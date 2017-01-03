@@ -1,10 +1,17 @@
 package com.cloudcraftgaming;
 
+import com.cloudcraftgaming.database.DatabaseInfo;
+import com.cloudcraftgaming.database.MySQL;
+import com.cloudcraftgaming.eventlisteners.MessageListener;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
+import com.cloudcraftgaming.internal.file.ReadFile;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.util.DiscordException;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Created by Nova Fox on 1/2/2017.
@@ -14,17 +21,23 @@ import sx.blah.discord.util.DiscordException;
 @SuppressWarnings("SameParameterValue")
 public class Main {
     public static IDiscordClient client;
+    public static DatabaseInfo databaseInfo;
 
     public static void main(String[] args) {
-        if (args.length < 1) // Needs a bot token provided
-            throw new IllegalArgumentException("The Bot Token has not be specified!");
+        if (args.length < 2) // Needs a bot token provided
+            throw new IllegalArgumentException("The Bot Token & MySQL file has not be specified!");
 
         client = createClient(args[0], true);
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
 
+        //Connect to MySQL
+        MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
+        connectToMySQL(mySQL);
+
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
+        dispatcher.registerListener(new MessageListener());
 
         //Accept commands
         ConsoleCommandExecutor.init();
@@ -43,5 +56,27 @@ public class Main {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static void connectToMySQL(MySQL mySQL) {
+        try {
+            Connection mySQLConnection = mySQL.openConnection();
+            databaseInfo = new DatabaseInfo(mySQL, mySQLConnection, mySQL.getPrefix());
+            System.out.println("Connected to MySQL database!");
+        } catch (Exception e) {
+            System.out.println("Failed to connect to MySQL database! Is it properly configured?");
+            e.printStackTrace();
+        }
+    }
+
+    public static void disconnectFromMySQL() {
+        if (databaseInfo != null) {
+            try {
+                databaseInfo.getMySQL().closeConnection();
+                System.out.println("Successfully disconnected from MySQL Database!");
+            } catch (SQLException e) {
+                System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
+            }
+        }
     }
 }

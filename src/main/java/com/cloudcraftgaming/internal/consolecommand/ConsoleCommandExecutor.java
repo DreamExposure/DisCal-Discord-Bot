@@ -53,6 +53,7 @@ public class ConsoleCommandExecutor {
         } catch (DiscordException e) {
             //No need to print, exiting anyway.
         }
+        Main.disconnectFromMySQL();
         System.exit(0);
     }
 }

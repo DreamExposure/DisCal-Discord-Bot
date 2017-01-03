@@ -45,6 +45,12 @@
             <artifactId>google-api-client</artifactId>
             <version>1.22.0</version>
         </dependency>
+        <!--MySQL Driver-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>LATEST</version>
+        </dependency>
     </dependencies>
 
     <build>
