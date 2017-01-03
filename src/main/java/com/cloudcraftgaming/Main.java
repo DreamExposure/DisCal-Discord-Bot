@@ -1,9 +1,9 @@
 package com.cloudcraftgaming;
 
+import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 
 /**
@@ -13,46 +13,21 @@ import sx.blah.discord.util.DiscordException;
  */
 @SuppressWarnings("SameParameterValue")
 public class Main {
+    public static IDiscordClient client;
+
     public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
             throw new IllegalArgumentException("The Bot Token has not be specified!");
 
-        IDiscordClient client = createClient(args[0], true);
+        client = createClient(args[0], true);
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
-
-        //Set client defaults
-        client.changeStatus(Status.game("Google Calendar"));
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
 
         //Accept commands
-        while (true) {
-            System.out.println("Enter a command below: ");
-            String input = System.console().readLine();
-            Boolean cmdValid = false;
-
-            if ("exit".equalsIgnoreCase(input)) {
-                System.out.println("Shutting down Discord bot!");
-                try {
-                    client.logout();
-                } catch (DiscordException e) {
-                    //No need to print, exiting anyway.
-                }
-                System.exit(0);
-            }
-            if ("?".equalsIgnoreCase(input)) {
-                cmdValid = true;
-                System.out.println("Valid console commands: ");
-                System.out.println("exit");
-            }
-
-            if (!cmdValid) {
-                System.out.println("Command not found! Use ? to list all commands.");
-                System.out.println();
-            }
-        }
+        ConsoleCommandExecutor.init();
     }
 
     private static IDiscordClient createClient(String token, boolean login) {
