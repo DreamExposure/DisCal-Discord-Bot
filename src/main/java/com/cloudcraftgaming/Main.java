@@ -3,6 +3,8 @@ package com.cloudcraftgaming;
 import com.cloudcraftgaming.database.DatabaseInfo;
 import com.cloudcraftgaming.database.MySQL;
 import com.cloudcraftgaming.eventlisteners.MessageListener;
+import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
+import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.file.ReadFile;
 import sx.blah.discord.api.ClientBuilder;
@@ -10,6 +12,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.util.DiscordException;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -35,8 +38,16 @@ public class Main {
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
         connectToMySQL(mySQL);
 
+        //Connect to Google Calendar
+        try {
+            CalendarAuth.init(args);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
+        dispatcher.registerListener(new ReadyEventListener());
         dispatcher.registerListener(new MessageListener());
 
         //Accept commands

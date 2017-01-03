@@ -13,7 +13,6 @@
 .idea/dataSources.local.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
-.idea/uiDesigner.xml
 
 # Gradle:
 .idea/gradle.xml
@@ -59,3 +58,4 @@ hs_err_pid*
 /.idea/
 /src/test/
 /DisCal.iml
+/src/main/resources/client_secret.json
