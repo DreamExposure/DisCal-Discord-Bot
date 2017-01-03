@@ -2,46 +2,39 @@ package com.cloudcraftgaming.module.command;
 
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.modules.IModule;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+
+import java.util.ArrayList;
 
 /**
  * Created by Nova Fox on 1/3/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public class CommandExecutor implements IModule {
-    IDiscordClient client;
+public class CommandExecutor {
+    private IDiscordClient client;
+    private final ArrayList<ICommand> commands = new ArrayList<>();
 
-    @Override
-    public boolean enable(IDiscordClient _client) {
+    public CommandExecutor enable(IDiscordClient _client) {
         client = _client;
         EventDispatcher dispatcher = client.getDispatcher();
         dispatcher.registerListener(new MessageListener(this));
+        return this;
+    }
+
+
+    //Functionals
+    public Boolean registerCommand(ICommand _command) {
+        commands.add(_command);
         return true;
     }
 
-    @Override
-    public void disable() {
+    void issueCommand(String cmd, String[] args, MessageReceivedEvent event) {
+        for (ICommand c : commands) {
+            if (c.getCommand().equalsIgnoreCase(cmd)) {
+                c.issueCommand(args, event, client);
+            }
+        }
 
-    }
-
-    @Override
-    public String getName() {
-        return "CommandExecutor";
-    }
-
-    @Override
-    public String getAuthor() {
-        return "NovaFox161";
-    }
-
-    @Override
-    public String getVersion() {
-        return "1.0.0";
-    }
-
-    @Override
-    public String getMinimumDiscord4JVersion() {
-        return "2.7.0";
     }
 }

@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.module.command;
 
-import com.cloudcraftgaming.utils.Message;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
@@ -22,9 +21,9 @@ public class MessageListener {
         IMessage msg = event.getMessage();
         if (msg.getContent().startsWith("!")) {
             //Command supported by DisCal, try commands.
-            if (msg.getContent().startsWith("!test")) {
-                Message.sendMessage("Bleep bloop", event, cmd.client);
-            }
+            String[] args = msg.getContent().split(" ");
+            String command = args[0].replaceAll("!", "");
+            cmd.issueCommand(command, args, event);
         }
     }
 }

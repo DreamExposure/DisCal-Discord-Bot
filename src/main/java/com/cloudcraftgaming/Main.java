@@ -7,6 +7,7 @@ import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.file.ReadFile;
 import com.cloudcraftgaming.module.command.CommandExecutor;
+import com.cloudcraftgaming.module.command.EventListCommand;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -50,7 +51,8 @@ public class Main {
         dispatcher.registerListener(new ReadyEventListener());
 
         //Register modules
-        new CommandExecutor().enable(client);
+        CommandExecutor executor = new CommandExecutor().enable(client);
+        executor.registerCommand(new EventListCommand());
 
         //Accept commands
         ConsoleCommandExecutor.init();
