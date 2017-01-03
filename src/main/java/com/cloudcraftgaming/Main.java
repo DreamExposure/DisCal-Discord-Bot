@@ -1,15 +1,11 @@
 package com.cloudcraftgaming;
 
-import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.database.MySQL;
 import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.file.ReadFile;
-import com.cloudcraftgaming.module.command.AddCalendarCommand;
-import com.cloudcraftgaming.module.command.CommandExecutor;
-import com.cloudcraftgaming.module.command.HelpCommand;
-import com.cloudcraftgaming.module.command.LinkCalendarCommand;
+import com.cloudcraftgaming.module.command.*;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -36,8 +32,8 @@ public class Main {
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
-        DatabaseManager.getManager().connectToMySQL(mySQL);
-        DatabaseManager.getManager().createTables();
+        //DatabaseManager.getManager().connectToMySQL(mySQL);
+        //DatabaseManager.getManager().createTables();
 
         //Connect to Google Calendar
         try {
@@ -55,6 +51,7 @@ public class Main {
         executor.registerCommand(new HelpCommand());
         executor.registerCommand(new AddCalendarCommand());
         executor.registerCommand(new LinkCalendarCommand());
+        executor.registerCommand(new EventListCommand());
 
         //Accept commands
         ConsoleCommandExecutor.init();

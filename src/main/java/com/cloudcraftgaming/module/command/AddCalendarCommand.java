@@ -19,16 +19,18 @@ public class AddCalendarCommand implements ICommand {
 
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        if (args.length < 1) {
+        if (args.length < 2) {
             //Not enough args, calendar ID must be listed.
-            Message.sendMessage("You must specify the Calendar ID to be used!", event, client);
+            Message.sendMessage("You must specify the Calendar ID and its address to be used!", event, client);
             return false;
         } else {
             String calendarId = args[0];
+            String calendarAddress = args[1];
             BotData bd = new BotData(event.getMessage().getGuild().getID());
             bd.setCalendarId(calendarId);
+            bd.setCalendarAddress(calendarAddress);
             DatabaseManager.getManager().updateData(bd);
-            Message.sendMessage("Calendar changed to: " + calendarId, event, client);
+            Message.sendMessage("Calendar changed to: " + calendarId + ", " + calendarAddress, event, client);
         }
         return false;
     }

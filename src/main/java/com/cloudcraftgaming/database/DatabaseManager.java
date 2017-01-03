@@ -53,6 +53,7 @@ public class DatabaseManager {
             String createDataTable = "CREATE TABLE IF NOT EXISTS " + dataTableName +
                     " (GUILD_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
+                    " CALENDAR_ADDRESS LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
             statement.executeUpdate(createDataTable);
             statement.close();
@@ -80,11 +81,12 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, CALENDAR_ID)" +
-                            " VALUES (?, ?);";
+                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS)" +
+                            " VALUES (?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, data.getGuildId());
                     ps.setString(2, data.getCalendarId());
+                    ps.setString(3, data.getCalendarAddress());
 
                     ps.executeUpdate();
                     ps.close();
@@ -93,6 +95,7 @@ public class DatabaseManager {
                     //Data present, update.
                     String updateCMD = "UPDATE " + dataTableName
                             + " SET CALENDAR_ID= '" + data.getCalendarId()
+                            + "', CALENDAR_ADDRESS='" + data.getCalendarAddress()
                             + "' WHERE GUILD_ID= '" + data.getGuildId() + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();
@@ -120,6 +123,7 @@ public class DatabaseManager {
 
                 if (hasStuff || res.getString("GUILD_ID") != null) {
                     botData.setCalendarId(res.getString("CALENDAR_ID"));
+                    botData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
 
                     statement.close();
                 } else {

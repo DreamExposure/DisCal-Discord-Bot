@@ -28,7 +28,7 @@ public class CalendarAuth {
 
     /** Directory to store user credentials for this application. */
     private static final java.io.File DATA_STORE_DIR = new java.io.File(
-            System.getProperty("user.home"), ".credentials/calendar-java-quickstart");
+            System.getProperty("user.home"), ".credentials/DisCal_");
 
     /** Global instance of the {@link FileDataStoreFactory}. */
     private static FileDataStoreFactory DATA_STORE_FACTORY;
@@ -46,7 +46,7 @@ public class CalendarAuth {
      * at ~/.credentials/calendar-java-quickstart
      */
     private static final List<String> SCOPES =
-            Arrays.asList(CalendarScopes.CALENDAR_READONLY);
+            Arrays.asList(CalendarScopes.CALENDAR_READONLY, CalendarScopes.CALENDAR);
 
     static {
         try {

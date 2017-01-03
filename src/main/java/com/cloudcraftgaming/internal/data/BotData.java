@@ -11,6 +11,7 @@ public class BotData {
     private final String guildId;
 
     private String calendarId;
+    private String calendarAddress;
 
     public BotData(String _guildId) {
         guildId = _guildId;
@@ -33,8 +34,16 @@ public class BotData {
         return calendarId;
     }
 
+    public String getCalendarAddress() {
+        return calendarAddress;
+    }
+
     //Setters
     public void setCalendarId(String _calendarId) {
         calendarId = _calendarId;
+    }
+
+    public void setCalendarAddress(String _calendarAddress) {
+        calendarAddress = _calendarAddress;
     }
 }
