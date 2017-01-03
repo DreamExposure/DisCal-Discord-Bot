@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.internal.consolecommand;
 
 import com.cloudcraftgaming.Main;
+import com.cloudcraftgaming.database.DatabaseManager;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 
@@ -53,7 +54,7 @@ public class ConsoleCommandExecutor {
         } catch (DiscordException e) {
             //No need to print, exiting anyway.
         }
-        Main.disconnectFromMySQL();
+        DatabaseManager.getManager().disconnectFromMySQL();
         System.exit(0);
     }
 }

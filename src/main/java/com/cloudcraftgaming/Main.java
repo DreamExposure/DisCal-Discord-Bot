@@ -1,21 +1,21 @@
 package com.cloudcraftgaming;
 
-import com.cloudcraftgaming.database.DatabaseInfo;
+import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.database.MySQL;
 import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.file.ReadFile;
+import com.cloudcraftgaming.module.command.AddCalendarCommand;
 import com.cloudcraftgaming.module.command.CommandExecutor;
-import com.cloudcraftgaming.module.command.EventListCommand;
+import com.cloudcraftgaming.module.command.HelpCommand;
+import com.cloudcraftgaming.module.command.LinkCalendarCommand;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.util.DiscordException;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created by Nova Fox on 1/2/2017.
@@ -25,7 +25,6 @@ import java.sql.SQLException;
 @SuppressWarnings("SameParameterValue")
 public class Main {
     public static IDiscordClient client;
-    public static DatabaseInfo databaseInfo;
 
     public static void main(String[] args) {
         if (args.length < 2) // Needs a bot token provided
@@ -37,7 +36,8 @@ public class Main {
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
-        connectToMySQL(mySQL);
+        DatabaseManager.getManager().connectToMySQL(mySQL);
+        DatabaseManager.getManager().createTables();
 
         //Connect to Google Calendar
         try {
@@ -52,7 +52,9 @@ public class Main {
 
         //Register modules
         CommandExecutor executor = new CommandExecutor().enable(client);
-        executor.registerCommand(new EventListCommand());
+        executor.registerCommand(new HelpCommand());
+        executor.registerCommand(new AddCalendarCommand());
+        executor.registerCommand(new LinkCalendarCommand());
 
         //Accept commands
         ConsoleCommandExecutor.init();
@@ -71,27 +73,5 @@ public class Main {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private static void connectToMySQL(MySQL mySQL) {
-        try {
-            Connection mySQLConnection = mySQL.openConnection();
-            databaseInfo = new DatabaseInfo(mySQL, mySQLConnection, mySQL.getPrefix());
-            System.out.println("Connected to MySQL database!");
-        } catch (Exception e) {
-            System.out.println("Failed to connect to MySQL database! Is it properly configured?");
-            e.printStackTrace();
-        }
-    }
-
-    public static void disconnectFromMySQL() {
-        if (databaseInfo != null) {
-            try {
-                databaseInfo.getMySQL().closeConnection();
-                System.out.println("Successfully disconnected from MySQL Database!");
-            } catch (SQLException e) {
-                System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
-            }
-        }
     }
 }
