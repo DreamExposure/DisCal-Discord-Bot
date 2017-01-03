@@ -1,5 +1,6 @@
 package com.cloudcraftgaming;
 
+import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.database.MySQL;
 import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
@@ -32,8 +33,8 @@ public class Main {
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
-        //DatabaseManager.getManager().connectToMySQL(mySQL);
-        //DatabaseManager.getManager().createTables();
+        DatabaseManager.getManager().connectToMySQL(mySQL);
+        DatabaseManager.getManager().createTables();
 
         //Connect to Google Calendar
         try {
