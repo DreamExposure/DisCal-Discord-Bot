@@ -12,14 +12,24 @@ import java.util.ArrayList;
  * For Project: DisCal
  */
 public class CommandExecutor {
+    private static CommandExecutor instance;
     private IDiscordClient client;
     private final ArrayList<ICommand> commands = new ArrayList<>();
+
+    private CommandExecutor() {}
+
+    public static CommandExecutor getExecutor() {
+        if (instance == null) {
+            instance = new CommandExecutor();
+        }
+        return instance;
+    }
 
     public CommandExecutor enable(IDiscordClient _client) {
         client = _client;
         EventDispatcher dispatcher = client.getDispatcher();
         dispatcher.registerListener(new MessageListener(this));
-        return this;
+        return instance;
     }
 
 
@@ -36,5 +46,15 @@ public class CommandExecutor {
             }
         }
 
+    }
+
+    public ArrayList<String> getAllCommands() {
+        ArrayList<String> cmds = new ArrayList<>();
+        for (ICommand c : commands) {
+            if (!cmds.contains(c.getCommand())) {
+                cmds.add(c.getCommand());
+            }
+        }
+        return cmds;
     }
 }

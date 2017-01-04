@@ -17,7 +17,12 @@ public class HelpCommand implements ICommand {
 
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        Message.sendMessage("All commands: addCalendar, linkCalendar, help", event, client);
+        String cmds = "";
+        for (String c : CommandExecutor.getExecutor().getAllCommands()) {
+            cmds = cmds + c + ", ";
+        }
+
+        Message.sendMessage("All commands: " + cmds, event, client);
         return true;
     }
 }
