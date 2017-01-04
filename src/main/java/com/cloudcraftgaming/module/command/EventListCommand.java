@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.module.command;
 
 import com.cloudcraftgaming.database.DatabaseManager;
+import com.cloudcraftgaming.internal.calendar.EventMessageFormatter;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.client.util.DateTime;
@@ -29,7 +30,7 @@ public class EventListCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage("Please specify how many events to list with '/events <int>...", event, client);
+            Message.sendMessage("Please specify how many events to list with '!events (amount)'...", event, client);
         } else {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
@@ -51,11 +52,7 @@ public class EventListCommand implements ICommand {
                      //List events.
                         Message.sendMessage("Upcoming events: ", event, client);
                         for (Event e : items) {
-                            DateTime start = e.getStart().getDateTime();
-                            if (start == null) {
-                                start = e.getStart().getDate();
-                            }
-                            Message.sendMessage(e.getSummary() + " " + start, event, client);
+                            Message.sendMessage(EventMessageFormatter.getFormatEventMessage(e), event, client);
                         }
                         return true;
                     }
