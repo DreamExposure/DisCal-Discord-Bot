@@ -18,9 +18,11 @@ public class HelpCommand implements ICommand {
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String cmds = "";
+
         for (String c : CommandExecutor.getExecutor().getAllCommands()) {
             cmds = cmds + c + ", ";
         }
+        cmds = cmds.substring(0, cmds.length() - 3);
 
         Message.sendMessage("All commands: " + cmds, event, client);
         return true;
