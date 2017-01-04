@@ -53,6 +53,7 @@ public class Main {
         executor.registerCommand(new AddCalendarCommand());
         executor.registerCommand(new LinkCalendarCommand());
         executor.registerCommand(new EventListCommand());
+        executor.registerCommand(new EventCommand());
 
         //Accept commands
         ConsoleCommandExecutor.init();

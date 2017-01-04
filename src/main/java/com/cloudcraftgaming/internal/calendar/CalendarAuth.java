@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
+@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 public class CalendarAuth {
     /** Application name. */
     private static final String APPLICATION_NAME =
@@ -46,7 +47,7 @@ public class CalendarAuth {
      * at ~/.credentials/calendar-java-quickstart
      */
     private static final List<String> SCOPES =
-            Arrays.asList(CalendarScopes.CALENDAR_READONLY, CalendarScopes.CALENDAR);
+            Arrays.asList(CalendarScopes.CALENDAR);
 
     static {
         try {
