@@ -1,7 +1,10 @@
 package com.cloudcraftgaming.internal.calendar;
 
+import com.cloudcraftgaming.database.DatabaseManager;
+import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -23,6 +26,7 @@ public class EventCreator {
         return instance;
     }
 
+    //Functionals
     public PreEvent init(MessageReceivedEvent e, String eventName) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             PreEvent event = new PreEvent(e.getMessage().getGuild().getID(), eventName);
@@ -30,6 +34,38 @@ public class EventCreator {
             return event;
         }
         return getPreEvent(e.getMessage().getGuild().getID());
+    }
+
+    public Boolean terminate(MessageReceivedEvent e) {
+        if (hasPreEvent(e.getMessage().getGuild().getID())) {
+            events.remove(getPreEvent(e.getMessage().getGuild().getID()));
+            return true;
+        }
+        return false;
+    }
+
+    public EventCreatorResponse confirmEvent(MessageReceivedEvent e) {
+        if (hasPreEvent(e.getMessage().getGuild().getID())) {
+            String guildId = e.getMessage().getGuild().getID();
+            PreEvent preEvent = getPreEvent(guildId);
+            if (preEvent.hasRequiredValues()) {
+                Event event = new Event();
+                event.setSummary(preEvent.getSummery());
+                event.setDescription(preEvent.getDescription());
+                event.setStart(preEvent.getStartDateTime());
+                event.setEnd(preEvent.getEndDateTime());
+
+                String calendarId = DatabaseManager.getManager().getData(guildId).getCalendarAddress();
+                try {
+                   Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
+                    terminate(e);
+                    return new EventCreatorResponse(true, confirmed);
+                } catch (IOException ex) {
+                    return new EventCreatorResponse(false);
+                }
+            }
+        }
+        return new EventCreatorResponse(false);
     }
 
     //Getters

@@ -13,7 +13,8 @@ public class PreEvent {
 
     private String summery;
     private String description;
-    private EventDateTime dateTime;
+    private EventDateTime startDateTime;
+    private EventDateTime endDateTime;
 
 
     public PreEvent(String _guildId, String _eventName) {
@@ -38,8 +39,12 @@ public class PreEvent {
         return description;
     }
 
-    public EventDateTime getDateTime() {
-        return dateTime;
+    public EventDateTime getStartDateTime() {
+        return startDateTime;
+    }
+
+    public EventDateTime getEndDateTime() {
+        return endDateTime;
     }
 
     //Setters
@@ -51,7 +56,16 @@ public class PreEvent {
         description = _description;
     }
 
-    public void setDateTime(EventDateTime _dateTime) {
-        dateTime = _dateTime;
+    public void setStartDateTime(EventDateTime _startDateTime) {
+        startDateTime = _startDateTime;
+    }
+
+    public void setEndDateTime(EventDateTime _endDateTime) {
+        endDateTime = _endDateTime;
+    }
+
+    //Booleans/Checkers
+    public Boolean hasRequiredValues() {
+        return startDateTime != null && endDateTime != null;
     }
 }

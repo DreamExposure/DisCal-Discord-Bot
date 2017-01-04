@@ -29,7 +29,7 @@ public class CalendarAuth {
 
     /** Directory to store user credentials for this application. */
     private static final java.io.File DATA_STORE_DIR = new java.io.File(
-            System.getProperty("user.home"), ".credentials/DisCal_");
+            System.getProperty("user.home"), ".credentials/DisCal");
 
     /** Global instance of the {@link FileDataStoreFactory}. */
     private static FileDataStoreFactory DATA_STORE_FACTORY;
