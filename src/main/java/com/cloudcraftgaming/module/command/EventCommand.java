@@ -1,8 +1,9 @@
 package com.cloudcraftgaming.module.command;
 
-import com.cloudcraftgaming.internal.calendar.EventCreator;
-import com.cloudcraftgaming.internal.calendar.EventCreatorResponse;
-import com.cloudcraftgaming.internal.calendar.EventMessageFormatter;
+import com.cloudcraftgaming.internal.calendar.event.EventCreator;
+import com.cloudcraftgaming.internal.calendar.event.EventCreatorResponse;
+import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
+import com.cloudcraftgaming.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -62,6 +63,12 @@ public class EventCommand implements ICommand {
                 } else {
                     Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                 }
+            } else if (function.equalsIgnoreCase("delete")) {
+                if (!EventCreator.getCreator().hasPreEvent(guildId)) {
+                    Message.sendMessage("Please specify the Id of the event to delete!", event, client);
+                } else {
+                    Message.sendMessage("You cannot delete an event while in the creator!", event, client);
+                }
             }
         } else if (args.length == 2) {
             String function = args[0];
@@ -72,6 +79,16 @@ public class EventCommand implements ICommand {
                 } else {
                     EventCreator.getCreator().init(event, args[1]);
                     Message.sendMessage("Event Creator initiated! Please specify event summery.", event, client);
+                }
+            } else if (function.equalsIgnoreCase("delete")) {
+                if (!EventCreator.getCreator().hasPreEvent(guildId)) {
+                    if (EventUtils.deleteEvent(guildId, args[1])) {
+                        Message.sendMessage("Event successfully deleted!", event, client);
+                    } else {
+                        Message.sendMessage("Failed to delete event! Is the Event ID correct?", event, client);
+                    }
+                } else {
+                    Message.sendMessage("You cannot delete an event while in the creator!", event, client);
                 }
             } else if (function.equalsIgnoreCase("startDate")) {
                 if (EventCreator.getCreator().hasPreEvent(guildId)) {

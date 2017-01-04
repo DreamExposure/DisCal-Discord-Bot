@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.module.command;
 
 import com.cloudcraftgaming.database.DatabaseManager;
-import com.cloudcraftgaming.internal.calendar.EventMessageFormatter;
+import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.client.util.DateTime;

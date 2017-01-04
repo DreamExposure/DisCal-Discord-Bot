@@ -1,4 +1,4 @@
-package com.cloudcraftgaming.internal.calendar;
+package com.cloudcraftgaming.internal.calendar.event;
 
 import com.google.api.services.calendar.model.Event;
 

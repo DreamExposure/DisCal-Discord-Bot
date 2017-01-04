@@ -1,6 +1,7 @@
-package com.cloudcraftgaming.internal.calendar;
+package com.cloudcraftgaming.internal.calendar.event;
 
 import com.cloudcraftgaming.database.DatabaseManager;
+import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 

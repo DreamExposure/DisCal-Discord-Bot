@@ -1,5 +1,6 @@
-package com.cloudcraftgaming.internal.calendar;
+package com.cloudcraftgaming.internal.calendar.event;
 
+import com.cloudcraftgaming.internal.calendar.event.PreEvent;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
