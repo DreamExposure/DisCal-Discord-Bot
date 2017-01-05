@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.internal.calendar.event;
 
-import com.cloudcraftgaming.internal.calendar.event.PreEvent;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
@@ -23,7 +22,7 @@ public class EventMessageFormatter {
                 + "Start Time (HH:mm): " + getHumanReadableTime(event) + lineBreak
                 + "End Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
                 + "End Time (HH:mm): " + getHumanReadableTime(event) + lineBreak
-                + "TimeZone: U.S. Central.";
+                + "TimeZone: " + event.getStart().getTimeZone();
     }
 
     public static String getFormatEventMessage(PreEvent event) {
@@ -35,7 +34,7 @@ public class EventMessageFormatter {
                 + "[REQ] Start Time (HH:mm): " + getHumanReadableTime(event.getStartDateTime()) + lineBreak
                 + "[REQ] End Date (yyyy/MM/dd): " + getHumanReadableDate(event.getEndDateTime()) + lineBreak
                 + "[REQ] End Time (HH:mm): " + getHumanReadableTime(event.getEndDateTime()) + lineBreak
-                + "TimeZone: U.S. Central.";
+                + "TimeZone: " + event.getTimeZone();
     }
 
     private static String getHumanReadableDate(Event event) {

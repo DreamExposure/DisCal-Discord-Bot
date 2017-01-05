@@ -16,10 +16,14 @@ public class PreEvent {
     private EventDateTime startDateTime;
     private EventDateTime endDateTime;
 
+    private String timeZone;
+
 
     public PreEvent(String _guildId, String _eventName) {
         guildId = _guildId;
         eventName = _eventName;
+
+        timeZone = "Unknown";
     }
 
     //Getters
@@ -47,6 +51,10 @@ public class PreEvent {
         return endDateTime;
     }
 
+    public String getTimeZone() {
+        return timeZone;
+    }
+
     //Setters
     public void setSummery(String _summery) {
         summery = _summery;
@@ -62,6 +70,10 @@ public class PreEvent {
 
     public void setEndDateTime(EventDateTime _endDateTime) {
         endDateTime = _endDateTime;
+    }
+
+    public void setTimeZone(String _timeZone) {
+        timeZone = _timeZone;
     }
 
     //Booleans/Checkers

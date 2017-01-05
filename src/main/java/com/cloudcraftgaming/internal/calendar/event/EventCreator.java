@@ -31,6 +31,12 @@ public class EventCreator {
     public PreEvent init(MessageReceivedEvent e, String eventName) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             PreEvent event = new PreEvent(e.getMessage().getGuild().getID(), eventName);
+            try {
+                String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
+                event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
+            } catch (IOException exc) {
+                //Failed to get timezone, ignore safely.
+            }
             events.add(event);
             return event;
         }
@@ -53,6 +59,10 @@ public class EventCreator {
                 Event event = new Event();
                 event.setSummary(preEvent.getSummery());
                 event.setDescription(preEvent.getDescription());
+                if (!preEvent.getTimeZone().equalsIgnoreCase("unknown")) {
+                    preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone());
+                    preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone());
+                }
                 event.setStart(preEvent.getStartDateTime());
                 event.setEnd(preEvent.getEndDateTime());
 
