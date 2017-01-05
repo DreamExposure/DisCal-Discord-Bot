@@ -1,4 +1,4 @@
-package com.cloudcraftgaming.internal.calendar;
+package com.cloudcraftgaming.internal.calendar.calendar;
 
 /**
  * Created by Nova Fox on 1/4/2017.
