@@ -3,6 +3,7 @@ package com.cloudcraftgaming.internal.calendar.calendar;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.data.BotData;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -57,6 +58,11 @@ public class CalendarCreator {
                 calendar.setTimeZone(preCalendar.getTimezone());
                 try {
                     Calendar confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
+                    AclRule rule = new AclRule();
+                    AclRule.Scope scope = new AclRule.Scope();
+                    scope.setType("default");
+                    rule.setScope(scope).setRole("reader");
+                    CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
                     BotData bd = new BotData(guildId);
                     bd.setCalendarId(confirmed.getId());
                     bd.setCalendarAddress(confirmed.getId());
