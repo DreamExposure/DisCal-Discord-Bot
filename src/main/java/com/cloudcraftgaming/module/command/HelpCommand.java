@@ -25,6 +25,7 @@ public class HelpCommand implements ICommand {
         cmds = cmds.substring(0, cmds.length() - 3);
 
         Message.sendMessage("All commands: " + cmds, event, client);
+        Message.sendMessage("For extra help visit: https://www.cloudcraftgaming.com/discal/", event, client);
         return true;
     }
 }

@@ -50,6 +50,7 @@ public class Main {
         //Register modules
         CommandExecutor executor = CommandExecutor.getExecutor().enable(client);
         executor.registerCommand(new HelpCommand());
+        executor.registerCommand(new DisCalCommand());
         executor.registerCommand(new CalendarCommand());
         executor.registerCommand(new LinkCalendarCommand());
         executor.registerCommand(new EventListCommand());
