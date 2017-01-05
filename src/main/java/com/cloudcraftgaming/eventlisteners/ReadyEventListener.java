@@ -10,10 +10,11 @@ import sx.blah.discord.handle.obj.Status;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("unused")
 public class ReadyEventListener {
 
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
-        Main.client.changeStatus(Status.game("Google Calendar"));
+        Main.client.changeStatus(Status.game("Discord Calendar"));
     }
 }
