@@ -65,6 +65,7 @@ public class EventCreator {
                 }
                 event.setStart(preEvent.getStartDateTime());
                 event.setEnd(preEvent.getEndDateTime());
+                event.setVisibility("public");
 
                 String calendarId = DatabaseManager.getManager().getData(guildId).getCalendarAddress();
                 try {
