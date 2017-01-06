@@ -6,4 +6,14 @@ package com.cloudcraftgaming.module.announcement;
  * For Project: DisCal
  */
 public class Announcer {
+    private static Announcer instance;
+
+    private Announcer() {}
+
+    public static Announcer getAnnouncer() {
+        if (instance == null) {
+            instance = new Announcer();
+        }
+        return instance;
+    }
 }
