@@ -38,6 +38,10 @@ public class ConsoleCommandExecutor {
                     System.out.println("Status changed! Check discord.");
                     System.out.println();
                 }
+                if (input.startsWith("serverCount")) {
+                    cmdValid = true;
+                    System.out.println("Server count: " + Main.client.getGuilds().size());
+                }
 
                 if (!cmdValid) {
                     System.out.println("Command not found! Use ? to list all commands.");
