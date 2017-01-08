@@ -1,6 +1,11 @@
 package com.cloudcraftgaming.module.announcement;
 
+import com.cloudcraftgaming.Main;
+import com.cloudcraftgaming.database.DatabaseManager;
+import sx.blah.discord.handle.obj.IGuild;
+
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by Nova Fox on 1/5/2017.
@@ -23,9 +28,28 @@ public class Announcer {
 
     public void init() {
         //This method will load all existing announcements from the database once supported.
+        for (IGuild guild : Main.client.getGuilds()) {
+            String guildId = guild.getID();
+            for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+                addAnnouncement(a);
+            }
+        }
+    }
+
+    public void shutdown() {
+        announcements.clear();
     }
 
     //Getters
+    public Announcement getAnnouncement(UUID announcementId) {
+        for (Announcement a : announcements) {
+            if (a.getAnnouncementId().equals(announcementId)) {
+                return a;
+            }
+        }
+        return null;
+    }
+
     public ArrayList<Announcement> getAnnouncements(String guildId) {
         ArrayList<Announcement> _announcements = new ArrayList<>();
         for (Announcement a : announcements) {
