@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.module.announcement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -54,6 +55,20 @@ public class Announcement {
         return subscribers;
     }
 
+    public String getSubscribersString() {
+        String subs = "";
+        Integer i = 0;
+        for (String sub : subscribers) {
+            if (i == 0) {
+                subs = sub;
+            } else {
+                subs = subs + "," + sub;
+            }
+            i++;
+        }
+        return subs;
+    }
+
     public int getHoursBefore() {
         return hoursBefore;
     }
@@ -73,5 +88,10 @@ public class Announcement {
 
     public void setMinutesBefore(Integer _minutesBefore) {
         minutesBefore = _minutesBefore;
+    }
+
+    public void setSubscribersFromString(String subList) {
+        String[] subs = subList.split(",");
+        Collections.addAll(subscribers, subs);
     }
 }
