@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.database;
 
 import com.cloudcraftgaming.internal.data.BotData;
+import com.cloudcraftgaming.module.announcement.Announcement;
 
 import java.sql.*;
 
@@ -114,6 +115,79 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to input data into database! Error Code: 00101");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Boolean updateAnnouncement(Announcement announcement) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcement.getAnnouncementId() + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
+                    //Data not present, add to db.
+                    String insertCommand = "INSERT INTO " + announcementTableName +
+                            "(ANNOUNCEMENT_ID, GUILD_ID, CHANNEL_ID, SUBSCRIBERS, HOURS_BEFORE, MINUTES_BEFORE)" +
+                            " VALUE  (?, ?, ?, ?, ?, ?)";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+                    ps.setString(1, announcement.getAnnouncementId().toString());
+                    ps.setString(2, announcement.getGuildId());
+                    ps.setString(3, announcement.getAnnouncementChannelId());
+
+                    //Get subscribers
+                    String subscribers = "";
+                    Integer i = 0;
+                    for (String sub : announcement.getSubscribers()) {
+                        if (i == 0) {
+                            subscribers = sub;
+                        } else {
+                            subscribers = subscribers + "," + sub;
+                        }
+                        i++;
+                    }
+
+                    ps.setString(4, subscribers);
+                    ps.setInt(5, announcement.getHoursBefore());
+                    ps.setInt(6, announcement.getMinutesBefore());
+
+                    ps.executeUpdate();
+                    ps.close();
+                    statement.close();
+                } else {
+                    //Data present, update.
+
+                    //Get subscribers
+                    String subscribers = "";
+                    Integer i = 0;
+                    for (String sub : announcement.getSubscribers()) {
+                        if (i == 0) {
+                            subscribers = sub;
+                        } else {
+                            subscribers = subscribers + "," + sub;
+                        }
+                        i++;
+                    }
+
+                    String updateCMD = "UPDATE " + announcementTableName
+                            + " SET CHANNEL_ID= '" + announcement.getAnnouncementChannelId()
+                            + "', SUBSCRIBERS='" + subscribers
+                            + "', HOURS_BEFORE='" + announcement.getHoursBefore()
+                            + "', MINUTES_BEFORE='" + announcement.getMinutesBefore()
+                            + "' WHERE ANNOUNCEMENT_ID= '" + announcement.getAnnouncementId() + "';";
+                    statement.executeUpdate(updateCMD);
+                    statement.close();
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.print("Failed to input announcement data! Error Code: 00201");
             e.printStackTrace();
         }
         return false;
