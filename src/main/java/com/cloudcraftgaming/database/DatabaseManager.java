@@ -50,12 +50,22 @@ public class DatabaseManager {
             Statement statement = databaseInfo.getConnection().createStatement();
 
             String dataTableName = databaseInfo.getPrefix() + "DATA";
+            String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
             String createDataTable = "CREATE TABLE IF NOT EXISTS " + dataTableName +
                     " (GUILD_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
+            String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
+                    " (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
+                    " GUILD_ID VARCHAR(255) not NULL, " +
+                    " CHANNEL_ID VARCHAR(255) not NULL, " +
+                    " SUBSCRIBERS LONGTEXT not NULL, " +
+                    " HOURS_BEFORE INTEGER not NULL, " +
+                    " MINUTES_BEFORE INTEGER not NULL, " +
+                    " PRIMARY KEY (ANNOUNCEMENT_ID))";
             statement.executeUpdate(createDataTable);
+            statement.executeUpdate(createAnnouncementTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
             return true;
