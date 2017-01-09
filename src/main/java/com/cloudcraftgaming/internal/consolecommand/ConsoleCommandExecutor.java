@@ -3,6 +3,7 @@ package com.cloudcraftgaming.internal.consolecommand;
 import com.cloudcraftgaming.Main;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.module.announcement.Announcer;
+import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 
@@ -29,6 +30,8 @@ public class ConsoleCommandExecutor {
                     System.out.println("Valid console commands: ");
                     System.out.println("exit");
                     System.out.println("status");
+                    System.out.println("serverCount");
+                    System.out.println("silence true/false");
                     System.out.println();
                 }
                 if (input.startsWith("status")) {
@@ -42,6 +45,11 @@ public class ConsoleCommandExecutor {
                 if (input.startsWith("serverCount")) {
                     cmdValid = true;
                     System.out.println("Server count: " + Main.client.getGuilds().size());
+                }
+                if (input.startsWith("silence")) {
+                    cmdValid = true;
+                    String value = input.replaceAll("silence ", "");
+                    silenceConsole(value);
                 }
 
                 if (!cmdValid) {
@@ -62,5 +70,21 @@ public class ConsoleCommandExecutor {
         Announcer.getAnnouncer().shutdown();
         DatabaseManager.getManager().disconnectFromMySQL();
         System.exit(0);
+    }
+
+    private static void silenceConsole(String value) {
+        try {
+            if (value.equalsIgnoreCase("true")) {
+                ((Discord4J.Discord4JLogger) Discord4J.LOGGER).setLevel(Discord4J.Discord4JLogger.Level.INFO);
+                System.out.println("Logger set to INFO only! Use 'silence false' to undo this action!");
+            } else if (value.equalsIgnoreCase("false")) {
+                ((Discord4J.Discord4JLogger) Discord4J.LOGGER).setLevel(Discord4J.Discord4JLogger.Level.INFO);
+                System.out.println("Logger set to DEBUG! Use 'silence true' to undo this action!");
+            } else {
+                System.out.println("Values must be true or false!");
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to silence logger!");
+        }
     }
 }
