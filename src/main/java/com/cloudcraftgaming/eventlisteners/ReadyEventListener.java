@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.eventlisteners;
 
 import com.cloudcraftgaming.Main;
+import com.cloudcraftgaming.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.module.announcement.Announcer;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -19,5 +20,6 @@ public class ReadyEventListener {
         Main.client.changeStatus(Status.game("Discord Calendar"));
         //Once DisCal is ready, initialize the Announcer!
         Announcer.getAnnouncer().init();
+        UpdateListData.updateSiteBotMeta();
     }
 }
