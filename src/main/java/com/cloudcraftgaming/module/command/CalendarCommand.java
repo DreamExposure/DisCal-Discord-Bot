@@ -152,8 +152,20 @@ public class CalendarCommand implements ICommand {
         } else {
             String function = args[0];
             String guildId = event.getMessage().getGuild().getID();
-
-            if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
+            if (function.equalsIgnoreCase("create")) {
+                if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
+                    if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        CalendarCreator.getCreator().init(event, getContent(args));
+                        Message.sendMessage("Calendar creator initialized!"
+                                + Message.lineBreak
+                                + "Please specify a description!", event, client);
+                    } else {
+                        Message.sendMessage("A calendar has already been created!", event, client);
+                    }
+                } else {
+                    Message.sendMessage("Calendar creator has already been initialized!", event, client);
+                }
+            } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setSummery(getContent(args));
                     Message.sendMessage("Calendar summer set to '" + getContent(args) + "'"
