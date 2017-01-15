@@ -22,8 +22,11 @@ public class DisCalCommand implements ICommand {
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (args.length < 1) {
-            Message.sendMessage("DisCal is the official Discord Calendar Bot", event, client);
-            Message.sendMessage("For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/", event, client);
+            Message.sendMessage("DisCal is the official Discord Calendar Bot!"
+                    + Message.lineBreak
+                     + "DisCal is on " + client.getGuilds().size() + " servers!"
+                    + Message.lineBreak + Message.lineBreak
+                    + "For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/", event, client);
         } else if (args.length == 1) {
             Message.sendMessage("Please specify a function and value!", event, client);
         } else if (args.length == 2) {

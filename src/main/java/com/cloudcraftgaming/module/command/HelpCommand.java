@@ -22,7 +22,7 @@ public class HelpCommand implements ICommand {
         for (String c : CommandExecutor.getExecutor().getAllCommands()) {
             cmds = cmds + c + ", ";
         }
-        cmds = cmds.substring(0, cmds.length() - 3);
+        cmds = cmds.substring(0, cmds.length() - 2);
 
         Message.sendMessage("All commands: " + cmds, event, client);
         Message.sendMessage("For extra help visit: https://www.cloudcraftgaming.com/discal/", event, client);

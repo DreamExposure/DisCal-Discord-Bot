@@ -10,6 +10,8 @@ import sx.blah.discord.util.MessageBuilder;
  * For Project: DisCal
  */
 public class Message {
+    public static String lineBreak = System.getProperty("line.separator");
+
     public static void sendMessage(String message, MessageReceivedEvent event, IDiscordClient client) {
         try {
             new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();

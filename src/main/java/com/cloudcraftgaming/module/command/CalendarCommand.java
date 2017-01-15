@@ -56,8 +56,9 @@ public class CalendarCommand implements ICommand {
                 }
             } else if (function.equalsIgnoreCase("view") || function.equalsIgnoreCase("review")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                    Message.sendMessage(CalendarMessageFormatter.getFormatEventMessage(CalendarCreator.getCreator().getPreCalendar(guildId)), event, client);
-                    Message.sendMessage("Confirm calendar to complete setup OR edit the values!", event, client);
+                    Message.sendMessage(CalendarMessageFormatter.getFormatEventMessage(CalendarCreator.getCreator().getPreCalendar(guildId))
+                            + Message.lineBreak + Message.lineBreak
+                            + "Confirm calendar to complete setup OR edit the values!", event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -69,7 +70,9 @@ public class CalendarCommand implements ICommand {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreatorResponse response = CalendarCreator.getCreator().confirmCalendar(event);
                     if (response.isSuccessful()) {
-                        Message.sendMessage("Calendar Created! Use !linkCalendar to display!", event, client);
+                        Message.sendMessage("Calendar Created! "
+                                + Message.lineBreak
+                                + "Use !linkCalendar to display!", event, client);
                     } else {
                         Message.sendMessage("Calendar creation failed!", event, client);
                     }
@@ -91,7 +94,9 @@ public class CalendarCommand implements ICommand {
                 if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         CalendarCreator.getCreator().init(event, value);
-                        Message.sendMessage("Calendar creator initialized! Please specify a description!", event, client);
+                        Message.sendMessage("Calendar creator initialized!"
+                                + Message.lineBreak
+                                + "Please specify a description!", event, client);
                     } else {
                         Message.sendMessage("A calendar has already been created!", event, client);
                     }
@@ -101,7 +106,9 @@ public class CalendarCommand implements ICommand {
             } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setSummery(value);
-                    Message.sendMessage("Calendar summery/name set to '" + value + "' Please specify the description!", event, client);
+                    Message.sendMessage("Calendar summery/name set to '" + value + "'"
+                            + Message.lineBreak + Message.lineBreak
+                            + " Please specify the description!", event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -112,8 +119,11 @@ public class CalendarCommand implements ICommand {
             } else if (function.equalsIgnoreCase("description")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setDescription(value);
-                    Message.sendMessage("Calendar description set to '" + value + "' Please specify the timezone!", event, client);
-                    Message.sendMessage("For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
+                    Message.sendMessage("Calendar description set to '" + value + "' "
+                            + Message.lineBreak + Message.lineBreak
+                            + "Please specify the timezone!"
+                            + Message.lineBreak
+                            + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -124,8 +134,11 @@ public class CalendarCommand implements ICommand {
             } else if (function.equalsIgnoreCase("TimeZone")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
-                    Message.sendMessage("Calendar TimeZone set to: " + value, event, client);
-                    Message.sendMessage("Calendar creation halted! View and/or confirm the calendar to make it official!", event, client);
+                    Message.sendMessage("Calendar TimeZone set to: " + value
+                            + Message.lineBreak + Message.lineBreak
+                            + "Calendar creation halted! "
+                            + Message.lineBreak
+                            + "View and/or confirm the calendar to make it official!", event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -143,7 +156,9 @@ public class CalendarCommand implements ICommand {
             if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setSummery(getContent(args));
-                    Message.sendMessage("Calendar summer set to '" + getContent(args) + "' Please specify the description!", event, client);
+                    Message.sendMessage("Calendar summer set to '" + getContent(args) + "'"
+                            + Message.lineBreak + Message.lineBreak
+                            + "Please specify the description!", event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -154,8 +169,11 @@ public class CalendarCommand implements ICommand {
             } else if (function.equalsIgnoreCase("description")) {
                 if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setDescription(getContent(args));
-                    Message.sendMessage("Calendar description set to '" + getContent(args) + "' Please specify the timezone!", event, client);
-                    Message.sendMessage("For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
+                    Message.sendMessage("Calendar description set to '" + getContent(args) + "' "
+                            + Message.lineBreak + Message.lineBreak
+                            + "Please specify the timezone!"
+                            + Message.lineBreak
+                            + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
                 } else {
                     if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                         Message.sendMessage("Calendar creator has not been initialized!", event, client);
