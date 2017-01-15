@@ -58,6 +58,7 @@ public class DatabaseManager {
                     " (GUILD_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
+                    " CONTROL_ROLE LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
             String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
                     " (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
@@ -94,12 +95,13 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS)" +
-                            " VALUES (?, ?, ?);";
+                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS, CONTROL_ROLE)" +
+                            " VALUES (?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, data.getGuildId());
                     ps.setString(2, data.getCalendarId());
                     ps.setString(3, data.getCalendarAddress());
+                    ps.setString(4, data.getControlRole());
 
                     ps.executeUpdate();
                     ps.close();
@@ -109,6 +111,7 @@ public class DatabaseManager {
                     String updateCMD = "UPDATE " + dataTableName
                             + " SET CALENDAR_ID= '" + data.getCalendarId()
                             + "', CALENDAR_ADDRESS='" + data.getCalendarAddress()
+                            + "', CONTROL_ROLE='" + data.getControlRole()
                             + "' WHERE GUILD_ID= '" + data.getGuildId() + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();

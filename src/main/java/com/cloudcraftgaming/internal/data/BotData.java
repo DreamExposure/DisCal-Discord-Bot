@@ -12,17 +12,22 @@ public class BotData {
 
     private String calendarId;
     private String calendarAddress;
+    private String controlRole;
 
     public BotData(String _guildId) {
         guildId = _guildId;
 
         calendarId = "primary";
+        calendarAddress = "primary";
+        controlRole = "everyone";
     }
 
     public BotData(String _guildId, IDiscordClient client) {
         guildId = _guildId;
 
         calendarId = "primary";
+        calendarAddress = "primary";
+        controlRole = "everyone";
     }
 
     //Getters
@@ -38,6 +43,10 @@ public class BotData {
         return calendarAddress;
     }
 
+    public String getControlRole() {
+        return controlRole;
+    }
+
     //Setters
     public void setCalendarId(String _calendarId) {
         calendarId = _calendarId;
@@ -45,5 +54,9 @@ public class BotData {
 
     public void setCalendarAddress(String _calendarAddress) {
         calendarAddress = _calendarAddress;
+    }
+
+    public void setControlRole(String _controlRole) {
+        controlRole = _controlRole;
     }
 }
