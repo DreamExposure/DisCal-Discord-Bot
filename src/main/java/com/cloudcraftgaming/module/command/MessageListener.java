@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.module.command;
 
+import com.cloudcraftgaming.Main;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
@@ -30,6 +31,15 @@ public class MessageListener {
             String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
             String command = argsOr[0].replaceAll("!", "");
+            cmd.issueCommand(command, args, event);
+        } else if (msg.getMentions().contains(Main.getSelfUser())) {
+            //DisCal mentioned, see if this is a valid command?
+            String[] argsOr = msg.getContent().split(" ");
+            ArrayList<String> argsOr2 = new ArrayList<>();
+            argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+            String[] args = argsOr2.toArray(new String[argsOr2.size()]);
+
+            String command = argsOr[1];
             cmd.issueCommand(command, args, event);
         }
     }
