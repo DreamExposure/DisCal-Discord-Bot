@@ -12,7 +12,7 @@ public class PreCalendar {
     private String description;
     private String timezone;
 
-    public PreCalendar(String _guildId, String _summery) {
+    PreCalendar(String _guildId, String _summery) {
         guildId = _guildId;
         summery = _summery;
     }
@@ -22,15 +22,15 @@ public class PreCalendar {
         return guildId;
     }
 
-    public String getSummery() {
+    String getSummery() {
         return summery;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public String getTimezone() {
+    String getTimezone() {
         return timezone;
     }
 
@@ -48,7 +48,7 @@ public class PreCalendar {
     }
 
     //Booleans/Checkers
-    public Boolean hasRequiredValues() {
+    Boolean hasRequiredValues() {
         return summery != null && timezone != null;
     }
 }

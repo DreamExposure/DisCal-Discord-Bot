@@ -55,9 +55,9 @@ public class CalendarAuth {
     /**
      * Creates an authorized Credential object.
      * @return an authorized Credential object.
-     * @throws IOException
+     * @throws IOException In the event authorization fails.
      */
-    public static Credential authorize() throws IOException {
+    private static Credential authorize() throws IOException {
         // Load client secrets.
         InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json");
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
@@ -72,7 +72,7 @@ public class CalendarAuth {
     /**
      * Build and return an authorized Calendar client service.
      * @return an authorized Calendar client service
-     * @throws IOException
+     * @throws IOException In the event authorization fails.
      */
     public static com.google.api.services.calendar.Calendar
     getCalendarService() throws IOException {
@@ -81,10 +81,9 @@ public class CalendarAuth {
     }
 
     public static void init(String[] args) throws IOException {
-        // Build a new authorized API client service.
-        // Note: Do not confuse this class with the
-        //   com.google.api.services.calendar.model.Calendar class.
+        /* Build a new authorized API client service.
+        Note: Do not confuse this class with the
+        com.google.api.services.calendar.model.Calendar class. */
         com.google.api.services.calendar.Calendar service = getCalendarService();
     }
-
 }

@@ -19,7 +19,8 @@ public class EventUtils {
             service.events().delete(calendarId, eventId).execute();
             return true;
         } catch (IOException e) {
-            //Ignore error.
+            System.out.println("Something weird happened when deleting an event!");
+            e.printStackTrace();
         }
         return false;
     }

@@ -8,26 +8,26 @@ import java.sql.Connection;
  * For Project: DisCal
  */
 @SuppressWarnings("unused")
-public class DatabaseInfo {
+class DatabaseInfo {
     private MySQL mySQL;
     private Connection con;
     private String prefix;
 
-    public DatabaseInfo(MySQL _mySQL, Connection _con, String _prefix) {
+    DatabaseInfo(MySQL _mySQL, Connection _con, String _prefix) {
         mySQL = _mySQL;
         con = _con;
         prefix = _prefix;
     }
 
-    public MySQL getMySQL() {
+    MySQL getMySQL() {
         return mySQL;
     }
 
-    public Connection getConnection() {
+    Connection getConnection() {
         return con;
     }
 
-    public String getPrefix() {
+    String getPrefix() {
         return prefix;
     }
 }

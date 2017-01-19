@@ -29,7 +29,7 @@ public class EventCommand implements ICommand {
 
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        if (PermissionChecker.hasSuffientRole(event)) {
+        if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute.", event, client);
             } else if (args.length == 1) {

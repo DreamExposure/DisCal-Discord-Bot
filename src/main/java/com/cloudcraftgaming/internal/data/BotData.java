@@ -1,7 +1,5 @@
 package com.cloudcraftgaming.internal.data;
 
-import sx.blah.discord.api.IDiscordClient;
-
 /**
  * Created by Nova Fox on 1/2/2017.
  * Website: www.cloudcraftgaming.com
@@ -15,14 +13,6 @@ public class BotData {
     private String controlRole;
 
     public BotData(String _guildId) {
-        guildId = _guildId;
-
-        calendarId = "primary";
-        calendarAddress = "primary";
-        controlRole = "everyone";
-    }
-
-    public BotData(String _guildId, IDiscordClient client) {
         guildId = _guildId;
 
         calendarId = "primary";

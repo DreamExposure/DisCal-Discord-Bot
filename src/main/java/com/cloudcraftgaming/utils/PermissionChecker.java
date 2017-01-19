@@ -12,7 +12,7 @@ import sx.blah.discord.handle.obj.IUser;
  * For Project: DisCal
  */
 public class PermissionChecker {
-    public static boolean hasSuffientRole(MessageReceivedEvent event) {
+    public static boolean hasSufficientRole(MessageReceivedEvent event) {
         BotData bd = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
         if (!bd.getControlRole().equalsIgnoreCase("everyone")) {
             IUser sender = event.getMessage().getAuthor();

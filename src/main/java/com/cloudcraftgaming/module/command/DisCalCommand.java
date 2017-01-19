@@ -44,7 +44,7 @@ public class DisCalCommand implements ICommand {
     }
 
     private void setControlRole(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        if (PermissionChecker.hasSuffientRole(event)) {
+        if (PermissionChecker.hasSufficientRole(event)) {
             String roleName = args[1];
             IGuild guild = event.getMessage().getGuild();
             IRole controlRole = null;

@@ -19,7 +19,7 @@ public class PreEvent {
     private String timeZone;
 
 
-    public PreEvent(String _guildId, String _eventName) {
+    PreEvent(String _guildId, String _eventName) {
         guildId = _guildId;
         eventName = _eventName;
 
@@ -35,23 +35,23 @@ public class PreEvent {
         return eventName;
     }
 
-    public String getSummery() {
+    String getSummery() {
         return summery;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public EventDateTime getStartDateTime() {
+    EventDateTime getStartDateTime() {
         return startDateTime;
     }
 
-    public EventDateTime getEndDateTime() {
+    EventDateTime getEndDateTime() {
         return endDateTime;
     }
 
-    public String getTimeZone() {
+    String getTimeZone() {
         return timeZone;
     }
 
@@ -72,7 +72,7 @@ public class PreEvent {
         endDateTime = _endDateTime;
     }
 
-    public void setTimeZone(String _timeZone) {
+    void setTimeZone(String _timeZone) {
         timeZone = _timeZone;
     }
 

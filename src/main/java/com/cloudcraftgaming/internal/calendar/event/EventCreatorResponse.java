@@ -12,11 +12,11 @@ public class EventCreatorResponse {
 
     private Event event;
 
-    public EventCreatorResponse(Boolean _successful) {
+    EventCreatorResponse(Boolean _successful) {
         successful = _successful;
     }
 
-    public EventCreatorResponse(Boolean _successful, Event _event) {
+    EventCreatorResponse(Boolean _successful, Event _event) {
         successful = _successful;
         event = _event;
     }

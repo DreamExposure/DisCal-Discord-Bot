@@ -8,8 +8,8 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public interface ICommand {
-    public String getCommand();
+interface ICommand {
+    String getCommand();
 
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client);
+    Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client);
 }

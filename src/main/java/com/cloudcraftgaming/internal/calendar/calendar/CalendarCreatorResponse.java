@@ -12,11 +12,11 @@ public class CalendarCreatorResponse {
 
     private Calendar calendar;
 
-    public CalendarCreatorResponse(Boolean _successful) {
+    CalendarCreatorResponse(Boolean _successful) {
         successful = _successful;
     }
 
-    public CalendarCreatorResponse(Boolean _successful, Calendar _calendar) {
+    CalendarCreatorResponse(Boolean _successful, Calendar _calendar) {
         successful = _successful;
         calendar = _calendar;
     }

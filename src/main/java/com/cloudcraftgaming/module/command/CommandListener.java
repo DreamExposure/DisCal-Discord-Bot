@@ -13,10 +13,11 @@ import java.util.Arrays;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public class MessageListener {
+@SuppressWarnings("unused")
+class CommandListener {
     private CommandExecutor cmd;
 
-    MessageListener(CommandExecutor _cmd) {
+    CommandListener(CommandExecutor _cmd) {
         cmd = _cmd;
     }
 

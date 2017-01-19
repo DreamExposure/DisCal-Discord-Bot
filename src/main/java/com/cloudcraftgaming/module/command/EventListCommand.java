@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.module.command;
 
 import com.cloudcraftgaming.database.DatabaseManager;
-import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -67,5 +67,4 @@ public class EventListCommand implements ICommand {
         }
         return false;
     }
-
 }
