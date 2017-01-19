@@ -3,6 +3,7 @@ package com.cloudcraftgaming.module.command;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.utils.Message;
+import com.cloudcraftgaming.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
@@ -43,36 +44,40 @@ public class DisCalCommand implements ICommand {
     }
 
     private void setControlRole(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        String roleName = args[1];
-        IGuild guild = event.getMessage().getGuild();
-        IRole controlRole = null;
+        if (PermissionChecker.hasSuffientRole(event)) {
+            String roleName = args[1];
+            IGuild guild = event.getMessage().getGuild();
+            IRole controlRole = null;
 
-        if (!roleName.equals("everyone")) {
-            for (IRole r : guild.getRoles()) {
-                if (r.getName().equals(roleName) || r.getID().equals(roleName)) {
-                    controlRole = r;
-                    break; //So that it only loops through a limited amount of roles.
+            if (!roleName.equals("everyone")) {
+                for (IRole r : guild.getRoles()) {
+                    if (r.getName().equals(roleName) || r.getID().equals(roleName)) {
+                        controlRole = r;
+                        break; //So that it only loops through a limited amount of roles.
+                    }
                 }
-            }
 
-            if (controlRole != null) {
-                BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-                botData.setControlRole(controlRole.getID());
-                DatabaseManager.getManager().updateData(botData);
-                //Send message.
-                Message.sendMessage("Required control role set to: " + controlRole.getName(), event, client);
+                if (controlRole != null) {
+                    BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+                    botData.setControlRole(controlRole.getID());
+                    DatabaseManager.getManager().updateData(botData);
+                    //Send message.
+                    Message.sendMessage("Required control role set to: " + controlRole.getName(), event, client);
 
+                } else {
+                    //Invalid role.
+                    Message.sendMessage("Invalid role specified! The role must exist!", event, client);
+                }
             } else {
-                //Invalid role.
-                Message.sendMessage("Invalid role specified! The role must exist!", event, client);
+                //Role is @everyone, set this so that anyone can control the bot.
+                BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+                botData.setControlRole("everyone");
+                DatabaseManager.getManager().updateData(botData);
+                //Send message
+                Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event, client);
             }
         } else {
-            //Role is @everyone, set this so that anyone can control the bot.
-            BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-            botData.setControlRole("everyone");
-            DatabaseManager.getManager().updateData(botData);
-            //Send message
-            Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event, client);
+            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
         }
     }
 }
