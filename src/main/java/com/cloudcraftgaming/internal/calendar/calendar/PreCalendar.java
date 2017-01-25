@@ -8,13 +8,13 @@ package com.cloudcraftgaming.internal.calendar.calendar;
 public class PreCalendar {
     private final String guildId;
 
-    private String summery;
+    private String summary;
     private String description;
     private String timezone;
 
-    PreCalendar(String _guildId, String _summery) {
+    PreCalendar(String _guildId, String _summary) {
         guildId = _guildId;
-        summery = _summery;
+        summary = _summary;
     }
 
     //Getters
@@ -22,8 +22,8 @@ public class PreCalendar {
         return guildId;
     }
 
-    String getSummery() {
-        return summery;
+    String getSummary() {
+        return summary;
     }
 
     String getDescription() {
@@ -35,8 +35,8 @@ public class PreCalendar {
     }
 
     //Setters
-    public void setSummery(String _summery) {
-        summery = _summery;
+    public void setSummary(String _summary) {
+        summary = _summary;
     }
 
     public void setDescription(String _description) {
@@ -49,6 +49,6 @@ public class PreCalendar {
 
     //Booleans/Checkers
     Boolean hasRequiredValues() {
-        return summery != null && timezone != null;
+        return summary != null && timezone != null;
     }
 }

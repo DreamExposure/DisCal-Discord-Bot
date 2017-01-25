@@ -53,7 +53,7 @@ public class CalendarCreator {
             PreCalendar preCalendar = getPreCalendar(guildId);
             if (preCalendar.hasRequiredValues()) {
                 Calendar calendar = new Calendar();
-                calendar.setSummary(preCalendar.getSummery());
+                calendar.setSummary(preCalendar.getSummary());
                 calendar.setDescription(preCalendar.getDescription());
                 calendar.setTimeZone(preCalendar.getTimezone());
                 try {

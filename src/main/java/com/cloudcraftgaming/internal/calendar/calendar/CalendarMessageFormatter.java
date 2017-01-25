@@ -20,7 +20,7 @@ public class CalendarMessageFormatter {
         String link = "https://calendar.google.com/calendar/embed?src=" + callURI;
         return "~-~-~- Calendar Info ~-~-~-" + lineBreak
                 + "Calendar ID: " + calendar.getId() + lineBreak + lineBreak
-                + "Name/Summery: " + calendar.getSummary() + lineBreak + lineBreak
+                + "Name/Summary: " + calendar.getSummary() + lineBreak + lineBreak
                 + "Description: " + calendar.getDescription() + lineBreak + lineBreak
                 + "TimeZone: " + calendar.getTimeZone() + lineBreak + lineBreak
                 + "Link: " + link;
@@ -29,7 +29,7 @@ public class CalendarMessageFormatter {
     public static String getFormatEventMessage(PreCalendar calendar) {
         return "~-~-~- Calendar Info ~-~-~-" + lineBreak
                 + "Calendar ID: null until creation completed" + lineBreak + lineBreak
-                + "Name/Summery: " + calendar.getSummery() + lineBreak + lineBreak
+                + "Name/Summary: " + calendar.getSummary() + lineBreak + lineBreak
                 + "Description: " + calendar.getDescription() + lineBreak + lineBreak
                 + "TimeZone: " + calendar.getTimezone() + lineBreak + lineBreak
                 + "Link: Unknown until confirmed.";

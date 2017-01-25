@@ -81,7 +81,7 @@ public class EventCommand implements ICommand {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
                         EventCreator.getCreator().init(event, args[1]);
-                        Message.sendMessage("Event Creator initiated! Please specify event summery.", event, client);
+                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                     }
                 } else if (function.equalsIgnoreCase("delete")) {
                     if (!EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -191,11 +191,11 @@ public class EventCommand implements ICommand {
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("summery")) {
+                } else if (function.equalsIgnoreCase("summary")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
-                        EventCreator.getCreator().getPreEvent(guildId).setSummery(content);
-                        Message.sendMessage("Event summery set to: '" + content + "'"
+                        EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
+                        Message.sendMessage("Event summary set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the event description!", event, client);
                     } else {
@@ -223,11 +223,11 @@ public class EventCommand implements ICommand {
                 String guildId = event.getMessage().getGuild().getID();
                 if (function.equalsIgnoreCase("create")) {
                     Message.sendMessage("Event name can only be one(1) word!", event, client);
-                } else if (function.equalsIgnoreCase("summery")) {
+                } else if (function.equalsIgnoreCase("summary")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
-                        EventCreator.getCreator().getPreEvent(guildId).setSummery(content);
-                        Message.sendMessage("Event summery set to: '" + content + "'"
+                        EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
+                        Message.sendMessage("Event summary set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the event description!", event, client);
                     } else {

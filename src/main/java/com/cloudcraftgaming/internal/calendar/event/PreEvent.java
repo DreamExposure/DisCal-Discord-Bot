@@ -11,7 +11,7 @@ public class PreEvent {
     private final String guildId;
     private final String eventName;
 
-    private String summery;
+    private String summary;
     private String description;
     private EventDateTime startDateTime;
     private EventDateTime endDateTime;
@@ -35,8 +35,8 @@ public class PreEvent {
         return eventName;
     }
 
-    String getSummery() {
-        return summery;
+    String getSummary() {
+        return summary;
     }
 
     String getDescription() {
@@ -56,8 +56,8 @@ public class PreEvent {
     }
 
     //Setters
-    public void setSummery(String _summery) {
-        summery = _summery;
+    public void setSummary(String _summary) {
+        summary = _summary;
     }
 
     public void setDescription(String _description) {

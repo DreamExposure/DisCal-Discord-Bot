@@ -105,10 +105,10 @@ public class CalendarCommand implements ICommand {
                     } else {
                         Message.sendMessage("Calendar creator has already been initialized!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
+                } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summary")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                        CalendarCreator.getCreator().getPreCalendar(guildId).setSummery(value);
-                        Message.sendMessage("Calendar summery/name set to '" + value + "'"
+                        CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(value);
+                        Message.sendMessage("Calendar summary/name set to '" + value + "'"
                                 + Message.lineBreak + Message.lineBreak
                                 + " Please specify the description!", event, client);
                     } else {
@@ -167,10 +167,10 @@ public class CalendarCommand implements ICommand {
                     } else {
                         Message.sendMessage("Calendar creator has already been initialized!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summery")) {
+                } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summary")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                        CalendarCreator.getCreator().getPreCalendar(guildId).setSummery(getContent(args));
-                        Message.sendMessage("Calendar summer set to '" + getContent(args) + "'"
+                        CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(getContent(args));
+                        Message.sendMessage("Calendar summary set to '" + getContent(args) + "'"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the description!", event, client);
                     } else {

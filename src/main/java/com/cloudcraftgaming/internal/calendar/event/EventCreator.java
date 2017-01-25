@@ -57,7 +57,7 @@ public class EventCreator {
             PreEvent preEvent = getPreEvent(guildId);
             if (preEvent.hasRequiredValues()) {
                 Event event = new Event();
-                event.setSummary(preEvent.getSummery());
+                event.setSummary(preEvent.getSummary());
                 event.setDescription(preEvent.getDescription());
                 if (!preEvent.getTimeZone().equalsIgnoreCase("unknown")) {
                     preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone());

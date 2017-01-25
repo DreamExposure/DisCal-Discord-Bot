@@ -16,7 +16,7 @@ public class EventMessageFormatter {
     public static String getFormatEventMessage(Event event) {
         return "~-~-~- Event Info ~-~-~-" + lineBreak
                 + "Event ID: " + event.getId() + lineBreak + lineBreak
-                + "Summery: " + event.getSummary() + lineBreak + lineBreak
+                + "Summary: " + event.getSummary() + lineBreak + lineBreak
                 + "Description: " + event.getDescription() + lineBreak + lineBreak
                 + "Start Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
                 + "Start Time (HH:mm): " + getHumanReadableTime(event) + lineBreak
@@ -28,7 +28,7 @@ public class EventMessageFormatter {
     public static String getFormatEventMessage(PreEvent event) {
         return "~-~-~- Event Info ~-~-~-" + lineBreak
                 + "Event ID: null until creation completed" + lineBreak + lineBreak
-                + "Summery: " + event.getSummery() + lineBreak + lineBreak
+                + "Summary: " + event.getSummary() + lineBreak + lineBreak
                 + "Description: " + event.getDescription() + lineBreak + lineBreak
                 + "[REQ] Start Date (yyyy/MM/dd): " + getHumanReadableDate(event.getStartDateTime()) + lineBreak
                 + "[REQ] Start Time (HH:mm): " + getHumanReadableTime(event.getStartDateTime()) + lineBreak
