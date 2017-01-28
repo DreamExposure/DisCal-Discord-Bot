@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.module.command;
 
+import com.cloudcraftgaming.Main;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.utils.Message;
@@ -25,7 +26,10 @@ public class DisCalCommand implements ICommand {
         if (args.length < 1) {
             Message.sendMessage("DisCal is the official Discord Calendar Bot!"
                     + Message.lineBreak
-                     + "DisCal is on " + client.getGuilds().size() + " servers!"
+                    + "DisCal is on " + client.getGuilds().size() + " servers!" + Message.lineBreak
+                    + "DisCal Version: " + Main.version + Message.lineBreak
+                    + "DisCal runs on Discord4J, version 2.7.0" + Message.lineBreak
+                    + "DisCal was created by NovaFox161"
                     + Message.lineBreak + Message.lineBreak
                     + "For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/", event, client);
         } else if (args.length == 1) {

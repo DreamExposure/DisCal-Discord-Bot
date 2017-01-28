@@ -22,6 +22,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("SameParameterValue")
 public class Main {
+    public static String version = "Beta 1.1.2";
     public static IDiscordClient client;
 
     public static void main(String[] args) {
