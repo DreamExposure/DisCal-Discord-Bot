@@ -11,12 +11,17 @@ DisCal is developed and maintained by NovaFox161.
 * Create a custom calendar
 * Create/edit/delete custom events
 * Set up announcements **WIP**
+* Easy to learn and use!
+* Simple commands, prefix "!" OR @DisCal
 * And much more coming soon!
 
 ## Planned Features
 
 * Custom announcements
 * Link up to external calendar
+* Edit events
+* Edit calendars
+* Delete/Remove calendars
 * And more!
 
 ## Contributing
