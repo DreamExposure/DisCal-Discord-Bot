@@ -40,8 +40,12 @@ class CommandListener {
             argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
             String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
-            String command = argsOr[1];
-            cmd.issueCommand(command, args, event);
+            if (args.length > 0) {
+                String command = argsOr[1];
+                cmd.issueCommand(command, args, event);
+            } else {
+                cmd.issueCommand("DisCal", args, event);
+            }
         }
     }
 }
