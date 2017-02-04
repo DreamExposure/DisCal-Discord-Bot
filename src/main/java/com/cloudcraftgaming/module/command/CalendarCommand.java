@@ -4,6 +4,8 @@ import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.calendar.CalendarCreator;
 import com.cloudcraftgaming.internal.calendar.calendar.CalendarCreatorResponse;
 import com.cloudcraftgaming.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.internal.calendar.calendar.CalendarUtils;
+import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.utils.Message;
 import com.cloudcraftgaming.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
@@ -84,6 +86,19 @@ public class CalendarCommand implements ICommand {
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
                         }
+                    }
+                } else if (function.equalsIgnoreCase("delete") || function.equalsIgnoreCase("remove")) {
+                    BotData data = DatabaseManager.getManager().getData(guildId);
+                    if (!data.getCalendarId().equalsIgnoreCase("primary")) {
+                        //Delete calendar
+                        if (CalendarUtils.deleteCalendar(data)) {
+                            Message.sendMessage("Calendar deleted! You may create a new one if you so wish!", event, client);
+                        } else {
+                            Message.sendMessage("Oops! Something went wrong! I failed to delete your calendar!", event, client);
+                        }
+                    } else {
+                        //No calendar to delete
+                        Message.sendMessage("Cannot delete calendar as one does not exist!", event, client);
                     }
                 } else {
                     Message.sendMessage("Invalid function!", event, client);
