@@ -5,6 +5,7 @@ import com.cloudcraftgaming.database.MySQL;
 import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.internal.file.ReadFile;
 import com.cloudcraftgaming.module.command.*;
 import sx.blah.discord.api.ClientBuilder;
@@ -26,8 +27,8 @@ public class Main {
     public static IDiscordClient client;
 
     public static void main(String[] args) {
-        if (args.length < 2) // Needs a bot token provided
-            throw new IllegalArgumentException("The Bot Token & MySQL file has not be specified!");
+        if (args.length < 3) // Needs a bot token provided
+            throw new IllegalArgumentException("The Bot Token, MySQL file, or Email file has not be specified!");
 
         client = createClient(args[0], true);
         if (client == null)
@@ -44,6 +45,9 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        //Setup email debugging
+        EmailSender.getSender().init(args[2]);
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();

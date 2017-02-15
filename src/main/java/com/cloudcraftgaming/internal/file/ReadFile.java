@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.internal.file;
 
 import com.cloudcraftgaming.database.MySQL;
+import com.cloudcraftgaming.internal.email.EmailData;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -68,6 +69,37 @@ public class ReadFile {
             //Return a new MySQL object
             return new MySQL(hostName, port, database, prefix, user, pass);
         }catch (Exception e){//Catch exception if any
+            System.err.println("Error: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static EmailData readEmailLogin(String fileAndPath) {
+        try {
+            FileInputStream fstream = new FileInputStream(fileAndPath);
+            //Get data
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            //Read file line by line
+            String user = null;
+            String pass = null;
+
+            int line = 0;
+            while ((strLine = br.readLine()) != null) {
+                if (line == 0) {
+                    user = strLine;
+                }
+                if (line == 1) {
+                    pass = strLine;
+                }
+                line++;
+            }
+            //Close input stream
+            in.close();
+
+            return new EmailData(user, pass);
+        } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
         return null;
