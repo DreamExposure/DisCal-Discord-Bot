@@ -1,10 +1,15 @@
 # About DisCal
 
-DisCal is a Discord bot that links up to a Google Calendar to create, delete, edit, and announce events and more! 
-
-This is the perfect bot for RPGs to allow them to schedule events with greater simplicity and ease.
+DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
+<br> <br>
+It was built to be powerful yet easy to use! 
+Discord lacks a built in calendar, so we took the chance to make one for you! With DisCal, you can bring your Guild closer together by scheduling events and activities and having DisCal handle all of the hard work! 
+<br> <br>
+DisCal is perfect for every guild! Whether you are an RP Guild, Gaming Guild, or community Guild, DisCal was built to be versatile and unique! With DisCal no longer will you need to do any complex scheduling, DisCal handles all of that hard work for you!
 
 DisCal is developed and maintained by NovaFox161.
+
+*WIP means "Work in Progress" or is a feature actively in development but not released yet. Features marked as WIP will be available in upcoming updates very soon!
 
 ## Core Features
 
@@ -14,6 +19,8 @@ DisCal is developed and maintained by NovaFox161.
 * Easy to learn and use!
 * Simple commands, prefix "!" OR @DisCal
 * And much more coming soon!
+
+In addition to all of the features above, DisCal will automatically send the developer an email should an error occur! This way the developer, Nova, will be alerted of an issue immediately and can fix is ASAP!!
 
 ## Planned Features
 
