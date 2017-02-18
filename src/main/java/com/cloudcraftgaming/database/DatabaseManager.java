@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.database;
 
 import com.cloudcraftgaming.internal.data.BotData;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.module.announcement.Announcement;
 
 import java.sql.*;
@@ -33,6 +34,7 @@ public class DatabaseManager {
             System.out.println("Connected to MySQL database!");
         } catch (Exception e) {
             System.out.println("Failed to connect to MySQL database! Is it properly configured?");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
     }
@@ -43,6 +45,7 @@ public class DatabaseManager {
                 databaseInfo.getMySQL().closeConnection();
                 System.out.println("Successfully disconnected from MySQL Database!");
             } catch (SQLException e) {
+                EmailSender.getSender().sendExceptionEmail(e);
                 System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
             }
         }
@@ -75,6 +78,7 @@ public class DatabaseManager {
             return true;
         } catch (SQLException e) {
             System.out.println("Failed to created database tables! Something must be wrong.");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return false;
@@ -120,6 +124,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to input data into database! Error Code: 00101");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return false;
@@ -167,6 +172,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.print("Failed to input announcement data! Error Code: 00201");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return false;
@@ -197,6 +203,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to get data from database! Error code: 00102");
+            EmailSender.getSender().sendExceptionEmail(e);
         }
         return botData;
     }
@@ -222,6 +229,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to get announcement from database! Error code: 00202");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return announcement;
@@ -250,6 +258,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to get announcements from database! Error code: 00203");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return announcements;

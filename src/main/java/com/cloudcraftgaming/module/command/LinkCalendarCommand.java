@@ -3,6 +3,7 @@ package com.cloudcraftgaming.module.command;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.IDiscordClient;
@@ -28,7 +29,8 @@ public class LinkCalendarCommand implements ICommand {
             Calendar cal = CalendarAuth.getCalendarService().calendars().get(calId).execute();
             Message.sendMessage(CalendarMessageFormatter.getFormatEventMessage(event, cal), event, client);
         } catch (IOException e) {
-            Message.sendMessage("Oops! Something went wrong! Please report this to the developer!", event, client);
+            EmailSender.getSender().sendExceptionEmail(e);
+            Message.sendMessage("Oops! Something went wrong! I have emailed the developer!", event, client);
         }
         return false;
     }

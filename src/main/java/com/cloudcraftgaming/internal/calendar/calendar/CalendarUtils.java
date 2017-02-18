@@ -2,6 +2,7 @@ package com.cloudcraftgaming.internal.calendar.calendar;
 
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.data.BotData;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.google.api.services.calendar.Calendar;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ public class CalendarUtils {
             return true;
         } catch (IOException e) {
             //Fail silently.
+            EmailSender.getSender().sendExceptionEmail(e);
         }
         return false;
     }

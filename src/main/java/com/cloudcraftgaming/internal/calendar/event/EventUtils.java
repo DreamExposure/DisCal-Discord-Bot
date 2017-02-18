@@ -2,6 +2,7 @@ package com.cloudcraftgaming.internal.calendar.event;
 
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.google.api.services.calendar.Calendar;
 
 import java.io.IOException;
@@ -20,6 +21,7 @@ public class EventUtils {
             return true;
         } catch (IOException e) {
             System.out.println("Something weird happened when deleting an event!");
+            EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
         return false;

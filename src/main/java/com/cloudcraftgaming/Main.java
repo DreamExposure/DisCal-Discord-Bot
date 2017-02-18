@@ -30,6 +30,9 @@ public class Main {
         if (args.length < 3) // Needs a bot token provided
             throw new IllegalArgumentException("The Bot Token, MySQL file, or Email file has not be specified!");
 
+        //Setup email debugging
+        EmailSender.getSender().init(args[2]);
+
         client = createClient(args[0], true);
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
@@ -44,10 +47,8 @@ public class Main {
             CalendarAuth.init(args);
         } catch (IOException e) {
             e.printStackTrace();
+            EmailSender.getSender().sendExceptionEmail(e);
         }
-
-        //Setup email debugging
-        EmailSender.getSender().init(args[2]);
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
@@ -77,6 +78,7 @@ public class Main {
             }
         } catch (DiscordException e) {
             e.printStackTrace();
+            EmailSender.getSender().sendExceptionEmail(e);
         }
         return null;
     }

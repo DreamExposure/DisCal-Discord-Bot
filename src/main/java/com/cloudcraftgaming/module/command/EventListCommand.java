@@ -3,6 +3,7 @@ package com.cloudcraftgaming.module.command;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -57,7 +58,8 @@ public class EventListCommand implements ICommand {
                         return true;
                     }
                 } catch (IOException e) {
-                    Message.sendMessage("Oops! Something terrible happened! Please report this to the NovaFox161 (developer).", event, client);
+                    Message.sendMessage("Oops! Something terrible happened! I have emailed the developer!", event, client);
+                    EmailSender.getSender().sendExceptionEmail(e);
                     e.printStackTrace();
                 }
 

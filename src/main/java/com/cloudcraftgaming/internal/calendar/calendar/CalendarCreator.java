@@ -3,6 +3,7 @@ package com.cloudcraftgaming.internal.calendar.calendar;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.data.BotData;
+import com.cloudcraftgaming.internal.email.EmailSender;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -70,6 +71,7 @@ public class CalendarCreator {
                     terminate(e);
                     return new CalendarCreatorResponse(true, confirmed);
                 } catch (IOException ex) {
+                    EmailSender.getSender().sendExceptionEmail(ex);
                     return new CalendarCreatorResponse(false);
                 }
             }
