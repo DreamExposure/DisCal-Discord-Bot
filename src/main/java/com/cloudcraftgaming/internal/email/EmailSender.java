@@ -6,6 +6,9 @@ import org.simplejavamail.mailer.Mailer;
 import org.simplejavamail.mailer.config.TransportStrategy;
 
 import javax.mail.Message;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -18,7 +21,7 @@ public class EmailSender {
     private static EmailSender instance;
 
     private Mailer mailer;
-    EmailData data;
+    private EmailData data;
 
     private EmailSender() {}
 
@@ -40,12 +43,23 @@ public class EmailSender {
     public void sendExceptionEmail(Exception e) {
         Email email = new Email();
 
-        String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+        String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String error = sw.toString(); // stack trace as a string
+        pw.close();
+
+        try {
+            sw.close();
+        } catch (IOException e1) {
+            //Can ignore silently...
+        }
 
         email.setFromAddress("DisCal", data.getUsername());
         email.addRecipient("CloudCraft", "cloudcraftcontact@gmail.com", Message.RecipientType.TO);
         email.setSubject("[DNR] DisCal Error");
-        email.setText("An error occurred on: " + timeStamp + com.cloudcraftgaming.utils.Message.lineBreak + e.toString());
+        email.setText("An error occurred on: " + timeStamp + com.cloudcraftgaming.utils.Message.lineBreak + error);
 
         mailer.sendMail(email);
     }
