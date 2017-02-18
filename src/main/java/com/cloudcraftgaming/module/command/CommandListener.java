@@ -26,32 +26,34 @@ class CommandListener {
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
             IMessage msg = event.getMessage();
-            if (msg.getContent().startsWith("!")) {
-                //Command supported by DisCal, try commands.
-                String[] argsOr = msg.getContent().split(" ");
-                ArrayList<String> argsOr2 = new ArrayList<>();
-                argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
-                String[] args = argsOr2.toArray(new String[argsOr2.size()]);
-
-                String command = argsOr[0].replaceAll("!", "");
-                cmd.issueCommand(command, args, event);
-            } else if (msg.getMentions().contains(Main.getSelfUser())) {
-                //DisCal mentioned, see if this is a valid command?
-                String[] argsOr = msg.getContent().split(" ");
-                ArrayList<String> argsOr2 = new ArrayList<>();
-                if (argsOr2.size() > 1) {
-                    argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+            if (!msg.getContent().isEmpty()) {
+                if (msg.getContent().startsWith("!")) {
+                    //Command supported by DisCal, try commands.
+                    String[] argsOr = msg.getContent().split(" ");
+                    ArrayList<String> argsOr2 = new ArrayList<>();
+                    argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
                     String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
-                    if (args.length > 0) {
-                        String command = argsOr[1];
-                        cmd.issueCommand(command, args, event);
+                    String command = argsOr[0].replaceAll("!", "");
+                    cmd.issueCommand(command, args, event);
+                } else if (msg.getMentions().contains(Main.getSelfUser())) {
+                    //DisCal mentioned, see if this is a valid command?
+                    String[] argsOr = msg.getContent().split(" ");
+                    ArrayList<String> argsOr2 = new ArrayList<>();
+                    if (argsOr2.size() > 1) {
+                        argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+                        String[] args = argsOr2.toArray(new String[argsOr2.size()]);
+
+                        if (args.length > 0) {
+                            String command = argsOr[1];
+                            cmd.issueCommand(command, args, event);
+                        } else {
+                            cmd.issueCommand("DisCal", args, event);
+                        }
                     } else {
-                        cmd.issueCommand("DisCal", args, event);
+                        //Only mentioned DisCal
+                        cmd.issueCommand("DisCal", new String[1], event);
                     }
-                } else {
-                    //Only mentioned DisCal
-                    cmd.issueCommand("DisCal", new String[1], event);
                 }
             }
         } catch (Exception e) {
