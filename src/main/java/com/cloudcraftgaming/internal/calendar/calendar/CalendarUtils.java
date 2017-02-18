@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.internal.calendar.calendar;
 
+import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.internal.email.EmailSender;
@@ -17,6 +18,12 @@ public class CalendarUtils {
         try {
             Calendar service = CalendarAuth.getCalendarService();
             service.calendars().delete(data.getCalendarAddress()).execute();
+
+            //Remove from database
+            data.setCalendarId("primary");
+            data.setCalendarAddress("primary");
+            DatabaseManager.getManager().updateData(data);
+            
             return true;
         } catch (IOException e) {
             //Fail silently.
