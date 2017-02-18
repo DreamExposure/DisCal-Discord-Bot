@@ -3,6 +3,7 @@ package com.cloudcraftgaming.internal.email;
 import com.cloudcraftgaming.internal.file.ReadFile;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.mailer.Mailer;
+import org.simplejavamail.mailer.config.TransportStrategy;
 
 import javax.mail.Message;
 import java.text.SimpleDateFormat;
@@ -17,6 +18,7 @@ public class EmailSender {
     private static EmailSender instance;
 
     private Mailer mailer;
+    EmailData data;
 
     private EmailSender() {}
 
@@ -28,11 +30,11 @@ public class EmailSender {
     }
 
     public void init(String emailDataFile) {
-        EmailData data = ReadFile.readEmailLogin(emailDataFile);
+        data = ReadFile.readEmailLogin(emailDataFile);
 
         assert data != null;
 
-        mailer = new Mailer("smtp.gmail.com", 465, data.getUsername(), data.getPassword());
+        mailer = new Mailer("smtp.gmail.com", 465, data.getUsername(), data.getPassword(), TransportStrategy.SMTP_SSL);
     }
 
     public void sendExceptionEmail(Exception e) {
@@ -40,7 +42,7 @@ public class EmailSender {
 
         String timeStamp = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss").format(Calendar.getInstance().getTime());
 
-        email.setFromAddress("DisCal", "discal@gmail.com");
+        email.setFromAddress("DisCal", data.getUsername());
         email.addRecipient("CloudCraft", "cloudcraftcontact@gmail.com", Message.RecipientType.TO);
         email.setSubject("[DNR] DisCal Error");
         email.setText("An error occurred on: " + timeStamp + com.cloudcraftgaming.utils.Message.lineBreak + e.toString());
