@@ -190,9 +190,10 @@ public class DatabaseManager {
 
                 Boolean hasStuff = res.next();
 
-                if (hasStuff || res.getString("GUILD_ID") != null) {
+                if (hasStuff && res.getString("GUILD_ID") != null) {
                     botData.setCalendarId(res.getString("CALENDAR_ID"));
                     botData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                    botData.setControlRole(res.getString("CONTROL_ROLE"));
 
                     statement.close();
                 } else {
