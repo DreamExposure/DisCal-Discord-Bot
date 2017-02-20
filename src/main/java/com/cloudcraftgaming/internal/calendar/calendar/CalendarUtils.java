@@ -23,7 +23,7 @@ public class CalendarUtils {
             data.setCalendarId("primary");
             data.setCalendarAddress("primary");
             DatabaseManager.getManager().updateData(data);
-            
+
             return true;
         } catch (IOException e) {
             //Fail silently.
