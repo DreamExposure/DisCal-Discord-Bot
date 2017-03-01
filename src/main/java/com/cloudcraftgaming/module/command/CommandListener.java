@@ -50,9 +50,6 @@ class CommandListener {
                         } else {
                             cmd.issueCommand("DisCal", args, event);
                         }
-                    } else {
-                        //Only mentioned DisCal
-                        cmd.issueCommand("DisCal", new String[1], event);
                     }
                 }
             }
