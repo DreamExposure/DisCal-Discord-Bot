@@ -24,14 +24,18 @@ public class DisCalCommand implements ICommand {
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (args.length < 1) {
-            Message.sendMessage("DisCal is the official Discord Calendar Bot!"
-                    + Message.lineBreak
-                    + "DisCal is on " + client.getGuilds().size() + " servers!" + Message.lineBreak
-                    + "DisCal Version: " + Main.version + Message.lineBreak
-                    + "DisCal runs on Discord4J, version 2.7.0" + Message.lineBreak
-                    + "DisCal was created by NovaFox161"
-                    + Message.lineBreak + Message.lineBreak
-                    + "For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/", event, client);
+          	EmbedBuilder em = new EmbedBuilder();
+				em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+				em.withAuthorName("DisCal!");
+				em.withTitle("DisCal is the official Discord Calendar Bot!");
+				em.appendField("Developer", "NovaFox161", true);
+				em.appendField("Version", Main.version, true);
+				em.appendField("Library", "Discord4J, version 2.7.0", false);
+				em.appendField("Total Guilds", client.getGuilds().size() + "", true);
+				em.withFooterText(
+						"For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/");
+				em.withColor(36, 153, 153);
+				Message.sendMessage(em.build(), event, client);
         } else if (args.length == 1) {
             Message.sendMessage("Please specify a function and value!", event, client);
         } else if (args.length == 2) {
