@@ -36,7 +36,7 @@ class CommandListener {
 
                     String command = argsOr[0].replaceAll("!", "");
                     cmd.issueCommand(command, args, event);
-                } else if (msg.getMentions().contains(Main.getSelfUser())) {
+                } else if (msg.getMentions().contains(Main.getSelfUser()) && !(msg.mentionsEveryone() || msg.mentionsHere())) {
                     //DisCal mentioned, see if this is a valid command?
                     String[] argsOr = msg.getContent().split(" ");
                     ArrayList<String> argsOr2 = new ArrayList<>();
