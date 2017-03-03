@@ -9,6 +9,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.util.EmbedBuilder;
 
 /**
  * Created by Nova Fox on 1/5/2017.
