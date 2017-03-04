@@ -16,6 +16,8 @@ public class Announcement {
     private final ArrayList<String> subscribers = new ArrayList<>();
 
     private String announcementChannelId;
+    private AnnouncementType type;
+    private String eventId;
     private int hoursBefore;
     private int minutesBefore;
 
@@ -69,6 +71,14 @@ public class Announcement {
         return subs;
     }
 
+    public AnnouncementType getAnnouncementType() {
+        return type;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
     public int getHoursBefore() {
         return hoursBefore;
     }
@@ -80,6 +90,14 @@ public class Announcement {
     //Setters
     public void setAnnouncementChannelId(String _announcementChannelId) {
         announcementChannelId = _announcementChannelId;
+    }
+
+    public void setAnnouncementType(AnnouncementType _type) {
+        type = _type;
+    }
+
+    public void setEventId(String _eventId) {
+        eventId = _eventId;
     }
 
     public void setHoursBefore(Integer _hoursBefore) {
