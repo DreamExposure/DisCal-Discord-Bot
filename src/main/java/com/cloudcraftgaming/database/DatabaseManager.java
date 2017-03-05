@@ -3,6 +3,7 @@ package com.cloudcraftgaming.database;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.module.announcement.Announcement;
+import com.cloudcraftgaming.module.announcement.AnnouncementType;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -66,8 +67,11 @@ public class DatabaseManager {
             String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
                     " (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
                     " GUILD_ID VARCHAR(255) not NULL, " +
+                    " SUBSCRIBERS_ROLE LONGTEXT not NULL, " +
+                    " SUBSCRIBERS_USER LONGTEXT not NULL, " +
                     " CHANNEL_ID VARCHAR(255) not NULL, " +
-                    " SUBSCRIBERS LONGTEXT not NULL, " +
+                    " ANNOUNCEMENT_TYPE VARCHAR(255) not NULL, " +
+                    " EVENT_ID LONGTEXT not NULL, " +
                     " HOURS_BEFORE INTEGER not NULL, " +
                     " MINUTES_BEFORE INTEGER not NULL, " +
                     " PRIMARY KEY (ANNOUNCEMENT_ID))";
@@ -83,7 +87,6 @@ public class DatabaseManager {
         }
         return false;
     }
-
 
     public Boolean updateData(BotData data) {
         try {
@@ -144,15 +147,18 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
                     //Data not present, add to db.
                     String insertCommand = "INSERT INTO " + announcementTableName +
-                            "(ANNOUNCEMENT_ID, GUILD_ID, CHANNEL_ID, SUBSCRIBERS, HOURS_BEFORE, MINUTES_BEFORE)" +
-                            " VALUE  (?, ?, ?, ?, ?, ?)";
+                            "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, HOURS_BEFORE, MINUTES_BEFORE)" +
+                            " VALUE  (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, announcement.getAnnouncementId().toString());
                     ps.setString(2, announcement.getGuildId());
-                    ps.setString(3, announcement.getAnnouncementChannelId());
-                    ps.setString(4, announcement.getSubscribersString());
-                    ps.setInt(5, announcement.getHoursBefore());
-                    ps.setInt(6, announcement.getMinutesBefore());
+                    ps.setString(3, announcement.getSubscriberRoleIdString());
+                    ps.setString(4, announcement.getSubscriberUserIdString());
+                    ps.setString(5, announcement.getAnnouncementChannelId());
+                    ps.setString(6, announcement.getAnnouncementType().name());
+                    ps.setString(7, announcement.getEventId());
+                    ps.setInt(8, announcement.getHoursBefore());
+                    ps.setInt(9, announcement.getMinutesBefore());
 
                     ps.executeUpdate();
                     ps.close();
@@ -160,11 +166,14 @@ public class DatabaseManager {
                 } else {
                     //Data present, update.
                     String updateCMD = "UPDATE " + announcementTableName
-                            + " SET CHANNEL_ID= '" + announcement.getAnnouncementChannelId()
-                            + "', SUBSCRIBERS='" + announcement.getSubscribersString()
+                            + " SET SUBSCRIBERS_ROLE= '" + announcement.getSubscriberRoleIdString()
+                            + "', SUBSCRIBERS_USER='" + announcement.getSubscriberUserIds()
+                            + "', CHANNEL_ID='" + announcement.getAnnouncementChannelId()
+                            + "', ANNOUNCEMENT_TYPE='" + announcement.getAnnouncementType().name()
+                            + "', EVENT_ID='" + announcement.getEventId()
                             + "', HOURS_BEFORE='" + announcement.getHoursBefore()
                             + "', MINUTES_BEFORE='" + announcement.getMinutesBefore()
-                            + "' WHERE ANNOUNCEMENT_ID= '" + announcement.getAnnouncementId() + "';";
+                             + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();
                 }
@@ -222,8 +231,11 @@ public class DatabaseManager {
                 Boolean hasStuff = res.next();
 
                 if (hasStuff || res.getString("ANNOUNCEMENT_ID") != null) {
+                    announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+                    announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
                     announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
-                    announcement.setSubscribersFromString(res.getString("SUBSCRIBERS"));
+                    announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
+                    announcement.setEventId(res.getString("EVENT_ID"));
                     announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                     announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
                 }
@@ -249,11 +261,13 @@ public class DatabaseManager {
                 while (res.next()) {
                     if (res.getString("ANNOUNCEMENT_ID") != null) {
                         Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), guildId);
+                        announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+                        announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
                         announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
-                        announcement.setSubscribersFromString(res.getString("SUBSCRIBERS"));
+                        announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
+                        announcement.setEventId(res.getString("EVENT_ID"));
                         announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                         announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
-                        announcements.add(announcement);
                     }
                 }
             }
@@ -263,5 +277,55 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return announcements;
+    }
+
+    public ArrayList<Announcement> getAnnouncements() {
+        ArrayList<Announcement> announcements = new ArrayList<>();
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + announcementTableName + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                while (res.next()) {
+                    if (res.getString("ANNOUNCEMENT_ID") != null) {
+                        Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), res.getString("GUILD_ID"));
+                        announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+                        announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
+                        announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
+                        announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
+                        announcement.setEventId(res.getString("EVENT_ID"));
+                        announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
+                        announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to get announcements from database! Error code: 00203");
+            EmailSender.getSender().sendExceptionEmail(e);
+            e.printStackTrace();
+        }
+        return announcements;
+    }
+
+    public Boolean deleteAnnouncement(String announcementId) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+                String query = "DELETE FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
+                PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+                preparedStmt.setString(1, announcementId);
+
+                preparedStmt.execute();
+                preparedStmt.close();
+                return true;
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e);
+        }
+        return false;
     }
 }

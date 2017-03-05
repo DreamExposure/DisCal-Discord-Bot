@@ -13,7 +13,8 @@ public class Announcement {
     private final UUID announcementId;
     private final String guildId;
 
-    private final ArrayList<String> subscribers = new ArrayList<>();
+    private final ArrayList<String> subscriberRoleIds = new ArrayList<>();
+    private final ArrayList<String> subscriberUserIds = new ArrayList<>();
 
     private String announcementChannelId;
     private AnnouncementType type;
@@ -53,14 +54,32 @@ public class Announcement {
         return announcementChannelId;
     }
 
-    public ArrayList<String> getSubscribers() {
-        return subscribers;
+    public ArrayList<String> getSubscriberRoleIds() {
+        return subscriberRoleIds;
     }
 
-    public String getSubscribersString() {
+    public ArrayList<String> getSubscriberUserIds() {
+        return subscriberUserIds;
+    }
+
+    public String getSubscriberRoleIdString() {
         String subs = "";
         Integer i = 0;
-        for (String sub : subscribers) {
+        for (String sub : subscriberRoleIds) {
+            if (i == 0) {
+                subs = sub;
+            } else {
+                subs = subs + "," + sub;
+            }
+            i++;
+        }
+        return subs;
+    }
+
+    public String getSubscriberUserIdString() {
+        String subs = "";
+        Integer i = 0;
+        for (String sub : subscriberUserIds) {
             if (i == 0) {
                 subs = sub;
             } else {
@@ -108,8 +127,13 @@ public class Announcement {
         minutesBefore = _minutesBefore;
     }
 
-    public void setSubscribersFromString(String subList) {
+    public void setSubscriberRoleIdsFromString(String subList) {
         String[] subs = subList.split(",");
-        Collections.addAll(subscribers, subs);
+        Collections.addAll(subscriberRoleIds, subs);
+    }
+
+    public void setSubscriberUserIdsFromString(String subList) {
+        String[] subs = subList.split(",");
+        Collections.addAll(subscriberUserIds, subs);
     }
 }

@@ -7,6 +7,7 @@ import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.internal.file.ReadFile;
+import com.cloudcraftgaming.module.announcement.Announcer;
 import com.cloudcraftgaming.module.command.*;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -62,6 +63,9 @@ public class Main {
         executor.registerCommand(new LinkCalendarCommand());
         executor.registerCommand(new EventListCommand());
         executor.registerCommand(new EventCommand());
+
+        //Init a few more modules
+        Announcer.getAnnouncer().init();
 
         //Accept commands
         ConsoleCommandExecutor.init();
