@@ -29,6 +29,11 @@ public class Announcement {
     public Announcement(String _guildId) {
         guildId = _guildId;
         announcementId = UUID.randomUUID();
+        announcementChannelId = "N/a";
+        eventId = "N/a";
+        type = AnnouncementType.UNIVERSAL;
+        hoursBefore = 0;
+        minutesBefore = 0;
     }
 
     /**
@@ -39,6 +44,11 @@ public class Announcement {
     public Announcement(UUID _announcementId, String _guildId) {
         announcementId = _announcementId;
         guildId = _guildId;
+        announcementChannelId = "N/a";
+        eventId = "N/a";
+        type = AnnouncementType.UNIVERSAL;
+        hoursBefore = 0;
+        minutesBefore = 0;
     }
 
     //Getters
@@ -135,5 +145,18 @@ public class Announcement {
     public void setSubscriberUserIdsFromString(String subList) {
         String[] subs = subList.split(",");
         Collections.addAll(subscriberUserIds, subs);
+    }
+
+    //Booleans/Checkers
+    public Boolean hasRequiredValues() {
+        if (minutesBefore != 0 || hoursBefore != 0) {
+            if (type.equals(AnnouncementType.SPECIFIC)) {
+                if (eventId.equalsIgnoreCase("N/a")) {
+                    return false;
+                }
+            }
+            return !announcementChannelId.equalsIgnoreCase("N/a");
+        }
+        return false;
     }
 }
