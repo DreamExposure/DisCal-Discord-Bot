@@ -19,9 +19,9 @@ public class EventMessageFormatter {
                 + "Summary: " + event.getSummary() + lineBreak + lineBreak
                 + "Description: " + event.getDescription() + lineBreak + lineBreak
                 + "Start Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
-                + "Start Time (HH:mm): " + getHumanReadableTime(event) + lineBreak
+                + "Start Time (HH:mm): " + getHumanReadableTime(event, true) + lineBreak
                 + "End Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
-                + "End Time (HH:mm): " + getHumanReadableTime(event) + lineBreak
+                + "End Time (HH:mm): " + getHumanReadableTime(event, false) + lineBreak
                 + "TimeZone: " + event.getStart().getTimeZone();
     }
 
@@ -69,12 +69,20 @@ public class EventMessageFormatter {
     }
 
 
-    private static String getHumanReadableTime(Event event) {
-        String[] timeArray = event.getStart().getDateTime().toStringRfc3339().split(":");
-        String hour = timeArray[0].substring(11, 13);
-        String minute = timeArray[1];
+    private static String getHumanReadableTime(Event event, boolean start) {
+        if (start) {
+            String[] timeArray = event.getStart().getDateTime().toStringRfc3339().split(":");
+            String hour = timeArray[0].substring(11, 13);
+            String minute = timeArray[1];
 
-        return hour + ":" + minute;
+            return hour + ":" + minute;
+        } else {
+            String[] timeArray = event.getEnd().getDateTime().toStringRfc3339().split(":");
+            String hour = timeArray[0].substring(11, 13);
+            String minute = timeArray[1];
+
+            return hour + ":" + minute;
+        }
     }
 
     public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime) {
