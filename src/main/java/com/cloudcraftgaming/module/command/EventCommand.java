@@ -1,16 +1,22 @@
 package com.cloudcraftgaming.module.command;
 
+import com.cloudcraftgaming.database.DatabaseManager;
+import com.cloudcraftgaming.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.internal.calendar.event.EventCreator;
 import com.cloudcraftgaming.internal.calendar.event.EventCreatorResponse;
 import com.cloudcraftgaming.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.internal.calendar.event.EventUtils;
+import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.utils.Message;
 import com.cloudcraftgaming.utils.PermissionChecker;
 import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -49,7 +55,7 @@ public class EventCommand implements ICommand {
                                 + Message.lineBreak + Message.lineBreak
                                 + "Confirm event to add to calendar OR edit the values!", event, client);
                     } else {
-                        Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
+                        Message.sendMessage("To review an event you must have the event creator initialized OR use '!event view <event ID> to view an event in the calendar!", event, client);
                     }
                 } else if (function.equalsIgnoreCase("confirm")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -82,6 +88,21 @@ public class EventCommand implements ICommand {
                     } else {
                         EventCreator.getCreator().init(event, args[1]);
                         Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                    }
+                } else if (function.equalsIgnoreCase("view")) {
+                    if (!EventCreator.getCreator().hasPreEvent(guildId)) {
+                        //Try to get the event by ID.
+                        try {
+                            Calendar service = CalendarAuth.getCalendarService();
+                            BotData data = DatabaseManager.getManager().getData(guildId);
+                            Event calEvent = service.events().get(data.getCalendarAddress(), args[1]).execute();
+                            Message.sendMessage(EventMessageFormatter.getFormatEventMessage(calEvent), event, client);
+                        } catch (IOException e) {
+                            //Event probably doesn't exist...
+                            Message.sendMessage("Oops! Something went wrong! Are you sure the event ID is correct?", event, client);
+                        }
+                    } else {
+                        Message.sendMessage("The event creator is active! You cannot view another event while the creator is active!", event, client);
                     }
                 } else if (function.equalsIgnoreCase("delete")) {
                     if (!EventCreator.getCreator().hasPreEvent(guildId)) {

@@ -49,12 +49,15 @@ public class EventListCommand implements ICommand {
                     if (items.size() == 0) {
                         Message.sendMessage("No upcoming events found.", event, client);
                         return true;
+                    } else if (items.size() == 1) {
+                        Message.sendMessage("1 upcoming event found: " + Message.lineBreak + EventMessageFormatter.getFormatEventMessage(items.get(0)), event, client);
                     } else {
-                     //List events.
-                        Message.sendMessage("Upcoming events: ", event, client);
+                        //List events by Id only.
+                        String eventIds = "";
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getFormatEventMessage(e), event, client);
+                            eventIds = eventIds + e.getId() + Message.lineBreak;
                         }
+                        Message.sendMessage("Upcoming event IDs. Use '!event view <id>' for more info: " + Message.lineBreak + eventIds, event, client);
                         return true;
                     }
                 } catch (IOException e) {
@@ -62,7 +65,6 @@ public class EventListCommand implements ICommand {
                     EmailSender.getSender().sendExceptionEmail(e);
                     e.printStackTrace();
                 }
-
             } catch (NumberFormatException e) {
                 Message.sendMessage("Event amount must be an Integer!", event, client);
             }
