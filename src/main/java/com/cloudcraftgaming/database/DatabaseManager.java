@@ -227,7 +227,7 @@ public class DatabaseManager {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcementId.toString() + "';'";
+                String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcementId.toString() + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 Boolean hasStuff = res.next();
