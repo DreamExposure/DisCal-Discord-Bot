@@ -1,9 +1,11 @@
 package com.cloudcraftgaming.database;
 
+import com.cloudcraftgaming.Main;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.module.announcement.Announcement;
 import com.cloudcraftgaming.module.announcement.AnnouncementType;
+import sx.blah.discord.handle.obj.IGuild;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -268,6 +270,8 @@ public class DatabaseManager {
                         announcement.setEventId(res.getString("EVENT_ID"));
                         announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                         announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+
+                        announcements.add(announcement);
                     }
                 }
             }
@@ -281,31 +285,10 @@ public class DatabaseManager {
 
     public ArrayList<Announcement> getAnnouncements() {
         ArrayList<Announcement> announcements = new ArrayList<>();
-        try {
-            if (databaseInfo.getMySQL().checkConnection()) {
-                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
-
-                Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + announcementTableName + ";";
-                ResultSet res = statement.executeQuery(query);
-
-                while (res.next()) {
-                    if (res.getString("ANNOUNCEMENT_ID") != null) {
-                        Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), res.getString("GUILD_ID"));
-                        announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
-                        announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
-                        announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
-                        announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
-                        announcement.setEventId(res.getString("EVENT_ID"));
-                        announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
-                        announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
-                    }
-                }
+        for (IGuild g : Main.client.getGuilds()) {
+            for (Announcement a : getAnnouncements(g.getID())) {
+                announcements.add(a);
             }
-        } catch (SQLException e) {
-            System.out.println("Failed to get announcements from database! Error code: 00203");
-            EmailSender.getSender().sendExceptionEmail(e);
-            e.printStackTrace();
         }
         return announcements;
     }
