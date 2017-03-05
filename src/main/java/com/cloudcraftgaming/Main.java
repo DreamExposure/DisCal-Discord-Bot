@@ -63,7 +63,7 @@ public class Main {
         executor.registerCommand(new LinkCalendarCommand());
         executor.registerCommand(new EventListCommand());
         executor.registerCommand(new EventCommand());
-        //TODO: Register announcement command...
+        executor.registerCommand(new AnnouncementCommand());
 
         //Init a few more modules
         Announcer.getAnnouncer().init();

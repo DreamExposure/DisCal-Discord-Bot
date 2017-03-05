@@ -6,5 +6,17 @@ package com.cloudcraftgaming.module.announcement;
  * For Project: DisCal
  */
 public enum AnnouncementType {
-    UNIVERSAL, SPECIFIC
+    UNIVERSAL, SPECIFIC;
+
+    public static Boolean isValid(String _value) {
+        return _value.equalsIgnoreCase("UNIVERSAL") || _value.equalsIgnoreCase("SPECIFIC");
+    }
+
+    public static AnnouncementType fromValue(String _value) {
+        if (_value.equalsIgnoreCase("UNIVERSAL")) {
+            return UNIVERSAL;
+        } else {
+            return SPECIFIC;
+        }
+    }
 }
