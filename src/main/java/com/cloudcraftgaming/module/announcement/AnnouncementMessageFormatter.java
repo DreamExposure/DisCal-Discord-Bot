@@ -19,6 +19,7 @@ public class AnnouncementMessageFormatter {
                 + "Hours Before: "  + a.getHoursBefore() + lineBreak
                 + "Minutes Before: " + a.getMinutesBefore() + lineBreak
                 + "In channel (name): " + channelFromId(a);
+                //TODO: Add subscribers list here...
     }
 
     private static String channelFromId(Announcement a) {
