@@ -171,6 +171,16 @@ public class AnnouncementCommand implements ICommand {
                     } else {
                         Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
                     }
+                } else if (function.equalsIgnoreCase("delete")) {
+                    if (announcementExists(value, event)) {
+                        if (DatabaseManager.getManager().deleteAnnouncement(value)) {
+                            Message.sendMessage("Announcement successfully deleted!", event, client);
+                        } else {
+                            Message.sendMessage("Failed to delete announcement! Something may have gone wrong, the dev has been emailed!", event, client);
+                        }
+                    } else {
+                        Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+                    }
                 } else {
                     //TODO: Add useful info about what you /can/ do.
                     Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
