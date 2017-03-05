@@ -148,7 +148,7 @@ public class DatabaseManager {
                     //Data not present, add to db.
                     String insertCommand = "INSERT INTO " + announcementTableName +
                             "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, HOURS_BEFORE, MINUTES_BEFORE)" +
-                            " VALUE  (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, announcement.getAnnouncementId().toString());
                     ps.setString(2, announcement.getGuildId());
@@ -286,7 +286,7 @@ public class DatabaseManager {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + announcementTableName + "';";
+                String query = "SELECT * FROM " + announcementTableName + ";";
                 ResultSet res = statement.executeQuery(query);
 
                 while (res.next()) {
