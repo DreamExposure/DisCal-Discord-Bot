@@ -3,6 +3,7 @@ package com.cloudcraftgaming.internal.consolecommand;
 import com.cloudcraftgaming.Main;
 import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.module.announcement.Announcer;
+import com.cloudcraftgaming.module.misc.TimeManager;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
@@ -68,6 +69,7 @@ public class ConsoleCommandExecutor {
             //No need to print, exiting anyway.
         }
         Announcer.getAnnouncer().shutdown();
+        TimeManager.getManager().shutdown();
         DatabaseManager.getManager().disconnectFromMySQL();
         System.exit(0);
     }
