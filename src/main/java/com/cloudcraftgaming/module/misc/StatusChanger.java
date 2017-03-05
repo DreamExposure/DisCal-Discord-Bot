@@ -16,11 +16,11 @@ public class StatusChanger extends TimerTask {
     private Integer index;
 
     StatusChanger() {
-        statuses.add("DisCal | Discord Calendar");
+        statuses.add("Discord Calendar");
         statuses.add("Use !discal for help");
-        statuses.add("Created by NovaFox161");
+        statuses.add("Made by NovaFox161");
         statuses.add("Official calendar bot!");
-        statuses.add("Used on %count% servers!");
+        statuses.add("Used on %count% guilds!");
         statuses.add("Version " + Main.version);
         index = 0;
     }

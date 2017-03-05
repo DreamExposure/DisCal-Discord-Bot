@@ -13,7 +13,7 @@ public class AnnouncementMessageFormatter {
 
     public static String getFormatEventMessage(Announcement a) {
         return "~-~-~- Announcement Info ~-~-~-" + lineBreak
-                + "Announcement ID: " + a.getAnnouncementType() + lineBreak + lineBreak
+                + "Announcement ID: " + a.getAnnouncementId() + lineBreak + lineBreak
                 + "Type: " + a.getAnnouncementType().name() + lineBreak + lineBreak
                 + "Event ID: " + a.getEventId() + lineBreak + lineBreak
                 + "Hours Before: "  + a.getHoursBefore() + lineBreak
