@@ -175,7 +175,7 @@ public class DatabaseManager {
                             + "', EVENT_ID='" + announcement.getEventId()
                             + "', HOURS_BEFORE='" + announcement.getHoursBefore()
                             + "', MINUTES_BEFORE='" + announcement.getMinutesBefore()
-                             + "';";
+                             + "' WHERE ANNOUNCEMENT_ID='" + announcement.getAnnouncementId() + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();
                 }
