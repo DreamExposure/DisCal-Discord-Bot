@@ -18,7 +18,6 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -33,65 +32,66 @@ public class Announce extends TimerTask {
     public void run() {
         DateTime now = new DateTime(System.currentTimeMillis());
         Long nowMS = System.currentTimeMillis();
-        ArrayList<Announcement> ans = Announcer.getAnnouncer().getAnnouncements();
-        for (Announcement a : ans) {
-            String guildId = a.getGuildId();
-            BotData data = DatabaseManager.getManager().getData(guildId);
-            if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-                try {
-                    Calendar service = CalendarAuth.getCalendarService();
-                    Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
+        for (IGuild guild : Main.client.getGuilds()) {
+            BotData data = DatabaseManager.getManager().getData(guild.getID());
+            String guildId = data.getGuildId();
+            for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+                if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                    try {
+                        Calendar service = CalendarAuth.getCalendarService();
+                        Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 
-                    //Test for the time...
-                    Long eventMS = event.getStart().getDateTime().getValue();
-                    Long timeUntilEvent = eventMS - nowMS;
-                    Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
-                    Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
-                    Long difference = minutesToEvent - announcementTime;
-                    if (difference >= 0) {
-                        if (difference <= 10) {
-                            //Right on time
-                            sendAnnouncementMessage(a, event);
+                        //Test for the time...
+                        Long eventMS = event.getStart().getDateTime().getValue();
+                        Long timeUntilEvent = eventMS - nowMS;
+                        Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+                        Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+                        Long difference = minutesToEvent - announcementTime;
+                        if (difference >= 0) {
+                            if (difference <= 10) {
+                                //Right on time
+                                sendAnnouncementMessage(a, event);
 
-                            //Delete announcement to ensure it does not spam fire
+                                //Delete announcement to ensure it does not spam fire
+                                Announcer.getAnnouncer().deleteAnnouncement(a);
+                            }
+                        } else {
+                            //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
                             Announcer.getAnnouncer().deleteAnnouncement(a);
                         }
-                    } else {
-                        //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
-                        Announcer.getAnnouncer().deleteAnnouncement(a);
+                    } catch (IOException e) {
+                        //Event may not exist...
+                        EmailSender.getSender().sendExceptionEmail(e);
                     }
-                } catch (IOException e) {
-                    //Event may not exist...
-                    EmailSender.getSender().sendExceptionEmail(e);
-                }
-            } else {
-                try {
-                    Calendar service = CalendarAuth.getCalendarService();
-                    Events events = service.events().list(data.getCalendarAddress())
-                            .setMaxResults(10)
-                            .setTimeMin(now)
-                            .setOrderBy("startTime")
-                            .setSingleEvents(true)
-                            .execute();
-                    List<Event> items = events.getItems();
-                    if (items.size() > 0) {
-                        for (Event event : items) {
-                            //Test for the time...
-                            Long eventMS = event.getStart().getDateTime().getValue();
-                            Long timeUntilEvent = eventMS - nowMS;
-                            Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
-                            Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
-                            Long difference = minutesToEvent - announcementTime;
-                            if (difference >= 0) {
-                                if (difference <= 10) {
-                                    //Right on time
-                                    sendAnnouncementMessage(a, event);
+                } else {
+                    try {
+                        Calendar service = CalendarAuth.getCalendarService();
+                        Events events = service.events().list(data.getCalendarAddress())
+                                .setMaxResults(10)
+                                .setTimeMin(now)
+                                .setOrderBy("startTime")
+                                .setSingleEvents(true)
+                                .execute();
+                        List<Event> items = events.getItems();
+                        if (items.size() > 0) {
+                            for (Event event : items) {
+                                //Test for the time...
+                                Long eventMS = event.getStart().getDateTime().getValue();
+                                Long timeUntilEvent = eventMS - nowMS;
+                                Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+                                Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+                                Long difference = minutesToEvent - announcementTime;
+                                if (difference >= 0) {
+                                    if (difference <= 10) {
+                                        //Right on time
+                                        sendAnnouncementMessage(a, event);
+                                    }
                                 }
                             }
                         }
+                    } catch (IOException e) {
+                        EmailSender.getSender().sendExceptionEmail(e);
                     }
-                } catch (IOException e) {
-                    EmailSender.getSender().sendExceptionEmail(e);
                 }
             }
         }
