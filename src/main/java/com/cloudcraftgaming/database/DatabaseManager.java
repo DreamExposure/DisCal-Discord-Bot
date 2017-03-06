@@ -169,7 +169,7 @@ public class DatabaseManager {
                     //Data present, update.
                     String updateCMD = "UPDATE " + announcementTableName
                             + " SET SUBSCRIBERS_ROLE= '" + announcement.getSubscriberRoleIdString()
-                            + "', SUBSCRIBERS_USER='" + announcement.getSubscriberUserIds()
+                            + "', SUBSCRIBERS_USER='" + announcement.getSubscriberUserIdString()
                             + "', CHANNEL_ID='" + announcement.getAnnouncementChannelId()
                             + "', ANNOUNCEMENT_TYPE='" + announcement.getAnnouncementType().name()
                             + "', EVENT_ID='" + announcement.getEventId()
