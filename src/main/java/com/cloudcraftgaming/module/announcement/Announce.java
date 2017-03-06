@@ -98,14 +98,15 @@ public class Announce extends TimerTask {
     private void sendAnnouncementMessage(Announcement announcement, Event event) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
-        em.withAuthorName("DisCal ");
+        em.withAuthorName("DisCal");
         em.withTitle("!~Event Announcement~!");
         em.appendField("Event Name/Summery", event.getSummary(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
         em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
         em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        em.appendField("Event ID", event.getId(), false);
         em.withUrl(event.getHtmlLink());
-        em.withFooterText("Event ID: " + event.getId() + " | Announcement ID: " + announcement.getAnnouncementId().toString());
+        em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
         em.withColor(36, 153, 153);
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
@@ -115,7 +116,7 @@ public class Announce extends TimerTask {
             try {
                 IUser user = guild.getUserByID(userId);
                 if (user != null) {
-                    userMentions = userMentions + user.mention(true) + ", ";
+                    userMentions = userMentions + user.mention(true) + " ";
                 }
             } catch (Exception e) {
                 //User does not exist, safely ignore.
@@ -127,7 +128,7 @@ public class Announce extends TimerTask {
             try {
                 IRole role = guild.getRoleByID(roleId);
                 if (role != null) {
-                    roleMentions = roleMentions + role.mention() + ", ";
+                    roleMentions = roleMentions + role.mention() + " ";
                 }
             } catch (Exception e) {
                 //Role does not exist, safely ignore.
