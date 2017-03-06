@@ -35,12 +35,12 @@ public class EventCommand implements ICommand {
 
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute.", event, client);
             } else if (args.length == 1) {
                 String function = args[0];
-                String guildId = event.getMessage().getGuild().getID();
                 if (function.equalsIgnoreCase("create")) {
                     Message.sendMessage("Please specify a name for the event!", event, client);
                 } else if (function.equalsIgnoreCase("cancel")) {
@@ -81,7 +81,6 @@ public class EventCommand implements ICommand {
                 }
             } else if (args.length == 2) {
                 String function = args[0];
-                String guildId = event.getMessage().getGuild().getID();
                 if (function.equalsIgnoreCase("create")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
@@ -241,7 +240,6 @@ public class EventCommand implements ICommand {
                 }
             } else {
                 String function = args[0];
-                String guildId = event.getMessage().getGuild().getID();
                 if (function.equalsIgnoreCase("create")) {
                     Message.sendMessage("Event name can only be one(1) word!", event, client);
                 } else if (function.equalsIgnoreCase("summary")) {
