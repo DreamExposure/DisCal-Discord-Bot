@@ -15,8 +15,6 @@ import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 
-import java.io.IOException;
-
 /**
  * Created by Nova Fox on 1/2/2017.
  * Website: www.cloudcraftgaming.com
@@ -44,12 +42,7 @@ public class Main {
         DatabaseManager.getManager().createTables();
 
         //Connect to Google Calendar
-        try {
-            CalendarAuth.init(args);
-        } catch (IOException e) {
-            e.printStackTrace();
-            EmailSender.getSender().sendExceptionEmail(e);
-        }
+        CalendarAuth.init();
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();

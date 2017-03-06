@@ -22,10 +22,8 @@ public class PermissionChecker {
                 String roleId = bd.getControlRole();
                 IRole role = event.getMessage().getGuild().getRoleByID(roleId);
 
-                if (role != null) {
-                    if (!event.getMessage().getGuild().getUsersByRole(role).contains(sender)) {
-                        return false;
-                    }
+                if (role != null && !event.getMessage().getGuild().getUsersByRole(role).contains(sender)) {
+                    return false;
                 }
             }
         } catch (Exception e) {

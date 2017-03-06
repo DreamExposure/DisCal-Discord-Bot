@@ -81,11 +81,9 @@ public class Announce extends TimerTask {
                                 Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
                                 Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                 Long difference = minutesToEvent - announcementTime;
-                                if (difference >= 0) {
-                                    if (difference <= 10) {
-                                        //Right on time
-                                        sendAnnouncementMessage(a, event);
-                                    }
+                                if (difference >= 0 && difference <= 10) {
+                                    //Right on time
+                                    sendAnnouncementMessage(a, event);
                                 }
                             }
                         }

@@ -58,7 +58,7 @@ public class DisCalCommand implements ICommand {
             IGuild guild = event.getMessage().getGuild();
             IRole controlRole = null;
 
-            if (!roleName.equals("everyone")) {
+            if (!"everyone".equalsIgnoreCase(roleName)) {
                 for (IRole r : guild.getRoles()) {
                     if (r.getName().equals(roleName) || r.getID().equals(roleName)) {
                         controlRole = r;

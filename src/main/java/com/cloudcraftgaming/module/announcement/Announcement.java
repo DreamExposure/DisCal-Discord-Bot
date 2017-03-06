@@ -9,6 +9,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("WeakerAccess")
 public class Announcement {
     private final UUID announcementId;
     private final String guildId;
@@ -149,14 +150,6 @@ public class Announcement {
 
     //Booleans/Checkers
     public Boolean hasRequiredValues() {
-        if (minutesBefore != 0 || hoursBefore != 0) {
-            if (type.equals(AnnouncementType.SPECIFIC)) {
-                if (eventId.equalsIgnoreCase("N/a")) {
-                    return false;
-                }
-            }
-            return !announcementChannelId.equalsIgnoreCase("N/a");
-        }
-        return false;
+        return (minutesBefore != 0 || hoursBefore != 0) && !(type.equals(AnnouncementType.SPECIFIC) && eventId.equalsIgnoreCase("N/a")) && !announcementChannelId.equalsIgnoreCase("N/a");
     }
 }
