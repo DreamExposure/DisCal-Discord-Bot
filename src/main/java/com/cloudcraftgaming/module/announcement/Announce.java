@@ -104,10 +104,10 @@ public class Announce extends TimerTask {
         em.withTitle("!~Event Announcement~!");
         em.appendField("Event Name/Summery", event.getSummary(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-        em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+        em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
         em.appendField("TimeZone", event.getStart().getTimeZone(), true);
         em.withUrl(event.getHtmlLink());
-        em.withFooterText("Event ID: " + event.getId() + "| Announcement ID: " + announcement.getAnnouncementId().toString());
+        em.withFooterText("Event ID: " + event.getId() + " | Announcement ID: " + announcement.getAnnouncementId().toString());
         em.withColor(36, 153, 153);
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
