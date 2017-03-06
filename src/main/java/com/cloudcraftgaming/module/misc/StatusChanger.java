@@ -35,7 +35,7 @@ public class StatusChanger extends TimerTask {
         Main.client.changeStatus(Status.game(status));
 
         //Set new index.
-        if (index + 1 > statuses.size() - 1) {
+        if (index + 1 >= statuses.size()) {
             index = 0;
         } else {
             index++;
