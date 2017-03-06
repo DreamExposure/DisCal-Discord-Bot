@@ -20,10 +20,27 @@ public class PermissionChecker {
             if (!bd.getControlRole().equalsIgnoreCase("everyone")) {
                 IUser sender = event.getMessage().getAuthor();
                 String roleId = bd.getControlRole();
-                IRole role = event.getMessage().getGuild().getRoleByID(roleId);
+                IRole role = null;
 
-                if (role != null && !event.getMessage().getGuild().getUsersByRole(role).contains(sender)) {
+                for (IRole r :  event.getMessage().getGuild().getRoles()) {
+                    if (r.getID().equals(roleId)) {
+                        role = r;
+                        break;
+                    }
+                }
+
+                if (role != null) {
+                    for (IRole r : sender.getRolesForGuild(event.getMessage().getGuild())) {
+                        if (r.getID().equals(role.getID())) {
+                            return true;
+                        }
+                    }
                     return false;
+                } else {
+                    //Role not found... reset Db...
+                    bd.setControlRole("everyone");
+                    DatabaseManager.getManager().updateData(bd);
+                    return true;
                 }
             }
         } catch (Exception e) {
