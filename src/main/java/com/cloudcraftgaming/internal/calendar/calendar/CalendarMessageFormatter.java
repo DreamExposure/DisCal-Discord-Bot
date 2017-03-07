@@ -1,7 +1,6 @@
 package com.cloudcraftgaming.internal.calendar.calendar;
 
 import com.cloudcraftgaming.database.DatabaseManager;
-import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 import java.net.URI;
@@ -14,16 +13,10 @@ import java.net.URI;
 public class CalendarMessageFormatter {
     private static String lineBreak = System.getProperty("line.separator");
 
-    public static String getFormatEventMessage(MessageReceivedEvent event, Calendar calendar) {
-        String calId = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID()).getCalendarAddress();
+    public static String getCalendarLink(MessageReceivedEvent e) {
+        String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
         URI callURI = URI.create(calId);
-        String link = "https://calendar.google.com/calendar/embed?src=" + callURI;
-        return "~-~-~- Calendar Info ~-~-~-" + lineBreak
-                + "Calendar ID: " + calendar.getId() + lineBreak + lineBreak
-                + "Name/Summary: " + calendar.getSummary() + lineBreak + lineBreak
-                + "Description: " + calendar.getDescription() + lineBreak + lineBreak
-                + "TimeZone: " + calendar.getTimeZone() + lineBreak + lineBreak
-                + "Link: " + link;
+        return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
 
     public static String getFormatEventMessage(PreCalendar calendar) {
