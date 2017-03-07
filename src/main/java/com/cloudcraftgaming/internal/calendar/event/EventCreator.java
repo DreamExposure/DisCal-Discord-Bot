@@ -29,9 +29,9 @@ public class EventCreator {
     }
 
     //Functionals
-    public PreEvent init(MessageReceivedEvent e, String eventName) {
+    public PreEvent init(MessageReceivedEvent e) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
-            PreEvent event = new PreEvent(e.getMessage().getGuild().getID(), eventName);
+            PreEvent event = new PreEvent(e.getMessage().getGuild().getID());
             try {
                 String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
                 event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());

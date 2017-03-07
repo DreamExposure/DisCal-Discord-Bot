@@ -9,7 +9,6 @@ import com.google.api.services.calendar.model.EventDateTime;
  */
 public class PreEvent {
     private final String guildId;
-    private final String eventName;
 
     private String summary;
     private String description;
@@ -19,9 +18,8 @@ public class PreEvent {
     private String timeZone;
 
 
-    PreEvent(String _guildId, String _eventName) {
+    PreEvent(String _guildId) {
         guildId = _guildId;
-        eventName = _eventName;
 
         timeZone = "Unknown";
     }
@@ -29,10 +27,6 @@ public class PreEvent {
     //Getters
     public String getGuildId() {
         return guildId;
-    }
-
-    public String getEventName() {
-        return eventName;
     }
 
     String getSummary() {

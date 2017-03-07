@@ -42,7 +42,12 @@ public class EventCommand implements ICommand {
             } else if (args.length == 1) {
                 String function = args[0];
                 if (function.equalsIgnoreCase("create")) {
-                    Message.sendMessage("Please specify a name for the event!", event, client);
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        Message.sendMessage("Event Creator already started!", event, client);
+                    } else {
+                        EventCreator.getCreator().init(event);
+                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                    }
                 } else if (function.equalsIgnoreCase("cancel")) {
                     if (EventCreator.getCreator().terminate(event)) {
                         Message.sendMessage("Event creation canceled! Event creator terminated!", event, client);
@@ -85,7 +90,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        EventCreator.getCreator().init(event, args[1]);
+                        EventCreator.getCreator().init(event);
                         Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                     }
                 } else if (function.equalsIgnoreCase("view")) {
@@ -241,7 +246,12 @@ public class EventCommand implements ICommand {
             } else {
                 String function = args[0];
                 if (function.equalsIgnoreCase("create")) {
-                    Message.sendMessage("Event name can only be one(1) word!", event, client);
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        Message.sendMessage("Event Creator already started!", event, client);
+                    } else {
+                        EventCreator.getCreator().init(event);
+                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                    }
                 } else if (function.equalsIgnoreCase("summary")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
