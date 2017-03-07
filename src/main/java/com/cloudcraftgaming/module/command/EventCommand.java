@@ -95,7 +95,7 @@ public class EventCommand implements ICommand {
                             Calendar service = CalendarAuth.getCalendarService();
                             BotData data = DatabaseManager.getManager().getData(guildId);
                             Event calEvent = service.events().get(data.getCalendarAddress(), args[1]).execute();
-                            Message.sendMessage(EventMessageFormatter.getFormatEventMessage(calEvent), event, client);
+                            Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent), event, client);
                         } catch (IOException e) {
                             //Event probably doesn't exist...
                             Message.sendMessage("Oops! Something went wrong! Are you sure the event ID is correct?", event, client);

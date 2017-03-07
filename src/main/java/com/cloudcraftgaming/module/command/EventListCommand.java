@@ -50,7 +50,7 @@ public class EventListCommand implements ICommand {
                         Message.sendMessage("No upcoming events found.", event, client);
                         return true;
                     } else if (items.size() == 1) {
-                        Message.sendMessage("1 upcoming event found: " + Message.lineBreak + EventMessageFormatter.getFormatEventMessage(items.get(0)), event, client);
+                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0)), "1 upcoming event found:", event, client);
                     } else {
                         //List events by Id only.
                         String eventIds = "";

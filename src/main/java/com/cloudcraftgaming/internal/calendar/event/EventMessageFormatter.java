@@ -1,7 +1,10 @@
 package com.cloudcraftgaming.internal.calendar.event;
 
+import com.cloudcraftgaming.Main;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.util.EmbedBuilder;
 
 import javax.annotation.Nullable;
 
@@ -14,16 +17,23 @@ import javax.annotation.Nullable;
 public class EventMessageFormatter {
     private static String lineBreak = System.getProperty("line.separator");
 
-    public static String getFormatEventMessage(Event event) {
-        return "~-~-~- Event Info ~-~-~-" + lineBreak
-                + "Event ID: " + event.getId() + lineBreak + lineBreak
-                + "Summary: " + event.getSummary() + lineBreak + lineBreak
-                + "Description: " + event.getDescription() + lineBreak + lineBreak
-                + "Start Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
-                + "Start Time (HH:mm): " + getHumanReadableTime(event, true) + lineBreak
-                + "End Date (yyyy/MM/dd): " + getHumanReadableDate(event) + lineBreak
-                + "End Time (HH:mm): " + getHumanReadableTime(event, false) + lineBreak
-                + "TimeZone: " + event.getStart().getTimeZone();
+    public static EmbedObject getEventEmbed(Event event) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Event Info");
+        em.appendField("Event Name/Summery", event.getSummary(), true);
+        em.appendField("Event Description", event.getDescription(), true);
+        em.appendField("Event Start Date", EventMessageFormatter.getHumanReadableDate(event), false);
+        em.appendField("Event Start Time", EventMessageFormatter.getHumanReadableTime(event, true), true);
+        em.appendField("Event End Date", EventMessageFormatter.getHumanReadableDate(event), false);
+        em.appendField("Event End Time", EventMessageFormatter.getHumanReadableTime(event, false), true);
+        em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        em.withUrl(event.getHtmlLink());
+        em.withFooterText("Event ID: " + event.getId());
+        em.withColor(36, 153, 153);
+
+        return em.build();
     }
 
     public static String getFormatEventMessage(PreEvent event) {
