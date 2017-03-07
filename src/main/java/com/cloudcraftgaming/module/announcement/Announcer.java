@@ -1,7 +1,5 @@
 package com.cloudcraftgaming.module.announcement;
 
-import com.cloudcraftgaming.database.DatabaseManager;
-
 import java.util.Timer;
 
 /**
@@ -30,9 +28,5 @@ public class Announcer {
 
     public void shutdown() {
         timer.cancel();
-    }
-
-    public Boolean deleteAnnouncement(Announcement announcement) {
-        return DatabaseManager.getManager().deleteAnnouncement(announcement.getAnnouncementId().toString());
     }
 }

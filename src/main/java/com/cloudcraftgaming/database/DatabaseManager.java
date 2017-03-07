@@ -1,11 +1,9 @@
 package com.cloudcraftgaming.database;
 
-import com.cloudcraftgaming.Main;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.module.announcement.Announcement;
 import com.cloudcraftgaming.module.announcement.AnnouncementType;
-import sx.blah.discord.handle.obj.IGuild;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -279,16 +277,6 @@ public class DatabaseManager {
             System.out.println("Failed to get announcements from database! Error code: 00203");
             EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
-        }
-        return announcements;
-    }
-
-    public ArrayList<Announcement> getAnnouncements() {
-        ArrayList<Announcement> announcements = new ArrayList<>();
-        for (IGuild g : Main.client.getGuilds()) {
-            for (Announcement a : getAnnouncements(g.getID())) {
-                announcements.add(a);
-            }
         }
         return announcements;
     }

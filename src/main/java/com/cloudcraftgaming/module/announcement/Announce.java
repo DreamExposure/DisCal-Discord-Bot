@@ -53,11 +53,11 @@ public class Announce extends TimerTask {
                                 sendAnnouncementMessage(a, event);
 
                                 //Delete announcement to ensure it does not spam fire
-                                Announcer.getAnnouncer().deleteAnnouncement(a);
+                                DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                             }
                         } else {
                             //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
-                            Announcer.getAnnouncer().deleteAnnouncement(a);
+                            DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                         }
                     } catch (IOException e) {
                         //Event may not exist...
