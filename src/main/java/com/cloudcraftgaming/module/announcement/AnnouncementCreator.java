@@ -48,6 +48,7 @@ public class AnnouncementCreator {
             Announcement a = getAnnouncement(guildId);
             if (a.hasRequiredValues()) {
                 DatabaseManager.getManager().updateAnnouncement(a);
+                terminate(e);
                 return new AnnouncementCreatorResponse(true, a);
             }
         }
