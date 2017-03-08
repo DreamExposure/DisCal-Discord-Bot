@@ -53,11 +53,11 @@ public class EventListCommand implements ICommand {
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0)), "1 upcoming event found:", event, client);
                     } else {
                         //List events by Id only.
-                        String eventIds = "";
+                        Message.sendMessage(items.size() + " upcoming events found...", event, client);
                         for (Event e : items) {
-                            eventIds = eventIds + e.getId() + Message.lineBreak;
+                            Message.sendMessage(EventMessageFormatter.getShortenedEventEmbed(e), event, client);
                         }
-                        Message.sendMessage("Upcoming event IDs. Use '!event view <id>' for more info: " + Message.lineBreak + eventIds, event, client);
+                        Message.sendMessage("Use '!event view <id>' for more info.", event, client);
                         return true;
                     }
                 } catch (IOException e) {

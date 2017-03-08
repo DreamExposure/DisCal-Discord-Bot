@@ -36,6 +36,20 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    public static EmbedObject getShortenedEventEmbed(Event event) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Shortened Event Info");
+        em.appendField("Event Name/Summery", event.getSummary(), true);
+        em.appendField("Event Description", event.getDescription(), true);
+        em.withUrl(event.getHtmlLink());
+        em.withFooterText("Event ID: " + event.getId());
+        em.withColor(36, 153, 153);
+
+        return em.build();
+    }
+
     public static String getFormatEventMessage(PreEvent event) {
         return "~-~-~- Event Info ~-~-~-" + lineBreak
                 + "Event ID: null until creation completed" + lineBreak + lineBreak
