@@ -1,5 +1,7 @@
 # About DisCal
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1675502e1b844a46b1a59960b8a7c37c)](https://www.codacy.com/app/NovaFox161/DisCal-Discord-Bot?utm_source=github.com&utm_medium=referral&utm_content=NovaFox161/DisCal-Discord-Bot&utm_campaign=badger)
+
 DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
 <br> <br>
 It was built to be powerful yet easy to use! 
