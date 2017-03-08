@@ -63,6 +63,7 @@ public class DatabaseManager {
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
                     " CONTROL_ROLE LONGTEXT not NULL, " +
+                    " DISCAL_CHANNEL LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
             String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
                     " (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
@@ -102,13 +103,14 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS, CONTROL_ROLE)" +
-                            " VALUES (?, ?, ?, ?);";
+                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS, CONTROL_ROLE, DISCAL_CHANNEL)" +
+                            " VALUES (?, ?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, data.getGuildId());
                     ps.setString(2, data.getCalendarId());
                     ps.setString(3, data.getCalendarAddress());
                     ps.setString(4, data.getControlRole());
+                    ps.setString(5, data.getChannel());
 
                     ps.executeUpdate();
                     ps.close();
@@ -119,6 +121,7 @@ public class DatabaseManager {
                             + " SET CALENDAR_ID= '" + data.getCalendarId()
                             + "', CALENDAR_ADDRESS='" + data.getCalendarAddress()
                             + "', CONTROL_ROLE='" + data.getControlRole()
+                            + "', DISCAL_CHANNEL='" + data.getChannel()
                             + "' WHERE GUILD_ID= '" + data.getGuildId() + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();
@@ -203,6 +206,7 @@ public class DatabaseManager {
                     botData.setCalendarId(res.getString("CALENDAR_ID"));
                     botData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
                     botData.setControlRole(res.getString("CONTROL_ROLE"));
+                    botData.setChannel(res.getString("DISCAL_CHANNEL"));
 
                     statement.close();
                 } else {

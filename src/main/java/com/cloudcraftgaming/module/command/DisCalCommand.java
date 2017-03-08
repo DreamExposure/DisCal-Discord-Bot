@@ -7,6 +7,7 @@ import com.cloudcraftgaming.utils.Message;
 import com.cloudcraftgaming.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.util.EmbedBuilder;
@@ -43,6 +44,8 @@ public class DisCalCommand implements ICommand {
             String function = args[0];
             if (function.equalsIgnoreCase("role")) {
                 setControlRole(args, event, client);
+            } else if (function.equalsIgnoreCase("channel")) {
+                setChannel(args[1], event, client);
             } else {
                 Message.sendMessage("Invalid function! Use !help.", event, client);
             }
@@ -88,5 +91,47 @@ public class DisCalCommand implements ICommand {
         } else {
             Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
         }
+    }
+
+    private void setChannel(String channelName, MessageReceivedEvent event, IDiscordClient client) {
+        if (channelName.equalsIgnoreCase("all")) {
+            //Reset channel info.
+            BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+            data.setChannel("all");
+            DatabaseManager.getManager().updateData(data);
+            Message.sendMessage("DisCal will not respond in all channels!", event, client);
+        } else {
+            if (channelExists(channelName, event)) {
+                IChannel channel = getChannelFromName(channelName, event);
+                if (channel != null) {
+                    BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+                    data.setChannel(channel.getID());
+                    DatabaseManager.getManager().updateData(data);
+                    Message.sendMessage("DisCal will now only respond in channel: " + channel.getName(), event, client);
+                } else {
+                    Message.sendMessage("The specified channel does not exist!", event, client);
+                }
+            } else {
+                Message.sendMessage("The specified channel does not exist!", event, client);
+            }
+        }
+    }
+
+    private Boolean channelExists(String value, MessageReceivedEvent event) {
+        for (IChannel c : event.getMessage().getGuild().getChannels()) {
+            if (c.getName().equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
+        for (IChannel c : event.getMessage().getGuild().getChannels()) {
+            if (c.getName().equalsIgnoreCase(value)) {
+                return c;
+            }
+        }
+        return null;
     }
 }

@@ -11,6 +11,7 @@ public class BotData {
     private String calendarId;
     private String calendarAddress;
     private String controlRole;
+    private String channel;
 
     public BotData(String _guildId) {
         guildId = _guildId;
@@ -18,6 +19,7 @@ public class BotData {
         calendarId = "primary";
         calendarAddress = "primary";
         controlRole = "everyone";
+        channel = "all";
     }
 
     //Getters
@@ -37,6 +39,10 @@ public class BotData {
         return controlRole;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
     //Setters
     public void setCalendarId(String _calendarId) {
         calendarId = _calendarId;
@@ -48,5 +54,9 @@ public class BotData {
 
     public void setControlRole(String _controlRole) {
         controlRole = _controlRole;
+    }
+
+    public void setChannel(String _channel) {
+        channel = _channel;
     }
 }

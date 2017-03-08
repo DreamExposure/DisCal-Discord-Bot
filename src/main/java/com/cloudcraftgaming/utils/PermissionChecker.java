@@ -4,6 +4,7 @@ import com.cloudcraftgaming.database.DatabaseManager;
 import com.cloudcraftgaming.internal.data.BotData;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -48,6 +49,30 @@ public class PermissionChecker {
             EmailSender.getSender().sendExceptionEmail(e);
             return true;
         }
+        return true;
+    }
+
+    public static boolean inCorrectChannel(MessageReceivedEvent event) {
+        BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+        if (data.getChannel().equalsIgnoreCase("all")) {
+            return true;
+        }
+
+        IChannel channel = null;
+        for (IChannel c : event.getMessage().getGuild().getChannels()) {
+            if (c.getID().equals(data.getChannel())) {
+                channel = c;
+                break;
+            }
+        }
+
+        if (channel != null) {
+            return event.getMessage().getChannel().getID().equals(channel.getID());
+        }
+
+        //If we got here, the channel no longer exists, reset data and return true.
+        data.setChannel("all");
+        DatabaseManager.getManager().updateData(data);
         return true;
     }
 }
