@@ -79,6 +79,4 @@ public class CalendarAuth {
         Credential credential = authorize();
         return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
     }
-
-    public static void init() {}
 }
