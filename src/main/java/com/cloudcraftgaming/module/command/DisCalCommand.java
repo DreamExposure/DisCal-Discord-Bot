@@ -99,7 +99,7 @@ public class DisCalCommand implements ICommand {
             BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
             data.setChannel("all");
             DatabaseManager.getManager().updateData(data);
-            Message.sendMessage("DisCal will not respond in all channels!", event, client);
+            Message.sendMessage("DisCal will now respond in all channels!", event, client);
         } else {
             if (channelExists(channelName, event)) {
                 IChannel channel = getChannelFromName(channelName, event);
