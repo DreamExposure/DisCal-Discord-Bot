@@ -53,26 +53,32 @@ public class PermissionChecker {
     }
 
     public static boolean inCorrectChannel(MessageReceivedEvent event) {
-        BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-        if (data.getChannel().equalsIgnoreCase("all")) {
+        try {
+            BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
+            if (data.getChannel().equalsIgnoreCase("all")) {
+                return true;
+            }
+
+            IChannel channel = null;
+            for (IChannel c : event.getMessage().getGuild().getChannels()) {
+                if (c.getID().equals(data.getChannel())) {
+                    channel = c;
+                    break;
+                }
+            }
+
+            if (channel != null) {
+                return event.getMessage().getChannel().getID().equals(channel.getID());
+            }
+
+            //If we got here, the channel no longer exists, reset data and return true.
+            data.setChannel("all");
+            DatabaseManager.getManager().updateData(data);
+            return true;
+        } catch (Exception e) {
+            //Catch any errors so that the bot always responds...
+            EmailSender.getSender().sendExceptionEmail(e);
             return true;
         }
-
-        IChannel channel = null;
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getID().equals(data.getChannel())) {
-                channel = c;
-                break;
-            }
-        }
-
-        if (channel != null) {
-            return event.getMessage().getChannel().getID().equals(channel.getID());
-        }
-
-        //If we got here, the channel no longer exists, reset data and return true.
-        data.setChannel("all");
-        DatabaseManager.getManager().updateData(data);
-        return true;
     }
 }
