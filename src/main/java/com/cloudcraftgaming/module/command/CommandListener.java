@@ -27,7 +27,7 @@ class CommandListener {
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
             IMessage msg = event.getMessage();
-            if (msg.getContent() != null && PermissionChecker.inCorrectChannel(event)) {
+            if (msg.getGuild() != null && !msg.getChannel().isPrivate() && PermissionChecker.inCorrectChannel(event)) {
                 if (!msg.getContent().isEmpty() && msg.getContent().startsWith("!")) {
                     //Command supported by DisCal, try commands.
                     String[] argsOr = msg.getContent().split(" ");
