@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -125,6 +126,7 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();
@@ -150,6 +152,7 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();
@@ -178,6 +181,7 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();
@@ -198,6 +202,7 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();

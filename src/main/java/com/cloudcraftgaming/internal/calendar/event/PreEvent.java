@@ -45,7 +45,7 @@ public class PreEvent {
         return endDateTime;
     }
 
-    String getTimeZone() {
+    public String getTimeZone() {
         return timeZone;
     }
 

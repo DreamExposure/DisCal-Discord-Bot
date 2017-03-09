@@ -60,10 +60,12 @@ public class EventCreator {
                 Event event = new Event();
                 event.setSummary(preEvent.getSummary());
                 event.setDescription(preEvent.getDescription());
+                /* NOT NEEDED?
                 if (!preEvent.getTimeZone().equalsIgnoreCase("unknown")) {
                     preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone());
                     preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone());
                 }
+                */
                 event.setStart(preEvent.getStartDateTime());
                 event.setEnd(preEvent.getEndDateTime());
                 event.setVisibility("public");
