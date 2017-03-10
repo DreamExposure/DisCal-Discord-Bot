@@ -5,10 +5,7 @@ import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.utils.PermissionChecker;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IMessage;
-
-import java.util.ArrayList;
-import java.util.Arrays;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  * Created by Nova Fox on 1/2/2017.
@@ -26,36 +23,45 @@ class CommandListener {
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
-            IMessage msg = event.getMessage();
-            if (msg.getGuild() != null && !msg.getChannel().isPrivate() && PermissionChecker.inCorrectChannel(event)) {
-                if (!msg.getContent().isEmpty() && msg.getContent().startsWith("!")) {
-                    //Command supported by DisCal, try commands.
-                    String[] argsOr = msg.getContent().split(" ");
-                    ArrayList<String> argsOr2 = new ArrayList<>();
-                    argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
-                    String[] args = argsOr2.toArray(new String[argsOr2.size()]);
+            if (event.getMessage() != null && event.getMessage().getGuild() != null && event.getMessage().getChannel() != null) {
+                //Message is a valid guild message (not DM). Check if in correct channel.
+                if (PermissionChecker.inCorrectChannel(event)) {
+                    //In correct channel for this guild, let's see if valid command.
+                    if (event.getMessage().getContent().startsWith("!")) {
+                        //Prefixed with ! which should mean it is a command, convert and confirm.
 
-                    String command = argsOr[0].replaceAll("!", "");
-                    cmd.issueCommand(command, args, event);
-                } else if (msg.getMentions().contains(Main.getSelfUser()) && !(msg.mentionsEveryone() || msg.mentionsHere())) {
-                    //DisCal mentioned, see if this is a valid command?
-                    String[] argsOr = msg.getContent().split(" ");
-                    ArrayList<String> argsOr2 = new ArrayList<>();
-                    if (argsOr2.size() > 1) {
-                        argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
-                        String[] args = argsOr2.toArray(new String[argsOr2.size()]);
+                        String[] argsOr = event.getMessage().getContent().split(" ");
+                        String[] args = new String[argsOr.length - 1];
+                        System.arraycopy(argsOr, 1, args, 0, argsOr.length);
 
-                        if (args.length > 0) {
-                            String command = argsOr[1];
-                            cmd.issueCommand(command, args, event);
-                        } else {
-                            cmd.issueCommand("DisCal", args, event);
-                        }
+                        String command = argsOr[0];
+                        cmd.issueCommand(command, args, event);
+
+                    } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && discalMentioned(event)) {
+                        //DisCal is mentioned, everyone and here were not, check if valid command.
+
+                        String[] argsOr = event.getMessage().getContent().split(" ");
+                        String[] args = new String[argsOr.length - 2];
+                        System.arraycopy(argsOr, 2, args, 0, argsOr.length);
+
+                        //TODO: Confirm mention is first arg.
+
+                        String command = argsOr[0];
+                        cmd.issueCommand(command, args, event);
                     }
                 }
             }
         } catch (Exception e) {
             EmailSender.getSender().sendExceptionEmail(e);
         }
+    }
+
+    private boolean discalMentioned(MessageReceivedEvent event) {
+        for (IUser u : event.getMessage().getMentions()) {
+            if (u.getID().equals(Main.getSelfUser().getID())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
