@@ -29,25 +29,36 @@ class CommandListener {
                     //In correct channel for this guild, let's see if valid command.
                     if (event.getMessage().getContent().startsWith("!")) {
                         //Prefixed with ! which should mean it is a command, convert and confirm.
-
                         String[] argsOr = event.getMessage().getContent().split(" ");
-                        String[] args = new String[argsOr.length - 1];
-                        System.arraycopy(argsOr, 1, args, 0, argsOr.length);
+                        if (argsOr.length > 1) {
+                            String[] args = new String[argsOr.length - 1];
+                            System.arraycopy(argsOr, 1, args, 0, argsOr.length);
 
-                        String command = argsOr[0];
-                        cmd.issueCommand(command, args, event);
-
+                            String command = argsOr[0].replaceAll("!", "");
+                            cmd.issueCommand(command, args, event);
+                        } else if (argsOr.length == 1) {
+                            //Only command... no args.
+                            cmd.issueCommand(argsOr[0].replaceAll("!", ""), new String[0], event);
+                        }
                     } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && discalMentioned(event)) {
                         //DisCal is mentioned, everyone and here were not, check if valid command.
+                        if (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getID() + ">")) {
 
-                        String[] argsOr = event.getMessage().getContent().split(" ");
-                        String[] args = new String[argsOr.length - 2];
-                        System.arraycopy(argsOr, 2, args, 0, argsOr.length);
+                            String[] argsOr = event.getMessage().getContent().split(" ");
+                            if (argsOr.length > 2) {
+                                String[] args = new String[argsOr.length - 2];
+                                System.arraycopy(argsOr, 2, args, 0, argsOr.length);
 
-                        //TODO: Confirm mention is first arg.
-
-                        String command = argsOr[0];
-                        cmd.issueCommand(command, args, event);
+                                String command = argsOr[1];
+                                cmd.issueCommand(command, args, event);
+                            } else if (argsOr.length == 2) {
+                                //No args...
+                                cmd.issueCommand(argsOr[1], new String[0], event);
+                            } else if (argsOr.length == 1) {
+                                //Only disCal mentioned...
+                                cmd.issueCommand("DisCal", new String[0], event);
+                            }
+                        }
                     }
                 }
             }
