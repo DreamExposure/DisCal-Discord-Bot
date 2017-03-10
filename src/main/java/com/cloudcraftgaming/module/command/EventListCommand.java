@@ -56,7 +56,7 @@ public class EventListCommand implements ICommand {
                         //List events by Id only.
                         Message.sendMessage(items.size() + " upcoming events found...", event, client);
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getShortenedEventEmbed(e), event, client);
+                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event, client);
                         }
                         Message.sendMessage("Use '!event view <id>' for more info.", event, client);
                         return true;

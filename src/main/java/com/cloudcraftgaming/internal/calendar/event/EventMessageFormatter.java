@@ -26,7 +26,7 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Event Info");
-        em.appendField("Event Name/Summery", event.getSummary(), true);
+        em.appendField("Event Name/Summary", event.getSummary(), true);
         em.appendField("Event Description", event.getDescription(), true);
         em.appendField("Event Start Date", EventMessageFormatter.getHumanReadableDate(event), true);
         em.appendField("Event Start Time", EventMessageFormatter.getHumanReadableTime(event, true), true);
@@ -51,13 +51,14 @@ public class EventMessageFormatter {
         return em.build();
     }
 
-    public static EmbedObject getShortenedEventEmbed(Event event) {
+    public static EmbedObject getCondensedEventEmbed(Event event) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Shortened Event Info");
-        em.appendField("Event Name/Summery", event.getSummary(), true);
-        em.appendField("Event Description", event.getDescription(), true);
+        em.withTitle("Condensed Event Info");
+        em.appendField("Event Summary", event.getSummary(), true);
+        em.appendField("Event Date", getHumanReadableDate(event), true);
+        em.appendField("Event ID", event.getId(), true);
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Event ID: " + event.getId());
         em.withColor(36, 153, 153);
