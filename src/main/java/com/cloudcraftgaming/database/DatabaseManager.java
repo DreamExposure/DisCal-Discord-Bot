@@ -223,7 +223,6 @@ public class DatabaseManager {
     }
 
     public Announcement getAnnouncement(UUID announcementId, String guildId) {
-        Announcement announcement = new Announcement(announcementId, guildId);
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
@@ -235,6 +234,7 @@ public class DatabaseManager {
                 Boolean hasStuff = res.next();
 
                 if (hasStuff || res.getString("ANNOUNCEMENT_ID") != null) {
+                    Announcement announcement = new Announcement(announcementId, guildId);
                     announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
                     announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
                     announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
@@ -242,6 +242,9 @@ public class DatabaseManager {
                     announcement.setEventId(res.getString("EVENT_ID"));
                     announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                     announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+
+                    statement.close();
+                    return announcement;
                 }
             }
         } catch (SQLException e) {
@@ -249,7 +252,7 @@ public class DatabaseManager {
             EmailSender.getSender().sendExceptionEmail(e);
             e.printStackTrace();
         }
-        return announcement;
+        return null;
     }
 
     public ArrayList<Announcement> getAnnouncements(String guildId) {

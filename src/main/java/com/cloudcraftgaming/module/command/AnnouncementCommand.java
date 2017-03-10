@@ -108,6 +108,17 @@ public class AnnouncementCommand implements ICommand {
                     } else {
                         Message.sendMessage("Announcement creator has not been initialized!", event, client);
                     }
+                } else if (function.equalsIgnoreCase("view") || function.equalsIgnoreCase("review")) {
+                    if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        Message.sendMessage("You cannot view another announcement while one is in the creator!", event, client);
+                    } else {
+                        Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
+                        if (a != null) {
+                            Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), event, client);
+                        } else {
+                            Message.sendMessage("That announcement does not exist! Are you sure you typed the ID correctly?", event, client);
+                        }
+                    }
                 } else if (function.equalsIgnoreCase("hours")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         try {
