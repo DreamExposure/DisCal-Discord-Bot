@@ -1,6 +1,10 @@
 package com.cloudcraftgaming.internal.calendar.event;
 
 import com.cloudcraftgaming.Main;
+import com.cloudcraftgaming.database.DatabaseManager;
+import com.cloudcraftgaming.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.internal.data.BotData;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -17,18 +21,29 @@ import javax.annotation.Nullable;
 public class EventMessageFormatter {
     private static String lineBreak = System.getProperty("line.separator");
 
-    public static EmbedObject getEventEmbed(Event event) {
+    public static EmbedObject getEventEmbed(Event event, String guildID) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Event Info");
         em.appendField("Event Name/Summery", event.getSummary(), true);
         em.appendField("Event Description", event.getDescription(), true);
-        em.appendField("Event Start Date", EventMessageFormatter.getHumanReadableDate(event), false);
+        em.appendField("Event Start Date", EventMessageFormatter.getHumanReadableDate(event), true);
         em.appendField("Event Start Time", EventMessageFormatter.getHumanReadableTime(event, true), true);
-        em.appendField("Event End Date", EventMessageFormatter.getHumanReadableDate(event), false);
+        em.appendField("Event End Date", EventMessageFormatter.getHumanReadableDate(event), true);
         em.appendField("Event End Time", EventMessageFormatter.getHumanReadableTime(event, false), true);
-        em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        try {
+            em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        } catch (IllegalArgumentException e) {
+            try {
+                BotData data = DatabaseManager.getManager().getData(guildID);
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                em.appendField("TimeZone", tz, true);
+            } catch (Exception e1) {
+                em.appendField("TimeZone", "Error/Unknown", true);
+            }
+        }
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Event ID: " + event.getId());
         em.withColor(36, 153, 153);
@@ -55,10 +70,10 @@ public class EventMessageFormatter {
                 + "Event ID: null until creation completed" + lineBreak + lineBreak
                 + "Summary: " + event.getSummary() + lineBreak + lineBreak
                 + "Description: " + event.getDescription() + lineBreak + lineBreak
-                + "[REQ] Start Date (yyyy/MM/dd): " + getHumanReadableDate(event.getStartDateTime()) + lineBreak
-                + "[REQ] Start Time (HH:mm): " + getHumanReadableTime(event.getStartDateTime()) + lineBreak
-                + "[REQ] End Date (yyyy/MM/dd): " + getHumanReadableDate(event.getEndDateTime()) + lineBreak
-                + "[REQ] End Time (HH:mm): " + getHumanReadableTime(event.getEndDateTime()) + lineBreak
+                + "[REQ] Start Date (yyyy/MM/dd): " + getHumanReadableDate(event.getViewableStartDate()) + lineBreak
+                + "[REQ] Start Time (HH:mm): " + getHumanReadableTime(event.getViewableStartDate()) + lineBreak
+                + "[REQ] End Date (yyyy/MM/dd): " + getHumanReadableDate(event.getViewableEndDate()) + lineBreak
+                + "[REQ] End Time (HH:mm): " + getHumanReadableTime(event.getViewableEndDate()) + lineBreak
                 + "TimeZone: " + event.getTimeZone();
     }
 

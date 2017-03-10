@@ -101,7 +101,7 @@ public class EventCommand implements ICommand {
                             Calendar service = CalendarAuth.getCalendarService();
                             BotData data = DatabaseManager.getManager().getData(guildId);
                             Event calEvent = service.events().get(data.getCalendarAddress(), args[1]).execute();
-                            Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent), event, client);
+                            Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent, guildId), event, client);
                         } catch (IOException e) {
                             //Event probably doesn't exist...
                             Message.sendMessage("Oops! Something went wrong! Are you sure the event ID is correct?", event, client);
@@ -134,11 +134,20 @@ public class EventCommand implements ICommand {
 
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV = sdfV.parse(dateRaw);
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
+
                                 Message.sendMessage("Event start date (yyyy/MM/dd) set to: " +
-                                        EventMessageFormatter.getHumanReadableDate(eventDateTime)
+                                        EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
                                         + Message.lineBreak
-                                        + "Event start time (HH:mm, military) set to: "
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTime)
+                                        + "Event start time (HH:mm) set to: "
+                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV)
                                         + Message.lineBreak + Message.lineBreak
                                         + "Please specify one of the following: "
                                         + Message.lineBreak
@@ -160,7 +169,15 @@ public class EventCommand implements ICommand {
 
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
-                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTime)
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV = sdfV.parse(dateRaw);
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
+                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
                                         + Message.lineBreak + Message.lineBreak
                                         + "Please specify one of the following: "
                                         + Message.lineBreak
@@ -189,10 +206,18 @@ public class EventCommand implements ICommand {
 
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
-                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTime)
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV = sdfV.parse(dateRaw);
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
+                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
                                         + Message.lineBreak
-                                        + "Event end time (HH:mm, military) set to: "
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTime)
+                                        + "Event end time (HH:mm) set to: "
+                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV)
                                         + Message.lineBreak + Message.lineBreak
                                         + "Event creation halted! View and/or confirm the event to make it official!", event, client);
                             } catch (ParseException e) {
@@ -210,6 +235,15 @@ public class EventCommand implements ICommand {
 
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV = sdfV.parse(dateRaw);
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
+
                                 Message.sendMessage("Event end date (yyyy/MM/dd) set to: "
                                         + EventMessageFormatter.getHumanReadableDate(eventDateTime)
                                         + Message.lineBreak + Message.lineBreak

@@ -15,6 +15,9 @@ public class PreEvent {
     private EventDateTime startDateTime;
     private EventDateTime endDateTime;
 
+    private EventDateTime viewableStartDate;
+    private EventDateTime viewableEndDate;
+
     private String timeZone;
 
 
@@ -45,6 +48,14 @@ public class PreEvent {
         return endDateTime;
     }
 
+    public EventDateTime getViewableStartDate() {
+        return viewableStartDate;
+    }
+
+    public EventDateTime getViewableEndDate() {
+        return viewableEndDate;
+    }
+
     public String getTimeZone() {
         return timeZone;
     }
@@ -64,6 +75,14 @@ public class PreEvent {
 
     public void setEndDateTime(EventDateTime _endDateTime) {
         endDateTime = _endDateTime;
+    }
+
+    public void setViewableStartDate(EventDateTime _viewableStart) {
+        viewableStartDate = _viewableStart;
+    }
+
+    public void setViewableEndDate(EventDateTime _viewableEnd) {
+        viewableEndDate = _viewableEnd;
     }
 
     void setTimeZone(String _timeZone) {
