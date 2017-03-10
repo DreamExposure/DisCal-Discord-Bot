@@ -1,7 +1,9 @@
 package com.cloudcraftgaming.module.announcement;
 
 import com.cloudcraftgaming.Main;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.util.EmbedBuilder;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -9,17 +11,21 @@ import sx.blah.discord.handle.obj.IGuild;
  * For Project: DisCal
  */
 public class AnnouncementMessageFormatter {
-    private static String lineBreak = System.getProperty("line.separator");
 
-    public static String getFormatEventMessage(Announcement a) {
-        return "~-~-~- Announcement Info ~-~-~-" + lineBreak
-                + "Announcement ID: " + a.getAnnouncementId() + lineBreak + lineBreak
-                + "Type: " + a.getAnnouncementType().name() + lineBreak + lineBreak
-                + "Event ID: " + a.getEventId() + lineBreak + lineBreak
-                + "Hours Before: "  + a.getHoursBefore() + lineBreak
-                + "Minutes Before: " + a.getMinutesBefore() + lineBreak
-                + "In channel (name): " + channelFromId(a);
-                //TODO: Add subscribers list here...
+    public static EmbedObject getFormatAnnouncementEmbed(Announcement a) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Announcement Info");
+        em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
+        em.appendField("Announcement Type", a.getAnnouncementType().toString(), true);
+        em.appendField("Event ID", a.getEventId(), true);
+        em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
+        em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
+        em.appendField("In Channel (Name)", channelFromId(a), true);
+        em.withColor(36, 153, 153);
+
+        return em.build();
     }
 
     private static String channelFromId(Announcement a) {

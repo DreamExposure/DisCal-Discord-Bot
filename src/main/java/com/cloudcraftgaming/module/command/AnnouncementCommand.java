@@ -53,7 +53,7 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("review") || function.equalsIgnoreCase("view")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        Message.sendMessage(AnnouncementMessageFormatter.getFormatEventMessage(AnnouncementCreator.getCreator().getAnnouncement(guildId)), event, client);
+                        Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId)), event, client);
                     } else {
                         Message.sendMessage("You must specify the ID of the announcement you wish to view!", event, client);
                     }
@@ -61,7 +61,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmEvent(event);
                         if (acr.isSuccessful()) {
-                            Message.sendMessage("Announcement created! " + Message.lineBreak + AnnouncementMessageFormatter.getFormatEventMessage(acr.getAnnouncement()) + Message.lineBreak + Message.lineBreak + "Use '!announcement subscribe <id>' to subscribe to the announcement!", event, client);
+                            Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use '!announcement subscribe <id>' to subscribe to the announcement!", event, client);
                         } else {
                             Message.sendMessage("Oops! Something went wrong! Are you sure all of the info is correct?", event, client);
                         }
