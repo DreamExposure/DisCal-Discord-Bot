@@ -6,6 +6,7 @@ import com.cloudcraftgaming.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.internal.email.EmailSender;
 import com.cloudcraftgaming.internal.file.ReadFile;
+import com.cloudcraftgaming.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.module.announcement.Announcer;
 import com.cloudcraftgaming.module.command.*;
 import sx.blah.discord.api.ClientBuilder;
@@ -34,6 +35,9 @@ public class Main {
         client = createClient(args[0], true);
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
+
+        if (args.length == 4)
+            UpdateListData.init(args[4]);
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
