@@ -44,6 +44,7 @@ public class EventMessageFormatter {
                 em.appendField("TimeZone", "Error/Unknown", true);
             }
         }
+        //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Event ID: " + event.getId());
         em.withColor(36, 153, 153);

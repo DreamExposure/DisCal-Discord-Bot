@@ -20,11 +20,16 @@ public class PreEvent {
 
     private String timeZone;
 
+    private boolean recur;
+    private Recurrence recurrence;
+
 
     PreEvent(String _guildId) {
         guildId = _guildId;
 
         timeZone = "Unknown";
+        recur = false;
+        recurrence = new Recurrence();
     }
 
     //Getters
@@ -48,16 +53,24 @@ public class PreEvent {
         return endDateTime;
     }
 
-    public EventDateTime getViewableStartDate() {
+    EventDateTime getViewableStartDate() {
         return viewableStartDate;
     }
 
-    public EventDateTime getViewableEndDate() {
+    EventDateTime getViewableEndDate() {
         return viewableEndDate;
     }
 
     public String getTimeZone() {
         return timeZone;
+    }
+
+    public boolean shouldRecur() {
+        return recur;
+    }
+
+    private Recurrence getRecurrence() {
+        return recurrence;
     }
 
     //Setters
@@ -87,6 +100,10 @@ public class PreEvent {
 
     void setTimeZone(String _timeZone) {
         timeZone = _timeZone;
+    }
+
+    void setShouldRecur(boolean _recur) {
+        recur = _recur;
     }
 
     //Booleans/Checkers
