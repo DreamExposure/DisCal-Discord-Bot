@@ -1,10 +1,15 @@
 package com.cloudcraftgaming.internal.network.discordpw;
 
 import com.cloudcraftgaming.Main;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Nova Fox on 1/13/2017.
@@ -23,12 +28,14 @@ public class UpdateListData {
             HttpClient httpClient = HttpClientBuilder.create().build();
 
             try {
-                HttpPost request = new HttpPost("https://bots.discord.pw/api/bots/:265523588918935552/stats");
+                HttpPost request = new HttpPost("http://bots.discord.pw/api/bots/265523588918935552/stats");
 
                 String serverCount = String.valueOf(Main.client.getGuilds().size());
-                StringEntity params = new StringEntity("metadata={\"server_count\": " + serverCount + " //} ");
+                List<NameValuePair> urlParameters = new ArrayList<>();
+                urlParameters.add(new BasicNameValuePair("server_count", serverCount));
+
+                request.setEntity(new UrlEncodedFormEntity(urlParameters));
                 request.setHeader("Authorization", token);
-                request.setEntity(params);
                 httpClient.execute(request);
             } catch (Exception e) {
                 //Handle issue.
