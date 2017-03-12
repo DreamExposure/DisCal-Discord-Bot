@@ -22,7 +22,7 @@ import sx.blah.discord.util.DiscordException;
  */
 @SuppressWarnings("SameParameterValue")
 public class Main {
-    public static String version = "Beta 2.0.2";
+    public static String version = "Beta 2.1.0";
     public static IDiscordClient client;
 
     public static void main(String[] args) {
