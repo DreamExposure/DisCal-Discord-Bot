@@ -37,7 +37,7 @@ public class Main {
             throw new NullPointerException("Failed to log in! Client cannot be null!");
 
         if (args.length == 4)
-            UpdateListData.init(args[4]);
+            UpdateListData.init(args[3]);
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);

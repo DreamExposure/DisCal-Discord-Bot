@@ -7,6 +7,9 @@ import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Created by Nova Fox on 1/2/2017.
  * Website: www.cloudcraftgaming.com
@@ -31,8 +34,9 @@ class CommandListener {
                         //Prefixed with ! which should mean it is a command, convert and confirm.
                         String[] argsOr = event.getMessage().getContent().split(" ");
                         if (argsOr.length > 1) {
-                            String[] args = new String[argsOr.length - 1];
-                            System.arraycopy(argsOr, 1, args, 0, argsOr.length);
+                            ArrayList<String> argsOr2 = new ArrayList<>();
+                            argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
+                            String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
                             String command = argsOr[0].replaceAll("!", "");
                             cmd.issueCommand(command, args, event);
@@ -46,8 +50,9 @@ class CommandListener {
 
                             String[] argsOr = event.getMessage().getContent().split(" ");
                             if (argsOr.length > 2) {
-                                String[] args = new String[argsOr.length - 2];
-                                System.arraycopy(argsOr, 2, args, 0, argsOr.length);
+                                ArrayList<String> argsOr2 = new ArrayList<>();
+                                argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+                                String [] args = argsOr2.toArray(new String[argsOr2.size()]);
 
                                 String command = argsOr[1];
                                 cmd.issueCommand(command, args, event);
