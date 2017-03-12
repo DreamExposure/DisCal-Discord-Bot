@@ -33,8 +33,8 @@ public class AnnouncementMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Condensed Announcement Info");
-        em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
-        em.appendField("Time Before", condensedTime(a), true);
+        em.appendField("Announcement ID", a.getAnnouncementId().toString(), false);
+        em.appendField("Time Before", condensedTime(a), false);
         em.withFooterText("Type: " + a.getAnnouncementType().name());
         em.withColor(36, 153, 153);
 
