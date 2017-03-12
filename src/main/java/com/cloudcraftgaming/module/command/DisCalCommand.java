@@ -47,10 +47,10 @@ public class DisCalCommand implements ICommand {
             } else if (function.equalsIgnoreCase("channel")) {
                 setChannel(args[1], event, client);
             } else {
-                Message.sendMessage("Invalid function! Use !help.", event, client);
+                Message.sendMessage("Invalid function! Use `!help`", event, client);
             }
         } else if (args.length > 2) {
-            Message.sendMessage("Invalid function! Use !help.", event, client);
+            Message.sendMessage("Invalid function! Use `!help`", event, client);
         }
         return false;
     }
@@ -74,7 +74,7 @@ public class DisCalCommand implements ICommand {
                     botData.setControlRole(controlRole.getID());
                     DatabaseManager.getManager().updateData(botData);
                     //Send message.
-                    Message.sendMessage("Required control role set to: " + controlRole.getName(), event, client);
+                    Message.sendMessage("Required control role set to: `" + controlRole.getName() + "'", event, client);
 
                 } else {
                     //Invalid role.
@@ -107,7 +107,7 @@ public class DisCalCommand implements ICommand {
                     BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
                     data.setChannel(channel.getID());
                     DatabaseManager.getManager().updateData(data);
-                    Message.sendMessage("DisCal will now only respond in channel: " + channel.getName(), event, client);
+                    Message.sendMessage("DisCal will now only respond in channel: `" + channel.getName() + "`", event, client);
                 } else {
                     Message.sendMessage("The specified channel does not exist!", event, client);
                 }

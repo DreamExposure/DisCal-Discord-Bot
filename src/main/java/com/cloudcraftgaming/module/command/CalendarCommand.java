@@ -76,7 +76,7 @@ public class CalendarCommand implements ICommand {
                         if (response.isSuccessful()) {
                             Message.sendMessage("Calendar Created! "
                                     + Message.lineBreak
-                                    + "Use !linkCalendar to display!", event, client);
+                                    + "Use `!linkCalendar` to display!", event, client);
                         } else {
                             Message.sendMessage("Calendar creation failed!", event, client);
                         }
@@ -123,7 +123,7 @@ public class CalendarCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("name") || function.equalsIgnoreCase("summary")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                         CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(value);
-                        Message.sendMessage("Calendar summary/name set to '" + value + "'"
+                        Message.sendMessage("Calendar summary/name set to `" + value + "`"
                                 + Message.lineBreak + Message.lineBreak
                                 + " Please specify the description!", event, client);
                     } else {
@@ -151,7 +151,7 @@ public class CalendarCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("TimeZone")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                         CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
-                        Message.sendMessage("Calendar TimeZone set to: " + value
+                        Message.sendMessage("Calendar TimeZone set to: `" + value + "`"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Calendar creation halted! "
                                 + Message.lineBreak

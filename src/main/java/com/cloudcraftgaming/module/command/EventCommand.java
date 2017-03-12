@@ -59,19 +59,20 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId)), "Confirm event `!event confirm` to add to calendar OR edit the values!", event, client);
                     } else {
-                        Message.sendMessage("To review an event you must have the event creator initialized OR use '!event view <event ID> to view an event in the calendar!", event, client);
+                        Message.sendMessage("To review an event you must have the event creator initialized OR use `!event view <event ID>` to view an event in the calendar!", event, client);
                     }
                 } else if (function.equalsIgnoreCase("confirm")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         if (EventCreator.getCreator().getPreEvent(guildId).hasRequiredValues()) {
                             EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
                             if (response.isSuccessful()) {
+                                //TODO: Add embed!!!!
                                 Message.sendMessage("Event confirmed! " + response.getEvent().getHtmlLink(), event, client);
                             } else {
                                 Message.sendMessage("Event created failed!", event, client);
                             }
                         } else {
-                            Message.sendMessage("Required data not set! Please review event!", event, client);
+                            Message.sendMessage("Required data not set! Please review event with `!event review`", event, client);
                         }
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
@@ -141,17 +142,15 @@ public class EventCommand implements ICommand {
                                 eventDateTimeV.setDateTime(dateTimeV);
                                 EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
 
-                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: " +
-                                        EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
+                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" +
+                                        EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
                                         + Message.lineBreak
-                                        + "Event start time (HH:mm) set to: "
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV)
+                                        + "Event start time (HH:mm) set to: `"
+                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
                                         + Message.lineBreak + Message.lineBreak
-                                        + "Please specify one of the following: "
+                                        + "Please specify the following: "
                                         + Message.lineBreak
-                                        + "For an ALL DAY event, please specify end date in yyyy/MM/dd format!"
-                                        + Message.lineBreak
-                                        + "For a TIMED EVENT event, please specify end date & ending time(military) in yyyy/MM/dd-HH:mm:ss format!", event, client);
+                                        + "For a TIMED EVENT event, please specify end date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
@@ -175,13 +174,10 @@ public class EventCommand implements ICommand {
                                 EventDateTime eventDateTimeV = new EventDateTime();
                                 eventDateTimeV.setDateTime(dateTimeV);
                                 EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
-                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
+                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
                                         + Message.lineBreak + Message.lineBreak
-                                        + "Please specify one of the following: "
-                                        + Message.lineBreak
-                                        + "For an ALL DAY event, please specify end date in yyyy/MM/dd format!"
-                                        + Message.lineBreak
-                                        + "For a TIMED EVENT event, please specify end date & ending time(military) in yyyy/MM/dd-HH:mm:ss format!", event, client);
+                                        + "Please specify the following: "
+                                        + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date specified!", event, client);
                             }
@@ -212,12 +208,12 @@ public class EventCommand implements ICommand {
                                 EventDateTime eventDateTimeV = new EventDateTime();
                                 eventDateTimeV.setDateTime(dateTimeV);
                                 EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
-                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: " + EventMessageFormatter.getHumanReadableDate(eventDateTimeV)
+                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
                                         + Message.lineBreak
-                                        + "Event end time (HH:mm) set to: "
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV)
+                                        + "Event end time (HH:mm) set to: `"
+                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
                                         + Message.lineBreak + Message.lineBreak
-                                        + "Event creation halted! View and/or confirm the event to make it official!", event, client);
+                                        + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
@@ -242,10 +238,10 @@ public class EventCommand implements ICommand {
                                 eventDateTimeV.setDateTime(dateTimeV);
                                 EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
 
-                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: "
-                                        + EventMessageFormatter.getHumanReadableDate(eventDateTime)
+                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: `"
+                                        + EventMessageFormatter.getHumanReadableDate(eventDateTime) + "`"
                                         + Message.lineBreak + Message.lineBreak
-                                        + "Event creation halted! View and/or confirm the event to make it official!", event, client);
+                                        + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date specified!", event, client);
                             }
@@ -259,7 +255,7 @@ public class EventCommand implements ICommand {
                         EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
                         Message.sendMessage("Event summary set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
-                                + "Please specify the event description!", event, client);
+                                + "Please specify the event description with `!event description <desc>`", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
@@ -269,11 +265,9 @@ public class EventCommand implements ICommand {
                         EventCreator.getCreator().getPreEvent(guildId).setDescription(content);
                         Message.sendMessage("Event description set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
-                                + "Please specify one of the following: "
+                                + "Please specify the following: "
                                 + Message.lineBreak
-                                + "For an ALL DAY event, please specify start date in yyyy/MM/dd format!"
-                                + Message.lineBreak
-                                + "For a TIMED EVENT event, please specify start date & starting time(military) in yyyy/MM/dd-HH:mm:ss format!", event, client);
+                                + "Start date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
@@ -287,7 +281,7 @@ public class EventCommand implements ICommand {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
                         EventCreator.getCreator().init(event);
-                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                        Message.sendMessage("Event Creator initiated! Please specify event summary with `!event summary <summary>`", event, client);
                     }
                 } else if (function.equalsIgnoreCase("summary")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -295,7 +289,7 @@ public class EventCommand implements ICommand {
                         EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
                         Message.sendMessage("Event summary set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
-                                + "Please specify the event description!", event, client);
+                                + "Please specify the event description with `!event description <desc>`", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
@@ -305,11 +299,9 @@ public class EventCommand implements ICommand {
                         EventCreator.getCreator().getPreEvent(guildId).setDescription(content);
                         Message.sendMessage("Event description set to: '" + content + "'"
                                 + Message.lineBreak + Message.lineBreak
-                                + "Please specify one of the following: "
+                                + "Please specify the following: "
                                 + Message.lineBreak
-                                + "For an ALL DAY event, please specify date in yyyy/MM/dd format!"
-                                + Message.lineBreak
-                                + "For a TIMED EVENT event, please specify date & starting time(military) in yyyy/MM/dd-HH:mm:ss format!", event, client);
+                                + "Starting date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }

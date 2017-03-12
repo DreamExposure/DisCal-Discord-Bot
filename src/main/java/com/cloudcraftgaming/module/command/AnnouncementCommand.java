@@ -37,7 +37,7 @@ public class AnnouncementCommand implements ICommand {
                 if (function.equalsIgnoreCase("create")) {
                     if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreator.getCreator().init(event);
-                        Message.sendMessage("Announcement creator initialized!" + Message.lineBreak + "Please specify the type:" + Message.lineBreak + "Either 'UNIVERSAL' for all events, or 'SPECIFIC' for a specific event", event, client);
+                        Message.sendMessage("Announcement creator initialized!" + Message.lineBreak + "Please specify the type:" + Message.lineBreak + "Either `UNIVERSAL` for all events, or `SPECIFIC` for a specific event", event, client);
                     } else {
                         Message.sendMessage("Announcement creator has already been started!", event, client);
                     }
@@ -61,7 +61,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmEvent(event);
                         if (acr.isSuccessful()) {
-                            Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use '!announcement subscribe <id>' to subscribe to the announcement!", event, client);
+                            Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use `!announcement subscribe <id>` to subscribe to the announcement!", event, client);
                         } else {
                             Message.sendMessage("Oops! Something went wrong! Are you sure all of the info is correct?", event, client);
                         }
@@ -74,7 +74,7 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("list")) {
                     if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        Message.sendMessage("Please specify how many announcements you wish to list or 'all'", event, client);
+                        Message.sendMessage("Please specify how many announcements you wish to list or `all`", event, client);
                     } else {
                         Message.sendMessage("You cannot list existing announcements while in the creator!", event, client);
                     }
@@ -91,9 +91,9 @@ public class AnnouncementCommand implements ICommand {
                         if (AnnouncementType.isValid(value)) {
                             AnnouncementType type = AnnouncementType.fromValue(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
-                            Message.sendMessage("Announcement type set to: " + type.name() + Message.lineBreak + "If type is SPECIFIC' please set the specific event ID to fire for with '!announcement event <id>'" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in!", event, client);
+                            Message.sendMessage("Announcement type set to: " + type.name() + Message.lineBreak + "If type is `SPECIFIC` please set the specific event ID to fire for with `!announcement event <id>`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
                         } else {
-                            Message.sendMessage("Valid types are only 'UNIVERSAL' or 'SPECIFIC'!", event, client);
+                            Message.sendMessage("Valid types are only `UNIVERSAL` or `SPECIFIC`!", event, client);
                         }
                     } else {
                         Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -104,7 +104,7 @@ public class AnnouncementCommand implements ICommand {
                             IChannel c = getChannelFromName(value, event);
                             if (c != null) {
                                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementChannelId(c.getID());
-                                Message.sendMessage("Announcement channel set to: " + c.getName() + Message.lineBreak + "Please specify the amount of hours before the event this is to fire!", event, client);
+                                Message.sendMessage("Announcement channel set to: `" + c.getName() + "`" + Message.lineBreak + "Please specify the amount of hours before the event this is to fire!", event, client);
                             } else {
                                 Message.sendMessage("Are you sure you typed the channel name correctly? I can't seem to find it.", event, client);
                             }
@@ -130,9 +130,9 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Integer hours = Integer.valueOf(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setHoursBefore(hours);
-                            Message.sendMessage("Announcement hours before set to: " + hours + Message.lineBreak + "Please specify the amount of minutes before the event to fire!", event, client);
+                            Message.sendMessage("Announcement hours before set to: `" + hours + "`" + Message.lineBreak + "Please specify the amount of minutes before the event to fire!", event, client);
                         } catch (NumberFormatException e) {
-                            Message.sendMessage("Hours must be a valid integer! (Ex: 1 or 10)", event, client);
+                            Message.sendMessage("Hours must be a valid integer! (Ex: `1` or `10`)", event, client);
                         }
                     } else {
                         Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -142,9 +142,9 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Integer minutes = Integer.valueOf(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-                            Message.sendMessage("Announcement minutes before set to: " + minutes + Message.lineBreak + "Announcement creation halted! Please use '!announcement review' to make sure everything is correct and then use '!announcement confirm' to create your announcement!", event, client);
+                            Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
                         } catch (NumberFormatException e) {
-                            Message.sendMessage("Minutes must be a valid integer! (Ex: 1 or 10)", event, client);
+                            Message.sendMessage("Minutes must be a valid integer! (Ex: `1` or `10`)", event, client);
                         }
                     } else {
                         Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -153,7 +153,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         if (eventExists(value, event)) {
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-                            Message.sendMessage("Event ID set to: " + value + Message.lineBreak + "Please use '!announcement review' to make sure everything is correct and then use '!announcement confirm' to create your announcement!", event, client);
+                            Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
                         } else {
                             Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
                         }
@@ -167,7 +167,7 @@ public class AnnouncementCommand implements ICommand {
                         if (!a.getSubscriberUserIds().contains(senderId)) {
                             a.getSubscriberUserIds().add(senderId);
                             DatabaseManager.getManager().updateAnnouncement(a);
-                            Message.sendMessage("You have subscribed to the announcement with the ID: " + value + Message.lineBreak + "To unsubscribe use '!announcement unsubscribe <id>", event, client);
+                            Message.sendMessage("You have subscribed to the announcement with the ID: `" + value + "`" + Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event, client);
                         } else {
                             Message.sendMessage("You are already subscribed to that event!", event, client);
                         }
@@ -181,7 +181,7 @@ public class AnnouncementCommand implements ICommand {
                         if (a.getSubscriberUserIds().contains(senderId)) {
                             a.getSubscriberUserIds().remove(senderId);
                             DatabaseManager.getManager().updateAnnouncement(a);
-                            Message.sendMessage("You have unsubscribed to the announcement with the ID: " + value + Message.lineBreak + "To re-subscribe use '!announcement subscribe <id>", event, client);
+                            Message.sendMessage("You have unsubscribed to the announcement with the ID: `" + value + "`" + Message.lineBreak + "To re-subscribe use `!announcement subscribe <id>`", event, client);
                         } else {
                             Message.sendMessage("You are not subscribed to this event!", event, client);
                         }
@@ -211,7 +211,7 @@ public class AnnouncementCommand implements ICommand {
                             //List specific amount of announcements
                             try {
                                 Integer amount = Integer.valueOf(value);
-                                Message.sendMessage("Displaying the first " + amount + " announcements found, use `!announcement view <id>` for more info.", event, client);
+                                Message.sendMessage("Displaying the first `" + amount + "` announcements found, use `!announcement view <id>` for more info.", event, client);
 
                                 int posted = 0;
                                 for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {

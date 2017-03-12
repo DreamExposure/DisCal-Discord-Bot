@@ -31,7 +31,7 @@ public class EventListCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage("Please specify how many events to list with '!events (amount)'...", event, client);
+            Message.sendMessage("Please specify how many events to list with `!events <amount>`", event, client);
         } else {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
@@ -58,7 +58,7 @@ public class EventListCommand implements ICommand {
                         for (Event e : items) {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event, client);
                         }
-                        Message.sendMessage("Use '!event view <id>' for more info.", event, client);
+                        Message.sendMessage("Use `!event view <id>` for more info.", event, client);
                         return true;
                     }
                 } catch (IOException e) {
