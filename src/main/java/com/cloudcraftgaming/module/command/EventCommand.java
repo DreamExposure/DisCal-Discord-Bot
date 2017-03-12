@@ -67,7 +67,7 @@ public class EventCommand implements ICommand {
                             EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
                             if (response.isSuccessful()) {
                                 //TODO: Add embed!!!!
-                                Message.sendMessage("Event confirmed! " + response.getEvent().getHtmlLink(), event, client);
+                                Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response), "Event confirmed!", event, client);
                             } else {
                                 Message.sendMessage("Event created failed!", event, client);
                             }

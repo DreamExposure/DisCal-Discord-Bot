@@ -86,6 +86,20 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Event Confirmation");
+        em.appendField("Event ID", ecr.getEvent().getId(), true);
+        em.appendField("Event Date", getHumanReadableDate(ecr.getEvent()), true);
+        em.withFooterText("Click title to view on Google Calendar!");
+        em.withUrl(ecr.getEvent().getHangoutLink());
+        em.withColor(36, 153, 153);
+
+        return em.build();
+    }
+
     private static String getHumanReadableDate(Event event) {
         String[] dateArray = event.getStart().getDateTime().toStringRfc3339().split("-");
         String year = dateArray[0];
