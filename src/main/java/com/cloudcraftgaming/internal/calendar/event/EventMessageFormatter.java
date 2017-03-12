@@ -19,7 +19,6 @@ import javax.annotation.Nullable;
  */
 @SuppressWarnings("Duplicates")
 public class EventMessageFormatter {
-    private static String lineBreak = System.getProperty("line.separator");
 
     public static EmbedObject getEventEmbed(Event event, String guildID) {
         EmbedBuilder em = new EmbedBuilder();
@@ -67,16 +66,24 @@ public class EventMessageFormatter {
         return em.build();
     }
 
-    public static String getFormatEventMessage(PreEvent event) {
-        return "~-~-~- Event Info ~-~-~-" + lineBreak
-                + "Event ID: null until creation completed" + lineBreak + lineBreak
-                + "Summary: " + event.getSummary() + lineBreak + lineBreak
-                + "Description: " + event.getDescription() + lineBreak + lineBreak
-                + "[REQ] Start Date (yyyy/MM/dd): " + getHumanReadableDate(event.getViewableStartDate()) + lineBreak
-                + "[REQ] Start Time (HH:mm): " + getHumanReadableTime(event.getViewableStartDate()) + lineBreak
-                + "[REQ] End Date (yyyy/MM/dd): " + getHumanReadableDate(event.getViewableEndDate()) + lineBreak
-                + "[REQ] End Time (HH:mm): " + getHumanReadableTime(event.getViewableEndDate()) + lineBreak
-                + "TimeZone: " + event.getTimeZone();
+    public static EmbedObject getPreEventEmbed(PreEvent event) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Event Info");
+        em.appendField("Event Name/Summary", event.getSummary(), true);
+        em.appendField("Event Description", event.getDescription(), true);
+        em.appendField("[R] Event Start Date", EventMessageFormatter.getHumanReadableDate(event.getViewableStartDate()), true);
+        em.appendField("[R] Event Start Time", EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
+        em.appendField("[R] Event End Date", EventMessageFormatter.getHumanReadableDate(event.getViewableEndDate()), true);
+        em.appendField("[R]Event End Time", EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate()), true);
+        em.appendField("TimeZone", event.getTimeZone(), true);
+        //TODO: Add info on recurrence here.
+
+        em.withFooterText("Event ID: Null until confirmed.");
+        em.withColor(36, 153, 153);
+
+        return em.build();
     }
 
     private static String getHumanReadableDate(Event event) {

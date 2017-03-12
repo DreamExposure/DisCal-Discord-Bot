@@ -57,9 +57,7 @@ public class EventCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("view") || function.equalsIgnoreCase("review")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
-                        Message.sendMessage(EventMessageFormatter.getFormatEventMessage(EventCreator.getCreator().getPreEvent(guildId))
-                                + Message.lineBreak + Message.lineBreak
-                                + "Confirm event to add to calendar OR edit the values!", event, client);
+                        Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId)), "Confirm event `!event confirm` to add to calendar OR edit the values!", event, client);
                     } else {
                         Message.sendMessage("To review an event you must have the event creator initialized OR use '!event view <event ID> to view an event in the calendar!", event, client);
                     }
