@@ -34,7 +34,12 @@ public class LinkCalendarCommand implements ICommand {
             em.withAuthorName("DisCal");
             em.withTitle("Guild Calendar");
             em.appendField("Calendar Name/Summary", cal.getSummary(), true);
-            em.appendField("Description", cal.getDescription(), true);
+            try {
+                em.appendField("Description", cal.getDescription(), true);
+            } catch (NullPointerException e) {
+                //Some error, desc probably never set, just ignore no need to email.
+                em.appendField("Description", "N/a", true);
+            }
             em.appendField("Timezone", cal.getTimeZone(), false);
             em.withUrl(CalendarMessageFormatter.getCalendarLink(event));
             em.withFooterText("Calendar ID: " + calId);
