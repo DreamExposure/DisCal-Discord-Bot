@@ -18,11 +18,24 @@ public class AnnouncementMessageFormatter {
         em.withAuthorName("DisCal");
         em.withTitle("Announcement Info");
         em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
-        em.appendField("Announcement Type", a.getAnnouncementType().toString(), true);
+        em.appendField("Announcement Type", a.getAnnouncementType().name(), true);
         em.appendField("Event ID", a.getEventId(), true);
         em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
         em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
         em.appendField("In Channel (Name)", channelFromId(a), true);
+        em.withColor(36, 153, 153);
+
+        return em.build();
+    }
+
+    public static EmbedObject getCondensedAnnouncementEmbed(Announcement a) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Condensed Announcement Info");
+        em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
+        em.appendField("Time Before", condensedTime(a), true);
+        em.withFooterText("Type: " + a.getAnnouncementType().name());
         em.withColor(36, 153, 153);
 
         return em.build();
@@ -34,5 +47,9 @@ public class AnnouncementMessageFormatter {
             return g.getChannelByID(a.getAnnouncementChannelId()).getName();
         }
         return "Unset or Invalid";
+    }
+
+    private static String condensedTime(Announcement a) {
+        return a.getHoursBefore() + "H" + a.getMinutesBefore() + "m";
     }
 }

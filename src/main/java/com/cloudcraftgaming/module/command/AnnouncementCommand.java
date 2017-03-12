@@ -72,6 +72,12 @@ public class AnnouncementCommand implements ICommand {
                     } else {
                         Message.sendMessage("You cannot delete an announcement while in the creator!", event, client);
                     }
+                } else if (function.equalsIgnoreCase("list")) {
+                    if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        Message.sendMessage("Please specify how many announcements you wish to list or 'all'", event, client);
+                    } else {
+                        Message.sendMessage("You cannot list existing announcements while in the creator!", event, client);
+                    }
                 } else {
                     //TODO: Add useful info about what you /can/ do.
                     Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
@@ -191,6 +197,38 @@ public class AnnouncementCommand implements ICommand {
                         }
                     } else {
                         Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+                    }
+                } else if (function.equalsIgnoreCase("list")) {
+                    if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        if (value.equalsIgnoreCase("all")) {
+                            Message.sendMessage("All announcements, use `!announcement view <id` for more info.", event, client);
+                            //Loop and add embeds
+                            for (Announcement a : DatabaseManager.getManager().getAnnouncements(
+                                    guildId)) {
+                                Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
+                            }
+                        } else {
+                            //List specific amount of announcements
+                            try {
+                                Integer amount = Integer.valueOf(value);
+                                Message.sendMessage("Displaying the first " + amount + " announcements found, use `!announcement view <id>` for more info.", event, client);
+
+                                int posted = 0;
+                                for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+                                    if (posted < amount) {
+                                        Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
+                                        
+                                        posted++;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            } catch (NumberFormatException e) {
+                                Message.sendMessage("Amount must either be `all` or a valid integer!", event, client);
+                            }
+                        }
+                    } else {
+                        Message.sendMessage("You cannot list announcements while in the creator!", event, client);
                     }
                 } else {
                     //TODO: Add useful info about what you /can/ do.
