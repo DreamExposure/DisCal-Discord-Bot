@@ -10,9 +10,11 @@ import java.util.Timer;
 public class Announcer {
     private static Announcer instance;
 
-    private Timer timer;
+    private final Timer timer;
 
-    private Announcer() {}
+    private Announcer() {
+        timer = new Timer();
+    }
 
     public static Announcer getAnnouncer() {
         if (instance == null) {
@@ -22,7 +24,6 @@ public class Announcer {
     }
 
     public void init() {
-        timer = new Timer();
         timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
     }
 
