@@ -21,7 +21,7 @@ public class EventUtils {
             return true;
         } catch (IOException e) {
             System.out.println("Something weird happened when deleting an event!");
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, EventUtils.class);
             e.printStackTrace();
         }
         return false;

@@ -63,7 +63,7 @@ public class EventListCommand implements ICommand {
                     }
                 } catch (IOException e) {
                     Message.sendMessage("Oops! Something terrible happened! I have emailed the developer!", event, client);
-                    EmailSender.getSender().sendExceptionEmail(e);
+                    EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {

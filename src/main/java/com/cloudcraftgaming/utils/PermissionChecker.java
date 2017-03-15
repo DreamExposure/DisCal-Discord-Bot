@@ -46,7 +46,7 @@ public class PermissionChecker {
             }
         } catch (Exception e) {
             //Something broke so we will harmlessly allow access and email the dev.
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, PermissionChecker.class);
             return true;
         }
         return true;
@@ -77,7 +77,7 @@ public class PermissionChecker {
             return true;
         } catch (Exception e) {
             //Catch any errors so that the bot always responds...
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, PermissionChecker.class);
             return true;
         }
     }

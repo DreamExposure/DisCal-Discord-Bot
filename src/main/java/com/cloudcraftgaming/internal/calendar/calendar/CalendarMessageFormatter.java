@@ -20,6 +20,7 @@ public class CalendarMessageFormatter {
     }
 
     public static String getFormatEventMessage(PreCalendar calendar) {
+        //TODO: Switch to Embed
         return "~-~-~- Calendar Info ~-~-~-" + lineBreak
                 + "Calendar ID: null until creation completed" + lineBreak + lineBreak
                 + "Name/Summary: " + calendar.getSummary() + lineBreak + lineBreak

@@ -76,7 +76,7 @@ public class EventCreator {
                     terminate(e);
                     return new EventCreatorResponse(true, confirmed);
                 } catch (IOException ex) {
-                    EmailSender.getSender().sendExceptionEmail(ex);
+                    EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
                     return new EventCreatorResponse(false);
                 }
             }

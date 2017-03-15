@@ -76,7 +76,7 @@ public class Main {
             }
         } catch (DiscordException e) {
             e.printStackTrace();
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, Main.class);
         }
         return null;
     }

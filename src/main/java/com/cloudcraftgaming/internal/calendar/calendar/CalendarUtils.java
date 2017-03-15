@@ -27,7 +27,7 @@ public class CalendarUtils {
             return true;
         } catch (IOException e) {
             //Fail silently.
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, CalendarUtils.class);
         }
         return false;
     }

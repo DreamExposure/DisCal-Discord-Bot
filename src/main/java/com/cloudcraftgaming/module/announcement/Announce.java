@@ -61,7 +61,7 @@ public class Announce extends TimerTask {
                         }
                     } catch (IOException e) {
                         //Event may not exist...
-                        EmailSender.getSender().sendExceptionEmail(e);
+                        EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                     }
                 } else {
                     try {
@@ -88,7 +88,7 @@ public class Announce extends TimerTask {
                             }
                         }
                     } catch (IOException e) {
-                        EmailSender.getSender().sendExceptionEmail(e);
+                        EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                     }
                 }
             }

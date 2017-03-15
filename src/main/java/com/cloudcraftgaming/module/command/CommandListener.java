@@ -61,7 +61,7 @@ class CommandListener {
                 }
             }
         } catch (Exception e) {
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
     }
 

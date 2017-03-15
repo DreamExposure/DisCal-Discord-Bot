@@ -71,7 +71,7 @@ public class CalendarCreator {
                     terminate(e);
                     return new CalendarCreatorResponse(true, confirmed);
                 } catch (IOException ex) {
-                    EmailSender.getSender().sendExceptionEmail(ex);
+                    EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
                     return new CalendarCreatorResponse(false);
                 }
             }

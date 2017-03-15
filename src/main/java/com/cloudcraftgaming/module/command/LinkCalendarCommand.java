@@ -47,7 +47,7 @@ public class LinkCalendarCommand implements ICommand {
 
             Message.sendMessage(em.build(), event, client);
         } catch (IOException e) {
-            EmailSender.getSender().sendExceptionEmail(e);
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
             Message.sendMessage("Oops! Something went wrong! I have emailed the developer!", event, client);
         }
         return false;

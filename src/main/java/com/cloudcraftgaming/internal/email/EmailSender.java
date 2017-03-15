@@ -40,7 +40,7 @@ public class EmailSender {
         mailer = new Mailer("smtp.gmail.com", 465, data.getUsername(), data.getPassword(), TransportStrategy.SMTP_SSL);
     }
 
-    public void sendExceptionEmail(Exception e) {
+    public void sendExceptionEmail(Exception e, Class clazz) {
         Email email = new Email();
 
         String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
@@ -59,7 +59,7 @@ public class EmailSender {
         email.setFromAddress("DisCal", data.getUsername());
         email.addRecipient("CloudCraft", "cloudcraftcontact@gmail.com", Message.RecipientType.TO);
         email.setSubject("[DNR] DisCal Error");
-        email.setText("An error occurred on: " + timeStamp + com.cloudcraftgaming.utils.Message.lineBreak + error);
+        email.setText("An error occurred on: " + timeStamp + com.cloudcraftgaming.utils.Message.lineBreak + "In class: " + clazz.getName()  + com.cloudcraftgaming.utils.Message.lineBreak + com.cloudcraftgaming.utils.Message.lineBreak + error);
 
         mailer.sendMail(email);
     }
