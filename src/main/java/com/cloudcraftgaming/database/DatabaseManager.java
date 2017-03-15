@@ -233,7 +233,7 @@ public class DatabaseManager {
 
                 Boolean hasStuff = res.next();
 
-                if (hasStuff || res.getString("ANNOUNCEMENT_ID") != null) {
+                if (hasStuff && res.getString("ANNOUNCEMENT_ID") != null) {
                     Announcement announcement = new Announcement(announcementId, guildId);
                     announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
                     announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
