@@ -118,11 +118,15 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         Message.sendMessage("You cannot view another announcement while one is in the creator!", event, client);
                     } else {
-                        Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
-                        if (a != null) {
-                            Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), event, client);
-                        } else {
-                            Message.sendMessage("That announcement does not exist! Are you sure you typed the ID correctly?", event, client);
+                        try {
+                            Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
+                            if (a != null) {
+                                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), event, client);
+                            } else {
+                                Message.sendMessage("That announcement does not exist! Are you sure you typed the ID correctly?", event, client);
+                            }
+                        } catch (NumberFormatException e) {
+                            Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..", event, client);
                         }
                     }
                 } else if (function.equalsIgnoreCase("hours")) {
