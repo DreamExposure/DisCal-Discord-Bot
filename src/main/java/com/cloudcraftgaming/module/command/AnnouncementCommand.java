@@ -254,6 +254,9 @@ public class AnnouncementCommand implements ICommand {
     }
 
     private Boolean channelExists(String value, MessageReceivedEvent event) {
+        if (value.startsWith("#")) {
+            value = value.replaceFirst("#", "");
+        }
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {
                 return true;
@@ -263,6 +266,9 @@ public class AnnouncementCommand implements ICommand {
     }
 
     private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
+        if (value.startsWith("#")) {
+            value = value.replaceFirst("#", "");
+        }
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {
                 return c;
