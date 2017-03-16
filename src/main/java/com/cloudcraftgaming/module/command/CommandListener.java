@@ -26,7 +26,7 @@ class CommandListener {
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
-            if (event.getMessage() != null && event.getMessage().getGuild() != null && event.getMessage().getChannel() != null) {
+            if (event.getMessage() != null && event.getMessage().getGuild() != null && event.getMessage().getChannel() != null && !event.getMessage().getChannel().isPrivate()) {
                 //Message is a valid guild message (not DM). Check if in correct channel.
                 if (PermissionChecker.inCorrectChannel(event) && event.getMessage().getContent().startsWith("!")) {
                     //Prefixed with ! which should mean it is a command, convert and confirm.
