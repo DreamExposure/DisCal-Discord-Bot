@@ -156,11 +156,15 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("event")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        if (eventExists(value, event)) {
-                            AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-                            Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
+                        if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                            if (eventExists(value, event)) {
+                                AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
+                                Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
+                            } else {
+                                Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
+                            }
                         } else {
-                            Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
+                            Message.sendMessage("You cannot set an event while the announcement Type is set to `UNIVERSAL`", event, client);
                         }
                     } else {
                         Message.sendMessage("Announcement creator has not been initialized!", event, client);
