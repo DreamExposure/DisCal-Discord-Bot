@@ -60,9 +60,7 @@ public class CalendarCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("view") || function.equalsIgnoreCase("review")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                        Message.sendMessage(CalendarMessageFormatter.getFormatEventMessage(CalendarCreator.getCreator().getPreCalendar(guildId))
-                                + Message.lineBreak + Message.lineBreak
-                                + "Confirm calendar to complete setup OR edit the values!", event, client);
+                        Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)), "Confirm calendar to complete setup `!calendar confirm` OR edit the values!", event, client);
                     } else {
                         if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
