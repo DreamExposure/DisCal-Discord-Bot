@@ -48,6 +48,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("cancel")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreator.getCreator().terminate(event);
+                        Message.sendMessage("Announcement creator terminated!", event, client);
                     } else {
                         Message.sendMessage("Cannot cancel creation when the creator has not been started!", event, client);
                     }
