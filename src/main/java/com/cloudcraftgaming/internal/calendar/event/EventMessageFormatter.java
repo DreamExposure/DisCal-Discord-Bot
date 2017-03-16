@@ -80,7 +80,7 @@ public class EventMessageFormatter {
         em.appendField("TimeZone", event.getTimeZone(), true);
         //TODO: Add info on recurrence here.
 
-        em.withFooterText("Event ID: Null until confirmed.");
+        em.withFooterText("[R] means required, field needs a value.");
         em.withColor(36, 153, 153);
 
         return em.build();
