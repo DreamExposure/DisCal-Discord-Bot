@@ -36,7 +36,7 @@ public class LinkCalendarCommand implements ICommand {
             em.appendField("Calendar Name/Summary", cal.getSummary(), true);
             try {
                 em.appendField("Description", cal.getDescription(), true);
-            } catch (NullPointerException e) {
+            } catch (NullPointerException | IllegalArgumentException e) {
                 //Some error, desc probably never set, just ignore no need to email.
                 em.appendField("Description", "N/a", true);
             }
