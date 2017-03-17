@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
-Class-Path: com.cloudcraftgaming
-Main-Class: com.cloudcraftgaming.Main
+Class-Path: com.cloudcraftgaming.discal
+Main-Class: com.cloudcraftgaming.discal.Main
 

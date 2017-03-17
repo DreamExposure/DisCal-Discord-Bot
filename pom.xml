@@ -81,7 +81,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.cloudcraftgaming.Main</mainClass>
+                            <mainClass>com.cloudcraftgaming.discal.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
