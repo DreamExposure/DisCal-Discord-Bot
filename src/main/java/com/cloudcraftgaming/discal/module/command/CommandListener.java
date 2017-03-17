@@ -67,8 +67,10 @@ class CommandListener {
 
     private boolean discalMentioned(MessageReceivedEvent event) {
         for (IUser u : event.getMessage().getMentions()) {
-            if (u.getID().equals(Main.getSelfUser().getID())) {
-                return true;
+            if (u != null) {
+                if (u.getID().equals(Main.getSelfUser().getID())) {
+                    return true;
+                }
             }
         }
         return false;
