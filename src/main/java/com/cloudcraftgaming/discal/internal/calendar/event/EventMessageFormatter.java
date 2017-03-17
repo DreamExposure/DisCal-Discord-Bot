@@ -58,9 +58,8 @@ public class EventMessageFormatter {
         em.withTitle("Condensed Event Info");
         em.appendField("Event Summary", event.getSummary(), true);
         em.appendField("Event Date", getHumanReadableDate(event), true);
-        em.appendField("Event ID", event.getId(), true);
+        em.appendField("Event ID", event.getId(), false);
         em.withUrl(event.getHtmlLink());
-        em.withFooterText("Event ID: " + event.getId());
         em.withColor(36, 153, 153);
 
         return em.build();
