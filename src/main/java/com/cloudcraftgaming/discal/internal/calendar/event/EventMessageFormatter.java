@@ -69,13 +69,13 @@ public class EventMessageFormatter {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Event Info");
+        em.withTitle("Pre-Event Info");
         em.appendField("Event Name/Summary", event.getSummary(), true);
         em.appendField("Event Description", event.getDescription(), true);
         em.appendField("[R] Event Start Date", getHumanReadableDate(event.getViewableStartDate()), true);
         em.appendField("[R] Event Start Time", EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
         em.appendField("[R] Event End Date", getHumanReadableDate(event.getViewableEndDate()), true);
-        em.appendField("[R]Event End Time", EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate()), true);
+        em.appendField("[R] Event End Time", EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate()), true);
         em.appendField("TimeZone", event.getTimeZone(), true);
         //TODO: Add info on recurrence here.
 
