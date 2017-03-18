@@ -35,6 +35,10 @@ public class AnnouncementMessageFormatter {
         em.withTitle("Condensed Announcement Info");
         em.appendField("Announcement ID", a.getAnnouncementId().toString(), false);
         em.appendField("Time Before", condensedTime(a), false);
+
+        if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+            em.appendField("Event ID", a.getEventId(), false);
+        }
         em.withFooterText("Type: " + a.getAnnouncementType().name());
         em.withColor(36, 153, 153);
 
