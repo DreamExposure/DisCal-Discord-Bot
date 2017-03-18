@@ -52,7 +52,7 @@ public class Announce extends TimerTask {
                             if (difference >= 0) {
                                 if (difference <= 10) {
                                     //Right on time
-                                    sendAnnouncementMessage(a, event);
+                                    sendAnnouncementMessage(a, event, data);
 
                                     //Delete announcement to ensure it does not spam fire
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
@@ -85,7 +85,7 @@ public class Announce extends TimerTask {
                                     Long difference = minutesToEvent - announcementTime;
                                     if (difference >= 0 && difference <= 10) {
                                         //Right on time
-                                        sendAnnouncementMessage(a, event);
+                                        sendAnnouncementMessage(a, event, data);
                                     }
                                 }
                             }
@@ -101,7 +101,7 @@ public class Announce extends TimerTask {
         EmailSender.getSender().sendDebugEmail(this.getClass(), "02", "Announcement Runnable completed!");
     }
 
-    private void sendAnnouncementMessage(Announcement announcement, Event event) {
+    private void sendAnnouncementMessage(Announcement announcement, Event event, BotData data) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
@@ -109,7 +109,17 @@ public class Announce extends TimerTask {
         em.appendField("Event Name/Summery", event.getSummary(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
         em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
-        em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        try {
+            em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+        } catch (Exception e) {
+            try {
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                em.appendField("TimeZone", tz, true);
+            } catch (Exception e1) {
+                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+            }
+        }
         em.appendField("Event ID", event.getId(), false);
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
