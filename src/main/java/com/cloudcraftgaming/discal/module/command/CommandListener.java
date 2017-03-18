@@ -66,12 +66,15 @@ class CommandListener {
     }
 
     private boolean discalMentioned(MessageReceivedEvent event) {
-        for (IUser u : event.getMessage().getMentions()) {
-            if (u != null) {
-                if (u.getID().equals(Main.getSelfUser().getID())) {
+        try {
+            for (IUser u : event.getMessage().getMentions()) {
+                if (u != null && u.getID().equals(Main.getSelfUser().getID())) {
                     return true;
                 }
             }
+        } catch (NullPointerException e) {
+            //Some error, let's just ignore the error and return false.
+            return false;
         }
         return false;
     }
