@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
+import com.cloudcraftgaming.discal.internal.email.EmailSender;
+
 import java.util.Timer;
 
 /**
@@ -25,6 +27,7 @@ public class Announcer {
 
     public void init() {
         timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "00", "Announcer initiated and announcements are scheduled!");
     }
 
     public void shutdown() {

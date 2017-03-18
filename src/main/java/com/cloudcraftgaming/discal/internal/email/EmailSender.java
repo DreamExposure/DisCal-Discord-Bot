@@ -63,4 +63,17 @@ public class EmailSender {
 
         mailer.sendMail(email);
     }
+
+    public void sendDebugEmail(Class clazz, String step, String message) {
+        Email email = new Email();
+
+        String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+        email.setFromAddress("DisCal", data.getUsername());
+        email.addRecipient("CloudCraft", "cloudcraftcontact@gmail.com", Message.RecipientType.TO);
+        email.setSubject("[DNR] DisCal Debugger");
+        email.setText("Debug message at: " + timeStamp + com.cloudcraftgaming.discal.utils.Message.lineBreak + "In class: " + clazz.getName() + com.cloudcraftgaming.discal.utils.Message.lineBreak + com.cloudcraftgaming.discal.utils.Message.lineBreak + "Debug Method Step: " + step + com.cloudcraftgaming.discal.utils.Message.lineBreak + com.cloudcraftgaming.discal.utils.Message.lineBreak + "Debug Message: " + message);
+
+        mailer.sendMail(email);
+    }
 }

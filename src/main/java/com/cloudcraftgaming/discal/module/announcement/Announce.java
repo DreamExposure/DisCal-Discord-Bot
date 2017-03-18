@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class Announce extends TimerTask {
     @Override
     public void run() {
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Announcement Runnable Start");
         DateTime now = new DateTime(System.currentTimeMillis());
         Long nowMS = System.currentTimeMillis();
         for (IGuild guild : Main.client.getGuilds()) {
@@ -93,6 +94,7 @@ public class Announce extends TimerTask {
                 }
             }
         }
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "02", "Announcement Runnable completed!");
     }
 
     private void sendAnnouncementMessage(Announcement announcement, Event event) {
