@@ -114,7 +114,7 @@ public class EventMessageFormatter {
         em.appendField("Event ID", ecr.getEvent().getId(), false);
         em.appendField("Event Date", getHumanReadableDate(ecr.getEvent()), false);
         em.withFooterText("Click title to view on Google Calendar!");
-        em.withUrl(ecr.getEvent().getHangoutLink());
+        em.withUrl(ecr.getEvent().getHtmlLink());
         em.withColor(36, 153, 153);
 
         return em.build();
