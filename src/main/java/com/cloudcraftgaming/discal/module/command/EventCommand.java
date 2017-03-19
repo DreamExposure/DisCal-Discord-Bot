@@ -128,7 +128,7 @@ public class EventCommand implements ICommand {
                     } else {
                         Message.sendMessage("You cannot delete an event while in the creator!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("startDate")) {
+                } else if (function.equalsIgnoreCase("startDate") || function.equalsIgnoreCase("start")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String dateRaw = args[1].trim();
                         if (dateRaw.length() > 10) {
@@ -160,42 +160,17 @@ public class EventCommand implements ICommand {
                                         + Message.lineBreak + Message.lineBreak
                                         + "Please specify the following: "
                                         + Message.lineBreak
-                                        + "For a TIMED EVENT event, please specify end date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                        + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
                         } else {
-                            try {
-                                //Do a lot of date shuffling to get to proper formats and shit like that.
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
-                                Date dateObj = sdf.parse(dateRaw);
-                                DateTime dateTime = new DateTime(dateObj);
-                                EventDateTime eventDateTime = new EventDateTime();
-                                eventDateTime.setDate(dateTime);
-
-                                //Date shuffling done, now actually apply all that damn stuff here.
-                                EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
-
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV = sdfV.parse(dateRaw);
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
-                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
-                                        + Message.lineBreak + Message.lineBreak
-                                        + "Please specify the following: "
-                                        + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
-                            } catch (ParseException e) {
-                                Message.sendMessage("Invalid Date specified!", event, client);
-                            }
+                            Message.sendMessage("Invalid date/time format! Use `yyyy/MM/dd-HH:mm:ss`", event, client);
                         }
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("endDate")) {
+                } else if (function.equalsIgnoreCase("endDate") || function.equalsIgnoreCase("end")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String dateRaw = args[1].trim();
                         if (dateRaw.length() > 10) {
@@ -228,33 +203,7 @@ public class EventCommand implements ICommand {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
                         } else {
-                            try {
-                                //Do a lot of date shuffling to get to proper formats and shit like that.
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
-                                Date dateObj = sdf.parse(dateRaw);
-                                DateTime dateTime = new DateTime(dateObj);
-                                EventDateTime eventDateTime = new EventDateTime();
-                                eventDateTime.setDate(dateTime);
-
-                                //Date shuffling done, now actually apply all that damn stuff here.
-                                EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
-
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV = sdfV.parse(dateRaw);
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
-
-                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: `"
-                                        + EventMessageFormatter.getHumanReadableDate(eventDateTime) + "`"
-                                        + Message.lineBreak + Message.lineBreak
-                                        + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
-                            } catch (ParseException e) {
-                                Message.sendMessage("Invalid Date specified!", event, client);
-                            }
+                            Message.sendMessage("Invalid date/time format! Use `yyyy/MM/dd-HH:mm:ss`", event, client);
                         }
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
