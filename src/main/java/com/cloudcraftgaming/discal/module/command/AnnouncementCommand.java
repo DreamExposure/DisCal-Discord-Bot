@@ -103,7 +103,11 @@ public class AnnouncementCommand implements ICommand {
                         if (AnnouncementType.isValid(value)) {
                             AnnouncementType type = AnnouncementType.fromValue(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
-                            Message.sendMessage("Announcement type set to: " + type.name() + Message.lineBreak + "If type is `SPECIFIC` please set the specific event ID to fire for with `!announcement event <id>`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
+                            if (type.equals(AnnouncementType.SPECIFIC)) {
+                                Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the specific event ID to fire for with `!announcement event <id>`", event, client);
+                            } else {
+                                Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
+                            }
                         } else {
                             Message.sendMessage("Valid types are only `UNIVERSAL` or `SPECIFIC`!", event, client);
                         }
@@ -170,7 +174,7 @@ public class AnnouncementCommand implements ICommand {
                         if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                             if (eventExists(value, event)) {
                                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-                                Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
+                                Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
                             } else {
                                 Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
                             }
