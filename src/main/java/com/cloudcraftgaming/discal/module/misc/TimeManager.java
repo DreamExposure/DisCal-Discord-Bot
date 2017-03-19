@@ -14,6 +14,10 @@ public class TimeManager {
 
     private TimeManager() {} //Prevent initialization
 
+    /**
+     * Gets the instance of the TimeManager that is loaded.
+     * @return The instance of the TimeManager.
+     */
     public static TimeManager getManager() {
         if (instance == null) {
             instance = new TimeManager();
@@ -21,11 +25,17 @@ public class TimeManager {
         return instance;
     }
 
+    /**
+     * Initializes the TimeManager and schedules the appropriate Timers.
+     */
     public void init() {
         timer = new Timer();
         timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
     }
 
+    /**
+     * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
+     */
     public void shutdown() {
         timer.cancel();
     }

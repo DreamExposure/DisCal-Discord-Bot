@@ -101,6 +101,12 @@ public class Announce extends TimerTask {
         //EmailSender.getSender().sendDebugEmail(this.getClass(), "02", "Announcement Runnable completed!");
     }
 
+    /**
+     * Sends an embed with the announcement info in a proper format.
+     * @param announcement The announcement to send info about.
+     * @param event the calendar event the announcement is for.
+     * @param data The BotData belonging to the guild.
+     */
     private void sendAnnouncementMessage(Announcement announcement, Event event, BotData data) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());

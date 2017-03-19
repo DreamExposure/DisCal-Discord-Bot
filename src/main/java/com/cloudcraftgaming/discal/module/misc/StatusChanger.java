@@ -15,6 +15,9 @@ public class StatusChanger extends TimerTask {
     private final ArrayList<String> statuses = new ArrayList<>();
     private Integer index;
 
+    /**
+     * Creates the StatusChanger and its Statuses list.
+     */
     StatusChanger() {
         statuses.add("Discord Calendar");
         statuses.add("Use !discal for help");

@@ -19,10 +19,18 @@ import java.util.Arrays;
 class CommandListener {
     private CommandExecutor cmd;
 
+    /**
+     * Creates a new CommandListener listener.
+     * @param _cmd The CommandExecutor instance to use.
+     */
     CommandListener(CommandExecutor _cmd) {
         cmd = _cmd;
     }
 
+    /**
+     * Checks for command validity and calls the command executor if valid.
+     * @param event The event received to check for a command.
+     */
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
@@ -65,6 +73,11 @@ class CommandListener {
         }
     }
 
+    /**
+     * Checks if the Bot was mentioned within the message.
+     * @param event The event received.
+     * @return <code>true</code> if mentioned, else <code>false</code>.
+     */
     private boolean discalMentioned(MessageReceivedEvent event) {
         try {
             for (IUser u : event.getMessage().getMentions()) {

@@ -18,6 +18,10 @@ public class CommandExecutor {
 
     private CommandExecutor() {}
 
+    /**
+     * Gets the instance of the CommandExecutor.
+     * @return The instance of the CommandExecutor.
+     */
     public static CommandExecutor getExecutor() {
         if (instance == null) {
             instance = new CommandExecutor();
@@ -25,6 +29,11 @@ public class CommandExecutor {
         return instance;
     }
 
+    /**
+     * Enables the CommandExecutor and sets up the Listener.
+     * @param _client The Client associated with the Bot.
+     * @return The CommandExecutor's instance.
+     */
     public CommandExecutor enable(IDiscordClient _client) {
         client = _client;
         EventDispatcher dispatcher = client.getDispatcher();
@@ -34,11 +43,22 @@ public class CommandExecutor {
 
 
     //Functionals
+    /**
+     * Registers a command that can be executed.
+     * @param _command The command to register.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public Boolean registerCommand(ICommand _command) {
         commands.add(_command);
         return true;
     }
 
+    /**
+     * Issues a command if valid, else does nothing.
+     * @param cmd The Command to issue.
+     * @param args The command arguments used.
+     * @param event The Event received.
+     */
     void issueCommand(String cmd, String[] args, MessageReceivedEvent event) {
         for (ICommand c : commands) {
             if (c.getCommand().equalsIgnoreCase(cmd)) {
@@ -48,6 +68,10 @@ public class CommandExecutor {
 
     }
 
+    /**
+     * Gets an ArrayList of all valid commands.
+     * @return An ArrayList of all valid commands.
+     */
     ArrayList<String> getAllCommands() {
         ArrayList<String> cmds = new ArrayList<>();
         for (ICommand c : commands) {

@@ -21,12 +21,22 @@ import java.util.List;
  * For Project: DisCal
  */
 public class EventListCommand implements ICommand {
-
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "events";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         //Get events from calendar

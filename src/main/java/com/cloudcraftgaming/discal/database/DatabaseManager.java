@@ -19,8 +19,12 @@ public class DatabaseManager {
     private static DatabaseManager instance;
     private DatabaseInfo databaseInfo;
 
-    private DatabaseManager() {}
+    private DatabaseManager() {} //Prevent initialization.
 
+    /**
+     * Gets the instance of the {@link DatabaseManager}.
+     * @return The instance of the {@link DatabaseManager}
+     */
     public static DatabaseManager getManager() {
         if (instance == null) {
             instance = new DatabaseManager();
@@ -28,6 +32,10 @@ public class DatabaseManager {
         return instance;
     }
 
+    /**
+     * Connects to the MySQL server specified.
+     * @param mySQL The MySQL server to connect to.
+     */
     public void connectToMySQL(MySQL mySQL) {
         try {
             Connection mySQLConnection = mySQL.openConnection();
@@ -40,6 +48,9 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Disconnects from the MySQL server if still connected.
+     */
     public void disconnectFromMySQL() {
         if (databaseInfo != null) {
             try {
@@ -52,6 +63,10 @@ public class DatabaseManager {
         }
     }
 
+    /**
+     * Creates all required tables in the database if they do not exist.
+     * @return <code>true</code> if successful, else false.
+     */
     public Boolean createTables() {
         try {
             Statement statement = databaseInfo.getConnection().createStatement();
@@ -89,6 +104,11 @@ public class DatabaseManager {
         return false;
     }
 
+    /**
+     * Updates or adds the specified {@link BotData} Object to the database.
+     * @param data The Data to be entered into the database.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public Boolean updateData(BotData data) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
@@ -136,6 +156,11 @@ public class DatabaseManager {
         return false;
     }
 
+    /**
+     * Updates or Adds the specified {@link Announcement} Object to the database.
+     * @param announcement The announcement object to add to the database.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public Boolean updateAnnouncement(Announcement announcement) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
@@ -190,6 +215,11 @@ public class DatabaseManager {
         return false;
     }
 
+    /**
+     * Gets the {@link BotData} Object belonging to the specified Guild.
+     * @param guildId The ID of the guild whose data is to be retrieved.
+     * @return The {@link BotData} of the Guild or <code>null</code>.
+     */
     public BotData getData(String guildId) {
         BotData botData = new BotData(guildId);
         try {
@@ -222,6 +252,12 @@ public class DatabaseManager {
         return botData;
     }
 
+    /**
+     * Gets the {@link Announcement} Object with the corresponding ID for the specified Guild.
+     * @param announcementId The ID of the announcement.
+     * @param guildId The ID of the guild the Announcement belongs to.
+     * @return The {@link Announcement} with the specified ID if it exists, otherwise <c>null</c>.
+     */
     public Announcement getAnnouncement(UUID announcementId, String guildId) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
@@ -255,6 +291,11 @@ public class DatabaseManager {
         return null;
     }
 
+    /**
+     * Gets an {@link ArrayList} of {@link Announcement}s belonging to the specific Guild.
+     * @param guildId The ID of the guild whose data is to be retrieved.
+     * @return An ArrayList of Announcements that belong to the specified Guild.
+     */
     public ArrayList<Announcement> getAnnouncements(String guildId) {
         ArrayList<Announcement> announcements = new ArrayList<>();
         try {
@@ -288,6 +329,11 @@ public class DatabaseManager {
         return announcements;
     }
 
+    /**
+     * Deletes the specified announcement from the Database.
+     * @param announcementId The ID of the announcement to delete.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public Boolean deleteAnnouncement(String announcementId) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {

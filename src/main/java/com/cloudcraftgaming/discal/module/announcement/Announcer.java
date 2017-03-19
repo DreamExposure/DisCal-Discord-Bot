@@ -16,6 +16,10 @@ public class Announcer {
         timer = new Timer();
     }
 
+    /**
+     * Gets the instance of the Announcer
+     * @return The instance of the Announcer
+     */
     public static Announcer getAnnouncer() {
         if (instance == null) {
             instance = new Announcer();
@@ -23,11 +27,17 @@ public class Announcer {
         return instance;
     }
 
+    /**
+     * Initiates the announcer and schedules the announcements.
+     */
     public void init() {
         timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
         //EmailSender.getSender().sendDebugEmail(this.getClass(), "00", "Announcer initiated and announcements are scheduled!");
     }
 
+    /**
+     * Gracefully shuts down the announcer and closes all timer threads.
+     */
     public void shutdown() {
         timer.cancel();
     }

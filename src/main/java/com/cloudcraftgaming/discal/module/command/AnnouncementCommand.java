@@ -21,11 +21,22 @@ import java.util.UUID;
  * For Project: DisCal
  */
 public class AnnouncementCommand implements ICommand {
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "Announcement";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (PermissionChecker.hasSufficientRole(event)) {
@@ -60,7 +71,7 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("confirm")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmEvent(event);
+                        AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(event);
                         if (acr.isSuccessful()) {
                             Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use `!announcement subscribe <id>` to subscribe to the announcement!", event, client);
                         } else {
@@ -253,6 +264,12 @@ public class AnnouncementCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Checks if the specified channel exists.
+     * @param value The channel name.
+     * @param event The event received.
+     * @return <code>true</code> if exists, else <code>false</code>.
+     */
     private Boolean channelExists(String value, MessageReceivedEvent event) {
         if (value.startsWith("#")) {
             value = value.replaceFirst("#", "");
@@ -265,6 +282,12 @@ public class AnnouncementCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Gets the IChannel from its name.
+     * @param value The channel name.
+     * @param event The event received.
+     * @return the IChannel if successful, else <code>null</code>.
+     */
     private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
         if (value.startsWith("#")) {
             value = value.replaceFirst("#", "");
@@ -277,6 +300,12 @@ public class AnnouncementCommand implements ICommand {
         return null;
     }
 
+    /**
+     * Checks if the event exists in the calendar.
+     * @param value The event ID.
+     * @param event The event received.
+     * @return <code>true</code> if the event exists, else <code>false</code>.
+     */
     private Boolean eventExists(String value, MessageReceivedEvent event) {
         try {
             Calendar service = CalendarAuth.getCalendarService();
@@ -291,6 +320,12 @@ public class AnnouncementCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Checks if the announcement exists.
+     * @param value The announcement ID.
+     * @param event The event received.
+     * @return <code>true</code> if the announcement exists, else <code>false</code>.
+     */
     private Boolean announcementExists(String value, MessageReceivedEvent event) {
         for (Announcement a : DatabaseManager.getManager().getAnnouncements(event.getMessage().getGuild().getID())) {
             if (a.getAnnouncementId().toString().equals(value)) {

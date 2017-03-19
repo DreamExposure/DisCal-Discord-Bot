@@ -12,6 +12,11 @@ import sx.blah.discord.util.EmbedBuilder;
  */
 public class AnnouncementMessageFormatter {
 
+    /**
+     * Gets the EmbedObject for an Announcement.
+     * @param a The Announcement to embed.
+     * @return The EmbedObject for the Announcement.
+     */
     public static EmbedObject getFormatAnnouncementEmbed(Announcement a) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -28,6 +33,11 @@ public class AnnouncementMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets the EmbedObject for a Condensed Announcement.
+     * @param a The Announcement to embed.
+     * @return The EmbedObject for a Condensed Announcement.
+     */
     public static EmbedObject getCondensedAnnouncementEmbed(Announcement a) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -45,6 +55,11 @@ public class AnnouncementMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets the specified channel via its ID.
+     * @param a The Announcement involved.
+     * @return The Name of the channel from its ID.
+     */
     private static String channelFromId(Announcement a) {
         IGuild g = Main.client.getGuildByID(a.getGuildId());
         if (!a.getAnnouncementChannelId().equalsIgnoreCase("N/a")) {
@@ -53,6 +68,11 @@ public class AnnouncementMessageFormatter {
         return "Unset or Invalid";
     }
 
+    /**
+     * Gets the formatted time from an Announcement.
+     * @param a The Announcement.
+     * @return The formatted time from an Announcement.
+     */
     private static String condensedTime(Announcement a) {
         return a.getHoursBefore() + "H" + a.getMinutesBefore() + "m";
     }

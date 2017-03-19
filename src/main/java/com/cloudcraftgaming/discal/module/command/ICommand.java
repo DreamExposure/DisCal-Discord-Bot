@@ -9,7 +9,18 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
  * For Project: DisCal
  */
 interface ICommand {
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     String getCommand();
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client);
 }

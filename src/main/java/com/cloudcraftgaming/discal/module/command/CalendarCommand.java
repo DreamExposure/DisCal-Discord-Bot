@@ -20,11 +20,22 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 public class CalendarCommand implements ICommand {
     private String TIME_ZONE_DB = "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List";
 
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "calendar";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (PermissionChecker.hasSufficientRole(event)) {
@@ -218,6 +229,11 @@ public class CalendarCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Gets the contents of the message at an offset.
+     * @param args The args of the command.
+     * @return The contents of the message at an offset.
+     */
     private String getContent(String[] args) {
         String content = "";
         for (int i = 1; i < args.length; i++) {

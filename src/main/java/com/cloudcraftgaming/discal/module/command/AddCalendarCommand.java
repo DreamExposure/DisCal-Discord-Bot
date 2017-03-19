@@ -12,11 +12,22 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
  * For Project: DisCal
  */
 public class AddCalendarCommand implements ICommand {
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "addCalendar";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (args.length < 2) {

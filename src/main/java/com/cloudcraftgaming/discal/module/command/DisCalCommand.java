@@ -18,11 +18,22 @@ import sx.blah.discord.util.EmbedBuilder;
  * For Project: DisCal
  */
 public class DisCalCommand implements ICommand {
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "Discal";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (args.length < 1) {
@@ -55,6 +66,12 @@ public class DisCalCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Sets the control role for the guild.
+     * @param args The args of the command.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     */
     private void setControlRole(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         if (PermissionChecker.hasSufficientRole(event)) {
             String roleName = args[1];
@@ -93,6 +110,12 @@ public class DisCalCommand implements ICommand {
         }
     }
 
+    /**
+     * Sets the channel for the guild that DisCal can respond in.
+     * @param channelName The name of the channel.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     */
     private void setChannel(String channelName, MessageReceivedEvent event, IDiscordClient client) {
         if (channelName.equalsIgnoreCase("all")) {
             //Reset channel info.
@@ -117,6 +140,12 @@ public class DisCalCommand implements ICommand {
         }
     }
 
+    /**
+     * Checks if the specified channel exists.
+     * @param value The name of the channel.
+     * @param event The event received.
+     * @return <code>true</code> if the channel exits, otherwise <code>false</code>.
+     */
     private Boolean channelExists(String value, MessageReceivedEvent event) {
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {
@@ -126,6 +155,12 @@ public class DisCalCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Gets the specified channel by name.
+     * @param value The name of the channel.
+     * @param event The event received.
+     * @return The IChannel if it exists, otherwise <code>false</code>.
+     */
     private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {

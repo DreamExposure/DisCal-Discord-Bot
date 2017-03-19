@@ -65,6 +65,12 @@ public class Main {
         ConsoleCommandExecutor.init();
     }
 
+    /**
+     * Creates the DisCal bot client.
+     * @param token The Bot Token.
+     * @param login Whether or not to login.
+     * @return The client if successful, otherwise <code>null</code>.
+     */
     private static IDiscordClient createClient(String token, boolean login) {
         ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
         clientBuilder.withToken(token); // Adds the login info to the builder
@@ -81,6 +87,10 @@ public class Main {
         return null;
     }
 
+    /**
+     * Gets The {@link IUser} Object of DisCal.
+     * @return The {@link IUser} Object of DisCal.
+     */
     public static IUser getSelfUser() {
         return client.getOurUser();
     }

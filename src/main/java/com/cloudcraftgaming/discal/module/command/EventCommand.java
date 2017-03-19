@@ -29,11 +29,22 @@ import java.util.TimeZone;
  */
 @SuppressWarnings("Duplicates")
 public class EventCommand implements ICommand {
+    /**
+     * Gets the command this Object is responsible for.
+     * @return The command this Object is responsible for.
+     */
     @Override
     public String getCommand() {
         return "event";
     }
 
+    /**
+     * Issues the command this Object is responsible for.
+     * @param args The command arguments.
+     * @param event The event received.
+     * @param client The Client associated with the Bot.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
@@ -314,6 +325,11 @@ public class EventCommand implements ICommand {
         return false;
     }
 
+    /**
+     * Gets the contents of the message at a set offset.
+     * @param args The args of the command.
+     * @return The contents of the message at a set offset.
+     */
     private String getContent(String[] args) {
         String content = "";
         for (int i = 1; i < args.length; i++) {

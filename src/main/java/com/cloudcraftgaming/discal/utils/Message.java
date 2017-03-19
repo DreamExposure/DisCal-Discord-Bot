@@ -15,6 +15,12 @@ import sx.blah.discord.util.MessageBuilder;
 public class Message {
     public static String lineBreak = System.getProperty("line.separator");
 
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param message The message to send, with formatting.
+     * @param event The Event received (to send to the same channel and guild).
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(String message, MessageReceivedEvent event, IDiscordClient client) {
         try {
             new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
@@ -23,6 +29,12 @@ public class Message {
         }
     }
 
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param message The message to send, with formatting.
+     * @param channel The channel to send the message to.
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(String message, IChannel channel, IDiscordClient client) {
         try {
             new MessageBuilder(client).appendContent(message).withChannel(channel).build();
@@ -30,7 +42,13 @@ public class Message {
             //Failed to send message.
         }
     }
-    
+
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param embed The EmbedObject to append to the message.
+     * @param event The event received (to send to the same channel and guild).
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(EmbedObject embed, MessageReceivedEvent event, IDiscordClient client) {
         try {
             new MessageBuilder(client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
@@ -39,6 +57,12 @@ public class Message {
         }
     }
 
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param embed The EmbedObject to append to the message.
+     * @param channel The channel to send the message to.
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(EmbedObject embed, IChannel channel, IDiscordClient client) {
         try {
             new MessageBuilder(client).withEmbed(embed).withChannel(channel).build();
@@ -47,6 +71,13 @@ public class Message {
         }
     }
 
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param embed The EmbedObject to append to the message.
+     * @param message The message to send, with formatting.
+     * @param event The event received (to send to the same channel and guild).
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(EmbedObject embed, String message, MessageReceivedEvent event, IDiscordClient client) {
         try {
             new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
@@ -55,6 +86,13 @@ public class Message {
         }
     }
 
+    /**
+     * Sends a message via Discord as DisCal.
+     * @param embed The EmbedObject to append to the message.
+     * @param message The message to send, with formatting.
+     * @param channel The channel to send the message to.
+     * @param client The Client associated with the Bot.
+     */
     public static void sendMessage(EmbedObject embed, String message, IChannel channel, IDiscordClient client) {
         try {
             new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();

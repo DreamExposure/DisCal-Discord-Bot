@@ -14,6 +14,11 @@ import sx.blah.discord.handle.obj.IUser;
  * For Project: DisCal
  */
 public class PermissionChecker {
+    /**
+     * Checks if the user who sent the received message has the proper role to use a command.
+     * @param event The Event received to check for the user and guild.
+     * @return <code>true</code> if the user has the proper role, otherwise <code>false</code>.
+     */
     public static boolean hasSufficientRole(MessageReceivedEvent event) {
         //TODO: Figure out exactly what is causing a NPE here...
         try {
@@ -52,6 +57,11 @@ public class PermissionChecker {
         return true;
     }
 
+    /**
+     * Checks if the user sent the command in a DisCal channel (if set).
+     * @param event The event received to check for the correct channel.
+     * @return <code>true</code> if in correct channel, otherwise <code>false</code>.
+     */
     public static boolean inCorrectChannel(MessageReceivedEvent event) {
         try {
             BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
