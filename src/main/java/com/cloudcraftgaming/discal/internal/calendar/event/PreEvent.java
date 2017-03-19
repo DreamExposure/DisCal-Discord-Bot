@@ -24,6 +24,10 @@ public class PreEvent {
     private Recurrence recurrence;
 
 
+    /**
+     * Creates a new PreEvent for the specified Guild.
+     * @param _guildId The ID of the guild.
+     */
     PreEvent(String _guildId) {
         guildId = _guildId;
 
@@ -33,80 +37,156 @@ public class PreEvent {
     }
 
     //Getters
+    /**
+     *  Gets the ID of the guild who owns this PreEvent.
+     * @return The ID of the guild who owns this PreEvent.
+     */
     public String getGuildId() {
         return guildId;
     }
 
+    /**
+     * Gets the event summary.
+     * @return The event summary.
+     */
     String getSummary() {
         return summary;
     }
 
+    /**
+     * Gets the description.
+     * @return The description.
+     */
     String getDescription() {
         return description;
     }
 
+    /**
+     * Gets the start date and time.
+     * @return The start date and time.
+     */
     EventDateTime getStartDateTime() {
         return startDateTime;
     }
 
+    /**
+     * Gets the end date and time.
+     * @return The end date and time.
+     */
     EventDateTime getEndDateTime() {
         return endDateTime;
     }
 
+    /**
+     * Gets the viewable start date and time.
+     * @return The viewable start date and time.
+     */
     EventDateTime getViewableStartDate() {
         return viewableStartDate;
     }
 
+    /**
+     * Gets the viewable end date and time.
+     * @return The viewable end date and time.
+     */
     EventDateTime getViewableEndDate() {
         return viewableEndDate;
     }
 
+    /**
+     * Gets the timezone of the event.
+     * @return The timezone of the event.
+     */
     public String getTimeZone() {
         return timeZone;
     }
 
+    /**
+     * Gets whether or not the vent should recur.
+     * @return <code>true</code> if recurring, otherwise <code>false</code>.
+     */
     public boolean shouldRecur() {
         return recur;
     }
 
+    /**
+     * Gets the recurrence rules and info for the event.
+     * @return The recurrence rules and info for the event.
+     */
     private Recurrence getRecurrence() {
         return recurrence;
     }
 
     //Setters
+    /**
+     * Sets the summary of the event.
+     * @param _summary The summary of the vent.
+     */
     public void setSummary(String _summary) {
         summary = _summary;
     }
 
+    /**
+     * Sets the description of the event.
+     * @param _description The description of the event.
+     */
     public void setDescription(String _description) {
         description = _description;
     }
 
+    /**
+     * Sets the start date and time of the event.
+     * @param _startDateTime The start date and time of the event.
+     */
     public void setStartDateTime(EventDateTime _startDateTime) {
         startDateTime = _startDateTime;
     }
 
+    /**
+     * Sets the end date and time of the event.
+     * @param _endDateTime The end date and time of the event.
+     */
     public void setEndDateTime(EventDateTime _endDateTime) {
         endDateTime = _endDateTime;
     }
 
+    /**
+     * Sets the viewable start date and time of the event.
+     * @param _viewableStart The viewable start date and time of the event.
+     */
     public void setViewableStartDate(EventDateTime _viewableStart) {
         viewableStartDate = _viewableStart;
     }
 
+    /**
+     * Sets the viewable end date and time of the event.
+     * @param _viewableEnd The viewable end date and time of the event.
+     */
     public void setViewableEndDate(EventDateTime _viewableEnd) {
         viewableEndDate = _viewableEnd;
     }
 
+    /**
+     * Sets the timezone of the event.
+     * @param _timeZone The timezone of the event.
+     */
     void setTimeZone(String _timeZone) {
         timeZone = _timeZone;
     }
 
+    /**
+     * Sets whether or not the event should recur.
+     * @param _recur Whether or not the event should recur.
+     */
     void setShouldRecur(boolean _recur) {
         recur = _recur;
     }
 
     //Booleans/Checkers
+    /**
+     * Whether or not the event has all required values to be created.
+     * @return <code>true</code> if required values set, otherwise <code>false</code>.
+     */
     public Boolean hasRequiredValues() {
         return startDateTime != null && endDateTime != null;
     }

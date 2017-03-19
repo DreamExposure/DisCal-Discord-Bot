@@ -14,6 +14,11 @@ import java.io.IOException;
  * For Project: DisCal
  */
 public class CalendarUtils {
+    /**
+     * Deletes a calendar from Google Calendar and the Db
+     * @param data The BotData of the Guild whose deleting their calendar.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public static Boolean deleteCalendar(BotData data) {
         try {
             Calendar service = CalendarAuth.getCalendarService();

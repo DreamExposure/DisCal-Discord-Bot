@@ -22,6 +22,7 @@ public class ReadFile {
      * Hostname, Port, Database, Prefix, Username, Password
      *
      * @param fileAndPath the path and file of the file to read from.
+     * @return A MySQL object with the data.
      */
     public static MySQL readDatabaseSettings(String fileAndPath) {
         try {
@@ -74,6 +75,14 @@ public class ReadFile {
         return null;
     }
 
+    /**
+     * To prevent the highly sensitive data from being hard coded into the .jar
+     * This will read a .txt file with the following information encoded in it.
+     * (In order, one per line):
+     * Username (email), password
+     * @param fileAndPath The path and file of the file to read from.
+     * @return An EmailData Object with the data.
+     */
     public static EmailData readEmailLogin(String fileAndPath) {
         try {
             FileInputStream fstream = new FileInputStream(fileAndPath);

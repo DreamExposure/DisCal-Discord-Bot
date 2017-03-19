@@ -23,8 +23,12 @@ public class EmailSender {
     private Mailer mailer;
     private EmailData data;
 
-    private EmailSender() {}
+    private EmailSender() {} //Prevent initialization
 
+    /**
+     * Gets the instance of the EmailSender.
+     * @return The instance of the EmailSender.
+     */
     public static EmailSender getSender() {
         if (instance == null) {
             instance = new EmailSender();
@@ -32,6 +36,10 @@ public class EmailSender {
         return instance;
     }
 
+    /**
+     * Initiates the EmailSender and sets up required information.
+     * @param emailDataFile The file and path of the email login.
+     */
     public void init(String emailDataFile) {
         data = ReadFile.readEmailLogin(emailDataFile);
 
@@ -40,6 +48,11 @@ public class EmailSender {
         mailer = new Mailer("smtp.gmail.com", 465, data.getUsername(), data.getPassword(), TransportStrategy.SMTP_SSL);
     }
 
+    /**
+     * Sends an email of an exception to the developer.
+     * @param e The exception to mail.
+     * @param clazz The class the exception occurred in.
+     */
     public void sendExceptionEmail(Exception e, Class clazz) {
         Email email = new Email();
 
@@ -64,6 +77,12 @@ public class EmailSender {
         mailer.sendMail(email);
     }
 
+    /**
+     * Sends a debug email to the developer
+     * @param clazz The class the debug message if from.
+     * @param step The step of the process being debugged.
+     * @param message The message to send about the process.
+     */
     public void sendDebugEmail(Class clazz, String step, String message) {
         Email email = new Email();
 

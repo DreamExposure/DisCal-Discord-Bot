@@ -19,10 +19,17 @@ import java.util.List;
 public class UpdateListData {
     private static String token = "N/a";
 
+    /**
+     * Initiates the data updater with a valid token.
+     * @param _token Private API token.
+     */
     public static void init(String _token) {
         token = _token;
     }
 
+    /**
+     * Updates the site meta on bots.discord.pw
+     */
     public static void updateSiteBotMeta() {
         if (!token.equalsIgnoreCase("N/a")) {
             HttpClient httpClient = HttpClientBuilder.create().build();

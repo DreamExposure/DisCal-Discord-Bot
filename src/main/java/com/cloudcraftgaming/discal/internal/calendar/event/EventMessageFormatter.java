@@ -20,6 +20,12 @@ import javax.annotation.Nullable;
 @SuppressWarnings("Duplicates")
 public class EventMessageFormatter {
 
+    /**
+     * Gets an EmbedObject for the specified event.
+     * @param event The event involved.
+     * @param guildID The ID of the guild.
+     * @return The EmbedObject of the event.
+     */
     public static EmbedObject getEventEmbed(Event event, String guildID) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -51,6 +57,11 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets an EmbedObject for the specified event.
+     * @param event The event involved.
+     * @return The EmbedObject of the event.
+     */
     public static EmbedObject getCondensedEventEmbed(Event event) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -65,6 +76,11 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets an EmbedObject for the specified PreEvent.
+     * @param event The PreEvent to get an embed for.
+     * @return The EmbedObject of the PreEvent.
+     */
     public static EmbedObject getPreEventEmbed(PreEvent event) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -85,6 +101,11 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets an EmbedObject for the specified CreatorResponse.
+     * @param ecr The CreatorResponse involved.
+     * @return The EmbedObject for the CreatorResponse.
+     */
     public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -99,6 +120,11 @@ public class EventMessageFormatter {
         return em.build();
     }
 
+    /**
+     * Gets a formatted date from the event.
+     * @param event The event to get the date from.
+     * @return A formatted date from the event.
+     */
     private static String getHumanReadableDate(Event event) {
         String[] dateArray = event.getStart().getDateTime().toStringRfc3339().split("-");
         String year = dateArray[0];
@@ -108,6 +134,11 @@ public class EventMessageFormatter {
         return year + "/" + month + "/" + day;
     }
 
+    /**
+     *  Gets a formatted date.
+     * @param eventDateTime The object to get the date from.
+     * @return A formatted date.
+     */
     public static String getHumanReadableDate(@Nullable EventDateTime eventDateTime) {
         if (eventDateTime == null) {
             return "Not Set";
@@ -130,6 +161,12 @@ public class EventMessageFormatter {
         }
     }
 
+    /**
+     * Gets a formatted time from the event.
+     * @param event The event to get the time from.
+     * @param start Whether or not to get the start time.
+     * @return A formatted time from the event.
+     */
     private static String getHumanReadableTime(Event event, boolean start) {
         if (start) {
             String[] timeArray = event.getStart().getDateTime().toStringRfc3339().split(":");
@@ -176,6 +213,11 @@ public class EventMessageFormatter {
         }
     }
 
+    /**
+     * Gets a formatted time.
+     * @param eventDateTime The object to get the time from.
+     * @return A formatted time.
+     */
     public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime) {
         if (eventDateTime == null) {
             return "Not Set";

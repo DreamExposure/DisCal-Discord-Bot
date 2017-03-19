@@ -13,6 +13,12 @@ import java.io.IOException;
  * For Project: DisCal
  */
 public class EventUtils {
+    /**
+     * Deletes an event from the calendar.
+     * @param guildId The ID of the guild.
+     * @param eventId The ID of the event to delete.
+     * @return <code>true</code> if successfully deleted, otherwise <code>false</code>.
+     */
     public static Boolean deleteEvent(String guildId, String eventId) {
         String calendarId = DatabaseManager.getManager().getData(guildId).getCalendarAddress();
         try {

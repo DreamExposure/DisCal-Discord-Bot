@@ -19,8 +19,12 @@ public class EventCreator {
 
     private ArrayList<PreEvent> events = new ArrayList<>();
 
-    private EventCreator() {}
+    private EventCreator() {} //Prevent initialization.
 
+    /**
+     * Gets the instance of the EventCreator.
+     * @return The instance of the EventCreator
+     */
     public static EventCreator getCreator() {
         if (instance == null) {
             instance = new EventCreator();
@@ -29,6 +33,11 @@ public class EventCreator {
     }
 
     //Functionals
+    /**
+     * Initiates the EventCreator for a specific guild.
+     * @param e The event received upon initialization.
+     * @return The PreEvent for the guild.
+     */
     public PreEvent init(MessageReceivedEvent e) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             PreEvent event = new PreEvent(e.getMessage().getGuild().getID());
@@ -44,6 +53,11 @@ public class EventCreator {
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
+    /**
+     * Gracefully terminates the EventCreator for a specific guild.
+     * @param e The event received upon termination.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
     public Boolean terminate(MessageReceivedEvent e) {
         if (hasPreEvent(e.getMessage().getGuild().getID())) {
             events.remove(getPreEvent(e.getMessage().getGuild().getID()));
@@ -52,6 +66,11 @@ public class EventCreator {
         return false;
     }
 
+    /**
+     * Confirms the event in the creator for the specific guild.
+     * @param e The event received upon confirmation.
+     * @return The response containing detailed info about the confirmation.
+     */
     public EventCreatorResponse confirmEvent(MessageReceivedEvent e) {
         if (hasPreEvent(e.getMessage().getGuild().getID())) {
             String guildId = e.getMessage().getGuild().getID();
@@ -85,6 +104,11 @@ public class EventCreator {
     }
 
     //Getters
+    /**
+     * gets the PreEvent for the specified guild.
+     * @param guildId The ID of the guild.
+     * @return The PreEvent belonging to the guild.
+     */
     public PreEvent getPreEvent(String guildId) {
         for (PreEvent e : events) {
             if (e.getGuildId().equals(guildId)) {
@@ -95,6 +119,11 @@ public class EventCreator {
     }
 
     //Booleans/Checkers
+    /**
+     * Checks if the specified guild has a PreEvent in the creator.
+     * @param guildId The ID of the guild.
+     * @return <code>true</code> if a PreEvent exists, otherwise <code>false</code>.
+     */
     public Boolean hasPreEvent(String guildId) {
         for (PreEvent e : events) {
             if (e.getGuildId().equals(guildId)) {

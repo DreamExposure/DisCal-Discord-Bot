@@ -21,8 +21,12 @@ public class CalendarCreator {
 
     private ArrayList<PreCalendar> calendars = new ArrayList<>();
 
-    private CalendarCreator() {}
+    private CalendarCreator() {} //Prevent initialization
 
+    /**
+     * Gets the instance of the CalendarCreator.
+     * @return The instance of the CalendarCreator.
+     */
     public static CalendarCreator getCreator() {
         if (instance == null) {
             instance = new CalendarCreator();
@@ -31,6 +35,12 @@ public class CalendarCreator {
     }
 
     //Functionals
+    /**
+     * Initiates the CalendarCreator for the guild involved in the event.
+     * @param e The event received upon creation start.
+     * @param calendarName The name of the calendar to create.
+     * @return The PreCalendar object created.
+     */
     public PreCalendar init(MessageReceivedEvent e, String calendarName) {
         if (!hasPreCalendar(e.getMessage().getGuild().getID())) {
             PreCalendar event = new PreCalendar(e.getMessage().getGuild().getID(), calendarName);
@@ -40,6 +50,11 @@ public class CalendarCreator {
         return getPreCalendar(e.getMessage().getGuild().getID());
     }
 
+    /**
+     * Gracefully closes down the CalendarCreator for the guild involved and DOES NOT create the calendar.
+     * @param e The event received upon termination.
+     * @return <codfe>true</codfe> if closed successfully, otherwise <code>false</code>.
+     */
     public Boolean terminate(MessageReceivedEvent e) {
         if (hasPreCalendar(e.getMessage().getGuild().getID())) {
             calendars.remove(getPreCalendar(e.getMessage().getGuild().getID()));
@@ -48,6 +63,11 @@ public class CalendarCreator {
         return false;
     }
 
+    /**
+     * Confirms the calendar and creates it within Google Calendar.
+     * @param e The event received upon confirmation.
+     * @return A CalendarCreatorResponse Object with detailed info about the confirmation.
+     */
     public CalendarCreatorResponse confirmCalendar(MessageReceivedEvent e) {
         if (hasPreCalendar(e.getMessage().getGuild().getID())) {
             String guildId = e.getMessage().getGuild().getID();
@@ -80,6 +100,11 @@ public class CalendarCreator {
     }
 
     //Getters
+    /**
+     * Gets the PreCalendar for the guild in the creator.
+     * @param guildId The ID of the guild whose PreCalendar is to be returned.
+     * @return The PreCalendar belonging to the guild.
+     */
     public PreCalendar getPreCalendar(String guildId) {
         for (PreCalendar c : calendars) {
             if (c.getGuildId().equals(guildId)) {
@@ -90,6 +115,11 @@ public class CalendarCreator {
     }
 
     //Booleans/Checkers
+    /**
+     * Checks whether or not the specified Guild has a PreCalendar in the creator.
+     * @param guildId The ID of the guild to check for.
+     * @return <code>true</code> if a PreCalendar exists, else <code>false</code>.
+     */
     public Boolean hasPreCalendar(String guildId) {
         for (PreCalendar c : calendars) {
             if (c.getGuildId().equals(guildId)) {

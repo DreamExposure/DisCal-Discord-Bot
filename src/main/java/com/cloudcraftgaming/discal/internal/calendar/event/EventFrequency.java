@@ -8,10 +8,20 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 public enum EventFrequency {
     DAILY, MONTHLY, YEARLY;
 
+    /**
+     * Checks if the value is a valid enum value.
+     * @param value The value to check.
+     * @return <code>true</code> if valid, else <code>false</code>.
+     */
     public static boolean isValid(String value) {
         return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
     }
 
+    /**
+     * Gets the enum value for the specified string value.
+     * @param value The value to get from.
+     * @return The enum value.
+     */
     public static EventFrequency fromValue(String value) {
         if (value.equalsIgnoreCase("DAILY")) {
             return DAILY;

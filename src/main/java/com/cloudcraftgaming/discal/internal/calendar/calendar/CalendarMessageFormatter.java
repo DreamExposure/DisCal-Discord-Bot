@@ -14,12 +14,22 @@ import java.net.URI;
  * For Project: DisCal
  */
 public class CalendarMessageFormatter {
+    /**
+     * Gets a formatted HTML link to a guild's calendar.
+     * @param e The Event received upon request of the link.
+     * @return The link to the calendar.
+     */
     public static String getCalendarLink(MessageReceivedEvent e) {
         String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
 
+    /**
+     * Creates an EmbedObject for the PreCalendar.
+     * @param calendar The PreCalendar to create an EmbedObject for.
+     * @return The EmbedObject for the PreCalendar.
+     */
     public static EmbedObject getPreCalendarEmbed(PreCalendar calendar) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());

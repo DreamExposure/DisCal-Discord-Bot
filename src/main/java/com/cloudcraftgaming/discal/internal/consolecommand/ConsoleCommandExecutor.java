@@ -14,6 +14,9 @@ import sx.blah.discord.util.DiscordException;
  * For Project: DisCal
  */
 public class ConsoleCommandExecutor {
+    /**
+     * Initiates the listener for commands via the DisCal console window.
+     */
     public static void init() {
         while (true) {
             System.out.println("Enter a command below: ");
@@ -61,6 +64,9 @@ public class ConsoleCommandExecutor {
         }
     }
 
+    /**
+     * Exits the application gracefully and shuts down the bot gracefully.
+     */
     private static void exitApplication() {
         System.out.println("Shutting down Discord bot!");
         try {
@@ -74,6 +80,10 @@ public class ConsoleCommandExecutor {
         System.exit(0);
     }
 
+    /**
+     * Attempts to silence the logger within the console window.
+     * @param value Whether or not the logger is to be silenced.
+     */
     private static void silenceConsole(String value) {
         try {
             if (value.equalsIgnoreCase("true")) {
