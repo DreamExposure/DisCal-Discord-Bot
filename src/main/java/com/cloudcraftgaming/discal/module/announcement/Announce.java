@@ -112,7 +112,7 @@ public class Announce extends TimerTask {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("!~Event Announcement~!");
-        em.appendField("Event Name/Summery", event.getSummary(), true);
+        em.appendField("Event Name/Summary", event.getSummary(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
         em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
         try {
