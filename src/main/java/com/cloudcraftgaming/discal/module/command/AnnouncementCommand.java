@@ -241,7 +241,7 @@ public class AnnouncementCommand implements ICommand {
                                 for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
                                     if (posted < amount) {
                                         Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
-                                        
+
                                         posted++;
                                     } else {
                                         break;
@@ -254,13 +254,32 @@ public class AnnouncementCommand implements ICommand {
                     } else {
                         Message.sendMessage("You cannot list announcements while in the creator!", event, client);
                     }
+                } else if (function.equalsIgnoreCase("info")) {
+                    if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
+                        Message.sendMessage("Announcement info set to: `" + value + "`", event, client);
+                    } else {
+                        Message.sendMessage("Announcement creator not initiated!", event, client);
+                    }
                 } else {
                     //TODO: Add useful info about what you /can/ do.
                     Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
                 }
             } else {
-                //TODO: Add useful info about what you /can/ do.
-                Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
+                String function = args[0];
+                String guildId = event.getMessage().getGuild().getID();
+                if (function.equalsIgnoreCase("info")) {
+                    if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        String value = getContent(args);
+                        AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                    } else {
+                        Message.sendMessage("Announcement Creator not initialized!", event, client);
+                    }
+                } else {
+                    //TODO: Add useful info about what you /can/ do.
+                    Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
+                }
             }
         } else {
             Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
@@ -337,5 +356,18 @@ public class AnnouncementCommand implements ICommand {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets the contents of the message at a set offset.
+     * @param args The args of the command.
+     * @return The contents of the message at a set offset.
+     */
+    private String getContent(String[] args) {
+        String content = "";
+        for (int i = 1; i < args.length; i++) {
+            content = content + args[i] + " ";
+        }
+        return content.trim();
     }
 }

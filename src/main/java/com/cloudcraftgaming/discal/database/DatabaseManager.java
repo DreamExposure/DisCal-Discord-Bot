@@ -90,6 +90,7 @@ public class DatabaseManager {
                     " EVENT_ID LONGTEXT not NULL, " +
                     " HOURS_BEFORE INTEGER not NULL, " +
                     " MINUTES_BEFORE INTEGER not NULL, " +
+                    " INFO LONGTEXT not NULL, " +
                     " PRIMARY KEY (ANNOUNCEMENT_ID))";
             statement.executeUpdate(createDataTable);
             statement.executeUpdate(createAnnouncementTable);
@@ -175,8 +176,8 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
                     //Data not present, add to db.
                     String insertCommand = "INSERT INTO " + announcementTableName +
-                            "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, HOURS_BEFORE, MINUTES_BEFORE)" +
-                            " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, HOURS_BEFORE, MINUTES_BEFORE, INFO)" +
+                            " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, announcement.getAnnouncementId().toString());
                     ps.setString(2, announcement.getGuildId());
@@ -187,6 +188,7 @@ public class DatabaseManager {
                     ps.setString(7, announcement.getEventId());
                     ps.setInt(8, announcement.getHoursBefore());
                     ps.setInt(9, announcement.getMinutesBefore());
+                    ps.setString(10, announcement.getInfo());
 
                     ps.executeUpdate();
                     ps.close();
@@ -201,6 +203,7 @@ public class DatabaseManager {
                             + "', EVENT_ID='" + announcement.getEventId()
                             + "', HOURS_BEFORE='" + announcement.getHoursBefore()
                             + "', MINUTES_BEFORE='" + announcement.getMinutesBefore()
+                            + "', INFO='" + announcement.getInfo()
                              + "' WHERE ANNOUNCEMENT_ID='" + announcement.getAnnouncementId() + "';";
                     statement.executeUpdate(updateCMD);
                     statement.close();
@@ -278,6 +281,7 @@ public class DatabaseManager {
                     announcement.setEventId(res.getString("EVENT_ID"));
                     announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                     announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+                    announcement.setInfo(res.getString("INFO"));
 
                     statement.close();
                     return announcement;
@@ -316,6 +320,7 @@ public class DatabaseManager {
                         announcement.setEventId(res.getString("EVENT_ID"));
                         announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                         announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+                        announcement.setInfo(res.getString("INFO"));
 
                         announcements.add(announcement);
                     }

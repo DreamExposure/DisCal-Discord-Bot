@@ -126,8 +126,8 @@ public class Announce extends TimerTask {
                 em.appendField("TimeZone", "Unknown *Error Occurred", true);
             }
         }
-        em.appendField("Event Name/Summary", event.getSummary(), false);
         em.appendField("Event ID", event.getId(), false);
+        em.appendField("Additional Info", announcement.getInfo(), false);
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
         em.withColor(36, 153, 153);

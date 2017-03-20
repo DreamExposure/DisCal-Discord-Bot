@@ -22,6 +22,7 @@ public class Announcement {
     private String eventId;
     private int hoursBefore;
     private int minutesBefore;
+    private String info;
 
     /**
      * Use this constructor when creating NEW announcements!!!
@@ -35,6 +36,7 @@ public class Announcement {
         type = AnnouncementType.UNIVERSAL;
         hoursBefore = 0;
         minutesBefore = 0;
+        info = "None";
     }
 
     /**
@@ -50,6 +52,7 @@ public class Announcement {
         type = AnnouncementType.UNIVERSAL;
         hoursBefore = 0;
         minutesBefore = 0;
+        info = "None";
     }
 
     //Getters
@@ -161,6 +164,14 @@ public class Announcement {
         return minutesBefore;
     }
 
+    /**
+     * Gets extra info for the announcement.
+     * @return Extra info for the announcement.
+     */
+    public String getInfo() {
+        return info;
+    }
+
     //Setters
     /**
      * Sets the ID of the channel to announce in.
@@ -200,6 +211,10 @@ public class Announcement {
      */
     public void setMinutesBefore(Integer _minutesBefore) {
         minutesBefore = _minutesBefore;
+    }
+
+    public void setInfo(String _info) {
+        info = _info;
     }
 
     /**
