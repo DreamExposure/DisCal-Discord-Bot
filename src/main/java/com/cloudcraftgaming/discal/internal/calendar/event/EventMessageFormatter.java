@@ -27,16 +27,23 @@ public class EventMessageFormatter {
      * @return The EmbedObject of the event.
      */
     public static EmbedObject getEventEmbed(Event event, String guildID) {
+        String summary = event.getSummary() == null || event.getSummary().equals("") ? "Failsafe" : event.getSummary();
+        String description = event.getDescription() == null || event.getDescription().equals("") ? "Failsafe" : event.getDescription();
+        String startDate =  EventMessageFormatter.getHumanReadableDate(event) == null ||  EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" :  EventMessageFormatter.getHumanReadableDate(event);
+        String startTime = EventMessageFormatter.getHumanReadableTime(event, true) == null ||  EventMessageFormatter.getHumanReadableTime(event, true).equals("true") ? "Failsafe" :  EventMessageFormatter.getHumanReadableTime(event, true);
+        String endDate = EventMessageFormatter.getHumanReadableDate(event) == null || EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableDate(event);
+        String endTime = EventMessageFormatter.getHumanReadableTime(event, false) == null || EventMessageFormatter.getHumanReadableTime(event, false).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableTime(event, false);
+        String id = event.getId() == null || event.getId().equals("") ? "Failsafe" : event.getId();
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Event Info");
-        em.appendField("Event Name/Summary", event.getSummary(), true);
-        em.appendField("Event Description", event.getDescription(), true);
-        em.appendField("Event Start Date", EventMessageFormatter.getHumanReadableDate(event), true);
-        em.appendField("Event Start Time", EventMessageFormatter.getHumanReadableTime(event, true), true);
-        em.appendField("Event End Date", EventMessageFormatter.getHumanReadableDate(event), true);
-        em.appendField("Event End Time", EventMessageFormatter.getHumanReadableTime(event, false), true);
+        em.appendField("Event Name/Summary", summary, true);
+        em.appendField("Event Description", description, true);
+        em.appendField("Event Start Date", startDate, true);
+        em.appendField("Event Start Time", startTime, true);
+        em.appendField("Event End Date", endDate, true);
+        em.appendField("Event End Time", endTime, true);
         try {
             em.appendField("TimeZone", event.getStart().getTimeZone(), true);
         } catch (IllegalArgumentException e) {
@@ -51,7 +58,7 @@ public class EventMessageFormatter {
         }
         //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
-        em.withFooterText("Event ID: " + event.getId());
+        em.withFooterText("Event ID: " + id);
         em.withColor(36, 153, 153);
 
         return em.build();
