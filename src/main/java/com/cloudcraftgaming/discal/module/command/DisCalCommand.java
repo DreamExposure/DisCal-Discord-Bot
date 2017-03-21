@@ -17,7 +17,7 @@ import sx.blah.discord.util.EmbedBuilder;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public class DisCalCommand implements ICommand {
+public class DisCalCommand implements com.cloudcraftgaming.discal.module.command.ICommand {
     /**
      * Gets the command this Object is responsible for.
      * @return The command this Object is responsible for.
@@ -36,6 +36,7 @@ public class DisCalCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        IGuild guild = event.getMessage().getGuild();
         if (args.length < 1) {
           	EmbedBuilder em = new EmbedBuilder();
 				em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
@@ -45,6 +46,7 @@ public class DisCalCommand implements ICommand {
 				em.appendField("Version", Main.version, true);
 				em.appendField("Library", "Discord4J, version 2.7.0", false);
 				em.appendField("Total Guilds", client.getGuilds().size() + "", true);
+				em.appendField("Current Ping [Shard " + event.getGuild().getShard() + "]", guild.getShard().getResponseTime() + "ms", true);
 				em.withFooterText("For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/");
 				em.withUrl("https://www.cloudcraftgaming.com/discal/");
 				em.withColor(36, 153, 153);
