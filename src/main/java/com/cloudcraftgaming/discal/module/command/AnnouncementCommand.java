@@ -294,8 +294,8 @@ public class AnnouncementCommand implements ICommand {
      * @return <code>true</code> if exists, else <code>false</code>.
      */
     private Boolean channelExists(String value, MessageReceivedEvent event) {
-        if (value.startsWith("#")) {
-            value = value.replaceFirst("#", "");
+        if (value.contains("#")) {
+            value = value.replaceAll("#", "");
         }
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {
@@ -312,8 +312,8 @@ public class AnnouncementCommand implements ICommand {
      * @return the IChannel if successful, else <code>null</code>.
      */
     private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
-        if (value.startsWith("#")) {
-            value = value.replaceFirst("#", "");
+        if (value.contains("#")) {
+            value = value.replaceAll("#", "");
         }
         for (IChannel c : event.getMessage().getGuild().getChannels()) {
             if (c.getName().equalsIgnoreCase(value)) {
