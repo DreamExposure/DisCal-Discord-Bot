@@ -17,7 +17,7 @@ import sx.blah.discord.util.EmbedBuilder;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public class DisCalCommand implements com.cloudcraftgaming.discal.module.command.ICommand {
+public class DisCalCommand implements ICommand {
     /**
      * Gets the command this Object is responsible for.
      * @return The command this Object is responsible for.
