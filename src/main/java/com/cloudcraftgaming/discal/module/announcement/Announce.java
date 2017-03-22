@@ -147,18 +147,32 @@ public class Announce extends TimerTask {
         }
 
         String roleMentions = "";
+        Boolean mentionEveryone = false;
+        Boolean mentionHere = false;
         for (String roleId : announcement.getSubscriberRoleIds()) {
-            try {
-                IRole role = guild.getRoleByID(roleId);
-                if (role != null) {
-                    roleMentions = roleMentions + role.mention() + " ";
+            if (roleId.equalsIgnoreCase("everyone")) {
+                mentionEveryone = true;
+            } else if (roleId.equalsIgnoreCase("here")) {
+                mentionHere = true;
+            } else {
+                try {
+                    IRole role = guild.getRoleByID(roleId);
+                    if (role != null) {
+                        roleMentions = roleMentions + role.mention() + " ";
+                    }
+                } catch (Exception e) {
+                    //Role does not exist, safely ignore.
                 }
-            } catch (Exception e) {
-                //Role does not exist, safely ignore.
             }
         }
 
         String message = "Subscribers: " + userMentions + " " + roleMentions;
+        if (mentionEveryone) {
+            message = message + " " + guild.getEveryoneRole().mention();
+        }
+        if (mentionHere) {
+            message = message + " @here";
+        }
 
         IChannel channel = guild.getChannelByID(announcement.getAnnouncementChannelId());
         Message.sendMessage(em.build(), message, channel, Main.client);
