@@ -292,11 +292,11 @@ public class AnnouncementCommand implements ICommand {
                                 DatabaseManager.getManager().updateAnnouncement(a);
                                 Message.sendMessage("`" + username + "` has been subscribed to the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>", event, client);
                             } else {
-                                Message.sendMessage("That user is already subscribed to the specified event! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                                Message.sendMessage("That user is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
                             }
                         } else {
                             //User does not exist, see if a role.
-                            IRole role = getRoleFromName(value2, event);
+                            IRole role = getRoleFromMention(value2, event);
                             if (role != null) {
                                 //Role valid, let's add that role to the announcement.
                                 if (!a.getSubscriberRoleIds().contains(role.getID())) {
@@ -305,7 +305,42 @@ public class AnnouncementCommand implements ICommand {
                                     DatabaseManager.getManager().updateAnnouncement(a);
                                     Message.sendMessage("`" + roleName + "` has been subscribed to the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>", event, client);
                                 } else {
-                                    Message.sendMessage("That role is already subscribed to the specified event! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                                    Message.sendMessage("That role is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                                }
+                            } else {
+                                //Role does not exist...
+                                Message.sendMessage("Role or user not found! Are you sure you typed them correctly?", event, client);
+                            }
+                        }
+                    } else {
+                        Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+                    }
+                } else if (function.equalsIgnoreCase("unsubscribe")) {
+                    if (announcementExists(value1, event)) {
+                        Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
+                        IUser user = getUserFromMention(value2, event);
+                        if (user != null) {
+                            //Valid user, let's add that user to the announcement.
+                            if (a.getSubscriberUserIds().contains(user.getID())) {
+                                String username = user.getDisplayName(event.getMessage().getGuild());
+                                a.getSubscriberUserIds().remove(user.getID());
+                                DatabaseManager.getManager().updateAnnouncement(a);
+                                Message.sendMessage("`" + username + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement subscribe <announcement ID> <mention>", event, client);
+                            } else {
+                                Message.sendMessage("That user is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                            }
+                        } else {
+                            //User does not exist, see if a role.
+                            IRole role = getRoleFromMention(value2, event);
+                            if (role != null) {
+                                //Role valid, let's add that role to the announcement.
+                                if (a.getSubscriberRoleIds().contains(role.getID())) {
+                                    String roleName = role.getName();
+                                    a.getSubscriberRoleIds().remove(role.getID());
+                                    DatabaseManager.getManager().updateAnnouncement(a);
+                                    Message.sendMessage("`" + roleName + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement subscribe <announcement ID> <mention>", event, client);
+                                } else {
+                                    Message.sendMessage("That role is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
                                 }
                             } else {
                                 //Role does not exist...
@@ -435,9 +470,9 @@ public class AnnouncementCommand implements ICommand {
         return null;
     }
 
-    private IRole getRoleFromName(String name, MessageReceivedEvent event) {
+    private IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (name.equalsIgnoreCase("<@" + r.getID() + ">") || name.equalsIgnoreCase("<@!" + r.getID() + ">")) {
+            if (mention.equalsIgnoreCase("<@" + r.getID() + ">") || mention.equalsIgnoreCase("<@!" + r.getID() + ">")) {
                 return r;
             }
         }
