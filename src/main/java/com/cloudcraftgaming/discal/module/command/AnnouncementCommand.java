@@ -11,6 +11,7 @@ import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.IOException;
@@ -282,14 +283,35 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("subscribe")) {
                     if (announcementExists(value1, event)) {
                         Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                        //TODO: Test if valid username, userID, role name, or role ID.
                         IUser user = getUserFromMention(value2, event);
                         if (user != null) {
-
+                            //Valid user, let's add that user to the announcement.
+                            if (!a.getSubscriberUserIds().contains(user.getID())) {
+                                String username = user.getDisplayName(event.getMessage().getGuild());
+                                a.getSubscriberUserIds().add(user.getID());
+                                DatabaseManager.getManager().updateAnnouncement(a);
+                                Message.sendMessage("`" + username + "` has been subscribed to the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>", event, client);
+                            } else {
+                                Message.sendMessage("That user is already subscribed to the specified event! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                            }
                         } else {
-
+                            //User does not exist, see if a role.
+                            IRole role = getRoleFromName(value2, event);
+                            if (role != null) {
+                                //Role valid, let's add that role to the announcement.
+                                if (!a.getSubscriberRoleIds().contains(role.getID())) {
+                                    String roleName = role.getName();
+                                    a.getSubscriberRoleIds().add(role.getID());
+                                    DatabaseManager.getManager().updateAnnouncement(a);
+                                    Message.sendMessage("`" + roleName + "` has been subscribed to the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>", event, client);
+                                } else {
+                                    Message.sendMessage("That role is already subscribed to the specified event! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                                }
+                            } else {
+                                //Role does not exist...
+                                Message.sendMessage("Role or user not found! Are you sure you typed them correctly?", event, client);
+                            }
                         }
-
                     } else {
                         Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
                     }
@@ -403,13 +425,22 @@ public class AnnouncementCommand implements ICommand {
         return content.trim();
     }
 
-    public IUser getUserFromMention(String mention, MessageReceivedEvent event) {
+    private IUser getUserFromMention(String mention, MessageReceivedEvent event) {
         for (IUser u : event.getMessage().getGuild().getUsers()) {
-            if ((!event.getMessage().mentionsEveryone() && mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">"))) {
+            if (mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">")) {
                 return u;
             }
         }
 
+        return null;
+    }
+
+    private IRole getRoleFromName(String name, MessageReceivedEvent event) {
+        for (IRole r : event.getMessage().getGuild().getRoles()) {
+            if (name.equalsIgnoreCase("<@" + r.getID() + ">") || name.equalsIgnoreCase("<@!" + r.getID() + ">")) {
+                return r;
+            }
+        }
         return null;
     }
 }
