@@ -46,11 +46,9 @@ public class CommandExecutor {
     /**
      * Registers a command that can be executed.
      * @param _command The command to register.
-     * @return <code>true</code> if successful, else <code>false</code>.
      */
-    public Boolean registerCommand(ICommand _command) {
+    public void registerCommand(ICommand _command) {
         commands.add(_command);
-        return true;
     }
 
     /**

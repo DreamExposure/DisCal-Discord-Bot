@@ -227,7 +227,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
                         EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
-                        Message.sendMessage("Event summary set to: '" + content + "'"
+                        Message.sendMessage("Event summary set to: ```" + content + "```"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the event description with `!event description <desc>`", event, client);
                     } else {
@@ -237,7 +237,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
                         EventCreator.getCreator().getPreEvent(guildId).setDescription(content);
-                        Message.sendMessage("Event description set to: '" + content + "'"
+                        Message.sendMessage("Event description set to: ```" + content + "```"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the following: "
                                 + Message.lineBreak
@@ -261,7 +261,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         String content = getContent(args);
                         EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
-                        Message.sendMessage("Event summary set to: '" + content + "'"
+                        Message.sendMessage("Event summary set to: ```" + content + "```"
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the event description with `!event description <desc>`", event, client);
                     } else {
@@ -295,10 +295,10 @@ public class EventCommand implements ICommand {
      * @return The contents of the message at a set offset.
      */
     private String getContent(String[] args) {
-        String content = "";
+        StringBuilder content = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            content = content + args[i] + " ";
+            content.append(args[i]).append(" ");
         }
-        return content.trim();
+        return content.toString().trim();
     }
 }

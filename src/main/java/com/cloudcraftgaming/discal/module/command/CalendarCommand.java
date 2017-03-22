@@ -235,10 +235,10 @@ public class CalendarCommand implements ICommand {
      * @return The contents of the message at an offset.
      */
     private String getContent(String[] args) {
-        String content = "";
+        StringBuilder content = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            content = content + args[i] + " ";
+            content.append(args[i]).append(" ");
         }
-        return content.trim();
+        return content.toString().trim();
     }
 }

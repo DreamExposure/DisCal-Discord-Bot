@@ -227,7 +227,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("list")) {
                     if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         if (value.equalsIgnoreCase("all")) {
-                            Message.sendMessage("All announcements, use `!announcement view <id` for more info.", event, client);
+                            Message.sendMessage("All announcements, use `!announcement view <id>` for more info.", event, client);
                             //Loop and add embeds
                             for (Announcement a : DatabaseManager.getManager().getAnnouncements(
                                     guildId)) {
@@ -473,11 +473,11 @@ public class AnnouncementCommand implements ICommand {
      * @return The contents of the message at a set offset.
      */
     private String getContent(String[] args) {
-        String content = "";
+        StringBuilder content = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            content = content + args[i] + " ";
+            content.append(args[i]).append(" ");
         }
-        return content.trim();
+        return content.toString().trim();
     }
 
     private IUser getUserFromMention(String mention, MessageReceivedEvent event) {

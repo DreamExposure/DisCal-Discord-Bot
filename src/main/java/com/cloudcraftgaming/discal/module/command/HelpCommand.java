@@ -28,15 +28,15 @@ public class HelpCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        String cmds = "";
+        StringBuilder cmds = new StringBuilder();
 
         for (String c : CommandExecutor.getExecutor().getAllCommands()) {
-            cmds = cmds + c + ", ";
+            cmds.append(c).append(", ");
         }
-        cmds = cmds.substring(0, cmds.length() - 2);
+        cmds = new StringBuilder(cmds.substring(0, cmds.length() - 2));
 
-        Message.sendMessage("All commands: " + cmds, event, client);
-        Message.sendMessage("For extra help visit: https://www.cloudcraftgaming.com/discal/", event, client);
+        //TODO: Make this prettier!
+        Message.sendMessage("All commands: " + cmds + Message.lineBreak + Message.lineBreak + "For extra help visit: https://www.cloudcraftgaming.com/discal/", event, client);
         return true;
     }
 }
