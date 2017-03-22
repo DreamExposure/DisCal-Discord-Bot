@@ -5,7 +5,6 @@ import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +49,7 @@ class CommandListener {
                         //Only command... no args.
                         cmd.issueCommand(argsOr[0].replaceAll("!", ""), new String[0], event);
                     }
-                } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && discalMentioned(event) && event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getID() + ">")) {
+                } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getID() + ">"))) {
                     String[] argsOr = event.getMessage().getContent().split(" ");
                     if (argsOr.length > 2) {
                         ArrayList<String> argsOr2 = new ArrayList<>();
@@ -71,24 +70,5 @@ class CommandListener {
         } catch (Exception e) {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
-    }
-
-    /**
-     * Checks if the Bot was mentioned within the message.
-     * @param event The event received.
-     * @return <code>true</code> if mentioned, else <code>false</code>.
-     */
-    private boolean discalMentioned(MessageReceivedEvent event) {
-        try {
-            for (IUser u : event.getMessage().getMentions()) {
-                if (u != null && u.getID().equals(Main.getSelfUser().getID())) {
-                    return true;
-                }
-            }
-        } catch (NullPointerException e) {
-            //Some error, let's just ignore the error and return false.
-            return false;
-        }
-        return false;
     }
 }
