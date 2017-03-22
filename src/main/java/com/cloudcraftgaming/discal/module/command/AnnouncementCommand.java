@@ -294,6 +294,16 @@ public class AnnouncementCommand implements ICommand {
                             } else {
                                 Message.sendMessage("That user is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
                             }
+                        } else if (value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
+                            //Here or everyone is to be subscribed...
+                            String men = value2.toLowerCase();
+                            if (!a.getSubscriberRoleIds().contains(men)) {
+                                a.getSubscriberRoleIds().add(men);
+                                DatabaseManager.getManager().updateAnnouncement(a);
+                                Message.sendMessage("`" + men + "` has been subscribed to the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To unsubscribe them use `!announcement unsubscribe <announcement ID> <value>", event, client);
+                            } else {
+                                Message.sendMessage(men + " is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <value>`", event, client);
+                            }
                         } else {
                             //User does not exist, see if a role.
                             IRole role = getRoleFromMention(value2, event);
@@ -328,6 +338,16 @@ public class AnnouncementCommand implements ICommand {
                                 Message.sendMessage("`" + username + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement subscribe <announcement ID> <mention>", event, client);
                             } else {
                                 Message.sendMessage("That user is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <mention>`", event, client);
+                            }
+                        } else if (value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
+                            //Here or everyone is to be mentioned...
+                            String men = value2.toLowerCase();
+                            if (a.getSubscriberRoleIds().contains(men)) {
+                                a.getSubscriberRoleIds().remove(men);
+                                DatabaseManager.getManager().updateAnnouncement(a);
+                                Message.sendMessage("`" + men + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement unsubscribe <announcement ID> <value>", event, client);
+                            } else {
+                                Message.sendMessage(men + " is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <value>`", event, client);
                             }
                         } else {
                             //User does not exist, see if a role.
