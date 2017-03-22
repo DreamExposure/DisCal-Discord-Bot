@@ -11,6 +11,7 @@ import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -265,6 +266,37 @@ public class AnnouncementCommand implements ICommand {
                     //TODO: Add useful info about what you /can/ do.
                     Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
                 }
+            } else if (args.length == 3) {
+                String function = args[0];
+                String value1 = args[1];
+                String value2 = args[2];
+                String guildId = event.getMessage().getGuild().getID();
+                if (function.equalsIgnoreCase("info")) {
+                    if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                        String value = value1 + " " + value2;
+                        AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                    } else {
+                        Message.sendMessage("Announcement Creator not initialized!", event, client);
+                    }
+                } else if (function.equalsIgnoreCase("subscribe")) {
+                    if (announcementExists(value1, event)) {
+                        Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
+                        //TODO: Test if valid username, userID, role name, or role ID.
+                        IUser user = getUserFromMention(value2, event);
+                        if (user != null) {
+
+                        } else {
+
+                        }
+
+                    } else {
+                        Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+                    }
+                } else {
+                    //TODO: Add useful info about what you /can/ do.
+                    Message.sendMessage("Invalid arguments. Useful info here coming soon!", event, client);
+                }
             } else {
                 String function = args[0];
                 String guildId = event.getMessage().getGuild().getID();
@@ -369,5 +401,15 @@ public class AnnouncementCommand implements ICommand {
             content = content + args[i] + " ";
         }
         return content.trim();
+    }
+
+    public IUser getUserFromMention(String mention, MessageReceivedEvent event) {
+        for (IUser u : event.getMessage().getGuild().getUsers()) {
+            if ((!event.getMessage().mentionsEveryone() && mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">"))) {
+                return u;
+            }
+        }
+
+        return null;
     }
 }
