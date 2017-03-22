@@ -9,6 +9,7 @@ import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.utils.Validator;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -135,32 +136,39 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
+                                TimeZone tz = TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone());
+                                sdf.setTimeZone(tz);
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();
                                 eventDateTime.setDateTime(dateTime);
 
-                                //Date shuffling done, now actually apply all that damn stuff here.
-                                EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
+                                //Wait! Lets check now if its in the future and not the past!
+                                if (!Validator.inPast(dateRaw, tz)) {
+                                    //Date shuffling done, now actually apply all that damn stuff here.
+                                    EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
 
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV = sdfV.parse(dateRaw);
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
+                                    //Apply viewable date/times...
+                                    SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                    Date dateObjV = sdfV.parse(dateRaw);
+                                    DateTime dateTimeV = new DateTime(dateObjV);
+                                    EventDateTime eventDateTimeV = new EventDateTime();
+                                    eventDateTimeV.setDateTime(dateTimeV);
+                                    EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
 
-                                Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" +
-                                        EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
-                                        + Message.lineBreak
-                                        + "Event start time (HH:mm) set to: `"
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
-                                        + Message.lineBreak + Message.lineBreak
-                                        + "Please specify the following: "
-                                        + Message.lineBreak
-                                        + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                    Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" +
+                                            EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
+                                            + Message.lineBreak
+                                            + "Event start time (HH:mm) set to: `"
+                                            + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
+                                            + Message.lineBreak + Message.lineBreak
+                                            + "Please specify the following: "
+                                            + Message.lineBreak
+                                            + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                } else {
+                                    //Oops! Time is in the past...
+                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past! Please make sure you typed everything correctly.", event, client);
+                                }
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
@@ -177,28 +185,35 @@ public class EventCommand implements ICommand {
                             try {
                                 //Do a lot of date shuffling to get to proper formats and shit like that.
                                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                sdf.setTimeZone(TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone()));
+                                TimeZone tz = TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(guildId).getTimeZone());
+                                sdf.setTimeZone(tz);
                                 Date dateObj = sdf.parse(dateRaw);
                                 DateTime dateTime = new DateTime(dateObj);
                                 EventDateTime eventDateTime = new EventDateTime();
                                 eventDateTime.setDateTime(dateTime);
 
-                                //Date shuffling done, now actually apply all that damn stuff here.
-                                EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
+                                //Wait! Lets check now if its in the future and not the past!
+                                if (!Validator.inPast(dateRaw, tz)) {
+                                    //Date shuffling done, now actually apply all that damn stuff here.
+                                    EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
 
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV = sdfV.parse(dateRaw);
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
-                                Message.sendMessage("Event end date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
-                                        + Message.lineBreak
-                                        + "Event end time (HH:mm) set to: `"
-                                        + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
-                                        + Message.lineBreak + Message.lineBreak
-                                        + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
+                                    //Apply viewable date/times...
+                                    SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                    Date dateObjV = sdfV.parse(dateRaw);
+                                    DateTime dateTimeV = new DateTime(dateObjV);
+                                    EventDateTime eventDateTimeV = new EventDateTime();
+                                    eventDateTimeV.setDateTime(dateTimeV);
+                                    EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
+                                    Message.sendMessage("Event end date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
+                                            + Message.lineBreak
+                                            + "Event end time (HH:mm) set to: `"
+                                            + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
+                                            + Message.lineBreak + Message.lineBreak
+                                            + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
+                                } else {
+                                    //Oops! Time is in the past...
+                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past! Please make sure you typed everything correctly.", event, client);
+                                }
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
                             }
