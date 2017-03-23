@@ -8,16 +8,28 @@ import java.util.ArrayList;
  * For Project: DisCal
  */
 public enum EventColor {
-    MELROSE(1, "A4BDFC"), RIPTIDE(2, "7AE7BF"), MAUVE(3, "DBADFF"), TANGERINE(4, "FF887C"), DANDELION(5, "FBD75B"),
-    MAC_AND_CHEESE(6, "FFB878"), TURQUOISE(7, "46D6DB"), MERCURY(8, "E1E1E1"), BLUE(9, "5484ED"), GREEN(10, "51B749"),
-    RED(11, "DC2127");
+    MELROSE(1, "A4BDFC", 164, 189, 252), RIPTIDE(2, "7AE7BF", 122, 231, 191),
+    MAUVE(3, "DBADFF", 219, 173, 255), TANGERINE(4, "FF887C", 255, 136, 124),
+    DANDELION(5, "FBD75B", 251, 215, 91), MAC_AND_CHEESE(6, "FFB878", 255, 184, 120),
+    TURQUOISE(7, "46D6DB", 70, 214, 219), MERCURY(8, "E1E1E1", 255, 255, 255),
+    BLUE(9, "5484ED", 84, 132, 237), GREEN(10, "51B749", 81, 183, 73),
+    RED(11, "DC2127", 220, 33, 39);
 
     private final Integer id;
     private final String hex;
 
-    EventColor(Integer _id, String _hex) {
+    //TOOD: Add RGB getters
+    private final Integer r;
+    private final Integer g;
+    private final Integer b;
+
+    EventColor(Integer _id, String _hex, Integer _r, Integer _g, Integer _b) {
         id = _id;
         hex = _hex;
+
+        r = _r;
+        b = _b;
+        g = _g;
     }
 
 
@@ -27,6 +39,18 @@ public enum EventColor {
 
     public String getHex() {
         return hex;
+    }
+
+    public Integer getR() {
+        return r;
+    }
+
+    public Integer getG() {
+        return g;
+    }
+
+    public Integer getB() {
+        return b;
     }
 
     //Static methods

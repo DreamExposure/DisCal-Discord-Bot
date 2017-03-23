@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -59,7 +60,13 @@ public class EventMessageFormatter {
         //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Event ID: " + id);
-        em.withColor(36, 153, 153);
+        try {
+            EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //Color is null, ignore and add our default.
+            em.withColor(36, 153, 153);
+        }
 
         return em.build();
     }
@@ -78,7 +85,13 @@ public class EventMessageFormatter {
         em.appendField("Event Date", getHumanReadableDate(event), true);
         em.appendField("Event ID", event.getId(), true);
         em.withUrl(event.getHtmlLink());
-        em.withColor(36, 153, 153);
+        try {
+            EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //Color is null, ignore and add our default.
+            em.withColor(36, 153, 153);
+        }
 
         return em.build();
     }
@@ -103,7 +116,8 @@ public class EventMessageFormatter {
         //TODO: Add info on recurrence here.
 
         em.withFooterText("[R] means required, field needs a value.");
-        em.withColor(36, 153, 153);
+        EventColor ec = event.getColor();
+        em.withColor(ec.getR(), ec.getG(), ec.getB());
 
         return em.build();
     }
@@ -122,7 +136,13 @@ public class EventMessageFormatter {
         em.appendField("Event Date", getHumanReadableDate(ecr.getEvent()), false);
         em.withFooterText("Click title to view on Google Calendar!");
         em.withUrl(ecr.getEvent().getHtmlLink());
-        em.withColor(36, 153, 153);
+        try {
+            EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //Color is null, ignore and add our default.
+            em.withColor(36, 153, 153);
+        }
 
         return em.build();
     }

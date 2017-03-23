@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.model.EventDateTime;
 
 /**
@@ -20,6 +21,8 @@ public class PreEvent {
 
     private String timeZone;
 
+    private EventColor color;
+
     private boolean recur;
     private Recurrence recurrence;
 
@@ -32,6 +35,9 @@ public class PreEvent {
         guildId = _guildId;
 
         timeZone = "Unknown";
+
+        color = EventColor.BLUE;
+
         recur = false;
         recurrence = new Recurrence();
     }
@@ -99,6 +105,14 @@ public class PreEvent {
      */
     public String getTimeZone() {
         return timeZone;
+    }
+
+    /**
+     * Gets the valid Google Calendar color for this event.
+     * @return The valid color for this event.
+     */
+    public EventColor getColor() {
+        return color;
     }
 
     /**
@@ -172,6 +186,14 @@ public class PreEvent {
      */
     void setTimeZone(String _timeZone) {
         timeZone = _timeZone;
+    }
+
+    /**
+     * Sets the valid Google Calendar color for this event.
+     * @param _color The valid color for this event.
+     */
+    public void setColor(EventColor _color) {
+        color = _color;
     }
 
     /**
