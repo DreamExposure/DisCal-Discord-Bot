@@ -12,6 +12,7 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -26,6 +27,22 @@ public class LinkCalendarCommand implements ICommand {
     @Override
     public String getCommand() {
         return "LinkCalendar";
+    }
+
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("linkcal");
+        aliases.add("calendarlink");
+        aliases.add("callink");
+        return aliases;
     }
 
     /**

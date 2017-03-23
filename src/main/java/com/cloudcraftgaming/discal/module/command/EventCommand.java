@@ -21,6 +21,7 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -38,6 +39,18 @@ public class EventCommand implements ICommand {
     @Override
     public String getCommand() {
         return "event";
+    }
+
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        return new ArrayList<>();
     }
 
     /**

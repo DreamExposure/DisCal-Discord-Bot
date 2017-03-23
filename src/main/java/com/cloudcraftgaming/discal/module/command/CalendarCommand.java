@@ -11,6 +11,8 @@ import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
+import java.util.ArrayList;
+
 /**
  * Created by Nova Fox on 1/4/2017.
  * Website: www.cloudcraftgaming.com
@@ -27,6 +29,20 @@ public class CalendarCommand implements ICommand {
     @Override
     public String getCommand() {
         return "calendar";
+    }
+
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("cal");
+        return aliases;
     }
 
     /**

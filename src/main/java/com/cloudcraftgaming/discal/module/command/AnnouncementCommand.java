@@ -15,6 +15,7 @@ import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -30,6 +31,21 @@ public class AnnouncementCommand implements ICommand {
     @Override
     public String getCommand() {
         return "Announcement";
+    }
+
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        ArrayList<String> aliases = new ArrayList<>();
+        aliases.add("announce");
+        aliases.add("alert");
+        return aliases;
     }
 
     /**

@@ -59,7 +59,7 @@ public class CommandExecutor {
      */
     void issueCommand(String cmd, String[] args, MessageReceivedEvent event) {
         for (ICommand c : commands) {
-            if (c.getCommand().equalsIgnoreCase(cmd)) {
+            if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase())) {
                 c.issueCommand(args, event, client);
             }
         }
