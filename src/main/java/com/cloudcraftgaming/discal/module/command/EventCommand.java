@@ -145,7 +145,7 @@ public class EventCommand implements ICommand {
                                 eventDateTime.setDateTime(dateTime);
 
                                 //Wait! Lets check now if its in the future and not the past!
-                                if (!Validator.inPast(dateRaw, tz)) {
+                                if (!Validator.inPast(dateRaw, tz) && !Validator.startAfterEnd(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
                                     //Date shuffling done, now actually apply all that damn stuff here.
                                     EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
 
@@ -167,8 +167,8 @@ public class EventCommand implements ICommand {
                                             + Message.lineBreak
                                             + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
                                 } else {
-                                    //Oops! Time is in the past...
-                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past! Please make sure you typed everything correctly.", event, client);
+                                    //Oops! Time is in the past or after end...
+                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has a starting time that is after the ending time!!! Please make sure you typed everything correctly.", event, client);
                                 }
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);
@@ -194,7 +194,7 @@ public class EventCommand implements ICommand {
                                 eventDateTime.setDateTime(dateTime);
 
                                 //Wait! Lets check now if its in the future and not the past!
-                                if (!Validator.inPast(dateRaw, tz)) {
+                                if (!Validator.inPast(dateRaw, tz) && !Validator.endBeforeStart(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
                                     //Date shuffling done, now actually apply all that damn stuff here.
                                     EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
 
@@ -212,8 +212,8 @@ public class EventCommand implements ICommand {
                                             + Message.lineBreak + Message.lineBreak
                                             + "Event creation halted! View `!event review` and/or confirm the event `!event confirm` to make it official!", event, client);
                                 } else {
-                                    //Oops! Time is in the past...
-                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past! Please make sure you typed everything correctly.", event, client);
+                                    //Oops! Time is in the past or before the starting time...
+                                    Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has an ending before the starting time!!! Please make sure you typed everything correctly.", event, client);
                                 }
                             } catch (ParseException e) {
                                 Message.sendMessage("Invalid Date & Time specified!", event, client);

@@ -71,7 +71,7 @@ public class PreEvent {
      * Gets the start date and time.
      * @return The start date and time.
      */
-    EventDateTime getStartDateTime() {
+    public EventDateTime getStartDateTime() {
         return startDateTime;
     }
 
@@ -79,7 +79,7 @@ public class PreEvent {
      * Gets the end date and time.
      * @return The end date and time.
      */
-    EventDateTime getEndDateTime() {
+    public EventDateTime getEndDateTime() {
         return endDateTime;
     }
 
@@ -111,7 +111,7 @@ public class PreEvent {
      * Gets the valid Google Calendar color for this event.
      * @return The valid color for this event.
      */
-    public EventColor getColor() {
+    EventColor getColor() {
         return color;
     }
 
