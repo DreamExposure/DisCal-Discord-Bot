@@ -1,7 +1,5 @@
 package com.cloudcraftgaming.discal.utils;
 
-import java.util.ArrayList;
-
 /**
  * Created by Nova Fox on 3/22/17.
  * Website: www.cloudcraftgaming.com
@@ -54,33 +52,26 @@ public enum EventColor {
     }
 
     //Static methods
-    public static ArrayList<EventColor> getAllColors() {
-        ArrayList<EventColor> colors = new ArrayList<>();
-        colors.add(MELROSE);
-        colors.add(RIPTIDE);
-        colors.add(MAUVE);
-        colors.add(TANGERINE);
-        colors.add(DANDELION);
-        colors.add(MAC_AND_CHEESE);
-        colors.add(TURQUOISE);
-        colors.add(MERCURY);
-        colors.add(BLUE);
-        colors.add(GREEN);
-        colors.add(RED);
-        return colors;
-    }
-
-    public static boolean exists(String nameOrHex) {
-        for (EventColor c : getAllColors()) {
-            if (c.name().equalsIgnoreCase(nameOrHex) || c.getHex().equals(nameOrHex)) {
+    public static boolean exists(String nameOrHexOrId) {
+        for (EventColor c : values()) {
+            if (c.name().equalsIgnoreCase(nameOrHexOrId) || c.getHex().equals(nameOrHexOrId)) {
                 return true;
+            } else {
+                try {
+                    Integer i = Integer.valueOf(nameOrHexOrId);
+                    if (c.getId().equals(i)) {
+                        return true;
+                    }
+                } catch (NumberFormatException e) {
+                    //Not number, just ignore.
+                }
             }
         }
         return false;
     }
 
     public static boolean exists(Integer id) {
-        for (EventColor c : getAllColors()) {
+        for (EventColor c : values()) {
             if (c.getId().equals(id)) {
                 return true;
             }
@@ -88,17 +79,26 @@ public enum EventColor {
         return false;
     }
 
-    public static EventColor fromNameOfHex(String nameOrHex) {
-        for (EventColor c : getAllColors()) {
-            if (c.name().equalsIgnoreCase(nameOrHex) || c.getHex().equals(nameOrHex)) {
+    public static EventColor fromNameOrHexOrID(String nameOrHexOrID) {
+        for (EventColor c : values()) {
+            if (c.name().equalsIgnoreCase(nameOrHexOrID) || c.getHex().equals(nameOrHexOrID)) {
                 return c;
+            } else {
+                try {
+                    Integer i = Integer.valueOf(nameOrHexOrID);
+                    if (c.getId().equals(i)) {
+                        return c;
+                    }
+                } catch (NumberFormatException e) {
+                    //Not number, just ignore.
+                }
             }
         }
         return RED;
     }
 
     public static EventColor fromId(Integer id) {
-        for (EventColor c : getAllColors()) {
+        for (EventColor c : values()) {
             if (c.getId().equals(id)) {
                 return c;
             }

@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.calendar.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.cloudcraftgaming.discal.utils.Validator;
@@ -242,6 +243,30 @@ public class EventCommand implements ICommand {
                                 + "Please specify the following: "
                                 + Message.lineBreak
                                 + "Start date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                    } else {
+                        Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
+                    }
+                } else if (function.equalsIgnoreCase("color")) {
+                    String value = args[1];
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")) {
+                            StringBuilder list = new StringBuilder("All Colors: ");
+                            for (EventColor ec : EventColor.values()) {
+                                list.append(Message.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
+                            }
+                            list.append(Message.lineBreak).append(Message.lineBreak).append("Use `!event color <name OR ID>` to set an event's color!");
+
+                            Message.sendMessage(list.toString().trim(), event, client);
+                        } else {
+                            //Attempt to get color.
+                            if (EventColor.exists(value)) {
+                                EventColor color = EventColor.fromNameOrHexOrID(value);
+                                EventCreator.getCreator().getPreEvent(guildId).setColor(color);
+                                Message.sendMessage("Event color set to: `" + color.name() + "`", event, client);
+                            } else {
+                                Message.sendMessage("Invalid/Unsupported color! Use `!event color list` to view all supported colors!", event, client);
+                            }
+                        }
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
