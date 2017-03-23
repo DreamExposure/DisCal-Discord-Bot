@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -130,7 +131,13 @@ public class Announce extends TimerTask {
         em.appendField("Additional Info", announcement.getInfo(), false);
         em.withUrl(event.getHtmlLink());
         em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
-        em.withColor(36, 153, 153);
+        try {
+            EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //I dunno, color probably null.
+            em.withColor(36, 153, 153);
+        }
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
