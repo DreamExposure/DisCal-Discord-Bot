@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
+import java.util.ArrayList;
+
 /**
  * Created by Nova Fox on 3/22/17.
  * Website: www.cloudcraftgaming.com
@@ -18,5 +20,65 @@ public enum EventColor {
         hex = _hex;
     }
 
-    //TODO: Add needed methods here...
+
+    public Integer getId() {
+        return id;
+    }
+
+    public String getHex() {
+        return hex;
+    }
+
+    //Static methods
+    public static ArrayList<EventColor> getAllColors() {
+        ArrayList<EventColor> colors = new ArrayList<>();
+        colors.add(MELROSE);
+        colors.add(RIPTIDE);
+        colors.add(MAUVE);
+        colors.add(TANGERINE);
+        colors.add(DANDELION);
+        colors.add(MAC_AND_CHEESE);
+        colors.add(TURQUOISE);
+        colors.add(MERCURY);
+        colors.add(BLUE);
+        colors.add(GREEN);
+        colors.add(RED);
+        return colors;
+    }
+
+    public static boolean exists(String nameOrHex) {
+        for (EventColor c : getAllColors()) {
+            if (c.name().equalsIgnoreCase(nameOrHex) || c.getHex().equals(nameOrHex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean exists(Integer id) {
+        for (EventColor c : getAllColors()) {
+            if (c.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static EventColor fromNameOfHex(String nameOrHex) {
+        for (EventColor c : getAllColors()) {
+            if (c.name().equalsIgnoreCase(nameOrHex) || c.getHex().equals(nameOrHex)) {
+                return c;
+            }
+        }
+        return RED;
+    }
+
+    public static EventColor fromId(Integer id) {
+        for (EventColor c : getAllColors()) {
+            if (c.getId().equals(id)) {
+                return c;
+            }
+        }
+        return RED;
+    }
 }
