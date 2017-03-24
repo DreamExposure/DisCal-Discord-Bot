@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.internal.network.google;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.internal.network.google.json.AuthPollRequest;
 import com.cloudcraftgaming.discal.internal.network.google.json.CodeRequest;
 import com.cloudcraftgaming.discal.internal.network.google.json.CodeResponse;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -60,6 +61,33 @@ public class Authorization {
             EmailSender.getSender().sendExceptionEmail(e, Authorization.class);
             IUser u = event.getMessage().getAuthor();
             Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", u);
+        }
+    }
+
+    public static void pollForAuth(CodeResponse cr) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            AuthPollRequest apr = new AuthPollRequest();
+            //TODO: Set client ID and client secret.
+            apr.code = cr.device_code;
+            apr.grant_type = "http://oauth.net/grant_type/device/1.0";
+
+            HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
+
+            String json = new Gson().toJson(apr);
+            request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
+
+            //Execute
+            HttpResponse httpResponse = httpClient.execute(request);
+
+            //Handle response.
+            CodeResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
+
+            
+
+        } catch (Exception e) {
+            //TODO: Handle exception.
         }
     }
 }
