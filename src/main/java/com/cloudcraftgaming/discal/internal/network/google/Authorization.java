@@ -84,7 +84,7 @@ public class Authorization {
             //Handle response.
             CodeResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
 
-            
+
 
         } catch (Exception e) {
             //TODO: Handle exception.
