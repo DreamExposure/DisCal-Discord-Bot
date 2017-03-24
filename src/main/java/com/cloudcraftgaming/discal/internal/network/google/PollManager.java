@@ -1,6 +1,9 @@
 package com.cloudcraftgaming.discal.internal.network.google;
 
+import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
+
 import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Nova Fox on 3/24/2017.
@@ -26,4 +29,12 @@ public class PollManager {
     }
 
     //Timer methods.
+    public void scheduleNextPoll(Poll poll) {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                //TODO: Call poller.
+            }
+        }, 1000 * poll.getInterval());
+    }
 }

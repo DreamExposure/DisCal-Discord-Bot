@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.network.google;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.network.google.json.AuthPollRequest;
+import com.cloudcraftgaming.discal.internal.network.google.json.AuthPollResponseGrant;
 import com.cloudcraftgaming.discal.internal.network.google.json.CodeRequest;
 import com.cloudcraftgaming.discal.internal.network.google.json.CodeResponse;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -82,9 +83,20 @@ public class Authorization {
             HttpResponse httpResponse = httpClient.execute(request);
 
             //Handle response.
-            CodeResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
+            if (httpResponse.getStatusLine().getStatusCode() == 403) {
+                //TODO: Handle access denied
+            } else if (httpResponse.getStatusLine().getStatusCode() == 400) {
+                //TODO: Handle auth pending or error occured.
+            } else if (httpResponse.getStatusLine().getStatusCode() == 429) {
+                //TODO: Handle rate limit
+            } else {
+                //Access granted
+                AuthPollResponseGrant aprg = new Gson().fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
 
+                //TODO: Save credentials securely.
 
+                //TODO: ask user which calendar we can use.
+            }
 
         } catch (Exception e) {
             //TODO: Handle exception.
