@@ -4,6 +4,8 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IPrivateChannel;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
@@ -108,6 +110,39 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();
+            } catch (Exception e) {
+                //Failed to send message.
+            }
+        });
+    }
+
+    public static void sendDirectMessage(String message, IUser user) {
+        RequestBuffer.request(() -> {
+           try {
+               IPrivateChannel pc = user.getOrCreatePMChannel();
+               pc.sendMessage(message);
+           } catch (Exception e) {
+               //Failed to send message.
+           }
+        });
+    }
+
+    public static void sendDirectMessage(EmbedObject embed, IUser user) {
+        RequestBuffer.request(() -> {
+            try {
+                IPrivateChannel pc = user.getOrCreatePMChannel();
+                pc.sendMessage("", embed, false);
+            } catch (Exception e) {
+                //Failed to send message.
+            }
+        });
+    }
+
+    public static void sendDirectMessage(String message, EmbedObject embed, IUser user) {
+        RequestBuffer.request(() -> {
+            try {
+                IPrivateChannel pc = user.getOrCreatePMChannel();
+                pc.sendMessage(message, embed, false);
             } catch (Exception e) {
                 //Failed to send message.
             }
