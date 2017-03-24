@@ -1,15 +1,12 @@
 package com.cloudcraftgaming.discal.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
-import org.apache.http.NameValuePair;
+import com.cloudcraftgaming.discal.internal.network.discordpw.json.Stats;
+import com.google.gson.Gson;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Nova Fox on 1/13/2017.
@@ -38,11 +35,13 @@ public class UpdateListData {
                 HttpPost request = new HttpPost("http://bots.discord.pw/api/bots/265523588918935552/stats");
 
                 String serverCount = String.valueOf(Main.client.getGuilds().size());
-                List<NameValuePair> urlParameters = new ArrayList<>();
-                urlParameters.add(new BasicNameValuePair("server_count", serverCount));
 
-                request.setEntity(new UrlEncodedFormEntity(urlParameters));
+                Stats stats = new Stats();
+                stats.server_count = serverCount;
+
                 request.setHeader("Authorization", token);
+                String json = new Gson().toJson(stats);
+                request.setEntity(new StringEntity(json));
                 httpClient.execute(request);
             } catch (Exception e) {
                 //Handle issue.
