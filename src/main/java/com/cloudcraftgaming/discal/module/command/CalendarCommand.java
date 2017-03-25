@@ -10,6 +10,7 @@ import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.ArrayList;
 
@@ -114,6 +115,11 @@ public class CalendarCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("delete") || function.equalsIgnoreCase("remove")) {
                     BotData data = DatabaseManager.getManager().getData(guildId);
+                    if(!event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
+		                        Permissions.MANAGE_SERVER)) {
+                        	Message.sendMessage("You need the \"Manage Server\" permission to run this command!", event, client);
+                        	return false;
+                    }
                     if (!data.getCalendarId().equalsIgnoreCase("primary")) {
                         //Delete calendar
                         if (CalendarUtils.deleteCalendar(data)) {
