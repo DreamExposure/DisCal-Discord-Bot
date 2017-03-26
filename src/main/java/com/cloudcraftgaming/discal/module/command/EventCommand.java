@@ -72,8 +72,12 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        EventCreator.getCreator().init(event);
-                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                            EventCreator.getCreator().init(event);
+                            Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                        } else {
+                            Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
                     }
                 } else if (function.equalsIgnoreCase("cancel")) {
                     if (EventCreator.getCreator().terminate(event)) {
@@ -90,11 +94,15 @@ public class EventCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("confirm")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         if (EventCreator.getCreator().getPreEvent(guildId).hasRequiredValues()) {
-                            EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
-                            if (response.isSuccessful()) {
-                                Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response), "Event confirmed!", event, client);
+                            if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                                EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
+                                if (response.isSuccessful()) {
+                                    Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response), "Event confirmed!", event, client);
+                                } else {
+                                    Message.sendMessage("Event created failed!", event, client);
+                                }
                             } else {
-                                Message.sendMessage("Event created failed!", event, client);
+                                Message.sendMessage("You cannot confirm an event when you do not have a calendar!", event, client);
                             }
                         } else {
                             Message.sendMessage("Required data not set! Please review event with `!event review`", event, client);
@@ -115,8 +123,12 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        EventCreator.getCreator().init(event);
-                        Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                            EventCreator.getCreator().init(event);
+                            Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                        } else {
+                            Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
                     }
                 } else if (function.equalsIgnoreCase("view")) {
                     if (!EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -292,8 +304,12 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        EventCreator.getCreator().init(event);
-                        Message.sendMessage("Event Creator initiated! Please specify event summary with `!event summary <summary>`", event, client);
+                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                            EventCreator.getCreator().init(event);
+                            Message.sendMessage("Event Creator initiated! Please specify event summary with `!event summary <summary>`", event, client);
+                        } else {
+                            Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
                     }
                 } else if (function.equalsIgnoreCase("summary")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
