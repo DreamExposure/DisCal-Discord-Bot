@@ -69,14 +69,25 @@ public class DatabaseManager {
      */
     public Boolean createTables() {
         try {
+            //TODO: Make calendar table
             Statement statement = databaseInfo.getConnection().createStatement();
 
             String dataTableName = databaseInfo.getPrefix() + "DATA";
             String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+            String settingsTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
             String createDataTable = "CREATE TABLE IF NOT EXISTS " + dataTableName +
                     " (GUILD_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
+                    " CONTROL_ROLE LONGTEXT not NULL, " +
+                    " DISCAL_CHANNEL LONGTEXT not NULL, " +
+                    " PRIMARY KEY (GUILD_ID))";
+            String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
+                    "(GUILD_ID VARCHAR(255) not NULL, " +
+                    " EXTERNAL_CALENDAR BOOLEAN not NULL, " +
+                    " PRIVATE_KEY VARCHAR(16) not NULL, " +
+                    " ACCESS_TOKEN LONGTEXT not NULL, " +
+                    " REFRESH_TOKEN LONGTEXT not NULL, " +
                     " CONTROL_ROLE LONGTEXT not NULL, " +
                     " DISCAL_CHANNEL LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
@@ -94,6 +105,7 @@ public class DatabaseManager {
                     " PRIMARY KEY (ANNOUNCEMENT_ID))";
             statement.executeUpdate(createDataTable);
             statement.executeUpdate(createAnnouncementTable);
+            statement.executeUpdate(createSettingsTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
             return true;
@@ -356,5 +368,9 @@ public class DatabaseManager {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
         return false;
+    }
+
+    public void runDatabaseUpdateIfNeeded() {
+        //TODO: move data
     }
 }
