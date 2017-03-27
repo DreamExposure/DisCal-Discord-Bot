@@ -43,6 +43,7 @@ public class Main {
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
         DatabaseManager.getManager().connectToMySQL(mySQL);
         DatabaseManager.getManager().createTables();
+        DatabaseManager.getManager().runDatabaseUpdateIfNeeded();
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
