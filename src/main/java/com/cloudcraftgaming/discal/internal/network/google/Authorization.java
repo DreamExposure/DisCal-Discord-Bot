@@ -25,6 +25,7 @@ import sx.blah.discord.util.EmbedBuilder;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("WeakerAccess")
 public class Authorization {
     public static void requestCode(MessageReceivedEvent event) {
         HttpClient httpClient = HttpClientBuilder.create().build();
@@ -92,7 +93,8 @@ public class Authorization {
 
             //Handle response.
             if (httpResponse.getStatusLine().getStatusCode() == 403) {
-                //TODO: Handle access denied
+                //Handle access denied
+                Message.sendDirectMessage("You have denied DisCal use of your calendars! If this was a mistake just restart the process!", poll.getUser());
             } else if (httpResponse.getStatusLine().getStatusCode() == 400) {
                 try {
                     //See if auth is pending, if so, just reschedule.
@@ -126,7 +128,10 @@ public class Authorization {
             }
 
         } catch (Exception e) {
-            //TODO: Handle exception.
+            //Handle exception.
+            EmailSender.getSender().sendExceptionEmail(e, Authorization.class);
+            Message.sendDirectMessage("Uh oh... An error has occured! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
+
         }
     }
 }
