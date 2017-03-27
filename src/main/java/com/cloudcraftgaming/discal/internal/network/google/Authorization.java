@@ -1,6 +1,9 @@
 package com.cloudcraftgaming.discal.internal.network.google;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
@@ -112,7 +115,12 @@ public class Authorization {
                 //Access granted
                 AuthPollResponseGrant aprg = new Gson().fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
 
-                //TODO: Save credentials securely.
+                //Save credentials securely.
+                GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getID());
+                AESEncryption encryption = new AESEncryption(gs);
+                gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
+                gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
+                DatabaseManager.getManager().updateSettings(gs);
 
                 //TODO: ask user which calendar we can use.
             }

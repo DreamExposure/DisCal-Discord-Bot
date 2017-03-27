@@ -136,6 +136,7 @@ public class DatabaseManager {
      * @param data The Data to be entered into the database.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
+    @Deprecated
     public Boolean updateData(BotData data) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
@@ -348,6 +349,7 @@ public class DatabaseManager {
      * @param guildId The ID of the guild whose data is to be retrieved.
      * @return The {@link BotData} of the Guild or <code>null</code>.
      */
+    @Deprecated
     public BotData getData(String guildId) {
         BotData botData = new BotData(guildId);
         try {
