@@ -1,9 +1,13 @@
 package com.cloudcraftgaming.discal.database;
 
+import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
+import sx.blah.discord.handle.obj.IGuild;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -169,6 +173,58 @@ public class DatabaseManager {
         return false;
     }
 
+    public boolean updateSettings(GuildSettings settings) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + settings.getGuildID() + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (!hasStuff || res.getString("GUILD_ID") == null) {
+                    //Data not present, add to DB.
+                    String insertCommand = "INSERT INTO " + dataTableName +
+                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?);";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+                    ps.setString(1, settings.getGuildID());
+                    ps.setBoolean(2, settings.useExternalCalendar());
+                    ps.setString(3, settings.getPrivateKey());
+                    ps.setString(4, settings.getEncryptedAccessToken());
+                    ps.setString(5, settings.getEncryptedRefreshToken());
+                    ps.setString(6, settings.getControlRole());
+                    ps.setString(7, settings.getDiscalChannel());
+
+
+                    ps.executeUpdate();
+                    ps.close();
+                    statement.close();
+                } else {
+                    //Data present, update.
+                    String updateCMD = "UPDATE " + dataTableName
+                            + " SET EXTERNAL_CALENDAR= '" + settings.useExternalCalendar()
+                            + "', PRIVATE_KEY='" + settings.getPrivateKey()
+                            + "', ACCESS_TOKEN='" + settings.getEncryptedAccessToken()
+                            + "', REFRESH_TOKEN='" + settings.getEncryptedRefreshToken()
+                            + "', CONTROL_ROLE='" + settings.getControlRole()
+                            + "', DISCAL_CHANNEL='" + settings.getDiscalChannel()
+                            + "' WHERE GUILD_ID= '" + settings.getGuildID() + "';";
+                    statement.executeUpdate(updateCMD);
+                    statement.close();
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to input data into database! Error Code: 00101");
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     /**
      * Updates or Adds the specified {@link Announcement} Object to the database.
      * @param announcement The announcement object to add to the database.
@@ -265,6 +321,39 @@ public class DatabaseManager {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
         return botData;
+    }
+
+    public GuildSettings getSettings(String guildId) {
+        GuildSettings settings = new GuildSettings(guildId);
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (hasStuff && res.getString("GUILD_ID") != null) {
+                    settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
+                    settings.setPrivateKey(res.getString("PRIVATE_KEY"));
+                    settings.setEncryptedAccessToken(res.getString("ACCESS_TOKEN"));
+                    settings.setEncryptedRefreshToken(res.getString("REFRESH_TOKEN"));
+                    settings.setControlRole(res.getString("CONTROL_ROLE"));
+                    settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
+
+                    statement.close();
+                } else {
+                    //Data not present.
+                    statement.close();
+                    return settings;
+                }
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return settings;
     }
 
     /**
@@ -371,6 +460,21 @@ public class DatabaseManager {
     }
 
     public void runDatabaseUpdateIfNeeded() {
-        //TODO: move data
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Running Db updater to move data to new tables!");
+        for (IGuild g : Main.client.getGuilds()) {
+            BotData data = getData(g.getID());
+            GuildSettings settings = new GuildSettings(g.getID());
+
+            //Set values.
+            settings.setUseExternalCalendar(false);
+            settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
+            settings.setControlRole(data.getControlRole());
+            settings.setDiscalChannel(data.getChannel());
+
+            //Add settings to Db.
+            updateSettings(settings);
+
+            //TODO: Move calendar data to new table.
+        }
     }
 }
