@@ -17,6 +17,9 @@ public class GuildSettings {
     private String controlRole;
     private String discalChannel;
 
+    private boolean patronGuild;
+    private Integer maxCalendars;
+
     public GuildSettings(String _guildId) {
         guildID = _guildId;
 
@@ -28,6 +31,9 @@ public class GuildSettings {
 
         controlRole = "everyone";
         discalChannel = "all";
+
+        patronGuild = false;
+        maxCalendars = 1;
     }
 
     //Getters
@@ -59,6 +65,14 @@ public class GuildSettings {
         return discalChannel;
     }
 
+    public boolean isPatronGuild() {
+        return patronGuild;
+    }
+
+    public Integer getMaxCalendars() {
+        return maxCalendars;
+    }
+
     //Setters
     public void setUseExternalCalendar(boolean _useExternal) {
         externalCalendar = _useExternal;
@@ -82,5 +96,13 @@ public class GuildSettings {
 
     public void setDiscalChannel(String _discalChannel) {
         discalChannel = _discalChannel;
+    }
+
+    public void setPatronGuild(boolean _patronGuild) {
+        patronGuild = _patronGuild;
+    }
+
+    public void setMaxCalendars(Integer _maxCalendars) {
+        maxCalendars = _maxCalendars;
     }
 }
