@@ -45,7 +45,7 @@ public class Validator {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 Date endDate = sdf.parse(endRaw);
-                Date startDate = new Date(event.getStartDateTime().getDate().getValue());
+                Date startDate = new Date(event.getStartDateTime().getDateTime().getValue());
 
                 return endDate.before(startDate);
             } catch (ParseException e) {
@@ -68,7 +68,7 @@ public class Validator {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 Date startDate = sdf.parse(startRaw);
-                Date endDate = new Date(event.getEndDateTime().getDate().getValue());
+                Date endDate = new Date(event.getEndDateTime().getDateTime().getValue());
 
                 return startDate.after(endDate);
             } catch (ParseException e) {
