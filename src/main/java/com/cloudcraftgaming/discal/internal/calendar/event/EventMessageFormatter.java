@@ -106,8 +106,16 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Pre-Event Info");
-        em.appendField("Event Name/Summary", event.getSummary(), true);
-        em.appendField("Event Description", event.getDescription(), true);
+        if (event.getSummary() != null) {
+            em.appendField("Event Name/Summary", event.getSummary(), true);
+        } else {
+            em.appendField("Event Name/Summary", "ERROR", true);
+        }
+        if (event.getDescription() != null) {
+            em.appendField("Event Description", event.getDescription(), true);
+        } else {
+            em.appendField("Event Description", "ERROR", true);
+        }
         em.appendField("[R] Event Start Date", getHumanReadableDate(event.getViewableStartDate()), true);
         em.appendField("[R] Event Start Time", EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
         em.appendField("[R] Event End Date", getHumanReadableDate(event.getViewableEndDate()), true);
