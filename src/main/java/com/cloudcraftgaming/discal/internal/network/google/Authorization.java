@@ -91,6 +91,39 @@ public class Authorization {
         }
     }
 
+    public String requestNewAccessToken(GuildSettings settings) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
+
+            AESEncryption encryption = new AESEncryption(settings);
+            AuthRefreshRequest arr = new AuthRefreshRequest();
+            arr.client_id = clientData.getClientId();
+            arr.client_secret = clientData.getClientSecret();
+            arr.refresh_token = encryption.decrypt(settings.getEncryptedRefreshToken());
+
+            String json = new Gson().toJson(arr);
+            request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
+
+            HttpResponse httpResponse = httpClient.execute(request);
+
+            AuthRefreshResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), AuthRefreshResponse.class);
+
+            //Update Db data.
+            settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
+            DatabaseManager.getManager().updateSettings(settings);
+
+            //Okay, we can return the access token to be used when this method is called.
+            return response.access_token;
+
+        } catch (Exception e) {
+            //Error occurred, lets just log it and return null.
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            return null;
+        }
+    }
+
     public void pollForAuth(Poll poll) {
         HttpClient httpClient = HttpClientBuilder.create().build();
 
