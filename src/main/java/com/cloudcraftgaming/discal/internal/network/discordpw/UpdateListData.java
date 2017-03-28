@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -37,6 +38,7 @@ public class UpdateListData {
             } catch (Exception e) {
                 //Handle issue.
                 System.out.println("Failed to update Discord PW list metadata!");
+                EmailSender.getSender().sendExceptionEmail(e, UpdateListData.class);
                 e.printStackTrace();
             }
         }
