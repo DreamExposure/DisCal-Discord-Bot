@@ -273,16 +273,17 @@ public class EventCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("color")) {
                     String value = args[1];
-                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
-                        if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")) {
-                            StringBuilder list = new StringBuilder("All Colors: ");
-                            for (EventColor ec : EventColor.values()) {
-                                list.append(Message.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
-                            }
-                            list.append(Message.lineBreak).append(Message.lineBreak).append("Use `!event color <name OR ID>` to set an event's color!");
+                    if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")) {
 
-                            Message.sendMessage(list.toString().trim(), event, client);
-                        } else {
+                        StringBuilder list = new StringBuilder("All Colors: ");
+                        for (EventColor ec : EventColor.values()) {
+                            list.append(Message.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
+                        }
+                        list.append(Message.lineBreak).append(Message.lineBreak).append("Use `!event color <name OR ID>` to set an event's color!");
+
+                        Message.sendMessage(list.toString().trim(), event, client);
+                    } else {
+                        if (EventCreator.getCreator().hasPreEvent(guildId)) {
                             //Attempt to get color.
                             if (EventColor.exists(value)) {
                                 EventColor color = EventColor.fromNameOrHexOrID(value);
@@ -291,9 +292,9 @@ public class EventCommand implements ICommand {
                             } else {
                                 Message.sendMessage("Invalid/Unsupported color! Use `!event color list` to view all supported colors!", event, client);
                             }
+                        } else {
+                            Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                         }
-                    } else {
-                        Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
                 } else {
                     Message.sendMessage("Invalid function!", event, client);
