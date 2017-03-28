@@ -180,7 +180,8 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Integer minutes = Integer.valueOf(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-                            Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
+                            Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! " +
+                                    "If you would like to add some info text, use `!announcement info <text>` otherwise, review your announcement with `!announcement review`", event, client);
                         } catch (NumberFormatException e) {
                             Message.sendMessage("Minutes must be a valid integer! (Ex: `1` or `10`)", event, client);
                         }
@@ -275,7 +276,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("info")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: `" + value + "`", event, client);
+                        Message.sendMessage("Announcement info set to: `" + value + "`" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement creator not initiated!", event, client);
                     }
@@ -292,7 +293,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         String value = value1 + " " + value2;
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement Creator not initialized!", event, client);
                     }
@@ -397,7 +398,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         String value = getContent(args);
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement Creator not initialized!", event, client);
                     }
