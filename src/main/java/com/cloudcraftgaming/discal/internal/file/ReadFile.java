@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.internal.file;
 
 import com.cloudcraftgaming.discal.database.MySQL;
 import com.cloudcraftgaming.discal.internal.email.EmailData;
+import com.cloudcraftgaming.discal.internal.network.google.json.ClientData;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -108,6 +109,37 @@ public class ReadFile {
             in.close();
 
             return new EmailData(user, pass);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static ClientData getGoogleClientData(String fileAndPath) {
+        try {
+            FileInputStream fstream = new FileInputStream(fileAndPath);
+            //Get data
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            //Read file line by line
+            String id = null;
+            String sec = null;
+
+            int line = 0;
+            while ((strLine = br.readLine()) != null) {
+                if (line == 0) {
+                    id = strLine;
+                }
+                if (line == 1) {
+                    sec = strLine;
+                }
+                line++;
+            }
+            //Close input stream
+            in.close();
+
+            return new ClientData(id, sec);
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }

@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -27,13 +28,29 @@ import sx.blah.discord.util.EmbedBuilder;
  */
 @SuppressWarnings("WeakerAccess")
 public class Authorization {
-    public static void requestCode(MessageReceivedEvent event) {
+    private static Authorization instance;
+    private ClientData clientData;
+
+    private Authorization() {} //Prevent initialization.
+
+    public static Authorization getAuth() {
+        if (instance == null) {
+            instance = new Authorization();
+        }
+        return instance;
+    }
+
+    public void init(String clientFile) {
+        clientData = ReadFile.getGoogleClientData(clientFile);
+    }
+
+    public void requestCode(MessageReceivedEvent event) {
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
             HttpPost request = new HttpPost("https://accounts.google.com/o/oauth2/device/code");
             CodeRequest cr = new CodeRequest();
-            //TODO: Set client ID here
+            cr.client_id = clientData.getClientId();
             cr.scope = CalendarScopes.CALENDAR;
             String json = new Gson().toJson(cr);
             request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
@@ -74,12 +91,13 @@ public class Authorization {
         }
     }
 
-    public static void pollForAuth(Poll poll) {
+    public void pollForAuth(Poll poll) {
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
             AuthPollRequest apr = new AuthPollRequest();
-            //TODO: Set client ID and client secret.
+            apr.client_id = clientData.getClientId();
+            apr.client_secret = clientData.getClientSecret();
             apr.code = poll.getDevice_code();
             apr.grant_type = "http://oauth.net/grant_type/device/1.0";
 

@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.consolecommand.ConsoleCommandExecuto
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
+import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.command.*;
 import sx.blah.discord.api.ClientBuilder;
@@ -38,6 +39,10 @@ public class Main {
 
         if (args.length > 3)
             UpdateListData.init(args[3]);
+
+        if (args.length > 4) {
+            Authorization.getAuth().init(args[4]);
+        }
 
         //Connect to MySQL
         MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);

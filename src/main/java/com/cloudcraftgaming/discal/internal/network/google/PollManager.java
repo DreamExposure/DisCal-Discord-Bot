@@ -29,12 +29,12 @@ public class PollManager {
     }
 
     //Timer methods.
-    public void scheduleNextPoll(Poll poll) {
+    void scheduleNextPoll(Poll poll) {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
-                Authorization.pollForAuth(poll);
+                Authorization.getAuth().pollForAuth(poll);
             }
         }, 1000 * poll.getInterval());
     }
