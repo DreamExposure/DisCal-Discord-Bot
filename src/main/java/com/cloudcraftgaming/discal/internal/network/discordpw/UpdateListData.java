@@ -1,12 +1,10 @@
 package com.cloudcraftgaming.discal.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.network.discordpw.json.Stats;
-import com.google.gson.Gson;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import org.json.JSONObject;
 
 /**
  * Created by Nova Fox on 1/13/2017.
@@ -29,20 +27,13 @@ public class UpdateListData {
      */
     public static void updateSiteBotMeta() {
         if (!token.equalsIgnoreCase("N/a")) {
-            HttpClient httpClient = HttpClientBuilder.create().build();
-
             try {
-                HttpPost request = new HttpPost("http://bots.discord.pw/api/bots/265523588918935552/stats");
+                Integer serverCount = Main.client.getGuilds().size();
 
-                String serverCount = String.valueOf(Main.client.getGuilds().size());
+                JSONObject json = new JSONObject().put("server_count", serverCount);
 
-                Stats stats = new Stats();
-                stats.server_count = serverCount;
+                HttpResponse<JsonNode> response = Unirest.post("http://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
 
-                request.setHeader("Authorization", token);
-                String json = new Gson().toJson(stats);
-                request.setEntity(new StringEntity(json));
-                httpClient.execute(request);
             } catch (Exception e) {
                 //Handle issue.
                 System.out.println("Failed to update Discord PW list metadata!");
