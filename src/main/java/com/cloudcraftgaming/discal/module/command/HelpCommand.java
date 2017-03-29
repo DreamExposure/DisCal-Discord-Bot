@@ -44,8 +44,12 @@ public class HelpCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         StringBuilder cmds = new StringBuilder();
 
-        for (String c : CommandExecutor.getExecutor().getAllCommands()) {
-            cmds.append(c).append(", ");
+        for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
+            if (c.getAliases().size() > 0) {
+                cmds.append(c.getCommand()).append(c.getAliases().toString()).append(", ");
+            } else {
+                cmds.append(c.getCommand()).append(", ");
+            }
         }
         cmds = new StringBuilder(cmds.substring(0, cmds.length() - 2));
 

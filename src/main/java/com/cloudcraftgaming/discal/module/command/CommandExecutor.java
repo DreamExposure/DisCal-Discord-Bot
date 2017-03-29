@@ -79,4 +79,8 @@ public class CommandExecutor {
         }
         return cmds;
     }
+
+    ArrayList<ICommand> getCommands() {
+        return commands;
+    }
 }
