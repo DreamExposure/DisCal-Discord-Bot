@@ -81,7 +81,7 @@ public class EventListCommand implements ICommand {
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), "1 upcoming event found:", event, client);
                     } else {
                         //List events by Id only.
-                        Message.sendMessage(items.size() + " upcoming events found...", event, client);
+                        Message.sendMessage(items.size() + " upcoming events found... Please note that this list may be delayed due to rate limiting...", event, client);
                         for (Event e : items) {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event, client);
                         }
