@@ -509,7 +509,7 @@ public class AnnouncementCommand implements ICommand {
 
     private IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (mention.equalsIgnoreCase("<@" + r.getID() + ">") || mention.equalsIgnoreCase("<@!" + r.getID() + ">")) {
+            if (mention.equalsIgnoreCase("<@&" + r.getID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getID() + ">")) {
                 return r;
             }
         }
