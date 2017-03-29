@@ -6,6 +6,8 @@ import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.utils.RoleUtils;
+import com.cloudcraftgaming.discal.utils.UserUtils;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.IDiscordClient;
@@ -300,7 +302,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("subscribe")) {
                     if (announcementExists(value1, event)) {
                         Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                        IUser user = getUserFromMention(value2, event);
+                        IUser user = UserUtils.getUserFromMention(value2, event);
                         if (user != null) {
                             //Valid user, let's add that user to the announcement.
                             if (!a.getSubscriberUserIds().contains(user.getID())) {
@@ -323,7 +325,7 @@ public class AnnouncementCommand implements ICommand {
                             }
                         } else {
                             //User does not exist, see if a role.
-                            IRole role = getRoleFromMention(value2, event);
+                            IRole role = RoleUtils.getRoleFromMention(value2, event);
                             if (role != null) {
                                 //Role valid, let's add that role to the announcement.
                                 if (!a.getSubscriberRoleIds().contains(role.getID())) {
@@ -345,7 +347,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("unsubscribe")) {
                     if (announcementExists(value1, event)) {
                         Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                        IUser user = getUserFromMention(value2, event);
+                        IUser user = UserUtils.getUserFromMention(value2, event);
                         if (user != null) {
                             //Valid user, let's add that user to the announcement.
                             if (a.getSubscriberUserIds().contains(user.getID())) {
@@ -368,7 +370,7 @@ public class AnnouncementCommand implements ICommand {
                             }
                         } else {
                             //User does not exist, see if a role.
-                            IRole role = getRoleFromMention(value2, event);
+                            IRole role = RoleUtils.getRoleFromMention(value2, event);
                             if (role != null) {
                                 //Role valid, let's add that role to the announcement.
                                 if (a.getSubscriberRoleIds().contains(role.getID())) {
@@ -495,24 +497,5 @@ public class AnnouncementCommand implements ICommand {
             content.append(args[i]).append(" ");
         }
         return content.toString().trim();
-    }
-
-    private IUser getUserFromMention(String mention, MessageReceivedEvent event) {
-        for (IUser u : event.getMessage().getGuild().getUsers()) {
-            if (mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">")) {
-                return u;
-            }
-        }
-
-        return null;
-    }
-
-    private IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
-        for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (mention.equalsIgnoreCase("<@&" + r.getID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getID() + ">")) {
-                return r;
-            }
-        }
-        return null;
     }
 }
