@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.mashape.unirest.http.HttpResponse;
@@ -14,36 +15,34 @@ import org.json.JSONObject;
  * For Project: DisCal
  */
 public class UpdateListData {
-    private static String token = "N/a";
+    static String token;
 
     /**
      * Initiates the data updater with a valid token.
-     * @param _token Private API token.
+     * @param settings BotSettings containing the API token.
      */
-    public static void init(String _token) {
-        token = _token;
+    public static void init(BotSettings settings) {
+        token = settings.getBotsPwToken();
     }
 
     /**
      * Updates the site meta on bots.discord.pw
      */
     public static void updateSiteBotMeta() {
-        if (!token.equalsIgnoreCase("N/a")) {
-            try {
-                Integer serverCount = Main.client.getGuilds().size();
+        try {
+            Integer serverCount = Main.client.getGuilds().size();
 
-                JSONObject json = new JSONObject().put("server_count", serverCount);
+            JSONObject json = new JSONObject().put("server_count", serverCount);
 
-                HttpResponse<JsonNode> response = Unirest.post("http://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
+            HttpResponse<JsonNode> response = Unirest.post("http://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
 
-                EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
+            EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
 
-            } catch (Exception e) {
-                //Handle issue.
-                System.out.println("Failed to update Discord PW list metadata!");
-                EmailSender.getSender().sendExceptionEmail(e, UpdateListData.class);
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            //Handle issue.
+            System.out.println("Failed to update Discord PW list metadata!");
+            EmailSender.getSender().sendExceptionEmail(e, UpdateListData.class);
+            e.printStackTrace();
         }
     }
 }

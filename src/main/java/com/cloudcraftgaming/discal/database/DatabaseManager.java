@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.database;
 
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
@@ -34,10 +35,11 @@ public class DatabaseManager {
 
     /**
      * Connects to the MySQL server specified.
-     * @param mySQL The MySQL server to connect to.
+     * @param bs The BotSettings containing MySQL info.
      */
-    public void connectToMySQL(MySQL mySQL) {
+    public void connectToMySQL(BotSettings bs) {
         try {
+            MySQL mySQL = new MySQL(bs.getDbHostName(), bs.getDbPort(), bs.getDbDatabase(), bs.getDbPrefix(), bs.getDbUser(), bs.getDbPass());
             Connection mySQLConnection = mySQL.openConnection();
             databaseInfo = new DatabaseInfo(mySQL, mySQLConnection, mySQL.getPrefix());
             System.out.println("Connected to MySQL database!");

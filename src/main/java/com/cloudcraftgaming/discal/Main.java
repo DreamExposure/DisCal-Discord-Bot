@@ -1,9 +1,9 @@
 package com.cloudcraftgaming.discal;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.database.MySQL;
 import com.cloudcraftgaming.discal.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.discal.internal.consolecommand.ConsoleCommandExecutor;
+import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
@@ -24,24 +24,28 @@ import sx.blah.discord.util.DiscordException;
 public class Main {
     public static String version = "Beta 2.2.0";
     public static IDiscordClient client;
+    public static BotSettings botSettings;
 
     public static void main(String[] args) {
-        if (args.length < 3) // Needs a bot token provided
-            throw new IllegalArgumentException("The Bot Token, MySQL file, or Email file has not be specified!");
+        if (args.length < 1) // Needs a bot token provided
+            throw new IllegalArgumentException("BotSettings file has not ne specified!!");
+
+        //Get bot settings
+        botSettings = ReadFile.readBotSettings(args[0]);
 
         //Setup email debugging
-        EmailSender.getSender().init(args[2]);
 
-        client = createClient(args[0], true);
+
+        EmailSender.getSender().init(botSettings);
+
+        client = createClient(botSettings.getBotToken(), true);
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
 
-        if (args.length > 3)
-            UpdateListData.init(args[3]);
+        UpdateListData.init(botSettings);
 
         //Connect to MySQL
-        MySQL mySQL = ReadFile.readDatabaseSettings(args[1]);
-        DatabaseManager.getManager().connectToMySQL(mySQL);
+        DatabaseManager.getManager().connectToMySQL(botSettings);
         DatabaseManager.getManager().createTables();
 
         //Register events
