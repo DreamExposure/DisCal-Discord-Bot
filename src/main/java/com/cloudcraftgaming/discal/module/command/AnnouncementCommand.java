@@ -4,10 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.module.announcement.*;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
-import com.cloudcraftgaming.discal.utils.RoleUtils;
-import com.cloudcraftgaming.discal.utils.UserUtils;
+import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.IDiscordClient;
@@ -136,8 +133,8 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("channel")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        if (channelExists(value, event)) {
-                            IChannel c = getChannelFromName(value, event);
+                        if (ChannelUtils.channelExists(value, event)) {
+                            IChannel c = ChannelUtils.getChannelFromNameOrId(value, event);
                             if (c != null) {
                                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementChannelId(c.getID());
                                 Message.sendMessage("Announcement channel set to: `" + c.getName() + "`" + Message.lineBreak + "Please specify the amount of hours before the event this is to fire!", event, client);
@@ -413,42 +410,6 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
         }
         return false;
-    }
-
-    /**
-     * Checks if the specified channel exists.
-     * @param value The channel name.
-     * @param event The event received.
-     * @return <code>true</code> if exists, else <code>false</code>.
-     */
-    private Boolean channelExists(String value, MessageReceivedEvent event) {
-        if (value.contains("#")) {
-            value = value.replaceAll("#", "");
-        }
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the IChannel from its name.
-     * @param value The channel name.
-     * @param event The event received.
-     * @return the IChannel if successful, else <code>null</code>.
-     */
-    private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
-        if (value.contains("#")) {
-            value = value.replaceAll("#", "");
-        }
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return c;
-            }
-        }
-        return null;
     }
 
     /**

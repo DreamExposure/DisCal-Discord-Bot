@@ -4,10 +4,10 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class AnnouncementMessageFormatter {
         em.appendField("Event ID", a.getEventId(), true);
         em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
         em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
-        em.appendField("In Channel (Name)", channelFromId(a), true);
+        em.appendField("In Channel (Name)", ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), a.getGuildId()), true);
         em.appendField("Additional Info", a.getInfo(), false);
         em.withColor(36, 153, 153);
 
@@ -69,19 +69,6 @@ public class AnnouncementMessageFormatter {
         em.withColor(36, 153, 153);
 
         return em.build();
-    }
-
-    /**
-     * Gets the specified channel via its ID.
-     * @param a The Announcement involved.
-     * @return The Name of the channel from its ID.
-     */
-    private static String channelFromId(Announcement a) {
-        IGuild g = Main.client.getGuildByID(a.getGuildId());
-        if (!a.getAnnouncementChannelId().equalsIgnoreCase("N/a")) {
-            return g.getChannelByID(a.getAnnouncementChannelId()).getName();
-        }
-        return "Unset or Invalid";
     }
 
     /**
