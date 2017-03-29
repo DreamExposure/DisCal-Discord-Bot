@@ -34,7 +34,7 @@ public class UpdateListData {
 
             JSONObject json = new JSONObject().put("server_count", serverCount);
 
-            HttpResponse<JsonNode> response = Unirest.post("http://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
+            HttpResponse<JsonNode> response = Unirest.post("https://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
 
             EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
 
