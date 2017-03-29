@@ -8,6 +8,9 @@ import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
@@ -78,5 +81,52 @@ public class AnnouncementMessageFormatter {
      */
     private static String condensedTime(Announcement a) {
         return a.getHoursBefore() + "H" + a.getMinutesBefore() + "m";
+    }
+
+    public static String getSubscriberNames(Announcement a) {
+        //Loop and get subs without mentions...
+        IGuild guild = Main.client.getGuildByID(a.getGuildId());
+
+        String userMentions = "";
+        for (String userId : a.getSubscriberUserIds()) {
+            try {
+                IUser user = guild.getUserByID(userId);
+                if (user != null) {
+                    userMentions = userMentions + user.getName() + " ";
+                }
+            } catch (Exception e) {
+                //User does not exist, safely ignore.
+            }
+        }
+
+        String roleMentions = "";
+        Boolean mentionEveryone = false;
+        Boolean mentionHere = false;
+        for (String roleId : a.getSubscriberRoleIds()) {
+            if (roleId.equalsIgnoreCase("everyone")) {
+                mentionEveryone = true;
+            } else if (roleId.equalsIgnoreCase("here")) {
+                mentionHere = true;
+            } else {
+                try {
+                    IRole role = guild.getRoleByID(roleId);
+                    if (role != null) {
+                        roleMentions = roleMentions + role.getName() + " ";
+                    }
+                } catch (Exception e) {
+                    //Role does not exist, safely ignore.
+                }
+            }
+        }
+
+        String message = "Subscribers: " + userMentions + " " + roleMentions;
+        if (mentionEveryone) {
+            message = message + " " + guild.getEveryoneRole().getName();
+        }
+        if (mentionHere) {
+            message = message + " here";
+        }
+
+        return message;
     }
 }

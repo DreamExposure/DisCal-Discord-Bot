@@ -154,7 +154,7 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
                             if (a != null) {
-                                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), event, client);
+                                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), AnnouncementMessageFormatter.getSubscriberNames(a), event, client);
                             } else {
                                 Message.sendMessage("That announcement does not exist! Are you sure you typed the ID correctly?", event, client);
                             }
