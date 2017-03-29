@@ -28,7 +28,9 @@ In addition to all of the features above, DisCal will automatically send the dev
 
 ## Planned Features
 
-* Link up to external calendar
+* Link up to external calendar (WIP)
+* Full overhaul of all creators
+* Web Dashboard to manage DisCal settings!
 * Edit events
 * Edit calendars
 * And more!

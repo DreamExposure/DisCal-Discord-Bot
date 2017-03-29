@@ -6,7 +6,7 @@
 
     <groupId>com.cloudcraftgaming</groupId>
     <artifactId>DisCal</artifactId>
-    <version>Beta 2.1.1</version>
+    <version>Beta 2.2.0</version>
 
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
