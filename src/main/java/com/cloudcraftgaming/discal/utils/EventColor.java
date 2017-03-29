@@ -16,7 +16,6 @@ public enum EventColor {
     private final Integer id;
     private final String hex;
 
-    //TOOD: Add RGB getters
     private final Integer r;
     private final Integer g;
     private final Integer b;
