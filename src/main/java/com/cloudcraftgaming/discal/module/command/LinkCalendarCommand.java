@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.IDiscordClient;
@@ -41,6 +42,19 @@ public class LinkCalendarCommand implements ICommand {
         aliases.add("calendarlink");
         aliases.add("callink");
         return aliases;
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("linkCalendar");
+        info.setDescription("Links the guild's calendar in a pretty embed!");
+        info.setExample("!linkCalendar");
+        return info;
     }
 
     /**

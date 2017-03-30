@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
@@ -40,6 +41,23 @@ public class DisCalCommand implements ICommand {
     @Override
     public ArrayList<String> getAliases() {
         return new ArrayList<>();
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("event");
+        info.setDescription("Used to configure DisCal");
+        info.setExample("!DisCal (function) (value)");
+
+        info.getSubCommands().add("role");
+        info.getSubCommands().add("channel");
+
+        return info;
     }
 
     /**

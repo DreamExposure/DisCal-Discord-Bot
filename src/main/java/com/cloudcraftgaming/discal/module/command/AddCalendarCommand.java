@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -35,6 +36,19 @@ public class AddCalendarCommand implements ICommand {
         ArrayList<String> aliases = new ArrayList<>();
         aliases.add("addcal");
         return aliases;
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("LinkCalendar");
+        info.setDescription("Allows you to start the process of syncing an external calendar!");
+        info.setExample("!addCalendar");
+        return info;
     }
 
     /**

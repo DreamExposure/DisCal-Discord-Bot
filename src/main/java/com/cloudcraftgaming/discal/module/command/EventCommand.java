@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.calendar.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
@@ -51,6 +52,34 @@ public class EventCommand implements ICommand {
     @Override
     public ArrayList<String> getAliases() {
         return new ArrayList<>();
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("event");
+        info.setDescription("Used for all event related functions");
+        info.setExample("!event <function> (value(s))");
+
+        info.getSubCommands().add("create");
+        info.getSubCommands().add("cancel");
+        info.getSubCommands().add("delete");
+        info.getSubCommands().add("view");
+        info.getSubCommands().add("review");
+        info.getSubCommands().add("confirm");
+        info.getSubCommands().add("start");
+        info.getSubCommands().add("startDate");
+        info.getSubCommands().add("end");
+        info.getSubCommands().add("endDate");
+        info.getSubCommands().add("summary");
+        info.getSubCommands().add("description");
+        info.getSubCommands().add("color");
+
+        return info;
     }
 
     /**

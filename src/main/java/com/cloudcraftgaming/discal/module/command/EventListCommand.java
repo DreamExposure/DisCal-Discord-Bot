@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -41,6 +42,19 @@ public class EventListCommand implements ICommand {
     @Override
     public ArrayList<String> getAliases() {
         return new ArrayList<>();
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("events");
+        info.setDescription("Lists the specified amount of events from the guild calendar.");
+        info.setExample("!events (number)");
+        return info;
     }
 
     /**

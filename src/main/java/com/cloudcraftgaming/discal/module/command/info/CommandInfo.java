@@ -1,0 +1,46 @@
+package com.cloudcraftgaming.discal.module.command.info;
+
+import java.util.ArrayList;
+
+/**
+ * Created by Nova Fox on 3/29/2017.
+ * Website: www.cloudcraftgaming.com
+ * For Project: DisCal
+ */
+public class CommandInfo {
+    private final String name;
+    private String description;
+    private String example;
+
+    private ArrayList<String> subCommands = new ArrayList<>();
+
+    public CommandInfo(String _name) {
+        name = _name;
+    }
+
+    //Getters
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getExample() {
+        return example;
+    }
+
+    public ArrayList<String> getSubCommands() {
+        return subCommands;
+    }
+
+    //Setters
+    public void setDescription(String _description) {
+        description = _description;
+    }
+
+    public void setExample(String _example) {
+        example = _example;
+    }
+}

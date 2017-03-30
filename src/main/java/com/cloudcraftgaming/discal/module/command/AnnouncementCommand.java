@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.module.announcement.*;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -45,6 +46,35 @@ public class AnnouncementCommand implements ICommand {
         aliases.add("announce");
         aliases.add("alert");
         return aliases;
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("announcement");
+        info.setDescription("Used for all announcement functions.");
+        info.setExample("!announcement <function> (value(s))");
+
+        info.getSubCommands().add("create");
+        info.getSubCommands().add("confirm");
+        info.getSubCommands().add("cancel");
+        info.getSubCommands().add("delete");
+        info.getSubCommands().add("view");
+        info.getSubCommands().add("review");
+        info.getSubCommands().add("subscribe");
+        info.getSubCommands().add("unsubscribe");
+        info.getSubCommands().add("type");
+        info.getSubCommands().add("hours");
+        info.getSubCommands().add("minutes");
+        info.getSubCommands().add("list");
+        info.getSubCommands().add("event");
+        info.getSubCommands().add("info");
+
+        return info;
     }
 
     /**

@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreatorRes
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
@@ -44,6 +45,32 @@ public class CalendarCommand implements ICommand {
         ArrayList<String> aliases = new ArrayList<>();
         aliases.add("cal");
         return aliases;
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("calendar");
+        info.setDescription("Used for direct interaction with your DisCal Calendar.");
+        info.setExample("!calendar <subCommand> (value)");
+
+        info.getSubCommands().add("create");
+        info.getSubCommands().add("cancel");
+        info.getSubCommands().add("view");
+        info.getSubCommands().add("review");
+        info.getSubCommands().add("confirm");
+        info.getSubCommands().add("delete");
+        info.getSubCommands().add("remove");
+        info.getSubCommands().add("name");
+        info.getSubCommands().add("summary");
+        info.getSubCommands().add("timezone");
+        info.getSubCommands().add("channel");
+
+        return info;
     }
 
     /**
