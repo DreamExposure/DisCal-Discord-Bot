@@ -391,7 +391,7 @@ public class AnnouncementCommand implements ICommand {
                             if (a.getSubscriberRoleIds().contains(men)) {
                                 a.getSubscriberRoleIds().remove(men);
                                 DatabaseManager.getManager().updateAnnouncement(a);
-                                Message.sendMessage("`" + men + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement unsubscribe <announcement ID> <value>", event, client);
+                                Message.sendMessage("`" + men + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement subscribe <announcement ID> <value>", event, client);
                             } else {
                                 Message.sendMessage(men + " is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <value>`", event, client);
                             }
