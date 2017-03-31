@@ -3,6 +3,8 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.IDiscordClient;
@@ -42,6 +44,23 @@ public class DisCalCommand implements ICommand {
     }
 
     /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("event");
+        info.setDescription("Used to configure DisCal");
+        info.setExample("!DisCal (function) (value)");
+
+        info.getSubCommands().add("role");
+        info.getSubCommands().add("channel");
+
+        return info;
+    }
+
+    /**
      * Issues the command this Object is responsible for.
      * @param args The command arguments.
      * @param event The event received.
@@ -60,8 +79,8 @@ public class DisCalCommand implements ICommand {
 				em.appendField("Version", Main.version, true);
 				em.appendField("Library", "Discord4J, version 2.7.0", false);
 				em.appendField("Total Guilds", client.getGuilds().size() + "", true);
-				em.appendField("Current Ping [Shard " + guild.getShard() + "]", guild.getShard().getResponseTime() + "ms", true);
-				em.withFooterText("For more information about DisCal, please visit: https://www.cloudcraftgaming.com/discal/");
+				em.appendField("Current Ping [Shard " + guild.getShard().getInfo()[0] + "]", guild.getShard().getResponseTime() + "ms", true);
+				em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
 				em.withUrl("https://www.cloudcraftgaming.com/discal/");
 				em.withColor(36, 153, 153);
 				Message.sendMessage(em.build(), event, client);
@@ -140,8 +159,8 @@ public class DisCalCommand implements ICommand {
             DatabaseManager.getManager().updateData(data);
             Message.sendMessage("DisCal will now respond in all channels!", event, client);
         } else {
-            if (channelExists(channelName, event)) {
-                IChannel channel = getChannelFromName(channelName, event);
+            if (ChannelUtils.channelExists(channelName, event)) {
+                IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
                 if (channel != null) {
                     BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
                     data.setChannel(channel.getID());
@@ -154,35 +173,5 @@ public class DisCalCommand implements ICommand {
                 Message.sendMessage("The specified channel does not exist!", event, client);
             }
         }
-    }
-
-    /**
-     * Checks if the specified channel exists.
-     * @param value The name of the channel.
-     * @param event The event received.
-     * @return <code>true</code> if the channel exits, otherwise <code>false</code>.
-     */
-    private Boolean channelExists(String value, MessageReceivedEvent event) {
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the specified channel by name.
-     * @param value The name of the channel.
-     * @param event The event received.
-     * @return The IChannel if it exists, otherwise <code>false</code>.
-     */
-    private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return c;
-            }
-        }
-        return null;
     }
 }

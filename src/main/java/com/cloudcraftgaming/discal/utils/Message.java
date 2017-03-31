@@ -6,7 +6,9 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
 
 
@@ -28,7 +30,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -44,7 +46,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).appendContent(message).withChannel(channel).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -60,7 +62,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -76,7 +78,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).withEmbed(embed).withChannel(channel).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -93,7 +95,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -110,7 +112,7 @@ public class Message {
         RequestBuffer.request(() -> {
             try {
                 new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -121,7 +123,7 @@ public class Message {
            try {
                IPrivateChannel pc = user.getOrCreatePMChannel();
                pc.sendMessage(message);
-           } catch (Exception e) {
+           } catch (DiscordException | MissingPermissionsException e) {
                //Failed to send message.
            }
         });
@@ -132,7 +134,7 @@ public class Message {
             try {
                 IPrivateChannel pc = user.getOrCreatePMChannel();
                 pc.sendMessage("", embed, false);
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });
@@ -143,7 +145,7 @@ public class Message {
             try {
                 IPrivateChannel pc = user.getOrCreatePMChannel();
                 pc.sendMessage(message, embed, false);
-            } catch (Exception e) {
+            } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
             }
         });

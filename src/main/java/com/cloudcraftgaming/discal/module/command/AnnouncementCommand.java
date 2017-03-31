@@ -4,8 +4,8 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.module.announcement.*;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.IDiscordClient;
@@ -46,6 +46,35 @@ public class AnnouncementCommand implements ICommand {
         aliases.add("announce");
         aliases.add("alert");
         return aliases;
+    }
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("announcement");
+        info.setDescription("Used for all announcement functions.");
+        info.setExample("!announcement <function> (value(s))");
+
+        info.getSubCommands().add("create");
+        info.getSubCommands().add("confirm");
+        info.getSubCommands().add("cancel");
+        info.getSubCommands().add("delete");
+        info.getSubCommands().add("view");
+        info.getSubCommands().add("review");
+        info.getSubCommands().add("subscribe");
+        info.getSubCommands().add("unsubscribe");
+        info.getSubCommands().add("type");
+        info.getSubCommands().add("hours");
+        info.getSubCommands().add("minutes");
+        info.getSubCommands().add("list");
+        info.getSubCommands().add("event");
+        info.getSubCommands().add("info");
+
+        return info;
     }
 
     /**
@@ -134,8 +163,8 @@ public class AnnouncementCommand implements ICommand {
                     }
                 } else if (function.equalsIgnoreCase("channel")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                        if (channelExists(value, event)) {
-                            IChannel c = getChannelFromName(value, event);
+                        if (ChannelUtils.channelExists(value, event)) {
+                            IChannel c = ChannelUtils.getChannelFromNameOrId(value, event);
                             if (c != null) {
                                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementChannelId(c.getID());
                                 Message.sendMessage("Announcement channel set to: `" + c.getName() + "`" + Message.lineBreak + "Please specify the amount of hours before the event this is to fire!", event, client);
@@ -155,7 +184,7 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
                             if (a != null) {
-                                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), event, client);
+                                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), AnnouncementMessageFormatter.getSubscriberNames(a), event, client);
                             } else {
                                 Message.sendMessage("That announcement does not exist! Are you sure you typed the ID correctly?", event, client);
                             }
@@ -180,7 +209,8 @@ public class AnnouncementCommand implements ICommand {
                         try {
                             Integer minutes = Integer.valueOf(value);
                             AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-                            Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! Please use `!announcement review` to make sure everything is correct and then use `!announcement confirm` to create your announcement!", event, client);
+                            Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! " +
+                                    "If you would like to add some info text, use `!announcement info <text>` otherwise, review your announcement with `!announcement review`", event, client);
                         } catch (NumberFormatException e) {
                             Message.sendMessage("Minutes must be a valid integer! (Ex: `1` or `10`)", event, client);
                         }
@@ -275,7 +305,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("info")) {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: `" + value + "`", event, client);
+                        Message.sendMessage("Announcement info set to: `" + value + "`" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement creator not initiated!", event, client);
                     }
@@ -292,14 +322,14 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         String value = value1 + " " + value2;
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement Creator not initialized!", event, client);
                     }
                 } else if (function.equalsIgnoreCase("subscribe")) {
                     if (announcementExists(value1, event)) {
                         Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                        IUser user = getUserFromMention(value2, event);
+                        IUser user = UserUtils.getUserFromMention(value2, event);
                         if (user != null) {
                             //Valid user, let's add that user to the announcement.
                             if (!a.getSubscriberUserIds().contains(user.getID())) {
@@ -322,7 +352,7 @@ public class AnnouncementCommand implements ICommand {
                             }
                         } else {
                             //User does not exist, see if a role.
-                            IRole role = getRoleFromMention(value2, event);
+                            IRole role = RoleUtils.getRoleFromMention(value2, event);
                             if (role != null) {
                                 //Role valid, let's add that role to the announcement.
                                 if (!a.getSubscriberRoleIds().contains(role.getID())) {
@@ -344,7 +374,7 @@ public class AnnouncementCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("unsubscribe")) {
                     if (announcementExists(value1, event)) {
                         Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                        IUser user = getUserFromMention(value2, event);
+                        IUser user = UserUtils.getUserFromMention(value2, event);
                         if (user != null) {
                             //Valid user, let's add that user to the announcement.
                             if (a.getSubscriberUserIds().contains(user.getID())) {
@@ -361,13 +391,13 @@ public class AnnouncementCommand implements ICommand {
                             if (a.getSubscriberRoleIds().contains(men)) {
                                 a.getSubscriberRoleIds().remove(men);
                                 DatabaseManager.getManager().updateAnnouncement(a);
-                                Message.sendMessage("`" + men + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement unsubscribe <announcement ID> <value>", event, client);
+                                Message.sendMessage("`" + men + "` has been unsubscribed from the announcement with the ID `" + a.getAnnouncementId() + "`" + Message.lineBreak + "To re-subscribe them use `!announcement subscribe <announcement ID> <value>", event, client);
                             } else {
                                 Message.sendMessage(men + " is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <value>`", event, client);
                             }
                         } else {
                             //User does not exist, see if a role.
-                            IRole role = getRoleFromMention(value2, event);
+                            IRole role = RoleUtils.getRoleFromMention(value2, event);
                             if (role != null) {
                                 //Role valid, let's add that role to the announcement.
                                 if (a.getSubscriberRoleIds().contains(role.getID())) {
@@ -397,7 +427,7 @@ public class AnnouncementCommand implements ICommand {
                     if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                         String value = getContent(args);
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-                        Message.sendMessage("Announcement info set to: ```" + value + "```", event, client);
+                        Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
                     } else {
                         Message.sendMessage("Announcement Creator not initialized!", event, client);
                     }
@@ -410,42 +440,6 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
         }
         return false;
-    }
-
-    /**
-     * Checks if the specified channel exists.
-     * @param value The channel name.
-     * @param event The event received.
-     * @return <code>true</code> if exists, else <code>false</code>.
-     */
-    private Boolean channelExists(String value, MessageReceivedEvent event) {
-        if (value.contains("#")) {
-            value = value.replaceAll("#", "");
-        }
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the IChannel from its name.
-     * @param value The channel name.
-     * @param event The event received.
-     * @return the IChannel if successful, else <code>null</code>.
-     */
-    private IChannel getChannelFromName(String value, MessageReceivedEvent event) {
-        if (value.contains("#")) {
-            value = value.replaceAll("#", "");
-        }
-        for (IChannel c : event.getMessage().getGuild().getChannels()) {
-            if (c.getName().equalsIgnoreCase(value)) {
-                return c;
-            }
-        }
-        return null;
     }
 
     /**
@@ -494,24 +488,5 @@ public class AnnouncementCommand implements ICommand {
             content.append(args[i]).append(" ");
         }
         return content.toString().trim();
-    }
-
-    private IUser getUserFromMention(String mention, MessageReceivedEvent event) {
-        for (IUser u : event.getMessage().getGuild().getUsers()) {
-            if (mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">")) {
-                return u;
-            }
-        }
-
-        return null;
-    }
-
-    private IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
-        for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (mention.equalsIgnoreCase("<@" + r.getID() + ">") || mention.equalsIgnoreCase("<@!" + r.getID() + ">")) {
-                return r;
-            }
-        }
-        return null;
     }
 }

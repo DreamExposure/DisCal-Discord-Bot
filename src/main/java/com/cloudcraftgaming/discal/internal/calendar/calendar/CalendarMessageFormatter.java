@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
@@ -23,6 +24,31 @@ public class CalendarMessageFormatter {
         String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
+    }
+
+    public static String getCalendarLink(String calId) {
+        URI callURI = URI.create(calId);
+        return "https://calendar.google.com/calendar/embed?src=" + callURI;
+    }
+
+    public static EmbedObject getCalendarLinkEmbed(Calendar cal) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("Guild Calendar");
+        em.appendField("Calendar Name/Summary", cal.getSummary(), true);
+        try {
+            em.appendField("Description", cal.getDescription(), true);
+        } catch (NullPointerException | IllegalArgumentException e) {
+            //Some error, desc probably never set, just ignore no need to email.
+            em.appendField("Description", "N/a", true);
+        }
+        em.appendField("Timezone", cal.getTimeZone(), false);
+        em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
+        em.withFooterText("Calendar ID: " + cal.getId());
+        em.withColor(36, 153, 153);
+
+        return em.build();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.module.command;
 
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -24,6 +25,12 @@ interface ICommand {
      * @return The aliases of the command.
      */
     ArrayList<String> getAliases();
+
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     * @return The command info.
+     */
+    CommandInfo getCommandInfo();
 
     /**
      * Issues the command this Object is responsible for.

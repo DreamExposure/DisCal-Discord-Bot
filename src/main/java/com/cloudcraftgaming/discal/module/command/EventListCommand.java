@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -44,6 +45,19 @@ public class EventListCommand implements ICommand {
     }
 
     /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo("events");
+        info.setDescription("Lists the specified amount of events from the guild calendar.");
+        info.setExample("!events (number)");
+        return info;
+    }
+
+    /**
      * Issues the command this Object is responsible for.
      * @param args The command arguments.
      * @param event The event received.
@@ -58,6 +72,10 @@ public class EventListCommand implements ICommand {
         } else {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
+                if (eventNum > 16) {
+                    Message.sendMessage("You cannot list more than 15 events!", event, client);
+                    return false;
+                }
                 try {
                     Calendar service = CalendarAuth.getCalendarService();
                     DateTime now = new DateTime(System.currentTimeMillis());
@@ -77,7 +95,7 @@ public class EventListCommand implements ICommand {
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), "1 upcoming event found:", event, client);
                     } else {
                         //List events by Id only.
-                        Message.sendMessage(items.size() + " upcoming events found...", event, client);
+                        Message.sendMessage(items.size() + " upcoming events found... Please note that this list may be delayed due to rate limiting...", event, client);
                         for (Event e : items) {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event, client);
                         }

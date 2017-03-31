@@ -79,4 +79,17 @@ public class CommandExecutor {
         }
         return cmds;
     }
+
+    ArrayList<ICommand> getCommands() {
+        return commands;
+    }
+
+    ICommand getCommand(String cmdNameOrAlias) {
+        for (ICommand c : commands) {
+            if (c.getCommand().equalsIgnoreCase(cmdNameOrAlias) || c.getAliases().contains(cmdNameOrAlias.toLowerCase())) {
+                return c;
+            }
+        }
+        return null;
+    }
 }
