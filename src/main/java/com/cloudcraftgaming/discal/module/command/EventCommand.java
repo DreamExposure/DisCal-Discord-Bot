@@ -219,7 +219,7 @@ public class EventCommand implements ICommand {
                                             + Message.lineBreak + Message.lineBreak
                                             + "Please specify the following: "
                                             + Message.lineBreak
-                                            + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                            + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format with the command `!event end <DateAndTime>`", event, client);
                                 } else {
                                     //Oops! Time is in the past or after end...
                                     Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has a starting time that is after the ending time!!! Please make sure you typed everything correctly.", event, client);
@@ -296,7 +296,7 @@ public class EventCommand implements ICommand {
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the following: "
                                 + Message.lineBreak
-                                + "Start date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                + "Start date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format with the command `!event start <DateAndTime>`", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
@@ -359,7 +359,7 @@ public class EventCommand implements ICommand {
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the following: "
                                 + Message.lineBreak
-                                + "Starting date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format!", event, client);
+                                + "Starting date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format with the command `!event start <DateAndTime>`", event, client);
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
