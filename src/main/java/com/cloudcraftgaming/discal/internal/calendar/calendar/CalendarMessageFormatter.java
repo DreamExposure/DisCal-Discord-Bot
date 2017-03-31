@@ -21,12 +21,12 @@ public class CalendarMessageFormatter {
      * @return The link to the calendar.
      */
     public static String getCalendarLink(MessageReceivedEvent e) {
-        String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
+        String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
 
-    public static String getCalendarLink(String calId) {
+    private static String getCalendarLink(String calId) {
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }

@@ -596,7 +596,7 @@ public class DatabaseManager {
     }
 
     public void runDatabaseUpdateIfNeeded() {
-        EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Running Db updater to move data to new tables!");
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "Start", "Running Db updater to move data to new tables!");
         for (IGuild g : Main.client.getGuilds()) {
             BotData data = getData(g.getID());
             GuildSettings settings = new GuildSettings(g.getID());
@@ -617,5 +617,6 @@ public class DatabaseManager {
             //Add calendar data to Db.
             updateCalendar(calData);
         }
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "Finish", "Db updating complete, data moved!");
     }
 }

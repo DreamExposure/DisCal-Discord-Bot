@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -22,10 +22,10 @@ public class PermissionChecker {
     public static boolean hasSufficientRole(MessageReceivedEvent event) {
         //TODO: Figure out exactly what is causing a NPE here...
         try {
-            BotData bd = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-            if (!bd.getControlRole().equalsIgnoreCase("everyone")) {
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
                 IUser sender = event.getMessage().getAuthor();
-                String roleId = bd.getControlRole();
+                String roleId = settings.getControlRole();
                 IRole role = null;
 
                 for (IRole r :  event.getMessage().getGuild().getRoles()) {
@@ -44,8 +44,8 @@ public class PermissionChecker {
                     return false;
                 } else {
                     //Role not found... reset Db...
-                    bd.setControlRole("everyone");
-                    DatabaseManager.getManager().updateData(bd);
+                    settings.setControlRole("everyone");
+                    DatabaseManager.getManager().updateSettings(settings);
                     return true;
                 }
             }
@@ -64,14 +64,14 @@ public class PermissionChecker {
      */
     public static boolean inCorrectChannel(MessageReceivedEvent event) {
         try {
-            BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-            if (data.getChannel().equalsIgnoreCase("all")) {
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            if (settings.getDiscalChannel().equalsIgnoreCase("all")) {
                 return true;
             }
 
             IChannel channel = null;
             for (IChannel c : event.getMessage().getGuild().getChannels()) {
-                if (c.getID().equals(data.getChannel())) {
+                if (c.getID().equals(settings.getDiscalChannel())) {
                     channel = c;
                     break;
                 }
@@ -82,8 +82,8 @@ public class PermissionChecker {
             }
 
             //If we got here, the channel no longer exists, reset data and return true.
-            data.setChannel("all");
-            DatabaseManager.getManager().updateData(data);
+            settings.setDiscalChannel("all");
+            DatabaseManager.getManager().updateSettings(settings);
             return true;
         } catch (Exception e) {
             //Catch any errors so that the bot always responds...

@@ -4,7 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -36,8 +36,9 @@ public class Announce extends TimerTask {
         Long nowMS = System.currentTimeMillis();
         for (IGuild guild : Main.client.getGuilds()) {
             try {
-                BotData data = DatabaseManager.getManager().getData(guild.getID());
-                String guildId = data.getGuildId();
+                String guildId = guild.getID();
+                //TODO: Add multiple calendar support...
+                CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
                 for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
                     if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                         try {
@@ -108,7 +109,7 @@ public class Announce extends TimerTask {
      * @param event the calendar event the announcement is for.
      * @param data The BotData belonging to the guild.
      */
-    private void sendAnnouncementMessage(Announcement announcement, Event event, BotData data) {
+    private void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
@@ -141,19 +142,19 @@ public class Announce extends TimerTask {
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
-        String userMentions = "";
+        StringBuilder userMentions = new StringBuilder();
         for (String userId : announcement.getSubscriberUserIds()) {
             try {
                 IUser user = guild.getUserByID(userId);
                 if (user != null) {
-                    userMentions = userMentions + user.mention(true) + " ";
+                    userMentions.append(user.mention(true)).append(" ");
                 }
             } catch (Exception e) {
                 //User does not exist, safely ignore.
             }
         }
 
-        String roleMentions = "";
+        StringBuilder roleMentions = new StringBuilder();
         Boolean mentionEveryone = false;
         Boolean mentionHere = false;
         for (String roleId : announcement.getSubscriberRoleIds()) {
@@ -165,7 +166,7 @@ public class Announce extends TimerTask {
                 try {
                     IRole role = guild.getRoleByID(roleId);
                     if (role != null) {
-                        roleMentions = roleMentions + role.mention() + " ";
+                        roleMentions.append(role.mention()).append(" ");
                     }
                 } catch (Exception e) {
                     //Role does not exist, safely ignore.

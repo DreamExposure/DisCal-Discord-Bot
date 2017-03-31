@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.google.api.services.calendar.Calendar;
 
@@ -19,7 +19,7 @@ public class CalendarUtils {
      * @param data The BotData of the Guild whose deleting their calendar.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
-    public static Boolean deleteCalendar(BotData data) {
+    public static Boolean deleteCalendar(CalendarData data) {
         try {
             Calendar service = CalendarAuth.getCalendarService();
             service.calendars().delete(data.getCalendarAddress()).execute();
@@ -27,7 +27,9 @@ public class CalendarUtils {
             //Remove from database
             data.setCalendarId("primary");
             data.setCalendarAddress("primary");
-            DatabaseManager.getManager().updateData(data);
+
+            //TODO: Remove??
+            DatabaseManager.getManager().updateCalendar(data);
 
             return true;
         } catch (IOException e) {

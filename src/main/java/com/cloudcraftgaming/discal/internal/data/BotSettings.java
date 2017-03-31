@@ -23,6 +23,8 @@ public class BotSettings {
     private String googleClientId;
     private String googleClientSecret;
 
+    private boolean runDatabaseUpdater;
+
     public BotSettings() {}
 
     //Getters
@@ -74,6 +76,10 @@ public class BotSettings {
         return googleClientSecret;
     }
 
+    public boolean shouldRunDatabaseUpdater() {
+        return runDatabaseUpdater;
+    }
+
     //Setters
     public void setBotToken(String _botToken) {
         botToken = _botToken;
@@ -121,5 +127,9 @@ public class BotSettings {
 
     public void setGoogleClientSecret(String _secret) {
         googleClientSecret = _secret;
+    }
+
+    public void setRunDatabaseUpdater(boolean _run) {
+        runDatabaseUpdater = _run;
     }
 }

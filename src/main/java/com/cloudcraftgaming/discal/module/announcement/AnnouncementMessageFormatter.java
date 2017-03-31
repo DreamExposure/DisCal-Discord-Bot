@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.module.announcement;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -61,8 +61,10 @@ public class AnnouncementMessageFormatter {
             em.appendField("Event ID", a.getEventId(), false);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
-                BotData data = DatabaseManager.getManager().getData(a.getGuildId());
+                //TODO: Handle multiple calendars...
+                CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
+
                 em.appendField("Event Summary", event.getSummary(), true);
             } catch (IOException e) {
                 em.appendField("Event Summary", "Unknown (Error)", true);
@@ -87,19 +89,19 @@ public class AnnouncementMessageFormatter {
         //Loop and get subs without mentions...
         IGuild guild = Main.client.getGuildByID(a.getGuildId());
 
-        String userMentions = "";
+        StringBuilder userMentions = new StringBuilder();
         for (String userId : a.getSubscriberUserIds()) {
             try {
                 IUser user = guild.getUserByID(userId);
                 if (user != null) {
-                    userMentions = userMentions + user.getName() + " ";
+                    userMentions.append(user.getName()).append(" ");
                 }
             } catch (Exception e) {
                 //User does not exist, safely ignore.
             }
         }
 
-        String roleMentions = "";
+        StringBuilder roleMentions = new StringBuilder();
         Boolean mentionEveryone = false;
         Boolean mentionHere = false;
         for (String roleId : a.getSubscriberRoleIds()) {
@@ -111,7 +113,7 @@ public class AnnouncementMessageFormatter {
                 try {
                     IRole role = guild.getRoleByID(roleId);
                     if (role != null) {
-                        roleMentions = roleMentions + role.getName() + " ";
+                        roleMentions.append(role.getName()).append(" ");
                     }
                 } catch (Exception e) {
                     //Role does not exist, safely ignore.

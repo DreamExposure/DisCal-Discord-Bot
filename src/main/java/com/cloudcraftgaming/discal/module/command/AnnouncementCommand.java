@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
@@ -451,8 +451,9 @@ public class AnnouncementCommand implements ICommand {
     private Boolean eventExists(String value, MessageReceivedEvent event) {
         try {
             Calendar service = CalendarAuth.getCalendarService();
-            BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-            Event calEvent = service.events().get(data.getCalendarAddress(), value).execute();
+            //TODO: Add support for multiple calendars...
+            CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
+            Event calEvent = service.events().get(calendarData.getCalendarAddress(), value).execute();
             if (calEvent != null) {
                 return true;
             }

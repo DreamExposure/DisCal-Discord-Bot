@@ -64,6 +64,9 @@ public class ReadFile {
                 if (line == 11) {
                     settings.setGoogleClientSecret(strLine);
                 }
+                if (line == 12) {
+                    settings.setRunDatabaseUpdater(strLine.equalsIgnoreCase("true"));
+                }
                 line++;
 
             }

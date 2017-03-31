@@ -20,7 +20,8 @@ public class EventUtils {
      * @return <code>true</code> if successfully deleted, otherwise <code>false</code>.
      */
     public static Boolean deleteEvent(String guildId, String eventId) {
-        String calendarId = DatabaseManager.getManager().getData(guildId).getCalendarAddress();
+        //TODO: Support multiple calendars...
+        String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
         try {
             Calendar service = CalendarAuth.getCalendarService();
             service.events().delete(calendarId, eventId).execute();

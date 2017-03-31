@@ -24,7 +24,7 @@ public class AESEncryption {
     /**
          * Constructor for AESEncryption.
          * This class it to be used for encrypting/decrypting data.
-         * @throws Exception
+         * @throws Exception if something fails
          */
     public AESEncryption(GuildSettings gs) throws Exception {
         SECRET_KEY_2 = gs.getPrivateKey();

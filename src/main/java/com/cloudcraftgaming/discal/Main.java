@@ -29,7 +29,7 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
-            throw new IllegalArgumentException("BotSettings file has not ne specified!!");
+            throw new IllegalArgumentException("BotSettings file has not been specified!!");
 
         //Get bot settings
         botSettings = ReadFile.readBotSettings(args[0]);
@@ -50,7 +50,6 @@ public class Main {
         //Connect to MySQL
         DatabaseManager.getManager().connectToMySQL(botSettings);
         DatabaseManager.getManager().createTables();
-        DatabaseManager.getManager().runDatabaseUpdateIfNeeded();
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();

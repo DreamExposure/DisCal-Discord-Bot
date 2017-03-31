@@ -6,7 +6,7 @@ import com.cloudcraftgaming.discal.internal.calendar.event.EventCreator;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -92,6 +92,8 @@ public class EventCommand implements ICommand {
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
+        //TODO: Add multiple calendar handling.
+        CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute.", event, client);
@@ -101,7 +103,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                             EventCreator.getCreator().init(event);
                             Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                         } else {
@@ -123,7 +125,7 @@ public class EventCommand implements ICommand {
                 } else if (function.equalsIgnoreCase("confirm")) {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         if (EventCreator.getCreator().getPreEvent(guildId).hasRequiredValues()) {
-                            if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                            if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                                 EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
                                 if (response.isSuccessful()) {
                                     Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response), "Event confirmed!", event, client);
@@ -152,7 +154,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                             EventCreator.getCreator().init(event);
                             Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                         } else {
@@ -164,8 +166,7 @@ public class EventCommand implements ICommand {
                         //Try to get the event by ID.
                         try {
                             Calendar service = CalendarAuth.getCalendarService();
-                            BotData data = DatabaseManager.getManager().getData(guildId);
-                            Event calEvent = service.events().get(data.getCalendarAddress(), args[1]).execute();
+                            Event calEvent = service.events().get(calendarData.getCalendarAddress(), args[1]).execute();
                             Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent, guildId), event, client);
                         } catch (IOException e) {
                             //Event probably doesn't exist...
@@ -334,7 +335,7 @@ public class EventCommand implements ICommand {
                     if (EventCreator.getCreator().hasPreEvent(guildId)) {
                         Message.sendMessage("Event Creator already started!", event, client);
                     } else {
-                        if (!DatabaseManager.getManager().getData(guildId).getCalendarAddress().equalsIgnoreCase("primary")) {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                             EventCreator.getCreator().init(event);
                             Message.sendMessage("Event Creator initiated! Please specify event summary with `!event summary <summary>`", event, client);
                         } else {

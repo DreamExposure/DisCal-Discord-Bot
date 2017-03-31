@@ -12,6 +12,7 @@ public class KeyGenerator {
     private static char[] VALID_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray();
 
     // cs = cryptographically secure
+    @SuppressWarnings("SameParameterValue")
     public static String csRandomAlphaNumericString(int numChars) {
         SecureRandom secRand = new SecureRandom();
         Random rand = new Random();

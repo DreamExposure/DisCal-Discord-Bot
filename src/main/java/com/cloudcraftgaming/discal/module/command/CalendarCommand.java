@@ -5,7 +5,7 @@ import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreator;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreatorResponse;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
@@ -88,12 +88,14 @@ public class CalendarCommand implements ICommand {
             } else if (args.length == 1) {
                 String function = args[0];
                 String guildId = event.getMessage().getGuild().getID();
+                //TODO: Add support for multiple calendars...
+                CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
 
                 if (function.equalsIgnoreCase("create")) {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                         Message.sendMessage("Calendar creator already initiated!", event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("You must specify a name for the calendar!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -107,7 +109,7 @@ public class CalendarCommand implements ICommand {
                             Message.sendMessage("Failed to cancel calendar creation!", event, client);
                         }
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -117,7 +119,7 @@ public class CalendarCommand implements ICommand {
                     if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                         Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)), "Confirm calendar to complete setup `!calendar confirm` OR edit the values!", event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -134,22 +136,21 @@ public class CalendarCommand implements ICommand {
                             Message.sendMessage("Calendar creation failed!", event, client);
                         }
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
                         }
                     }
                 } else if (function.equalsIgnoreCase("delete") || function.equalsIgnoreCase("remove")) {
-                    BotData data = DatabaseManager.getManager().getData(guildId);
                     if(!event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
 		                        Permissions.MANAGE_SERVER)) {
                         	Message.sendMessage("You need the \"Manage Server\" permission to run this command!", event, client);
                         	return false;
                     }
-                    if (!data.getCalendarId().equalsIgnoreCase("primary")) {
+                    if (!calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                         //Delete calendar
-                        if (CalendarUtils.deleteCalendar(data)) {
+                        if (CalendarUtils.deleteCalendar(calendarData)) {
                             Message.sendMessage("Calendar deleted! You may create a new one if you so wish!", event, client);
                         } else {
                             Message.sendMessage("Oops! Something went wrong! I failed to delete your calendar!", event, client);
@@ -165,9 +166,12 @@ public class CalendarCommand implements ICommand {
                 String function = args[0];
                 String value = args[1];
                 String guildId = event.getMessage().getGuild().getID();
+                //TODO: Add support for multiple calendars...
+                CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
+
                 if (function.equalsIgnoreCase("create")) {
                     if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             CalendarCreator.getCreator().init(event, value);
                             Message.sendMessage("Calendar creator initialized!"
                                     + Message.lineBreak
@@ -185,7 +189,7 @@ public class CalendarCommand implements ICommand {
                                 + Message.lineBreak + Message.lineBreak
                                 + " Please specify the description!", event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -200,7 +204,7 @@ public class CalendarCommand implements ICommand {
                                 + Message.lineBreak
                                 + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -215,7 +219,7 @@ public class CalendarCommand implements ICommand {
                                 + Message.lineBreak
                                 + "View and/or confirm the calendar to make it official!", event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -227,9 +231,12 @@ public class CalendarCommand implements ICommand {
             } else {
                 String function = args[0];
                 String guildId = event.getMessage().getGuild().getID();
+                //TODO: Add support for multiple calendars...
+                CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
+
                 if (function.equalsIgnoreCase("create")) {
                     if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             CalendarCreator.getCreator().init(event, getContent(args));
                             Message.sendMessage("Calendar creator initialized!"
                                     + Message.lineBreak
@@ -247,7 +254,7 @@ public class CalendarCommand implements ICommand {
                                 + Message.lineBreak + Message.lineBreak
                                 + "Please specify the description!", event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);
@@ -262,7 +269,7 @@ public class CalendarCommand implements ICommand {
                                 + Message.lineBreak
                                 + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
                     } else {
-                        if (DatabaseManager.getManager().getData(guildId).getCalendarId().equalsIgnoreCase("primary")) {
+                        if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                             Message.sendMessage("Calendar creator has not been initialized!", event, client);
                         } else {
                             Message.sendMessage("A calendar has already been created!", event, client);

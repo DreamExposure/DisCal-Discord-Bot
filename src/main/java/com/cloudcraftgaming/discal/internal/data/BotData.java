@@ -5,6 +5,7 @@ package com.cloudcraftgaming.discal.internal.data;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@Deprecated
 public class BotData {
     private final String guildId;
 

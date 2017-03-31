@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -30,10 +30,10 @@ public class EventMessageFormatter {
     public static EmbedObject getEventEmbed(Event event, String guildID) {
         String summary = event.getSummary() == null || event.getSummary().equals("") ? "Failsafe" : event.getSummary();
         String description = event.getDescription() == null || event.getDescription().equals("") ? "Failsafe" : event.getDescription();
-        String startDate =  EventMessageFormatter.getHumanReadableDate(event) == null ||  EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" :  EventMessageFormatter.getHumanReadableDate(event);
-        String startTime = EventMessageFormatter.getHumanReadableTime(event, true) == null ||  EventMessageFormatter.getHumanReadableTime(event, true).equals("true") ? "Failsafe" :  EventMessageFormatter.getHumanReadableTime(event, true);
-        String endDate = EventMessageFormatter.getHumanReadableDate(event) == null || EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableDate(event);
-        String endTime = EventMessageFormatter.getHumanReadableTime(event, false) == null || EventMessageFormatter.getHumanReadableTime(event, false).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableTime(event, false);
+        String startDate = EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" :  EventMessageFormatter.getHumanReadableDate(event);
+        String startTime = EventMessageFormatter.getHumanReadableTime(event, true).equals("true") ? "Failsafe" :  EventMessageFormatter.getHumanReadableTime(event, true);
+        String endDate = EventMessageFormatter.getHumanReadableDate(event).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableDate(event);
+        String endTime = EventMessageFormatter.getHumanReadableTime(event, false).equals("") ? "Failsafe" : EventMessageFormatter.getHumanReadableTime(event, false);
         String id = event.getId() == null || event.getId().equals("") ? "Failsafe" : event.getId();
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
@@ -49,7 +49,8 @@ public class EventMessageFormatter {
             em.appendField("TimeZone", event.getStart().getTimeZone(), true);
         } catch (IllegalArgumentException e) {
             try {
-                BotData data = DatabaseManager.getManager().getData(guildID);
+                //TODO: add support for multiple calendars...
+                CalendarData data = DatabaseManager.getManager().getMainCalendar(guildID);
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
                 em.appendField("TimeZone", tz, true);

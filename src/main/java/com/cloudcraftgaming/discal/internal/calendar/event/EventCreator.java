@@ -42,7 +42,9 @@ public class EventCreator {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             PreEvent event = new PreEvent(e.getMessage().getGuild().getID());
             try {
-                String calId = DatabaseManager.getManager().getData(e.getMessage().getGuild().getID()).getCalendarAddress();
+
+                //TODO: Handle multiple calendars...
+                String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
                 event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
             } catch (IOException exc) {
                 //Failed to get timezone, ignore safely.
@@ -79,18 +81,13 @@ public class EventCreator {
                 Event event = new Event();
                 event.setSummary(preEvent.getSummary());
                 event.setDescription(preEvent.getDescription());
-                /* NOT NEEDED?
-                if (!preEvent.getTimeZone().equalsIgnoreCase("unknown")) {
-                    preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone());
-                    preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone());
-                }
-                */
                 event.setStart(preEvent.getStartDateTime());
                 event.setEnd(preEvent.getEndDateTime());
                 event.setVisibility("public");
                 event.setColorId(String.valueOf(preEvent.getColor().getId()));
 
-                String calendarId = DatabaseManager.getManager().getData(guildId).getCalendarAddress();
+                //TODO handle multiple calendars...
+                String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
                 try {
                    Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
                     terminate(e);

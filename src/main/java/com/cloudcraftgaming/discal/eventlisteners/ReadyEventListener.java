@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.eventlisteners;
 
+import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.module.misc.TimeManager;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -15,7 +17,11 @@ public class ReadyEventListener {
     @EventSubscriber
     public void onReadyEvent(ReadyEvent event) {
         TimeManager.getManager().init();
-        //Once DisCal is ready, initialize the Announcer!
         UpdateListData.updateSiteBotMeta();
+
+        //Run any Db updating...
+        if (Main.botSettings.shouldRunDatabaseUpdater()) {
+            DatabaseManager.getManager().runDatabaseUpdateIfNeeded();
+        }
     }
 }

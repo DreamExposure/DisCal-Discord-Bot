@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -79,8 +80,8 @@ public class EventListCommand implements ICommand {
                 try {
                     Calendar service = CalendarAuth.getCalendarService();
                     DateTime now = new DateTime(System.currentTimeMillis());
-                    String calendarAddress = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID()).getCalendarAddress();
-                    Events events = service.events().list(calendarAddress)
+                    CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
+                    Events events = service.events().list(calendarData.getCalendarAddress())
                             .setMaxResults(eventNum)
                             .setTimeMin(now)
                             .setOrderBy("startTime")

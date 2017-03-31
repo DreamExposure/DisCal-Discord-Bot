@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
@@ -84,10 +84,10 @@ public class CalendarCreator {
                     scope.setType("default");
                     rule.setScope(scope).setRole("reader");
                     CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
-                    BotData bd = new BotData(guildId);
-                    bd.setCalendarId(confirmed.getId());
-                    bd.setCalendarAddress(confirmed.getId());
-                    DatabaseManager.getManager().updateData(bd);
+                    CalendarData calendarData = new CalendarData(guildId, 1);
+                    calendarData.setCalendarId(confirmed.getId());
+                    calendarData.setCalendarAddress(confirmed.getId());
+                    DatabaseManager.getManager().updateCalendar(calendarData);
                     terminate(e);
                     return new CalendarCreatorResponse(true, confirmed);
                 } catch (IOException ex) {

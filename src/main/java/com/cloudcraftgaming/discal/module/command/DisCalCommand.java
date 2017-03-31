@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.data.BotData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -122,9 +122,9 @@ public class DisCalCommand implements ICommand {
                 }
 
                 if (controlRole != null) {
-                    BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-                    botData.setControlRole(controlRole.getID());
-                    DatabaseManager.getManager().updateData(botData);
+                    GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
+                    settings.setControlRole(controlRole.getID());
+                    DatabaseManager.getManager().updateSettings(settings);
                     //Send message.
                     Message.sendMessage("Required control role set to: `" + controlRole.getName() + "'", event, client);
 
@@ -134,9 +134,9 @@ public class DisCalCommand implements ICommand {
                 }
             } else {
                 //Role is @everyone, set this so that anyone can control the bot.
-                BotData botData = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-                botData.setControlRole("everyone");
-                DatabaseManager.getManager().updateData(botData);
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
+                settings.setControlRole("everyone");
+                DatabaseManager.getManager().updateSettings(settings);
                 //Send message
                 Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event, client);
             }
@@ -154,17 +154,17 @@ public class DisCalCommand implements ICommand {
     private void setChannel(String channelName, MessageReceivedEvent event, IDiscordClient client) {
         if (channelName.equalsIgnoreCase("all")) {
             //Reset channel info.
-            BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-            data.setChannel("all");
-            DatabaseManager.getManager().updateData(data);
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            settings.setDiscalChannel("all");
+            DatabaseManager.getManager().updateSettings(settings);
             Message.sendMessage("DisCal will now respond in all channels!", event, client);
         } else {
             if (ChannelUtils.channelExists(channelName, event)) {
                 IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
                 if (channel != null) {
-                    BotData data = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID());
-                    data.setChannel(channel.getID());
-                    DatabaseManager.getManager().updateData(data);
+                    GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+                    settings.setDiscalChannel(channel.getID());
+                    DatabaseManager.getManager().updateSettings(settings);
                     Message.sendMessage("DisCal will now only respond in channel: `" + channel.getName() + "`", event, client);
                 } else {
                     Message.sendMessage("The specified channel does not exist!", event, client);

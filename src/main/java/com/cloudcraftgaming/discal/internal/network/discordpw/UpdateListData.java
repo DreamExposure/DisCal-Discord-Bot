@@ -15,7 +15,7 @@ import org.json.JSONObject;
  * For Project: DisCal
  */
 public class UpdateListData {
-    static String token;
+    private static String token;
 
     /**
      * Initiates the data updater with a valid token.

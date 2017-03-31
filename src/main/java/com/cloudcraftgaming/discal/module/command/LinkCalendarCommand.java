@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -67,8 +68,9 @@ public class LinkCalendarCommand implements ICommand {
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         try {
-            String calId = DatabaseManager.getManager().getData(event.getMessage().getGuild().getID()).getCalendarAddress();
-            Calendar cal = CalendarAuth.getCalendarService().calendars().get(calId).execute();
+            //TODO: Handle multiple calendars...
+            CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
+            Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
             Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal), event, client);
         } catch (IOException e) {

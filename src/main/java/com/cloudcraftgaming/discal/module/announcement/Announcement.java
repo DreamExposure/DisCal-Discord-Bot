@@ -101,17 +101,17 @@ public class Announcement {
      * @return A string of roles that are subscribed to the announcement.
      */
     public String getSubscriberRoleIdString() {
-        String subs = "";
+        StringBuilder subs = new StringBuilder();
         Integer i = 0;
         for (String sub : subscriberRoleIds) {
             if (i == 0) {
-                subs = sub;
+                subs = new StringBuilder(sub);
             } else {
-                subs = subs + "," + sub;
+                subs.append(",").append(sub);
             }
             i++;
         }
-        return subs;
+        return subs.toString();
     }
 
     /**
@@ -119,17 +119,17 @@ public class Announcement {
      * @return A string of users that are subscribed to the announcement.
      */
     public String getSubscriberUserIdString() {
-        String subs = "";
+        StringBuilder subs = new StringBuilder();
         Integer i = 0;
         for (String sub : subscriberUserIds) {
             if (i == 0) {
-                subs = sub;
+                subs = new StringBuilder(sub);
             } else {
-                subs = subs + "," + sub;
+                subs.append(",").append(sub);
             }
             i++;
         }
-        return subs;
+        return subs.toString();
     }
 
     /**
