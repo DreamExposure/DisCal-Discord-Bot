@@ -45,9 +45,7 @@ public class Main {
 
         UpdateListData.init(botSettings);
 
-        if (args.length > 4) {
-            Authorization.getAuth().init(args[4]);
-        }
+        Authorization.getAuth().init(botSettings);
 
         //Connect to MySQL
         DatabaseManager.getManager().connectToMySQL(botSettings);

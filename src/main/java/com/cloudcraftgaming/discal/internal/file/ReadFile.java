@@ -58,6 +58,12 @@ public class ReadFile {
                 if (line == 9) {
                     settings.setBotsPwToken(strLine);
                 }
+                if (line == 10) {
+                    settings.setGoogleClientId(strLine);
+                }
+                if (line == 11) {
+                    settings.setGoogleClientSecret(strLine);
+                }
                 line++;
 
             }

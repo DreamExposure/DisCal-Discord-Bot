@@ -20,6 +20,9 @@ public class BotSettings {
 
     private String botsPwToken;
 
+    private String googleClientId;
+    private String googleClientSecret;
+
     public BotSettings() {}
 
     //Getters
@@ -63,6 +66,14 @@ public class BotSettings {
         return botsPwToken;
     }
 
+    public String getGoogleClientId() {
+        return googleClientId;
+    }
+
+    public String getGoogleClientSecret() {
+        return googleClientSecret;
+    }
+
     //Setters
     public void setBotToken(String _botToken) {
         botToken = _botToken;
@@ -102,5 +113,13 @@ public class BotSettings {
 
     public void setBotsPwToken(String _token) {
         botsPwToken = _token;
+    }
+
+    public void setGoogleClientId(String _id) {
+        googleClientId = _id;
+    }
+
+    public void setGoogleClientSecret(String _secret) {
+        googleClientSecret = _secret;
     }
 }

@@ -3,9 +3,9 @@ package com.cloudcraftgaming.discal.internal.network.google;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
+import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
-import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -40,8 +40,8 @@ public class Authorization {
         return instance;
     }
 
-    public void init(String clientFile) {
-        clientData = ReadFile.getGoogleClientData(clientFile);
+    public void init(BotSettings settings) {
+        clientData = new ClientData(settings.getGoogleClientId(), settings.getGoogleClientSecret());
     }
 
     public void requestCode(MessageReceivedEvent event) {
