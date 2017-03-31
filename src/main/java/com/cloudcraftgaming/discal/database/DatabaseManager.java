@@ -1,10 +1,15 @@
 package com.cloudcraftgaming.discal.database;
 
+import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
+import sx.blah.discord.handle.obj.IGuild;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -35,11 +40,12 @@ public class DatabaseManager {
 
     /**
      * Connects to the MySQL server specified.
-     * @param bs The BotSettings containing MySQL info.
+     * @param bs The BotSettings with Db info to connect to.
      */
-    public void connectToMySQL(BotSettings bs) {
+    public void  connectToMySQL(BotSettings bs) {
         try {
             MySQL mySQL = new MySQL(bs.getDbHostName(), bs.getDbPort(), bs.getDbDatabase(), bs.getDbPrefix(), bs.getDbUser(), bs.getDbPass());
+
             Connection mySQLConnection = mySQL.openConnection();
             databaseInfo = new DatabaseInfo(mySQL, mySQLConnection, mySQL.getPrefix());
             System.out.println("Connected to MySQL database!");
@@ -75,12 +81,25 @@ public class DatabaseManager {
 
             String dataTableName = databaseInfo.getPrefix() + "DATA";
             String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+            String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+            String settingsTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
             String createDataTable = "CREATE TABLE IF NOT EXISTS " + dataTableName +
                     " (GUILD_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
                     " CONTROL_ROLE LONGTEXT not NULL, " +
                     " DISCAL_CHANNEL LONGTEXT not NULL, " +
+                    " PRIMARY KEY (GUILD_ID))";
+            String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
+                    "(GUILD_ID VARCHAR(255) not NULL, " +
+                    " EXTERNAL_CALENDAR BOOLEAN not NULL, " +
+                    " PRIVATE_KEY VARCHAR(16) not NULL, " +
+                    " ACCESS_TOKEN LONGTEXT not NULL, " +
+                    " REFRESH_TOKEN LONGTEXT not NULL, " +
+                    " CONTROL_ROLE LONGTEXT not NULL, " +
+                    " DISCAL_CHANNEL LONGTEXT not NULL, " +
+                    " PATRON_GUILD BOOLEAN not NULL, " +
+                    " MAX_CALENDARS INTEGER not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
             String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
                     " (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
@@ -94,8 +113,16 @@ public class DatabaseManager {
                     " MINUTES_BEFORE INTEGER not NULL, " +
                     " INFO LONGTEXT not NULL, " +
                     " PRIMARY KEY (ANNOUNCEMENT_ID))";
+            String createCalendarTable = "CREATE TABLE IF NOT EXISTS " + calendarTableName +
+                    " (GUILD_ID VARCHAR(255) not NULL, " +
+                    " CALENDAR_NUMBER INTEGER not NULL, " +
+                    " CALENDAR_ID VARCHAR(255) not NULL, " +
+                    " CALENDAR_ADDRESS LONGTEXT not NULL, " +
+                    " PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER)";
             statement.executeUpdate(createDataTable);
             statement.executeUpdate(createAnnouncementTable);
+            statement.executeUpdate(createSettingsTable);
+            statement.executeUpdate(createCalendarTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
             return true;
@@ -112,6 +139,7 @@ public class DatabaseManager {
      * @param data The Data to be entered into the database.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
+    @Deprecated
     public Boolean updateData(BotData data) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
@@ -155,6 +183,105 @@ public class DatabaseManager {
             System.out.println("Failed to input data into database! Error Code: 00101");
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateSettings(GuildSettings settings) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + settings.getGuildID() + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (!hasStuff || res.getString("GUILD_ID") == null) {
+                    //Data not present, add to DB.
+                    String insertCommand = "INSERT INTO " + dataTableName +
+                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, PATRON_GUILD, MAX_CALENDARS)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+                    ps.setString(1, settings.getGuildID());
+                    ps.setBoolean(2, settings.useExternalCalendar());
+                    ps.setString(3, settings.getPrivateKey());
+                    ps.setString(4, settings.getEncryptedAccessToken());
+                    ps.setString(5, settings.getEncryptedRefreshToken());
+                    ps.setString(6, settings.getControlRole());
+                    ps.setString(7, settings.getDiscalChannel());
+                    ps.setBoolean(8, settings.isPatronGuild());
+                    ps.setInt(9, settings.getMaxCalendars());
+
+
+                    ps.executeUpdate();
+                    ps.close();
+                    statement.close();
+                } else {
+                    //Data present, update.
+                    String updateCMD = "UPDATE " + dataTableName
+                            + " SET EXTERNAL_CALENDAR= '" + settings.useExternalCalendar()
+                            + "', PRIVATE_KEY='" + settings.getPrivateKey()
+                            + "', ACCESS_TOKEN='" + settings.getEncryptedAccessToken()
+                            + "', REFRESH_TOKEN='" + settings.getEncryptedRefreshToken()
+                            + "', CONTROL_ROLE='" + settings.getControlRole()
+                            + "', DISCAL_CHANNEL='" + settings.getDiscalChannel()
+                            + "', PATRON_GUILD='" + settings.isPatronGuild()
+                            + "', MAX_CALENDARS='" + settings.getMaxCalendars()
+                            + "' WHERE GUILD_ID= '" + settings.getGuildID() + "';";
+                    statement.executeUpdate(updateCMD);
+                    statement.close();
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            System.out.println("Failed to input data into database! Error Code: 00101");
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateCalendar(CalendarData calData) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + calData.getGuildId() + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (!hasStuff || res.getString("GUILD_ID") == null) {
+                    //Data not present, add to DB.
+                    String insertCommand = "INSERT INTO " + calendarTableName +
+                            "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS)" +
+                            " VALUES (?, ?, ?, ?);";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+                    ps.setString(1, calData.getGuildId());
+                    ps.setInt(2, calData.getCalendarNumber());
+                    ps.setString(3, calData.getCalendarId());
+                    ps.setString(4, calData.getCalendarAddress());
+
+                    ps.executeUpdate();
+                    ps.close();
+                    statement.close();
+                } else {
+                    //Data present, update.
+                    String updateCMD = "UPDATE " + calendarTableName
+                            + " SET CALENDAR_NUMBER= '" + calData.getCalendarNumber()
+                            + "', CALENDAR_ID='" + calData.getCalendarId()
+                            + "', CALENDAR_ADDRESS='" + calData.getCalendarAddress()
+                            + "' WHERE GUILD_ID= '" + calData.getGuildId() + "';";
+                    statement.executeUpdate(updateCMD);
+                    statement.close();
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
         return false;
     }
@@ -225,6 +352,7 @@ public class DatabaseManager {
      * @param guildId The ID of the guild whose data is to be retrieved.
      * @return The {@link BotData} of the Guild or <code>null</code>.
      */
+    @Deprecated
     public BotData getData(String guildId) {
         BotData botData = new BotData(guildId);
         try {
@@ -255,6 +383,113 @@ public class DatabaseManager {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
         return botData;
+    }
+
+    public GuildSettings getSettings(String guildId) {
+        GuildSettings settings = new GuildSettings(guildId);
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                Boolean hasStuff = res.next();
+
+                if (hasStuff && res.getString("GUILD_ID") != null) {
+                    settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
+                    settings.setPrivateKey(res.getString("PRIVATE_KEY"));
+                    settings.setEncryptedAccessToken(res.getString("ACCESS_TOKEN"));
+                    settings.setEncryptedRefreshToken(res.getString("REFRESH_TOKEN"));
+                    settings.setControlRole(res.getString("CONTROL_ROLE"));
+                    settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
+
+                    statement.close();
+                } else {
+                    //Data not present.
+                    statement.close();
+                    return settings;
+                }
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return settings;
+    }
+
+    public CalendarData getMainCalendar(String guildId) {
+        CalendarData calData = new CalendarData(guildId, 1);
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                while (res.next()) {
+                    if (res.getInt("CALENDAR_NUMBER") == 1) {
+                        calData.setCalendarId(res.getString("CALENDAR_ID"));
+                        calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                        break;
+                    }
+                }
+                statement.close();
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return calData;
+    }
+
+    public CalendarData getCalendar(String guildId, Integer calendarNumber) {
+        CalendarData calData = new CalendarData(guildId, calendarNumber);
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                while (res.next()) {
+                    if (res.getInt("CALENDAR_NUMBER") == calendarNumber) {
+                        calData.setCalendarId(res.getString("CALENDAR_ID"));
+                        calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                        break;
+                    }
+                }
+                statement.close();
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return calData;
+    }
+
+    public ArrayList<CalendarData> getAllCalendars(String guildId) {
+        ArrayList<CalendarData> calendars = new ArrayList<>();
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                ResultSet res = statement.executeQuery(query);
+
+                while (res.next()) {
+                    CalendarData calData = new CalendarData(guildId, res.getInt("CALENDAR_NUMBER"));
+                    calData.setCalendarId(res.getString("CALENDAR_ID"));
+                    calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                    calendars.add(calData);
+                }
+                statement.close();
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return calendars;
     }
 
     /**
@@ -358,5 +593,29 @@ public class DatabaseManager {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
         return false;
+    }
+
+    public void runDatabaseUpdateIfNeeded() {
+        EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Running Db updater to move data to new tables!");
+        for (IGuild g : Main.client.getGuilds()) {
+            BotData data = getData(g.getID());
+            GuildSettings settings = new GuildSettings(g.getID());
+
+            //Set values.
+            settings.setUseExternalCalendar(false);
+            settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
+            settings.setControlRole(data.getControlRole());
+            settings.setDiscalChannel(data.getChannel());
+
+            //Add settings to Db.
+            updateSettings(settings);
+
+            CalendarData calData = new CalendarData(g.getID(), 1);
+            calData.setCalendarId(data.getCalendarId());
+            calData.setCalendarAddress(data.getCalendarAddress());
+
+            //Add calendar data to Db.
+            updateCalendar(calData);
+        }
     }
 }
