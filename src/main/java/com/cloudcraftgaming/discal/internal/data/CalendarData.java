@@ -15,6 +15,9 @@ public class CalendarData {
     public CalendarData(String _guildID, Integer _calendarNumber) {
         guildId = _guildID;
         calendarNumber = _calendarNumber;
+
+        calendarId = "primary";
+        calendarAddress = "primary";
     }
 
     //Getters
