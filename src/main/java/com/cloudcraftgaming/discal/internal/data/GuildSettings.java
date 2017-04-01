@@ -18,6 +18,7 @@ public class GuildSettings {
     private String discalChannel;
 
     private boolean patronGuild;
+    private boolean devGuild;
     private Integer maxCalendars;
 
     public GuildSettings(String _guildId) {
@@ -33,6 +34,7 @@ public class GuildSettings {
         discalChannel = "all";
 
         patronGuild = false;
+        devGuild = false;
         maxCalendars = 1;
     }
 
@@ -69,6 +71,10 @@ public class GuildSettings {
         return patronGuild;
     }
 
+    public boolean isDevGuild() {
+        return devGuild;
+    }
+
     public Integer getMaxCalendars() {
         return maxCalendars;
     }
@@ -100,6 +106,10 @@ public class GuildSettings {
 
     public void setPatronGuild(boolean _patronGuild) {
         patronGuild = _patronGuild;
+    }
+
+    public void setDevGuild(boolean _devGuild) {
+        devGuild = _devGuild;
     }
 
     public void setMaxCalendars(Integer _maxCalendars) {

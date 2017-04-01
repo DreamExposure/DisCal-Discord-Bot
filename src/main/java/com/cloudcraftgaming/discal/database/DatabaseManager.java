@@ -99,6 +99,7 @@ public class DatabaseManager {
                     " CONTROL_ROLE LONGTEXT not NULL, " +
                     " DISCAL_CHANNEL LONGTEXT not NULL, " +
                     " PATRON_GUILD BOOLEAN not NULL, " +
+                    " DEV_GUILD BOOLEAN not NULL, " +
                     " MAX_CALENDARS INTEGER not NULL, " +
                     " PRIMARY KEY (GUILD_ID))";
             String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
@@ -201,8 +202,8 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, PATRON_GUILD, MAX_CALENDARS)" +
-                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, settings.getGuildID());
                     ps.setBoolean(2, settings.useExternalCalendar());
@@ -212,7 +213,8 @@ public class DatabaseManager {
                     ps.setString(6, settings.getControlRole());
                     ps.setString(7, settings.getDiscalChannel());
                     ps.setBoolean(8, settings.isPatronGuild());
-                    ps.setInt(9, settings.getMaxCalendars());
+                    ps.setBoolean(9, settings.isDevGuild());
+                    ps.setInt(10, settings.getMaxCalendars());
 
 
                     ps.executeUpdate();
@@ -228,6 +230,7 @@ public class DatabaseManager {
                             + "', CONTROL_ROLE='" + settings.getControlRole()
                             + "', DISCAL_CHANNEL='" + settings.getDiscalChannel()
                             + "', PATRON_GUILD='" + settings.isPatronGuild()
+                            + "', DEV_GUILD='" + settings.isDevGuild()
                             + "', MAX_CALENDARS='" + settings.getMaxCalendars()
                             + "' WHERE GUILD_ID= '" + settings.getGuildID() + "';";
                     statement.executeUpdate(updateCMD);
@@ -404,6 +407,9 @@ public class DatabaseManager {
                     settings.setEncryptedRefreshToken(res.getString("REFRESH_TOKEN"));
                     settings.setControlRole(res.getString("CONTROL_ROLE"));
                     settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
+                    settings.setPatronGuild(res.getBoolean("PATRON_GUILD"));
+                    settings.setDevGuild(res.getBoolean("DEV_GUILD"));
+                    settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
 
                     statement.close();
                 } else {
