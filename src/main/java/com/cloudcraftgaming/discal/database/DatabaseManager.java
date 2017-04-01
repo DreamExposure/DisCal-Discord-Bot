@@ -1,15 +1,11 @@
 package com.cloudcraftgaming.discal.database;
 
-import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
-import com.cloudcraftgaming.discal.internal.data.BotData;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
-import sx.blah.discord.handle.obj.IGuild;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -73,23 +69,14 @@ public class DatabaseManager {
 
     /**
      * Creates all required tables in the database if they do not exist.
-     * @return <code>true</code> if successful, else false.
      */
-    public Boolean createTables() {
+    public void createTables() {
         try {
             Statement statement = databaseInfo.getConnection().createStatement();
 
-            String dataTableName = databaseInfo.getPrefix() + "DATA";
             String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
             String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
             String settingsTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
-            String createDataTable = "CREATE TABLE IF NOT EXISTS " + dataTableName +
-                    " (GUILD_ID VARCHAR(255) not NULL, " +
-                    " CALENDAR_ID VARCHAR(255) not NULL, " +
-                    " CALENDAR_ADDRESS LONGTEXT not NULL, " +
-                    " CONTROL_ROLE LONGTEXT not NULL, " +
-                    " DISCAL_CHANNEL LONGTEXT not NULL, " +
-                    " PRIMARY KEY (GUILD_ID))";
             String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
                     "(GUILD_ID VARCHAR(255) not NULL, " +
                     " EXTERNAL_CALENDAR BOOLEAN not NULL, " +
@@ -119,73 +106,17 @@ public class DatabaseManager {
                     " CALENDAR_NUMBER INTEGER not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
-                    " PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER)";
-            statement.executeUpdate(createDataTable);
+                    " PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER))";
             statement.executeUpdate(createAnnouncementTable);
             statement.executeUpdate(createSettingsTable);
             statement.executeUpdate(createCalendarTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
-            return true;
         } catch (SQLException e) {
             System.out.println("Failed to created database tables! Something must be wrong.");
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
             e.printStackTrace();
         }
-        return false;
-    }
-
-    /**
-     * Updates or adds the specified {@link BotData} Object to the database.
-     * @param data The Data to be entered into the database.
-     * @return <code>true</code> if successful, else <code>false</code>.
-     */
-    @Deprecated
-    public Boolean updateData(BotData data) {
-        try {
-            if (databaseInfo.getMySQL().checkConnection()) {
-                String dataTableName = databaseInfo.getPrefix() + "DATA";
-
-                Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + data.getGuildId() + "';";
-                ResultSet res = statement.executeQuery(query);
-
-                Boolean hasStuff = res.next();
-
-                if (!hasStuff || res.getString("GUILD_ID") == null) {
-                    //Data not present, add to DB.
-                    String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, CALENDAR_ID, CALENDAR_ADDRESS, CONTROL_ROLE, DISCAL_CHANNEL)" +
-                            " VALUES (?, ?, ?, ?, ?);";
-                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-                    ps.setString(1, data.getGuildId());
-                    ps.setString(2, data.getCalendarId());
-                    ps.setString(3, data.getCalendarAddress());
-                    ps.setString(4, data.getControlRole());
-                    ps.setString(5, data.getChannel());
-
-                    ps.executeUpdate();
-                    ps.close();
-                    statement.close();
-                } else {
-                    //Data present, update.
-                    String updateCMD = "UPDATE " + dataTableName
-                            + " SET CALENDAR_ID= '" + data.getCalendarId()
-                            + "', CALENDAR_ADDRESS='" + data.getCalendarAddress()
-                            + "', CONTROL_ROLE='" + data.getControlRole()
-                            + "', DISCAL_CHANNEL='" + data.getChannel()
-                            + "' WHERE GUILD_ID= '" + data.getGuildId() + "';";
-                    statement.executeUpdate(updateCMD);
-                    statement.close();
-                }
-                return true;
-            }
-        } catch (SQLException e) {
-            System.out.println("Failed to input data into database! Error Code: 00101");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
-            e.printStackTrace();
-        }
-        return false;
     }
 
     public boolean updateSettings(GuildSettings settings) {
@@ -348,44 +279,6 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return false;
-    }
-
-    /**
-     * Gets the {@link BotData} Object belonging to the specified Guild.
-     * @param guildId The ID of the guild whose data is to be retrieved.
-     * @return The {@link BotData} of the Guild or <code>null</code>.
-     */
-    @Deprecated
-    public BotData getData(String guildId) {
-        BotData botData = new BotData(guildId);
-        try {
-            if (databaseInfo.getMySQL().checkConnection()) {
-                String dataTableName = databaseInfo.getPrefix() + "DATA";
-
-                Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + botData.getGuildId() + "';";
-                ResultSet res = statement.executeQuery(query);
-
-                Boolean hasStuff = res.next();
-
-                if (hasStuff && res.getString("GUILD_ID") != null) {
-                    botData.setCalendarId(res.getString("CALENDAR_ID"));
-                    botData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-                    botData.setControlRole(res.getString("CONTROL_ROLE"));
-                    botData.setChannel(res.getString("DISCAL_CHANNEL"));
-
-                    statement.close();
-                } else {
-                    //Data not present.
-                    statement.close();
-                    return botData;
-                }
-            }
-        } catch (SQLException e) {
-            System.out.println("Failed to get data from database! Error code: 00102");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
-        }
-        return botData;
     }
 
     public GuildSettings getSettings(String guildId) {
@@ -601,28 +494,5 @@ public class DatabaseManager {
         return false;
     }
 
-    public void runDatabaseUpdateIfNeeded() {
-        EmailSender.getSender().sendDebugEmail(this.getClass(), "Start", "Running Db updater to move data to new tables!");
-        for (IGuild g : Main.client.getGuilds()) {
-            BotData data = getData(g.getID());
-            GuildSettings settings = new GuildSettings(g.getID());
-
-            //Set values.
-            settings.setUseExternalCalendar(false);
-            settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
-            settings.setControlRole(data.getControlRole());
-            settings.setDiscalChannel(data.getChannel());
-
-            //Add settings to Db.
-            updateSettings(settings);
-
-            CalendarData calData = new CalendarData(g.getID(), 1);
-            calData.setCalendarId(data.getCalendarId());
-            calData.setCalendarAddress(data.getCalendarAddress());
-
-            //Add calendar data to Db.
-            updateCalendar(calData);
-        }
-        EmailSender.getSender().sendDebugEmail(this.getClass(), "Finish", "Db updating complete, data moved!");
-    }
+    public void runDatabaseUpdateIfNeeded() {}
 }
