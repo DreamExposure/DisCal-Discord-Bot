@@ -220,7 +220,7 @@ public class DatabaseManager {
                     //Data present, update.
                     String update = "UPDATE " + calendarTableName
                             + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-                            + " CALENDAR_ADDRESS = ?,"
+                            + " CALENDAR_ADDRESS = ?"
                             + " WHERE GUILD_ID = ?";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
                     ps.setInt(1, calData.getCalendarNumber());
