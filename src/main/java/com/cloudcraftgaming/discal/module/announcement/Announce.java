@@ -43,24 +43,29 @@ public class Announce extends TimerTask {
                     if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                         try {
                             Calendar service = CalendarAuth.getCalendarService();
-                            Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
+                            try {
+                                Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 
-                            //Test for the time...
-                            Long eventMS = event.getStart().getDateTime().getValue();
-                            Long timeUntilEvent = eventMS - nowMS;
-                            Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
-                            Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
-                            Long difference = minutesToEvent - announcementTime;
-                            if (difference >= 0) {
-                                if (difference <= 10) {
-                                    //Right on time
-                                    sendAnnouncementMessage(a, event, data);
+                                //Test for the time...
+                                Long eventMS = event.getStart().getDateTime().getValue();
+                                Long timeUntilEvent = eventMS - nowMS;
+                                Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+                                Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+                                Long difference = minutesToEvent - announcementTime;
+                                if (difference >= 0) {
+                                    if (difference <= 10) {
+                                        //Right on time
+                                        sendAnnouncementMessage(a, event, data);
 
-                                    //Delete announcement to ensure it does not spam fire
+                                        //Delete announcement to ensure it does not spam fire
+                                        DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+                                    }
+                                } else {
+                                    //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                                 }
-                            } else {
-                                //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
+                            } catch (Exception e) {
+                                //Event does not exist, delete announcement
                                 DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                             }
                         } catch (IOException e) {
