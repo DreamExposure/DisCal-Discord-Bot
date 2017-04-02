@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.database;
 
+import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
@@ -120,6 +121,9 @@ public class DatabaseManager {
     }
 
     public boolean updateSettings(GuildSettings settings) {
+        if (settings.getPrivateKey().equalsIgnoreCase("N/a")) {
+            settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
+        }
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
@@ -153,18 +157,28 @@ public class DatabaseManager {
                     statement.close();
                 } else {
                     //Data present, update.
-                    String updateCMD = "UPDATE " + dataTableName
-                            + " SET EXTERNAL_CALENDAR='" + settings.useExternalCalendar()
-                            + "', PRIVATE_KEY='" + settings.getPrivateKey()
-                            + "', ACCESS_TOKEN='" + settings.getEncryptedAccessToken()
-                            + "', REFRESH_TOKEN='" + settings.getEncryptedRefreshToken()
-                            + "', CONTROL_ROLE='" + settings.getControlRole()
-                            + "', DISCAL_CHANNEL='" + settings.getDiscalChannel()
-                            + "', PATRON_GUILD='" + settings.isPatronGuild()
-                            + "', DEV_GUILD='" + settings.isDevGuild()
-                            + "', MAX_CALENDARS='" + settings.getMaxCalendars()
-                            + "' WHERE GUILD_ID= '" + settings.getGuildID() + "';";
-                    statement.executeUpdate(updateCMD);
+                    String update = "UPDATE " + dataTableName
+                            + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
+                            + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
+                            + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?,"
+                            + " PATRON_GUILD = ?, DEV_GUILD = ?,"
+                            + " MAX_CALENDARS = ?"
+                            + " WHERE GUILD_ID = ?";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+
+                    ps.setBoolean(1, settings.useExternalCalendar());
+                    ps.setString(2, settings.getPrivateKey());
+                    ps.setString(3, settings.getEncryptedAccessToken());
+                    ps.setString(4, settings.getEncryptedRefreshToken());
+                    ps.setString(5, settings.getControlRole());
+                    ps.setString(6, settings.getDiscalChannel());
+                    ps.setBoolean(7, settings.isPatronGuild());
+                    ps.setBoolean(8, settings.isDevGuild());
+                    ps.setInt(9, settings.getMaxCalendars());
+                    ps.setString(10, settings.getGuildID());
+
+                    ps.executeUpdate();
+
                     statement.close();
                 }
                 return true;
