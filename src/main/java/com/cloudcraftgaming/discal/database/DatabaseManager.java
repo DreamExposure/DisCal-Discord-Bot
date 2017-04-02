@@ -218,12 +218,18 @@ public class DatabaseManager {
                     statement.close();
                 } else {
                     //Data present, update.
-                    String updateCMD = "UPDATE " + calendarTableName
-                            + " SET CALENDAR_NUMBER= '" + calData.getCalendarNumber()
-                            + "', CALENDAR_ID='" + calData.getCalendarId()
-                            + "', CALENDAR_ADDRESS='" + calData.getCalendarAddress()
-                            + "' WHERE GUILD_ID= '" + calData.getGuildId() + "';";
-                    statement.executeUpdate(updateCMD);
+                    String update = "UPDATE " + calendarTableName
+                            + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
+                            + " CALENDAR_ADDRESS = ?,"
+                            + " WHERE GUILD_ID = ?";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+                    ps.setInt(1, calData.getCalendarNumber());
+                    ps.setString(2, calData.getCalendarId());
+                    ps.setString(3, calData.getCalendarAddress());
+                    ps.setString(4, calData.getGuildId());
+
+                    ps.executeUpdate();
+
                     statement.close();
                 }
                 return true;
@@ -272,17 +278,27 @@ public class DatabaseManager {
                     statement.close();
                 } else {
                     //Data present, update.
-                    String updateCMD = "UPDATE " + announcementTableName
-                            + " SET SUBSCRIBERS_ROLE= '" + announcement.getSubscriberRoleIdString()
-                            + "', SUBSCRIBERS_USER='" + announcement.getSubscriberUserIdString()
-                            + "', CHANNEL_ID='" + announcement.getAnnouncementChannelId()
-                            + "', ANNOUNCEMENT_TYPE='" + announcement.getAnnouncementType().name()
-                            + "', EVENT_ID='" + announcement.getEventId()
-                            + "', HOURS_BEFORE='" + announcement.getHoursBefore()
-                            + "', MINUTES_BEFORE='" + announcement.getMinutesBefore()
-                            + "', INFO='" + announcement.getInfo()
-                             + "' WHERE ANNOUNCEMENT_ID='" + announcement.getAnnouncementId() + "';";
-                    statement.executeUpdate(updateCMD);
+
+                    String update = "UPDATE " + announcementTableName
+                            + " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
+                            + " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?,"
+                            + " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
+                            + " INFO = ?"
+                            + " WHERE ANNOUNCEMENT_ID = ?";
+                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+
+                    ps.setString(1, announcement.getSubscriberRoleIdString());
+                    ps.setString(2, announcement.getSubscriberUserIdString());
+                    ps.setString(3, announcement.getAnnouncementChannelId());
+                    ps.setString(4, announcement.getAnnouncementType().name());
+                    ps.setString(5, announcement.getEventId());
+                    ps.setInt(6, announcement.getHoursBefore());
+                    ps.setInt(7, announcement.getMinutesBefore());
+                    ps.setString(8, announcement.getInfo());
+                    ps.setString(9, announcement.getAnnouncementId().toString());
+
+                    ps.executeUpdate();
+
                     statement.close();
                 }
                 return true;
