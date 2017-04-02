@@ -154,7 +154,7 @@ public class DatabaseManager {
                 } else {
                     //Data present, update.
                     String updateCMD = "UPDATE " + dataTableName
-                            + " SET EXTERNAL_CALENDAR= '" + settings.useExternalCalendar()
+                            + " SET EXTERNAL_CALENDAR='" + settings.useExternalCalendar()
                             + "', PRIVATE_KEY='" + settings.getPrivateKey()
                             + "', ACCESS_TOKEN='" + settings.getEncryptedAccessToken()
                             + "', REFRESH_TOKEN='" + settings.getEncryptedRefreshToken()
