@@ -36,7 +36,23 @@ public class EventUtils {
         return false;
     }
 
-    public static PreEvent copyEvent(String guildId, Event event) {
+    public static boolean eventExists(String guildId, String eventId) {
+        //TODO: Support multiple calendars...
+        String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
+        try {
+            Calendar service = CalendarAuth.getCalendarService();
+            if (service.events().get(calendarId, eventId).execute() != null) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (IOException e) {
+            //Failed to check event, probably doesn't exist, safely ignore.
+        }
+        return false;
+    }
+
+    static PreEvent copyEvent(String guildId, Event event) {
         PreEvent pe = new PreEvent(guildId);
         pe.setSummary(event.getSummary());
         pe.setDescription(event.getDescription());

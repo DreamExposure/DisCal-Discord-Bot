@@ -2,10 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventCreator;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventCreatorResponse;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
+import com.cloudcraftgaming.discal.internal.calendar.event.*;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.EventColor;
@@ -66,6 +63,7 @@ public class EventCommand implements ICommand {
         info.setExample("!event <function> (value(s))");
 
         info.getSubCommands().add("create");
+        info.getSubCommands().add("copy");
         info.getSubCommands().add("cancel");
         info.getSubCommands().add("delete");
         info.getSubCommands().add("view");
@@ -108,6 +106,16 @@ public class EventCommand implements ICommand {
                             Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                         } else {
                             Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
+                    }
+                } else if (function.equalsIgnoreCase("copy")) {
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        Message.sendMessage("Event Creator already started!", event, client);
+                    } else {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                            Message.sendMessage("Please specify the ID of the event you wish to copy with `!event copy <ID>`", event, client);
+                        } else {
+                            Message.sendMessage("You cannot copy an event when you do not have a calendar", event, client);
                         }
                     }
                 } else if (function.equalsIgnoreCase("cancel")) {
@@ -159,6 +167,27 @@ public class EventCommand implements ICommand {
                             Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
                         } else {
                             Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
+                    }
+                } else if (function.equalsIgnoreCase("copy")) {
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        Message.sendMessage("Event Creator already started!", event, client);
+                    } else {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                            String eventId = args[1];
+                            //Check if valid.
+                            if (EventUtils.eventExists(guildId, eventId)) {
+                                PreEvent preEvent = EventCreator.getCreator().init(event, eventId);
+                                if (preEvent != null) {
+                                    Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Creator initialized! Event details copied! Please specify the date/times!", event, client);
+                                } else {
+                                    Message.sendMessage("Something went wrong! I'm sorry, try again!", event, client);
+                                }
+                            } else {
+                                Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event, client);
+                            }
+                        } else {
+                            Message.sendMessage("You cannot cop an event when you do not have a calendar!", event, client);
                         }
                     }
                 } else if (function.equalsIgnoreCase("view")) {
@@ -340,6 +369,27 @@ public class EventCommand implements ICommand {
                             Message.sendMessage("Event Creator initiated! Please specify event summary with `!event summary <summary>`", event, client);
                         } else {
                             Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
+                        }
+                    }
+                } else if (function.equalsIgnoreCase("copy")) {
+                    if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                        Message.sendMessage("Event Creator already started!", event, client);
+                    } else {
+                        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                            String eventId = args[1];
+                            //Check if valid.
+                            if (EventUtils.eventExists(guildId, eventId)) {
+                                PreEvent preEvent = EventCreator.getCreator().init(event, eventId);
+                                if (preEvent != null) {
+                                    Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Creator initialized! Event details copied! Please specify the date/times!", event, client);
+                                } else {
+                                    Message.sendMessage("Something went wrong! I'm sorry, try again!", event, client);
+                                }
+                            } else {
+                                Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event, client);
+                            }
+                        } else {
+                            Message.sendMessage("You cannot cop an event when you do not have a calendar!", event, client);
                         }
                     }
                 } else if (function.equalsIgnoreCase("summary")) {

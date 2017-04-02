@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -55,18 +56,28 @@ public class EventCreator {
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
-    public PreEvent init(MessageReceivedEvent e, Event calEvent) {
+    public PreEvent init(MessageReceivedEvent e, String eventId) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             //TODO: Handle multiple calendars...
-            PreEvent event = EventUtils.copyEvent(e.getMessage().getGuild().getID(), calEvent);
             try {
                 String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
-                event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
+                Calendar service = CalendarAuth.getCalendarService();
+                Event calEvent = service.events().get(calId, eventId).execute();
+
+                PreEvent event = EventUtils.copyEvent(e.getMessage().getGuild().getID(), calEvent);
+
+                try {
+                    event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
+                } catch (IOException e1) {
+                    //Failed to get tz, ignore safely.
+                }
+
+                events.add(event);
+                return event;
             } catch (IOException exc) {
-                //Failed to get timezone, ignore safely.
+               //Something failed...
             }
-            events.add(event);
-            return event;
+            return null;
         }
         return getPreEvent(e.getMessage().getGuild().getID());
     }
