@@ -172,7 +172,7 @@ public class AnnouncementCommand implements ICommand {
             }
         } else if (args.length == 2) {
             String value = args[1];
-            if (announcementExists(value, event)) {
+            if (AnnouncementUtils.announcementExists(value, event)) {
                 if (DatabaseManager.getManager().deleteAnnouncement(value)) {
                     Message.sendMessage("Announcement successfully deleted!", event, client);
                 } else {
@@ -181,6 +181,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement delete <ID>`", event, client);
         }
     }
 
@@ -208,6 +210,8 @@ public class AnnouncementCommand implements ICommand {
                     Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..", event, client);
                 }
             }
+        } else {
+            Message.sendMessage("Please use `!announcement view` or `!announcement view <ID>`", event, client);
         }
     }
 
@@ -217,7 +221,7 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("Please specify the ID of the announcement you wish to subscribe to!", event, client);
         } else if (args.length == 2) {
             String value = args[1];
-            if (announcementExists(value, event)) {
+            if (AnnouncementUtils.announcementExists(value, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
                 String senderId = event.getMessage().getAuthor().getID();
                 if (!a.getSubscriberUserIds().contains(senderId)) {
@@ -233,7 +237,7 @@ public class AnnouncementCommand implements ICommand {
         } else if (args.length == 3) {
             String value1 = args[1];
             String value2 = args[2];
-            if (announcementExists(value1, event)) {
+            if (AnnouncementUtils.announcementExists(value1, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
                 IUser user = UserUtils.getUserFromMention(value2, event);
                 if (user != null) {
@@ -277,6 +281,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement subscribe <ID>` or `!announcement subscribe <ID> <user mention/role mention/here/everyone>`", event, client);
         }
     }
 
@@ -286,7 +292,7 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("Please specify the ID of the announcement you wish to unsubscribe from!", event, client);
         } else if (args.length == 2) {
             String value = args[1];
-            if (announcementExists(value, event)) {
+            if (AnnouncementUtils.announcementExists(value, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
                 String senderId = event.getMessage().getAuthor().getID();
                 if (a.getSubscriberUserIds().contains(senderId)) {
@@ -302,7 +308,7 @@ public class AnnouncementCommand implements ICommand {
         } else if (args.length == 3) {
             String value1 = args[1];
             String value2 = args[2];
-            if (announcementExists(value1, event)) {
+            if (AnnouncementUtils.announcementExists(value1, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
                 IUser user = UserUtils.getUserFromMention(value2, event);
                 if (user != null) {
@@ -346,6 +352,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement unsubscribe <ID>` or `!announcement unsubscribe <ID> <user mention/role mention/here/everyone>`", event, client);
         }
     }
 
@@ -368,6 +376,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement type <TYPE>`", event, client);
         }
     }
 
@@ -386,6 +396,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement hours <amount>`", event, client);
         }
     }
 
@@ -405,6 +417,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement minutes <amount>`", event, client);
         }
     }
 
@@ -449,6 +463,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("You cannot list announcements while in the creator!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement list <amount>` or `!announcement list all`", event, client);
         }
     }
 
@@ -470,12 +486,16 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement event <Event ID>`", event, client);
         }
     }
 
-    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client)   {
         String guildId = event.getMessage().getGuild().getID();
-        if (args.length == 2) {
+        if (args.length < 2) {
+            Message.sendMessage("Please use `!announcement info <your info here>`", event, client);
+        } else if (args.length == 2) {
             String value = args[1];
             if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
@@ -485,7 +505,7 @@ public class AnnouncementCommand implements ICommand {
             }
         } else if (args.length > 2) {
             if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-                String value = getContent(args);
+                String value = GeneralUtils.getContent(args, 1);
                 AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
                 Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak + "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!", event, client);
             } else {
@@ -513,37 +533,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
             }
+        } else {
+            Message.sendMessage("Please use `!announcement channel <ChannelName>`", event, client);
         }
-    }
-
-
-
-
-    /**
-     * Checks if the announcement exists.
-     * @param value The announcement ID.
-     * @param event The event received.
-     * @return <code>true</code> if the announcement exists, else <code>false</code>.
-     */
-    private Boolean announcementExists(String value, MessageReceivedEvent event) {
-        for (Announcement a : DatabaseManager.getManager().getAnnouncements(event.getMessage().getGuild().getID())) {
-            if (a.getAnnouncementId().toString().equals(value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Gets the contents of the message at a set offset.
-     * @param args The args of the command.
-     * @return The contents of the message at a set offset.
-     */
-    private String getContent(String[] args) {
-        StringBuilder content = new StringBuilder();
-        for (int i = 1; i < args.length; i++) {
-            content.append(args[i]).append(" ");
-        }
-        return content.toString().trim();
     }
 }
