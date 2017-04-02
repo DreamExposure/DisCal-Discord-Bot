@@ -45,6 +45,8 @@ public class AnnouncementCommand implements ICommand {
         ArrayList<String> aliases = new ArrayList<>();
         aliases.add("announce");
         aliases.add("alert");
+        aliases.add("a");
+        aliases.add("ann");
         return aliases;
     }
 
