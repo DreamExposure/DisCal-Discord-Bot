@@ -55,6 +55,22 @@ public class EventCreator {
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
+    public PreEvent init(MessageReceivedEvent e, Event calEvent) {
+        if (!hasPreEvent(e.getMessage().getGuild().getID())) {
+            //TODO: Handle multiple calendars...
+            PreEvent event = EventUtils.copyEvent(e.getMessage().getGuild().getID(), calEvent);
+            try {
+                String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
+                event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
+            } catch (IOException exc) {
+                //Failed to get timezone, ignore safely.
+            }
+            events.add(event);
+            return event;
+        }
+        return getPreEvent(e.getMessage().getGuild().getID());
+    }
+
     /**
      * Gracefully terminates the EventCreator for a specific guild.
      * @param e The event received upon termination.

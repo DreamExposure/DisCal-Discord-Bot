@@ -3,7 +3,9 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
 
 import java.io.IOException;
 
@@ -32,5 +34,18 @@ public class EventUtils {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static PreEvent copyEvent(String guildId, Event event) {
+        PreEvent pe = new PreEvent(guildId);
+        pe.setSummary(event.getSummary());
+        pe.setDescription(event.getDescription());
+        if (event.getColorId() != null) {
+            pe.setColor(EventColor.fromNameOrHexOrID(event.getColorId()));
+        } else {
+            pe.setColor(EventColor.RED);
+        }
+
+        return pe;
     }
 }
