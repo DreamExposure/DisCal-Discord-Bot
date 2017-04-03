@@ -87,7 +87,7 @@ public class AnnouncementCommand implements ICommand {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help announcement`", event, client);
-            } else if (args.length > 1) {
+            } else if (args.length >= 1) {
                 String function = args[0];
                 if (function.equalsIgnoreCase("create")) {
                     moduleCreate(event, client);
