@@ -524,5 +524,26 @@ public class DatabaseManager {
         return false;
     }
 
+    public Boolean deleteAnnouncementsForEvent(String guildId, String eventId) {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+                String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
+                PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+                preparedStmt.setString(1, eventId);
+                preparedStmt.setString(2, guildId);
+                preparedStmt.setString(3, AnnouncementType.SPECIFIC.name());
+
+                preparedStmt.execute();
+                preparedStmt.close();
+                return true;
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return false;
+    }
+
     public void runDatabaseUpdateIfNeeded() {}
 }

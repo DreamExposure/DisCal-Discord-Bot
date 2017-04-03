@@ -27,6 +27,7 @@ public class EventUtils {
         try {
             Calendar service = CalendarAuth.getCalendarService();
             service.events().delete(calendarId, eventId).execute();
+            DatabaseManager.getManager().deleteAnnouncementsForEvent(guildId, eventId);
             return true;
         } catch (IOException e) {
             System.out.println("Something weird happened when deleting an event!");
