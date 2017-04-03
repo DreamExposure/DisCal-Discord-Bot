@@ -8,6 +8,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -65,8 +66,17 @@ public class Announce extends TimerTask {
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                                 }
                             } catch (Exception e) {
-                                //Event does not exist, delete announcement
-                                DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+                                //Check error first...
+                                if (e instanceof GoogleJsonResponseException) {
+                                    GoogleJsonResponseException ge = (GoogleJsonResponseException) e;
+                                    if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
+                                        //Event deleted or not found, delete announcement.
+                                        DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+                                    } else {
+                                        //Unknown cause, send email
+                                        EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                                    }
+                                }
                             }
                         } catch (IOException e) {
                             //Event may not exist...
