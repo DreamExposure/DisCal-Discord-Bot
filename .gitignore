@@ -59,3 +59,4 @@ hs_err_pid*
 /src/test/
 /DisCal.iml
 /src/main/resources/client_secret.json
+/src/main/resources/META-INF/
