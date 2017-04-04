@@ -42,11 +42,7 @@ public class EventUtils {
         String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
         try {
             Calendar service = CalendarAuth.getCalendarService();
-            if (service.events().get(calendarId, eventId).execute() != null) {
-                return true;
-            } else {
-                return false;
-            }
+            return service.events().get(calendarId, eventId).execute() != null;
         } catch (IOException e) {
             //Failed to check event, probably doesn't exist, safely ignore.
         }
