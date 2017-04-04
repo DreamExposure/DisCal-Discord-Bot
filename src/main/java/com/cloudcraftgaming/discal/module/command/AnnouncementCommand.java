@@ -88,37 +88,61 @@ public class AnnouncementCommand implements ICommand {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help announcement`", event, client);
             } else if (args.length >= 1) {
-                String function = args[0];
-                if (function.equalsIgnoreCase("create")) {
-                    moduleCreate(event, client);
-                } else if (function.equalsIgnoreCase("confirm")) {
-                    moduleConfirm(event, client);
-                } else if (function.equalsIgnoreCase("cancel")) {
-                    moduleCancel(event, client);
-                } else if (function.equalsIgnoreCase("delete")) {
-                    moduleDelete(args, event, client);
-                } else if (function.equalsIgnoreCase("view") || function.equalsIgnoreCase("review")) {
-                    moduleView(args, event, client);
-                } else if (function.equalsIgnoreCase("subscribe") || function.equalsIgnoreCase("sub")) {
-                    moduleSubscribe(args, event, client);
-                } else if (function.equalsIgnoreCase("unsubscribe") || function.equalsIgnoreCase("unsub")) {
-                    moduleUnsubscribe(args, event, client);
-                } else if (function.equalsIgnoreCase("type")) {
-                    moduleType(args, event, client);
-                } else if (function.equalsIgnoreCase("hours")) {
-                    moduleHours(args, event, client);
-                } else if (function.equalsIgnoreCase("minutes")) {
-                    moduleMinutes(args, event, client);
-                } else if (function.equalsIgnoreCase("list")) {
-                    moduleList(args, event, client);
-                } else if (function.equalsIgnoreCase("event")) {
-                    moduleEvent(args, event, client);
-                } else if (function.equalsIgnoreCase("info")) {
-                    moduleInfo(args, event, client);
-                } else if (function.equalsIgnoreCase("channel")) {
-                    moduleChannel(args, event, client);
-                } else {
-                    Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
+                switch (args[0].toLowerCase()) {
+                    case "create":
+                        moduleCreate(event, client);
+                        break;
+                    case "confirm":
+                        moduleConfirm(event, client);
+                        break;
+                    case "cancel":
+                        moduleCancel(event, client);
+                        break;
+                    case "delete":
+                        moduleDelete(args, event, client);
+                        break;
+                    case "view":
+                        moduleView(args, event, client);
+                        break;
+                    case "review":
+                        moduleView(args, event, client);
+                        break;
+                    case "subscribe":
+                        moduleSubscribe(args, event, client);
+                        break;
+                    case "sub":
+                        moduleSubscribe(args, event, client);
+                        break;
+                    case "unsubscribe":
+                        moduleUnsubscribe(args, event, client);
+                        break;
+                    case "unsub":
+                        moduleUnsubscribe(args, event, client);
+                        break;
+                    case "type":
+                        moduleType(args, event, client);
+                        break;
+                    case "hours":
+                        moduleHours(args, event, client);
+                        break;
+                    case "minutes":
+                        moduleMinutes(args, event, client);
+                        break;
+                    case "list":
+                        moduleList(args, event, client);
+                        break;
+                    case "event":
+                        moduleEvent(args, event, client);
+                        break;
+                    case "info":
+                        moduleInfo(args, event, client);
+                        break;
+                    case "channel":
+                        moduleChannel(args, event, client);
+                        break;
+                    default:
+                        Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
+                        break;
                 }
             }
         } else {
