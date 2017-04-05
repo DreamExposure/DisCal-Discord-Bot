@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
+import com.cloudcraftgaming.discal.utils.EventColor;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
@@ -20,6 +22,7 @@ public class Announcement {
     private String announcementChannelId;
     private AnnouncementType type;
     private String eventId;
+    private EventColor eventColor;
     private int hoursBefore;
     private int minutesBefore;
     private String info;
@@ -33,6 +36,7 @@ public class Announcement {
         announcementId = UUID.randomUUID();
         announcementChannelId = "N/a";
         eventId = "N/a";
+        eventColor = EventColor.RED;
         type = AnnouncementType.UNIVERSAL;
         hoursBefore = 0;
         minutesBefore = 0;
@@ -49,6 +53,7 @@ public class Announcement {
         guildId = _guildId;
         announcementChannelId = "N/a";
         eventId = "N/a";
+        eventColor = EventColor.RED;
         type = AnnouncementType.UNIVERSAL;
         hoursBefore = 0;
         minutesBefore = 0;
@@ -148,6 +153,10 @@ public class Announcement {
         return eventId;
     }
 
+    public EventColor getEventColor() {
+        return eventColor;
+    }
+
     /**
      * Gets the amount of hours before the event to announce.
      * @return The amount of hours before the event to announce.
@@ -195,6 +204,10 @@ public class Announcement {
      */
     public void setEventId(String _eventId) {
         eventId = _eventId;
+    }
+
+    public void setEventColor(EventColor _eventColor) {
+        eventColor = _eventColor;
     }
 
     /**

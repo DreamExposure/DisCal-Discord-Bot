@@ -101,8 +101,18 @@ public class Announce extends TimerTask {
                                     Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                     Long difference = minutesToEvent - announcementTime;
                                     if (difference >= 0 && difference <= 10) {
-                                        //Right on time
-                                        sendAnnouncementMessage(a, event, data);
+                                        //Right on time, let's check if universal or color specific.
+                                        if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
+                                            sendAnnouncementMessage(a, event, data);
+                                        } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                                            //Color, test for color.
+                                            String colorId = event.getColorId();
+                                            EventColor color = EventColor.fromNameOrHexOrID(colorId);
+                                            if (color.name().equals(a.getEventColor().name())) {
+                                                //Color matches, announce
+                                                sendAnnouncementMessage(a, event, data);
+                                            }
+                                        }
                                     }
                                 }
                             }

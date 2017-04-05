@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
+import com.cloudcraftgaming.discal.utils.EventColor;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -98,6 +99,7 @@ public class DatabaseManager {
                     " CHANNEL_ID VARCHAR(255) not NULL, " +
                     " ANNOUNCEMENT_TYPE VARCHAR(255) not NULL, " +
                     " EVENT_ID LONGTEXT not NULL, " +
+                    " EVENT_COLOR VARCHAR(255) not NULL, " +
                     " HOURS_BEFORE INTEGER not NULL, " +
                     " MINUTES_BEFORE INTEGER not NULL, " +
                     " INFO LONGTEXT not NULL, " +
@@ -259,8 +261,8 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
                     //Data not present, add to db.
                     String insertCommand = "INSERT INTO " + announcementTableName +
-                            "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, HOURS_BEFORE, MINUTES_BEFORE, INFO)" +
-                            " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                            "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, HOURS_BEFORE, MINUTES_BEFORE, INFO)" +
+                            " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, announcement.getAnnouncementId().toString());
                     ps.setString(2, announcement.getGuildId());
@@ -269,9 +271,10 @@ public class DatabaseManager {
                     ps.setString(5, announcement.getAnnouncementChannelId());
                     ps.setString(6, announcement.getAnnouncementType().name());
                     ps.setString(7, announcement.getEventId());
-                    ps.setInt(8, announcement.getHoursBefore());
-                    ps.setInt(9, announcement.getMinutesBefore());
-                    ps.setString(10, announcement.getInfo());
+                    ps.setString(8, announcement.getEventColor().name());
+                    ps.setInt(9, announcement.getHoursBefore());
+                    ps.setInt(10, announcement.getMinutesBefore());
+                    ps.setString(11, announcement.getInfo());
 
                     ps.executeUpdate();
                     ps.close();
@@ -281,7 +284,7 @@ public class DatabaseManager {
 
                     String update = "UPDATE " + announcementTableName
                             + " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
-                            + " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?,"
+                            + " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
                             + " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
                             + " INFO = ?"
                             + " WHERE ANNOUNCEMENT_ID = ?";
@@ -292,10 +295,11 @@ public class DatabaseManager {
                     ps.setString(3, announcement.getAnnouncementChannelId());
                     ps.setString(4, announcement.getAnnouncementType().name());
                     ps.setString(5, announcement.getEventId());
-                    ps.setInt(6, announcement.getHoursBefore());
-                    ps.setInt(7, announcement.getMinutesBefore());
-                    ps.setString(8, announcement.getInfo());
-                    ps.setString(9, announcement.getAnnouncementId().toString());
+                    ps.setString(6, announcement.getEventColor().name());
+                    ps.setInt(7, announcement.getHoursBefore());
+                    ps.setInt(8, announcement.getMinutesBefore());
+                    ps.setString(9, announcement.getInfo());
+                    ps.setString(10, announcement.getAnnouncementId().toString());
 
                     ps.executeUpdate();
 
@@ -445,6 +449,7 @@ public class DatabaseManager {
                     announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
                     announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
                     announcement.setEventId(res.getString("EVENT_ID"));
+                    announcement.setEventColor(EventColor.fromNameOrHexOrID(res.getString("EVENT_COLOR")));
                     announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                     announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
                     announcement.setInfo(res.getString("INFO"));
@@ -484,6 +489,7 @@ public class DatabaseManager {
                         announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
                         announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
                         announcement.setEventId(res.getString("EVENT_ID"));
+                        announcement.setEventColor(EventColor.fromNameOrHexOrID(res.getString("EVENT_COLOR")));
                         announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
                         announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
                         announcement.setInfo(res.getString("INFO"));

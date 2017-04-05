@@ -140,6 +140,11 @@ public class AnnouncementCommand implements ICommand {
                     case "channel":
                         moduleChannel(args, event, client);
                         break;
+                    case "color":
+                        moduleColor(args, event, client);
+                        break;
+                    case "colour":
+                        moduleColor(args, event, client);
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
                         break;
@@ -391,11 +396,13 @@ public class AnnouncementCommand implements ICommand {
                     AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
                     if (type.equals(AnnouncementType.SPECIFIC)) {
                         Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the specific event ID to fire for with `!announcement event <id>`", event, client);
+                    } else if (type.equals(AnnouncementType.COLOR)) {
+                        Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the specific event color to fire for with `!announcement color <name or ID>`", event, client);
                     } else {
                         Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
                     }
                 } else {
-                    Message.sendMessage("Valid types are only `UNIVERSAL` or `SPECIFIC`!", event, client);
+                    Message.sendMessage("Valid types are only `UNIVERSAL`, `SPECIFIC`, or `COLOR`!", event, client);
                 }
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -505,7 +512,7 @@ public class AnnouncementCommand implements ICommand {
                         Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
                     }
                 } else {
-                    Message.sendMessage("You cannot set an event while the announcement Type is set to `UNIVERSAL`", event, client);
+                    Message.sendMessage("You cannot set an event while the announcement Type is NOT set to `SPECIFIC`", event, client);
                 }
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -559,6 +566,30 @@ public class AnnouncementCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please use `!announcement channel <ChannelName>`", event, client);
+        }
+    }
+
+    private void moduleColor(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            String value = args[1];
+            if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                    if (EventColor.exists(value)) {
+                        EventColor color = EventColor.fromNameOrHexOrID(value);
+                        AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventColor(color);
+                        Message.sendMessage("Announcement Color set to: `" + color.name() + "`" + Message.lineBreak + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
+                    } else {
+                        Message.sendMessage("Please specify a valid color NAME, ID, or HEX!", event, client);
+                    }
+                } else {
+                    Message.sendMessage("You cannot set announcement color while announcement type is NOT `COLOR`", event, client);
+                }
+            } else {
+                Message.sendMessage("Announcement creator not initiated!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify a color with `!announcement color <color>`", event, client);
         }
     }
 }

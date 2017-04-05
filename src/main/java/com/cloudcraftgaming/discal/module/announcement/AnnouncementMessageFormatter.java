@@ -34,7 +34,11 @@ public class AnnouncementMessageFormatter {
         em.withTitle("Announcement Info");
         em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
         em.appendField("Announcement Type", a.getAnnouncementType().name(), true);
-        em.appendField("Event ID", a.getEventId(), true);
+        if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+            em.appendField("Event ID", a.getEventId(), true);
+        } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+            em.appendField("Event Color", a.getEventColor().name(), true);
+        }
         em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
         em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
         em.appendField("In Channel (Name)", ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), a.getGuildId()), true);
@@ -69,6 +73,8 @@ public class AnnouncementMessageFormatter {
             } catch (IOException e) {
                 em.appendField("Event Summary", "Unknown (Error)", true);
             }
+        } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+            em.appendField("Event Color", a.getEventColor().name(), true);
         }
         em.withFooterText("Type: " + a.getAnnouncementType().name());
         em.withColor(36, 153, 153);
