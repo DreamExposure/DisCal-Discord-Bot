@@ -76,6 +76,7 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("summary");
         info.getSubCommands().add("description");
         info.getSubCommands().add("color");
+        info.getSubCommands().add("colour");
 
         return info;
     }
@@ -330,9 +331,9 @@ public class EventCommand implements ICommand {
                     } else {
                         Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event, client);
                     }
-                } else if (function.equalsIgnoreCase("color")) {
+                } else if (function.equalsIgnoreCase("color") || function.equalsIgnoreCase("colour")) {
                     String value = args[1];
-                    if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")) {
+                    if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
 
                         StringBuilder list = new StringBuilder("All Colors: ");
                         for (EventColor ec : EventColor.values()) {
