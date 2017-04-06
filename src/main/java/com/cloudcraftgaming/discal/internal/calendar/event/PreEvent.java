@@ -127,7 +127,7 @@ public class PreEvent {
      * Gets the recurrence rules and info for the event.
      * @return The recurrence rules and info for the event.
      */
-    private Recurrence getRecurrence() {
+    public Recurrence getRecurrence() {
         return recurrence;
     }
 
@@ -200,7 +200,7 @@ public class PreEvent {
      * Sets whether or not the event should recur.
      * @param _recur Whether or not the event should recur.
      */
-    void setShouldRecur(boolean _recur) {
+    public void setShouldRecur(boolean _recur) {
         recur = _recur;
     }
 
