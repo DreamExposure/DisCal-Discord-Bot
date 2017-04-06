@@ -52,12 +52,13 @@ public class AnnouncementCommand implements ICommand {
      * @return The command info.
      */
     @Override
-    public CommandInfo getCommandInfo() {
+    public CommandInfo getCommandInfo()  {
         CommandInfo info = new CommandInfo("announcement");
         info.setDescription("Used for all announcement functions.");
         info.setExample("!announcement <function> (value(s))");
 
         info.getSubCommands().add("create");
+        info.getSubCommands().add("copy");
         info.getSubCommands().add("confirm");
         info.getSubCommands().add("cancel");
         info.getSubCommands().add("delete");
@@ -145,6 +146,10 @@ public class AnnouncementCommand implements ICommand {
                         break;
                     case "colour":
                         moduleColor(args, event, client);
+                        break;
+                    case "copy":
+                        moduleCopy(args, event, client);
+                        break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
                         break;
@@ -590,6 +595,26 @@ public class AnnouncementCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify a color with `!announcement color <color>`", event, client);
+        }
+    }
+
+    private void moduleCopy(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            String value = args[1];
+            if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+                if (AnnouncementUtils.announcementExists(value, event)) {
+                    Announcement a = AnnouncementCreator.getCreator().init(event, value);
+
+                    Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a), "Announcement copied! Edit any values you wish and confirm the announcement with the command `!announcement confirm`", event, client);
+                } else {
+                    Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..", event, client);
+                }
+            } else {
+                Message.sendMessage("Announcement creator already initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify the announcement to copy with `!announcement copy <ID>`", event, client);
         }
     }
 }

@@ -60,6 +60,21 @@ public class Announcement {
         info = "None";
     }
 
+    public Announcement(Announcement from) {
+        guildId = from.getGuildId();
+        announcementId = UUID.randomUUID();
+        announcementChannelId = from.getAnnouncementChannelId();
+        eventId = from.getEventId();
+        eventColor = from.getEventColor();
+        type = from.getAnnouncementType();
+        hoursBefore = from.getHoursBefore();
+        minutesBefore = from.getMinutesBefore();
+        info = from.getInfo();
+
+        setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
+        setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
+    }
+
     //Getters
     /**
      *  Gets the ID of the announcement.

@@ -1,9 +1,11 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -39,6 +41,21 @@ public class AnnouncementCreator {
             Announcement a = new Announcement(e.getMessage().getGuild().getID());
             announcements.add(a);
             return a;
+        }
+        return getAnnouncement(e.getMessage().getGuild().getID());
+    }
+
+    public Announcement init(MessageReceivedEvent e, String announcementId) {
+        if (!hasAnnouncement(e.getMessage().getGuild().getID())) {
+            if (AnnouncementUtils.announcementExists(announcementId, e)) {
+                Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
+
+                //Copy
+                Announcement a = new Announcement(toCopy);
+
+                announcements.add(a);
+                return a;
+            }
         }
         return getAnnouncement(e.getMessage().getGuild().getID());
     }
