@@ -50,6 +50,7 @@ public class DevCommand implements ICommand {
         ci.setDescription("Used for developer commands. Only able to be used by registered developers");
         ci.setExample("!dev <function> (value)");
         ci.getSubCommands().add("patron");
+        ci.getSubCommands().add("dev");
 
         return ci;
     }
@@ -74,6 +75,9 @@ public class DevCommand implements ICommand {
                     case "patron":
                         modulePatron(args, event, client);
                         break;
+                    case "dev":
+                        moduleDevGuild(args, event, client);
+                        break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
                         break;
@@ -86,9 +90,7 @@ public class DevCommand implements ICommand {
     }
 
     private void modulePatron(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        if (args.length == 1) {
-            Message.sendMessage("Please specify the Id of the guild to set as a patron guild!", event, client);
-        } else if (args.length == 2) {
+        if (args.length == 2) {
             String guildId = args[1];
             if (Main.client.getGuildByID(guildId) != null) {
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
@@ -103,7 +105,27 @@ public class DevCommand implements ICommand {
                 Message.sendMessage("Guild not found or is not connected to DisCal!", event, client);
             }
         } else {
-            Message.sendMessage("Please specify only the ID of the guild to set as a patron guild!", event, client);
+            Message.sendMessage("Please specify the ID of the guild to set as a patron guild with `!dev patron <ID>`", event, client);
+        }
+    }
+
+    private void moduleDevGuild(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        if (args.length == 2) {
+            String guildId = args[1];
+            if (Main.client.getGuildByID(guildId) != null) {
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+                settings.setDevGuild(!settings.isDevGuild());
+
+                Boolean isPatron = settings.isDevGuild();
+
+                DatabaseManager.getManager().updateSettings(settings);
+
+                Message.sendMessage("Guild with ID: `" + guildId + "` is dev guild set to: `" + isPatron + "`", event, client);
+            } else {
+                Message.sendMessage("Guild not found or is not connected to DisCal!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event, client);
         }
     }
 }
