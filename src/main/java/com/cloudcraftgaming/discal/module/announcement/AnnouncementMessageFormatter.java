@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
+import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -43,7 +44,12 @@ public class AnnouncementMessageFormatter {
         em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
         em.appendField("In Channel (Name)", ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), a.getGuildId()), true);
         em.appendField("Additional Info", a.getInfo(), false);
-        em.withColor(36, 153, 153);
+        if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+            EventColor c = a.getEventColor();
+            em.withColor(c.getR(), c.getG(), c.getB());
+        } else {
+            em.withColor(36, 153, 153);
+        }
 
         return em.build();
     }
@@ -77,7 +83,13 @@ public class AnnouncementMessageFormatter {
             em.appendField("Event Color", a.getEventColor().name(), true);
         }
         em.withFooterText("Type: " + a.getAnnouncementType().name());
-        em.withColor(36, 153, 153);
+
+        if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+            EventColor c = a.getEventColor();
+            em.withColor(c.getR(), c.getG(), c.getB());
+        } else {
+            em.withColor(36, 153, 153);
+        }
 
         return em.build();
     }
