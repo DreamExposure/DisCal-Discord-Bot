@@ -6,7 +6,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
  * For Project: DisCal
  */
 public enum EventFrequency {
-    DAILY, MONTHLY, YEARLY;
+    DAILY, WEEKLY, MONTHLY, YEARLY;
 
     /**
      * Checks if the value is a valid enum value.
@@ -14,7 +14,7 @@ public enum EventFrequency {
      * @return <code>true</code> if valid, else <code>false</code>.
      */
     public static boolean isValid(String value) {
-        return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
+        return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
     }
 
     /**
@@ -23,12 +23,17 @@ public enum EventFrequency {
      * @return The enum value.
      */
     public static EventFrequency fromValue(String value) {
-        if (value.equalsIgnoreCase("DAILY")) {
-            return DAILY;
-        } else if (value.equalsIgnoreCase("MONTHLY")) {
-            return MONTHLY;
-        } else {
-            return YEARLY;
+        switch (value.toUpperCase()) {
+            case "DAILY":
+                return DAILY;
+            case "WEEKLY":
+                return WEEKLY;
+            case "MONTHLY":
+                return MONTHLY;
+            case "YEARLY":
+                return YEARLY;
+            default:
+                return DAILY;
         }
     }
 }
