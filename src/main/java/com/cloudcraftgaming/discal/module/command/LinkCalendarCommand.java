@@ -70,9 +70,15 @@ public class LinkCalendarCommand implements ICommand {
         try {
             //TODO: Handle multiple calendars...
             CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
-            Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
-            Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal), event, client);
+            if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //Does not have a calendar.
+                Message.sendMessage("You do not have a calendar to link!" + Message.lineBreak + "Use `!calendar create` to create a new calendar!", event, client);
+            } else {
+                Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
+
+                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal), event, client);
+            }
         } catch (IOException e) {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
             Message.sendMessage("Oops! Something went wrong! I have emailed the developer!", event, client);
