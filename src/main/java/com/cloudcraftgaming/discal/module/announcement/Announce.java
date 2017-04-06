@@ -35,15 +35,15 @@ public class Announce extends TimerTask {
         //EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Announcement Runnable Start");
         DateTime now = new DateTime(System.currentTimeMillis());
         Long nowMS = System.currentTimeMillis();
-        for (IGuild guild : Main.client.getGuilds()) {
-            try {
-                String guildId = guild.getID();
-                //TODO: Add multiple calendar support...
-                CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
-                for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
-                    if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-                        try {
-                            Calendar service = CalendarAuth.getCalendarService();
+        try {
+            Calendar service = CalendarAuth.getCalendarService();
+            for (IGuild guild : Main.client.getGuilds()) {
+                try {
+                    String guildId = guild.getID();
+                    //TODO: Add multiple calendar support...
+                    CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+                    for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+                        if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                             try {
                                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 
@@ -78,61 +78,59 @@ public class Announce extends TimerTask {
                                     }
                                 }
                             }
-                        } catch (IOException e) {
-                            //Event may not exist...
-                            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
-                        }
-                    } else {
-                        try {
-                            Calendar service = CalendarAuth.getCalendarService();
-                            Events events = service.events().list(data.getCalendarAddress())
-                                    .setMaxResults(10)
-                                    .setTimeMin(now)
-                                    .setOrderBy("startTime")
-                                    .setSingleEvents(true)
-                                    .execute();
-                            List<Event> items = events.getItems();
-                            if (items.size() > 0) {
-                                for (Event event : items) {
-                                    //Test for the time...
-                                    Long eventMS = event.getStart().getDateTime().getValue();
-                                    Long timeUntilEvent = eventMS - nowMS;
-                                    Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
-                                    Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
-                                    Long difference = minutesToEvent - announcementTime;
-                                    if (difference >= 0 && difference <= 10) {
-                                        //Right on time, let's check if universal or color specific.
-                                        if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
-                                            sendAnnouncementMessage(a, event, data);
-                                        } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-                                            //Color, test for color.
-                                            String colorId = event.getColorId();
-                                            EventColor color = EventColor.fromNameOrHexOrID(colorId);
-                                            if (color.name().equals(a.getEventColor().name())) {
-                                                //Color matches, announce
+                        } else {
+                            try {
+                                Events events = service.events().list(data.getCalendarAddress())
+                                        .setMaxResults(10)
+                                        .setTimeMin(now)
+                                        .setOrderBy("startTime")
+                                        .setSingleEvents(true)
+                                        .execute();
+                                List<Event> items = events.getItems();
+                                if (items.size() > 0) {
+                                    for (Event event : items) {
+                                        //Test for the time...
+                                        Long eventMS = event.getStart().getDateTime().getValue();
+                                        Long timeUntilEvent = eventMS - nowMS;
+                                        Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+                                        Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+                                        Long difference = minutesToEvent - announcementTime;
+                                        if (difference >= 0 && difference <= 10) {
+                                            //Right on time, let's check if universal or color specific.
+                                            if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
                                                 sendAnnouncementMessage(a, event, data);
+                                            } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                                                //Color, test for color.
+                                                String colorId = event.getColorId();
+                                                EventColor color = EventColor.fromNameOrHexOrID(colorId);
+                                                if (color.name().equals(a.getEventColor().name())) {
+                                                    //Color matches, announce
+                                                    sendAnnouncementMessage(a, event, data);
+                                                }
                                             }
                                         }
                                     }
                                 }
+                            } catch (IOException e) {
+                                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                             }
-                        } catch (IOException e) {
-                            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                         }
                     }
+                } catch (Exception e) {
+                    EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                 }
-            } catch (Exception e) {
-                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
             }
+        } catch (IOException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
         }
-        //EmailSender.getSender().sendDebugEmail(this.getClass(), "02", "Announcement Runnable completed!");
     }
 
     /**
      * Sends an embed with the announcement info in a proper format.
+     *
      * @param announcement The announcement to send info about.
-     * @param event the calendar event the announcement is for.
-     * @param data The BotData belonging to the guild.
+     * @param event        the calendar event the announcement is for.
+     * @param data         The BotData belonging to the guild.
      */
     private void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data) {
         EmbedBuilder em = new EmbedBuilder();
