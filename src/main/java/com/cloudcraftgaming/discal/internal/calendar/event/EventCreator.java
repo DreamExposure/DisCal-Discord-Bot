@@ -9,7 +9,7 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -109,16 +109,15 @@ public class EventCreator {
                 Event event = new Event();
                 event.setSummary(preEvent.getSummary());
                 event.setDescription(preEvent.getDescription());
-                event.setStart(preEvent.getStartDateTime());
-                event.setEnd(preEvent.getEndDateTime());
+                event.setStart(preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone()));
+                event.setEnd(preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone()));
                 event.setVisibility("public");
                 event.setColorId(String.valueOf(preEvent.getColor().getId()));
 
                 //Set recurrence
                 if (preEvent.shouldRecur()) {
-                    List<String> recurrence = new ArrayList<>();
-                    recurrence.add(preEvent.getRecurrence().toRRule());
-                    event.setRecurrence(recurrence);
+                    String[] recurrence = new String[] {preEvent.getRecurrence().toRRule()};
+                    event.setRecurrence(Arrays.asList(recurrence));
                 }
 
                 //TODO handle multiple calendars...
