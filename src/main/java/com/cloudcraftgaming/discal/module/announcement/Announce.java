@@ -81,7 +81,7 @@ public class Announce extends TimerTask {
                         } else {
                             try {
                                 Events events = service.events().list(data.getCalendarAddress())
-                                        .setMaxResults(10)
+                                        .setMaxResults(20)
                                         .setTimeMin(now)
                                         .setOrderBy("startTime")
                                         .setSingleEvents(true)
