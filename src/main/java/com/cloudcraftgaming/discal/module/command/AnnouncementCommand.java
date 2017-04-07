@@ -470,17 +470,17 @@ public class AnnouncementCommand implements ICommand {
             String value = args[1];
             if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 if (value.equalsIgnoreCase("all")) {
-                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info.", event, client);
+                    ArrayList<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(guildId);
+                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info." + Message.lineBreak + "`" + announcements.size() + "`"  + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
                     //Loop and add embeds
-                    for (Announcement a : DatabaseManager.getManager().getAnnouncements(
-                            guildId)) {
+                    for (Announcement a : announcements) {
                         Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
                     }
                 } else {
                     //List specific amount of announcements
                     try {
                         Integer amount = Integer.valueOf(value);
-                        Message.sendMessage("Displaying the first `" + amount + "` announcements found, use `!announcement view <id>` for more info.", event, client);
+                        Message.sendMessage("Displaying the first `" + amount + "` announcements found, use `!announcement view <id>` for more info." + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
 
                         int posted = 0;
                         for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
