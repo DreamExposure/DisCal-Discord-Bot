@@ -117,6 +117,9 @@ public class EventMessageFormatter {
         } else {
             em.appendField("Event Description", "ERROR", true);
         }
+        if (event.shouldRecur()) {
+            em.appendField("Recurrence", event.getRecurrence().toHumanReadable(), true);
+        }
         em.appendField("[R] Event Start Date", getHumanReadableDate(event.getViewableStartDate()), true);
         em.appendField("[R] Event Start Time", EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
         em.appendField("[R] Event End Date", getHumanReadableDate(event.getViewableEndDate()), true);
