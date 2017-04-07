@@ -6,7 +6,7 @@ package com.cloudcraftgaming.discal.module.announcement;
  * For Project: DisCal
  */
 public enum AnnouncementType {
-    UNIVERSAL, SPECIFIC, COLOR;
+    UNIVERSAL, SPECIFIC, COLOR, RECUR;
 
     /**
      * Checks if the specified value is a valid AnnouncementType.
@@ -14,7 +14,7 @@ public enum AnnouncementType {
      * @return <code>true</code> if value, otherwise <code>false</code>.
      */
     public static Boolean isValid(String _value) {
-        return _value.equalsIgnoreCase("UNIVERSAL") || _value.equalsIgnoreCase("SPECIFIC") || _value.equalsIgnoreCase("COLOR") || _value.equalsIgnoreCase("COLOUR");
+        return _value.equalsIgnoreCase("UNIVERSAL") || _value.equalsIgnoreCase("SPECIFIC") || _value.equalsIgnoreCase("COLOR") || _value.equalsIgnoreCase("COLOUR") || _value.equalsIgnoreCase("RECUR");
     }
 
     /**
@@ -32,6 +32,8 @@ public enum AnnouncementType {
                 return COLOR;
             case "COLOUR":
                 return COLOR;
+            case "RECUR":
+                return RECUR;
             default:
                 return UNIVERSAL;
         }

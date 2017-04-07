@@ -167,7 +167,7 @@ public class AnnouncementCommand implements ICommand {
 
         if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
             AnnouncementCreator.getCreator().init(event);
-            Message.sendMessage("Announcement creator initialized!" + Message.lineBreak + "Please specify the type:" + Message.lineBreak + "Either `UNIVERSAL` for all events, or `SPECIFIC` for a specific event", event, client);
+            Message.sendMessage("Announcement creator initialized!" + Message.lineBreak + "Please specify the type:" + Message.lineBreak + "`UNIVERSAL` for all events, or `SPECIFIC` for a specific event, `COLOR` for events with a specific color, or `RECUR` for recurring events.", event, client);
         } else {
             Message.sendMessage("Announcement creator has already been started!", event, client);
         }
@@ -403,11 +403,13 @@ public class AnnouncementCommand implements ICommand {
                         Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the specific event ID to fire for with `!announcement event <id>`", event, client);
                     } else if (type.equals(AnnouncementType.COLOR)) {
                         Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the specific event color to fire for with `!announcement color <name or ID>`", event, client);
+                    } else if (type.equals(AnnouncementType.RECUR)) {
+                        Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please set the recurring event to fire for with `!announcement event  <ID>`", event, client);
                     } else {
                         Message.sendMessage("Announcement type set to: `" + type.name() + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
                     }
                 } else {
-                    Message.sendMessage("Valid types are only `UNIVERSAL`, `SPECIFIC`, or `COLOR`!", event, client);
+                    Message.sendMessage("Valid types are only `UNIVERSAL`, `SPECIFIC`, `COLOR`, or `RECUR`!", event, client);
                 }
             } else {
                 Message.sendMessage("Announcement creator has not been initialized!", event, client);
@@ -512,6 +514,18 @@ public class AnnouncementCommand implements ICommand {
                 if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                     if (EventUtils.eventExists(guildId, value)) {
                         AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
+                        Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
+                    } else {
+                        Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);
+                    }
+                } else if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                    if (EventUtils.eventExists(guildId, value)) {
+                        if (value.contains("_")) {
+                            String[] stuff = value.split("_");
+                            value = stuff[0];
+                        }
+                        AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
+
                         Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak + "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!", event, client);
                     } else {
                         Message.sendMessage("Hmm... I can't seem to find an event with that ID, are you sure its correct?", event, client);

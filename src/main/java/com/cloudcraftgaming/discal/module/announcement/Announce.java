@@ -107,6 +107,11 @@ public class Announce extends TimerTask {
                                                     //Color matches, announce
                                                     sendAnnouncementMessage(a, event, data);
                                                 }
+                                            } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                                                //Recurring event announcement.
+                                                if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
+                                                    sendAnnouncementMessage(a, event, data);
+                                                }
                                             }
                                         }
                                     }

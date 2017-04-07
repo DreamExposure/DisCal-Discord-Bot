@@ -39,6 +39,8 @@ public class AnnouncementMessageFormatter {
             em.appendField("Event ID", a.getEventId(), true);
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             em.appendField("Event Color", a.getEventColor().name(), true);
+        } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+            em.appendField("Recurring Event ID", a.getEventId(), true);
         }
         em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
         em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
@@ -81,6 +83,8 @@ public class AnnouncementMessageFormatter {
             }
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             em.appendField("Event Color", a.getEventColor().name(), true);
+        } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+            em.appendField("Recurring Event ID", a.getEventId(), true);
         }
         em.withFooterText("Type: " + a.getAnnouncementType().name());
 
