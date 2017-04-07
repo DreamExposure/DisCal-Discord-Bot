@@ -74,6 +74,7 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("description");
         info.getSubCommands().add("color");
         info.getSubCommands().add("colour");
+        info.getSubCommands().add("recur");
 
         return info;
     }
@@ -140,6 +141,9 @@ public class EventCommand implements ICommand {
                     case "colour":
                         moduleColor(args, event, client);
                         break;
+                    case "recur":
+                        moduleRecur(args, event, client);
+                        break;
                     default:
                         Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event, client);
                         break;
@@ -150,6 +154,7 @@ public class EventCommand implements ICommand {
         }
         return false;
     }
+
 
     private void moduleCreate(MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
         String guildId = event.getMessage().getGuild().getID();
@@ -447,6 +452,31 @@ public class EventCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify the color or function with `!event color <color/function>`", event, client);
+        }
+    }
+
+    private void moduleRecur(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            String valueString = args[1];
+            if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                try {
+                    boolean value = Boolean.valueOf(valueString);
+                    EventCreator.getCreator().getPreEvent(guildId).setShouldRecur(value);
+                    if (value) {
+                        Message.sendMessage("Event will recur! Please specify the frequency it will recur with `!event freq <TYPE>`", event, client);
+                    } else {
+                        Message.sendMessage("Event will not recur!", event, client);
+                    }
+                } catch (Exception e) {
+                    //Could not convert to boolean
+                    Message.sendMessage("Acceptable values are only `true` or `false`", event, client);
+                }
+            } else {
+                Message.sendMessage("Event Creator has not been initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify if the event should recur with `!event recur <true/false>`", event, client);
         }
     }
 }
