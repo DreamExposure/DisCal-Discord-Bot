@@ -79,6 +79,7 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("frequency");
         info.getSubCommands().add("freq");
         info.getSubCommands().add("count");
+        info.getSubCommands().add("interval");
 
         return info;
     }
@@ -157,6 +158,8 @@ public class EventCommand implements ICommand {
                     case "count":
                         moduleCount(args, event, client);
                         break;
+                    case "interval":
+                        moduleInterval(args, event, client);
                     default:
                         Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event, client);
                         break;
@@ -527,7 +530,7 @@ public class EventCommand implements ICommand {
                     try {
                         Integer amount = Integer.valueOf(args[1]);
                         EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setCount(amount);
-                        Message.sendMessage("Event count set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "To set the interval (optionally) use `!event interval <amount`", event, client);
+                        Message.sendMessage("Event count set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "To set the interval (optionally) use `!event interval <amount`" + Message.lineBreak + Message.lineBreak + "The interval is how often to schedule following the frequency. (EX: if daily and interval is 2, it will be scheduled for every other day)", event, client);
                     } catch (NumberFormatException e) {
                         Message.sendMessage("Invalid value specified! Count must be a valid number (EX `1` or `24`)", event, client);
                     }
@@ -539,6 +542,29 @@ public class EventCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify how many times this event should recur with `!event count <amount>` Use `-1` for infinite!", event, client);
+        }
+    }
+
+    private void moduleInterval(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {
+                    try {
+                        Integer amount = Integer.valueOf(args[1]);
+                        EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setInterval(amount);
+                        Message.sendMessage("Event interval set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "Please use `!event review` to review that all info entered is correct and confirm with `!event confirm`", event, client);
+                    } catch (NumberFormatException e) {
+                        Message.sendMessage("Invalid value specified! Interval must be a valid number (EX `1` or `24`)", event, client);
+                    }
+                } else {
+                    Message.sendMessage("Event is not set to recur! Use `!event recur true` to make the event recur!", event, client);
+                }
+            } else {
+                Message.sendMessage("Event Creator not initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify the interval rule for the event with`!event interval <amount>` Defaulted to `1`" + Message.lineBreak + Message.lineBreak + "he interval is how often to schedule following the frequency. (EX: if daily and interval is 2, it will be scheduled for every other day)", event, client);
         }
     }
 }
