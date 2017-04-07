@@ -2,11 +2,8 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventCreator;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventFrequency;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
-import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -54,7 +51,6 @@ public class DevCommand implements ICommand {
         ci.setExample("!dev <function> (value)");
         ci.getSubCommands().add("patron");
         ci.getSubCommands().add("dev");
-        ci.getSubCommands().add("recur");
 
         return ci;
     }
@@ -81,9 +77,6 @@ public class DevCommand implements ICommand {
                         break;
                     case "dev":
                         moduleDevGuild(args, event, client);
-                        break;
-                    case "recur":
-                        moduleTestRecur(event, client);
                         break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
@@ -134,22 +127,5 @@ public class DevCommand implements ICommand {
         } else {
             Message.sendMessage("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event, client);
         }
-    }
-
-    private void moduleTestRecur(MessageReceivedEvent event, IDiscordClient client) {
-        //Just create a recurring event to test it...
-        Message.sendMessage("Creating a recurring event test! Please wait!", event, client);
-
-        String guildId = event.getMessage().getGuild().getID();
-        EventCreator.getCreator().init(event);
-        EventCreator.getCreator().getPreEvent(guildId).setSummary("Daily Recur");
-        EventCreator.getCreator().getPreEvent(guildId).setDescription("This event will recur daily for one (1) week to test the event recurrence module.");
-        EventCreator.getCreator().getPreEvent(guildId).setColor(EventColor.RED);
-
-        EventCreator.getCreator().getPreEvent(guildId).setShouldRecur(true);
-        EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setFrequency(EventFrequency.DAILY);
-        EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setCount(7);
-
-        Message.sendMessage("Please specify the start and end date/time with the appropriate commands and confirm the event! If this works, you will have a recurring event for the next 7 days!", event, client);
     }
 }
