@@ -78,6 +78,7 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("recur");
         info.getSubCommands().add("frequency");
         info.getSubCommands().add("freq");
+        info.getSubCommands().add("count");
 
         return info;
     }
@@ -152,6 +153,9 @@ public class EventCommand implements ICommand {
                         break;
                     case "freq":
                         moduleFrequency(args, event, client);
+                        break;
+                    case "count":
+                        moduleCount(args, event, client);
                         break;
                     default:
                         Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event, client);
@@ -464,6 +468,7 @@ public class EventCommand implements ICommand {
         }
     }
 
+    //Event recurrence settings
     private void moduleRecur(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
         if (args.length == 2) {
@@ -511,6 +516,29 @@ public class EventCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify the frequency with `!event freq <TYPE>`", event, client);
+        }
+    }
+
+    private void moduleCount(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {
+                    try {
+                        Integer amount = Integer.valueOf(args[1]);
+                        EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setCount(amount);
+                        Message.sendMessage("Event count set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "To set the interval (optionally) use `!event interval <amount`", event, client);
+                    } catch (NumberFormatException e) {
+                        Message.sendMessage("Invalid value specified! Count must be a valid number (EX `1` or `24`)", event, client);
+                    }
+                } else {
+                    Message.sendMessage("Event is not set to recur! Use `!event recur true` to make the event recur!", event, client);
+                }
+            } else {
+                Message.sendMessage("Event Creator not initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify how many times this event should recur with `!event count <amount>` Use `-1` for infinite!", event, client);
         }
     }
 }
