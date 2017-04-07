@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -75,6 +76,8 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("color");
         info.getSubCommands().add("colour");
         info.getSubCommands().add("recur");
+        info.getSubCommands().add("frequency");
+        info.getSubCommands().add("freq");
 
         return info;
     }
@@ -143,6 +146,12 @@ public class EventCommand implements ICommand {
                         break;
                     case "recur":
                         moduleRecur(args, event, client);
+                        break;
+                    case "frequency":
+                        moduleFrequency(args, event, client);
+                        break;
+                    case "freq":
+                        moduleFrequency(args, event, client);
                         break;
                     default:
                         Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event, client);
@@ -477,6 +486,31 @@ public class EventCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify if the event should recur with `!event recur <true/false>`", event, client);
+        }
+    }
+
+    private void moduleFrequency(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (args.length == 2) {
+            if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {
+                    String value = args[1];
+                    if (EventFrequency.isValid(value)) {
+                        EventFrequency freq = EventFrequency.fromValue(value);
+                        EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setFrequency(freq);
+                        Message.sendMessage("Event frequency set to: `" + freq.name() + "`" + Message.lineBreak + "Please specify how many times this event should recur with `!event count <amount>` Use `-1` for infinite!", event, client);
+                    } else {
+                        String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+                        Message.sendMessage("Invalid frequency type specified! Valid types are as follows: `" + values + "`", event, client);
+                    }
+                } else {
+                    Message.sendMessage("Event is not recurring, use `!event recur true` to enable recurring!", event, client);
+                }
+            } else {
+                Message.sendMessage("Event Creator not initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify the frequency with `!event freq <TYPE>`", event, client);
         }
     }
 }
