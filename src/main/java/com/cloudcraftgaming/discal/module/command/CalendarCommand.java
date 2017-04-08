@@ -195,7 +195,7 @@ public class CalendarCommand implements ICommand {
                         + Message.lineBreak
                         + "Use `!linkCalendar` to display!", event, client);
             } else {
-                Message.sendMessage("Calendar creation failed!", event, client);
+                Message.sendMessage("Calendar creation failed!" + Message.lineBreak + Message.lineBreak + "The most likely cause is that your TimeZone is incorrect! Please specify the proper TimeZone and try again!", event, client);
             }
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -254,6 +254,9 @@ public class CalendarCommand implements ICommand {
                         + Message.lineBreak + Message.lineBreak
                         + "Please specify the timezone!"
                         + Message.lineBreak
+                        + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
+                        + Message.lineBreak
+                        + Message.lineBreak
                         + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -280,7 +283,7 @@ public class CalendarCommand implements ICommand {
                             + Message.lineBreak
                             + "View and/or confirm the calendar to make it official!", event, client);
                 } else {
-                    Message.sendMessage("Invalid timezone specified! Please make sure the timezone is on this list: " + TIME_ZONE_DB, event, client);
+                    Message.sendMessage("Invalid timezone specified! Please make sure the timezone is on this list: <" + TIME_ZONE_DB + ">" + Message.lineBreak + Message.lineBreak + "It is very important that you input the timezone correctly because it is case sensitive! (EX: Not `america/new_york` but rather `America/New_York`)", event, client);
                 }
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -290,7 +293,12 @@ public class CalendarCommand implements ICommand {
                 }
             }
         } else {
-            Message.sendMessage("Please specify the timezone with `!calendar timezone <TZ>`" + Message.lineBreak + "Please make sure the TZ is valid and listed here: " + TIME_ZONE_DB, event, client);
+            Message.sendMessage("Please specify the timezone!"
+                    + Message.lineBreak
+                    + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
+                    + Message.lineBreak
+                    + Message.lineBreak
+                    + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
         }
     }
 }
