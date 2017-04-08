@@ -87,14 +87,14 @@ public class CalendarCommand implements ICommand {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("You must specify a function to execute!", event, client);
-            } else if (args.length > 1) {
+            } else if (args.length >= 1) {
                 String guildId = event.getMessage().getGuild().getID();
                 //TODO: Add support for multiple calendars...
                 CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
 
                 switch (args[0].toLowerCase()) {
                     case "create":
-                        moduleCreate(event, client, calendarData);
+                        moduleCreate(args, event, client, calendarData);
                         break;
                     case "cancel":
                         moduleCancel(event, client, calendarData);
@@ -137,13 +137,19 @@ public class CalendarCommand implements ICommand {
         return false;
     }
 
-    private void moduleCreate(MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
+    private void moduleCreate(String[] args, MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
         String guildId = event.getMessage().getGuild().getID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             Message.sendMessage("Calendar creator already initiated!", event, client);
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                Message.sendMessage("You must specify a name for the calendar!", event, client);
+                if (args.length > 1) {
+                    String name = GeneralUtils.getContent(args, 1);
+                    CalendarCreator.getCreator().init(event, name);
+                    Message.sendMessage("Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", event, client);
+                } else {
+                    Message.sendMessage("Please specify a name for the calendar!", event, client);
+                }
             } else {
                 Message.sendMessage("A calendar has already been created!", event, client);
             }

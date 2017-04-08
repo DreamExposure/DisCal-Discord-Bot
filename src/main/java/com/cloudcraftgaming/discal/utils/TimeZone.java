@@ -121,7 +121,7 @@ public enum TimeZone {
             value = value.replace("/", "_");
         }
         try {
-            TimeZone tz = valueOf(value);
+            TimeZone tz = valueOf(value.toUpperCase());
             return true;
         } catch (IllegalArgumentException e) {
             return false;
