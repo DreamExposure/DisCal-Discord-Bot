@@ -10,6 +10,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.GeneralUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.utils.TimeZone;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Permissions;
@@ -265,12 +266,16 @@ public class CalendarCommand implements ICommand {
         if (args.length == 2) {
             String value = args[1];
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
-                Message.sendMessage("Calendar TimeZone set to: `" + value + "`"
-                        + Message.lineBreak + Message.lineBreak
-                        + "Calendar creation halted! "
-                        + Message.lineBreak
-                        + "View and/or confirm the calendar to make it official!", event, client);
+                if (TimeZone.isValid(value)) {
+                    CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
+                    Message.sendMessage("Calendar TimeZone set to: `" + value + "`"
+                            + Message.lineBreak + Message.lineBreak
+                            + "Calendar creation halted! "
+                            + Message.lineBreak
+                            + "View and/or confirm the calendar to make it official!", event, client);
+                } else {
+                    Message.sendMessage("Invalid timezone specified! Please make sure the timezone is on this list: " + TIME_ZONE_DB, event, client);
+                }
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                     Message.sendMessage("Calendar creator has not been initialized!", event, client);
