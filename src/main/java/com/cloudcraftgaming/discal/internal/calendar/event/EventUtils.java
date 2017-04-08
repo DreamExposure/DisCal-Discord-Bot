@@ -26,7 +26,12 @@ public class EventUtils {
         String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
         try {
             Calendar service = CalendarAuth.getCalendarService();
-            service.events().delete(calendarId, eventId).execute();
+            try {
+                service.events().delete(calendarId, eventId).execute();
+            } catch (Exception e) {
+                //Failed to delete event...
+                return false;
+            }
             DatabaseManager.getManager().deleteAnnouncementsForEvent(guildId, eventId);
             return true;
         } catch (IOException e) {
