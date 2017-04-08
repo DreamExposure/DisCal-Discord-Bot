@@ -62,8 +62,16 @@ public class CalendarMessageFormatter {
         em.withAuthorName("DisCal");
         em.withTitle("Calendar Info");
         em.appendField("[R] Calendar Name/Summary", calendar.getSummary(), true);
-        em.appendField("[R] Calendar Description", calendar.getDescription(), true);
-        em.appendField("[R] TimeZone", calendar.getTimezone(), true);
+        if (calendar.getDescription() != null) {
+            em.appendField("[R] Calendar Description", calendar.getDescription(), true);
+        } else {
+            em.appendField("[R] Calendar Description", "Error/Unset", true);
+        }
+        if (calendar.getTimezone() != null) {
+            em.appendField("[R] TimeZone", calendar.getTimezone(), true);
+        } else {
+            em.appendField("[R] TimeZone", "Error/Unset", true);
+        }
         em.appendField("Calendar ID", "Unknown until creation complete", true);
 
         em.withFooterText("[R] means required, field needs a value.");
