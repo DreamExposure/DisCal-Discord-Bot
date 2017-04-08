@@ -143,6 +143,7 @@ public class Announce extends TimerTask {
         em.withAuthorName("DisCal");
         em.withTitle("!~Event Announcement~!");
         em.appendField("Event Name/Summary", event.getSummary(), true);
+        em.appendField("Event Description", event.getDescription(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
         em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
         try {
