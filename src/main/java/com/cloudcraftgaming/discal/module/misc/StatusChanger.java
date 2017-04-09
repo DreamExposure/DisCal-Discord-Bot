@@ -20,11 +20,14 @@ public class StatusChanger extends TimerTask {
      */
     StatusChanger() {
         statuses.add("Discord Calendar");
-        statuses.add("Use !discal for help");
+        statuses.add("Use !help for help");
+        statuses.add("Use !DisCal for info");
         statuses.add("Made by NovaFox161");
         statuses.add("Official calendar bot!");
         statuses.add("Used on %count% guilds!");
         statuses.add("Version " + Main.version);
+        statuses.add("Use !discal settings for info");
+        statuses.add("Support DisCal on patron!");
         index = 0;
     }
 
