@@ -385,7 +385,7 @@ public class EventCommand implements ICommand {
                                     + "Event end time (HH:mm) set to: `"
                                     + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
                                     + Message.lineBreak + Message.lineBreak
-                                    + "If you would like a specific color for your event use `!event color <name OR id>` to list all colors use `!event color list`" + Message.lineBreak + "Otherwise use `!event review` to review the event!", event, client);
+                                    + "If you would like a specific color for your event use `!event color <name OR id>` to list all colors use `!event color list`" + Message.lineBreak + Message.lineBreak + "If you would like to make this event recurring please use `!event recur true`" + Message.lineBreak + Message.lineBreak + "Otherwise use `!event review` to review the event!", event, client);
                         } else {
                             //Oops! Time is in the past or before the starting time...
                             Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has an ending before the starting time!!! Please make sure you typed everything correctly.", event, client);
