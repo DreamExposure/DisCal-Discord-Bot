@@ -46,16 +46,14 @@ public class AnnouncementCreator {
     }
 
     public Announcement init(MessageReceivedEvent e, String announcementId) {
-        if (!hasAnnouncement(e.getMessage().getGuild().getID())) {
-            if (AnnouncementUtils.announcementExists(announcementId, e)) {
-                Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
+        if (!hasAnnouncement(e.getMessage().getGuild().getID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
+            Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
 
-                //Copy
-                Announcement a = new Announcement(toCopy);
+            //Copy
+            Announcement a = new Announcement(toCopy);
 
-                announcements.add(a);
-                return a;
-            }
+            announcements.add(a);
+            return a;
         }
         return getAnnouncement(e.getMessage().getGuild().getID());
     }

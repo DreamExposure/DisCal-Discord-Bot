@@ -15,7 +15,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class AESEncryption {
     //Public key, its fine if this is here, I don't even have access to private keys
     private static final String SECRET_KEY_1 = "E4B39r8F57F1Csd";
-    private final String SECRET_KEY_2;
 
     private IvParameterSpec ivParameterSpec;
     private SecretKeySpec secretKeySpec;
@@ -27,7 +26,7 @@ public class AESEncryption {
          * @throws Exception if something fails
          */
     public AESEncryption(GuildSettings gs) throws Exception {
-        SECRET_KEY_2 = gs.getPrivateKey();
+        String SECRET_KEY_2 = gs.getPrivateKey();
         ivParameterSpec = new IvParameterSpec(SECRET_KEY_1.getBytes("UTF-8"));
         secretKeySpec = new SecretKeySpec(SECRET_KEY_2.getBytes("UTF-8"), "AES");
         cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");

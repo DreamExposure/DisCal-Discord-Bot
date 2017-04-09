@@ -67,18 +67,16 @@ public class Announce extends TimerTask {
                                     //Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                                 }
-                            } catch (Exception e) {
-                                //Check error first...
-                                if (e instanceof GoogleJsonResponseException) {
-                                    GoogleJsonResponseException ge = (GoogleJsonResponseException) e;
-                                    if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
-                                        //Event deleted or not found, delete announcement.
-                                        DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
-                                    } else {
-                                        //Unknown cause, send email
-                                        EmailSender.getSender().sendExceptionEmail(e, this.getClass());
-                                    }
+                            }  catch (GoogleJsonResponseException ge) {
+                                if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
+                                    //Event deleted or not found, delete announcement.
+                                    DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+                                } else {
+                                    //Unknown cause, send email
+                                    EmailSender.getSender().sendExceptionEmail(ge, this.getClass());
                                 }
+                            } catch (Exception e) {
+                                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
                             }
                         } else {
                             try {

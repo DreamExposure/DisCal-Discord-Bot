@@ -25,8 +25,6 @@ public class BotSettings {
 
     private boolean runDatabaseUpdater;
 
-    public BotSettings() {}
-
     //Getters
     public String getBotToken() {
         return botToken;

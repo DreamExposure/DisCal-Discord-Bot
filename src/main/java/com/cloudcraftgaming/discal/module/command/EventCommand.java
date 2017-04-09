@@ -160,6 +160,7 @@ public class EventCommand implements ICommand {
                         break;
                     case "interval":
                         moduleInterval(args, event, client);
+                        break;
                     default:
                         Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event, client);
                         break;
