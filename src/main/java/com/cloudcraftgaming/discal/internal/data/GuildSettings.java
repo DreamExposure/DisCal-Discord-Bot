@@ -17,6 +17,8 @@ public class GuildSettings {
     private String controlRole;
     private String discalChannel;
 
+    private boolean simpleAnnouncements;
+
     private boolean patronGuild;
     private boolean devGuild;
     private Integer maxCalendars;
@@ -32,6 +34,8 @@ public class GuildSettings {
 
         controlRole = "everyone";
         discalChannel = "all";
+
+        simpleAnnouncements = false;
 
         patronGuild = false;
         devGuild = false;
@@ -65,6 +69,10 @@ public class GuildSettings {
 
     public String getDiscalChannel() {
         return discalChannel;
+    }
+
+    public boolean usingSimpleAnnouncements() {
+        return simpleAnnouncements;
     }
 
     public boolean isPatronGuild() {
@@ -102,6 +110,10 @@ public class GuildSettings {
 
     public void setDiscalChannel(String _discalChannel) {
         discalChannel = _discalChannel;
+    }
+
+    public void setSimpleAnnouncements(boolean _simpleAnnouncements) {
+        simpleAnnouncements = _simpleAnnouncements;
     }
 
     public void setPatronGuild(boolean _patronGuild) {

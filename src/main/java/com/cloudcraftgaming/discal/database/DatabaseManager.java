@@ -87,6 +87,7 @@ public class DatabaseManager {
                     " REFRESH_TOKEN LONGTEXT not NULL, " +
                     " CONTROL_ROLE LONGTEXT not NULL, " +
                     " DISCAL_CHANNEL LONGTEXT not NULL, " +
+                    " SIMPLE_ANNOUNCEMENT BOOLEAN not NULL, " +
                     " PATRON_GUILD BOOLEAN not NULL, " +
                     " DEV_GUILD BOOLEAN not NULL, " +
                     " MAX_CALENDARS INTEGER not NULL, " +
@@ -139,8 +140,8 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS)" +
-                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, settings.getGuildID());
                     ps.setBoolean(2, settings.useExternalCalendar());
@@ -149,9 +150,10 @@ public class DatabaseManager {
                     ps.setString(5, settings.getEncryptedRefreshToken());
                     ps.setString(6, settings.getControlRole());
                     ps.setString(7, settings.getDiscalChannel());
-                    ps.setBoolean(8, settings.isPatronGuild());
-                    ps.setBoolean(9, settings.isDevGuild());
-                    ps.setInt(10, settings.getMaxCalendars());
+                    ps.setBoolean(8, settings.usingSimpleAnnouncements());
+                    ps.setBoolean(9, settings.isPatronGuild());
+                    ps.setBoolean(10, settings.isDevGuild());
+                    ps.setInt(11, settings.getMaxCalendars());
 
 
                     ps.executeUpdate();
@@ -162,7 +164,7 @@ public class DatabaseManager {
                     String update = "UPDATE " + dataTableName
                             + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
                             + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
-                            + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?,"
+                            + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
                             + " PATRON_GUILD = ?, DEV_GUILD = ?,"
                             + " MAX_CALENDARS = ?"
                             + " WHERE GUILD_ID = ?";
@@ -174,10 +176,11 @@ public class DatabaseManager {
                     ps.setString(4, settings.getEncryptedRefreshToken());
                     ps.setString(5, settings.getControlRole());
                     ps.setString(6, settings.getDiscalChannel());
-                    ps.setBoolean(7, settings.isPatronGuild());
-                    ps.setBoolean(8, settings.isDevGuild());
-                    ps.setInt(9, settings.getMaxCalendars());
-                    ps.setString(10, settings.getGuildID());
+                    ps.setBoolean(7, settings.usingSimpleAnnouncements());
+                    ps.setBoolean(8, settings.isPatronGuild());
+                    ps.setBoolean(9, settings.isDevGuild());
+                    ps.setInt(10, settings.getMaxCalendars());
+                    ps.setString(11, settings.getGuildID());
 
                     ps.executeUpdate();
 

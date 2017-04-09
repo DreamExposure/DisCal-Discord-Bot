@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -38,6 +39,7 @@ public class Announce extends TimerTask {
         try {
             Calendar service = CalendarAuth.getCalendarService();
             for (IGuild guild : Main.client.getGuilds()) {
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
                 try {
                     String guildId = guild.getID();
                     //TODO: Add multiple calendar support...
@@ -56,7 +58,7 @@ public class Announce extends TimerTask {
                                 if (difference >= 0) {
                                     if (difference <= 10) {
                                         //Right on time
-                                        sendAnnouncementMessage(a, event, data);
+                                        sendAnnouncementMessage(a, event, data, settings);
 
                                         //Delete announcement to ensure it does not spam fire
                                         DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
@@ -98,19 +100,19 @@ public class Announce extends TimerTask {
                                         if (difference >= 0 && difference <= 10) {
                                             //Right on time, let's check if universal or color specific.
                                             if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
-                                                sendAnnouncementMessage(a, event, data);
+                                                sendAnnouncementMessage(a, event, data, settings);
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
                                                 //Color, test for color.
                                                 String colorId = event.getColorId();
                                                 EventColor color = EventColor.fromNameOrHexOrID(colorId);
                                                 if (color.name().equals(a.getEventColor().name())) {
                                                     //Color matches, announce
-                                                    sendAnnouncementMessage(a, event, data);
+                                                    sendAnnouncementMessage(a, event, data, settings);
                                                 }
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
                                                 //Recurring event announcement.
                                                 if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
-                                                    sendAnnouncementMessage(a, event, data);
+                                                    sendAnnouncementMessage(a, event, data, settings);
                                                 }
                                             }
                                         }
@@ -137,7 +139,7 @@ public class Announce extends TimerTask {
      * @param event        the calendar event the announcement is for.
      * @param data         The BotData belonging to the guild.
      */
-    private void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data) {
+    private void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
@@ -157,10 +159,14 @@ public class Announce extends TimerTask {
                 em.appendField("TimeZone", "Unknown *Error Occurred", true);
             }
         }
-        em.appendField("Event ID", event.getId(), false);
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event ID", event.getId(), false);
+        }
         em.appendField("Additional Info", announcement.getInfo(), false);
         em.withUrl(event.getHtmlLink());
-        em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+        if (!settings.usingSimpleAnnouncements()) {
+            em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+        }
         try {
             EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
             em.withColor(ec.getR(), ec.getG(), ec.getB());
