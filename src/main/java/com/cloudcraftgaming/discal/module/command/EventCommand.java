@@ -518,7 +518,8 @@ public class EventCommand implements ICommand {
                 Message.sendMessage("Event Creator not initialized!", event, client);
             }
         } else {
-            Message.sendMessage("Please specify the frequency with `!event freq <TYPE>`", event, client);
+            String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+            Message.sendMessage("Pleas specify the frequency with `!event freq <TYPE>`! Valid types are as follows: `" + values + "`", event, client);
         }
     }
 
