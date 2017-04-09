@@ -26,7 +26,7 @@ public class StatusChanger extends TimerTask {
         statuses.add("Official calendar bot!");
         statuses.add("Used on %count% guilds!");
         statuses.add("Version " + Main.version);
-        statuses.add("Use !discal settings for info");
+        statuses.add("!discal settings for info");
         statuses.add("Support DisCal on patron!");
         index = 0;
     }
