@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.utils.RoleUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -54,6 +55,7 @@ public class DisCalCommand implements ICommand {
         info.setDescription("Used to configure DisCal");
         info.setExample("!DisCal (function) (value)");
 
+        info.getSubCommands().add("settings");
         info.getSubCommands().add("role");
         info.getSubCommands().add("channel");
         info.getSubCommands().add("simpleAnnouncement");
@@ -77,6 +79,8 @@ public class DisCalCommand implements ICommand {
                 case "discal":
                     moduleDisCalInfo(event, client);
                     break;
+                case "settings":
+                    moduleSettings(event, client);
                 case "role":
                     moduleControlRole(args, event, client);
                     break;
@@ -202,5 +206,35 @@ public class DisCalCommand implements ICommand {
         DatabaseManager.getManager().updateSettings(settings);
 
         Message.sendMessage("Use simple announcements set to `" + settings.usingSimpleAnnouncements() + "`", event, client);
+    }
+
+    private void moduleSettings(MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+
+        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("DisCal Guild Settings");
+        em.appendField("Using External Calendar", String.valueOf(settings.useExternalCalendar()), true);
+        if (RoleUtils.roleExists(settings.getControlRole(), event)) {
+            em.appendField("Control Role", RoleUtils.getRoleNameFromID(settings.getControlRole(), event), true);
+        } else {
+            em.appendField("Control Role", "everyone", true);
+        }
+        if (ChannelUtils.channelExists(settings.getDiscalChannel(), event)) {
+            em.appendField("DisCal Channel", ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), guildId), false);
+        } else {
+            em.appendField("DisCal Channel", "All Channels", true);
+        }
+        em.appendField("Simple Announcements", String.valueOf(settings.usingSimpleAnnouncements()), true);
+        em.appendField("Patron Guild", String.valueOf(settings.isPatronGuild()), true);
+        em.appendField("Dev Guild", String.valueOf(settings.isDevGuild()), true);
+        em.appendField("Max Calendars", String.valueOf(settings.getMaxCalendars()), true);
+        em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
+        em.withUrl("https://www.cloudcraftgaming.com/discal/");
+        em.withColor(36, 153, 153);
+        Message.sendMessage(em.build(), event, client);
     }
 }

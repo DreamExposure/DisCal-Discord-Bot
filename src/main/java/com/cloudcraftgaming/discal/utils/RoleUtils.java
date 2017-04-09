@@ -17,4 +17,31 @@ public class RoleUtils {
         }
         return null;
     }
+
+    public static IRole getRoleFromID(String id, MessageReceivedEvent event) {
+        for (IRole r : event.getMessage().getGuild().getRoles()) {
+            if (id.equals(r.getID())) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public static boolean roleExists(String id, MessageReceivedEvent event) {
+        for (IRole r : event.getMessage().getGuild().getRoles()) {
+            if (id.equals(r.getID())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getRoleNameFromID(String id, MessageReceivedEvent event) {
+        IRole role = getRoleFromID(id, event);
+        if (role != null) {
+            return role.getName();
+        } else {
+            return "ERROR";
+        }
+    }
 }
