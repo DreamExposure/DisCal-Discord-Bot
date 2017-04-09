@@ -337,6 +337,7 @@ public class DatabaseManager {
                     settings.setEncryptedRefreshToken(res.getString("REFRESH_TOKEN"));
                     settings.setControlRole(res.getString("CONTROL_ROLE"));
                     settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
+                    settings.setSimpleAnnouncements(res.getBoolean("SIMPLE_ANNOUNCEMENT"));
                     settings.setPatronGuild(res.getBoolean("PATRON_GUILD"));
                     settings.setDevGuild(res.getBoolean("DEV_GUILD"));
                     settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
