@@ -33,7 +33,7 @@ public class TimeManager {
     public void init() {
         timer = new Timer();
         timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-        timer.schedule(new TimedUpdate(), 60 * 30 * 1000);
+        timer.schedule(new TimedUpdate(), 60 * 30 * 1000, 60 * 30 * 1000);
     }
 
     /**

@@ -3,7 +3,6 @@ package com.cloudcraftgaming.discal.internal.network.discordpw;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
-import com.cloudcraftgaming.discal.utils.Message;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -36,7 +35,7 @@ public class UpdateListData {
 
             HttpResponse<JsonNode> response = Unirest.post("https://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
 
-            EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
+            //EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
 
         } catch (Exception e) {
             //Handle issue.
