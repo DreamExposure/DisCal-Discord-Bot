@@ -81,6 +81,7 @@ public class DisCalCommand implements ICommand {
                     break;
                 case "settings":
                     moduleSettings(event, client);
+                    break;
                 case "role":
                     moduleControlRole(args, event, client);
                     break;
@@ -92,6 +93,7 @@ public class DisCalCommand implements ICommand {
                     break;
                 default:
                     Message.sendMessage("Invalid function! Use `!help discal` for a list of valid functions!", event, client);
+                    break;
             }
         }
         return false;
