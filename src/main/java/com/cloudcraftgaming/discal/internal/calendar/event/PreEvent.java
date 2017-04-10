@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
 /**
@@ -10,6 +11,7 @@ import com.google.api.services.calendar.model.EventDateTime;
  */
 public class PreEvent {
     private final String guildId;
+    private final String eventId;
 
     private String summary;
     private String description;
@@ -33,6 +35,7 @@ public class PreEvent {
      */
     PreEvent(String _guildId) {
         guildId = _guildId;
+        eventId = "N/a";
 
         timeZone = "Unknown";
 
@@ -42,6 +45,29 @@ public class PreEvent {
         recurrence = new Recurrence();
     }
 
+    PreEvent(String _guildId, Event e) {
+        guildId = _guildId;
+        eventId = e.getId();
+
+        color = EventColor.fromNameOrHexOrID(e.getColorId());
+
+        if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
+            recur = true;
+            recurrence = new Recurrence();
+            recurrence.fromRRule(e.getRecurrence().get(0));
+        }
+
+        if (e.getSummary() != null) {
+            summary = e.getSummary();
+        }
+        if (e.getDescription() != null) {
+            description = e.getDescription();
+        }
+
+        startDateTime = e.getStart();
+        endDateTime = e.getEnd();
+    }
+
     //Getters
     /**
      *  Gets the ID of the guild who owns this PreEvent.
@@ -49,6 +75,10 @@ public class PreEvent {
      */
     public String getGuildId() {
         return guildId;
+    }
+
+    public String getEventId() {
+        return eventId;
     }
 
     /**

@@ -102,7 +102,7 @@ public class Recurrence {
      * @param rrule The RRules to convert from.
      */
     public void fromRRule(String rrule) {
-        rrule = rrule.replaceAll("RRULE", "");
+        rrule = rrule.replaceAll("RRULE:", "");
         String[] contents = rrule.split(";");
         for (String c : contents) {
             if (c.contains("FREQ=")) {

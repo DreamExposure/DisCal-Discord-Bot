@@ -83,6 +83,32 @@ public class EventCreator {
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
+    public PreEvent edit(MessageReceivedEvent e, String eventId) {
+        String guildId = e.getMessage().getGuild().getID();
+        if (!hasPreEvent(guildId)) {
+            //TODO: Handle multiple calendars...
+            try {
+                String calId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
+                Calendar service = CalendarAuth.getCalendarService();
+                Event calEvent = service.events().get(calId, eventId).execute();
+
+                PreEvent event = new PreEvent(guildId, calEvent);
+
+                try {
+                    event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
+                } catch (IOException e1) {
+                    //Failed to get tz, ignore safely.
+                }
+                events.add(event);
+                return event;
+            } catch (IOException exc) {
+                //Oops
+            }
+            return null;
+        }
+        return getPreEvent(guildId);
+    }
+
     /**
      * Gracefully terminates the EventCreator for a specific guild.
      * @param e The event received upon termination.
