@@ -4,6 +4,7 @@ import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IPrivateChannel;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
@@ -149,5 +150,35 @@ public class Message {
                 //Failed to send message.
             }
         });
+    }
+
+    public static boolean deleteMessage(MessageReceivedEvent event) {
+        RequestBuffer.request(() -> {
+            try {
+                if (!event.getMessage().isDeleted()) {
+                    event.getMessage().delete();
+                }
+                return true;
+            } catch (DiscordException | MissingPermissionsException e) {
+                //Failed to delete
+                return false;
+            }
+        });
+        return false;
+    }
+
+    public static boolean deleteMessage(IMessage message) {
+        RequestBuffer.request(() -> {
+           try {
+               if (!message.isDeleted()) {
+                   message.delete();
+               }
+               return true;
+           } catch (DiscordException | MissingPermissionsException e) {
+               //Failed to delete.
+               return false;
+           }
+        });
+        return false;
     }
 }
