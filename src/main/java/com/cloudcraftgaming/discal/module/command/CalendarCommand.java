@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class CalendarCommand implements ICommand {
-    private String TIME_ZONE_DB = "http://www.joda.org/joda-time/apidocs/index.html";
+    private String TIME_ZONE_DB = "http://www.joda.org/joda-time/timezones.html";
 
     /**
      * Gets the command this Object is responsible for.
