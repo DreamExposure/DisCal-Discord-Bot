@@ -1,10 +1,7 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreator;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreatorResponse;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.*;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.GeneralUtils;
@@ -72,6 +69,7 @@ public class CalendarCommand implements ICommand {
         info.getSubCommands().add("summary");
         info.getSubCommands().add("description");
         info.getSubCommands().add("timezone");
+        info.getSubCommands().add("edit");
 
         return info;
     }
@@ -126,6 +124,9 @@ public class CalendarCommand implements ICommand {
                         break;
                     case "timezone":
                         moduleTimezone(args, event, client, calendarData);
+                        break;
+                    case "edit":
+                        moduleEdit(event, client, calendarData);
                         break;
                     default:
                         Message.sendMessage("Invalid function! Please view `!help calendar` for a full list of valid functions!", event, client);
@@ -300,6 +301,24 @@ public class CalendarCommand implements ICommand {
                     + Message.lineBreak
                     + Message.lineBreak
                     + "For a list of valid timezones: " + TIME_ZONE_DB, event, client);
+        }
+    }
+
+    private void moduleEdit(MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
+            if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                PreCalendar preCalendar = CalendarCreator.getCreator().edit(event);
+                if (preCalendar != null) {
+                    Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initiated! Edit the values and then confirm your edits with `!calendar confirm`", event, client);
+                } else {
+                    Message.sendMessage("An error has occurred! The developer has been emailed!", event, client);
+                }
+            } else {
+                Message.sendMessage("You cannot edit your calendar when you do not have one!", event, client);
+            }
+        } else {
+            Message.sendMessage("Calendar Creator has already been initiated!", event, client);
         }
     }
 }

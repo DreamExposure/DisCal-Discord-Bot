@@ -50,6 +50,31 @@ public class CalendarCreator {
         return getPreCalendar(e.getMessage().getGuild().getID());
     }
 
+    public PreCalendar edit(MessageReceivedEvent event) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (!hasPreCalendar(guildId)) {
+            //TODO: Support multiple calendars
+            CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+
+            try {
+                com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService();
+
+                Calendar calendar = service.calendars().get(data.getCalendarAddress()).execute();
+
+                PreCalendar preCalendar = new PreCalendar(guildId, calendar);
+                preCalendar.setEditing(true);
+                preCalendar.setCalendarId(data.getCalendarAddress());
+                calendars.add(preCalendar);
+                return preCalendar;
+            } catch (IOException e) {
+                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                return null;
+            }
+        } else {
+            return getPreCalendar(guildId);
+        }
+    }
+
     /**
      * Gracefully closes down the CalendarCreator for the guild involved and DOES NOT create the calendar.
      * @param e The event received upon termination.
@@ -73,26 +98,48 @@ public class CalendarCreator {
             String guildId = e.getMessage().getGuild().getID();
             PreCalendar preCalendar = getPreCalendar(guildId);
             if (preCalendar.hasRequiredValues()) {
-                Calendar calendar = new Calendar();
-                calendar.setSummary(preCalendar.getSummary());
-                calendar.setDescription(preCalendar.getDescription());
-                calendar.setTimeZone(preCalendar.getTimezone());
-                try {
-                    Calendar confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
-                    AclRule rule = new AclRule();
-                    AclRule.Scope scope = new AclRule.Scope();
-                    scope.setType("default");
-                    rule.setScope(scope).setRole("reader");
-                    CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
-                    CalendarData calendarData = new CalendarData(guildId, 1);
-                    calendarData.setCalendarId(confirmed.getId());
-                    calendarData.setCalendarAddress(confirmed.getId());
-                    DatabaseManager.getManager().updateCalendar(calendarData);
-                    terminate(e);
-                    return new CalendarCreatorResponse(true, confirmed);
-                } catch (IOException ex) {
-                    EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
-                    return new CalendarCreatorResponse(false);
+                if (!preCalendar.isEditing()) {
+                    Calendar calendar = new Calendar();
+                    calendar.setSummary(preCalendar.getSummary());
+                    calendar.setDescription(preCalendar.getDescription());
+                    calendar.setTimeZone(preCalendar.getTimezone());
+                    try {
+                        Calendar confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
+                        AclRule rule = new AclRule();
+                        AclRule.Scope scope = new AclRule.Scope();
+                        scope.setType("default");
+                        rule.setScope(scope).setRole("reader");
+                        CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
+                        CalendarData calendarData = new CalendarData(guildId, 1);
+                        calendarData.setCalendarId(confirmed.getId());
+                        calendarData.setCalendarAddress(confirmed.getId());
+                        DatabaseManager.getManager().updateCalendar(calendarData);
+                        terminate(e);
+                        return new CalendarCreatorResponse(true, confirmed);
+                    } catch (IOException ex) {
+                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        return new CalendarCreatorResponse(false);
+                    }
+                } else {
+                    //Editing calendar...
+                    Calendar calendar = new Calendar();
+                    calendar.setSummary(preCalendar.getSummary());
+                    calendar.setDescription(preCalendar.getDescription());
+                    calendar.setTimeZone(preCalendar.getTimezone());
+
+                    try {
+                        Calendar confirmed = CalendarAuth.getCalendarService().calendars().update(preCalendar.getCalendarId(), calendar).execute();
+                        AclRule rule = new AclRule();
+                        AclRule.Scope scope = new AclRule.Scope();
+                        scope.setType("default");
+                        rule.setScope(scope).setRole("reader");
+                        CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
+                        terminate(e);
+                        return new CalendarCreatorResponse(true, confirmed);
+                    } catch (IOException ex) {
+                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        return new CalendarCreatorResponse(false);
+                    }
                 }
             }
         }

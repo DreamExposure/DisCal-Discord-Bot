@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
+import com.google.api.services.calendar.model.Calendar;
+
 /**
  * Created by Nova Fox on 1/4/2017.
  * Website: www.cloudcraftgaming.com
@@ -12,6 +14,9 @@ public class PreCalendar {
     private String description;
     private String timezone;
 
+    private boolean editing;
+    private String calendarId;
+
     /**
      * Creates a new PreCalendar for the Guild.
      * @param _guildId The ID of the guild.
@@ -20,6 +25,22 @@ public class PreCalendar {
     PreCalendar(String _guildId, String _summary) {
         guildId = _guildId;
         summary = _summary;
+
+        editing = false;
+    }
+
+    PreCalendar(String _guildId, Calendar calendar) {
+        guildId = _guildId;
+        summary = calendar.getSummary();
+
+        if (calendar.getDescription() != null) {
+            description = calendar.getDescription();
+        }
+        if (calendar.getTimeZone() != null) {
+            timezone = calendar.getTimeZone();
+        }
+
+        editing = false;
     }
 
     //Getters
@@ -56,6 +77,14 @@ public class PreCalendar {
         return timezone;
     }
 
+    public boolean isEditing() {
+        return editing;
+    }
+
+    public String getCalendarId() {
+        return calendarId;
+    }
+
     //Setters
     /**
      * Sets the summary/name of the calendar.
@@ -79,6 +108,14 @@ public class PreCalendar {
      */
     public void setTimezone(String _timezone) {
         timezone = _timezone;
+    }
+
+    public void setEditing(boolean _editing) {
+        editing = _editing;
+    }
+
+    public void setCalendarId(String _id) {
+        calendarId = _id;
     }
 
     //Booleans/Checkers
