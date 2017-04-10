@@ -42,6 +42,7 @@ public class LinkCalendarCommand implements ICommand {
         aliases.add("linkcal");
         aliases.add("calendarlink");
         aliases.add("callink");
+        aliases.add("callador");
         return aliases;
     }
 

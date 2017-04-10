@@ -46,6 +46,7 @@ public class CalendarCommand implements ICommand {
     public ArrayList<String> getAliases() {
         ArrayList<String> aliases = new ArrayList<>();
         aliases.add("cal");
+        aliases.add("callador");
         return aliases;
     }
 
