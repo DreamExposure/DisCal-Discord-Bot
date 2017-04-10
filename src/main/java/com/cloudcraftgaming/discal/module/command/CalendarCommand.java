@@ -10,7 +10,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.GeneralUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
-import com.cloudcraftgaming.discal.utils.TimeZone;
+import com.cloudcraftgaming.discal.utils.TimeZoneUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.Permissions;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
  */
 @SuppressWarnings("FieldCanBeLocal")
 public class CalendarCommand implements ICommand {
-    private String TIME_ZONE_DB = "https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List";
+    private String TIME_ZONE_DB = "http://www.joda.org/joda-time/apidocs/index.html";
 
     /**
      * Gets the command this Object is responsible for.
@@ -258,7 +258,7 @@ public class CalendarCommand implements ICommand {
                         + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
                         + Message.lineBreak
                         + Message.lineBreak
-                        + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
+                        + "For a list of valid timezones: " + TIME_ZONE_DB, event, client);
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
                     Message.sendMessage("Calendar creator has not been initialized!", event, client);
@@ -276,7 +276,7 @@ public class CalendarCommand implements ICommand {
         if (args.length == 2) {
             String value = args[1];
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                if (TimeZone.isValid(value)) {
+                if (TimeZoneUtils.isValid(value)) {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
                     Message.sendMessage("Calendar TimeZone set to: `" + value + "`"
                             + Message.lineBreak + Message.lineBreak
@@ -299,7 +299,7 @@ public class CalendarCommand implements ICommand {
                     + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
                     + Message.lineBreak
                     + Message.lineBreak
-                    + "For a list of valid timezones (within the 'TZ*' column): " + TIME_ZONE_DB, event, client);
+                    + "For a list of valid timezones: " + TIME_ZONE_DB, event, client);
         }
     }
 }
