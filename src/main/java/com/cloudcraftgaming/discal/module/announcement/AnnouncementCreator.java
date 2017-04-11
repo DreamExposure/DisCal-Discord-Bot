@@ -58,6 +58,20 @@ public class AnnouncementCreator {
         return getAnnouncement(e.getMessage().getGuild().getID());
     }
 
+    public Announcement edit(MessageReceivedEvent e, String announcementId) {
+        if (!hasAnnouncement(e.getMessage().getGuild().getID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
+            Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
+
+            //Copy
+            Announcement a = new Announcement(edit, true);
+            a.setEditing(true);
+
+            announcements.add(a);
+            return a;
+        }
+        return getAnnouncement(e.getMessage().getGuild().getID());
+    }
+
     /**
      * Terminates the creator gracefully.
      * @param e The event received upon termination.

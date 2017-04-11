@@ -27,6 +27,8 @@ public class Announcement {
     private int minutesBefore;
     private String info;
 
+    private boolean editing;
+
     /**
      * Use this constructor when creating NEW announcements!!!
      * @param _guildId The ID of the Guild this announcement belongs to.
@@ -58,6 +60,8 @@ public class Announcement {
         hoursBefore = 0;
         minutesBefore = 0;
         info = "None";
+
+        editing = false;
     }
 
     public Announcement(Announcement from) {
@@ -73,6 +77,29 @@ public class Announcement {
 
         setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
         setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
+
+        editing = false;
+    }
+
+    public Announcement(Announcement from, boolean copyId) {
+        guildId = from.getGuildId();
+        if (copyId) {
+            announcementId = from.getAnnouncementId();
+        } else {
+            announcementId = UUID.randomUUID();
+        }
+        announcementChannelId = from.getAnnouncementChannelId();
+        eventId = from.getEventId();
+        eventColor = from.getEventColor();
+        type = from.getAnnouncementType();
+        hoursBefore = from.getHoursBefore();
+        minutesBefore = from.getMinutesBefore();
+        info = from.getInfo();
+
+        setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
+        setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
+
+        editing = false;
     }
 
     //Getters
@@ -196,6 +223,10 @@ public class Announcement {
         return info;
     }
 
+    public boolean isEditing() {
+        return editing;
+    }
+
     //Setters
     /**
      * Sets the ID of the channel to announce in.
@@ -261,6 +292,10 @@ public class Announcement {
     public void setSubscriberUserIdsFromString(String subList) {
         String[] subs = subList.split(",");
         Collections.addAll(subscriberUserIds, subs);
+    }
+
+    public void setEditing(boolean _editing) {
+        editing = _editing;
     }
 
     //Booleans/Checkers

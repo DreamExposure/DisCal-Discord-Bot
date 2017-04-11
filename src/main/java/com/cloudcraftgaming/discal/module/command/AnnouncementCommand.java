@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
@@ -61,6 +62,7 @@ public class AnnouncementCommand implements ICommand {
 
         info.getSubCommands().add("create");
         info.getSubCommands().add("copy");
+        info.getSubCommands().add("edit");
         info.getSubCommands().add("confirm");
         info.getSubCommands().add("cancel");
         info.getSubCommands().add("delete");
@@ -91,6 +93,8 @@ public class AnnouncementCommand implements ICommand {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help announcement`", event, client);
             } else if (args.length >= 1) {
+                String guildId = event.getMessage().getGuild().getID();
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 switch (args[0].toLowerCase()) {
                     case "create":
                         moduleCreate(event, client);
@@ -152,6 +156,13 @@ public class AnnouncementCommand implements ICommand {
                     case "copy":
                         moduleCopy(args, event, client);
                         break;
+                    case "edit":
+                        if (settings.isDevGuild()) {
+                            moduleEdit(args, event, client);
+                        } else {
+                            Message.sendMessage("This option is disabled for testing only!", event, client);
+                        }
+                        break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
                         break;
@@ -172,6 +183,26 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("Announcement creator initialized!" + Message.lineBreak + "Please specify the type:" + Message.lineBreak + "`UNIVERSAL` for all events, or `SPECIFIC` for a specific event, `COLOR` for events with a specific color, or `RECUR` for recurring events.", event, client);
         } else {
             Message.sendMessage("Announcement creator has already been started!", event, client);
+        }
+    }
+
+    private void moduleEdit(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+            if (args.length == 2) {
+                String anId = args[1];
+                if (AnnouncementUtils.announcementExists(anId, event)) {
+                    Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId);
+
+                    Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement), "Announcement Editor initiated! Edit the values and then confirm your edits with `!announcement confirm`", event, client);
+                } else {
+                    Message.sendMessage("I can't seem to find an announcement with that ID. Are you sure you typed it correctly?", event, client);
+                }
+            } else {
+                Message.sendMessage("Please specify the ID of the announcement to edit with `!announcement edit <ID>`", event, client);
+            }
+        } else {
+            Message.sendMessage("Announcement Creator has already been initialized!", event, client);
         }
     }
 
