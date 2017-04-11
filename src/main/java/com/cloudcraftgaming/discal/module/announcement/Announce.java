@@ -145,7 +145,7 @@ public class Announce extends TimerTask {
         em.appendField("Event Name/Summary", event.getSummary(), true);
         em.appendField("Event Description", event.getDescription(), true);
         em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-        em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), false);
+        em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
         try {
             em.appendField("TimeZone", event.getStart().getTimeZone(), true);
         } catch (Exception e) {
