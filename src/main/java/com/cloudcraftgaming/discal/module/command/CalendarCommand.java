@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.*;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.GeneralUtils;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -88,6 +89,7 @@ public class CalendarCommand implements ICommand {
                 Message.sendMessage("You must specify a function to execute!", event, client);
             } else if (args.length >= 1) {
                 String guildId = event.getMessage().getGuild().getID();
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 //TODO: Add support for multiple calendars...
                 CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
 
@@ -126,7 +128,11 @@ public class CalendarCommand implements ICommand {
                         moduleTimezone(args, event, client, calendarData);
                         break;
                     case "edit":
-                        moduleEdit(event, client, calendarData);
+                        if (settings.isDevGuild()) {
+                            moduleEdit(event, client, calendarData);
+                        } else {
+                            Message.sendMessage("This option is disabled for testing only!", event, client);
+                        }
                         break;
                     default:
                         Message.sendMessage("Invalid function! Please view `!help calendar` for a full list of valid functions!", event, client);

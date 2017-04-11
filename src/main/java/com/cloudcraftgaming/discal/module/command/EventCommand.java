@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.*;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.client.util.DateTime;
@@ -97,6 +98,7 @@ public class EventCommand implements ICommand {
         String guildId = event.getMessage().getGuild().getID();
         //TODO: Add multiple calendar handling.
         CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
+        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute.", event, client);
@@ -109,7 +111,11 @@ public class EventCommand implements ICommand {
                         moduleCopy(args, event, client, calendarData);
                         break;
                     case "edit":
-                        moduleEdit(args, event, client, calendarData);
+                        if (settings.isDevGuild()) {
+                            moduleEdit(args, event, client, calendarData);
+                        } else {
+                            Message.sendMessage("This option is disabled for testing only!", event, client);
+                        }
                         break;
                     case "cancel":
                         moduleCancel(event, client);
