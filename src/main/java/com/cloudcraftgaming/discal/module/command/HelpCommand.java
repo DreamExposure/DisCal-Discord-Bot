@@ -60,21 +60,19 @@ public class HelpCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-        StringBuilder cmds = new StringBuilder();
-
         if (args.length < 1) {
+            EmbedBuilder em = new EmbedBuilder();
+            em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+            em.withAuthorName("DisCal");
+            em.withTitle("DisCal Command Help");
             for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
-                if (c.getAliases().size() > 0) {
-                    cmds.append(c.getCommand()).append(c.getAliases().toString()).append(", ");
-                } else {
-                    cmds.append(c.getCommand()).append(", ");
-                }
+                String al = c.getAliases().toString();
+                em.appendField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
             }
-            cmds = new StringBuilder(cmds.substring(0, cmds.length() - 2));
-
-            //TODO: Make this prettier!
-            Message.sendMessage("All commands: " + cmds + Message.lineBreak + Message.lineBreak + "Use `!help (command) (sub-command)` for more info on the command!" + Message.lineBreak + Message.lineBreak + "For extra help visit: https://www.cloudcraftgaming.com/discal/", event, client);
-            return true;
+            em.withFooterText("Check out the official site for more command info!");
+            em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
+            em.withColor(36, 153, 153);
+            Message.sendMessage(em.build(), event, client);
         } else if (args.length == 1) {
             String cmdFor = args[0];
             ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
