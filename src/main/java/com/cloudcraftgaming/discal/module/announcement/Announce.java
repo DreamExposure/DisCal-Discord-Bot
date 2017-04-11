@@ -170,7 +170,7 @@ public class Announce extends TimerTask {
 
             em.appendField("Event Start", start, false);
         }
-        
+
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField("Event ID", event.getId(), false);
         }

@@ -93,6 +93,7 @@ public class EventCreator {
                 Event calEvent = service.events().get(calId, eventId).execute();
 
                 PreEvent event = new PreEvent(guildId, calEvent);
+                event.setEditing(true);
 
                 try {
                     event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
@@ -148,13 +149,25 @@ public class EventCreator {
 
                 //TODO handle multiple calendars...
                 String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
-                try {
-                   Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
-                    terminate(e);
-                    return new EventCreatorResponse(true, confirmed);
-                } catch (IOException ex) {
-                    EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
-                    return new EventCreatorResponse(false);
+
+                if (!preEvent.isEditing()) {
+                    try {
+                        Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
+                        terminate(e);
+                        return new EventCreatorResponse(true, confirmed);
+                    } catch (IOException ex) {
+                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        return new EventCreatorResponse(false);
+                    }
+                } else {
+                    try {
+                        Event confirmed = CalendarAuth.getCalendarService().events().update(calendarId, preEvent.getEventId(), event).execute();
+                        terminate(e);
+                        return new EventCreatorResponse(true, confirmed);
+                    } catch (IOException ex) {
+                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        return new EventCreatorResponse(false);
+                    }
                 }
             }
         }

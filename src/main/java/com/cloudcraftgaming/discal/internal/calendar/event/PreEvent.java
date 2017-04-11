@@ -28,6 +28,8 @@ public class PreEvent {
     private boolean recur;
     private Recurrence recurrence;
 
+    private boolean editing;
+
 
     /**
      * Creates a new PreEvent for the specified Guild.
@@ -43,6 +45,8 @@ public class PreEvent {
 
         recur = false;
         recurrence = new Recurrence();
+
+        editing = false;
     }
 
     PreEvent(String _guildId, Event e) {
@@ -66,6 +70,8 @@ public class PreEvent {
 
         startDateTime = e.getStart();
         endDateTime = e.getEnd();
+
+        editing = false;
     }
 
     //Getters
@@ -161,6 +167,10 @@ public class PreEvent {
         return recurrence;
     }
 
+    public boolean isEditing() {
+        return editing;
+    }
+
     //Setters
     /**
      * Sets the summary of the event.
@@ -232,6 +242,10 @@ public class PreEvent {
      */
     public void setShouldRecur(boolean _recur) {
         recur = _recur;
+    }
+
+    public void setEditing(boolean _editing) {
+        editing = _editing;
     }
 
     //Booleans/Checkers

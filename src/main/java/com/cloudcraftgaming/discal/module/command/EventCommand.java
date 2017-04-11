@@ -62,6 +62,7 @@ public class EventCommand implements ICommand {
 
         info.getSubCommands().add("create");
         info.getSubCommands().add("copy");
+        info.getSubCommands().add("edit");
         info.getSubCommands().add("cancel");
         info.getSubCommands().add("delete");
         info.getSubCommands().add("view");
@@ -106,6 +107,9 @@ public class EventCommand implements ICommand {
                         break;
                     case "copy":
                         moduleCopy(args, event, client, calendarData);
+                        break;
+                    case "edit":
+                        moduleEdit(args, event, client, calendarData);
                         break;
                     case "cancel":
                         moduleCancel(event, client);
@@ -211,6 +215,29 @@ public class EventCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Cannot copy event when you do not have a calendar!", event, client);
+        }
+    }
+
+    private void moduleEdit(String[] args, MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
+        String guildId = event.getMessage().getGuild().getID();
+        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            if (!EventCreator.getCreator().hasPreEvent(guildId)) {
+                if (args.length == 2) {
+                    String eventId = args[1];
+                    if (EventUtils.eventExists(guildId, eventId)) {
+                        PreEvent preEvent = EventCreator.getCreator().edit(event, eventId);
+                        Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Editor initiated! Edit the values and then confirm your edits with `!event confirm`", event, client);
+                    } else {
+                        Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event, client);
+                    }
+                } else {
+                    Message.sendMessage("Please input the ID of the event to edit with `!event edit <ID>`", event, client);
+                }
+            } else {
+                Message.sendMessage("Event Creator already initialized!", event, client);
+            }
+        } else {
+            Message.sendMessage("Cannot edit event when you do not have a calendar", event, client);
         }
     }
 

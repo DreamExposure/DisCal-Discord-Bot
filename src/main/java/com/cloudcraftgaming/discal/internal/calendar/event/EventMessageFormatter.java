@@ -107,6 +107,9 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Pre-Event Info");
+        if (event.isEditing()) {
+            em.appendField("Event ID", event.getEventId(), true);
+        }
         if (event.getSummary() != null) {
             em.appendField("Event Name/Summary", event.getSummary(), true);
         } else {
@@ -119,6 +122,8 @@ public class EventMessageFormatter {
         }
         if (event.shouldRecur()) {
             em.appendField("Recurrence", event.getRecurrence().toHumanReadable(), true);
+        } else {
+            em.appendField("Recurrence", "None or N/a", true);
         }
         em.appendField("[R] Event Start Date", getHumanReadableDate(event.getViewableStartDate()), true);
         em.appendField("[R] Event Start Time", EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
