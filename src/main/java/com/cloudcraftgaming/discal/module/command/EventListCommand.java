@@ -76,6 +76,10 @@ public class EventListCommand implements ICommand {
                 if (eventNum > 16) {
                     Message.sendMessage("You cannot list more than 15 events!", event, client);
                     return false;
+                } 
+                if (eventNum < 1) {
+                    Message.sendMessage("Valid numbers are only `1-15`", event, client);
+                    return false;
                 }
                 try {
                     Calendar service = CalendarAuth.getCalendarService();
