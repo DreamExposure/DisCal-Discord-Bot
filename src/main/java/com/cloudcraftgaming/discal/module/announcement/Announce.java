@@ -144,19 +144,33 @@ public class Announce extends TimerTask {
         em.withTitle("!~Event Announcement~!");
         em.appendField("Event Name/Summary", event.getSummary(), true);
         em.appendField("Event Description", event.getDescription(), true);
-        em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-        em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
-        try {
-            em.appendField("TimeZone", event.getStart().getTimeZone(), true);
-        } catch (Exception e) {
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
+            em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            try {
+                em.appendField("TimeZone", event.getStart().getTimeZone(), true);
+            } catch (Exception e) {
+                try {
+                    Calendar service = CalendarAuth.getCalendarService();
+                    String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                    em.appendField("TimeZone", tz, true);
+                } catch (Exception e1) {
+                    em.appendField("TimeZone", "Unknown *Error Occurred", true);
+                }
+            }
+        } else {
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                em.appendField("TimeZone", tz, true);
+                start = start + " " + tz;
             } catch (Exception e1) {
-                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+                start = start + " (TZ UNKNOWN/ERROR)";
             }
+
+            em.appendField("Event Start", start, false);
         }
+        
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField("Event ID", event.getId(), false);
         }
