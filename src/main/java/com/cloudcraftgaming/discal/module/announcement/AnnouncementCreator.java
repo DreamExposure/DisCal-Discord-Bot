@@ -39,6 +39,7 @@ public class AnnouncementCreator {
     public Announcement init(MessageReceivedEvent e) {
         if (!hasAnnouncement(e.getMessage().getGuild().getID())) {
             Announcement a = new Announcement(e.getMessage().getGuild().getID());
+            a.setAnnouncementChannelId(e.getMessage().getChannel().getID());
             announcements.add(a);
             return a;
         }
