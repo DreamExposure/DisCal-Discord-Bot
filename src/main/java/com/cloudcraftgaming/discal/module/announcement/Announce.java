@@ -142,21 +142,21 @@ public class Announce extends TimerTask {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("!~Event Announcement~!");
-        em.appendField("Event Name/Summary", event.getSummary(), true);
-        em.appendField("Event Description", event.getDescription(), true);
+        if (event.getSummary() != null) {
+            em.appendField("Event Name/Summary", event.getSummary(), true);
+        }
+        if (event.getDescription() != null) {
+            em.appendField("Event Description", event.getDescription(), true);
+        }
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
             em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
             try {
-                em.appendField("TimeZone", event.getStart().getTimeZone(), true);
-            } catch (Exception e) {
-                try {
-                    Calendar service = CalendarAuth.getCalendarService();
-                    String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                    em.appendField("TimeZone", tz, true);
-                } catch (Exception e1) {
-                    em.appendField("TimeZone", "Unknown *Error Occurred", true);
-                }
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                em.appendField("TimeZone", tz, true);
+            } catch (Exception e1) {
+                em.appendField("TimeZone", "Unknown *Error Occurred", true);
             }
         } else {
             String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());

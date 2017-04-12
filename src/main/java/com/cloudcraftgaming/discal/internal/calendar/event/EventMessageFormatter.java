@@ -41,19 +41,15 @@ public class EventMessageFormatter {
         em.appendField("Event Start Date", getHumanReadableDate(event.getStart()), true);
         em.appendField("Event Start Time", getHumanReadableTime(event.getStart()), true);
         em.appendField("Event End Date", getHumanReadableDate(event.getEnd()), true);
-        em.appendField("Event End Time", getHumanReadableTime(event.getEnd()), true);
+
         try {
-            em.appendField("TimeZone", event.getStart().getTimeZone(), true);
-        } catch (IllegalArgumentException e) {
-            try {
-                //TODO: add support for multiple calendars...
-                CalendarData data = DatabaseManager.getManager().getMainCalendar(guildID);
-                Calendar service = CalendarAuth.getCalendarService();
-                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                em.appendField("TimeZone", tz, true);
-            } catch (Exception e1) {
-                em.appendField("TimeZone", "Error/Unknown", true);
-            }
+            //TODO: add support for multiple calendars...
+            CalendarData data = DatabaseManager.getManager().getMainCalendar(guildID);
+            Calendar service = CalendarAuth.getCalendarService();
+            String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+            em.appendField("TimeZone", tz, true);
+        } catch (Exception e1) {
+            em.appendField("TimeZone", "Error/Unknown", true);
         }
         //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
@@ -79,7 +75,9 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("Condensed Event Info");
-        em.appendField("Event Summary", event.getSummary(), true);
+        if (event.getSummary() != null) {
+            em.appendField("Event Summary", event.getSummary(), true);
+        }
         em.appendField("Event Date", getHumanReadableDate(event), true);
         em.appendField("Event ID", event.getId(), true);
         em.withUrl(event.getHtmlLink());
@@ -109,13 +107,9 @@ public class EventMessageFormatter {
         }
         if (event.getSummary() != null) {
             em.appendField("Event Name/Summary", event.getSummary(), true);
-        } else {
-            em.appendField("Event Name/Summary", "ERROR", true);
         }
         if (event.getDescription() != null) {
             em.appendField("Event Description", event.getDescription(), true);
-        } else {
-            em.appendField("Event Description", "ERROR", true);
         }
         if (event.shouldRecur()) {
             em.appendField("Recurrence", event.getRecurrence().toHumanReadable(), true);
