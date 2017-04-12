@@ -511,6 +511,11 @@ public class EventCommand implements ICommand {
         if (args.length == 2) {
             String valueString = args[1];
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(guildId);
+                if (pre.isEditing() && pre.getEventId().contains("_")) {
+                    Message.sendMessage("You cannot set the Recurring rules for a child event of a recurring event! Use `!event edit " + pre.getEventId().split("_")[0] + "` to edit the recurring settings!",event, client);
+                    return;
+                }
                 try {
                     boolean value = Boolean.valueOf(valueString);
                     EventCreator.getCreator().getPreEvent(guildId).setShouldRecur(value);
