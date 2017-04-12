@@ -55,9 +55,10 @@ public class PreEvent {
 
         color = EventColor.fromNameOrHexOrID(e.getColorId());
 
+        recurrence = new Recurrence();
+
         if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
             recur = true;
-            recurrence = new Recurrence();
             recurrence.fromRRule(e.getRecurrence().get(0));
         }
 
