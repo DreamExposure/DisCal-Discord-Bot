@@ -51,6 +51,7 @@ public class DevCommand implements ICommand {
         ci.setExample("!dev <function> (value)");
         ci.getSubCommands().add("patron");
         ci.getSubCommands().add("dev");
+        ci.getSubCommands().add("maxcal");
 
         return ci;
     }
@@ -77,6 +78,9 @@ public class DevCommand implements ICommand {
                         break;
                     case "dev":
                         moduleDevGuild(args, event, client);
+                        break;
+                    case "maxcal":
+                        moduleMaxCalendars(args, event, client);
                         break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
@@ -126,6 +130,30 @@ public class DevCommand implements ICommand {
             }
         } else {
             Message.sendMessage("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event, client);
+        }
+    }
+
+    private void moduleMaxCalendars(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        if (args.length == 3) {
+            String guildId = args[1];
+            try {
+                Integer mc = Integer.valueOf(args[2]);
+                mc = Math.abs(mc);
+                if (Main.client.getGuildByID(guildId) != null) {
+                    GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+                    settings.setMaxCalendars(mc);
+
+                    DatabaseManager.getManager().updateSettings(settings);
+
+                    Message.sendMessage("Guild with ID: `" + guildId + "` max calendar count set to: `" + mc + "`", event, client);
+                } else {
+                    Message.sendMessage("Guild not found or is not connected to DisCal!", event, client);
+                }
+            } catch (NumberFormatException e) {
+                Message.sendMessage("Max Calendar amount must be a valid Integer!", event, client);
+            }
+        } else {
+            Message.sendMessage("Please specify the ID of the guild and calendar amount with `!dev maxcal <ID> <amount>`", event, client);
         }
     }
 }
