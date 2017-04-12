@@ -71,6 +71,9 @@ public class PreEvent {
         startDateTime = e.getStart();
         endDateTime = e.getEnd();
 
+        viewableStartDate = e.getStart();
+        viewableEndDate = e.getEnd();
+
         editing = false;
     }
 
