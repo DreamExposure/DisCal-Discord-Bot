@@ -458,7 +458,8 @@ public class AnnouncementCommand implements ICommand {
             String value = args[1];
             if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 try {
-                    Integer hours = Integer.valueOf(value);
+                    Integer hoursOr = Integer.valueOf(value);
+                    Integer hours = Math.abs(hoursOr);
                     AnnouncementCreator.getCreator().getAnnouncement(guildId).setHoursBefore(hours);
                     Message.sendMessage("Announcement hours before set to: `" + hours + "`" + Message.lineBreak + "Please specify the amount of minutes before the event to fire!", event, client);
                 } catch (NumberFormatException e) {
@@ -478,7 +479,8 @@ public class AnnouncementCommand implements ICommand {
             String value = args[1];
             if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 try {
-                    Integer minutes = Integer.valueOf(value);
+                    Integer minutesOr = Integer.valueOf(value);
+                    Integer minutes = Math.abs(minutesOr);
                     AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
                     Message.sendMessage("Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak + "Announcement creation halted! " +
                             "If you would like to add some info text, use `!announcement info <text>` otherwise, review your announcement with `!announcement review`", event, client);
