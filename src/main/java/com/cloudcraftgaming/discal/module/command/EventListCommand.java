@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -69,17 +70,37 @@ public class EventListCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage("Please specify how many events to list with `!events <amount>`", event, client);
+            Message.sendMessage("Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`", event, client);
         } else {
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            switch (args[0].toLowerCase()) {
+                case "search":
+                    if (settings.isDevGuild()) {
+                        //To search module.
+                        Message.sendMessage("Uh... I'm working on it okay~", event, client);
+                    } else {
+                        Message.sendMessage("This option is disabled for testing only!", event, client);
+                    }
+                    break;
+                default:
+                    moduleSimpleList(args, event, client);
+                    break;
+            }
+        }
+        return false;
+    }
+
+    private void moduleSimpleList(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        if (args.length == 1) {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
                 if (eventNum > 16) {
                     Message.sendMessage("You cannot list more than 15 events!", event, client);
-                    return false;
-                } 
+                    return;
+                }
                 if (eventNum < 1) {
                     Message.sendMessage("Valid numbers are only `1-15`", event, client);
-                    return false;
+                    return;
                 }
                 try {
                     Calendar service = CalendarAuth.getCalendarService();
@@ -94,7 +115,6 @@ public class EventListCommand implements ICommand {
                     List<Event> items = events.getItems();
                     if (items.size() == 0) {
                         Message.sendMessage("No upcoming events found.", event, client);
-                        return true;
                     } else if (items.size() == 1) {
                         String guildId = event.getMessage().getGuild().getID();
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), "1 upcoming event found:", event, client);
@@ -105,7 +125,6 @@ public class EventListCommand implements ICommand {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event, client);
                         }
                         Message.sendMessage("Use `!event view <id>` for more info.", event, client);
-                        return true;
                     }
                 } catch (IOException e) {
                     Message.sendMessage("Oops! Something terrible happened! I have emailed the developer!", event, client);
@@ -115,7 +134,8 @@ public class EventListCommand implements ICommand {
             } catch (NumberFormatException e) {
                 Message.sendMessage("Event amount must be an Integer!", event, client);
             }
+        } else {
+            Message.sendMessage("Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`", event, client);
         }
-        return false;
     }
 }
