@@ -66,8 +66,12 @@ public class HelpCommand implements ICommand {
             em.withAuthorName("DisCal");
             em.withTitle("DisCal Command Help");
             for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
-                String al = c.getAliases().toString();
-                em.appendField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
+                if (c.getAliases().size() > 0) {
+                    String al = c.getAliases().toString();
+                    em.appendField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
+                } else {
+                    em.appendField(c.getCommand(), c.getCommandInfo().getDescription(), true);
+                }
             }
             em.withFooterText("Check out the official site for more command info!");
             em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
