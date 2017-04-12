@@ -96,7 +96,7 @@ public class EventListCommand implements ICommand {
         if (args.length == 1) {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
-                if (eventNum > 16) {
+                if (eventNum > 15) {
                     Message.sendMessage("You cannot list more than 15 events!", event, client);
                     return;
                 }
