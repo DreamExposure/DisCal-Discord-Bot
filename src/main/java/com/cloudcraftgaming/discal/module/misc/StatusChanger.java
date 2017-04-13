@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.module.misc;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.database.DatabaseManager;
 import sx.blah.discord.handle.obj.Status;
 
 import java.util.ArrayList;
@@ -24,7 +25,9 @@ public class StatusChanger extends TimerTask {
         statuses.add("!DisCal for info");
         statuses.add("Made by NovaFox161");
         statuses.add("Official calendar bot!");
-        statuses.add("Used on %count% guilds!");
+        statuses.add("Used on %guCount% guilds!");
+        statuses.add("%calCount$ calendars!");
+        statuses.add("%annCount% announcements!");
         statuses.add("Version " + Main.version);
         statuses.add("DisCal is on patreon!");
         statuses.add("Share DisCal!!");
@@ -35,8 +38,14 @@ public class StatusChanger extends TimerTask {
     public void run() {
         String statusOr = statuses.get(index);
         String status = statusOr;
-        if (statusOr.contains("%count%")) {
-            status = statusOr.replaceAll("%count%", String.valueOf(Main.client.getGuilds().size()));
+        if (statusOr.contains("%guCount%")) {
+            status = statusOr.replaceAll("%guCount%", Main.client.getGuilds().size() + "");
+        }
+        if (statusOr.contains("%calCount%")) {
+            status = statusOr.replaceAll("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
+        }
+        if (statusOr.contains("%annCount%")) {
+            status = statusOr.replaceAll("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
         }
         Main.client.changeStatus(Status.game(status));
 
