@@ -38,15 +38,9 @@ public class StatusChanger extends TimerTask {
     public void run() {
         String statusOr = statuses.get(index);
         String status = statusOr;
-        if (statusOr.contains("%guCount%")) {
-            status = statusOr.replaceAll("%guCount%", Main.client.getGuilds().size() + "");
-        }
-        if (statusOr.contains("%calCount%")) {
-            status = statusOr.replaceAll("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
-        }
-        if (statusOr.contains("%annCount%")) {
-            status = statusOr.replaceAll("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
-        }
+        status = statusOr.replaceAll("%guCount%", Main.client.getGuilds().size() + "");
+        status = statusOr.replaceAll("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
+        status = statusOr.replaceAll("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
         Main.client.changeStatus(Status.game(status));
 
         //Set new index.
