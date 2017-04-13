@@ -128,22 +128,17 @@ public class DisCalCommand implements ICommand {
             if (args.length == 2) {
                 String roleName = args[1];
                 IGuild guild = event.getMessage().getGuild();
-                IRole controlRole = null;
+                IRole controlRole;
 
                 if (!"everyone".equalsIgnoreCase(roleName)) {
-                    for (IRole r : guild.getRoles()) {
-                        if (r.getName().equals(roleName) || r.getID().equals(roleName)) {
-                            controlRole = r;
-                            break; //So that it only loops through a limited amount of roles.
-                        }
-                    }
+                    controlRole = RoleUtils.getRoleFromID(roleName, event);
 
                     if (controlRole != null) {
                         GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
                         settings.setControlRole(controlRole.getID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
-                        Message.sendMessage("Required control role set to: `" + controlRole.getName() + "'", event, client);
+                        Message.sendMessage("Required control role set to: `" + controlRole.getName() + "`", event, client);
 
                     } else {
                         //Invalid role.

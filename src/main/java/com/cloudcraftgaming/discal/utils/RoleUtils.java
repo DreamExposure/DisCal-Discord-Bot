@@ -20,7 +20,7 @@ public class RoleUtils {
 
     public static IRole getRoleFromID(String id, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (id.equals(r.getID())) {
+            if (id.equals(r.getID()) || id.equals(r.getName())) {
                 return r;
             }
         }
