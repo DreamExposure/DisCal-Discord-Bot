@@ -3,13 +3,17 @@ package com.cloudcraftgaming.discal.module.announcement;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -103,6 +107,70 @@ public class AnnouncementMessageFormatter {
     }
 
     /**
+     * Sends an embed with the announcement info in a proper format.
+     *
+     * @param announcement The announcement to send info about.
+     * @param event        the calendar event the announcement is for.
+     * @param data         The BotData belonging to the guild.
+     */
+    static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("!~Event Announcement~!");
+        if (event.getSummary() != null) {
+            em.appendField("Event Name/Summary", event.getSummary(), true);
+        }
+        if (event.getDescription() != null) {
+            em.appendField("Event Description", event.getDescription(), true);
+        }
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
+            em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            try {
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                em.appendField("TimeZone", tz, true);
+            } catch (Exception e1) {
+                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+            }
+        } else {
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
+            try {
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                start = start + " " + tz;
+            } catch (Exception e1) {
+                start = start + " (TZ UNKNOWN/ERROR)";
+            }
+
+            em.appendField("Event Start", start, false);
+        }
+
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event ID", event.getId(), false);
+        }
+        em.appendField("Additional Info", announcement.getInfo(), false);
+        em.withUrl(event.getHtmlLink());
+        if (!settings.usingSimpleAnnouncements()) {
+            em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+        }
+        try {
+            EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //I dunno, color probably null.
+            em.withColor(36, 153, 153);
+        }
+
+        IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
+
+        IChannel channel = guild.getChannelByID(announcement.getAnnouncementChannelId());
+
+        Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel, Main.client);
+    }
+
+    /**
      * Gets the formatted time from an Announcement.
      * @param a The Announcement.
      * @return The formatted time from an Announcement.
@@ -153,6 +221,50 @@ public class AnnouncementMessageFormatter {
         }
         if (mentionHere) {
             message = message + " here";
+        }
+
+        return message;
+    }
+
+    public static String getSubscriberMentions(Announcement a, IGuild guild) {
+        StringBuilder userMentions = new StringBuilder();
+        for (String userId : a.getSubscriberUserIds()) {
+            try {
+                IUser user = guild.getUserByID(userId);
+                if (user != null) {
+                    userMentions.append(user.mention(true)).append(" ");
+                }
+            } catch (Exception e) {
+                //User does not exist, safely ignore.
+            }
+        }
+
+        StringBuilder roleMentions = new StringBuilder();
+        Boolean mentionEveryone = false;
+        Boolean mentionHere = false;
+        for (String roleId : a.getSubscriberRoleIds()) {
+            if (roleId.equalsIgnoreCase("everyone")) {
+                mentionEveryone = true;
+            } else if (roleId.equalsIgnoreCase("here")) {
+                mentionHere = true;
+            } else {
+                try {
+                    IRole role = guild.getRoleByID(roleId);
+                    if (role != null) {
+                        roleMentions.append(role.mention()).append(" ");
+                    }
+                } catch (Exception e) {
+                    //Role does not exist, safely ignore.
+                }
+            }
+        }
+
+        String message = "Subscribers: " + userMentions + " " + roleMentions;
+        if (mentionEveryone) {
+            message = message + " " + guild.getEveryoneRole().mention();
+        }
+        if (mentionHere) {
+            message = message + " @here";
         }
 
         return message;
