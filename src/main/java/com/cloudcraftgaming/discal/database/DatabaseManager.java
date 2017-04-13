@@ -429,6 +429,22 @@ public class DatabaseManager {
         return calendars;
     }
 
+    public Integer getCalendarCount() {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + calendarTableName + ";";
+                ResultSet res = statement.executeQuery(query);
+                return res.getFetchSize();
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return -1;
+    }
+
     /**
      * Gets the {@link Announcement} Object with the corresponding ID for the specified Guild.
      * @param announcementId The ID of the announcement.
@@ -508,6 +524,22 @@ public class DatabaseManager {
             e.printStackTrace();
         }
         return announcements;
+    }
+
+    public Integer getAnnouncementCount() {
+        try {
+            if (databaseInfo.getMySQL().checkConnection()) {
+                String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+                Statement statement = databaseInfo.getConnection().createStatement();
+                String query = "SELECT * FROM " + announcementTableName + ";";
+                ResultSet res = statement.executeQuery(query);
+                return res.getFetchSize();
+            }
+        } catch (SQLException e) {
+            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+        }
+        return -1;
     }
 
     /**
