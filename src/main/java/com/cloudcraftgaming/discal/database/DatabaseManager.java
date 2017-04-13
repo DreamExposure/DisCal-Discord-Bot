@@ -437,7 +437,11 @@ public class DatabaseManager {
                 Statement statement = databaseInfo.getConnection().createStatement();
                 String query = "SELECT * FROM " + calendarTableName + ";";
                 ResultSet res = statement.executeQuery(query);
-                return res.getFetchSize();
+                if (res.last()) {
+                    return res.getRow();
+                } else {
+                    return 0;
+                }
             }
         } catch (SQLException e) {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
@@ -534,7 +538,11 @@ public class DatabaseManager {
                 Statement statement = databaseInfo.getConnection().createStatement();
                 String query = "SELECT * FROM " + announcementTableName + ";";
                 ResultSet res = statement.executeQuery(query);
-                return res.getFetchSize();
+                if (res.last()) {
+                    return res.getRow();
+                } else {
+                    return 0;
+                }
             }
         } catch (SQLException e) {
             EmailSender.getSender().sendExceptionEmail(e, this.getClass());
