@@ -26,7 +26,7 @@ public class StatusChanger extends TimerTask {
         statuses.add("Made by NovaFox161");
         statuses.add("Official calendar bot!");
         statuses.add("Used on %guCount% guilds!");
-        statuses.add("%calCount$ calendars!");
+        statuses.add("%calCount% calendars!");
         statuses.add("%annCount% announcements!");
         statuses.add("Version " + Main.version);
         statuses.add("DisCal is on patreon!");
