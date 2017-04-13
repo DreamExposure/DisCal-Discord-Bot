@@ -75,7 +75,7 @@ public class HelpCommand implements ICommand {
             }
             em.withFooterText("Check out the official site for more command info!");
             em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
             Message.sendMessage(em.build(), event, client);
         } else if (args.length == 1) {
             String cmdFor = args[0];

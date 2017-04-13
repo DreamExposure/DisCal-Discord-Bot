@@ -46,7 +46,7 @@ public class CalendarMessageFormatter {
         em.appendField("Timezone", cal.getTimeZone(), false);
         em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
         em.withFooterText("Calendar ID: " + cal.getId());
-        em.withColor(36, 153, 153);
+        em.withColor(56, 138, 237);
 
         return em.build();
     }
@@ -75,7 +75,7 @@ public class CalendarMessageFormatter {
         em.appendField("Calendar ID", "Unknown until creation complete", true);
 
         em.withFooterText("[R] means required, field needs a value.");
-        em.withColor(36, 153, 153);
+        em.withColor(56, 138, 237);
 
         return em.build();
     }

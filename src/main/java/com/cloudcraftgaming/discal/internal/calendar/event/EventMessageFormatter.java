@@ -59,7 +59,7 @@ public class EventMessageFormatter {
             em.withColor(ec.getR(), ec.getG(), ec.getB());
         } catch (Exception e) {
             //Color is null, ignore and add our default.
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         return em.build();
@@ -86,7 +86,7 @@ public class EventMessageFormatter {
             em.withColor(ec.getR(), ec.getG(), ec.getB());
         } catch (Exception e) {
             //Color is null, ignore and add our default.
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         return em.build();
@@ -149,7 +149,7 @@ public class EventMessageFormatter {
             em.withColor(ec.getR(), ec.getG(), ec.getB());
         } catch (Exception e) {
             //Color is null, ignore and add our default.
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         return em.build();

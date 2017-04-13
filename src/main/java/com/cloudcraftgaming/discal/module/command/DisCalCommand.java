@@ -115,7 +115,7 @@ public class DisCalCommand implements ICommand {
         em.appendField("Total Announcements", DatabaseManager.getManager().getAnnouncementCount() + "", true);
         em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
-        em.withColor(36, 153, 153);
+        em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event, client);
     }
 
@@ -233,7 +233,7 @@ public class DisCalCommand implements ICommand {
         em.appendField("Max Calendars", String.valueOf(settings.getMaxCalendars()), true);
         em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
-        em.withColor(36, 153, 153);
+        em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event, client);
     }
 }

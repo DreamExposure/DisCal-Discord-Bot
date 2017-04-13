@@ -55,7 +55,7 @@ public class AnnouncementMessageFormatter {
             EventColor c = a.getEventColor();
             em.withColor(c.getR(), c.getG(), c.getB());
         } else {
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         return em.build();
@@ -100,7 +100,7 @@ public class AnnouncementMessageFormatter {
             EventColor c = a.getEventColor();
             em.withColor(c.getR(), c.getG(), c.getB());
         } else {
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         return em.build();
