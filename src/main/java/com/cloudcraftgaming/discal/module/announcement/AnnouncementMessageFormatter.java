@@ -26,6 +26,7 @@ import java.io.IOException;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("Duplicates")
 public class AnnouncementMessageFormatter {
 
     /**
@@ -160,7 +161,7 @@ public class AnnouncementMessageFormatter {
             em.withColor(ec.getR(), ec.getG(), ec.getB());
         } catch (Exception e) {
             //I dunno, color probably null.
-            em.withColor(36, 153, 153);
+            em.withColor(56, 138, 237);
         }
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
@@ -168,6 +169,63 @@ public class AnnouncementMessageFormatter {
         IChannel channel = guild.getChannelByID(announcement.getAnnouncementChannelId());
 
         Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel, Main.client);
+    }
+
+    static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
+        EmbedBuilder em = new EmbedBuilder();
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorName("DisCal");
+        em.withTitle("!~Event Announcement~!");
+        if (event.getSummary() != null) {
+            em.appendField("Event Name/Summary", event.getSummary(), true);
+        }
+        if (event.getDescription() != null) {
+            em.appendField("Event Description", event.getDescription(), true);
+        }
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
+            em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            try {
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                em.appendField("TimeZone", tz, true);
+            } catch (Exception e1) {
+                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+            }
+        } else {
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
+            try {
+                Calendar service = CalendarAuth.getCalendarService();
+                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+                start = start + " " + tz;
+            } catch (Exception e1) {
+                start = start + " (TZ UNKNOWN/ERROR)";
+            }
+
+            em.appendField("Event Start", start, false);
+        }
+
+        if (!settings.usingSimpleAnnouncements()) {
+            em.appendField("Event ID", event.getId(), false);
+        }
+        em.appendField("Additional Info", announcement.getInfo(), false);
+        em.withUrl(event.getHtmlLink());
+        if (!settings.usingSimpleAnnouncements()) {
+            em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+        }
+        try {
+            EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+            em.withColor(ec.getR(), ec.getG(), ec.getB());
+        } catch (Exception e) {
+            //I dunno, color probably null.
+            em.withColor(56, 138, 237);
+        }
+
+        IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
+
+        String msg = "Announcement in Guild: `" + guild.getName() + "`" + Message.lineBreak + Message.lineBreak + "You are receiving this DM because you enabled DM announcements for the respective guild." + Message.lineBreak + "To disable this, go to the guild and use `discal dmAnnouncements`";
+
+        Message.sendDirectMessage(msg, em.build(), user);
     }
 
     /**
