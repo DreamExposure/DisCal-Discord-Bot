@@ -211,7 +211,11 @@ public class AnnouncementCommand implements ICommand {
         if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
             AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(event);
             if (acr.isSuccessful()) {
-                Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use `!announcement subscribe <id>` to subscribe to the announcement!", event, client);
+                if (acr.getAnnouncement().isEditing()) {
+                    Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement updated!", event, client);
+                } else {
+                    Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()), "Announcement created " + Message.lineBreak + Message.lineBreak + "Use `!announcement subscribe <id>` to subscribe to the announcement!", event, client);
+                }
             } else {
                 Message.sendMessage("Oops! Something went wrong! Are you sure all of the info is correct?", event, client);
             }
@@ -223,9 +227,9 @@ public class AnnouncementCommand implements ICommand {
 
         if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
             AnnouncementCreator.getCreator().terminate(event);
-            Message.sendMessage("Announcement creator terminated!", event, client);
+            Message.sendMessage("Announcement Creator terminated!", event, client);
         } else {
-            Message.sendMessage("Cannot cancel creation when the creator has not been started!", event, client);
+            Message.sendMessage("Cannot cancel creation when the Creator has not been started!", event, client);
         }
     }
 
@@ -235,7 +239,7 @@ public class AnnouncementCommand implements ICommand {
             if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 Message.sendMessage("Please specify the Id of the announcement to delete!", event, client);
             } else {
-                Message.sendMessage("You cannot delete an announcement while in the creator!", event, client);
+                Message.sendMessage("You cannot delete an announcement while in the Creator!", event, client);
             }
         } else if (args.length == 2) {
             String value = args[1];
