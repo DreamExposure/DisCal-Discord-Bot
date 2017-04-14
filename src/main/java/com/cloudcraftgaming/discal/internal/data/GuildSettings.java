@@ -1,5 +1,8 @@
 package com.cloudcraftgaming.discal.internal.data;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * Created by Nova Fox on 3/26/2017.
  * Website: www.cloudcraftgaming.com
@@ -22,6 +25,8 @@ public class GuildSettings {
     private boolean patronGuild;
     private boolean devGuild;
     private Integer maxCalendars;
+
+    private final ArrayList<String> dmAnnouncements = new ArrayList<>();
 
     public GuildSettings(String _guildId) {
         guildID = _guildId;
@@ -87,6 +92,24 @@ public class GuildSettings {
         return maxCalendars;
     }
 
+    public ArrayList<String> getDmAnnouncements() {
+        return dmAnnouncements;
+    }
+
+    public String getDmAnnouncementsString() {
+        StringBuilder users = new StringBuilder();
+        Integer i = 0;
+        for (String sub : dmAnnouncements) {
+            if (i == 0) {
+                users = new StringBuilder(sub);
+            } else {
+                users.append(",").append(sub);
+            }
+            i++;
+        }
+        return users.toString();
+    }
+
     //Setters
     public void setUseExternalCalendar(boolean _useExternal) {
         externalCalendar = _useExternal;
@@ -126,5 +149,10 @@ public class GuildSettings {
 
     public void setMaxCalendars(Integer _maxCalendars) {
         maxCalendars = _maxCalendars;
+    }
+
+    public void setDmAnnouncementsFromString(String userList) {
+        String[] subs = userList.split(",");
+        Collections.addAll(dmAnnouncements, subs);
     }
 }
