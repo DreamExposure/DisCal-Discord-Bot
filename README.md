@@ -24,7 +24,7 @@ DisCal is developed and maintained by NovaFox161.
 * Versatile and built for all types of Guilds 
 * And much more coming soon!
 
-In addition to all of the features above, DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix is ASAP!!
+In addition to all of the features above, DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix it ASAP!!
 
 ## Planned Features
 
