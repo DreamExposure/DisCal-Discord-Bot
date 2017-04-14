@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -68,7 +68,7 @@ class CommandListener {
                 }
             }
         } catch (Exception e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Command error; event message: " + event.getMessage().getContent(), e, this.getClass());
         }
     }
 }

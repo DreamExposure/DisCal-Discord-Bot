@@ -5,9 +5,9 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.gson.Gson;
@@ -85,7 +85,7 @@ public class Authorization {
 
         } catch (Exception e) {
             //Failed, report issue to dev.
-            EmailSender.getSender().sendExceptionEmail(e, Authorization.class);
+            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to request Google Access Code", e, this.getClass());
             IUser u = event.getMessage().getAuthor();
             Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", u);
         }
@@ -119,7 +119,7 @@ public class Authorization {
 
         } catch (Exception e) {
             //Error occurred, lets just log it and return null.
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to request new access token.", e, this.getClass());
             return null;
         }
     }
@@ -158,7 +158,7 @@ public class Authorization {
                     }
                 } catch (Exception e) {
                     //Auth is not pending, error occurred.
-                    EmailSender.getSender().sendExceptionEmail(e, Authorization.class);
+                    ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account.", e, this.getClass());
                     Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", poll.getUser());
                 }
             } else if (httpResponse.getStatusLine().getStatusCode() == 429) {
@@ -180,7 +180,7 @@ public class Authorization {
 
         } catch (Exception e) {
             //Handle exception.
-            EmailSender.getSender().sendExceptionEmail(e, Authorization.class);
+            ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass());
             Message.sendDirectMessage("Uh oh... An error has occured! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
 
         }

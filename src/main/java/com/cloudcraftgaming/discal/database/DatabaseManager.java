@@ -4,10 +4,10 @@ import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ public class DatabaseManager {
             System.out.println("Connected to MySQL database!");
         } catch (Exception e) {
             System.out.println("Failed to connect to MySQL database! Is it properly configured?");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Connecting to MySQL server failed.", e, this.getClass());
             e.printStackTrace();
         }
     }
@@ -63,7 +63,7 @@ public class DatabaseManager {
                 databaseInfo.getMySQL().closeConnection();
                 System.out.println("Successfully disconnected from MySQL Database!");
             } catch (SQLException e) {
-                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                ExceptionHandler.sendException(null, "Discconnecting from MySQL failed.", e, this.getClass());
                 System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
             }
         }
@@ -118,7 +118,7 @@ public class DatabaseManager {
             System.out.println("Successfully created needed tables in MySQL database!");
         } catch (SQLException e) {
             System.out.println("Failed to created database tables! Something must be wrong.");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Creating MySQL tables failed", e, this.getClass());
             e.printStackTrace();
         }
     }
@@ -190,7 +190,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.println("Failed to input data into database! Error Code: 00101");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to update/insert guild settings.", e, this.getClass());
             e.printStackTrace();
         }
         return false;
@@ -240,7 +240,7 @@ public class DatabaseManager {
                 return true;
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to update/insert calendar data.", e, this.getClass());
         }
         return false;
     }
@@ -312,7 +312,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             System.out.print("Failed to input announcement data! Error Code: 00201");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to update/insert announcement.", e, this.getClass());
             e.printStackTrace();
         }
         return false;
@@ -350,7 +350,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get Guild Settings.", e, this.getClass());
         }
         return settings;
     }
@@ -375,7 +375,7 @@ public class DatabaseManager {
                 statement.close();
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get calendar settings.", e, this.getClass());
         }
         return calData;
     }
@@ -400,7 +400,7 @@ public class DatabaseManager {
                 statement.close();
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get calendar data", e, this.getClass());
         }
         return calData;
     }
@@ -424,7 +424,7 @@ public class DatabaseManager {
                 statement.close();
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get all guild calendars.", e, this.getClass());
         }
         return calendars;
     }
@@ -444,7 +444,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get calendar count", e, this.getClass());
         }
         return -1;
     }
@@ -483,8 +483,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Failed to get announcement from database! Error code: 00202");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get announcement data.", e, this.getClass());
             e.printStackTrace();
         }
         return null;
@@ -523,8 +522,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Failed to get announcements from database! Error code: 00203");
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get all guild announcements.", e, this.getClass());
             e.printStackTrace();
         }
         return announcements;
@@ -545,7 +543,7 @@ public class DatabaseManager {
                 }
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to get announcement count", e, this.getClass());
         }
         return -1;
     }
@@ -569,7 +567,7 @@ public class DatabaseManager {
                 return true;
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to delete announcement.", e, this.getClass());
         }
         return false;
     }
@@ -590,7 +588,7 @@ public class DatabaseManager {
                 return true;
             }
         } catch (SQLException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to delete announcements for specific event.", e, this.getClass());
         }
         return false;
     }

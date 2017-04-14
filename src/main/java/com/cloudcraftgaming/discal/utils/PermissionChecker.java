@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
@@ -51,7 +50,7 @@ public class PermissionChecker {
             }
         } catch (Exception e) {
             //Something broke so we will harmlessly allow access and email the dev.
-            EmailSender.getSender().sendExceptionEmail(e, PermissionChecker.class);
+            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to check for sufficient control role.", e, PermissionChecker.class);
             return true;
         }
         return true;
@@ -87,7 +86,7 @@ public class PermissionChecker {
             return true;
         } catch (Exception e) {
             //Catch any errors so that the bot always responds...
-            EmailSender.getSender().sendExceptionEmail(e, PermissionChecker.class);
+            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to check for discal channel.", e, PermissionChecker.class);
             return true;
         }
     }

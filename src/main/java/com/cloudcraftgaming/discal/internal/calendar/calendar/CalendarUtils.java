@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;
 
 import java.io.IOException;
@@ -34,7 +34,7 @@ public class CalendarUtils {
             return true;
         } catch (IOException e) {
             //Fail silently.
-            EmailSender.getSender().sendExceptionEmail(e, CalendarUtils.class);
+            ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
         }
         return false;
     }

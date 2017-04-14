@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -67,7 +67,7 @@ public class CalendarCreator {
                 calendars.add(preCalendar);
                 return preCalendar;
             } catch (IOException e) {
-                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to init calendar editor", e, this.getClass());
                 return null;
             }
         } else {
@@ -117,7 +117,7 @@ public class CalendarCreator {
                         terminate(e);
                         return new CalendarCreatorResponse(true, confirmed);
                     } catch (IOException ex) {
-                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to confirm calendar.", ex, this.getClass());
                         return new CalendarCreatorResponse(false);
                     }
                 } else {
@@ -137,7 +137,7 @@ public class CalendarCreator {
                         terminate(e);
                         return new CalendarCreatorResponse(true, confirmed);
                     } catch (IOException ex) {
-                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update calendar.", ex, this.getClass());
                         return new CalendarCreatorResponse(false);
                     }
                 }

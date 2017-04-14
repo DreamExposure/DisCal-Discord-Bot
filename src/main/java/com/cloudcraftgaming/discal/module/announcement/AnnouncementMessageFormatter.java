@@ -6,9 +6,9 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -87,7 +87,7 @@ public class AnnouncementMessageFormatter {
                 }
             } catch (IOException e) {
                 //Failed to get from google cal.
-                EmailSender.getSender().sendExceptionEmail(e, AnnouncementMessageFormatter.class);
+                ExceptionHandler.sendException(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class);
             }
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             em.appendField("Event Color", a.getEventColor().name(), true);

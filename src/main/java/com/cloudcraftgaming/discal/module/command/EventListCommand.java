@@ -5,8 +5,8 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -130,7 +130,7 @@ public class EventListCommand implements ICommand {
                     }
                 } catch (IOException e) {
                     Message.sendMessage("Oops! Something terrible happened! I have emailed the developer!", event, client);
-                    EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                    ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to list events.", e, this.getClass());
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {

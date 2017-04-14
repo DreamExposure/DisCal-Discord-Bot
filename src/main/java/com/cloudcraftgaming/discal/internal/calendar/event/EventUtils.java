@@ -2,8 +2,8 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -36,7 +36,7 @@ public class EventUtils {
             return true;
         } catch (IOException e) {
             System.out.println("Something weird happened when deleting an event!");
-            EmailSender.getSender().sendExceptionEmail(e, EventUtils.class);
+            ExceptionHandler.sendException(null, "Failed to delete event.", e, EventUtils.class);
             e.printStackTrace();
         }
         return false;

@@ -83,7 +83,7 @@ public class DevCommand implements ICommand {
                         moduleMaxCalendars(args, event, client);
                         break;
                     default:
-                        Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
+                        Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event, client);
                         break;
                 }
             }

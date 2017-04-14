@@ -4,7 +4,6 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.discal.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.network.google.Authorization;
@@ -33,11 +32,6 @@ public class Main {
 
         //Get bot settings
         botSettings = ReadFile.readBotSettings(args[0]);
-
-        //Setup email debugging
-
-
-        EmailSender.getSender().init(botSettings);
 
         client = createClient(botSettings.getBotToken(), true);
         if (client == null)
@@ -90,7 +84,6 @@ public class Main {
             }
         } catch (DiscordException e) {
             e.printStackTrace();
-            EmailSender.getSender().sendExceptionEmail(e, Main.class);
         }
         return null;
     }

@@ -5,8 +5,8 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -69,10 +69,10 @@ public class Announce extends TimerTask {
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                                 } else {
                                     //Unknown cause, send email
-                                    EmailSender.getSender().sendExceptionEmail(ge, this.getClass());
+                                    ExceptionHandler.sendException(null, "Something failed with google.", ge, this.getClass());
                                 }
                             } catch (Exception e) {
-                                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                                ExceptionHandler.sendException(null, "Announcement failure.", e, this.getClass());
                             }
                         } else {
                             try {
@@ -113,16 +113,16 @@ public class Announce extends TimerTask {
                                     }
                                 }
                             } catch (IOException e) {
-                                EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                                ExceptionHandler.sendException(null, "Announcement failure", e, this.getClass());
                             }
                         }
                     }
                 } catch (Exception e) {
-                    EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+                    ExceptionHandler.sendException(null, "Announcement failure", e, this.getClass());
                 }
             }
         } catch (IOException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to connect to google calendar", e, this.getClass());
         }
     }
 }

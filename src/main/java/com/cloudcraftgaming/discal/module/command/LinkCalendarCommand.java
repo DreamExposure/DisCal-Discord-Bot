@@ -4,8 +4,8 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.IDiscordClient;
@@ -81,7 +81,7 @@ public class LinkCalendarCommand implements ICommand {
                 Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal), event, client);
             }
         } catch (IOException e) {
-            EmailSender.getSender().sendExceptionEmail(e, this.getClass());
+            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
             Message.sendMessage("Oops! Something went wrong! I have emailed the developer!", event, client);
         }
         return false;

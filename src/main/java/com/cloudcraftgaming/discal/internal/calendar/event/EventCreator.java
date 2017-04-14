@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.email.EmailSender;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -156,7 +156,7 @@ public class EventCreator {
                         terminate(e);
                         return new EventCreatorResponse(true, confirmed);
                     } catch (IOException ex) {
-                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to create event.", ex, this.getClass());
                         return new EventCreatorResponse(false);
                     }
                 } else {
@@ -165,7 +165,7 @@ public class EventCreator {
                         terminate(e);
                         return new EventCreatorResponse(true, confirmed);
                     } catch (IOException ex) {
-                        EmailSender.getSender().sendExceptionEmail(ex, this.getClass());
+                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update event.", ex, this.getClass());
                         return new EventCreatorResponse(false);
                     }
                 }
