@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -10,6 +11,8 @@ import com.google.api.services.calendar.model.Calendar;
 public class CalendarCreatorResponse {
     private final Boolean successful;
 
+    private boolean edited;
+    private IMessage creatorMessage;
     private Calendar calendar;
 
     /**
@@ -47,12 +50,28 @@ public class CalendarCreatorResponse {
         return calendar;
     }
 
+    public boolean isEdited() {
+        return edited;
+    }
+
+    public IMessage getCreatorMessage() {
+        return creatorMessage;
+    }
+
     //Setters
     /**
      * Sets the calendar involved.
      * @param _calendar The calendar involved.
      */
-    public void setEvent(Calendar _calendar) {
+    public void setCalendar(Calendar _calendar) {
         calendar = _calendar;
+    }
+
+    void setEdited(boolean _edit) {
+        edited = _edit;
+    }
+
+    void setCreatorMessage(IMessage msg) {
+        creatorMessage = msg;
     }
 }

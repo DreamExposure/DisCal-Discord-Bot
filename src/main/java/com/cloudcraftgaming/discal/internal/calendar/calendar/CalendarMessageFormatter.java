@@ -1,10 +1,8 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.net.URI;
@@ -15,17 +13,6 @@ import java.net.URI;
  * For Project: DisCal
  */
 public class CalendarMessageFormatter {
-    /**
-     * Gets a formatted HTML link to a guild's calendar.
-     * @param e The Event received upon request of the link.
-     * @return The link to the calendar.
-     */
-    public static String getCalendarLink(MessageReceivedEvent e) {
-        String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
-        URI callURI = URI.create(calId);
-        return "https://calendar.google.com/calendar/embed?src=" + callURI;
-    }
-
     private static String getCalendarLink(String calId) {
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
@@ -63,16 +50,20 @@ public class CalendarMessageFormatter {
         em.withTitle("Calendar Info");
         em.appendField("[R] Calendar Name/Summary", calendar.getSummary(), true);
         if (calendar.getDescription() != null) {
-            em.appendField("[R] Calendar Description", calendar.getDescription(), true);
+            em.appendField("[R] Calendar Description", calendar.getDescription(), false);
         } else {
-            em.appendField("[R] Calendar Description", "Error/Unset", true);
+            em.appendField("[R] Calendar Description", "Error/Unset", false);
         }
         if (calendar.getTimezone() != null) {
             em.appendField("[R] TimeZone", calendar.getTimezone(), true);
         } else {
             em.appendField("[R] TimeZone", "Error/Unset", true);
         }
-        em.appendField("Calendar ID", "Unknown until creation complete", true);
+        if (calendar.isEditing()) {
+            em.appendField("Calendar ID", calendar.getCalendarId(), true);
+        } else {
+            em.appendField("Calendar ID", "Unknown until creation complete", true);
+        }
 
         em.withFooterText("[R] means required, field needs a value.");
         em.withColor(56, 138, 237);

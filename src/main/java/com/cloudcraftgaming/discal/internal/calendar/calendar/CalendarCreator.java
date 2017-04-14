@@ -1,12 +1,15 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
+import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,16 +44,21 @@ public class CalendarCreator {
      * @param calendarName The name of the calendar to create.
      * @return The PreCalendar object created.
      */
-    public PreCalendar init(MessageReceivedEvent e, String calendarName) {
+    public PreCalendar init(MessageReceivedEvent e, String calendarName, boolean handleCreatorMessage) {
         if (!hasPreCalendar(e.getMessage().getGuild().getID())) {
-            PreCalendar event = new PreCalendar(e.getMessage().getGuild().getID(), calendarName);
-            calendars.add(event);
-            return event;
+            PreCalendar calendar = new PreCalendar(e.getMessage().getGuild().getID(), calendarName);
+
+            if (handleCreatorMessage) {
+                IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", e, Main.client);
+                calendar.setCreatorMessage(msg);
+            }
+            calendars.add(calendar);
+            return calendar;
         }
         return getPreCalendar(e.getMessage().getGuild().getID());
     }
 
-    public PreCalendar edit(MessageReceivedEvent event) {
+    public PreCalendar edit(MessageReceivedEvent event, boolean handleCreatorMessage) {
         String guildId = event.getMessage().getGuild().getID();
         if (!hasPreCalendar(guildId)) {
             //TODO: Support multiple calendars
@@ -64,6 +72,12 @@ public class CalendarCreator {
                 PreCalendar preCalendar = new PreCalendar(guildId, calendar);
                 preCalendar.setEditing(true);
                 preCalendar.setCalendarId(data.getCalendarAddress());
+
+                if (handleCreatorMessage) {
+                    IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initialized!", event, Main.client);
+                    preCalendar.setCreatorMessage(msg);
+                }
+
                 calendars.add(preCalendar);
                 return preCalendar;
             } catch (IOException e) {
@@ -115,10 +129,16 @@ public class CalendarCreator {
                         calendarData.setCalendarAddress(confirmed.getId());
                         DatabaseManager.getManager().updateCalendar(calendarData);
                         terminate(e);
-                        return new CalendarCreatorResponse(true, confirmed);
+                        CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
+                        response.setEdited(false);
+                        response.setCreatorMessage(preCalendar.getCreatorMessage());
+                        return response;
                     } catch (IOException ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to confirm calendar.", ex, this.getClass());
-                        return new CalendarCreatorResponse(false);
+                        CalendarCreatorResponse response = new CalendarCreatorResponse(false);
+                        response.setEdited(false);
+                        response.setCreatorMessage(preCalendar.getCreatorMessage());
+                        return response;
                     }
                 } else {
                     //Editing calendar...
@@ -135,10 +155,16 @@ public class CalendarCreator {
                         rule.setScope(scope).setRole("reader");
                         CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
                         terminate(e);
-                        return new CalendarCreatorResponse(true, confirmed);
+                        CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
+                        response.setEdited(true);
+                        response.setCreatorMessage(preCalendar.getCreatorMessage());
+                        return response;
                     } catch (IOException ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update calendar.", ex, this.getClass());
-                        return new CalendarCreatorResponse(false);
+                        CalendarCreatorResponse response = new CalendarCreatorResponse(false);
+                        response.setEdited(true);
+                        response.setCreatorMessage(preCalendar.getCreatorMessage());
+                        return response;
                     }
                 }
             }

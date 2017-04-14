@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -16,6 +17,8 @@ public class PreCalendar {
 
     private boolean editing;
     private String calendarId;
+
+    private IMessage creatorMessage;
 
     /**
      * Creates a new PreCalendar for the Guild.
@@ -85,6 +88,10 @@ public class PreCalendar {
         return calendarId;
     }
 
+    public IMessage getCreatorMessage() {
+        return creatorMessage;
+    }
+
     //Setters
     /**
      * Sets the summary/name of the calendar.
@@ -116,6 +123,10 @@ public class PreCalendar {
 
     public void setCalendarId(String _id) {
         calendarId = _id;
+    }
+
+    public void setCreatorMessage(IMessage _message) {
+        creatorMessage = _message;
     }
 
     //Booleans/Checkers
