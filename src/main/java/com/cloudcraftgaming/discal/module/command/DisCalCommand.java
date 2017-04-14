@@ -13,6 +13,7 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().add("role");
         info.getSubCommands().add("channel");
         info.getSubCommands().add("simpleAnnouncement");
+        info.getSubCommands().add("dmAnnouncement");
 
         return info;
     }
@@ -90,6 +92,9 @@ public class DisCalCommand implements ICommand {
                     break;
                 case "simpleannouncement":
                     moduleSimpleAnnouncement(event, client);
+                    break;
+                case "dmannouncement":
+                    moduleDmAnnouncements(event, client);
                     break;
                 default:
                     Message.sendMessage("Invalid function! Use `!help discal` for a list of valid functions!", event, client);
@@ -235,5 +240,25 @@ public class DisCalCommand implements ICommand {
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event, client);
+    }
+
+    private void moduleDmAnnouncements(MessageReceivedEvent event, IDiscordClient client) {
+        String guildId = event.getMessage().getGuild().getID();
+        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+        if (settings.isDevGuild()) {
+            IUser user = event.getMessage().getAuthor();
+
+            if (settings.getDmAnnouncements().contains(user.getID())) {
+                settings.getDmAnnouncements().remove(user.getID());
+                DatabaseManager.getManager().updateSettings(settings);
+                Message.sendMessage("You will no longer receive announcement DMs for this guild!", event, client);
+            } else {
+                settings.getDmAnnouncements().add(user.getID());
+                DatabaseManager.getManager().updateSettings(settings);
+                Message.sendMessage("You will now receive DMs for announcements from this guild!", event, client);
+            }
+        } else {
+            Message.sendMessage("This function is disabled for testing purposes!", event, client);
+        }
     }
 }
