@@ -8,6 +8,7 @@ import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.Language;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -88,6 +89,7 @@ public class DatabaseManager {
                     " CONTROL_ROLE LONGTEXT not NULL, " +
                     " DISCAL_CHANNEL LONGTEXT not NULL, " +
                     " SIMPLE_ANNOUNCEMENT BOOLEAN not NULL, " +
+                    " LANG VARCHAR(255) not NULL, " +
                     " PATRON_GUILD BOOLEAN not NULL, " +
                     " DEV_GUILD BOOLEAN not NULL, " +
                     " MAX_CALENDARS INTEGER not NULL, " +
@@ -141,8 +143,8 @@ public class DatabaseManager {
                 if (!hasStuff || res.getString("GUILD_ID") == null) {
                     //Data not present, add to DB.
                     String insertCommand = "INSERT INTO " + dataTableName +
-                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS)" +
-                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                            "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS)" +
+                            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, settings.getGuildID());
                     ps.setBoolean(2, settings.useExternalCalendar());
@@ -152,10 +154,11 @@ public class DatabaseManager {
                     ps.setString(6, settings.getControlRole());
                     ps.setString(7, settings.getDiscalChannel());
                     ps.setBoolean(8, settings.usingSimpleAnnouncements());
-                    ps.setBoolean(9, settings.isPatronGuild());
-                    ps.setBoolean(10, settings.isDevGuild());
-                    ps.setInt(11, settings.getMaxCalendars());
-                    ps.setString(12, settings.getDmAnnouncementsString());
+                    ps.setString(9, settings.getLang().name());
+                    ps.setBoolean(10, settings.isPatronGuild());
+                    ps.setBoolean(11, settings.isDevGuild());
+                    ps.setInt(12, settings.getMaxCalendars());
+                    ps.setString(13, settings.getDmAnnouncementsString());
 
 
                     ps.executeUpdate();
@@ -167,7 +170,7 @@ public class DatabaseManager {
                             + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
                             + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
                             + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
-                            + " PATRON_GUILD = ?, DEV_GUILD = ?,"
+                            + " LANG = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
                             + " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?"
                             + " WHERE GUILD_ID = ?";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
@@ -179,11 +182,12 @@ public class DatabaseManager {
                     ps.setString(5, settings.getControlRole());
                     ps.setString(6, settings.getDiscalChannel());
                     ps.setBoolean(7, settings.usingSimpleAnnouncements());
-                    ps.setBoolean(8, settings.isPatronGuild());
-                    ps.setBoolean(9, settings.isDevGuild());
-                    ps.setInt(10, settings.getMaxCalendars());
-                    ps.setString(11, settings.getDmAnnouncementsString());
-                    ps.setString(12, settings.getGuildID());
+                    ps.setString(8, settings.getLang().name());
+                    ps.setBoolean(9, settings.isPatronGuild());
+                    ps.setBoolean(10, settings.isDevGuild());
+                    ps.setInt(11, settings.getMaxCalendars());
+                    ps.setString(12, settings.getDmAnnouncementsString());
+                    ps.setString(13, settings.getGuildID());
 
                     ps.executeUpdate();
 
@@ -341,6 +345,7 @@ public class DatabaseManager {
                     settings.setControlRole(res.getString("CONTROL_ROLE"));
                     settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
                     settings.setSimpleAnnouncements(res.getBoolean("SIMPLE_ANNOUNCEMENT"));
+                    settings.setLang(Language.valueOf(res.getString("LANG")));
                     settings.setPatronGuild(res.getBoolean("PATRON_GUILD"));
                     settings.setDevGuild(res.getBoolean("DEV_GUILD"));
                     settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
