@@ -27,14 +27,15 @@ public class Message {
      * @param event The Event received (to send to the same channel and guild).
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(String message, MessageReceivedEvent event, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(String message, MessageReceivedEvent event, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     /**
@@ -43,14 +44,15 @@ public class Message {
      * @param channel The channel to send the message to.
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(String message, IChannel channel, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(String message, IChannel channel, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).appendContent(message).withChannel(channel).build();
+                return new MessageBuilder(client).appendContent(message).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     /**
@@ -59,14 +61,16 @@ public class Message {
      * @param event The event received (to send to the same channel and guild).
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(EmbedObject embed, MessageReceivedEvent event, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(EmbedObject embed, MessageReceivedEvent event, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
+
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     /**
@@ -75,14 +79,15 @@ public class Message {
      * @param channel The channel to send the message to.
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(EmbedObject embed, IChannel channel, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(EmbedObject embed, IChannel channel, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).withEmbed(embed).withChannel(channel).build();
+                return new MessageBuilder(client).withEmbed(embed).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     /**
@@ -92,14 +97,15 @@ public class Message {
      * @param event The event received (to send to the same channel and guild).
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(EmbedObject embed, String message, MessageReceivedEvent event, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(EmbedObject embed, String message, MessageReceivedEvent event, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     /**
@@ -109,14 +115,15 @@ public class Message {
      * @param channel The channel to send the message to.
      * @param client The Client associated with the Bot.
      */
-    public static void sendMessage(EmbedObject embed, String message, IChannel channel, IDiscordClient client) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendMessage(EmbedObject embed, String message, IChannel channel, IDiscordClient client) {
+        return RequestBuffer.request(() -> {
             try {
-                new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();
+                return new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+                return null;
             }
-        });
+        }).get();
     }
 
     public static void sendDirectMessage(String message, IUser user) {
@@ -178,6 +185,36 @@ public class Message {
                //Failed to delete.
                return false;
            }
+        });
+        return false;
+    }
+
+    public static boolean editMessage(IMessage message, String content) {
+        RequestBuffer.request(() -> {
+            try {
+                if (!message.isDeleted()) {
+                    message.edit(content);
+                }
+                return true;
+            } catch (DiscordException | MissingPermissionsException e) {
+                //Failed to edit.
+                return false;
+            }
+        });
+        return false;
+    }
+
+    public static boolean editMessage(IMessage message, String content, EmbedObject embed) {
+        RequestBuffer.request(() -> {
+            try {
+                if (!message.isDeleted()) {
+                    message.edit(content, embed);
+                }
+                return true;
+            } catch (DiscordException | MissingPermissionsException e) {
+                //Failed to edit.
+                return false;
+            }
         });
         return false;
     }
