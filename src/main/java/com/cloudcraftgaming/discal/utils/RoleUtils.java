@@ -49,7 +49,7 @@ public class RoleUtils {
         }
     }
 
-    private String getRole(String toLookFor, IMessage m) {
+    public static String getRole(String toLookFor, IMessage m) {
         toLookFor = toLookFor.trim();
         final String lower = toLookFor.toLowerCase();
         String res = "";
