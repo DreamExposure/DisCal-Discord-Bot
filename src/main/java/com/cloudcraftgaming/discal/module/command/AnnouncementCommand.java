@@ -158,6 +158,20 @@ public class AnnouncementCommand implements ICommand {
 							Message.sendMessage("This option is disabled for testing only!", event, client);
 						}
 						break;
+					case "devsub":
+						if (settings.isDevGuild()) {
+							moduleSubscribeRewrite(args, event, client);
+						} else {
+							Message.sendMessage("This option is disabled for testing only!", event, client);
+						}
+						break;
+					case "devunsub":
+						if (settings.isDevGuild()) {
+							moduleUnsubscribeRewrite(args, event, client);
+						} else {
+							Message.sendMessage("This option is disabled for testing only!", event, client);
+						}
+						break;
 					default:
 						Message.sendMessage("Invalid sub command! Use `!help announcement` to view valid sub commands!", event, client);
 						break;
@@ -353,9 +367,6 @@ public class AnnouncementCommand implements ICommand {
 	}
 
 	private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {
-		if (!DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).isDevGuild()) {
-			return;
-		}
 		IMessage message = event.getMessage();
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
@@ -452,6 +463,112 @@ public class AnnouncementCommand implements ICommand {
 				}
 				em.withAuthorName("Announcement Subscribe");
 				em.withDesc("Users subscribed: " + subscribedUsers + "\nRoles subscribed: " + subscribedRoles);
+				em.withFooterText("Announcement ID: " + announcementId);
+				Message.sendMessage(em.build(), event, client);
+			} else {
+				Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+			}
+		}
+
+	}
+
+	private void moduleUnsubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+		if (!DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).isDevGuild()) {
+			return;
+		}
+		IMessage message = event.getMessage();
+		IGuild guild = message.getGuild();
+		IUser user = message.getAuthor();
+		if (args.length == 1) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
+				UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId();
+				Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guild.getID());
+				String senderId = user.getID();
+				if (a.getSubscriberUserIds().contains(senderId)) {
+					a.getSubscriberUserIds().remove(senderId);
+					DatabaseManager.getManager().updateAnnouncement(a);
+					Message.sendMessage("You have unsubscribed from the announcement with the ID: `" + announcementId.toString() + "`" + Message.lineBreak + "To subscribe use `!announcement subsribe <id>`", event, client);
+				} else { // Announcement contains user ID
+					Message.sendMessage("You are not subscribed to that event!", event, client);
+				}
+			} else { // User not creating an announcement
+				Message.sendMessage("Please specify the ID of the announcement you wish to unsubscribe from!", event, client);
+			}
+		} else if (args.length == 2) {
+			String value = args[1];
+			if (AnnouncementUtils.announcementExists(value, event)) {
+				String senderId = user.getID();
+				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guild.getID());
+				if (a.getSubscriberUserIds().contains(senderId)) {
+					a.getSubscriberUserIds().remove(senderId);
+					DatabaseManager.getManager().updateAnnouncement(a);
+					Message.sendMessage("You have unsubscribed from the announcement with the ID: `" + value + "`" + Message.lineBreak + "To subscribe use `!announcement unsubscribe <id>`", event, client);
+				} else {
+					Message.sendMessage("You are already unsubscribed to that event!", event, client);
+				}
+			} else {
+				Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+			}
+		} else {
+			List<String> subscribedUsers = new ArrayList<>();
+			List<String> subscribedRoles = new ArrayList<>();
+
+			String announcementId = "";
+			int start = 1;
+			if (args[1].length() > 32) {
+				announcementId = args[1];
+			} else {
+				if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
+					announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId().toString();
+					start++;
+				} else {
+					Message.sendMessage("You must specify an announcement ID as your first argument!", event, client);
+					return;
+				}
+			}
+
+			if (AnnouncementUtils.announcementExists(announcementId, event)) {
+				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guild.getID());
+				for (int i = start; i < args.length; i++) {
+					IUser u = guild.getUserByID(UserUtils.getUser(args[i], message));
+					IRole r = guild.getRoleByID(RoleUtils.getRole(args[i], message));
+					if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
+						//Here or everyone is to be subscribed...
+						String men = args[i].toLowerCase();
+						if (a.getSubscriberRoleIds().contains(men)) {
+							a.getSubscriberRoleIds().remove(men);
+							DatabaseManager.getManager().updateAnnouncement(a);
+							subscribedUsers.add(men);
+						}
+					} else {
+						if (u != null) {
+							if (a.getSubscriberUserIds().contains(user.getID())) {
+								String username = user.getDisplayName(event.getMessage().getGuild());
+								a.getSubscriberUserIds().remove(user.getID());
+								DatabaseManager.getManager().updateAnnouncement(a);
+								subscribedUsers.add(username);
+							}
+						} else if (r != null) {
+							if (a.getSubscriberRoleIds().contains(r.getID())) {
+								String roleName = r.getName();
+								a.getSubscriberRoleIds().remove(r.getID());
+								DatabaseManager.getManager().updateAnnouncement(a);
+								subscribedRoles.add(roleName);
+							}
+						}
+
+
+					}
+				}
+
+				EmbedBuilder em = new EmbedBuilder();
+				try {
+					em.withAuthorIcon(client.getApplicationIconURL());
+				} catch (DiscordException ex) {
+					ExceptionHandler.sendException(user, "Client author icon failed on unsubscribing members", ex, ex.getClass());
+				}
+				em.withAuthorName("Announcement Subscribe");
+				em.withDesc("Users unsubscribed: " + subscribedUsers + "\nRoles unsubscribed: " + subscribedRoles);
 				em.withFooterText("Announcement ID: " + announcementId);
 				Message.sendMessage(em.build(), event, client);
 			} else {
