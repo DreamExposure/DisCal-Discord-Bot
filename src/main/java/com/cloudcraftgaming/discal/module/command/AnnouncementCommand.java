@@ -7,12 +7,14 @@ import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -476,12 +478,18 @@ public class AnnouncementCommand implements ICommand {
 		IMessage message = event.getMessage();
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
+		IChannel debug = guild.getChannelByID("267685015016570880");
+		Message.sendMessage(debugEmbed("Args: " + Arrays.toString(args)), event, client);
+
 		if (args.length == 1) {
+			Message.sendMessage(debugEmbed("Args.length == 1"), event, client);
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
+				Message.sendMessage(debugEmbed("Announcement being created."), event, client);
 				UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId();
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(guild.getID());
 				String senderId = user.getID();
 				if (a.getSubscriberUserIds().contains(senderId)) {
+					Message.sendMessage(debugEmbed("User in announcement"), event, client);
 					a.getSubscriberUserIds().remove(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage("You have unsubscribed from the announcement with the ID: `" + announcementId.toString() + "`" + Message.lineBreak + "To subscribe use `!announcement subsribe <id>`", event, client);
@@ -489,14 +497,17 @@ public class AnnouncementCommand implements ICommand {
 					Message.sendMessage("You are not subscribed to that event!", event, client);
 				}
 			} else { // User not creating an announcement
+				Message.sendMessage(debugEmbed("Announcement not being created."), event, client);
 				Message.sendMessage("Please specify the ID of the announcement you wish to unsubscribe from!", event, client);
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementUtils.announcementExists(value, event)) {
+				Message.sendMessage(debugEmbed("Valid UID."), event, client);
 				String senderId = user.getID();
 				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guild.getID());
 				if (a.getSubscriberUserIds().contains(senderId)) {
+					Message.sendMessage(debugEmbed("User subscribed"), event, client);
 					a.getSubscriberUserIds().remove(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage("You have unsubscribed from the announcement with the ID: `" + value + "`" + Message.lineBreak + "To subscribe use `!announcement unsubscribe <id>`", event, client);
@@ -504,6 +515,7 @@ public class AnnouncementCommand implements ICommand {
 					Message.sendMessage("You are already unsubscribed to that event!", event, client);
 				}
 			} else {
+				Message.sendMessage(debugEmbed("Invalid UID."), event, client);
 				Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
 			}
 		} else {
@@ -514,9 +526,11 @@ public class AnnouncementCommand implements ICommand {
 			int start = 1;
 			if (args[1].length() > 32) {
 				announcementId = args[1];
+				Message.sendMessage(debugEmbed("Args[1].legth = " + args[1].length() + "\nArgs[1] = " + args[1]), event, client);
 			} else {
 				if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
 					announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId().toString();
+					Message.sendMessage(debugEmbed("Announcement being created"), event, client);
 					start++;
 				} else {
 					Message.sendMessage("You must specify an announcement ID as your first argument!", event, client);
@@ -525,12 +539,17 @@ public class AnnouncementCommand implements ICommand {
 			}
 
 			if (AnnouncementUtils.announcementExists(announcementId, event)) {
+				Message.sendMessage(debugEmbed("Announcement exists."), event, client);
 				Announcement a = start == 1 ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guild.getID()) : AnnouncementCreator.getCreator().getAnnouncement(guild.getID());
+				Message.sendMessage(debugEmbed("Args at point of subscribing multiple users: " + Arrays.toString(args)), event, client);
 				for (int i = start; i < args.length; i++) {
+					Message.sendMessage(debugEmbed("ARGS[I]: " + args[i]), event, client);
 					IUser u = guild.getUserByID(UserUtils.getUser(args[i], message));
 					IRole r = guild.getRoleByID(RoleUtils.getRole(args[i], message));
+					Message.sendMessage(debugEmbed("u == null: " + (u == null) + "\n\nr == null: " + (r == null)), event, client);
 					if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
 						//Here or everyone is to be subscribed...
+						Message.sendMessage(debugEmbed("args[i] = " + args[i]), event, client);
 						String men = args[i].toLowerCase();
 						if (a.getSubscriberRoleIds().contains(men)) {
 							a.getSubscriberRoleIds().remove(men);
@@ -539,6 +558,7 @@ public class AnnouncementCommand implements ICommand {
 						}
 					} else {
 						if (u != null) {
+							Message.sendMessage(debugEmbed("u is not null"), event, client);
 							if (a.getSubscriberUserIds().contains(user.getID())) {
 								String username = user.getDisplayName(event.getMessage().getGuild());
 								a.getSubscriberUserIds().remove(user.getID());
@@ -546,6 +566,7 @@ public class AnnouncementCommand implements ICommand {
 								subscribedUsers.add(username);
 							}
 						} else if (r != null) {
+							Message.sendMessage(debugEmbed("r is not null"), event, client);
 							if (a.getSubscriberRoleIds().contains(r.getID())) {
 								String roleName = r.getName();
 								a.getSubscriberRoleIds().remove(r.getID());
@@ -573,6 +594,10 @@ public class AnnouncementCommand implements ICommand {
 			}
 		}
 
+	}
+
+	private EmbedObject debugEmbed(String str) {
+		return new EmbedBuilder().withAuthorName("DEBUG EMBED").withDesc(str).build();
 	}
 
 	private void moduleUnsubscribe(String[] args, MessageReceivedEvent event, IDiscordClient client) {
