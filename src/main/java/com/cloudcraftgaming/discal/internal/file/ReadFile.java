@@ -50,13 +50,6 @@ public class ReadFile {
                 if (line == 6) {
                     settings.setDbPass(strLine);
                 }
-                if (line == 7) {
-                    settings.setEmailUser(strLine);
-                }
-                if (line == 8) {
-                    settings.setEmailPass(strLine);
-                }
-
                 if (line == 9) {
                     settings.setBotsPwToken(strLine);
                 }
@@ -86,6 +79,7 @@ public class ReadFile {
         switch (lang) {
             default:
                 file = new File(ReadFile.class.getResource("/folder/ENGLISH.json").toURI());
+                break;
         }
         FileReader fr = new FileReader(file);
         Map<String, String> map = Main.gson.fromJson(fr, HashMap.class);

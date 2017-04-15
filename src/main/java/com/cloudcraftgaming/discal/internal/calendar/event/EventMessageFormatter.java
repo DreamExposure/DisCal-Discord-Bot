@@ -197,58 +197,6 @@ public class EventMessageFormatter {
     }
 
     /**
-     * Gets a formatted time from the event.
-     * @param event The event to get the time from.
-     * @param start Whether or not to get the start time.
-     * @return A formatted time from the event.
-     */
-    private static String getHumanReadableTime(Event event, boolean start) {
-        if (start) {
-            String[] timeArray = event.getStart().getDateTime().toStringRfc3339().split(":");
-            String suffix = "";
-            String hour = timeArray[0].substring(11, 13);
-
-            //Convert hour from 24 to 12...
-            try {
-                Integer hRaw = Integer.valueOf(hour);
-                if (hRaw > 12) {
-                    hour = String.valueOf(hRaw - 12);
-                    suffix = "PM";
-                } else {
-                    suffix = "AM";
-                }
-            } catch (NumberFormatException e) {
-                //I Dunno... just should catch the error now and not crash anything...
-            }
-
-            String minute = timeArray[1];
-
-            return hour + ":" + minute + suffix;
-        } else {
-            String[] timeArray = event.getEnd().getDateTime().toStringRfc3339().split(":");
-            String suffix = "";
-            String hour = timeArray[0].substring(11, 13);
-
-            //Convert hour from 24 to 12...
-            try {
-                Integer hRaw = Integer.valueOf(hour);
-                if (hRaw > 12) {
-                    hour = String.valueOf(hRaw - 12);
-                    suffix = "PM";
-                } else {
-                    suffix = "AM";
-                }
-            } catch (NumberFormatException e) {
-                //I Dunno... just should catch the error now and not crash anything...
-            }
-
-            String minute = timeArray[1];
-
-            return hour + ":" + minute + suffix;
-        }
-    }
-
-    /**
      * Gets a formatted time.
      * @param eventDateTime The object to get the time from.
      * @return A formatted time.

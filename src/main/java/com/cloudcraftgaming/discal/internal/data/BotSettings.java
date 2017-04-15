@@ -15,9 +15,6 @@ public class BotSettings {
     private String dbUser;
     private String dbPass;
 
-    private String emailUser;
-    private String emailPass;
-
     private String botsPwToken;
 
     private String googleClientId;
@@ -52,14 +49,6 @@ public class BotSettings {
 
     public String getDbPass() {
         return dbPass;
-    }
-
-    public String getEmailUser() {
-        return emailUser;
-    }
-
-    public String getEmailPass() {
-        return emailPass;
     }
 
     public String getBotsPwToken() {
@@ -105,14 +94,6 @@ public class BotSettings {
 
     public void setDbPass(String _pass) {
         dbPass = _pass;
-    }
-
-    public void setEmailUser(String _user) {
-        emailUser = _user;
-    }
-
-    public void setEmailPass(String _pass) {
-        emailPass = _pass;
     }
 
     public void setBotsPwToken(String _token) {
