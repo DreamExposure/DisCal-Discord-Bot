@@ -115,9 +115,9 @@ public class DisCalCommand implements ICommand {
         em.appendField("Version", Main.version, true);
         em.appendField("Library", "Discord4J, version 2.7.0", false);
         em.appendField("Total Guilds", client.getGuilds().size() + "", true);
-        em.appendField("Current Ping [Shard " + guild.getShard().getInfo()[0] + "]", guild.getShard().getResponseTime() + "ms", true);
         em.appendField("Total Calendars", DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField("Total Announcements", DatabaseManager.getManager().getAnnouncementCount() + "", true);
+		em.appendField("Current Ping [Shard " + guild.getShard().getInfo()[0] + "]", guild.getShard().getResponseTime() + "ms", false);
         em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
