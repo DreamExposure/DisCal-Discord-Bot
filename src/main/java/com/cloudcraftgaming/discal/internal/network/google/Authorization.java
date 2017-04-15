@@ -91,13 +91,12 @@ public class Authorization {
         }
     }
 
-    public String requestNewAccessToken(GuildSettings settings) {
+    public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
         HttpClient httpClient = HttpClientBuilder.create().build();
 
         try {
             HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
 
-            AESEncryption encryption = new AESEncryption(settings);
             AuthRefreshRequest arr = new AuthRefreshRequest();
             arr.client_id = clientData.getClientId();
             arr.client_secret = clientData.getClientSecret();

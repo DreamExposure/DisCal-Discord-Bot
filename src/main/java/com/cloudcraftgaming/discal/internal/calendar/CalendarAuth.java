@@ -1,10 +1,14 @@
 package com.cloudcraftgaming.discal.internal.calendar;
 
+import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -69,6 +73,21 @@ public class CalendarAuth {
         return credential;
     }
 
+    private static Credential authorize(GuildSettings g) throws Exception {
+		if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a")) {
+			throw new IllegalAccessException("Guild does not have proper access token!");
+		}
+
+		AESEncryption encryption = new AESEncryption(g);
+		String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
+
+		GoogleCredential credential = new GoogleCredential();
+		credential.setAccessToken(accessToken);
+		credential.setRefreshToken(encryption.decrypt(g.getEncryptedRefreshToken()));
+
+		return credential;
+	}
+
     /**
      * Build and return an authorized Calendar client service.
      * @return an authorized Calendar client service
@@ -79,4 +98,10 @@ public class CalendarAuth {
         Credential credential = authorize();
         return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
     }
+
+    public static com.google.api.services.calendar.Calendar getCalendarService(GuildSettings g) throws Exception {
+    	Credential credential = authorize(g);
+
+    	return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+	}
 }
