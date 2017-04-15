@@ -8,9 +8,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -359,7 +357,43 @@ public class AnnouncementCommand implements ICommand {
         }
     }
 
-    private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {}
+    private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        IMessage message = event.getMessage();
+        IGuild guild = message.getGuild();
+        IUser user = message.getAuthor();
+        if (args.length == 1) {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
+                UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId();
+                Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guild.getID());
+                String senderId = user.getID();
+                if (!a.getSubscriberUserIds().contains(senderId)) {
+                    a.getSubscriberUserIds().add(senderId);
+                    DatabaseManager.getManager().updateAnnouncement(a);
+                    Message.sendMessage("You have subscribed to the announcement with the ID: `" + announcementId.toString() + "`" + Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event, client);
+                } else { // Announcement contains user ID
+                    Message.sendMessage("You are already subscribed to that event!", event, client);
+                }
+            } else { // User not creating an announcement
+                Message.sendMessage("Please specify the ID of the announcement you wish to subscribe to!", event, client);
+            }
+        } else if (args.length == 2) {
+            String value = args[1];
+            if (AnnouncementUtils.announcementExists(value, event)) {
+                String senderId = user.getID();
+                Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guild.getID());
+                if (!a.getSubscriberUserIds().contains(senderId)) {
+                    a.getSubscriberUserIds().add(senderId);
+                    DatabaseManager.getManager().updateAnnouncement(a);
+                    Message.sendMessage("You have subscribed to the announcement with the ID: `" + value + "`" + Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event, client);
+                } else {
+                    Message.sendMessage("You are already subscribed to that event!", event, client);
+                }
+            } else {
+                Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+            }
+        }
+
+    }
 
     private void moduleUnsubscribe(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
