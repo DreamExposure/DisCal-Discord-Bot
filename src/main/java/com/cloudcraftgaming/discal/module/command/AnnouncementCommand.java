@@ -23,6 +23,7 @@ import java.util.UUID;
 public class AnnouncementCommand implements ICommand {
     /**
      * Gets the command this Object is responsible for.
+     *
      * @return The command this Object is responsible for.
      */
     @Override
@@ -55,7 +56,7 @@ public class AnnouncementCommand implements ICommand {
      * @return The command info.
      */
     @Override
-    public CommandInfo getCommandInfo()  {
+    public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo("announcement");
         info.setDescription("Used for all announcement functions.");
         info.setExample("!announcement <function> (value(s))");
@@ -82,8 +83,9 @@ public class AnnouncementCommand implements ICommand {
 
     /**
      * Issues the command this Object is responsible for.
-     * @param args The command arguments.
-     * @param event The event received.
+     *
+     * @param args   The command arguments.
+     * @param event  The event received.
      * @param client The Client associated with the Bot.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
@@ -310,7 +312,7 @@ public class AnnouncementCommand implements ICommand {
             String value2 = args[2];
             if (AnnouncementUtils.announcementExists(value1, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                IUser user = UserUtils.getUserFromMention(value2, event);
+                IUser user = event.getMessage().getGuild().getUserByID(UserUtils.getUser(value2, event.getMessage()));
                 if (user != null) {
                     //Valid user, let's add that user to the announcement.
                     if (!a.getSubscriberUserIds().contains(user.getID())) {
@@ -356,6 +358,8 @@ public class AnnouncementCommand implements ICommand {
             Message.sendMessage("Please use `!announcement subscribe <ID>` or `!announcement subscribe <ID> <user mention/role mention/here/everyone>`", event, client);
         }
     }
+
+    private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {}
 
     private void moduleUnsubscribe(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
@@ -512,7 +516,7 @@ public class AnnouncementCommand implements ICommand {
             if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 if (value.equalsIgnoreCase("all")) {
                     ArrayList<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(guildId);
-                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info." + Message.lineBreak + "`" + announcements.size() + "`"  + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
+                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info." + Message.lineBreak + "`" + announcements.size() + "`" + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
                     //Loop and add embeds
                     for (Announcement a : announcements) {
                         Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
@@ -580,7 +584,7 @@ public class AnnouncementCommand implements ICommand {
         }
     }
 
-    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client)   {
+    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
         if (args.length < 2) {
             Message.sendMessage("Please use `!announcement info <your info here>`", event, client);
