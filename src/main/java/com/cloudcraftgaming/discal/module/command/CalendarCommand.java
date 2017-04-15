@@ -11,6 +11,7 @@ import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.cloudcraftgaming.discal.utils.TimeZoneUtils;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.ArrayList;
@@ -168,8 +169,9 @@ public class CalendarCommand implements ICommand {
     private void moduleCancel(MessageReceivedEvent event, IDiscordClient client, CalendarData calendarData) {
         String guildId = event.getMessage().getGuild().getID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
+        	IMessage message = CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage();
             if (CalendarCreator.getCreator().terminate(event)) {
-                Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Calendar creation cancelled! Calendar creator terminated!");
+                Message.editMessage(message, "Calendar creation cancelled! Calendar creator terminated!");
                 Message.deleteMessage(event);
             } else {
                 Message.sendMessage("Failed to cancel calendar creation!", event, client);
