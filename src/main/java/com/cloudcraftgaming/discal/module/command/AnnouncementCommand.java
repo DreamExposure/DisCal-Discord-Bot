@@ -109,20 +109,14 @@ public class AnnouncementCommand implements ICommand {
                         moduleDelete(args, event, client);
                         break;
                     case "view":
-                        moduleView(args, event, client);
-                        break;
                     case "review":
                         moduleView(args, event, client);
                         break;
                     case "subscribe":
-                        moduleSubscribe(args, event, client);
-                        break;
                     case "sub":
                         moduleSubscribe(args, event, client);
                         break;
                     case "unsubscribe":
-                        moduleUnsubscribe(args, event, client);
-                        break;
                     case "unsub":
                         moduleUnsubscribe(args, event, client);
                         break;
@@ -148,8 +142,6 @@ public class AnnouncementCommand implements ICommand {
                         moduleChannel(args, event, client);
                         break;
                     case "color":
-                        moduleColor(args, event, client);
-                        break;
                     case "colour":
                         moduleColor(args, event, client);
                         break;
@@ -358,6 +350,9 @@ public class AnnouncementCommand implements ICommand {
     }
 
     private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        if (!DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).isDevGuild()) {
+            return;
+        }
         IMessage message = event.getMessage();
         IGuild guild = message.getGuild();
         IUser user = message.getAuthor();
@@ -391,6 +386,8 @@ public class AnnouncementCommand implements ICommand {
             } else {
                 Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
             }
+        } else {
+
         }
 
     }
