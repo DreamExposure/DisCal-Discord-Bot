@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
+import com.cloudcraftgaming.discal.Main;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -126,41 +127,45 @@ public class Message {
         }).get();
     }
 
-    public static void sendDirectMessage(String message, IUser user) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendDirectMessage(String message, IUser user) {
+        return RequestBuffer.request(() -> {
            try {
                IPrivateChannel pc = user.getOrCreatePMChannel();
                pc.sendMessage(message);
+               return new MessageBuilder(Main.client).withChannel(pc).appendContent(message).build();
            } catch (DiscordException | MissingPermissionsException e) {
                //Failed to send message.
+			   return null;
            }
-        });
+        }).get();
     }
 
-    public static void sendDirectMessage(EmbedObject embed, IUser user) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendDirectMessage(EmbedObject embed, IUser user) {
+        return RequestBuffer.request(() -> {
             try {
                 IPrivateChannel pc = user.getOrCreatePMChannel();
-                pc.sendMessage("", embed, false);
+                return new MessageBuilder(Main.client).withChannel(pc).withEmbed(embed).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+				return null;
             }
-        });
+        }).get();
     }
 
-    public static void sendDirectMessage(String message, EmbedObject embed, IUser user) {
-        RequestBuffer.request(() -> {
+    public static IMessage sendDirectMessage(String message, EmbedObject embed, IUser user) {
+        return RequestBuffer.request(() -> {
             try {
                 IPrivateChannel pc = user.getOrCreatePMChannel();
-                pc.sendMessage(message, embed, false);
+                return new MessageBuilder(Main.client).withChannel(pc).appendContent(message).withEmbed(embed).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
+				return null;
             }
-        });
+        }).get();
     }
 
     public static boolean deleteMessage(MessageReceivedEvent event) {
-        RequestBuffer.request(() -> {
+        return RequestBuffer.request(() -> {
             try {
                 if (!event.getMessage().isDeleted()) {
                     event.getMessage().delete();
@@ -170,12 +175,11 @@ public class Message {
                 //Failed to delete
                 return false;
             }
-        });
-        return false;
+        }).get();
     }
 
     public static boolean deleteMessage(IMessage message) {
-        RequestBuffer.request(() -> {
+        return RequestBuffer.request(() -> {
            try {
                if (!message.isDeleted()) {
                    message.delete();
@@ -185,12 +189,11 @@ public class Message {
                //Failed to delete.
                return false;
            }
-        });
-        return false;
+        }).get();
     }
 
     public static boolean editMessage(IMessage message, String content) {
-        RequestBuffer.request(() -> {
+        return RequestBuffer.request(() -> {
             try {
                 if (!message.isDeleted()) {
                     message.edit(content);
@@ -200,12 +203,11 @@ public class Message {
                 //Failed to edit.
                 return false;
             }
-        });
-        return false;
+        }).get();
     }
 
     public static boolean editMessage(IMessage message, String content, EmbedObject embed) {
-        RequestBuffer.request(() -> {
+        return RequestBuffer.request(() -> {
             try {
                 if (!message.isDeleted()) {
                     message.edit(content, embed);
@@ -215,7 +217,6 @@ public class Message {
                 //Failed to edit.
                 return false;
             }
-        });
-        return false;
+        }).get();
     }
 }
