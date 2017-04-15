@@ -1,11 +1,13 @@
 package com.cloudcraftgaming.discal.internal.file;
 
+import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
+import com.cloudcraftgaming.discal.utils.Language;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Nova Fox on 1/2/2017.
@@ -26,7 +28,7 @@ public class ReadFile {
             //Read File Line By Line
 
             int line = 0;
-            while ((strLine = br.readLine()) != null)   {
+            while ((strLine = br.readLine()) != null) {
                 if (line == 0) {
                     settings.setBotToken(strLine);
                 }
@@ -72,9 +74,22 @@ public class ReadFile {
             }
             //Close the input stream
             in.close();
-        }catch (Exception e){//Catch exception if any
+        } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
         return settings;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> readLangFile(Language lang) throws IOException, URISyntaxException {
+        File file;
+        switch (lang) {
+            default:
+                file = new File(ReadFile.class.getResource("/folder/ENGLISH.json").toURI());
+        }
+        FileReader fr = new FileReader(file);
+        Map<String, String> map = Main.gson.fromJson(fr, HashMap.class);
+        fr.close();
+        return map;
     }
 }

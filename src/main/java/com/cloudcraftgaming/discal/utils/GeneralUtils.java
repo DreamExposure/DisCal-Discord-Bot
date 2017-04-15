@@ -9,7 +9,8 @@ package com.cloudcraftgaming.discal.utils;
 public class GeneralUtils {
     /**
      * Gets the contents of the message at a set offset.
-     * @param args The args of the command.
+     *
+     * @param args   The args of the command.
      * @param offset The offset in the string.
      * @return The contents of the message at a set offset.
      */
@@ -19,5 +20,23 @@ public class GeneralUtils {
             content.append(args[i]).append(" ");
         }
         return content.toString().trim();
+    }
+
+    /**
+     * Combines the arguments of a String array
+     *
+     * @param args  The string array
+     * @param start What index to start at
+     * @return The combines arguments
+     */
+    public static String combineArgs(String[] args, int start) {
+        if (start >= args.length)
+            throw new IllegalArgumentException("You can not start at an index that doesn't exit!");
+
+        String res = "";
+        for (int i = start; i < args.length; i++) {
+            res += args[i] + " ";
+        }
+        return res;
     }
 }
