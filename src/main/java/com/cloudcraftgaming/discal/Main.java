@@ -9,6 +9,8 @@ import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.command.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -25,6 +27,7 @@ public class Main {
     public static String version = "Beta 2.3.0";
     public static IDiscordClient client;
     public static BotSettings botSettings;
+    public static Gson gson;
 
     public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
@@ -65,10 +68,14 @@ public class Main {
 
         //Accept commands
         ConsoleCommandExecutor.init();
+
+        // Make Gson
+        gson = new GsonBuilder().setPrettyPrinting().create();
     }
 
     /**
      * Creates the DisCal bot client.
+     *
      * @param token The Bot Token.
      * @param login Whether or not to login.
      * @return The client if successful, otherwise <code>null</code>.
@@ -90,6 +97,7 @@ public class Main {
 
     /**
      * Gets The {@link IUser} Object of DisCal.
+     *
      * @return The {@link IUser} Object of DisCal.
      */
     public static IUser getSelfUser() {

@@ -8,9 +8,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -23,6 +21,7 @@ import java.util.UUID;
 public class AnnouncementCommand implements ICommand {
     /**
      * Gets the command this Object is responsible for.
+     *
      * @return The command this Object is responsible for.
      */
     @Override
@@ -55,7 +54,7 @@ public class AnnouncementCommand implements ICommand {
      * @return The command info.
      */
     @Override
-    public CommandInfo getCommandInfo()  {
+    public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo("announcement");
         info.setDescription("Used for all announcement functions.");
         info.setExample("!announcement <function> (value(s))");
@@ -82,8 +81,9 @@ public class AnnouncementCommand implements ICommand {
 
     /**
      * Issues the command this Object is responsible for.
-     * @param args The command arguments.
-     * @param event The event received.
+     *
+     * @param args   The command arguments.
+     * @param event  The event received.
      * @param client The Client associated with the Bot.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
@@ -310,7 +310,7 @@ public class AnnouncementCommand implements ICommand {
             String value2 = args[2];
             if (AnnouncementUtils.announcementExists(value1, event)) {
                 Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value1), guildId);
-                IUser user = UserUtils.getUserFromMention(value2, event);
+                IUser user = event.getMessage().getGuild().getUserByID(UserUtils.getUser(value2, event.getMessage()));
                 if (user != null) {
                     //Valid user, let's add that user to the announcement.
                     if (!a.getSubscriberUserIds().contains(user.getID())) {
@@ -355,6 +355,44 @@ public class AnnouncementCommand implements ICommand {
         } else {
             Message.sendMessage("Please use `!announcement subscribe <ID>` or `!announcement subscribe <ID> <user mention/role mention/here/everyone>`", event, client);
         }
+    }
+
+    private void moduleSubscribeRewrite(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+        IMessage message = event.getMessage();
+        IGuild guild = message.getGuild();
+        IUser user = message.getAuthor();
+        if (args.length == 1) {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getID())) {
+                UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getID()).getAnnouncementId();
+                Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guild.getID());
+                String senderId = user.getID();
+                if (!a.getSubscriberUserIds().contains(senderId)) {
+                    a.getSubscriberUserIds().add(senderId);
+                    DatabaseManager.getManager().updateAnnouncement(a);
+                    Message.sendMessage("You have subscribed to the announcement with the ID: `" + announcementId.toString() + "`" + Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event, client);
+                } else { // Announcement contains user ID
+                    Message.sendMessage("You are already subscribed to that event!", event, client);
+                }
+            } else { // User not creating an announcement
+                Message.sendMessage("Please specify the ID of the announcement you wish to subscribe to!", event, client);
+            }
+        } else if (args.length == 2) {
+            String value = args[1];
+            if (AnnouncementUtils.announcementExists(value, event)) {
+                String senderId = user.getID();
+                Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guild.getID());
+                if (!a.getSubscriberUserIds().contains(senderId)) {
+                    a.getSubscriberUserIds().add(senderId);
+                    DatabaseManager.getManager().updateAnnouncement(a);
+                    Message.sendMessage("You have subscribed to the announcement with the ID: `" + value + "`" + Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event, client);
+                } else {
+                    Message.sendMessage("You are already subscribed to that event!", event, client);
+                }
+            } else {
+                Message.sendMessage("Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?", event, client);
+            }
+        }
+
     }
 
     private void moduleUnsubscribe(String[] args, MessageReceivedEvent event, IDiscordClient client) {
@@ -512,7 +550,7 @@ public class AnnouncementCommand implements ICommand {
             if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
                 if (value.equalsIgnoreCase("all")) {
                     ArrayList<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(guildId);
-                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info." + Message.lineBreak + "`" + announcements.size() + "`"  + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
+                    Message.sendMessage("All announcements, use `!announcement view <id>` for more info." + Message.lineBreak + "`" + announcements.size() + "`" + Message.lineBreak + Message.lineBreak + "Please note that this list may be delayed due to rate limiting...", event, client);
                     //Loop and add embeds
                     for (Announcement a : announcements) {
                         Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event, client);
@@ -580,7 +618,7 @@ public class AnnouncementCommand implements ICommand {
         }
     }
 
-    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client)   {
+    private void moduleInfo(String[] args, MessageReceivedEvent event, IDiscordClient client) {
         String guildId = event.getMessage().getGuild().getID();
         if (args.length < 2) {
             Message.sendMessage("Please use `!announcement info <your info here>`", event, client);

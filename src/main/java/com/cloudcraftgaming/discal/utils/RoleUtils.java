@@ -1,7 +1,11 @@
 package com.cloudcraftgaming.discal.utils;
 
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -43,5 +47,24 @@ public class RoleUtils {
         } else {
             return "ERROR";
         }
+    }
+
+    private String getRole(String toLookFor, IMessage m) {
+        toLookFor = toLookFor.trim();
+        final String lower = toLookFor.toLowerCase();
+        String res = "";
+
+        if (!m.getRoleMentions().isEmpty()) {
+            res = m.getRoleMentions().get(0).getID();
+        }
+
+        List<IRole> roles = m.getGuild().getRoles().stream().filter(r -> r.getName().toLowerCase().contains(lower) || r.getName().equalsIgnoreCase(lower) || r.getID().equals(lower)).collect(Collectors.toList());
+        if (res.isEmpty()) {
+            if (!roles.isEmpty()) {
+                res = roles.get(0).getID();
+            }
+        }
+
+        return res;
     }
 }
