@@ -189,8 +189,10 @@ public class EventCommand implements ICommand {
             Message.sendMessage("Event Creator already started!", event, client);
         } else {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                EventCreator.getCreator().init(event);
-                Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+                PreEvent e = EventCreator.getCreator().init(event, true);
+                if (e.getCreatorMessage() == null) {
+					Message.sendMessage("Event Creator initiated! Please specify event summary.", event, client);
+				}
             } else {
                 Message.sendMessage("You cannot create an event when you do not have a calendar!", event, client);
             }
@@ -204,9 +206,11 @@ public class EventCommand implements ICommand {
                 if (args.length == 2) {
                     String eventId = args[1];
                     if (EventUtils.eventExists(guildId, eventId)) {
-                        PreEvent preEvent = EventCreator.getCreator().init(event, eventId);
+                        PreEvent preEvent = EventCreator.getCreator().init(event, eventId, true);
                         if (preEvent != null) {
-                            Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Creator initialized! Event details copied! Please specify the date/times!", event, client);
+                        	if (preEvent.getCreatorMessage() == null) {
+								Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Creator initialized! Event details copied! Please specify the date/times!", event, client);
+							}
                         } else {
                             Message.sendMessage("Something went wrong! I'm sorry, try again!", event, client);
                         }
@@ -231,8 +235,10 @@ public class EventCommand implements ICommand {
                 if (args.length == 2) {
                     String eventId = args[1];
                     if (EventUtils.eventExists(guildId, eventId)) {
-                        PreEvent preEvent = EventCreator.getCreator().edit(event, eventId);
-                        Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Editor initiated! Edit the values and then confirm your edits with `!event confirm`", event, client);
+                        PreEvent preEvent = EventCreator.getCreator().edit(event, eventId, true);
+						if (preEvent.getCreatorMessage() == null) {
+							Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Editor initiated! Edit the values and then confirm your edits with `!event confirm`", event, client);
+						}
                     } else {
                         Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event, client);
                     }

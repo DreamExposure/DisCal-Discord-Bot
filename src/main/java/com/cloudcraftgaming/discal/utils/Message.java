@@ -195,7 +195,7 @@ public class Message {
     public static boolean editMessage(IMessage message, String content) {
         return RequestBuffer.request(() -> {
             try {
-                if (!message.isDeleted()) {
+                if (message != null && !message.isDeleted()) {
                     message.edit(content);
                 }
                 return true;

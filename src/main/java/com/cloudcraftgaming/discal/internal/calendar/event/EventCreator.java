@@ -1,11 +1,14 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
+import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ public class EventCreator {
      * @param e The event received upon initialization.
      * @return The PreEvent for the guild.
      */
-    public PreEvent init(MessageReceivedEvent e) {
+    public PreEvent init(MessageReceivedEvent e, boolean handleMessage) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             PreEvent event = new PreEvent(e.getMessage().getGuild().getID());
             try {
@@ -51,13 +54,18 @@ public class EventCreator {
             } catch (IOException exc) {
                 //Failed to get timezone, ignore safely.
             }
+            if (handleMessage) {
+				IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Creator Initiated!", e, Main.client);
+				event.setCreatorMessage(message);
+			}
+
             events.add(event);
             return event;
         }
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
-    public PreEvent init(MessageReceivedEvent e, String eventId) {
+    public PreEvent init(MessageReceivedEvent e, String eventId, boolean handleMessage) {
         if (!hasPreEvent(e.getMessage().getGuild().getID())) {
             //TODO: Handle multiple calendars...
             try {
@@ -73,6 +81,11 @@ public class EventCreator {
                     //Failed to get tz, ignore safely.
                 }
 
+				if (handleMessage) {
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event copied! Please specify the date/times for the event!", e, Main.client);
+					event.setCreatorMessage(message);
+				}
+
                 events.add(event);
                 return event;
             } catch (IOException exc) {
@@ -83,7 +96,7 @@ public class EventCreator {
         return getPreEvent(e.getMessage().getGuild().getID());
     }
 
-    public PreEvent edit(MessageReceivedEvent e, String eventId) {
+    public PreEvent edit(MessageReceivedEvent e, String eventId, boolean handleMessage) {
         String guildId = e.getMessage().getGuild().getID();
         if (!hasPreEvent(guildId)) {
             //TODO: Handle multiple calendars...
@@ -100,6 +113,12 @@ public class EventCreator {
                 } catch (IOException e1) {
                     //Failed to get tz, ignore safely.
                 }
+
+				if (handleMessage) {
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Editor Initiated!", e, Main.client);
+					event.setCreatorMessage(message);
+				}
+
                 events.add(event);
                 return event;
             } catch (IOException exc) {

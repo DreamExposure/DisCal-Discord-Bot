@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -29,6 +30,8 @@ public class PreEvent {
     private Recurrence recurrence;
 
     private boolean editing;
+
+    private IMessage creatorMessage;
 
 
     /**
@@ -175,6 +178,10 @@ public class PreEvent {
         return editing;
     }
 
+    public IMessage getCreatorMessage() {
+    	return creatorMessage;
+	}
+
     //Setters
     /**
      * Sets the summary of the event.
@@ -251,6 +258,10 @@ public class PreEvent {
     public void setEditing(boolean _editing) {
         editing = _editing;
     }
+
+    public void setCreatorMessage(IMessage _creatorMessage) {
+    	creatorMessage = _creatorMessage;
+	}
 
     //Booleans/Checkers
     /**

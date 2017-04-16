@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.google.api.services.calendar.model.Event;
+import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -9,6 +10,8 @@ import com.google.api.services.calendar.model.Event;
  */
 public class EventCreatorResponse {
     private final Boolean successful;
+
+    private IMessage creatorMessage;
 
     private Event event;
 
@@ -39,6 +42,10 @@ public class EventCreatorResponse {
         return successful;
     }
 
+    public IMessage getCreatorMessage() {
+    	return creatorMessage;
+	}
+
     /**
      * Gets the event that was created.
      * @return The event that was created.
@@ -48,6 +55,10 @@ public class EventCreatorResponse {
     }
 
     //Setters
+	public void setCreatorMessage(IMessage _creatorMessage) {
+    	creatorMessage = _creatorMessage;
+	}
+
     /**
      * Sets the event that was created.
      * @param _event The event that was created.
