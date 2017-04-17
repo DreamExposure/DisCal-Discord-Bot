@@ -5,9 +5,11 @@
   "Creator.Calendar.Create.Name": "Please specify a name for the calendar!",
   "Creator.Calendar.Cancel.Success": "Calendar creation cancelled! Calendar Creator terminated!",
   "Creator.Calendar.Cancel.Failure": "Failed to cancel calendar creation!",
+  "Creator.Calendar.Review": "Confirm calendar to complete setup `!calendar confirm` OR edit the values!",
 
   "Creator.Calendar.AlreadyInit": "Calendar Creator already initialized!",
-  "Creator.Calendar.HasCalendar": "A calendar has already been created!",
+  "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
+  "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name>` to create one!",
 
 
 

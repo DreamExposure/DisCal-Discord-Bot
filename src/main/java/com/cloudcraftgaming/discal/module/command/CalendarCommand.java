@@ -198,16 +198,16 @@ public class CalendarCommand implements ICommand {
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             PreCalendar preCalendar = CalendarCreator.getCreator().getPreCalendar(guildId);
             if (preCalendar.getCreatorMessage() != null) {
-				Message.editMessage(preCalendar.getCreatorMessage(), "Confirm calendar to complete setup `!calendar confirm` OR edit the values!", CalendarMessageFormatter.getPreCalendarEmbed(preCalendar));
+				Message.editMessage(preCalendar.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Review", event), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar));
 				Message.deleteMessage(event);
 			} else {
-            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Confirm calendar to complete setup `!calendar confirm` OR edit the values!", event);
+            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Review", event), event);
 			}
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                Message.sendMessage("Calendar creator has not been initialized! Use `!linkCalendar` to view your existing calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
             } else {
-                Message.sendMessage("A calendar has already been created!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
             }
         }
     }
