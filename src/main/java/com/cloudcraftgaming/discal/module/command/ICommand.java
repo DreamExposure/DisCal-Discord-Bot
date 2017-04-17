@@ -1,7 +1,6 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 import java.util.ArrayList;
@@ -36,8 +35,7 @@ interface ICommand {
      * Issues the command this Object is responsible for.
      * @param args The command arguments.
      * @param event The event received.
-     * @param client The Client associated with the Bot.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
-    Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client);
+    Boolean issueCommand(String[] args, MessageReceivedEvent event);
 }

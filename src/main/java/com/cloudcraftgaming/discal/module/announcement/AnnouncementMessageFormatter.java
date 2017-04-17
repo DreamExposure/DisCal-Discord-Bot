@@ -168,7 +168,7 @@ public class AnnouncementMessageFormatter {
 
         IChannel channel = guild.getChannelByID(announcement.getAnnouncementChannelId());
 
-        Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel, Main.client);
+        Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {

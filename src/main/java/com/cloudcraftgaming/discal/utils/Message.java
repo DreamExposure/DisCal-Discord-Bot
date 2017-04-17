@@ -1,7 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.Main;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -26,12 +25,11 @@ public class Message {
      * Sends a message via Discord as DisCal.
      * @param message The message to send, with formatting.
      * @param event The Event received (to send to the same channel and guild).
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(String message, MessageReceivedEvent event, IDiscordClient client) {
+    public static IMessage sendMessage(String message, MessageReceivedEvent event) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(Main.client).appendContent(message).withChannel(event.getMessage().getChannel()).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
                 return null;
@@ -43,12 +41,11 @@ public class Message {
      * Sends a message via Discord as DisCal.
      * @param message The message to send, with formatting.
      * @param channel The channel to send the message to.
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(String message, IChannel channel, IDiscordClient client) {
+    public static IMessage sendMessage(String message, IChannel channel) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).appendContent(message).withChannel(channel).build();
+                return new MessageBuilder(Main.client).appendContent(message).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
                 return null;
@@ -60,12 +57,11 @@ public class Message {
      * Sends a message via Discord as DisCal.
      * @param embed The EmbedObject to append to the message.
      * @param event The event received (to send to the same channel and guild).
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(EmbedObject embed, MessageReceivedEvent event, IDiscordClient client) {
+    public static IMessage sendMessage(EmbedObject embed, MessageReceivedEvent event) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(Main.client).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
 
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
@@ -78,12 +74,11 @@ public class Message {
      * Sends a message via Discord as DisCal.
      * @param embed The EmbedObject to append to the message.
      * @param channel The channel to send the message to.
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(EmbedObject embed, IChannel channel, IDiscordClient client) {
+    public static IMessage sendMessage(EmbedObject embed, IChannel channel) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).withEmbed(embed).withChannel(channel).build();
+                return new MessageBuilder(Main.client).withEmbed(embed).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
                 return null;
@@ -96,12 +91,11 @@ public class Message {
      * @param embed The EmbedObject to append to the message.
      * @param message The message to send, with formatting.
      * @param event The event received (to send to the same channel and guild).
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(EmbedObject embed, String message, MessageReceivedEvent event, IDiscordClient client) {
+    public static IMessage sendMessage(EmbedObject embed, String message, MessageReceivedEvent event) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
+                return new MessageBuilder(Main.client).appendContent(message).withEmbed(embed).withChannel(event.getMessage().getChannel()).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
                 return null;
@@ -114,12 +108,11 @@ public class Message {
      * @param embed The EmbedObject to append to the message.
      * @param message The message to send, with formatting.
      * @param channel The channel to send the message to.
-     * @param client The Client associated with the Bot.
      */
-    public static IMessage sendMessage(EmbedObject embed, String message, IChannel channel, IDiscordClient client) {
+    public static IMessage sendMessage(EmbedObject embed, String message, IChannel channel) {
         return RequestBuffer.request(() -> {
             try {
-                return new MessageBuilder(client).appendContent(message).withEmbed(embed).withChannel(channel).build();
+                return new MessageBuilder(Main.client).appendContent(message).withEmbed(embed).withChannel(channel).build();
             } catch (DiscordException | MissingPermissionsException e) {
                 //Failed to send message.
                 return null;

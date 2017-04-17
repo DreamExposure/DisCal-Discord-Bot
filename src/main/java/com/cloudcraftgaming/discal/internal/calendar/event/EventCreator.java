@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
-import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
@@ -57,10 +56,10 @@ public class EventCreator {
             }
             if (handleMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Creator Initiated!", e, Main.client);
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Creator Initiated!", e);
 					event.setCreatorMessage(message);
 				} else {
-					Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e, Main.client);
+					Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e);
 				}
 			}
 
@@ -88,10 +87,10 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event copied! Please specify the date/times for the event!", e, Main.client);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event copied! Please specify the date/times for the event!", e);
 						event.setCreatorMessage(message);
 					} else {
-						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e, Main.client);
+						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e);
 					}
 				}
 
@@ -125,10 +124,10 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Editor Initiated!", e, Main.client);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Editor Initiated!", e);
 						event.setCreatorMessage(message);
 					} else {
-						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)", e, Main.client);
+						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)", e);
 					}
 				}
 

@@ -53,7 +53,7 @@ public class Main {
         dispatcher.registerListener(new ReadyEventListener());
 
         //Register modules
-        CommandExecutor executor = CommandExecutor.getExecutor().enable(client);
+        CommandExecutor executor = CommandExecutor.getExecutor().enable();
         executor.registerCommand(new HelpCommand());
         executor.registerCommand(new DisCalCommand());
         executor.registerCommand(new CalendarCommand());

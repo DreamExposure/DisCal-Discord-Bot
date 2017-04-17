@@ -29,7 +29,7 @@ public class StatusChanger extends TimerTask {
         statuses.add("%calCount% calendars!");
         statuses.add("%annCount% announcements!");
         statuses.add("Version " + Main.version);
-        statuses.add("DisCal is on patreon!");
+        statuses.add("DisCal is on Patreon!");
         statuses.add("Share DisCal!!");
         index = 0;
     }

@@ -3,7 +3,6 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
@@ -55,14 +54,13 @@ public class HelpCommand implements ICommand {
      * Issues the command this Object is responsible for.
      * @param args The command arguments.
      * @param event The event received.
-     * @param client The Client associated with the Bot.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         if (args.length < 1) {
             EmbedBuilder em = new EmbedBuilder();
-            em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+            em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
             em.withAuthorName("DisCal");
             em.withTitle("DisCal Command Help");
             for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
@@ -76,12 +74,12 @@ public class HelpCommand implements ICommand {
             em.withFooterText("Check out the official site for more command info!");
             em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
             em.withColor(56, 138, 237);
-            Message.sendMessage(em.build(), event, client);
+            Message.sendMessage(em.build(), event);
         } else if (args.length == 1) {
             String cmdFor = args[0];
             ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
             if (cmd != null) {
-                Message.sendMessage(getCommandInfoEmbed(cmd), event, client);
+                Message.sendMessage(getCommandInfoEmbed(cmd), event);
             }
         }
 

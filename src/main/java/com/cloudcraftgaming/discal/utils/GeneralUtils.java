@@ -33,10 +33,10 @@ public class GeneralUtils {
         if (start >= args.length)
             throw new IllegalArgumentException("You can not start at an index that doesn't exit!");
 
-        String res = "";
+        StringBuilder res = new StringBuilder();
         for (int i = start; i < args.length; i++) {
-            res += args[i] + " ";
+            res.append(args[i]).append(" ");
         }
-        return res;
+        return res.toString();
     }
 }

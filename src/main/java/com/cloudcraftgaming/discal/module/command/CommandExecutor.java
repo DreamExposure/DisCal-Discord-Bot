@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.module.command;
 
-import sx.blah.discord.api.IDiscordClient;
+import com.cloudcraftgaming.discal.Main;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -13,7 +13,6 @@ import java.util.ArrayList;
  */
 public class CommandExecutor {
     private static CommandExecutor instance;
-    private IDiscordClient client;
     private final ArrayList<ICommand> commands = new ArrayList<>();
 
     private CommandExecutor() {}
@@ -31,12 +30,10 @@ public class CommandExecutor {
 
     /**
      * Enables the CommandExecutor and sets up the Listener.
-     * @param _client The Client associated with the Bot.
      * @return The CommandExecutor's instance.
      */
-    public CommandExecutor enable(IDiscordClient _client) {
-        client = _client;
-        EventDispatcher dispatcher = client.getDispatcher();
+    public CommandExecutor enable() {
+        EventDispatcher dispatcher = Main.client.getDispatcher();
         dispatcher.registerListener(new CommandListener(this));
         return instance;
     }
@@ -60,7 +57,7 @@ public class CommandExecutor {
     void issueCommand(String cmd, String[] args, MessageReceivedEvent event) {
         for (ICommand c : commands) {
             if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase())) {
-                c.issueCommand(args, event, client);
+                c.issueCommand(args, event);
             }
         }
 

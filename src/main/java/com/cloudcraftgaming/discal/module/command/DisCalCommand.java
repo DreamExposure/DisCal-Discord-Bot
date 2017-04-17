@@ -8,7 +8,6 @@ import com.cloudcraftgaming.discal.utils.ChannelUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.cloudcraftgaming.discal.utils.RoleUtils;
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -69,68 +68,66 @@ public class DisCalCommand implements ICommand {
      * Issues the command this Object is responsible for.
      * @param args The command arguments.
      * @param event The event received.
-     * @param client The Client associated with the Bot.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         if (args.length < 1) {
-            moduleDisCalInfo(event, client);
+            moduleDisCalInfo(event);
         } else {
             switch (args[0].toLowerCase()) {
                 case "discal":
-                    moduleDisCalInfo(event, client);
+                    moduleDisCalInfo(event);
                     break;
                 case "settings":
-                    moduleSettings(event, client);
+                    moduleSettings(event);
                     break;
                 case "role":
-                    moduleControlRole(args, event, client);
+                    moduleControlRole(args, event);
                     break;
                 case "channel":
-                    moduleDisCalChannel(args, event, client);
+                    moduleDisCalChannel(args, event);
                     break;
                 case "simpleannouncement":
-                    moduleSimpleAnnouncement(event, client);
+                    moduleSimpleAnnouncement(event);
                     break;
                 case "dmannouncement":
-                    moduleDmAnnouncements(event, client);
+                    moduleDmAnnouncements(event);
                     break;
                 default:
-                    Message.sendMessage("Invalid function! Use `!help discal` for a list of valid functions!", event, client);
+                    Message.sendMessage("Invalid function! Use `!help discal` for a list of valid functions!", event);
                     break;
             }
         }
         return false;
     }
 
-    private void moduleDisCalInfo(MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleDisCalInfo(MessageReceivedEvent event) {
         IGuild guild = event.getMessage().getGuild();
 
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal!");
         em.withTitle("DisCal is the official Discord Calendar Bot!");
         em.appendField("Developer", "NovaFox161", true);
         em.appendField("Version", Main.version, true);
         em.appendField("Library", "Discord4J, version 2.7.0", false);
-        em.appendField("Total Guilds", client.getGuilds().size() + "", true);
+        em.appendField("Total Guilds", Main.client.getGuilds().size() + "", true);
         em.appendField("Total Calendars", DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField("Total Announcements", DatabaseManager.getManager().getAnnouncementCount() + "", true);
 		em.appendField("Current Ping [Shard " + guild.getShard().getInfo()[0] + "]", guild.getShard().getResponseTime() + "ms", false);
         em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
-        Message.sendMessage(em.build(), event, client);
+        Message.sendMessage(em.build(), event);
     }
 
     /**
      * Sets the control role for the guild.
      * @param args The args of the command.
      * @param event The event received.
-     * @param client The Client associated with the Bot.
      */
-    private void moduleControlRole(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleControlRole(String[] args, MessageReceivedEvent event) {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length == 2) {
                 String roleName = args[1];
@@ -145,11 +142,11 @@ public class DisCalCommand implements ICommand {
                         settings.setControlRole(controlRole.getID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
-                        Message.sendMessage("Required control role set to: `" + controlRole.getName() + "`", event, client);
+                        Message.sendMessage("Required control role set to: `" + controlRole.getName() + "`", event);
 
                     } else {
                         //Invalid role.
-                        Message.sendMessage("Invalid role specified! The role must exist!", event, client);
+                        Message.sendMessage("Invalid role specified! The role must exist!", event);
                     }
                 } else {
                     //Role is @everyone, set this so that anyone can control the bot.
@@ -157,13 +154,13 @@ public class DisCalCommand implements ICommand {
                     settings.setControlRole("everyone");
                     DatabaseManager.getManager().updateSettings(settings);
                     //Send message
-                    Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event, client);
+                    Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event);
                 }
             } else {
-                Message.sendMessage("Please specify the role with `!discal role <role>`", event, client);
+                Message.sendMessage("Please specify the role with `!discal role <role>`", event);
             }
         } else {
-            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event, client);
+            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event);
         }
     }
 
@@ -171,9 +168,8 @@ public class DisCalCommand implements ICommand {
      * Sets the channel for the guild that DisCal can respond in.
      * @param args The command args
      * @param event The event received.
-     * @param client The Client associated with the Bot.
      */
-    private void moduleDisCalChannel(String[] args, MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleDisCalChannel(String[] args, MessageReceivedEvent event) {
         String guildId = event.getMessage().getGuild().getID();
         if (args.length == 2) {
             String channelName = args[1];
@@ -182,7 +178,7 @@ public class DisCalCommand implements ICommand {
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 settings.setDiscalChannel("all");
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("DisCal will now respond in all channels!", event, client);
+                Message.sendMessage("DisCal will now respond in all channels!", event);
             } else {
                 if (ChannelUtils.channelExists(channelName, event)) {
                     IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
@@ -190,35 +186,35 @@ public class DisCalCommand implements ICommand {
                         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                         settings.setDiscalChannel(channel.getID());
                         DatabaseManager.getManager().updateSettings(settings);
-                        Message.sendMessage("DisCal will now only respond in channel: `" + channel.getName() + "`", event, client);
+                        Message.sendMessage("DisCal will now only respond in channel: `" + channel.getName() + "`", event);
                     } else {
-                        Message.sendMessage("The specified channel does not exist!", event, client);
+                        Message.sendMessage("The specified channel does not exist!", event);
                     }
                 } else {
-                    Message.sendMessage("The specified channel does not exist!", event, client);
+                    Message.sendMessage("The specified channel does not exist!", event);
                 }
             }
         } else {
-            Message.sendMessage("Please specify the channel with `!discal channel <channel Name>`", event, client);
+            Message.sendMessage("Please specify the channel with `!discal channel <channel Name>`", event);
         }
     }
 
-    private void moduleSimpleAnnouncement(MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleSimpleAnnouncement(MessageReceivedEvent event) {
         String guildId = event.getMessage().getGuild().getID();
         GuildSettings settings =  DatabaseManager.getManager().getSettings(guildId);
         settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
         DatabaseManager.getManager().updateSettings(settings);
 
-        Message.sendMessage("Use simple announcements set to `" + settings.usingSimpleAnnouncements() + "`", event, client);
+        Message.sendMessage("Use simple announcements set to `" + settings.usingSimpleAnnouncements() + "`", event);
     }
 
-    private void moduleSettings(MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleSettings(MessageReceivedEvent event) {
         String guildId = event.getMessage().getGuild().getID();
 
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle("DisCal Guild Settings");
         em.appendField("Using External Calendar", String.valueOf(settings.useExternalCalendar()), true);
@@ -239,10 +235,10 @@ public class DisCalCommand implements ICommand {
         em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
-        Message.sendMessage(em.build(), event, client);
+        Message.sendMessage(em.build(), event);
     }
 
-    private void moduleDmAnnouncements(MessageReceivedEvent event, IDiscordClient client) {
+    private void moduleDmAnnouncements(MessageReceivedEvent event) {
         String guildId = event.getMessage().getGuild().getID();
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
         if (settings.isDevGuild()) {
@@ -251,14 +247,14 @@ public class DisCalCommand implements ICommand {
             if (settings.getDmAnnouncements().contains(user.getID())) {
                 settings.getDmAnnouncements().remove(user.getID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("You will no longer receive announcement DMs for this guild!", event, client);
+                Message.sendMessage("You will no longer receive announcement DMs for this guild!", event);
             } else {
                 settings.getDmAnnouncements().add(user.getID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("You will now receive DMs for announcements from this guild!", event, client);
+                Message.sendMessage("You will now receive DMs for announcements from this guild!", event);
             }
         } else {
-            Message.sendMessage("This function is disabled for testing purposes!", event, client);
+            Message.sendMessage("This function is disabled for testing purposes!", event);
         }
     }
 }
