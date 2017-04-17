@@ -1,11 +1,13 @@
 package com.cloudcraftgaming.discal.utils;
 
+import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Permissions;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -90,4 +92,8 @@ public class PermissionChecker {
             return true;
         }
     }
+
+    public static boolean botHasMessageManagePerms(MessageReceivedEvent event) {
+    	return Main.getSelfUser().getPermissionsForGuild(event.getMessage().getGuild()).contains(Permissions.MANAGE_MESSAGES);
+	}
 }

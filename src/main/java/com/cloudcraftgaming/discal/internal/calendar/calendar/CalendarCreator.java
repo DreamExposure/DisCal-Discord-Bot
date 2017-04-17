@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -49,8 +50,12 @@ public class CalendarCreator {
             PreCalendar calendar = new PreCalendar(e.getMessage().getGuild().getID(), calendarName);
 
             if (handleCreatorMessage) {
-                IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", e, Main.client);
-                calendar.setCreatorMessage(msg);
+            	if (PermissionChecker.botHasMessageManagePerms(e)) {
+					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", e, Main.client);
+					calendar.setCreatorMessage(msg);
+				} else {
+            		Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e, Main.client);
+				}
             }
             calendars.add(calendar);
             return calendar;
@@ -74,9 +79,13 @@ public class CalendarCreator {
                 preCalendar.setCalendarId(data.getCalendarAddress());
 
                 if (handleCreatorMessage) {
-                    IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initialized!", event, Main.client);
-                    preCalendar.setCreatorMessage(msg);
-                }
+					if (PermissionChecker.botHasMessageManagePerms(event)) {
+						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initialized!", event, Main.client);
+						preCalendar.setCreatorMessage(msg);
+					} else {
+						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)", event, Main.client);
+					}
+				}
 
                 calendars.add(preCalendar);
                 return preCalendar;
