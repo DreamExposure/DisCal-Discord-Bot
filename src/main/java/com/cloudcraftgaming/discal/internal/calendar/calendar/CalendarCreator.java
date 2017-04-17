@@ -51,7 +51,7 @@ public class CalendarCreator {
 
             if (handleCreatorMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", e);
+					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
 					calendar.setCreatorMessage(msg);
 				} else {
             		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
@@ -80,7 +80,7 @@ public class CalendarCreator {
 
                 if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initialized!", event);
+						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", event), event);

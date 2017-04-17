@@ -5,10 +5,7 @@ import com.cloudcraftgaming.discal.internal.calendar.calendar.*;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
-import com.cloudcraftgaming.discal.utils.GeneralUtils;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
-import com.cloudcraftgaming.discal.utils.TimeZoneUtils;
+import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.Permissions;
@@ -54,7 +51,7 @@ public class CalendarCommand implements ICommand {
      * @return The command info.
      */
     @Override
-    public CommandInfo getCommandInfo() {
+     public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo("calendar");
         info.setDescription("Used for direct interaction with your DisCal Calendar.");
         info.setExample("!calendar <subCommand> (value)");
@@ -85,7 +82,7 @@ public class CalendarCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
-                Message.sendMessage("You must specify a function to execute!", event);
+                Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
             } else if (args.length >= 1) {
                 String guildId = event.getMessage().getGuild().getID();
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
@@ -130,16 +127,16 @@ public class CalendarCommand implements ICommand {
                         if (settings.isDevGuild()) {
                             moduleEdit(event, calendarData);
                         } else {
-                            Message.sendMessage("This option is disabled for testing only!", event);
+                            Message.sendMessage("Notification.Disabled", event);
                         }
                         break;
                     default:
-                        Message.sendMessage("Invalid function! Please view `!help calendar` for a full list of valid functions!", event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
                         break;
                 }
             }
         } else {
-            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
         }
         return false;
     }
@@ -148,10 +145,10 @@ public class CalendarCommand implements ICommand {
         String guildId = event.getMessage().getGuild().getID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Calendar Creator already initialized!");
+				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.AlreadyInit", event));
 				Message.deleteMessage(event);
 			} else {
-        		Message.sendMessage("Calendar Creator already initialized!", event);
+        		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", event), event);
 			}
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -161,13 +158,13 @@ public class CalendarCommand implements ICommand {
                     if (calendar.getCreatorMessage() != null) {
 						Message.deleteMessage(event);
 					} else {
-                    	Message.sendMessage("Calendar Creator initiated! Please specify the description with `!calendar description <desc, spaces allowed`", event);
+                    	Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Create.Init", event), event);
 					}
                 } else {
-                    Message.sendMessage("Please specify a name for the calendar!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Create.Name", event), event);
                 }
             } else {
-                Message.sendMessage("A calendar has already been created!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
             }
         }
     }
@@ -178,20 +175,20 @@ public class CalendarCommand implements ICommand {
         	IMessage message = CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage();
             if (CalendarCreator.getCreator().terminate(event)) {
             	if (message != null) {
-					Message.editMessage(message, "Calendar creation cancelled! Calendar creator terminated!");
+					Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Success", event));
 					Message.deleteMessage(event);
 				} else {
-            		Message.sendMessage("Calendar creation cancelled! Calendar creator terminated!", event);
+            		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Success", event), event);
 				}
             } else {
-                Message.sendMessage("Failed to cancel calendar creation!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Failure", event), event);
                 Message.deleteMessage(event);
             }
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                Message.sendMessage("Calendar creator has not been initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", event), event);
             } else {
-                Message.sendMessage("A calendar has already been created!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
             }
         }
     }
