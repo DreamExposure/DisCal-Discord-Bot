@@ -1,0 +1,20 @@
+{
+  "Creator.Notif.MANAGE_MESSAGES": "DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)",
+  "Creator.Calendar.Create.Init": "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`",
+  "Creator.Calendar.Edit.Init": "Calendar Editor initialized!",
+  "Creator.Calendar.Create.Name": "Please specify a name for the calendar!",
+  "Creator.Calendar.Cancel.Success": "Calendar creation cancelled! Calendar Creator terminated!",
+  "Creator.Calendar.Cancel.Failure": "Failed to cancel calendar creation!",
+
+  "Creator.Calendar.AlreadyInit": "Calendar Creator already initialized!",
+  "Creator.Calendar.HasCalendar": "A calendar has already been created!",
+
+
+
+
+
+  "Notification.Args.Few": "You must specify a function to execute!",
+  "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
+  "Notification.Disabled": "This option is disabled for testing only!",
+  "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!"
+}

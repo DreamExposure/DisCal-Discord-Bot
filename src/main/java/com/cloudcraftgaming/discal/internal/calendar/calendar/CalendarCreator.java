@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
@@ -53,7 +54,7 @@ public class CalendarCreator {
 					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`", e);
 					calendar.setCreatorMessage(msg);
 				} else {
-            		Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e);
+            		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
 				}
             }
             calendars.add(calendar);
@@ -82,7 +83,7 @@ public class CalendarCreator {
 						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), "Calendar Editor initialized!", event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
-						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)", event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", event), event);
 					}
 				}
 
