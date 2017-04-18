@@ -219,41 +219,41 @@ public class CalendarCommand implements ICommand {
             if (response.isSuccessful()) {
                 if (response.isEdited()) {
                 	if (response.getCreatorMessage() != null) {
-						Message.editMessage(response.getCreatorMessage(), "Calendar successfully edited!", CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), "Calendar successfully edited!", event);
+                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), event);
 					}
                 } else {
                 	if (response.getCalendar() != null) {
-						Message.editMessage(response.getCreatorMessage(), "Calendar successfully created!", CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), "Calendar successfully created!", event);
+                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), event);
 					}
                 }
             } else {
                 if (response.isEdited()) {
                 	if (response.getCreatorMessage() != null) {
-						Message.editMessage(response.getCreatorMessage(), "Calendar Edit failed! Are you sure everything is correct?");
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Failure", event));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage("Calendar Edit failed! Are you sure everything is correct?", event);
+                		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Failure", event), event);
 					}
                 } else {
                 	if (response.getCreatorMessage() != null) {
-						Message.editMessage(response.getCreatorMessage(), "Calendar Creation failed! Are you sure everything is correct?");
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Failure", event));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage("Calendar Creation failed! Are you sure everything is correct?", event);
+                		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Confirm.Create.Failure", event), event);
 					}
                 }
             }
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                Message.sendMessage("Calendar creator has not been initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
             } else {
-                Message.sendMessage("A calendar has already been created!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
             }
         }
     }

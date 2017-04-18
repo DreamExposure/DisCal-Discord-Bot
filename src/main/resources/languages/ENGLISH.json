@@ -6,6 +6,10 @@
   "Creator.Calendar.Cancel.Success": "Calendar creation cancelled! Calendar Creator terminated!",
   "Creator.Calendar.Cancel.Failure": "Failed to cancel calendar creation!",
   "Creator.Calendar.Review": "Confirm calendar to complete setup `!calendar confirm` OR edit the values!",
+  "Creator.Calendar.Confirm.Edit.Success": "Calendar successfully edited!",
+  "Creator.Calendar.Confirm.Edit.Failure": "Calendar Edit failed! Are you sure everything is correct?",
+  "Creator.Calendar.Confirm.Create.Success": "Calendar successfully created!",
+  "Creator.Calendar.Confirm.Create.Failure": "Calendar Creation failed! Are you sure everything is correct?",
 
   "Creator.Calendar.AlreadyInit": "Calendar Creator already initialized!",
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
