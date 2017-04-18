@@ -4,8 +4,13 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
 
@@ -51,6 +56,8 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("patron");
         ci.getSubCommands().add("dev");
         ci.getSubCommands().add("maxcal");
+        ci.getSubCommands().add("leave");
+        ci.getSubCommands().add("listGuilds");
 
         return ci;
     }
@@ -80,6 +87,12 @@ public class DevCommand implements ICommand {
                     case "maxcal":
                         moduleMaxCalendars(args, event);
                         break;
+					case "leave":
+						moduleLeaveGuild(args, event);
+						break;
+					case "listguilds":
+						moduleListGuilds(event);
+						break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
                         break;
@@ -154,4 +167,51 @@ public class DevCommand implements ICommand {
             Message.sendMessage("Please specify the ID of the guild and calendar amount with `!dev maxcal <ID> <amount>`", event);
         }
     }
+
+    private void moduleLeaveGuild(String[] args, MessageReceivedEvent event) {
+    	if (args.length == 2) {
+			if (Main.client.getGuildByID(args[1]) != null) {
+				RequestBuffer.request(() -> {
+					try {
+						Main.client.getGuildByID(args[1]).leaveGuild();
+					} catch (DiscordException e) {
+						ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to leave guild", e, this.getClass());
+					}
+				});
+				Message.sendMessage("Left Guild!", event);
+			} else {
+				Message.sendMessage("Guild not found!", event);
+			}
+		} else {
+    		Message.sendMessage("Please specify the ID of the guild to leave with `!dev leave <ID>`", event);
+		}
+	}
+
+	private void moduleListGuilds(MessageReceivedEvent event) {
+
+    	Message.sendMessage("Sending a list of all Guilds! This may take awhile...", event);
+    	String msg = "";
+
+    	for (IGuild g : Main.client.getGuilds()) {
+    		msg = msg + Message.lineBreak + g.getName() + " | " + g.getID() + " | " + g.getTotalMemberCount() + " | Bots:" + botPercent(g) + "%";
+
+    		if (msg.length() >= 1500) {
+    			Message.sendMessage(msg, event);
+    			msg = "";
+			}
+		}
+		Message.sendMessage(msg, event);
+    	Message.sendMessage("All Guilds listed!", event);
+	}
+
+
+	private int botPercent(IGuild g) {
+    	int bots = 0;
+    	for (IUser u : g.getUsers()) {
+    		if (u.isBot()) {
+    			bots++;
+			}
+		}
+		return Math.round(bots / g.getTotalMemberCount() * 100);
+	}
 }
