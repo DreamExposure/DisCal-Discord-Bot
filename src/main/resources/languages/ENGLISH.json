@@ -30,12 +30,17 @@
   "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name, spaces allowed>` to create one!",
 
   "Event.List.Args.Few": "Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`",
-
+  "Event.List.Amount.Over": "You cannot list more than 15 events!",
+  "Event.List.Amount.Under": "Valid numbers are only `1-15`",
+  "Event.List.Found.None": "No upcoming events found.",
+  "Event.List.Found.One": "1 upcoming event found:",
+  "Event.List.Found.Many": "%amount% upcoming events found... Please note that this list may be delayed due to rate limiting... %lb% Use `!event view <id>` for more info.",
 
 
 
   "Notification.Args.Few": "You must specify a function to execute!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
+  "Notification.Args.Value.Integer": "The specified value must be a number! (EX: `1` or `13`)",
   "Notification.Disabled": "This option is disabled for testing only!",
   "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!",
   "Notification.Perm.MANAGE_SERVER": "You must have the \"Manage Server\" permission to use this command!",

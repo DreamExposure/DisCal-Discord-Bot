@@ -68,7 +68,7 @@ public class EventListCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event)  {
         //Get events from calendar
         if (args.length < 1) {
             Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
@@ -96,11 +96,11 @@ public class EventListCommand implements ICommand {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
                 if (eventNum > 15) {
-                    Message.sendMessage("You cannot list more than 15 events!", event);
+                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Over", event), event);
                     return;
                 }
                 if (eventNum < 1) {
-                    Message.sendMessage("Valid numbers are only `1-15`", event);
+                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Under", event), event);
                     return;
                 }
                 try {
@@ -115,25 +115,24 @@ public class EventListCommand implements ICommand {
                             .execute();
                     List<Event> items = events.getItems();
                     if (items.size() == 0) {
-                        Message.sendMessage("No upcoming events found.", event);
+                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", event), event);
                     } else if (items.size() == 1) {
                         String guildId = event.getMessage().getGuild().getID();
-                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), "1 upcoming event found:", event);
+                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), MessageManager.getMessage("Event.List.Found.One", event), event);
                     } else {
                         //List events by Id only.
-                        Message.sendMessage(items.size() + " upcoming events found... Please note that this list may be delayed due to rate limiting...", event);
+                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", event), event);
                         for (Event e : items) {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event);
                         }
-                        Message.sendMessage("Use `!event view <id>` for more info.", event);
                     }
                 } catch (IOException e) {
-                    Message.sendMessage("Oops! Something terrible happened! I have emailed the developer!", event);
+                    Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
                     ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to list events.", e, this.getClass());
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {
-                Message.sendMessage("Event amount must be an Integer!", event);
+                Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", event), event);
             }
         } else {
             Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
