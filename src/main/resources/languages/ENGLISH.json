@@ -29,6 +29,7 @@
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
   "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name, spaces allowed>` to create one!",
 
+  "Event.List.Args.Few": "Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`",
 
 
 
@@ -37,5 +38,6 @@
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
   "Notification.Disabled": "This option is disabled for testing only!",
   "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!",
-  "Notification.Perm.MANAGE_SERVER": "You must have the \"Manage Server\" permission to use this command!"
+  "Notification.Perm.MANAGE_SERVER": "You must have the \"Manage Server\" permission to use this command!",
+  "Notification.Error.Unknown": "Oops! Something has failed terribly! I have messaged my development team!"
 }

@@ -8,6 +8,7 @@ import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -70,7 +71,7 @@ public class EventListCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage("Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`", event);
+            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
         } else {
             GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
             switch (args[0].toLowerCase()) {
@@ -79,7 +80,7 @@ public class EventListCommand implements ICommand {
                         //To search module.
                         Message.sendMessage("Uh... I'm working on it okay~", event);
                     } else {
-                        Message.sendMessage("This option is disabled for testing only!", event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
                     }
                     break;
                 default:
@@ -135,7 +136,7 @@ public class EventListCommand implements ICommand {
                 Message.sendMessage("Event amount must be an Integer!", event);
             }
         } else {
-            Message.sendMessage("Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`", event);
+            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
         }
     }
 }

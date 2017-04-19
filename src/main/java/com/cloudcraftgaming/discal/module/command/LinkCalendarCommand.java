@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -72,7 +73,7 @@ public class LinkCalendarCommand implements ICommand {
 
             if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
                 //Does not have a calendar.
-                Message.sendMessage("You do not have a calendar to link!" + Message.lineBreak + "Use `!calendar create` to create a new calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
             } else {
                 Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
@@ -80,7 +81,7 @@ public class LinkCalendarCommand implements ICommand {
             }
         } catch (IOException e) {
             ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
-            Message.sendMessage("Oops! Something went wrong! I have emailed the developer!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
         }
         return false;
     }
