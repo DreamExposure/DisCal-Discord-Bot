@@ -262,28 +262,28 @@ public class CalendarCommand implements ICommand {
         String guildId = event.getMessage().getGuild().getID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Cannot delete calendar while in Calendar Creator!");
+				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Delete.Failure.InCreator", event));
 				Message.deleteMessage(event);
 			} else {
-        		Message.sendMessage("Cannot delete calendar while in the Calendar Creator/Editor!", event);
+        		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.InCreator", event), event);
 			}
             return;
         }
         if(!event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
                 Permissions.MANAGE_SERVER)) {
-            Message.sendMessage("You need the \"Manage Server\" permission to run this command!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", event), event);
             return;
         }
         if (!calendarData.getCalendarId().equalsIgnoreCase("primary")) {
             //Delete calendar
             if (CalendarUtils.deleteCalendar(calendarData)) {
-                Message.sendMessage("Calendar deleted! You may create a new one if you so wish!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Success", event), event);
             } else {
-                Message.sendMessage("Oops! Something went wrong! I failed to delete your calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.Unknown", event), event);
             }
         } else {
             //No calendar to delete
-            Message.sendMessage("Cannot delete calendar as one does not exist!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.NoCalendar", event), event);
         }
     }
 
@@ -293,28 +293,29 @@ public class CalendarCommand implements ICommand {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
 					CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(GeneralUtils.getContent(args, 1));
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Summary set!", CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 					Message.deleteMessage(event);
 				} else {
-            		Message.sendMessage("Summary set to: `" + GeneralUtils.getContent(args, 1) + "`", event);
+					String msg = MessageManager.getMessage("Creator.Calendar.Summary.O.Success", "%summary%", GeneralUtils.getContent(args, 1), event);
+            		Message.sendMessage(msg, event);
 				}
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                    Message.sendMessage("Calendar creator has not been initialized!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
                 } else {
-                    Message.sendMessage("A calendar has already been created!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
                 }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Please specify the name/summary of the calendar with `!calendar summary <summary, spaces allowed>`");
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.Specify", event));
 					Message.deleteMessage(event);
 				} else {
-            		Message.sendMessage("Please specify the name/summary of the calendar with `!calendar summary <summary, spaces allowed>`", event);
+            		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Summary.Specify", event), event);
 				}
             } else {
-                Message.sendMessage("Please specify the name/summary of the calendar with `!calendar summary <summary, spaces allowed>`", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Summary.Specify", event), event);
             }
         }
     }
@@ -325,34 +326,28 @@ public class CalendarCommand implements ICommand {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                 CalendarCreator.getCreator().getPreCalendar(guildId).setDescription(GeneralUtils.getContent(args, 1));
                 if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Calendar description set!"
-							+ "Please specify the timezone!"
-							+ Message.lineBreak
-							+ "For a list of valid timezones: " + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.N.Success", event) + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 					Message.deleteMessage(event);
 				} else {
-					Message.sendMessage("Calendar description set to `" + GeneralUtils.getContent(args, 1) + "`" + Message.lineBreak
-							+ "Please specify the timezone!"
-							+ Message.lineBreak
-							+ "For a list of valid timezones: " + TIME_ZONE_DB, event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.O.Success", "%desc%", GeneralUtils.getContent(args, 1), event) + TIME_ZONE_DB, event);
 				}
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                    Message.sendMessage("Calendar creator has not been initialized!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
                 } else {
-                    Message.sendMessage("A calendar has already been created!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
                 }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Please specify the calendar description with `!calendar description <desc, spaces allowed>`");
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.Specify", event));
 					Message.deleteMessage(event);
 				} else {
-            		Message.sendMessage("Please specify the calendar description with `!calendar description <desc, spaces allowed>`", event);
+            		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.Specify", event), event);
 				}
             } else {
-                Message.sendMessage("Please specify the calendar description with `!calendar description <desc, spaces allowed>`", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.Specify", event), event);
             }
         }
     }

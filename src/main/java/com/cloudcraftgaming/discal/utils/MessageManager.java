@@ -14,8 +14,8 @@ import java.util.HashMap;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("unchecked")
 public class MessageManager {
-	@SuppressWarnings("unchecked")
 	public static String getMessage(String key, MessageReceivedEvent event) {
 		Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
 		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
@@ -23,6 +23,16 @@ public class MessageManager {
 
 		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!");
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+	}
+
+	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
+		Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
 	}
 }

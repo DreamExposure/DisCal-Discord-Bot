@@ -10,6 +10,16 @@
   "Creator.Calendar.Confirm.Edit.Failure": "Calendar Edit failed! Are you sure everything is correct?",
   "Creator.Calendar.Confirm.Create.Success": "Calendar successfully created!",
   "Creator.Calendar.Confirm.Create.Failure": "Calendar Creation failed! Are you sure everything is correct?",
+  "Creator.Calendar.Delete.Failure.InCreator": "You cannot delete the calendar while in the Creator/Editor!",
+  "Creator.Calendar.Delete.Failure.NoCalendar": "Cannot delete the calendar as the guild does not have one!",
+  "Creator.Calendar.Delete.Failure.Unknown": "Oops! Something went wrong! I failed to delete your calendar!",
+  "Creator.Calendar.Delete.Success": "Calendar deleted! You may create a new one if you so wish!",
+  "Creator.Calendar.Summary.N.Success": "Name/Summary set!",
+  "Creator.Calendar.Summary.O.Success": "Name/Summary set to %summary%!",
+  "Creator.Calendar.Summary.Specify": "Please specify the name/summary of the calendar with `!calendar summary <summary, spaces allowed>`",
+  "Creator.Calendar.Description.N.Success": "Calendar description set! Please specify the timezone! %lb% For a list of valid timezones: ",
+  "Creator.Calendar.Description.O.Success": "Calendar description set to %desc%! Please specify the timezone! %lb% For a list of valid timezones: ",
+  "Creator.Calendar.Description.Specify": "Please specify the calendar description with `!calendar description <desc, spaces allowed>`",
 
   "Creator.Calendar.AlreadyInit": "Calendar Creator already initialized!",
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
@@ -22,5 +32,6 @@
   "Notification.Args.Few": "You must specify a function to execute!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
   "Notification.Disabled": "This option is disabled for testing only!",
-  "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!"
+  "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!",
+  "Notification.Perm.MANAGE_SERVER": "You must have the \"Manage Server\" permission to use this command!"
 }
