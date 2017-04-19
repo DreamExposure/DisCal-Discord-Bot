@@ -36,6 +36,18 @@
   "Event.List.Found.One": "1 upcoming event found:",
   "Event.List.Found.Many": "%amount% upcoming events found... Please note that this list may be delayed due to rate limiting... %lb% Use `!event view <id>` for more info.",
 
+  "DisCal.ControlRole.Set": "Required control role set to: `%role%`",
+  "DisCal.ControlRole.Reset": "Specific role no longer required! Everyone may edit/create!",
+  "DisCal.ControlRole.Invalid": "Invalid role specified! The role must exist!",
+  "DisCal.ControlRole.Specify": "Please specify the role with `!discal role <role>`",
+  "DisCal.Channel.All": "DisCal will now respond in all channels!",
+  "DisCal.Channel.Set": "DisCal will now only respond in channel: `%channel%`",
+  "Discal.Channel.NotFound": "The specified channel does not exist or was not found!",
+  "DisCal.Channel.Specify": "Please specify the channel with `!discal channel <channel Name>`",
+  "DisCal.SimpleAnnouncement": "Use simple announcements set to `%value%`",
+  "DisCal.DmAnnouncements.Off": "You will no longer receive announcement DMs for this guild!",
+  "DisCal.DmAnnouncements.On": "You will now receive DMs for announcements from this guild!",
+
 
 
   "Notification.Args.Few": "You must specify a function to execute!",

@@ -4,10 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
-import com.cloudcraftgaming.discal.utils.ChannelUtils;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
-import com.cloudcraftgaming.discal.utils.RoleUtils;
+import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -95,7 +92,7 @@ public class DisCalCommand implements ICommand {
                     moduleDmAnnouncements(event);
                     break;
                 default:
-                    Message.sendMessage("Invalid function! Use `!help discal` for a list of valid functions!", event);
+                    Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
                     break;
             }
         }
@@ -142,11 +139,11 @@ public class DisCalCommand implements ICommand {
                         settings.setControlRole(controlRole.getID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
-                        Message.sendMessage("Required control role set to: `" + controlRole.getName() + "`", event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), event), event);
 
                     } else {
                         //Invalid role.
-                        Message.sendMessage("Invalid role specified! The role must exist!", event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Invalid", event), event);
                     }
                 } else {
                     //Role is @everyone, set this so that anyone can control the bot.
@@ -154,13 +151,13 @@ public class DisCalCommand implements ICommand {
                     settings.setControlRole("everyone");
                     DatabaseManager.getManager().updateSettings(settings);
                     //Send message
-                    Message.sendMessage("Specific role no longer required! Everyone may edit/create!", event);
+                    Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Reset", event), event);
                 }
             } else {
-                Message.sendMessage("Please specify the role with `!discal role <role>`", event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Specify", event), event);
             }
         } else {
-            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
         }
     }
 
@@ -178,7 +175,7 @@ public class DisCalCommand implements ICommand {
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 settings.setDiscalChannel("all");
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("DisCal will now respond in all channels!", event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.Channel.All", event), event);
             } else {
                 if (ChannelUtils.channelExists(channelName, event)) {
                     IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
@@ -186,16 +183,16 @@ public class DisCalCommand implements ICommand {
                         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                         settings.setDiscalChannel(channel.getID());
                         DatabaseManager.getManager().updateSettings(settings);
-                        Message.sendMessage("DisCal will now only respond in channel: `" + channel.getName() + "`", event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), event), event);
                     } else {
-                        Message.sendMessage("The specified channel does not exist!", event);
+                        Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", event), event);
                     }
                 } else {
-                    Message.sendMessage("The specified channel does not exist!", event);
+                    Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", event), event);
                 }
             }
         } else {
-            Message.sendMessage("Please specify the channel with `!discal channel <channel Name>`", event);
+            Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Specify", event), event);
         }
     }
 
@@ -205,7 +202,7 @@ public class DisCalCommand implements ICommand {
         settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
         DatabaseManager.getManager().updateSettings(settings);
 
-        Message.sendMessage("Use simple announcements set to `" + settings.usingSimpleAnnouncements() + "`", event);
+        Message.sendMessage(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", event), event);
     }
 
     private void moduleSettings(MessageReceivedEvent event) {
@@ -247,14 +244,14 @@ public class DisCalCommand implements ICommand {
             if (settings.getDmAnnouncements().contains(user.getID())) {
                 settings.getDmAnnouncements().remove(user.getID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("You will no longer receive announcement DMs for this guild!", event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", event), event);
             } else {
                 settings.getDmAnnouncements().add(user.getID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage("You will now receive DMs for announcements from this guild!", event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", event), event);
             }
         } else {
-            Message.sendMessage("This function is disabled for testing purposes!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
         }
     }
 }
