@@ -1,7 +1,7 @@
 {
   "Creator.Notif.MANAGE_MESSAGES": "DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)",
   "Creator.Calendar.Create.Init": "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`",
-  "Creator.Calendar.Edit.Init": "Calendar Editor initialized!",
+  "Creator.Calendar.Edit.Init": "Calendar Editor initialized! Edit the values and confirm with `!calendar confirm`",
   "Creator.Calendar.Create.Name": "Please specify a name for the calendar!",
   "Creator.Calendar.Cancel.Success": "Calendar creation cancelled! Calendar Creator terminated!",
   "Creator.Calendar.Cancel.Failure": "Failed to cancel calendar creation!",
@@ -20,10 +20,14 @@
   "Creator.Calendar.Description.N.Success": "Calendar description set! Please specify the timezone! %lb% For a list of valid timezones: ",
   "Creator.Calendar.Description.O.Success": "Calendar description set to %desc%! Please specify the timezone! %lb% For a list of valid timezones: ",
   "Creator.Calendar.Description.Specify": "Please specify the calendar description with `!calendar description <desc, spaces allowed>`",
+  "Creator.Calendar.TimeZone.N.Success": "TimeZone Set!",
+  "Creator.Calendar.TimeZone.O.Success": "TimeZone set to `'%tz%' %lb% Please review your calendar with `!calendar review` to verify that the values are correct and confirm with `!calendar confirm`",
+  "Creator.Calendar.TimeZone.Invalid": "Invalid timezone specified! Please make sure the timezone is on this list: <%tz_db%> %lb% %lb% It is very important that you input the timezone correctly because it is case sensitive! (EX: Not `america/new_york` but rather `America/New_York`)",
+  "Creator.Calendar.TimeZone.Specify": "Please specify the timezone! %lb% Timezones are case sensitive. (Ex. America/New_York and not america/new_york) %lb% %lb% For a list of valid timezones: ",
 
-  "Creator.Calendar.AlreadyInit": "Calendar Creator already initialized!",
+  "Creator.Calendar.AlreadyInit": "Calendar Creator/Editor already initialized!",
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
-  "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name>` to create one!",
+  "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name, spaces allowed>` to create one!",
 
 
 

@@ -361,42 +361,32 @@ public class CalendarCommand implements ICommand {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
 
                     if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "TimeZone set!", CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 						Message.deleteMessage(event);
 					} else {
-                    	Message.sendMessage("TimeZone set to `" + value + "`" + Message.lineBreak + "Please review your calendar with `!calendar review` to verify that the values are correct and confirm with `!calendar confirm`", event);
+                    	Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.O.Success", "%tz%", value, event), event);
 					}
                 } else {
                 	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Invalid timezone specified! Please make sure the timezone is on this list: <" + TIME_ZONE_DB + ">" + Message.lineBreak + Message.lineBreak + "It is very important that you input the timezone correctly because it is case sensitive! (EX: Not `america/new_york` but rather `America/New_York`)", CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage("Invalid timezone specified! Please make sure the timezone is on this list: <" + TIME_ZONE_DB + ">" + Message.lineBreak + Message.lineBreak + "It is very important that you input the timezone correctly because it is case sensitive! (EX: Not `america/new_york` but rather `America/New_York`)", event);
+                		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), event);
 					}
                 }
             } else {
                 if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                    Message.sendMessage("Calendar creator has not been initialized!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
                 } else {
-                    Message.sendMessage("A calendar has already been created!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
                 }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-                Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Please specify the timezone!"
-                        + Message.lineBreak
-                        + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
-                        + Message.lineBreak
-                        + Message.lineBreak
-                        + "For a list of valid timezones: " + TIME_ZONE_DB);
+                Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Specify", event) + TIME_ZONE_DB);
                 Message.deleteMessage(event);
             } else {
-                Message.sendMessage("Please specify the timezone!"
-                        + Message.lineBreak
-                        + "Timezones are case sensitive. (Ex. America/New_York and not america/new_york)"
-                        + Message.lineBreak
-                        + Message.lineBreak
-                        + "For a list of valid timezones: " + TIME_ZONE_DB, event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.Specify", event) + TIME_ZONE_DB, event);
             }
         }
     }
@@ -409,17 +399,17 @@ public class CalendarCommand implements ICommand {
                 if (calendar.getCreatorMessage() != null) {
 					Message.deleteMessage(event);
 				} else {
-                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), "Calendar Editor initiated! Edit the values and confirm with `!calendar confirm", event);
+                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 				}
             } else {
-                Message.sendMessage("You cannot edit your calendar when you do not have one!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
             }
         } else {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), "Calendar Creator has already been initiated!");
+				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.AlreadyInit", event));
 				Message.deleteMessage(event);
 			} else {
-        		Message.sendMessage("Calendar Creator has already been initiated!", event);
+        		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", event), event);
 			}
         }
     }
