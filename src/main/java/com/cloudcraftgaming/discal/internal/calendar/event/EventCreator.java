@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -59,7 +60,7 @@ public class EventCreator {
 					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Creator Initiated!", e);
 					event.setCreatorMessage(message);
 				} else {
-					Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e);
+					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
 				}
 			}
 
@@ -90,7 +91,7 @@ public class EventCreator {
 						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event copied! Please specify the date/times for the event!", e);
 						event.setCreatorMessage(message);
 					} else {
-						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator after permissions are added!)", e);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
 					}
 				}
 
@@ -127,7 +128,7 @@ public class EventCreator {
 						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Editor Initiated!", e);
 						event.setCreatorMessage(message);
 					} else {
-						Message.sendMessage("DisCal does not have \"MANAGE MESSAGES\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Editor after permissions are added!)", e);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
 					}
 				}
 

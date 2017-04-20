@@ -99,7 +99,7 @@ public class EventCommand implements ICommand {
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
-                Message.sendMessage("Please specify the function you would like to execute.", event);
+                Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
             } else {
                 switch (args[0].toLowerCase()) {
                     case "create":
@@ -112,7 +112,7 @@ public class EventCommand implements ICommand {
                         if (settings.isDevGuild()) {
                             moduleEdit(args, event, calendarData);
                         } else {
-                            Message.sendMessage("This option is disabled for testing only!", event);
+                            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
                         }
                         break;
                     case "cancel":
@@ -170,12 +170,12 @@ public class EventCommand implements ICommand {
                         moduleInterval(args, event);
                         break;
                     default:
-                        Message.sendMessage("Invalid function, use `!help event` for a full list of valid functions!", event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
                         break;
                 }
             }
         } else {
-            Message.sendMessage("You do not have sufficient permissions to use this DisCal command!", event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
         }
         return false;
     }
