@@ -105,15 +105,15 @@ public class DisCalCommand implements ICommand {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal!");
-        em.withTitle("DisCal is the official Discord Calendar Bot!");
-        em.appendField("Developer", "NovaFox161", true);
-        em.appendField("Version", Main.version, true);
-        em.appendField("Library", "Discord4J, version 2.7.0", false);
-        em.appendField("Total Guilds", Main.client.getGuilds().size() + "", true);
-        em.appendField("Total Calendars", DatabaseManager.getManager().getCalendarCount() + "", true);
-        em.appendField("Total Announcements", DatabaseManager.getManager().getAnnouncementCount() + "", true);
-		em.appendField("Current Ping [Shard " + guild.getShard().getInfo()[0] + "]", guild.getShard().getResponseTime() + "ms", false);
-        em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
+        em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", event));
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", event), "NovaFox161", true);
+        em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", event), Main.version, true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", event), "Discord4J, version 2.7.0", false);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", event), Main.client.getGuilds().size() + "", true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", event), DatabaseManager.getManager().getCalendarCount() + "", true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", event), DatabaseManager.getManager().getAnnouncementCount() + "", true);
+		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "", event), guild.getShard().getResponseTime() + "ms", false);
+        em.withFooterText("[" + MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + "](https://www.patreon.com/Novafox)");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event);
@@ -213,23 +213,23 @@ public class DisCalCommand implements ICommand {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("DisCal Guild Settings");
-        em.appendField("Using External Calendar", String.valueOf(settings.useExternalCalendar()), true);
+        em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", event));
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", event), String.valueOf(settings.useExternalCalendar()), true);
         if (RoleUtils.roleExists(settings.getControlRole(), event)) {
-            em.appendField("Control Role", RoleUtils.getRoleNameFromID(settings.getControlRole(), event), true);
+            em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", event), RoleUtils.getRoleNameFromID(settings.getControlRole(), event), true);
         } else {
-            em.appendField("Control Role", "everyone", true);
+            em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", event), "everyone", true);
         }
         if (ChannelUtils.channelExists(settings.getDiscalChannel(), event)) {
-            em.appendField("DisCal Channel", ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), guildId), false);
+            em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", event), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), guildId), false);
         } else {
-            em.appendField("DisCal Channel", "All Channels", true);
+            em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", event), "All Channels", true);
         }
-        em.appendField("Simple Announcements", String.valueOf(settings.usingSimpleAnnouncements()), true);
-        em.appendField("Patron Guild", String.valueOf(settings.isPatronGuild()), true);
-        em.appendField("Dev Guild", String.valueOf(settings.isDevGuild()), true);
-        em.appendField("Max Calendars", String.valueOf(settings.getMaxCalendars()), true);
-        em.withFooterText("Be a patron today! https://www.patreon.com/Novafox");
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.SimpleAnn", event), String.valueOf(settings.usingSimpleAnnouncements()), true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Patron", event), String.valueOf(settings.isPatronGuild()), true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Dev", event), String.valueOf(settings.isDevGuild()), true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", event), String.valueOf(settings.getMaxCalendars()), true);
+        em.withFooterText("[" + MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + "](https://www.patreon.com/Novafox)");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event);
