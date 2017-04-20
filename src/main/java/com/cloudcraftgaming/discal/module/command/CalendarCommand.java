@@ -198,10 +198,10 @@ public class CalendarCommand implements ICommand {
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             PreCalendar preCalendar = CalendarCreator.getCreator().getPreCalendar(guildId);
             if (preCalendar.getCreatorMessage() != null) {
-				Message.editMessage(preCalendar.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Review", event), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar));
+				Message.editMessage(preCalendar.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Review", event), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId));
 				Message.deleteMessage(event);
 			} else {
-            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Review", event), event);
+            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId), MessageManager.getMessage("Creator.Calendar.Review", event), event);
 			}
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -219,17 +219,17 @@ public class CalendarCommand implements ICommand {
             if (response.isSuccessful()) {
                 if (response.isEdited()) {
                 	if (response.getCreatorMessage() != null) {
-						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), guildId));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), event);
+                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), guildId), MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", event), event);
 					}
                 } else {
                 	if (response.getCalendar() != null) {
-						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()));
+						Message.editMessage(response.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), guildId));
 						Message.deleteMessage(event);
 					} else {
-                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar()), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), event);
+                		Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), guildId), MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", event), event);
 					}
                 }
             } else {
@@ -293,7 +293,7 @@ public class CalendarCommand implements ICommand {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
 					CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(GeneralUtils.getContent(args, 1));
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
 					Message.deleteMessage(event);
 				} else {
 					String msg = MessageManager.getMessage("Creator.Calendar.Summary.O.Success", "%summary%", GeneralUtils.getContent(args, 1), event);
@@ -326,7 +326,7 @@ public class CalendarCommand implements ICommand {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                 CalendarCreator.getCreator().getPreCalendar(guildId).setDescription(GeneralUtils.getContent(args, 1));
                 if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.N.Success", event) + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.N.Success", event) + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
 					Message.deleteMessage(event);
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.O.Success", "%desc%", GeneralUtils.getContent(args, 1), event) + TIME_ZONE_DB, event);
@@ -361,14 +361,14 @@ public class CalendarCommand implements ICommand {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
 
                     if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
 						Message.deleteMessage(event);
 					} else {
                     	Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.O.Success", "%tz%", value, event), event);
 					}
                 } else {
                 	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
 						Message.deleteMessage(event);
 					} else {
                 		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), event);
@@ -399,7 +399,7 @@ public class CalendarCommand implements ICommand {
                 if (calendar.getCreatorMessage() != null) {
 					Message.deleteMessage(event);
 				} else {
-                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
+                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, guildId), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 				}
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);

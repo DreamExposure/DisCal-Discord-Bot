@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.EmbedBuilder;
@@ -18,21 +19,20 @@ public class CalendarMessageFormatter {
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
 
-    public static EmbedObject getCalendarLinkEmbed(Calendar cal) {
+    public static EmbedObject getCalendarLinkEmbed(Calendar cal, String guildId) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Guild Calendar");
-        em.appendField("Calendar Name/Summary", cal.getSummary(), true);
+        em.withTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", guildId));
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Summary", guildId), cal.getSummary(), true);
         try {
-            em.appendField("Description", cal.getDescription(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Description", guildId), cal.getDescription(), true);
         } catch (NullPointerException | IllegalArgumentException e) {
-            //Some error, desc probably never set, just ignore no need to email.
-            em.appendField("Description", "N/a", true);
+            //Some error, desc probably never set, just ignore no need to log.
         }
-        em.appendField("Timezone", cal.getTimeZone(), false);
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", guildId), cal.getTimeZone(), false);
         em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
-        em.withFooterText("Calendar ID: " + cal.getId());
+        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), guildId));
         em.withColor(56, 138, 237);
 
         return em.build();
@@ -43,29 +43,27 @@ public class CalendarMessageFormatter {
      * @param calendar The PreCalendar to create an EmbedObject for.
      * @return The EmbedObject for the PreCalendar.
      */
-    public static EmbedObject getPreCalendarEmbed(PreCalendar calendar) {
+    public static EmbedObject getPreCalendarEmbed(PreCalendar calendar, String guildId) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Calendar Info");
-        em.appendField("[R] Calendar Name/Summary", calendar.getSummary(), true);
+        em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", guildId));
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", guildId), calendar.getSummary(), true);
         if (calendar.getDescription() != null) {
-            em.appendField("[R] Calendar Description", calendar.getDescription(), false);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", guildId), calendar.getDescription(), false);
         } else {
-            em.appendField("[R] Calendar Description", "Error/Unset", false);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", guildId), "Error/Unset", false);
         }
         if (calendar.getTimezone() != null) {
-            em.appendField("[R] TimeZone", calendar.getTimezone(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", guildId), calendar.getTimezone(), true);
         } else {
-            em.appendField("[R] TimeZone", "Error/Unset", true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", guildId), "***UNSET***", true);
         }
         if (calendar.isEditing()) {
-            em.appendField("Calendar ID", calendar.getCalendarId(), true);
-        } else {
-            em.appendField("Calendar ID", "Unknown until creation complete", true);
-        }
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", guildId), calendar.getCalendarId(), true);
+        } //No else needed, just don't post it.
 
-        em.withFooterText("[R] means required, field needs a value.");
+        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Pre.Key", guildId));
         em.withColor(56, 138, 237);
 
         return em.build();

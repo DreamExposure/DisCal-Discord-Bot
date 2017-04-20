@@ -35,4 +35,24 @@ public class MessageManager {
 
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
 	}
+
+	public static String getMessage(String key, String guildId) {
+		Language lang = DatabaseManager.getManager().getSettings(guildId).getLang();
+		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+	}
+
+	public static String getMessage(String key, String var, String replace, String guildId) {
+		Language lang = DatabaseManager.getManager().getSettings(guildId).getLang();
+		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+	}
 }

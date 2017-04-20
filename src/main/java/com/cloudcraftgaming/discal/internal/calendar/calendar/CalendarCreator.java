@@ -46,12 +46,13 @@ public class CalendarCreator {
      * @return The PreCalendar object created.
      */
     public PreCalendar init(MessageReceivedEvent e, String calendarName, boolean handleCreatorMessage) {
-        if (!hasPreCalendar(e.getMessage().getGuild().getID())) {
-            PreCalendar calendar = new PreCalendar(e.getMessage().getGuild().getID(), calendarName);
+    	String guildId = e.getMessage().getGuild().getID();
+        if (!hasPreCalendar(guildId)) {
+            PreCalendar calendar = new PreCalendar(guildId, calendarName);
 
             if (handleCreatorMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
+					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, guildId), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
 					calendar.setCreatorMessage(msg);
 				} else {
             		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
@@ -63,7 +64,8 @@ public class CalendarCreator {
         return getPreCalendar(e.getMessage().getGuild().getID());
     }
 
-    public PreCalendar edit(MessageReceivedEvent event, boolean handleCreatorMessage) {
+    @SuppressWarnings("SameParameterValue")
+	public PreCalendar edit(MessageReceivedEvent event, boolean handleCreatorMessage) {
         String guildId = event.getMessage().getGuild().getID();
         if (!hasPreCalendar(guildId)) {
             //TODO: Support multiple calendars
@@ -80,7 +82,7 @@ public class CalendarCreator {
 
                 if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
+						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", event), event);

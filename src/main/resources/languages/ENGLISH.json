@@ -48,7 +48,17 @@
   "DisCal.DmAnnouncements.Off": "You will no longer receive announcement DMs for this guild!",
   "DisCal.DmAnnouncements.On": "You will now receive DMs for announcements from this guild!",
 
-
+  "Embed.Calendar.Link.Title": "Guild Calendar",
+  "Embed.Calendar.Link.Summary": "Calendar Name/Summary",
+  "Embed.Calendar.Link.Description": "Description",
+  "Embed.Calendar.Link.TimeZone": "TimeZone",
+  "Embed.Calendar.Link.CalendarId": "Calendar ID: %id%",
+  "Embed.Calendar.Pre.Title": "Calendar Info",
+  "Embed.Calendar.Pre.Summary": "[R] Calendar Name/Summary",
+  "Embed.Calendar.Pre.Description": "Calendar Description",
+  "Embed.Calendar.Pre.TimeZone": "[R] TimeZone",
+  "Embed.Calendar.Pre.CalendarId": "Calendar ID",
+  "Embed.Calendar.Pre.Key": "[R] means required, field needs a value.",
 
   "Notification.Args.Few": "You must specify a function to execute!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
