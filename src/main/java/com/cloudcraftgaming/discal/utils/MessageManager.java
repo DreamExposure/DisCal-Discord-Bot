@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 import java.io.BufferedReader;
@@ -49,6 +50,24 @@ public class MessageManager {
 	public static String getMessage(String key, String var, String replace, String guildId) {
 		Language lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+	}
+
+	public static String getMessage(String key, GuildSettings settings) {
+		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + settings.getLang().name() + ".json");
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+	}
+
+	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
+		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + settings.getLang().name() + ".json");
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
 		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);

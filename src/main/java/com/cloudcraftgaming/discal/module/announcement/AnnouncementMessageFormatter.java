@@ -6,10 +6,7 @@ import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.utils.ChannelUtils;
-import com.cloudcraftgaming.discal.utils.EventColor;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -38,20 +35,20 @@ public class AnnouncementMessageFormatter {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Announcement Info");
-        em.appendField("Announcement ID", a.getAnnouncementId().toString(), true);
-        em.appendField("Announcement Type", a.getAnnouncementType().name(), true);
+        em.withTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", a.getGuildId()));
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.ID", a.getGuildId()), a.getAnnouncementId().toString(), true);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Type", a.getGuildId()), a.getAnnouncementType().name(), true);
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-            em.appendField("Event ID", a.getEventId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Info.EventID", a.getGuildId()), a.getEventId(), true);
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-            em.appendField("Event Color", a.getEventColor().name(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Color", a.getGuildId()), a.getEventColor().name(), true);
         } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
-            em.appendField("Recurring Event ID", a.getEventId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", a.getGuildId()), a.getEventId(), true);
         }
-        em.appendField("Hours Before", String.valueOf(a.getHoursBefore()), true);
-        em.appendField("Minutes Before", String.valueOf(a.getMinutesBefore()), true);
-        em.appendField("In Channel (Name)", ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), a.getGuildId()), true);
-        em.appendField("Additional Info", a.getInfo(), false);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Hours", a.getGuildId()), String.valueOf(a.getHoursBefore()), true);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", a.getGuildId()), String.valueOf(a.getMinutesBefore()), true);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Channel", a.getGuildId()), ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), a.getGuildId()), true);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Info", a.getGuildId()), a.getInfo(), false);
         if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             EventColor c = a.getEventColor();
             em.withColor(c.getR(), c.getG(), c.getB());
@@ -71,12 +68,12 @@ public class AnnouncementMessageFormatter {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("Condensed Announcement Info");
-        em.appendField("Announcement ID", a.getAnnouncementId().toString(), false);
-        em.appendField("Time Before", condensedTime(a), false);
+        em.withTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", a.getGuildId()));
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", a.getGuildId()), a.getAnnouncementId().toString(), false);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Time", a.getGuildId()), condensedTime(a), false);
 
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-            em.appendField("Event ID", a.getEventId(), false);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.EventID", a.getGuildId()), a.getEventId(), false);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 //TODO: Handle multiple calendars...
@@ -84,18 +81,18 @@ public class AnnouncementMessageFormatter {
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 
                 if (event.getSummary() != null) {
-                    em.appendField("Event Summary", event.getSummary(), true);
+                    em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Summary", a.getGuildId()), event.getSummary(), true);
                 }
             } catch (IOException e) {
                 //Failed to get from google cal.
                 ExceptionHandler.sendException(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class);
             }
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-            em.appendField("Event Color", a.getEventColor().name(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", a.getGuildId()), a.getEventColor().name(), true);
         } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
-            em.appendField("Recurring Event ID", a.getEventId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.RecurID", a.getGuildId()), a.getEventId(), true);
         }
-        em.withFooterText("Type: " + a.getAnnouncementType().name());
+        em.withFooterText(MessageManager.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getAnnouncementType().name(), a.getGuildId()));
 
         if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             EventColor c = a.getEventColor();
@@ -118,22 +115,22 @@ public class AnnouncementMessageFormatter {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("!~Event Announcement~!");
+        em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
         if (event.getSummary() != null) {
-            em.appendField("Event Name/Summary", event.getSummary(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), event.getSummary(), true);
         }
         if (event.getDescription() != null) {
-            em.appendField("Event Description", event.getDescription(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), event.getDescription(), true);
         }
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-            em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                em.appendField("TimeZone", tz, true);
+                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
             } catch (Exception e1) {
-                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
             String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
@@ -145,16 +142,16 @@ public class AnnouncementMessageFormatter {
                 start = start + " (TZ UNKNOWN/ERROR)";
             }
 
-            em.appendField("Event Start", start, false);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
         }
 
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField("Event ID", event.getId(), false);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
         }
-        em.appendField("Additional Info", announcement.getInfo(), false);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
         em.withUrl(event.getHtmlLink());
         if (!settings.usingSimpleAnnouncements()) {
-            em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+            em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
         }
         try {
             EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
@@ -175,22 +172,22 @@ public class AnnouncementMessageFormatter {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle("!~Event Announcement~!");
+        em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
         if (event.getSummary() != null) {
-            em.appendField("Event Name/Summary", event.getSummary(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), event.getSummary(), true);
         }
         if (event.getDescription() != null) {
-            em.appendField("Event Description", event.getDescription(), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), event.getDescription(), true);
         }
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField("Event Date", EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-            em.appendField("Event Time", EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                em.appendField("TimeZone", tz, true);
+                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
             } catch (Exception e1) {
-                em.appendField("TimeZone", "Unknown *Error Occurred", true);
+                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
             String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
@@ -202,16 +199,16 @@ public class AnnouncementMessageFormatter {
                 start = start + " (TZ UNKNOWN/ERROR)";
             }
 
-            em.appendField("Event Start", start, false);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
         }
 
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField("Event ID", event.getId(), false);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
         }
-        em.appendField("Additional Info", announcement.getInfo(), false);
+        em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
         em.withUrl(event.getHtmlLink());
         if (!settings.usingSimpleAnnouncements()) {
-            em.withFooterText("Announcement ID: " + announcement.getAnnouncementId().toString());
+            em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
         }
         try {
             EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
@@ -223,7 +220,7 @@ public class AnnouncementMessageFormatter {
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
-        String msg = "Announcement in Guild: `" + guild.getName() + "`" + Message.lineBreak + Message.lineBreak + "You are receiving this DM because you enabled DM announcements for the respective guild." + Message.lineBreak + "To disable this, go to the guild and use `discal dmAnnouncements`";
+        String msg = MessageManager.getMessage("Embed.Announcement.Announce.Dm.Message", "%guild%", guild.getName(), settings);
 
         Message.sendDirectMessage(msg, em.build(), user);
     }
