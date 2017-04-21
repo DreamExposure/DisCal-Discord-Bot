@@ -10,7 +10,6 @@ import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -52,12 +51,12 @@ public class Authorization {
             CodeRequest cr = new CodeRequest();
             cr.client_id = clientData.getClientId();
             cr.scope = CalendarScopes.CALENDAR;
-            String json = new Gson().toJson(cr);
+            String json = Main.gson.toJson(cr);
             request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
 
             HttpResponse httpResponse = httpClient.execute(request);
 
-            CodeResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
+            CodeResponse response = Main.gson.fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
 
 
             //Send DM to user with code.
@@ -102,12 +101,12 @@ public class Authorization {
             arr.client_secret = clientData.getClientSecret();
             arr.refresh_token = encryption.decrypt(settings.getEncryptedRefreshToken());
 
-            String json = new Gson().toJson(arr);
+            String json = Main.gson.toJson(arr);
             request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
 
             HttpResponse httpResponse = httpClient.execute(request);
 
-            AuthRefreshResponse response = new Gson().fromJson(httpResponse.getEntity().toString(), AuthRefreshResponse.class);
+            AuthRefreshResponse response = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthRefreshResponse.class);
 
             //Update Db data.
             settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
@@ -135,7 +134,7 @@ public class Authorization {
 
             HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
 
-            String json = new Gson().toJson(apr);
+            String json = Main.gson.toJson(apr);
             request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
 
             //Execute
@@ -148,7 +147,7 @@ public class Authorization {
             } else if (httpResponse.getStatusLine().getStatusCode() == 400) {
                 try {
                     //See if auth is pending, if so, just reschedule.
-                    AuthPollResponseError apre = new Gson().fromJson(httpResponse.getEntity().toString(), AuthPollResponseError.class);
+                    AuthPollResponseError apre = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthPollResponseError.class);
                     if (apre.error.equalsIgnoreCase("authorization_pending")) {
                         //Response pending
                         PollManager.getManager().scheduleNextPoll(poll);
@@ -165,7 +164,7 @@ public class Authorization {
                 poll.setInterval(poll.getInterval() * 2);
             } else {
                 //Access granted
-                AuthPollResponseGrant aprg = new Gson().fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
+                AuthPollResponseGrant aprg = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
 
                 //Save credentials securely.
                 GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getID());
