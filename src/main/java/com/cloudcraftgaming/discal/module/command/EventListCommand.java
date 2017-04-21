@@ -123,7 +123,7 @@ public class EventListCommand implements ICommand {
                         //List events by Id only.
                         Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", event), event);
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e), event);
+                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, event.getMessage().getGuild().getID()), event);
                         }
                     }
                 } catch (IOException e) {

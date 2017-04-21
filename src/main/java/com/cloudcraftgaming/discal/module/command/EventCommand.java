@@ -318,7 +318,7 @@ public class EventCommand implements ICommand {
                 if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                     EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
                     if (response.isSuccessful()) {
-                        Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response), "Event confirmed!", event);
+                        Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response, guildId), "Event confirmed!", event);
                     } else {
                         Message.sendMessage("Event created failed!", event);
                     }
