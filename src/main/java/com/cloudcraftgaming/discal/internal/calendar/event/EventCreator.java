@@ -57,7 +57,7 @@ public class EventCreator {
             }
             if (handleMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Creator Initiated!", e);
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Create.Init", e), e);
 					event.setCreatorMessage(message);
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
@@ -88,7 +88,7 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event copied! Please specify the date/times for the event!", e);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Copy.Init", e), e);
 						event.setCreatorMessage(message);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
@@ -125,7 +125,7 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), "Event Editor Initiated!", e);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Edit.Init", e), e);
 						event.setCreatorMessage(message);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);

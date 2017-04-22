@@ -184,15 +184,15 @@ public class EventCommand implements ICommand {
     private void moduleCreate(MessageReceivedEvent event, CalendarData calendarData) {
         String guildId = event.getMessage().getGuild().getID();
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
-            Message.sendMessage("Event Creator already started!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", event), event);
         } else {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 PreEvent e = EventCreator.getCreator().init(event, true);
                 if (e.getCreatorMessage() == null) {
-					Message.sendMessage("Event Creator initiated! Please specify event summary.", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Event.Create.Init", event), event);
 				}
             } else {
-                Message.sendMessage("You cannot create an event when you do not have a calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
             }
         }
     }
@@ -207,22 +207,22 @@ public class EventCommand implements ICommand {
                         PreEvent preEvent = EventCreator.getCreator().init(event, eventId, true);
                         if (preEvent != null) {
                         	if (preEvent.getCreatorMessage() == null) {
-								Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Creator initialized! Event details copied! Please specify the date/times!", event);
+								Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), MessageManager.getMessage("Creator.Event.Copy.Init", event), event);
 							}
                         } else {
-                            Message.sendMessage("Something went wrong! I'm sorry, try again!", event);
+                            Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
                         }
                     } else {
-                        Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", event), event);
                     }
                 } else {
-                    Message.sendMessage("Please input the ID of the event to copy with `!event copy <ID>`", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Copy.Specify", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator already initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", event), event);
             }
         } else {
-            Message.sendMessage("Cannot copy event when you do not have a calendar!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
         }
     }
 
@@ -235,27 +235,27 @@ public class EventCommand implements ICommand {
                     if (EventUtils.eventExists(guildId, eventId)) {
                         PreEvent preEvent = EventCreator.getCreator().edit(event, eventId, true);
 						if (preEvent.getCreatorMessage() == null) {
-							Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), "Event Editor initiated! Edit the values and then confirm your edits with `!event confirm`", event);
+							Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent), MessageManager.getMessage("Creator.Event.Edit.Init", event), event);
 						}
                     } else {
-                        Message.sendMessage("I can't find that event! Are you sure the ID is correct?", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", event), event);
                     }
                 } else {
-                    Message.sendMessage("Please input the ID of the event to edit with `!event edit <ID>`", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Edit.Specify", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator already initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", event), event);
             }
         } else {
-            Message.sendMessage("Cannot edit event when you do not have a calendar", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
         }
     }
 
     private void moduleCancel(MessageReceivedEvent event) {
         if (EventCreator.getCreator().terminate(event)) {
-            Message.sendMessage("Event creation canceled! Event creator terminated!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Cancel.Success", event), event);
         } else {
-            Message.sendMessage("Event Creation could not be cancelled because it was never started!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
         }
     }
 
@@ -265,18 +265,18 @@ public class EventCommand implements ICommand {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                     if (EventUtils.deleteEvent(guildId, args[1])) {
-                        Message.sendMessage("Event successfully deleted!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Success", event), event);
                     } else {
-                        Message.sendMessage("Failed to delete event! Is the Event ID correct?", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", event), event);
                     }
                 } else {
-                    Message.sendMessage("You cannot delete an event while in the creator!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", event), event);
                 }
             } else {
-                Message.sendMessage("You cannot delete an event when you do not have a calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the ID of the event to delete with `!event delete <ID>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Specify", event), event);
         }
     }
 

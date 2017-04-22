@@ -29,6 +29,21 @@
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
   "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name, spaces allowed>` to create one!",
 
+  "Creator.Event.Create.Init": "Event Creator Initiated! Please specify event summary.",
+  "Creator.Event.Copy.Init": "Event copied! Please specify the date/times for the event!",
+  "Creator.Event.Copy.Specify": "Please specify the ID of the event to copy with `!event copy <ID>`",
+  "Creator.Event.Edit.Init": "Event Editor Initiated! Edit the values and then confirm your edits with `!event confirm`",
+  "Creator.Event.Edit.Specify": "Please specify the ID of the event to edit with `!event edit <ID>`",
+  "Creator.Event.Cancel.Success": "Event creation/edit canceled! Event Creator/Editor terminated!",
+  "Creator.Event.Delete.Success": "Event successfully deleted!",
+  "Creator.Event.Delete.Failure.Creator": "You cannot delete an event while in the creator!",
+  "Creator.Event.Delete.Specify": "Please specify the ID of the event to delete with `!event delete <ID>`",
+
+  "Creator.Event.AlreadyInit": "Event Creator/Editor already initialized!",
+  "Creator.Event.NotInit": "Event Function failed because the Creator/Editor has never been started!",
+  "Creator.Event.NoCalendar": "You cannot use this event function when you do not have a calendar!",
+  "Creator.Event.NotFound": "I can't find that event! Are you sure the ID is correct?",
+
   "Event.List.Args.Few": "Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`",
   "Event.List.Amount.Over": "You cannot list more than 15 events!",
   "Event.List.Amount.Under": "Valid numbers are only `1-15`",
