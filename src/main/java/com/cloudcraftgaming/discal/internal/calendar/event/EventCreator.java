@@ -186,19 +186,27 @@ public class EventCreator {
                     try {
                         Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
                         terminate(e);
-                        return new EventCreatorResponse(true, confirmed);
+                        EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
+                        response.setEdited(false);
+                        return response;
                     } catch (IOException ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to create event.", ex, this.getClass());
-                        return new EventCreatorResponse(false);
+                        EventCreatorResponse response = new EventCreatorResponse(false);
+                        response.setEdited(false);
+                        return response;
                     }
                 } else {
                     try {
                         Event confirmed = CalendarAuth.getCalendarService().events().update(calendarId, preEvent.getEventId(), event).execute();
                         terminate(e);
-                        return new EventCreatorResponse(true, confirmed);
+                        EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
+                        response.setEdited(true);
+                        return response;
                     } catch (IOException ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update event.", ex, this.getClass());
-                        return new EventCreatorResponse(false);
+                        EventCreatorResponse response = new EventCreatorResponse(false);
+                        response.setEdited(true);
+                        return response;
                     }
                 }
             }

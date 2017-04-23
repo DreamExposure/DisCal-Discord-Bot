@@ -284,9 +284,9 @@ public class EventCommand implements ICommand {
         String guildId = event.getMessage().getGuild().getID();
         if (args.length == 1) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
-                Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId)), "Confirm event `!event confirm` to add to calendar OR edit the values!", event);
+                Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId)), MessageManager.getMessage("Event.View.Creator.Confirm", event), event);
             } else {
-                Message.sendMessage("To review an event you must have the event creator initialized OR use `!event view <event ID>` to view an event in the calendar!", event);
+                Message.sendMessage(MessageManager.getMessage("Event.View.Args.Few", event), event);
             }
         } else if (args.length == 2) {
             //Try to get the event by ID.
@@ -298,16 +298,16 @@ public class EventCommand implements ICommand {
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent, guildId), event);
                     } catch (IOException e) {
                         //Event probably doesn't exist...
-                        Message.sendMessage("Oops! Something went wrong! Are you sure the event ID is correct?", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", event), event);
                     }
                 } else {
-                    Message.sendMessage("You cannot view an event when you do not have a calendar!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
                 }
             } else {
-                Message.sendMessage("The event creator is active! You cannot view another event while the creator is active!", event);
+                Message.sendMessage(MessageManager.getMessage("Event.View.Creator.Active", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the ID of the event you wish to view with `!event view <ID>`", event);
+            Message.sendMessage(MessageManager.getMessage("Event.View.Specify", event), event);
         }
     }
 
@@ -318,18 +318,22 @@ public class EventCommand implements ICommand {
                 if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                     EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
                     if (response.isSuccessful()) {
-                        Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response, guildId), "Event confirmed!", event);
+                    	if (!response.isEdited()) {
+							Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response, guildId), MessageManager.getMessage("Creator.Event.Confirm.Create", event), event);
+						} else {
+                    		Message.sendMessage(EventMessageFormatter.getEventConfirmationEmbed(response, guildId), MessageManager.getMessage("Creator.Event.Confirm.Edit", event), event);
+						}
                     } else {
-                        Message.sendMessage("Event created failed!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Confirm.Failure", event), event);
                     }
                 } else {
-                    Message.sendMessage("You cannot confirm an event when you do not have a calendar!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", event), event);
                 }
             } else {
-                Message.sendMessage("Required data not set! Please review event with `!event review`", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NoRequired", event), event);
             }
         } else {
-            Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
         }
     }
 
@@ -362,30 +366,24 @@ public class EventCommand implements ICommand {
                             eventDateTimeV.setDateTime(dateTimeV);
                             EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
 
-                            Message.sendMessage("Event start date (yyyy/MM/dd) set to: `" +
-                                    EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
-                                    + Message.lineBreak
-                                    + "Event start time (HH:mm) set to: `"
-                                    + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
-                                    + Message.lineBreak + Message.lineBreak
-                                    + "Please specify the following: "
-                                    + Message.lineBreak
-                                    + "End date & ending time(military) in `yyyy/MM/dd-HH:mm:ss` format with the command `!event end <DateAndTime>`", event);
+                            String msg = MessageManager.getMessage("Creator.Event.Start.Success", event);
+                            msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV));
+                            Message.sendMessage(msg, event);
                         } else {
                             //Oops! Time is in the past or after end...
-                            Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has a starting time that is after the ending time!!! Please make sure you typed everything correctly.", event);
+                            Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", event), event);
                         }
                     } catch (ParseException e) {
-                        Message.sendMessage("Invalid Date & Time specified!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", event), event);
                     }
                 } else {
-                    Message.sendMessage("Invalid date/time format! Use `yyyy/MM/dd-HH:mm:ss`", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the start date/time with `!event start <date/time>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Specify", event), event);
         }
     }
 
@@ -417,27 +415,25 @@ public class EventCommand implements ICommand {
                             EventDateTime eventDateTimeV = new EventDateTime();
                             eventDateTimeV.setDateTime(dateTimeV);
                             EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventDateTimeV);
-                            Message.sendMessage("Event end date (yyyy/MM/dd) set to: `" + EventMessageFormatter.getHumanReadableDate(eventDateTimeV) + "`"
-                                    + Message.lineBreak
-                                    + "Event end time (HH:mm) set to: `"
-                                    + EventMessageFormatter.getHumanReadableTime(eventDateTimeV) + "`"
-                                    + Message.lineBreak + Message.lineBreak
-                                    + "If you would like a specific color for your event use `!event color <name OR id>` to list all colors use `!event color list`" + Message.lineBreak + Message.lineBreak + "If you would like to make this event recurring please use `!event recur true`" + Message.lineBreak + Message.lineBreak + "Otherwise use `!event review` to review the event!", event);
+
+                            String msg = MessageManager.getMessage("Creator.Event.End.Success", event);
+                            msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV));
+                            Message.sendMessage(msg, event);
                         } else {
                             //Oops! Time is in the past or before the starting time...
-                            Message.sendMessage("Sorry >.< but I can't schedule an event that is in the past or has an ending before the starting time!!! Please make sure you typed everything correctly.", event);
+                            Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Failure.Illegal", event), event);
                         }
                     } catch (ParseException e) {
-                        Message.sendMessage("Invalid Date & Time specified!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", event), event);
                     }
                 } else {
-                    Message.sendMessage("Invalid date/time format! Use `yyyy/MM/dd-HH:mm:ss`", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the end/date time with `!event end <Date/Time>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Specify", event), event);
         }
     }
 
@@ -447,14 +443,12 @@ public class EventCommand implements ICommand {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String content = GeneralUtils.getContent(args, 1);
                 EventCreator.getCreator().getPreEvent(guildId).setSummary(content);
-                Message.sendMessage("Event summary set to: ```" + content + "```"
-                        + Message.lineBreak + Message.lineBreak
-                        + "Please specify the event description with `!event description <desc>`", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Success", "%summary%", GeneralUtils.getContent(args, 1), event), event);
             } else {
-                Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the event summary with `!event summary <summary, spaces allowed>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Specify", event), event);
         }
     }
 
@@ -464,16 +458,12 @@ public class EventCommand implements ICommand {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String content = GeneralUtils.getContent(args, 1);
                 EventCreator.getCreator().getPreEvent(guildId).setDescription(content);
-                Message.sendMessage("Event description set to: '" + content + "'"
-                        + Message.lineBreak + Message.lineBreak
-                        + "Please specify the following: "
-                        + Message.lineBreak
-                        + "Starting date & starting time(military) in `yyyy/MM/dd-HH:mm:ss` format with the command `!event start <DateAndTime>`", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Success", "%description%", content, event), event);
             } else {
-                Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify the description with `!event description <desc, spaces allowed>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Specify", event), event);
         }
     }
 
@@ -482,12 +472,12 @@ public class EventCommand implements ICommand {
         if (args.length == 2) {
             String value = args[1];
             if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
-
+				//TODO: Make this list pretty!!!
                 StringBuilder list = new StringBuilder("All Colors: ");
                 for (EventColor ec : EventColor.values()) {
                     list.append(Message.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
                 }
-                list.append(Message.lineBreak).append(Message.lineBreak).append("Use `!event color <name OR ID>` to set an event's color!");
+                list.append(Message.lineBreak).append(Message.lineBreak).append(MessageManager.getMessage("Creator.Event.Color.List", event));
 
                 Message.sendMessage(list.toString().trim(), event);
             } else {
@@ -496,16 +486,16 @@ public class EventCommand implements ICommand {
                     if (EventColor.exists(value)) {
                         EventColor color = EventColor.fromNameOrHexOrID(value);
                         EventCreator.getCreator().getPreEvent(guildId).setColor(color);
-                        Message.sendMessage("Event color set to: `" + color.name() + "`" + Message.lineBreak + Message.lineBreak + "Review the event with `!event review` to verify everything is correct and then confirm it with `!event confirm`", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Success", "%color%", color.name(), event), event);
                     } else {
-                        Message.sendMessage("Invalid/Unsupported color! Use `!event color list` to view all supported colors!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Invalid", event), event);
                     }
                 } else {
-                    Message.sendMessage("Event Creator has not been initialized! Create an event to initialize!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
                 }
             }
         } else {
-            Message.sendMessage("Please specify the color or function with `!event color <color/function>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Specify", event), event);
         }
     }
 
@@ -517,7 +507,7 @@ public class EventCommand implements ICommand {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 PreEvent pre = EventCreator.getCreator().getPreEvent(guildId);
                 if (pre.isEditing() && pre.getEventId().contains("_")) {
-                    Message.sendMessage("You cannot set the Recurring rules for a child event of a recurring event! Use `!event edit " + pre.getEventId().split("_")[0] + "` to edit the recurring settings!",event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split(" ")[0], event),event);
                     return;
                 }
                 try {

@@ -14,6 +14,7 @@ public class EventCreatorResponse {
     private IMessage creatorMessage;
 
     private Event event;
+    private boolean edited;
 
     /**
      * Creates a new Response.
@@ -31,6 +32,7 @@ public class EventCreatorResponse {
     EventCreatorResponse(Boolean _successful, Event _event) {
         successful = _successful;
         event = _event;
+        edited = false;
     }
 
     //Getters
@@ -44,6 +46,10 @@ public class EventCreatorResponse {
 
     public IMessage getCreatorMessage() {
     	return creatorMessage;
+	}
+
+	public boolean isEdited() {
+    	return edited;
 	}
 
     /**
@@ -66,4 +72,8 @@ public class EventCreatorResponse {
     public void setEvent(Event _event) {
         event = _event;
     }
+
+    public void setEdited(boolean _edited) {
+    	edited = _edited;
+	}
 }
