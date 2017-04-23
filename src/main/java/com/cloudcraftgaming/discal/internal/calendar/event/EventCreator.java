@@ -229,6 +229,13 @@ public class EventCreator {
         return null;
     }
 
+    public IMessage getCreatorMessage(String guildId) {
+    	if (hasPreEvent(guildId)) {
+    		return getPreEvent(guildId).getCreatorMessage();
+		}
+		return null;
+	}
+
     //Booleans/Checkers
     /**
      * Checks if the specified guild has a PreEvent in the creator.
@@ -243,4 +250,8 @@ public class EventCreator {
         }
         return false;
     }
+
+    public boolean hasCreatorMessage(String guildId) {
+    	return hasPreEvent(guildId) && getPreEvent(guildId).getCreatorMessage() != null;
+	}
 }
