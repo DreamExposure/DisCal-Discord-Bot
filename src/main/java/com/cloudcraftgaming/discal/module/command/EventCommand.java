@@ -514,19 +514,19 @@ public class EventCommand implements ICommand {
                     boolean value = Boolean.valueOf(valueString);
                     EventCreator.getCreator().getPreEvent(guildId).setShouldRecur(value);
                     if (value) {
-                        Message.sendMessage("Event will recur! Please specify the frequency it will recur with `!event freq <TYPE>`", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.True", event), event);
                     } else {
-                        Message.sendMessage("Event will not recur!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.False", event), event);
                     }
                 } catch (Exception e) {
                     //Could not convert to boolean
-                    Message.sendMessage("Acceptable values are only `true` or `false`", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator has not been initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify if the event should recur with `!event recur <true/false>`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Specify", event), event);
         }
     }
 
@@ -539,20 +539,20 @@ public class EventCommand implements ICommand {
                     if (EventFrequency.isValid(value)) {
                         EventFrequency freq = EventFrequency.fromValue(value);
                         EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setFrequency(freq);
-                        Message.sendMessage("Event frequency set to: `" + freq.name() + "`" + Message.lineBreak + "Please specify how many times this event should recur with `!event count <amount>` Use `-1` for infinite!", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Success", "%freq%", freq.name(), event), event);
                     } else {
                         String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
-                        Message.sendMessage("Invalid frequency type specified! Valid types are as follows: `" + values + "`", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", values, event), event);
                     }
                 } else {
-                    Message.sendMessage("Event is not recurring, use `!event recur true` to enable recurring!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator not initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
             String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
-            Message.sendMessage("Pleas specify the frequency with `!event freq <TYPE>`! Valid types are as follows: `" + values + "`", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, event), event);
         }
     }
 
@@ -564,18 +564,18 @@ public class EventCommand implements ICommand {
                     try {
                         Integer amount = Integer.valueOf(args[1]);
                         EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setCount(amount);
-                        Message.sendMessage("Event count set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "To set the interval (optionally) use `!event interval <amount`" + Message.lineBreak + Message.lineBreak + "The interval is how often to schedule following the frequency. (EX: if daily and interval is 2, it will be scheduled for every other day)", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Count.Success", "%count%", amount + "", event), event);
                     } catch (NumberFormatException e) {
-                        Message.sendMessage("Invalid value specified! Count must be a valid number (EX `1` or `24`)", event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", event), event);
                     }
                 } else {
-                    Message.sendMessage("Event is not set to recur! Use `!event recur true` to make the event recur!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", event), event);
                 }
             } else {
-                Message.sendMessage("Event Creator not initialized!", event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", event), event);
             }
         } else {
-            Message.sendMessage("Please specify how many times this event should recur with `!event count <amount>` Use `-1` for infinite!", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Cont.Specify", event), event);
         }
     }
 
@@ -587,18 +587,18 @@ public class EventCommand implements ICommand {
                     try {
                         Integer amount = Integer.valueOf(args[1]);
                         EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setInterval(amount);
-                        Message.sendMessage("Event interval set to: `" + amount + "`" + Message.lineBreak + Message.lineBreak + "Please use `!event review` to review that all info entered is correct and confirm with `!event confirm`", event);
+                        Message.sendMessage(MessageManager.getMessage("Creator.Event.Interval.Success", "%amount%", amount + "", event), event);
                     } catch (NumberFormatException e) {
-                        Message.sendMessage("Invalid value specified! Interval must be a valid number (EX `1` or `24`)", event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", event), event);
                     }
                 } else {
-                    Message.sendMessage("Event is not set to recur! Use `!event recur true` to make the event recur!", event);
+                    Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", event), event);
                 }
             } else {
                 Message.sendMessage("Event Creator not initialized!", event);
             }
         } else {
-            Message.sendMessage("Please specify the interval rule for the event with`!event interval <amount>` Defaulted to `1`" + Message.lineBreak + Message.lineBreak + "he interval is how often to schedule following the frequency. (EX: if daily and interval is 2, it will be scheduled for every other day)", event);
+            Message.sendMessage(MessageManager.getMessage("Creator.Event.Interval.Specify", event), event);
         }
     }
 }
