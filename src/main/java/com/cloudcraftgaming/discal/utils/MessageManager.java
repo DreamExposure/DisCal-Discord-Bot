@@ -18,23 +18,33 @@ import java.util.HashMap;
 @SuppressWarnings("unchecked")
 public class MessageManager {
 	public static String getMessage(String key, MessageReceivedEvent event) {
-		Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		try {
+			Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+			InputStream in = MessageManager.class.getClassLoader().getResourceAsStream("languages/" + lang.name() + ".json");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+			HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(event.getMessage().getAuthor(), "Fuck you messages", e, MessageManager.class);
+		}
+		return "***MESSAGES BROKE*** I'm working so hard, please understand :/";
 	}
 
 	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
-		Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		try {
+			Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+			InputStream in = MessageManager.class.getResourceAsStream("languages/" + lang.name() + ".json");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+			HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(event.getMessage().getAuthor(), "More damn errors", e, MessageManager.class);
+		}
+		return "***MESSAGES BROKE*** I know. Im sorry. Please. I am sorry.";
 	}
 
 	public static String getMessage(String key, String guildId) {
