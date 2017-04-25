@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.internal.file;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
-import com.cloudcraftgaming.discal.utils.Language;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -73,17 +72,23 @@ public class ReadFile {
         return settings;
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<String, String> readLangFile(Language lang) throws IOException, URISyntaxException {
-        File file;
-        switch (lang) {
-            default:
-                file = new File(ReadFile.class.getResource("/folder/ENGLISH.json").toURI());
-                break;
-        }
-        FileReader fr = new FileReader(file);
-        Map<String, String> map = Main.gson.fromJson(fr, HashMap.class);
-        fr.close();
-        return map;
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    public static Map<String, Map<String, String>> readAllLangFiles() throws IOException, URISyntaxException {
+    	Map<String, Map<String, String>> langs = new HashMap<>();
+
+        File langDir = new File(Main.langPath);
+
+        for (File f : langDir.listFiles()) {
+			// Open the file
+			FileInputStream fstream = new FileInputStream(f);
+			// Get the object of DataInputStream
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+
+			Map<String, String> map = Main.gson.fromJson(br, HashMap.class);
+			langs.put(map.get("Language"), map);
+		}
+        return langs;
     }
 }

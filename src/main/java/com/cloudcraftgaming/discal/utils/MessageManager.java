@@ -17,6 +17,10 @@ import java.util.HashMap;
  */
 @SuppressWarnings("unchecked")
 public class MessageManager {
+	private static final HashMap<String, HashMap<String, String>> langs = new HashMap<>();
+
+
+
 	public static String getMessage(String key, MessageReceivedEvent event) {
 		try {
 			Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
