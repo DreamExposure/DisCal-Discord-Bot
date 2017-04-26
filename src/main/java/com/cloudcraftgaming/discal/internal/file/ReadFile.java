@@ -2,8 +2,10 @@ package com.cloudcraftgaming.discal.internal.file;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,8 +87,9 @@ public class ReadFile {
 			DataInputStream in = new DataInputStream(fstream);
 			BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-
-			Map<String, String> map = Main.gson.fromJson(br, HashMap.class);
+			Type type = new TypeToken<Map<String, String>>() {
+			}.getType();
+			Map<String, String> map = Main.gson.fromJson(br, type);
 			langs.put(map.get("Language"), map);
 		}
         return langs;
