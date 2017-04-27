@@ -58,6 +58,11 @@ public class PermissionChecker {
         return true;
     }
 
+    public static boolean hasManageServerRole(MessageReceivedEvent event) {
+    	return event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
+				Permissions.MANAGE_SERVER);
+	}
+
     /**
      * Checks if the user sent the command in a DisCal channel (if set).
      * @param event The event received to check for the correct channel.

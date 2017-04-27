@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -58,6 +59,7 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("maxcal");
         ci.getSubCommands().add("leave");
         ci.getSubCommands().add("listGuilds");
+        ci.getSubCommands().add("reloadLangs");
 
         return ci;
     }
@@ -92,6 +94,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "listguilds":
 						moduleListGuilds(event);
+						break;
+					case "reloadlangs":
+						moduleReloadLangs(event);
 						break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
@@ -202,6 +207,15 @@ public class DevCommand implements ICommand {
 		}
 		Message.sendMessage(msg, event);
     	Message.sendMessage("All Guilds listed!", event);
+	}
+
+	private void moduleReloadLangs(MessageReceivedEvent event) {
+
+    	Message.sendMessage("Reloading lang files!", event);
+
+		MessageManager.reloadLangs();
+
+		Message.sendMessage("All lang files reloaded!", event);
 	}
 
 

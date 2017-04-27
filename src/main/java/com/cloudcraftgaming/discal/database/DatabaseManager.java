@@ -8,7 +8,6 @@ import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.Language;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -154,7 +153,7 @@ public class DatabaseManager {
                     ps.setString(6, settings.getControlRole());
                     ps.setString(7, settings.getDiscalChannel());
                     ps.setBoolean(8, settings.usingSimpleAnnouncements());
-                    ps.setString(9, settings.getLang().name());
+                    ps.setString(9, settings.getLang());
                     ps.setBoolean(10, settings.isPatronGuild());
                     ps.setBoolean(11, settings.isDevGuild());
                     ps.setInt(12, settings.getMaxCalendars());
@@ -182,7 +181,7 @@ public class DatabaseManager {
                     ps.setString(5, settings.getControlRole());
                     ps.setString(6, settings.getDiscalChannel());
                     ps.setBoolean(7, settings.usingSimpleAnnouncements());
-                    ps.setString(8, settings.getLang().name());
+                    ps.setString(8, settings.getLang());
                     ps.setBoolean(9, settings.isPatronGuild());
                     ps.setBoolean(10, settings.isDevGuild());
                     ps.setInt(11, settings.getMaxCalendars());
@@ -348,7 +347,7 @@ public class DatabaseManager {
                     settings.setControlRole(res.getString("CONTROL_ROLE"));
                     settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
                     settings.setSimpleAnnouncements(res.getBoolean("SIMPLE_ANNOUNCEMENT"));
-                    settings.setLang(Language.valueOf(res.getString("LANG")));
+                    settings.setLang(res.getString("LANG"));
                     settings.setPatronGuild(res.getBoolean("PATRON_GUILD"));
                     settings.setDevGuild(res.getBoolean("DEV_GUILD"));
                     settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));

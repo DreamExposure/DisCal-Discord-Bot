@@ -109,6 +109,9 @@
   "DisCal.SimpleAnnouncement": "Use simple announcements set to `%value%`",
   "DisCal.DmAnnouncements.Off": "You will no longer receive announcement DMs for this guild!",
   "DisCal.DmAnnouncements.On": "You will now receive DMs for announcements from this guild!",
+  "DisCal.Lang.Success": "Language successfully changed!",
+  "DisCal.Lang.Unsupported": "Sorry! That language may be misspelled or unsupported... %lb% supported languages are currently: %values% %lb% %lb% Don't see your language? Translate DisCal now at: <https://github.com/NovaFox161/DisCal-Discord-Bot>!",
+  "DisCal.Lang.Specify": "Please specify a supported language with `!discal lang <langName>` %lb% supported languages are currently: %values% %lb% %lb% Don't see your language? Translate DisCal now at: <https://github.com/NovaFox161/DisCal-Discord-Bot>!",
 
   "Embed.Calendar.Link.Title": "Guild Calendar",
   "Embed.Calendar.Link.Summary": "Calendar Name/Summary",

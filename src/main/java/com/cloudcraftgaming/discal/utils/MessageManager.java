@@ -1,15 +1,12 @@
 package com.cloudcraftgaming.discal.utils;
 
-import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,73 +34,119 @@ public class MessageManager {
 		}
 	}
 
+	public static List<String> getLangs() {
+		List<String> allLangs = new ArrayList<>();
+
+		allLangs.addAll(langs.keySet());
+
+		return allLangs;
+	}
+
+	public static boolean isSupported(String _value) {
+		for (String l : langs.keySet()) {
+			if (l.equalsIgnoreCase(_value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static String getValidLang(String _value) {
+		for (String l : langs.keySet()) {
+			if (l.equalsIgnoreCase(_value)) {
+				return l;
+			}
+		}
+		return "ENGLISH";
+	}
+
 
 
 	public static String getMessage(String key, MessageReceivedEvent event) {
 		try {
-			Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
-			InputStream in = MessageManager.class.getClassLoader().getResourceAsStream("languages/" + lang.name() + ".json");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+			Map<String, String> messages;
 
-			HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+			if (langs.containsKey(lang)) {
+				messages = langs.get(lang);
+			} else {
+				messages = langs.get("ENGLISH");
+			}
 
 			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "Fuck you messages", e, MessageManager.class);
+			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 1)", e, MessageManager.class);
 		}
-		return "***MESSAGES BROKE*** I'm working so hard, please understand :/";
+		return "***MESSAGES BROKE (ID 1)***";
 	}
 
 	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
 		try {
-			Language lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
-			InputStream in = MessageManager.class.getResourceAsStream("languages/" + lang.name() + ".json");
-			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
 
-			HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+			Map<String, String> messages;
+
+			if (langs.containsKey(lang)) {
+				messages = langs.get(lang);
+			} else {
+				messages = langs.get("ENGLISH");
+			}
 
 			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "More damn errors", e, MessageManager.class);
+			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 2)", e, MessageManager.class);
 		}
-		return "***MESSAGES BROKE*** I know. Im sorry. Please. I am sorry.";
+		return "***MESSAGES BROKE (ID 2)***";
 	}
 
 	public static String getMessage(String key, String guildId) {
-		Language lang = DatabaseManager.getManager().getSettings(guildId).getLang();
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+		Map<String, String> messages;
+
+		if (langs.containsKey(lang)) {
+			messages = langs.get(lang);
+		} else {
+			messages = langs.get("ENGLISH");
+		}
 
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, String var, String replace, String guildId) {
-		Language lang = DatabaseManager.getManager().getSettings(guildId).getLang();
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + lang.name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+		Map<String, String> messages;
+
+		if (langs.containsKey(lang)) {
+			messages = langs.get(lang);
+		} else {
+			messages = langs.get("ENGLISH");
+		}
 
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, GuildSettings settings) {
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + settings.getLang().name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		Map<String, String> messages;
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
+		if (langs.containsKey(settings.getLang())) {
+			messages = langs.get(settings.getLang());
+		} else {
+			messages = langs.get("ENGLISH");
+		}
 
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
-		InputStream in = MessageManager.class.getResourceAsStream("/languages/" + settings.getLang().name() + ".json");
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		Map<String, String> messages;
 
-		HashMap<String, String> messages = Main.gson.fromJson(reader, HashMap.class);
-
+		if (langs.containsKey(settings.getLang())) {
+			messages = langs.get(settings.getLang());
+		} else {
+			messages = langs.get("ENGLISH");
+		}
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
 	}
 }

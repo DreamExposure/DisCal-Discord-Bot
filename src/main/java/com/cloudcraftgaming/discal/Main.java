@@ -51,6 +51,12 @@ public class Main {
         DatabaseManager.getManager().connectToMySQL(botSettings);
         DatabaseManager.getManager().createTables();
 
+		// Make Gson
+		gson = new GsonBuilder().setPrettyPrinting().create();
+
+		//Load language files.
+		MessageManager.loadLangs();
+
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
         dispatcher.registerListener(new ReadyEventListener());
@@ -71,12 +77,6 @@ public class Main {
 
         //Accept commands
         ConsoleCommandExecutor.init();
-
-        // Make Gson
-        gson = new GsonBuilder().setPrettyPrinting().create();
-
-        //Load language files.
-		MessageManager.loadLangs();
 	}
 
     /**

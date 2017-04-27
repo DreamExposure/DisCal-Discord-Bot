@@ -1,7 +1,5 @@
 package com.cloudcraftgaming.discal.internal.data;
 
-import com.cloudcraftgaming.discal.utils.Language;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -23,7 +21,7 @@ public class GuildSettings {
     private String discalChannel;
 
     private boolean simpleAnnouncements;
-    private Language lang;
+    private String lang;
 
     private boolean patronGuild;
     private boolean devGuild;
@@ -44,7 +42,7 @@ public class GuildSettings {
         discalChannel = "all";
 
         simpleAnnouncements = false;
-        lang = Language.ENGLISH;
+        lang = "ENGLISH";
 
         patronGuild = false;
         devGuild = false;
@@ -84,7 +82,7 @@ public class GuildSettings {
         return simpleAnnouncements;
     }
 
-    public Language getLang() {
+    public String getLang() {
         return lang;
     }
 
@@ -147,7 +145,7 @@ public class GuildSettings {
         simpleAnnouncements = _simpleAnnouncements;
     }
 
-    public void setLang(Language _lang) {
+    public void setLang(String _lang) {
         lang = _lang;
     }
 

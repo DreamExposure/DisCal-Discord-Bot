@@ -57,6 +57,8 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().add("channel");
         info.getSubCommands().add("simpleAnnouncement");
         info.getSubCommands().add("dmAnnouncement");
+        info.getSubCommands().add("language");
+        info.getSubCommands().add("lang");
 
         return info;
     }
@@ -91,6 +93,12 @@ public class DisCalCommand implements ICommand {
                 case "dmannouncement":
                     moduleDmAnnouncements(event);
                     break;
+				case "language":
+					moduleLanguage(args, event);
+					break;
+				case "lang":
+					moduleLanguage(args, event);
+					break;
                 default:
                     Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
                     break;
@@ -183,7 +191,7 @@ public class DisCalCommand implements ICommand {
                         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                         settings.setDiscalChannel(channel.getID());
                         DatabaseManager.getManager().updateSettings(settings);
-                        Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), event), event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
                     } else {
                         Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", event), event);
                     }
@@ -254,4 +262,30 @@ public class DisCalCommand implements ICommand {
             Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
         }
     }
+
+    private void moduleLanguage(String[] args, MessageReceivedEvent event) {
+		if (PermissionChecker.hasManageServerRole(event)) {
+			if (args.length == 2) {
+				String value = args[1];
+				if (MessageManager.isSupported(value)) {
+					String guildId = event.getMessage().getGuild().getID();
+					String valid = MessageManager.getValidLang(value);
+					GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+
+					settings.setLang(valid);
+					DatabaseManager.getManager().updateSettings(settings);
+
+					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Success", settings), event);
+				} else {
+					String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
+					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Unsupported", "%values%", langs, event), event);
+				}
+			} else {
+				String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
+				Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Specify", "%values%", langs, event), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", event), event);
+		}
+	}
 }
