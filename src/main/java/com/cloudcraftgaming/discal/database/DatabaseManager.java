@@ -191,6 +191,7 @@ public class DatabaseManager {
 
                     ps.executeUpdate();
 
+                    ps.close();
                     statement.close();
                 }
                 return true;
@@ -242,6 +243,7 @@ public class DatabaseManager {
 
                     ps.executeUpdate();
 
+					ps.close();
                     statement.close();
                 }
                 return true;
@@ -313,6 +315,7 @@ public class DatabaseManager {
 
                     ps.executeUpdate();
 
+                    ps.close();
                     statement.close();
                 }
                 return true;
@@ -439,6 +442,7 @@ public class DatabaseManager {
     }
 
     public Integer getCalendarCount() {
+    	Integer amount = -1;
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
@@ -447,15 +451,17 @@ public class DatabaseManager {
                 String query = "SELECT * FROM " + calendarTableName + ";";
                 ResultSet res = statement.executeQuery(query);
                 if (res.last()) {
-                    return res.getRow();
+                    amount = res.getRow();
                 } else {
-                    return 0;
+                    amount = 0;
                 }
+
+                statement.close();
             }
         } catch (SQLException e) {
             ExceptionHandler.sendException(null, "Failed to get calendar count", e, this.getClass());
         }
-        return -1;
+        return amount;
     }
 
     /**
@@ -529,6 +535,8 @@ public class DatabaseManager {
                         announcements.add(announcement);
                     }
                 }
+
+                statement.close();
             }
         } catch (SQLException e) {
             ExceptionHandler.sendException(null, "Failed to get all guild announcements.", e, this.getClass());
@@ -538,6 +546,7 @@ public class DatabaseManager {
     }
 
     public Integer getAnnouncementCount() {
+    	Integer amount = -1;
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
@@ -546,15 +555,17 @@ public class DatabaseManager {
                 String query = "SELECT * FROM " + announcementTableName + ";";
                 ResultSet res = statement.executeQuery(query);
                 if (res.last()) {
-                    return res.getRow();
+                    amount = res.getRow();
                 } else {
-                    return 0;
+                    amount = 0;
                 }
+
+                statement.close();
             }
         } catch (SQLException e) {
             ExceptionHandler.sendException(null, "Failed to get announcement count", e, this.getClass());
         }
-        return -1;
+        return amount;
     }
 
     /**
