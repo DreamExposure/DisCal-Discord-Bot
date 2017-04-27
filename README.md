@@ -41,3 +41,19 @@ In addition to all of the features above, DisCal will automatically post an erro
 2. Add a test if applicable and run the existing tests with `mvn clean test` to make sure they pass
 3. Commit your changes and push to your fork `git push origin master`
 4. Create a new pull request and submit it back to us!
+
+## Translations
+
+As a calendar bot, DisCal reaches global use, and because of this, DisCal now allows users to select the language they wish to use, however, all of the languages and translations are manually made. So we, this DisCal Development Team, are looking for translators!!
+<br> <br>
+If you are interested in translating DisCal, just follow the format provided in the [TEMPLATE LANGUAGE JSON File.](https://github.com/NovaFox161/DisCal-Discord-Bot/blob/master/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
+
+### Guidelines
+
+We very much appreciate all of the translations we can get, but please follow the guidelines below so that we may ensure that we have high quality translations.
+
+1. Please be fluent in the language you are translating to. We will ***NOT*** accept any translations that are made through Google Translate.
+2. The general JSON format is `"key": "value"`, which means that the "key" must remain the same in all files, so ***DO NOT*** change the key, only the values.
+3. At the beginning of the file, you will see `"Language: "LANG_NAME_HERE"` Please change `LANG_NAME_HERE` to the language you are translating the file to!
+4. Please run your translated language file through this [Online JSON Parser](http://jsonparseronline.com/) If you cannot do that, the development team will.
+5. Contact the development team in our Discord guild for any additional help or info.
