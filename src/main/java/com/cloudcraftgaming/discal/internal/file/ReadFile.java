@@ -67,7 +67,9 @@ public class ReadFile {
 
             }
             //Close the input stream
+			br.close();
             in.close();
+            fstream.close();
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
@@ -91,6 +93,10 @@ public class ReadFile {
 			}.getType();
 			Map<String, String> map = Main.gson.fromJson(br, type);
 			langs.put(map.get("Language"), map);
+
+			br.close();
+			in.close();
+			fstream.close();
 		}
         return langs;
     }

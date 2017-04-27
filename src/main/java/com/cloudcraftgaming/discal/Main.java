@@ -9,6 +9,7 @@ import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.command.*;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import sx.blah.discord.api.ClientBuilder;
@@ -73,7 +74,10 @@ public class Main {
 
         // Make Gson
         gson = new GsonBuilder().setPrettyPrinting().create();
-    }
+
+        //Load language files.
+		MessageManager.loadLangs();
+	}
 
     /**
      * Creates the DisCal bot client.
