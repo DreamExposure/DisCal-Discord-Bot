@@ -85,19 +85,14 @@ public class ReadFile {
 
 			for (File f : langDir.listFiles()) {
 				// Open the file
-				FileInputStream fstream = new FileInputStream(f);
-				// Get the object of DataInputStream
-				DataInputStream in = new DataInputStream(fstream);
-				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				FileReader fr = new FileReader(f);
 
 				Type type = new TypeToken<Map<String, String>>() {
 				}.getType();
-				Map<String, String> map = Main.gson.fromJson(br, type);
+				Map<String, String> map = Main.gson.fromJson(fr, type);
 				langs.put(map.get("Language"), map);
 
-				br.close();
-				in.close();
-				fstream.close();
+				fr.close();
 			}
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "Failed to load lang files!", e, ReadFile.class);
