@@ -96,9 +96,7 @@ public class AnnouncementCommand implements ICommand {
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (args.length < 1) {
-				Message.sendMessage(
-						"Please specify the function you would like to execute. To view valid functions use `!help announcement`",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
 			} else if (args.length >= 1) {
 				String guildId = event.getMessage().getGuild().getID();
 				GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
@@ -159,32 +157,30 @@ public class AnnouncementCommand implements ICommand {
 						if (settings.isDevGuild()) {
 							moduleEdit(args, event);
 						} else {
-							Message.sendMessage("This option is disabled for testing only!", event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					case "devsub":
 						if (settings.isDevGuild()) {
 							moduleSubscribeRewrite(args, event);
 						} else {
-							Message.sendMessage("This option is disabled for testing only!", event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					case "devunsub":
 						if (settings.isDevGuild()) {
 							moduleUnsubscribeRewrite(args, event);
 						} else {
-							Message.sendMessage("This option is disabled for testing only!", event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					default:
-						Message.sendMessage(
-								"Invalid sub command! Use `!help announcement` to view valid sub commands!", event);
+						Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
 						break;
 				}
 			}
 		} else {
-			Message
-					.sendMessage("You do not have sufficient permissions to use this DisCal command!", event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
 		}
 		return false;
 	}
