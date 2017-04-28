@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.file;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.Message;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
@@ -86,6 +87,17 @@ public class ReadFile {
 			for (File f : langDir.listFiles()) {
 				// Open the file
 				FileReader fr = new FileReader(f);
+
+				//Debug shits
+				BufferedReader br = new BufferedReader(fr);
+
+				String line;
+				StringBuilder res = new StringBuilder();
+				while((line = br.readLine()) != null)
+					res.append(Message.lineBreak).append(line);
+
+				ExceptionHandler.sendDebug(null, res.toString(), "What Lang files read as.", ReadFile.class);
+
 
 				Type type = new TypeToken<Map<String, String>>() {
 				}.getType();

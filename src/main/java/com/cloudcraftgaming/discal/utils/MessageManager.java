@@ -22,11 +22,13 @@ public class MessageManager {
 		langs = ReadFile.readAllLangFiles();
 	}
 
-	public static void reloadLangs() {
+	public static boolean reloadLangs() {
 		try {
 			langs = ReadFile.readAllLangFiles();
+			return true;
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "Failed to reload lang files!", e, MessageManager.class);
+			return false;
 		}
 	}
 

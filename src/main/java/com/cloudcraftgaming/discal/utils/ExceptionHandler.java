@@ -60,4 +60,30 @@ public class ExceptionHandler {
 
         Message.sendMessage(em.build(), "```" + error + "```", channel);
     }
+
+    public static void sendDebug(@Nullable IUser author, String message, @Nullable String info, Class clazz) {
+		IUser bot = Main.getSelfUser();
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(bot.getAvatarURL());
+		if (author != null) {
+			em.withAuthorName(author.getName());
+			em.withThumbnail(author.getAvatarURL());
+		}
+		em.withColor(239, 15, 0);
+		em.withFooterText(clazz.getName());
+
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+
+		em.appendField("Time", timeStamp, true);
+		if (info != null) {
+			em.appendField("Additional Info", info, true);
+		}
+
+		//Get DisCal guild and channel..
+		IGuild guild = Main.client.getGuildByID("266063520112574464");
+		IChannel channel = guild.getChannelByID("302249332244217856");
+
+		Message.sendMessage(em.build(), "```" + message + "```", channel);
+	}
 }
