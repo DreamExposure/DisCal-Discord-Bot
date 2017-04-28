@@ -9,7 +9,6 @@ import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RequestBuffer;
 
@@ -195,17 +194,17 @@ public class DevCommand implements ICommand {
 	private void moduleListGuilds(MessageReceivedEvent event) {
 
     	Message.sendMessage("Sending a list of all Guilds! This may take awhile...", event);
-    	String msg = "";
+    	StringBuilder msg = new StringBuilder();
 
     	for (IGuild g : Main.client.getGuilds()) {
-    		msg = msg + Message.lineBreak + g.getName() + " | " + g.getID() + " | " + g.getTotalMemberCount() + " | Bots:" + botPercent(g) + "%";
+    		msg.append(Message.lineBreak).append(g.getName()).append(" | ").append(g.getID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
 
     		if (msg.length() >= 1500) {
-    			Message.sendMessage(msg, event);
-    			msg = "";
+    			Message.sendMessage(msg.toString(), event);
+    			msg = new StringBuilder();
 			}
 		}
-		Message.sendMessage(msg, event);
+		Message.sendMessage(msg.toString(), event);
     	Message.sendMessage("All Guilds listed!", event);
 	}
 
@@ -219,13 +218,7 @@ public class DevCommand implements ICommand {
 	}
 
 
-	private int botPercent(IGuild g) {
-    	int bots = 0;
-    	for (IUser u : g.getUsers()) {
-    		if (u.isBot()) {
-    			bots++;
-			}
-		}
-		return Math.round(bots / g.getTotalMemberCount() * 100);
+	private long botPercent(IGuild g) {
+		return g.getUsers().stream().filter(u -> u.isBot()).count() * 100 / g.getTotalMemberCount();
 	}
 }

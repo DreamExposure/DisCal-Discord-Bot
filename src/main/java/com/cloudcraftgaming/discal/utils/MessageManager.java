@@ -19,11 +19,7 @@ public class MessageManager {
 	private static Map<String, Map<String, String>> langs;
 
 	public static void loadLangs() {
-		try {
-			langs = ReadFile.readAllLangFiles();
-		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to load lang files!", e, MessageManager.class);
-		}
+		langs = ReadFile.readAllLangFiles();
 	}
 
 	public static void reloadLangs() {
@@ -67,7 +63,7 @@ public class MessageManager {
 			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
 			Map<String, String> messages;
 
-			if (langs.containsKey(lang)) {
+			if (lang != null && langs.containsKey(lang)) {
 				messages = langs.get(lang);
 			} else {
 				messages = langs.get("ENGLISH");
@@ -86,7 +82,7 @@ public class MessageManager {
 
 			Map<String, String> messages;
 
-			if (langs.containsKey(lang)) {
+			if (lang != null && langs.containsKey(lang)) {
 				messages = langs.get(lang);
 			} else {
 				messages = langs.get("ENGLISH");
@@ -104,7 +100,7 @@ public class MessageManager {
 
 		Map<String, String> messages;
 
-		if (langs.containsKey(lang)) {
+		if (lang != null && langs.containsKey(lang)) {
 			messages = langs.get(lang);
 		} else {
 			messages = langs.get("ENGLISH");
@@ -118,7 +114,7 @@ public class MessageManager {
 
 		Map<String, String> messages;
 
-		if (langs.containsKey(lang)) {
+		if (lang != null && langs.containsKey(lang)) {
 			messages = langs.get(lang);
 		} else {
 			messages = langs.get("ENGLISH");
@@ -130,7 +126,7 @@ public class MessageManager {
 	public static String getMessage(String key, GuildSettings settings) {
 		Map<String, String> messages;
 
-		if (langs.containsKey(settings.getLang())) {
+		if (settings.getLang() != null && langs.containsKey(settings.getLang())) {
 			messages = langs.get(settings.getLang());
 		} else {
 			messages = langs.get("ENGLISH");
@@ -142,7 +138,7 @@ public class MessageManager {
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
 		Map<String, String> messages;
 
-		if (langs.containsKey(settings.getLang())) {
+		if (settings.getLang() != null && langs.containsKey(settings.getLang())) {
 			messages = langs.get(settings.getLang());
 		} else {
 			messages = langs.get("ENGLISH");

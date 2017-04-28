@@ -25,7 +25,7 @@ import sx.blah.discord.util.DiscordException;
  */
 @SuppressWarnings("SameParameterValue")
 public class Main {
-	public static String langPath = "/languages/";
+	public static String langPath = "languages/";
 
     public static String version = "Beta 2.3.0";
     public static IDiscordClient client;
@@ -51,12 +51,6 @@ public class Main {
         DatabaseManager.getManager().connectToMySQL(botSettings);
         DatabaseManager.getManager().createTables();
 
-		// Make Gson
-		gson = new GsonBuilder().setPrettyPrinting().create();
-
-		//Load language files.
-		MessageManager.loadLangs();
-
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
         dispatcher.registerListener(new ReadyEventListener());
@@ -77,6 +71,12 @@ public class Main {
 
         //Accept commands
         ConsoleCommandExecutor.init();
+
+		// Make Gson
+		gson = new GsonBuilder().setPrettyPrinting().create();
+
+		//Load language files.
+		MessageManager.loadLangs();
 	}
 
     /**

@@ -2,11 +2,11 @@ package com.cloudcraftgaming.discal.internal.file;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,26 +77,30 @@ public class ReadFile {
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    public static Map<String, Map<String, String>> readAllLangFiles() throws IOException, URISyntaxException {
+    public static Map<String, Map<String, String>> readAllLangFiles() {
     	Map<String, Map<String, String>> langs = new HashMap<>();
 
-        File langDir = new File(Main.langPath);
+    	try {
+			File langDir = new File(Main.langPath);
 
-        for (File f : langDir.listFiles()) {
-			// Open the file
-			FileInputStream fstream = new FileInputStream(f);
-			// Get the object of DataInputStream
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			for (File f : langDir.listFiles()) {
+				// Open the file
+				FileInputStream fstream = new FileInputStream(f);
+				// Get the object of DataInputStream
+				DataInputStream in = new DataInputStream(fstream);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-			Type type = new TypeToken<Map<String, String>>() {
-			}.getType();
-			Map<String, String> map = Main.gson.fromJson(br, type);
-			langs.put(map.get("Language"), map);
+				Type type = new TypeToken<Map<String, String>>() {
+				}.getType();
+				Map<String, String> map = Main.gson.fromJson(br, type);
+				langs.put(map.get("Language"), map);
 
-			br.close();
-			in.close();
-			fstream.close();
+				br.close();
+				in.close();
+				fstream.close();
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to load lang files!", e, ReadFile.class);
 		}
         return langs;
     }
