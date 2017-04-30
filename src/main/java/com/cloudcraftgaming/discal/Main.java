@@ -11,7 +11,6 @@ import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.command.*;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -25,8 +24,6 @@ import sx.blah.discord.util.DiscordException;
  */
 @SuppressWarnings("SameParameterValue")
 public class Main {
-	public static String langPath = "languages/";
-
     public static String version = "Beta 2.3.0";
     public static IDiscordClient client;
     public static BotSettings botSettings;
@@ -73,7 +70,7 @@ public class Main {
         ConsoleCommandExecutor.init();
 
 		// Make Gson
-		gson = new GsonBuilder().setPrettyPrinting().create();
+		gson = new Gson();
 
 		//Load language files.
 		MessageManager.loadLangs();

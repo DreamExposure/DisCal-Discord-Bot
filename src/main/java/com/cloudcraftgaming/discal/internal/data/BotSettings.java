@@ -15,6 +15,8 @@ public class BotSettings {
     private String dbUser;
     private String dbPass;
 
+    private String langPath;
+
     private String botsPwToken;
 
     private String googleClientId;
@@ -50,6 +52,10 @@ public class BotSettings {
     public String getDbPass() {
         return dbPass;
     }
+
+    public String getLangPath() {
+    	return langPath;
+	}
 
     public String getBotsPwToken() {
         return botsPwToken;
@@ -95,6 +101,10 @@ public class BotSettings {
     public void setDbPass(String _pass) {
         dbPass = _pass;
     }
+
+    public void setLangPath(String _path) {
+    	langPath = _path;
+	}
 
     public void setBotsPwToken(String _token) {
         botsPwToken = _token;
