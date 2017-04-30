@@ -52,7 +52,7 @@ public class Announce extends TimerTask {
                                 Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                 Long difference = minutesToEvent - announcementTime;
                                 if (difference >= 0) {
-                                    if (difference <= 10) {
+                                    if (difference <= 5) {
                                         //Right on time
                                         sendAnnouncementMessage(a, event, data, settings);
 
@@ -91,7 +91,7 @@ public class Announce extends TimerTask {
                                         Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
                                         Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                         Long difference = minutesToEvent - announcementTime;
-                                        if (difference >= 0 && difference <= 10) {
+                                        if (difference >= 0 && difference <= 5) {
                                             //Right on time, let's check if universal or color specific.
                                             if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
                                                 sendAnnouncementMessage(a, event, data, settings);
