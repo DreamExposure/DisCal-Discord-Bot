@@ -121,7 +121,7 @@ public class DisCalCommand implements ICommand {
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", event), DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", event), DatabaseManager.getManager().getAnnouncementCount() + "", true);
 		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "", event), guild.getShard().getResponseTime() + "ms", false);
-        em.withFooterText("[" + MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + "](https://www.patreon.com/Novafox)");
+        em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event);
@@ -238,7 +238,7 @@ public class DisCalCommand implements ICommand {
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Dev", event), String.valueOf(settings.isDevGuild()), true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", event), String.valueOf(settings.getMaxCalendars()), true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Language", event), settings.getLang(), true);
-        em.withFooterText("[" + MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + "](https://www.patreon.com/Novafox)");
+        em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event);
