@@ -4,7 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class HelpCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         if (args.length < 1) {
             EmbedBuilder em = new EmbedBuilder();
-            em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+            em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
             em.withAuthorName("DisCal");
             em.withTitle("DisCal Command Help");
             for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
@@ -89,7 +89,7 @@ public class HelpCommand implements ICommand {
     //Embed formatters
     private EmbedObject getCommandInfoEmbed(ICommand cmd) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.appendField("Command", cmd.getCommand(), true);
         em.appendField("Description", cmd.getCommandInfo().getDescription(), true);

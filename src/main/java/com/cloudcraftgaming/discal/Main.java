@@ -85,7 +85,7 @@ public class Main {
      */
     private static IDiscordClient createClient(String token, boolean login) {
         ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
-        clientBuilder.withToken(token); // Adds the login info to the builder
+        clientBuilder.withToken(token).withRecommendedShardCount(); // Adds the login info to the builder
         try {
             if (login) {
                 return clientBuilder.login();

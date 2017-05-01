@@ -33,7 +33,7 @@ public class AnnouncementMessageFormatter {
      */
     public static EmbedObject getFormatAnnouncementEmbed(Announcement a) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", a.getGuildId()));
         em.appendField(MessageManager.getMessage("Embed.Announcement.Info.ID", a.getGuildId()), a.getAnnouncementId().toString(), true);
@@ -66,7 +66,7 @@ public class AnnouncementMessageFormatter {
      */
     public static EmbedObject getCondensedAnnouncementEmbed(Announcement a) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", a.getGuildId()));
         em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", a.getGuildId()), a.getAnnouncementId().toString(), false);
@@ -113,7 +113,7 @@ public class AnnouncementMessageFormatter {
      */
     static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
         if (event.getSummary() != null) {
@@ -163,14 +163,14 @@ public class AnnouncementMessageFormatter {
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
-        IChannel channel = guild.getChannelByID(announcement.getAnnouncementChannelId());
+        IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 
         Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
         if (event.getSummary() != null) {
@@ -241,7 +241,7 @@ public class AnnouncementMessageFormatter {
         StringBuilder userMentions = new StringBuilder();
         for (String userId : a.getSubscriberUserIds()) {
             try {
-                IUser user = guild.getUserByID(userId);
+                IUser user = guild.getUserByID(Long.valueOf(userId));
                 if (user != null) {
                     userMentions.append(user.getName()).append(" ");
                 }
@@ -260,7 +260,7 @@ public class AnnouncementMessageFormatter {
                 mentionHere = true;
             } else {
                 try {
-                    IRole role = guild.getRoleByID(roleId);
+                    IRole role = guild.getRoleByID(Long.valueOf(roleId));
                     if (role != null) {
                         roleMentions.append(role.getName()).append(" ");
                     }
@@ -285,7 +285,7 @@ public class AnnouncementMessageFormatter {
         StringBuilder userMentions = new StringBuilder();
         for (String userId : a.getSubscriberUserIds()) {
             try {
-                IUser user = guild.getUserByID(userId);
+                IUser user = guild.getUserByID(Long.valueOf(userId));
                 if (user != null) {
                     userMentions.append(user.mention(true)).append(" ");
                 }
@@ -304,7 +304,7 @@ public class AnnouncementMessageFormatter {
                 mentionHere = true;
             } else {
                 try {
-                    IRole role = guild.getRoleByID(roleId);
+                    IRole role = guild.getRoleByID(Long.valueOf(roleId));
                     if (role != null) {
                         roleMentions.append(role.mention()).append(" ");
                     }

@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.module.misc;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import sx.blah.discord.handle.obj.Status;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -40,7 +39,7 @@ public class StatusChanger extends TimerTask {
         status = status.replace("%guCount%", Main.client.getGuilds().size() + "");
         status = status.replace("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
         status = status.replace("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
-        Main.client.changeStatus(Status.game(status));
+        Main.client.changePlayingText(status);
 
         //Set new index.
         if (index + 1 >= statuses.size()) {

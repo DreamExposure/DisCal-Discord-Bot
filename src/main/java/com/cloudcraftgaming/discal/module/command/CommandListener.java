@@ -4,7 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ class CommandListener {
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
-            if (event.getMessage() != null && event.getMessage().getGuild() != null && event.getMessage().getChannel() != null && !event.getMessage().getChannel().isPrivate() && event.getMessage().getContent() != null && event.getMessage().getContent().length() > 0) {
+            if (event.getMessage() != null && event.getGuild() != null && event.getChannel() != null && !event.getChannel().isPrivate() && event.getMessage().getContent() != null && event.getMessage().getContent().length() > 0) {
                 //Message is a valid guild message (not DM). Check if in correct channel.
                 if (PermissionChecker.inCorrectChannel(event) && event.getMessage().getContent().startsWith("!")) {
                     //Prefixed with ! which should mean it is a command, convert and confirm.
@@ -49,7 +49,7 @@ class CommandListener {
                         //Only command... no args.
                         cmd.issueCommand(argsOr[0].replaceAll("!", ""), new String[0], event);
                     }
-                } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getID() + ">"))) {
+                } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getStringID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getStringID() + ">"))) {
                     String[] argsOr = event.getMessage().getContent().split(" ");
                     if (argsOr.length > 2) {
                         ArrayList<String> argsOr2 = new ArrayList<>();
@@ -68,7 +68,7 @@ class CommandListener {
                 }
             }
         } catch (Exception e) {
-            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Command error; event message: " + event.getMessage().getContent(), e, this.getClass());
+            ExceptionHandler.sendException(event.getAuthor(), "Command error; event message: " + event.getMessage().getContent(), e, this.getClass());
         }
     }
 }

@@ -6,7 +6,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.Permissions;
 
@@ -84,7 +84,7 @@ public class CalendarCommand implements ICommand {
             if (args.length < 1) {
                 Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
             } else if (args.length >= 1) {
-                String guildId = event.getMessage().getGuild().getID();
+                long guildId = event.getGuild().getLongID();
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 //TODO: Add support for multiple calendars...
                 CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
@@ -142,7 +142,7 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleCreate(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
 				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.AlreadyInit", event));
@@ -170,7 +170,7 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleCancel(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	IMessage message = CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage();
             if (CalendarCreator.getCreator().terminate(event)) {
@@ -194,14 +194,14 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleView(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             PreCalendar preCalendar = CalendarCreator.getCreator().getPreCalendar(guildId);
             if (preCalendar.getCreatorMessage() != null) {
-				Message.editMessage(preCalendar.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Review", event), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId));
+				Message.editMessage(preCalendar.getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Review", event), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar));
 				Message.deleteMessage(event);
 			} else {
-            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId), MessageManager.getMessage("Creator.Calendar.Review", event), event);
+            	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Review", event), event);
 			}
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
@@ -213,7 +213,7 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleConfirm(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             CalendarCreatorResponse response = CalendarCreator.getCreator().confirmCalendar(event);
             if (response.isSuccessful()) {
@@ -259,7 +259,7 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleDelete(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getMessage().getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
 				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Delete.Failure.InCreator", event));
@@ -288,12 +288,12 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleSummary(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length > 1) {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
 					CalendarCreator.getCreator().getPreCalendar(guildId).setSummary(GeneralUtils.getContent(args, 1));
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Summary.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 					Message.deleteMessage(event);
 				} else {
 					String msg = MessageManager.getMessage("Creator.Calendar.Summary.O.Success", "%summary%", GeneralUtils.getContent(args, 1), event);
@@ -321,12 +321,12 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleDescription(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length > 1) {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
                 CalendarCreator.getCreator().getPreCalendar(guildId).setDescription(GeneralUtils.getContent(args, 1));
                 if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.N.Success", event) + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
+					Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.Description.N.Success", event) + TIME_ZONE_DB, CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 					Message.deleteMessage(event);
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.O.Success", "%desc%", GeneralUtils.getContent(args, 1), event) + TIME_ZONE_DB, event);
@@ -353,7 +353,7 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleTimezone(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             String value = args[1];
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
@@ -361,14 +361,14 @@ public class CalendarCommand implements ICommand {
                     CalendarCreator.getCreator().getPreCalendar(guildId).setTimezone(value);
 
                     if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.N.Success", event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 						Message.deleteMessage(event);
 					} else {
                     	Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.O.Success", "%tz%", value, event), event);
 					}
                 } else {
                 	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId), guildId));
+						Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), CalendarMessageFormatter.getPreCalendarEmbed(CalendarCreator.getCreator().getPreCalendar(guildId)));
 						Message.deleteMessage(event);
 					} else {
                 		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.TimeZone.Invalid", "%tz_db%", TIME_ZONE_DB, event), event);
@@ -392,14 +392,14 @@ public class CalendarCommand implements ICommand {
     }
 
     private void moduleEdit(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (!CalendarCreator.getCreator().hasPreCalendar(guildId)) {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 PreCalendar calendar = CalendarCreator.getCreator().edit(event, true);
                 if (calendar.getCreatorMessage() != null) {
 					Message.deleteMessage(event);
 				} else {
-                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, guildId), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
+                	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 				}
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);

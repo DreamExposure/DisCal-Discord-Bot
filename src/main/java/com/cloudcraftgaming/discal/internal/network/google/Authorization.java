@@ -16,7 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
@@ -61,7 +61,7 @@ public class Authorization {
 
             //Send DM to user with code.
             EmbedBuilder em = new EmbedBuilder();
-            em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+            em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
             em.withAuthorName("DisCal");
             em.withTitle("User Auth");
             em.appendField("Code", response.user_code, true);
@@ -70,11 +70,11 @@ public class Authorization {
             em.withUrl(response.verification_url);
             em.withColor(36, 153, 153);
 
-            IUser user = event.getMessage().getAuthor();
+            IUser user = event.getAuthor();
             Message.sendDirectMessage("Please authorize DisCal access to your Google Calendar so that it can use your external calendar!", em.build(), user);
 
             //Start timer to poll Google Cal for auth
-            Poll poll = new Poll(user, event.getMessage().getGuild());
+            Poll poll = new Poll(user, event.getGuild());
 
             poll.setDevice_code(response.device_code);
             poll.setRemainingSeconds(response.expires_in);
@@ -84,8 +84,8 @@ public class Authorization {
 
         } catch (Exception e) {
             //Failed, report issue to dev.
-            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to request Google Access Code", e, this.getClass());
-            IUser u = event.getMessage().getAuthor();
+            ExceptionHandler.sendException(event.getAuthor(), "Failed to request Google Access Code", e, this.getClass());
+            IUser u = event.getAuthor();
             Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", u);
         }
     }
@@ -167,7 +167,7 @@ public class Authorization {
                 AuthPollResponseGrant aprg = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
 
                 //Save credentials securely.
-                GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getID());
+                GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
                 AESEncryption encryption = new AESEncryption(gs);
                 gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
                 gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
@@ -179,7 +179,7 @@ public class Authorization {
         } catch (Exception e) {
             //Handle exception.
             ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass());
-            Message.sendDirectMessage("Uh oh... An error has occured! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
+            Message.sendDirectMessage("Uh oh... An error has occurred! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
 
         }
     }

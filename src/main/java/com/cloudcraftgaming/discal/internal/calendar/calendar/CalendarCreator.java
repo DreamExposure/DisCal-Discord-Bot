@@ -9,7 +9,7 @@ import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
@@ -46,13 +46,13 @@ public class CalendarCreator {
      * @return The PreCalendar object created.
      */
     public PreCalendar init(MessageReceivedEvent e, String calendarName, boolean handleCreatorMessage) {
-    	String guildId = e.getMessage().getGuild().getID();
+    	long guildId = e.getMessage().getGuild().getLongID();
         if (!hasPreCalendar(guildId)) {
             PreCalendar calendar = new PreCalendar(guildId, calendarName);
 
             if (handleCreatorMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, guildId), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
+					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
 					calendar.setCreatorMessage(msg);
 				} else {
             		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
@@ -61,12 +61,12 @@ public class CalendarCreator {
             calendars.add(calendar);
             return calendar;
         }
-        return getPreCalendar(e.getMessage().getGuild().getID());
+        return getPreCalendar(e.getMessage().getGuild().getLongID());
     }
 
     @SuppressWarnings("SameParameterValue")
 	public PreCalendar edit(MessageReceivedEvent event, boolean handleCreatorMessage) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getMessage().getGuild().getLongID();
         if (!hasPreCalendar(guildId)) {
             //TODO: Support multiple calendars
             CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
@@ -82,7 +82,7 @@ public class CalendarCreator {
 
                 if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, guildId), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
+						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", event), event);
@@ -106,8 +106,8 @@ public class CalendarCreator {
      * @return <codfe>true</codfe> if closed successfully, otherwise <code>false</code>.
      */
     public Boolean terminate(MessageReceivedEvent e) {
-        if (hasPreCalendar(e.getMessage().getGuild().getID())) {
-            calendars.remove(getPreCalendar(e.getMessage().getGuild().getID()));
+        if (hasPreCalendar(e.getMessage().getGuild().getLongID())) {
+            calendars.remove(getPreCalendar(e.getMessage().getGuild().getLongID()));
             return true;
         }
         return false;
@@ -119,8 +119,8 @@ public class CalendarCreator {
      * @return A CalendarCreatorResponse Object with detailed info about the confirmation.
      */
     public CalendarCreatorResponse confirmCalendar(MessageReceivedEvent e) {
-        if (hasPreCalendar(e.getMessage().getGuild().getID())) {
-            String guildId = e.getMessage().getGuild().getID();
+        if (hasPreCalendar(e.getMessage().getGuild().getLongID())) {
+            long guildId = e.getMessage().getGuild().getLongID();
             PreCalendar preCalendar = getPreCalendar(guildId);
             if (preCalendar.hasRequiredValues()) {
                 if (!preCalendar.isEditing()) {
@@ -189,9 +189,9 @@ public class CalendarCreator {
      * @param guildId The ID of the guild whose PreCalendar is to be returned.
      * @return The PreCalendar belonging to the guild.
      */
-    public PreCalendar getPreCalendar(String guildId) {
+    public PreCalendar getPreCalendar(long guildId) {
         for (PreCalendar c : calendars) {
-            if (c.getGuildId().equals(guildId)) {
+            if (c.getGuildId() ==guildId) {
                 return c;
             }
         }
@@ -204,9 +204,9 @@ public class CalendarCreator {
      * @param guildId The ID of the guild to check for.
      * @return <code>true</code> if a PreCalendar exists, else <code>false</code>.
      */
-    public Boolean hasPreCalendar(String guildId) {
+    public Boolean hasPreCalendar(long guildId) {
         for (PreCalendar c : calendars) {
-            if (c.getGuildId().equals(guildId)) {
+            if (c.getGuildId() == guildId) {
                 return true;
             }
         }

@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class RoleUtils {
     public static IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (mention.equalsIgnoreCase("<@&" + r.getID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getID() + ">")) {
+            if (mention.equalsIgnoreCase("<@&" + r.getStringID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getStringID() + ">")) {
                 return r;
             }
         }
@@ -24,7 +24,7 @@ public class RoleUtils {
 
     public static IRole getRoleFromID(String id, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (id.equals(r.getID()) || id.equals(r.getName())) {
+            if (id.equals(r.getStringID()) || id.equals(r.getName())) {
                 return r;
             }
         }
@@ -33,7 +33,7 @@ public class RoleUtils {
 
     public static boolean roleExists(String id, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {
-            if (id.equals(r.getID())) {
+            if (id.equals(r.getStringID())) {
                 return true;
             }
         }
@@ -49,19 +49,19 @@ public class RoleUtils {
         }
     }
 
-    public static String getRole(String toLookFor, IMessage m) {
+    public static long getRole(String toLookFor, IMessage m) {
         toLookFor = toLookFor.trim();
         final String lower = toLookFor.toLowerCase();
-        String res = "";
+        long res = 0;
 
         if (!m.getRoleMentions().isEmpty()) {
-            res = m.getRoleMentions().get(0).getID();
+            res = m.getRoleMentions().get(0).getLongID();
         }
 
-        List<IRole> roles = m.getGuild().getRoles().stream().filter(r -> r.getName().toLowerCase().contains(lower) || r.getName().equalsIgnoreCase(lower) || r.getID().equals(lower)).collect(Collectors.toList());
-        if (res.isEmpty()) {
+        List<IRole> roles = m.getGuild().getRoles().stream().filter(r -> r.getName().toLowerCase().contains(lower) || r.getName().equalsIgnoreCase(lower) || r.getStringID().equals(lower)).collect(Collectors.toList());
+        if (res == 0) {
             if (!roles.isEmpty()) {
-                res = roles.get(0).getID();
+                res = roles.get(0).getLongID();
             }
         }
 

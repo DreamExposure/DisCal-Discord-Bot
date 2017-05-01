@@ -8,7 +8,7 @@ import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
@@ -45,12 +45,12 @@ public class EventCreator {
      * @return The PreEvent for the guild.
      */
     public PreEvent init(MessageReceivedEvent e, boolean handleMessage) {
-        if (!hasPreEvent(e.getMessage().getGuild().getID())) {
-            PreEvent event = new PreEvent(e.getMessage().getGuild().getID());
+        if (!hasPreEvent(e.getGuild().getLongID())) {
+            PreEvent event = new PreEvent(e.getGuild().getLongID());
             try {
 
                 //TODO: Handle multiple calendars...
-                String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
+                String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
                 event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
             } catch (IOException exc) {
                 //Failed to get timezone, ignore safely.
@@ -68,18 +68,18 @@ public class EventCreator {
             events.add(event);
             return event;
         }
-        return getPreEvent(e.getMessage().getGuild().getID());
+        return getPreEvent(e.getGuild().getLongID());
     }
 
     public PreEvent init(MessageReceivedEvent e, String eventId, boolean handleMessage) {
-        if (!hasPreEvent(e.getMessage().getGuild().getID())) {
+        if (!hasPreEvent(e.getGuild().getLongID())) {
             //TODO: Handle multiple calendars...
             try {
-                String calId = DatabaseManager.getManager().getMainCalendar(e.getMessage().getGuild().getID()).getCalendarAddress();
+                String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
                 Calendar service = CalendarAuth.getCalendarService();
                 Event calEvent = service.events().get(calId, eventId).execute();
 
-                PreEvent event = EventUtils.copyEvent(e.getMessage().getGuild().getID(), calEvent);
+                PreEvent event = EventUtils.copyEvent(e.getGuild().getLongID(), calEvent);
 
                 try {
                     event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
@@ -104,11 +104,11 @@ public class EventCreator {
             }
             return null;
         }
-        return getPreEvent(e.getMessage().getGuild().getID());
+        return getPreEvent(e.getGuild().getLongID());
     }
 
     public PreEvent edit(MessageReceivedEvent e, String eventId, boolean handleMessage) {
-        String guildId = e.getMessage().getGuild().getID();
+        long guildId = e.getGuild().getLongID();
         if (!hasPreEvent(guildId)) {
             //TODO: Handle multiple calendars...
             try {
@@ -151,8 +151,8 @@ public class EventCreator {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     public Boolean terminate(MessageReceivedEvent e) {
-        if (hasPreEvent(e.getMessage().getGuild().getID())) {
-            events.remove(getPreEvent(e.getMessage().getGuild().getID()));
+        if (hasPreEvent(e.getGuild().getLongID())) {
+            events.remove(getPreEvent(e.getGuild().getLongID()));
             return true;
         }
         return false;
@@ -164,8 +164,8 @@ public class EventCreator {
      * @return The response containing detailed info about the confirmation.
      */
     public EventCreatorResponse confirmEvent(MessageReceivedEvent e) {
-        if (hasPreEvent(e.getMessage().getGuild().getID())) {
-            String guildId = e.getMessage().getGuild().getID();
+        if (hasPreEvent(e.getGuild().getLongID())) {
+            long guildId = e.getGuild().getLongID();
             PreEvent preEvent = getPreEvent(guildId);
             if (preEvent.hasRequiredValues()) {
                 Event event = new Event();
@@ -193,7 +193,7 @@ public class EventCreator {
                         response.setEdited(false);
                         return response;
                     } catch (IOException ex) {
-                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to create event.", ex, this.getClass());
+                        ExceptionHandler.sendException(e.getAuthor(), "Failed to create event.", ex, this.getClass());
                         EventCreatorResponse response = new EventCreatorResponse(false);
                         response.setEdited(false);
                         return response;
@@ -206,7 +206,7 @@ public class EventCreator {
                         response.setEdited(true);
                         return response;
                     } catch (IOException ex) {
-                        ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update event.", ex, this.getClass());
+                        ExceptionHandler.sendException(e.getAuthor(), "Failed to update event.", ex, this.getClass());
                         EventCreatorResponse response = new EventCreatorResponse(false);
                         response.setEdited(true);
                         return response;
@@ -223,16 +223,16 @@ public class EventCreator {
      * @param guildId The ID of the guild.
      * @return The PreEvent belonging to the guild.
      */
-    public PreEvent getPreEvent(String guildId) {
+    public PreEvent getPreEvent(long guildId) {
         for (PreEvent e : events) {
-            if (e.getGuildId().equals(guildId)) {
+            if (e.getGuildId() == guildId) {
                 return e;
             }
         }
         return null;
     }
 
-    public IMessage getCreatorMessage(String guildId) {
+    public IMessage getCreatorMessage(long guildId) {
     	if (hasPreEvent(guildId)) {
     		return getPreEvent(guildId).getCreatorMessage();
 		}
@@ -245,16 +245,16 @@ public class EventCreator {
      * @param guildId The ID of the guild.
      * @return <code>true</code> if a PreEvent exists, otherwise <code>false</code>.
      */
-    public Boolean hasPreEvent(String guildId) {
+    public Boolean hasPreEvent(long guildId) {
         for (PreEvent e : events) {
-            if (e.getGuildId().equals(guildId)) {
+            if (e.getGuildId() == guildId) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean hasCreatorMessage(String guildId) {
+    public boolean hasCreatorMessage(long guildId) {
     	return hasPreEvent(guildId) && getPreEvent(guildId).getCreatorMessage() != null;
 	}
 }

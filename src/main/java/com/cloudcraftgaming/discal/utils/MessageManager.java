@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.utils;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +62,7 @@ public class MessageManager {
 
 	public static String getMessage(String key, MessageReceivedEvent event) {
 		try {
-			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
 			Map<String, String> messages;
 
 			if (lang != null && langs.containsKey(lang)) {
@@ -80,7 +80,7 @@ public class MessageManager {
 
 	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
 		try {
-			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID()).getLang();
+			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
 
 			Map<String, String> messages;
 
@@ -97,7 +97,7 @@ public class MessageManager {
 		return "***MESSAGES BROKE (ID 2)***";
 	}
 
-	public static String getMessage(String key, String guildId) {
+	public static String getMessage(String key, long guildId) {
 		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 
 		Map<String, String> messages;
@@ -111,7 +111,7 @@ public class MessageManager {
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
 	}
 
-	public static String getMessage(String key, String var, String replace, String guildId) {
+	public static String getMessage(String key, String var, String replace, long guildId) {
 		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 
 		Map<String, String> messages;

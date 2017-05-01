@@ -9,7 +9,7 @@ import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.model.Calendar;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class LinkCalendarCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
         try {
             //TODO: Handle multiple calendars...
-            CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
+            CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 
             if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
                 //Does not have a calendar.
@@ -77,10 +77,10 @@ public class LinkCalendarCommand implements ICommand {
             } else {
                 Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
-                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, event.getMessage().getGuild().getID()), event);
+                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, event.getGuild().getLongID()), event);
             }
         } catch (IOException e) {
-            ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
+            ExceptionHandler.sendException(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
             Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
         }
         return false;

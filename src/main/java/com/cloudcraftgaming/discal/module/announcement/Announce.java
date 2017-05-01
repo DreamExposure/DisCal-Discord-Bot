@@ -35,9 +35,9 @@ public class Announce extends TimerTask {
         try {
             Calendar service = CalendarAuth.getCalendarService();
             for (IGuild guild : Main.client.getGuilds()) {
-                GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
+                GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
                 try {
-                    String guildId = guild.getID();
+                    long guildId = guild.getLongID();
                     //TODO: Add multiple calendar support...
                     CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
                     for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {

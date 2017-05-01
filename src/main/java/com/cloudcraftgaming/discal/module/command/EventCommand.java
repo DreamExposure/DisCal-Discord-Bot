@@ -11,7 +11,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class EventCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         //TODO: Add multiple calendar handling.
         CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
@@ -188,7 +188,7 @@ public class EventCommand implements ICommand {
 
 
     private void moduleCreate(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
         	if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
         		Message.editMessage(EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Event.AlreadyInit", event));
@@ -209,7 +209,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleCopy(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
             if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (args.length == 2) {
@@ -243,7 +243,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleEdit(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
             if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (args.length == 2) {
@@ -273,7 +273,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleCancel(MessageReceivedEvent event) {
-    	String guildId = event.getMessage().getGuild().getID();
+    	long guildId = event.getGuild().getLongID();
     	IMessage msg = null;
     	if (EventCreator.getCreator().hasCreatorMessage(guildId))
     		msg = EventCreator.getCreator().getCreatorMessage(guildId);
@@ -291,7 +291,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleDelete(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 if (!EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -317,7 +317,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleView(String[] args, MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 1) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
             	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
@@ -358,7 +358,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleConfirm(MessageReceivedEvent event, CalendarData calendarData) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
             if (EventCreator.getCreator().getPreEvent(guildId).hasRequiredValues()) {
                 if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
@@ -409,7 +409,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleStartDate(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String dateRaw = args[1].trim();
@@ -484,7 +484,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleEndDate(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String dateRaw = args[1].trim();
@@ -559,7 +559,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleSummary(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length > 1) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String content = GeneralUtils.getContent(args, 1);
@@ -584,7 +584,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleDescription(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length  > 1) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 String content = GeneralUtils.getContent(args, 1);
@@ -609,7 +609,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleColor(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             String value = args[1];
             if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
@@ -662,7 +662,7 @@ public class EventCommand implements ICommand {
 
     //Event recurrence settings
     private void moduleRecur(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             String valueString = args[1];
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
@@ -717,7 +717,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleFrequency(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {
@@ -763,7 +763,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleCount(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {
@@ -806,7 +806,7 @@ public class EventCommand implements ICommand {
     }
 
     private void moduleInterval(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             if (EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (EventCreator.getCreator().getPreEvent(guildId).shouldRecur()) {

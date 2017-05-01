@@ -5,7 +5,6 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.misc.TimeManager;
 import sx.blah.discord.Discord4J;
-import sx.blah.discord.handle.obj.Status;
 import sx.blah.discord.util.DiscordException;
 
 /**
@@ -33,17 +32,8 @@ public class ConsoleCommandExecutor {
                     cmdValid = true;
                     System.out.println("Valid console commands: ");
                     System.out.println("exit");
-                    System.out.println("status");
                     System.out.println("serverCount");
                     System.out.println("silence true/false");
-                    System.out.println();
-                }
-                if (input.startsWith("status")) {
-                    cmdValid = true;
-                    String status = input.replaceAll("status ", "");
-                    Main.client.changeStatus(Status.game(status));
-
-                    System.out.println("Status changed! Check discord.");
                     System.out.println();
                 }
                 if (input.startsWith("serverCount")) {

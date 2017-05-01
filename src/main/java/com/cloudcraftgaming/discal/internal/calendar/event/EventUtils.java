@@ -21,7 +21,7 @@ public class EventUtils {
      * @param eventId The ID of the event to delete.
      * @return <code>true</code> if successfully deleted, otherwise <code>false</code>.
      */
-    public static Boolean deleteEvent(String guildId, String eventId) {
+    public static Boolean deleteEvent(long guildId, String eventId) {
         //TODO: Support multiple calendars...
         String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
         try {
@@ -42,7 +42,7 @@ public class EventUtils {
         return false;
     }
 
-    public static boolean eventExists(String guildId, String eventId) {
+    public static boolean eventExists(long guildId, String eventId) {
         //TODO: Support multiple calendars...
         String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
         try {
@@ -54,7 +54,7 @@ public class EventUtils {
         return false;
     }
 
-    static PreEvent copyEvent(String guildId, Event event) {
+    static PreEvent copyEvent(long guildId, Event event) {
         PreEvent pe = new PreEvent(guildId);
         pe.setSummary(event.getSummary());
         pe.setDescription(event.getDescription());

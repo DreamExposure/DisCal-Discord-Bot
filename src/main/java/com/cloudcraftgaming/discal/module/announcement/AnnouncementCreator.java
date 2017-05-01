@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -37,18 +37,18 @@ public class AnnouncementCreator {
      * @return A new Announcement.
      */
     public Announcement init(MessageReceivedEvent e) {
-        if (!hasAnnouncement(e.getMessage().getGuild().getID())) {
-            Announcement a = new Announcement(e.getMessage().getGuild().getID());
-            a.setAnnouncementChannelId(e.getMessage().getChannel().getID());
+        if (!hasAnnouncement(e.getGuild().getLongID())) {
+            Announcement a = new Announcement(e.getGuild().getLongID());
+            a.setAnnouncementChannelId(e.getChannel().getStringID());
             announcements.add(a);
             return a;
         }
-        return getAnnouncement(e.getMessage().getGuild().getID());
+        return getAnnouncement(e.getGuild().getLongID());
     }
 
     public Announcement init(MessageReceivedEvent e, String announcementId) {
-        if (!hasAnnouncement(e.getMessage().getGuild().getID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
-            Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
+        if (!hasAnnouncement(e.getGuild().getLongID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
+            Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getGuild().getLongID());
 
             //Copy
             Announcement a = new Announcement(toCopy);
@@ -56,12 +56,12 @@ public class AnnouncementCreator {
             announcements.add(a);
             return a;
         }
-        return getAnnouncement(e.getMessage().getGuild().getID());
+        return getAnnouncement(e.getGuild().getLongID());
     }
 
     public Announcement edit(MessageReceivedEvent e, String announcementId) {
-        if (!hasAnnouncement(e.getMessage().getGuild().getID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
-            Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getMessage().getGuild().getID());
+        if (!hasAnnouncement(e.getGuild().getLongID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
+            Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getGuild().getLongID());
 
             //Copy
             Announcement a = new Announcement(edit, true);
@@ -70,7 +70,7 @@ public class AnnouncementCreator {
             announcements.add(a);
             return a;
         }
-        return getAnnouncement(e.getMessage().getGuild().getID());
+        return getAnnouncement(e.getGuild().getLongID());
     }
 
     /**
@@ -79,8 +79,8 @@ public class AnnouncementCreator {
      * @return Whether or not the Creator was successfully terminated.
      */
     public Boolean terminate(MessageReceivedEvent e) {
-        if (hasAnnouncement(e.getMessage().getGuild().getID())) {
-            announcements.remove(getAnnouncement(e.getMessage().getGuild().getID()));
+        if (hasAnnouncement(e.getGuild().getLongID())) {
+            announcements.remove(getAnnouncement(e.getGuild().getLongID()));
             return true;
         }
         return false;
@@ -92,8 +92,8 @@ public class AnnouncementCreator {
      * @return An AnnouncementCreatorResponse with detailed information.
      */
     public AnnouncementCreatorResponse confirmAnnouncement(MessageReceivedEvent e) {
-        if (hasAnnouncement(e.getMessage().getGuild().getID())) {
-            String guildId = e.getMessage().getGuild().getID();
+        if (hasAnnouncement(e.getGuild().getLongID())) {
+            long guildId = e.getGuild().getLongID();
             Announcement a = getAnnouncement(guildId);
             if (a.hasRequiredValues()) {
                 DatabaseManager.getManager().updateAnnouncement(a);
@@ -110,9 +110,9 @@ public class AnnouncementCreator {
      * @param guildId The ID of the guild
      * @return The Announcement in the creator for the guild.
      */
-    public Announcement getAnnouncement(String guildId) {
+    public Announcement getAnnouncement(long guildId) {
         for (Announcement a : announcements) {
-            if (a.getGuildId().equals(guildId)) {
+            if (a.getGuildId() == guildId) {
                 return a;
             }
         }
@@ -125,9 +125,9 @@ public class AnnouncementCreator {
      * @param guildId The ID of the guild.
      * @return <code>true</code> if active, else <code>false</code>.
      */
-    public Boolean hasAnnouncement(String guildId) {
+    public Boolean hasAnnouncement(long guildId) {
         for (Announcement a : announcements) {
-            if (a.getGuildId().equals(guildId)) {
+            if (a.getGuildId() == guildId) {
                 return true;
             }
         }

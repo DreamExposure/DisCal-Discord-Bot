@@ -14,7 +14,7 @@ import java.util.UUID;
 @SuppressWarnings("WeakerAccess")
 public class Announcement {
     private final UUID announcementId;
-    private final String guildId;
+    private final long guildId;
 
     private final ArrayList<String> subscriberRoleIds = new ArrayList<>();
     private final ArrayList<String> subscriberUserIds = new ArrayList<>();
@@ -33,7 +33,7 @@ public class Announcement {
      * Use this constructor when creating NEW announcements!!!
      * @param _guildId The ID of the Guild this announcement belongs to.
      */
-    public Announcement(String _guildId) {
+    public Announcement(long _guildId) {
         guildId = _guildId;
         announcementId = UUID.randomUUID();
         announcementChannelId = "N/a";
@@ -50,7 +50,7 @@ public class Announcement {
      * @param _announcementId The ID of the announcement object.
      * @param _guildId The ID of the guild the announcement belongs to.
      */
-    public Announcement(UUID _announcementId, String _guildId) {
+    public Announcement(UUID _announcementId, long _guildId) {
         announcementId = _announcementId;
         guildId = _guildId;
         announcementChannelId = "N/a";
@@ -115,7 +115,7 @@ public class Announcement {
      * Gets the Guild ID the announcement belongs to.
      * @return The Guild ID the announcement belongs to.
      */
-    public String getGuildId() {
+    public long getGuildId() {
         return guildId;
     }
 

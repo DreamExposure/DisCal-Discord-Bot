@@ -55,8 +55,8 @@ public class ExceptionHandler {
         }
 
         //Get DisCal guild and channel..
-        IGuild guild = Main.client.getGuildByID("266063520112574464");
-        IChannel channel = guild.getChannelByID("302249332244217856");
+        IGuild guild = Main.client.getGuildByID(266063520112574464L);
+        IChannel channel = guild.getChannelByID(302249332244217856L);
 
         Message.sendMessage(em.build(), "```" + error + "```", channel);
     }
@@ -81,8 +81,8 @@ public class ExceptionHandler {
 		}
 
 		//Get DisCal guild and channel..
-		IGuild guild = Main.client.getGuildByID("266063520112574464");
-		IChannel channel = guild.getChannelByID("302249332244217856");
+		IGuild guild = Main.client.getGuildByID(266063520112574464L);
+		IChannel channel = guild.getChannelByID(302249332244217856L);
 
 		Message.sendMessage(em.build(), "```" + message + "```", channel);
 	}

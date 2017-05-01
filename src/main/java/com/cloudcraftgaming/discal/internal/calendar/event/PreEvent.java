@@ -11,7 +11,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal
  */
 public class PreEvent {
-    private final String guildId;
+    private final long guildId;
     private final String eventId;
 
     private String summary;
@@ -38,7 +38,7 @@ public class PreEvent {
      * Creates a new PreEvent for the specified Guild.
      * @param _guildId The ID of the guild.
      */
-    PreEvent(String _guildId) {
+    PreEvent(long _guildId) {
         guildId = _guildId;
         eventId = "N/a";
 
@@ -52,7 +52,7 @@ public class PreEvent {
         editing = false;
     }
 
-    PreEvent(String _guildId, Event e) {
+    PreEvent(long _guildId, Event e) {
         guildId = _guildId;
         eventId = e.getId();
 
@@ -86,7 +86,7 @@ public class PreEvent {
      *  Gets the ID of the guild who owns this PreEvent.
      * @return The ID of the guild who owns this PreEvent.
      */
-    public String getGuildId() {
+    public long getGuildId() {
         return guildId;
     }
 

@@ -6,13 +6,13 @@ package com.cloudcraftgaming.discal.internal.data;
  * For Project: DisCal
  */
 public class CalendarData {
-    private final String guildId;
+    private final long guildId;
     private final Integer calendarNumber;
 
     private String calendarId;
     private String calendarAddress;
 
-    public CalendarData(String _guildID, Integer _calendarNumber) {
+    public CalendarData(long _guildID, Integer _calendarNumber) {
         guildId = _guildID;
         calendarNumber = _calendarNumber;
 
@@ -21,7 +21,7 @@ public class CalendarData {
     }
 
     //Getters
-    public String getGuildId() {
+    public long getGuildId() {
         return guildId;
     }
 

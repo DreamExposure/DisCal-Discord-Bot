@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal
  */
 public class PreCalendar {
-    private final String guildId;
+    private final long guildId;
 
     private String summary;
     private String description;
@@ -25,14 +25,14 @@ public class PreCalendar {
      * @param _guildId The ID of the guild.
      * @param _summary The summary/name of the calendar.
      */
-    PreCalendar(String _guildId, String _summary) {
+    PreCalendar(long _guildId, String _summary) {
         guildId = _guildId;
         summary = _summary;
 
         editing = false;
     }
 
-    PreCalendar(String _guildId, Calendar calendar) {
+    PreCalendar(long _guildId, Calendar calendar) {
         guildId = _guildId;
         summary = calendar.getSummary();
 
@@ -52,7 +52,7 @@ public class PreCalendar {
      * Gets the ID of the guild this PreCalendar belongs to.
      * @return The ID of the guild this PreCalendar belongs to.
      */
-    public String getGuildId() {
+    public long getGuildId() {
         return guildId;
     }
 

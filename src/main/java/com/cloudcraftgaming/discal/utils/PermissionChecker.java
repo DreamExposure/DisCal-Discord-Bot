@@ -3,7 +3,7 @@ package com.cloudcraftgaming.discal.utils;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -23,14 +23,14 @@ public class PermissionChecker {
     public static boolean hasSufficientRole(MessageReceivedEvent event) {
         //TODO: Figure out exactly what is causing a NPE here...
         try {
-            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
             if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
                 IUser sender = event.getMessage().getAuthor();
                 String roleId = settings.getControlRole();
                 IRole role = null;
 
                 for (IRole r :  event.getMessage().getGuild().getRoles()) {
-                    if (r.getID().equals(roleId)) {
+                    if (r.getStringID().equals(roleId)) {
                         role = r;
                         break;
                     }
@@ -38,7 +38,7 @@ public class PermissionChecker {
 
                 if (role != null) {
                     for (IRole r : sender.getRolesForGuild(event.getMessage().getGuild())) {
-                        if (r.getID().equals(role.getID())) {
+                        if (r.getStringID().equals(role.getStringID())) {
                             return true;
                         }
                     }
@@ -70,21 +70,21 @@ public class PermissionChecker {
      */
     public static boolean inCorrectChannel(MessageReceivedEvent event) {
         try {
-            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
             if (settings.getDiscalChannel().equalsIgnoreCase("all")) {
                 return true;
             }
 
             IChannel channel = null;
             for (IChannel c : event.getMessage().getGuild().getChannels()) {
-                if (c.getID().equals(settings.getDiscalChannel())) {
+                if (c.getStringID().equals(settings.getDiscalChannel())) {
                     channel = c;
                     break;
                 }
             }
 
             if (channel != null) {
-                return event.getMessage().getChannel().getID().equals(channel.getID());
+                return event.getMessage().getChannel().getStringID().equals(channel.getStringID());
             }
 
             //If we got here, the channel no longer exists, reset data and return true.

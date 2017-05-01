@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("SpellCheckingInspection")
 public class AESEncryption {
     //Public key, its fine if this is here, I don't even have access to private keys
     private static final String SECRET_KEY_1 = "E4B39r8F57F1Csd";

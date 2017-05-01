@@ -7,8 +7,9 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RequestBuffer;
 
@@ -72,9 +73,9 @@ public class DevCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
-        String novaId = "130510525770629121";
-        String xaanitId = "233611560545812480";
-        if (event.getMessage().getAuthor().getID().equals(novaId) || event.getMessage().getAuthor().getID().equals(xaanitId)) {
+        long novaId = 130510525770629121L;
+        long xaanitId = 233611560545812480L;
+        if (event.getAuthor().getLongID() == novaId || event.getAuthor().getLongID() == xaanitId) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
             } else if (args.length >= 1) {
@@ -110,7 +111,7 @@ public class DevCommand implements ICommand {
 
     private void modulePatron(String[] args, MessageReceivedEvent event) {
         if (args.length == 2) {
-            String guildId = args[1];
+            long guildId = Long.valueOf(args[1]);
             if (Main.client.getGuildByID(guildId) != null) {
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 settings.setPatronGuild(!settings.isPatronGuild());
@@ -130,7 +131,7 @@ public class DevCommand implements ICommand {
 
     private void moduleDevGuild(String[] args, MessageReceivedEvent event) {
         if (args.length == 2) {
-            String guildId = args[1];
+            long guildId = Long.valueOf(args[1]);
             if (Main.client.getGuildByID(guildId) != null) {
                 GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 settings.setDevGuild(!settings.isDevGuild());
@@ -150,7 +151,7 @@ public class DevCommand implements ICommand {
 
     private void moduleMaxCalendars(String[] args, MessageReceivedEvent event) {
         if (args.length == 3) {
-            String guildId = args[1];
+            long guildId = Long.valueOf(args[1]);
             try {
                 Integer mc = Integer.valueOf(args[2]);
                 mc = Math.abs(mc);
@@ -174,10 +175,10 @@ public class DevCommand implements ICommand {
 
     private void moduleLeaveGuild(String[] args, MessageReceivedEvent event) {
     	if (args.length == 2) {
-			if (Main.client.getGuildByID(args[1]) != null) {
+			if (Main.client.getGuildByID(Long.valueOf(args[1])) != null) {
 				RequestBuffer.request(() -> {
 					try {
-						Main.client.getGuildByID(args[1]).leaveGuild();
+						Main.client.getGuildByID(Long.valueOf(args[1])).leave();
 					} catch (DiscordException e) {
 						ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to leave guild", e, this.getClass());
 					}
@@ -197,7 +198,7 @@ public class DevCommand implements ICommand {
     	StringBuilder msg = new StringBuilder();
 
     	for (IGuild g : Main.client.getGuilds()) {
-    		msg.append(Message.lineBreak).append(g.getName()).append(" | ").append(g.getID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
+    		msg.append(Message.lineBreak).append(g.getName()).append(" | ").append(g.getLongID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
 
     		if (msg.length() >= 1500) {
     			Message.sendMessage(msg.toString(), event);
@@ -219,6 +220,6 @@ public class DevCommand implements ICommand {
 
 
 	private long botPercent(IGuild g) {
-		return g.getUsers().stream().filter(u -> u.isBot()).count() * 100 / g.getTotalMemberCount();
+		return g.getUsers().stream().filter(IUser::isBot).count() * 100 / g.getTotalMemberCount();
 	}
 }

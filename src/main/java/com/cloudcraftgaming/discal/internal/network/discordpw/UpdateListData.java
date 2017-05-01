@@ -31,12 +31,12 @@ public class UpdateListData {
         try {
             Integer serverCount = Main.client.getGuilds().size();
 
-            JSONObject json = new JSONObject().put("server_count", serverCount);
+            JSONObject json = new JSONObject()
+					.put("shard_id", Main.client.getShards().get(0).getInfo()[0])
+					.put("shard_count", Main.client.getShardCount())
+					.put("server_count", serverCount);
 
             HttpResponse<JsonNode> response = Unirest.post("https://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
-
-            //EmailSender.getSender().sendDebugEmail(UpdateListData.class, "01", "Response Code: " + response.getStatus() + Message.lineBreak + "Body: " + response.getBody());
-
         } catch (Exception e) {
             //Handle issue.
             System.out.println("Failed to update Discord PW list metadata!");

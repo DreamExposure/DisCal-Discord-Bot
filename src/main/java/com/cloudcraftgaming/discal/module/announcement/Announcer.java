@@ -32,7 +32,6 @@ public class Announcer {
      */
     public void init() {
         timer.schedule(new Announce(), 5 * 1000 * 60, 5 * 1000 * 60);
-        //EmailSender.getSender().sendDebugEmail(this.getClass(), "00", "Announcer initiated and announcements are scheduled!");
     }
 
     /**

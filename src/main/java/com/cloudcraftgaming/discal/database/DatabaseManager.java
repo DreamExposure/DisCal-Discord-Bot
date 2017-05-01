@@ -40,7 +40,7 @@ public class DatabaseManager {
      * Connects to the MySQL server specified.
      * @param bs The BotSettings with Db info to connect to.
      */
-    public void  connectToMySQL(BotSettings bs) {
+    public void connectToMySQL(BotSettings bs) {
         try {
             MySQL mySQL = new MySQL(bs.getDbHostName(), bs.getDbPort(), bs.getDbDatabase(), bs.getDbPrefix(), bs.getDbUser(), bs.getDbPass());
 
@@ -63,7 +63,7 @@ public class DatabaseManager {
                 databaseInfo.getMySQL().closeConnection();
                 System.out.println("Successfully disconnected from MySQL Database!");
             } catch (SQLException e) {
-                ExceptionHandler.sendException(null, "Discconnecting from MySQL failed.", e, this.getClass());
+                ExceptionHandler.sendException(null, "Disconnecting from MySQL failed.", e, this.getClass());
                 System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
             }
         }
@@ -134,7 +134,7 @@ public class DatabaseManager {
                 String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + settings.getGuildID() + "';";
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(settings.getGuildID()) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 Boolean hasStuff = res.next();
@@ -145,7 +145,7 @@ public class DatabaseManager {
                             "(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS)" +
                             " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-                    ps.setString(1, settings.getGuildID());
+                    ps.setString(1, String.valueOf(settings.getGuildID()));
                     ps.setBoolean(2, settings.useExternalCalendar());
                     ps.setString(3, settings.getPrivateKey());
                     ps.setString(4, settings.getEncryptedAccessToken());
@@ -186,7 +186,7 @@ public class DatabaseManager {
                     ps.setBoolean(10, settings.isDevGuild());
                     ps.setInt(11, settings.getMaxCalendars());
                     ps.setString(12, settings.getDmAnnouncementsString());
-                    ps.setString(13, settings.getGuildID());
+                    ps.setString(13, String.valueOf(settings.getGuildID()));
 
                     ps.executeUpdate();
 
@@ -209,7 +209,7 @@ public class DatabaseManager {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + calData.getGuildId() + "';";
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(calData.getGuildId()) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 Boolean hasStuff = res.next();
@@ -220,7 +220,7 @@ public class DatabaseManager {
                             "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS)" +
                             " VALUES (?, ?, ?, ?);";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-                    ps.setString(1, calData.getGuildId());
+                    ps.setString(1, String.valueOf(calData.getGuildId()));
                     ps.setInt(2, calData.getCalendarNumber());
                     ps.setString(3, calData.getCalendarId());
                     ps.setString(4, calData.getCalendarAddress());
@@ -238,7 +238,7 @@ public class DatabaseManager {
                     ps.setInt(1, calData.getCalendarNumber());
                     ps.setString(2, calData.getCalendarId());
                     ps.setString(3, calData.getCalendarAddress());
-                    ps.setString(4, calData.getGuildId());
+                    ps.setString(4, String.valueOf(calData.getGuildId()));
 
                     ps.executeUpdate();
 
@@ -276,7 +276,7 @@ public class DatabaseManager {
                             " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
                     ps.setString(1, announcement.getAnnouncementId().toString());
-                    ps.setString(2, announcement.getGuildId());
+                    ps.setString(2, String.valueOf(announcement.getGuildId()));
                     ps.setString(3, announcement.getSubscriberRoleIdString());
                     ps.setString(4, announcement.getSubscriberUserIdString());
                     ps.setString(5, announcement.getAnnouncementChannelId());
@@ -327,14 +327,14 @@ public class DatabaseManager {
         return false;
     }
 
-    public GuildSettings getSettings(String guildId) {
+    public GuildSettings getSettings(long guildId) {
         GuildSettings settings = new GuildSettings(guildId);
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 Boolean hasStuff = res.next();
@@ -366,14 +366,14 @@ public class DatabaseManager {
         return settings;
     }
 
-    public CalendarData getMainCalendar(String guildId) {
+    public CalendarData getMainCalendar(long guildId) {
         CalendarData calData = new CalendarData(guildId, 1);
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 while (res.next()) {
@@ -391,14 +391,14 @@ public class DatabaseManager {
         return calData;
     }
 
-    public CalendarData getCalendar(String guildId, Integer calendarNumber) {
+    public CalendarData getCalendar(long guildId, Integer calendarNumber) {
         CalendarData calData = new CalendarData(guildId, calendarNumber);
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 while (res.next()) {
@@ -416,14 +416,14 @@ public class DatabaseManager {
         return calData;
     }
 
-    public ArrayList<CalendarData> getAllCalendars(String guildId) {
+    public ArrayList<CalendarData> getAllCalendars(long guildId) {
         ArrayList<CalendarData> calendars = new ArrayList<>();
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 while (res.next()) {
@@ -469,7 +469,7 @@ public class DatabaseManager {
      * @param guildId The ID of the guild the Announcement belongs to.
      * @return The {@link Announcement} with the specified ID if it exists, otherwise <c>null</c>.
      */
-    public Announcement getAnnouncement(UUID announcementId, String guildId) {
+    public Announcement getAnnouncement(UUID announcementId, long guildId) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
@@ -508,14 +508,14 @@ public class DatabaseManager {
      * @param guildId The ID of the guild whose data is to be retrieved.
      * @return An ArrayList of Announcements that belong to the specified Guild.
      */
-    public ArrayList<Announcement> getAnnouncements(String guildId) {
+    public ArrayList<Announcement> getAnnouncements(long guildId) {
         ArrayList<Announcement> announcements = new ArrayList<>();
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
                 Statement statement = databaseInfo.getConnection().createStatement();
-                String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + guildId + "';";
+                String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
                 ResultSet res = statement.executeQuery(query);
 
                 while (res.next()) {
@@ -591,7 +591,7 @@ public class DatabaseManager {
         return false;
     }
 
-    public Boolean deleteAnnouncementsForEvent(String guildId, String eventId) {
+    public Boolean deleteAnnouncementsForEvent(long guildId, String eventId) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
@@ -599,7 +599,7 @@ public class DatabaseManager {
                 String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
                 PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
                 preparedStmt.setString(1, eventId);
-                preparedStmt.setString(2, guildId);
+                preparedStmt.setString(2, String.valueOf(guildId));
                 preparedStmt.setString(3, AnnouncementType.SPECIFIC.name());
 
                 preparedStmt.execute();

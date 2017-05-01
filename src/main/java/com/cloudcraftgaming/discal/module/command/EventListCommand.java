@@ -13,7 +13,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public class EventListCommand implements ICommand {
         if (args.length < 1) {
             Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
         } else {
-            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getID());
+            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
             switch (args[0].toLowerCase()) {
                 case "search":
                     if (settings.isDevGuild()) {
@@ -106,7 +106,7 @@ public class EventListCommand implements ICommand {
                 try {
                     Calendar service = CalendarAuth.getCalendarService();
                     DateTime now = new DateTime(System.currentTimeMillis());
-                    CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getMessage().getGuild().getID());
+                    CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
                     Events events = service.events().list(calendarData.getCalendarAddress())
                             .setMaxResults(eventNum)
                             .setTimeMin(now)
@@ -117,18 +117,18 @@ public class EventListCommand implements ICommand {
                     if (items.size() == 0) {
                         Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", event), event);
                     } else if (items.size() == 1) {
-                        String guildId = event.getMessage().getGuild().getID();
+                        long guildId = event.getGuild().getLongID();
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), MessageManager.getMessage("Event.List.Found.One", event), event);
                     } else {
                         //List events by Id only.
                         Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", event), event);
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, event.getMessage().getGuild().getID()), event);
+                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, event.getGuild().getLongID()), event);
                         }
                     }
                 } catch (IOException e) {
                     Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
-                    ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to list events.", e, this.getClass());
+                    ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {

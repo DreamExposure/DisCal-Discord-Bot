@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
  */
 public class UserUtils {
     public static IUser getUserFromMention(String mention, MessageReceivedEvent event) {
-        for (IUser u : event.getMessage().getGuild().getUsers()) {
-            if (mention.equalsIgnoreCase("<@" + u.getID() + ">") || mention.equalsIgnoreCase("<@!" + u.getID() + ">")) {
+        for (IUser u : event.getGuild().getUsers()) {
+            if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">")) {
                 return u;
             }
         }
@@ -31,23 +31,23 @@ public class UserUtils {
      * @param m         The message, incase of mention
      * @return The ID of the user found.
      */
-    public static String getUser(String toLookFor, IMessage m) {
+    public static long getUser(String toLookFor, IMessage m) {
         toLookFor = toLookFor.trim();
         final String lower = toLookFor.toLowerCase();
 
-        String res = "";
+        long res = 0;
 
         if (!m.getMentions().isEmpty())
-            res = m.getMentions().get(0).getID();
+            res = m.getMentions().get(0).getLongID();
 
         List<IUser> users = m.getGuild().getUsers().stream()
                 .filter(u -> u.getName().toLowerCase().contains(lower)
-                        || u.getName().equalsIgnoreCase(lower) || u.getID().equals(lower)
+                        || u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
                         || u.getDisplayName(m.getGuild()).toLowerCase().contains(lower)
                         || u.getDisplayName(m.getGuild()).equalsIgnoreCase(lower))
                 .collect(Collectors.toList());
         if (!users.isEmpty())
-            res = users.get(0).getID();
+            res = users.get(0).getLongID();
 
         return res;
     }

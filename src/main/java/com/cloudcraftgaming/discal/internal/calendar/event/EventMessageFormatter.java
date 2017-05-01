@@ -28,9 +28,9 @@ public class EventMessageFormatter {
      * @param guildID The ID of the guild.
      * @return The EmbedObject of the event.
      */
-    public static EmbedObject getEventEmbed(Event event, String guildID) {
+    public static EmbedObject getEventEmbed(Event event, long guildID) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", guildID));
         if (event.getSummary() != null) {
@@ -72,9 +72,9 @@ public class EventMessageFormatter {
      * @param event The event involved.
      * @return The EmbedObject of the event.
      */
-    public static EmbedObject getCondensedEventEmbed(Event event, String guildId) {
+    public static EmbedObject getCondensedEventEmbed(Event event, long guildId) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", guildId));
         if (event.getSummary() != null) {
@@ -101,7 +101,7 @@ public class EventMessageFormatter {
      */
     public static EmbedObject getPreEventEmbed(PreEvent event) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", event.getGuildId()));
         if (event.isEditing()) {
@@ -137,9 +137,9 @@ public class EventMessageFormatter {
      * @param ecr The CreatorResponse involved.
      * @return The EmbedObject for the CreatorResponse.
      */
-    public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr, String guildId) {
+    public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr, long guildId) {
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", guildId));
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", guildId), ecr.getEvent().getId(), false);

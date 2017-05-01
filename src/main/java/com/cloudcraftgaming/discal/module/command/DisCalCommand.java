@@ -5,7 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -108,15 +108,15 @@ public class DisCalCommand implements ICommand {
     }
 
     private void moduleDisCalInfo(MessageReceivedEvent event) {
-        IGuild guild = event.getMessage().getGuild();
+        IGuild guild = event.getGuild();
 
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal!");
         em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", event));
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", event), "NovaFox161", true);
         em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", event), Main.version, true);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", event), "Discord4J, version 2.7.0", false);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", event), "Discord4J, version 2.8.1", false);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", event), Main.client.getGuilds().size() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", event), DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", event), DatabaseManager.getManager().getAnnouncementCount() + "", true);
@@ -136,15 +136,15 @@ public class DisCalCommand implements ICommand {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length == 2) {
                 String roleName = args[1];
-                IGuild guild = event.getMessage().getGuild();
+                IGuild guild = event.getGuild();
                 IRole controlRole;
 
                 if (!"everyone".equalsIgnoreCase(roleName)) {
                     controlRole = RoleUtils.getRoleFromID(roleName, event);
 
                     if (controlRole != null) {
-                        GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
-                        settings.setControlRole(controlRole.getID());
+                        GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
+                        settings.setControlRole(controlRole.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
                         Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), event), event);
@@ -155,7 +155,7 @@ public class DisCalCommand implements ICommand {
                     }
                 } else {
                     //Role is @everyone, set this so that anyone can control the bot.
-                    GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getID());
+                    GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
                     settings.setControlRole("everyone");
                     DatabaseManager.getManager().updateSettings(settings);
                     //Send message
@@ -175,7 +175,7 @@ public class DisCalCommand implements ICommand {
      * @param event The event received.
      */
     private void moduleDisCalChannel(String[] args, MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         if (args.length == 2) {
             String channelName = args[1];
             if (channelName.equalsIgnoreCase("all")) {
@@ -189,7 +189,7 @@ public class DisCalCommand implements ICommand {
                     IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
                     if (channel != null) {
                         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-                        settings.setDiscalChannel(channel.getID());
+                        settings.setDiscalChannel(channel.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
                         Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
                     } else {
@@ -205,7 +205,7 @@ public class DisCalCommand implements ICommand {
     }
 
     private void moduleSimpleAnnouncement(MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         GuildSettings settings =  DatabaseManager.getManager().getSettings(guildId);
         settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
         DatabaseManager.getManager().updateSettings(settings);
@@ -214,12 +214,12 @@ public class DisCalCommand implements ICommand {
     }
 
     private void moduleSettings(MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
 
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
         EmbedBuilder em = new EmbedBuilder();
-        em.withAuthorIcon(Main.client.getGuildByID("266063520112574464").getIconURL());
+        em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", event));
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", event), String.valueOf(settings.useExternalCalendar()), true);
@@ -245,17 +245,17 @@ public class DisCalCommand implements ICommand {
     }
 
     private void moduleDmAnnouncements(MessageReceivedEvent event) {
-        String guildId = event.getMessage().getGuild().getID();
+        long guildId = event.getGuild().getLongID();
         GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
         if (settings.isDevGuild()) {
-            IUser user = event.getMessage().getAuthor();
+            IUser user = event.getAuthor();
 
-            if (settings.getDmAnnouncements().contains(user.getID())) {
-                settings.getDmAnnouncements().remove(user.getID());
+            if (settings.getDmAnnouncements().contains(user.getStringID())) {
+                settings.getDmAnnouncements().remove(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
                 Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", event), event);
             } else {
-                settings.getDmAnnouncements().add(user.getID());
+                settings.getDmAnnouncements().add(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
                 Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", event), event);
             }
@@ -269,7 +269,7 @@ public class DisCalCommand implements ICommand {
 			if (args.length == 2) {
 				String value = args[1];
 				if (MessageManager.isSupported(value)) {
-					String guildId = event.getMessage().getGuild().getID();
+					long guildId = event.getGuild().getLongID();
 					String valid = MessageManager.getValidLang(value);
 					GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
