@@ -160,7 +160,7 @@
   "Embed.Announcement.Condensed.Color": "Event Color",
   "Embed.Announcement.Condensed.RecurID": "Recurring Event ID",
   "Embed.Announcement.Condensed.Type": "Type: %type%",
-  "Embed.Announcement.Announce.Title": "__**!~Event Announcement~!**__",
+  "Embed.Announcement.Announce.Title": "!~Event Announcement~!",
   "Embed.Announcement.Announce.Summary": "Event Name/Summary",
   "Embed.Announcement.Announce.Description": "Event Description",
   "Embed.Announcement.Announce.Date": "Event Date",
