@@ -12,7 +12,9 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.io.IOException;
 import java.util.List;
@@ -125,4 +127,24 @@ public class Announce extends TimerTask {
             ExceptionHandler.sendException(null, "Failed to connect to google calendar", e, this.getClass());
         }
     }
+
+    private void doDmAnnouncements(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
+    	if (announcement.getSubscriberRoleIds().contains("everyone") || announcement.getSubscriberRoleIds().contains("here")) {
+    		//Everyone in channel...
+			IGuild guild = Main.client.getGuildByID(settings.getGuildID());
+			IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+
+
+			for (IUser user : channel.getUsersHere()) {
+				//First check if they have DMs enabled
+				if (settings.getDmAnnouncements().contains(user.getStringID())) {
+					//Send DM
+					AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, user, data, settings);
+				}
+			}
+
+		} else {
+
+		}
+	}
 }
