@@ -959,7 +959,7 @@ public class AnnouncementCommand implements ICommand {
 					ArrayList<Announcement> announcements = DatabaseManager.getManager()
 							.getAnnouncements(guildId);
 					Message.sendMessage(
-							"All announcements, use `!announcement view <id>` for more info." + Message.lineBreak
+							"All (" + announcements.size() + ") announcements, use `!announcement view <id>` for more info." + Message.lineBreak
 									+ "`" + announcements.size() + "`" + Message.lineBreak + Message.lineBreak
 									+ "Please note that this list may be delayed due to rate limiting...", event);
 					//Loop and add embeds
