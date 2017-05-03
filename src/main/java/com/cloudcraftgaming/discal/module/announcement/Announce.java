@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.UserUtils;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -14,9 +15,11 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +60,7 @@ public class Announce extends TimerTask {
                                     if (difference <= 5) {
                                         //Right on time
                                         sendAnnouncementMessage(a, event, data, settings);
+                                        doDmAnnouncements(a, event, data, settings);
 
                                         //Delete announcement to ensure it does not spam fire
                                         DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
@@ -97,6 +101,7 @@ public class Announce extends TimerTask {
                                             //Right on time, let's check if universal or color specific.
                                             if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
                                                 sendAnnouncementMessage(a, event, data, settings);
+                                                doDmAnnouncements(a, event, data, settings);
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
                                                 //Color, test for color.
                                                 String colorId = event.getColorId();
@@ -104,11 +109,13 @@ public class Announce extends TimerTask {
                                                 if (color.name().equals(a.getEventColor().name())) {
                                                     //Color matches, announce
                                                     sendAnnouncementMessage(a, event, data, settings);
+													doDmAnnouncements(a, event, data, settings);
                                                 }
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
                                                 //Recurring event announcement.
                                                 if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
                                                     sendAnnouncementMessage(a, event, data, settings);
+													doDmAnnouncements(a, event, data, settings);
                                                 }
                                             }
                                         }
@@ -129,22 +136,50 @@ public class Announce extends TimerTask {
     }
 
     private void doDmAnnouncements(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
+		IGuild guild = Main.client.getGuildByID(settings.getGuildID());
+		IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+
     	if (announcement.getSubscriberRoleIds().contains("everyone") || announcement.getSubscriberRoleIds().contains("here")) {
     		//Everyone in channel...
-			IGuild guild = Main.client.getGuildByID(settings.getGuildID());
-			IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+			for (String uId : settings.getDmAnnouncements()) {
+				IUser user = UserUtils.getUser(uId, guild);
+				if (user != null) {
+					//First check if they have DMs enabled
+					if (channel.getUsersHere().contains(user)) {
+						//Send DM
+						AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, user, data, settings);
+					}
+				}
+			}
+		} else {
+			//Let's only check for specific users...
+			List<IUser> usersToDm = new ArrayList<>();
 
-
-			for (IUser user : channel.getUsersHere()) {
-				//First check if they have DMs enabled
-				if (settings.getDmAnnouncements().contains(user.getStringID())) {
-					//Send DM
-					AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, user, data, settings);
+			for (String uId : settings.getDmAnnouncements()) {
+				if (announcement.getSubscriberUserIds().contains(uId)) {
+					//Verify user still exists and such...
+					IUser u = UserUtils.getUser(uId, guild);
+					if (u != null && !usersToDm.contains(u)) {
+						usersToDm.add(u);
+					}
+				} else {
+					//Not specifically subscribed... lets just if their role is subscribed...
+					IUser u = UserUtils.getUser(uId, guild);
+					if (u != null && !usersToDm.contains(u)) {
+						for (IRole r : u.getRolesForGuild(guild)) {
+							if (announcement.getSubscriberRoleIds().contains(r.getStringID())) {
+								usersToDm.add(u);
+								break;
+							}
+						}
+					}
 				}
 			}
 
-		} else {
-
+			//Now DM...
+			for (IUser u : usersToDm) {
+				AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, u, data, settings);
+			}
 		}
 	}
 }

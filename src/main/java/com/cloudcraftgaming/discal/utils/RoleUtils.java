@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 
@@ -30,6 +31,15 @@ public class RoleUtils {
         }
         return null;
     }
+
+    public static IRole getRoleFromID(String id, IGuild guild) {
+    	for (IRole r : guild.getRoles()) {
+    		if (id.equalsIgnoreCase(r.getStringID()) || id.equals(r.getName())) {
+    			return r;
+			}
+		}
+		return null;
+	}
 
     public static boolean roleExists(String id, MessageReceivedEvent event) {
         for (IRole r : event.getMessage().getGuild().getRoles()) {

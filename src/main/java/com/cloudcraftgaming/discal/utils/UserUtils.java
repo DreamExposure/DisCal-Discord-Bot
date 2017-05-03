@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
@@ -51,4 +52,21 @@ public class UserUtils {
 
         return res;
     }
+
+	public static IUser getUser(String toLookFor, IGuild guild) {
+		toLookFor = toLookFor.trim();
+		final String lower = toLookFor.toLowerCase();
+
+		IUser res = null;
+		List<IUser> users = guild.getUsers().stream()
+				.filter(u -> u.getName().toLowerCase().contains(lower)
+						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
+						|| u.getDisplayName(guild).toLowerCase().contains(lower)
+						|| u.getDisplayName(guild).equalsIgnoreCase(lower))
+				.collect(Collectors.toList());
+		if (!users.isEmpty())
+			res = users.get(0);
+
+		return res;
+	}
 }
