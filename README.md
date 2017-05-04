@@ -16,12 +16,14 @@ DisCal is developed and maintained by NovaFox161.
 
 ## Core Features
 
-* Create a custom calendar
-* Create/edit/delete custom events
-* Custom announcements
+* Create/edit custom calendar.
+* Create/edit/delete/announce complex events.
+* Create/edit/delete custom announcements.
+* Recurring events
 * Easy to learn and use!
 * Simple commands, prefix "!" OR @DisCal
 * Versatile and built for all types of Guilds 
+* Super responsive.
 * And much more coming soon!
 
 In addition to all of the features above, DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix it ASAP!!
@@ -29,10 +31,8 @@ In addition to all of the features above, DisCal will automatically post an erro
 ## Planned Features
 
 * Link up to external calendar (WIP)
-* Full overhaul of all creators
+* Full overhaul of all creators (WIP)
 * Web Dashboard to manage DisCal settings!
-* Edit events
-* Edit calendars
 * And more!
 
 ## Contributing
