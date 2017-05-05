@@ -112,6 +112,8 @@
   "DisCal.Lang.Success": "Language successfully changed!",
   "DisCal.Lang.Unsupported": "Sorry! That language may be misspelled or unsupported... %lb% supported languages are currently: %values% %lb% %lb% Don't see your language? Translate DisCal now at: <https://github.com/NovaFox161/DisCal-Discord-Bot>!",
   "DisCal.Lang.Specify": "Please specify a supported language with `!discal lang <langName>` %lb% supported languages are currently: %values% %lb% %lb% Don't see your language? Translate DisCal now at: <https://github.com/NovaFox161/DisCal-Discord-Bot>!",
+  "DisCal.Prefix.Set": "Prefix set to `%prefix%` DisCal will now accept commands starting with the new prefix **OR** by mentioning DisCal!",
+  "DisCal.Prefix.Specify": "Please specify the preferred prefix with `!discal prefix <prefix>` **SPACES ARE NOT ALLOWED**!",
 
   "Embed.Calendar.Link.Title": "Guild Calendar",
   "Embed.Calendar.Link.Summary": "Calendar Name/Summary",
@@ -142,6 +144,7 @@
   "Embed.DisCal.Settings.Dev": "Dev Guild",
   "Embed.DisCal.Settings.MaxCal": "Max Calendars",
   "Embed.DisCal.Settings.Language": "Language",
+  "Embed.DisCal.Settings.Prefix": "Prefix",
   "Embed.Announcement.Info.Title": "Announcement Info",
   "Embed.Announcement.Info.ID": "Announcement ID",
   "Embed.Announcement.Info.Type": "Announcement Type",

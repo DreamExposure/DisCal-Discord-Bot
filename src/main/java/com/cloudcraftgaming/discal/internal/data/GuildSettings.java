@@ -22,6 +22,7 @@ public class GuildSettings {
 
     private boolean simpleAnnouncements;
     private String lang;
+    private String prefix;
 
     private boolean patronGuild;
     private boolean devGuild;
@@ -43,6 +44,7 @@ public class GuildSettings {
 
         simpleAnnouncements = false;
         lang = "ENGLISH";
+        prefix = "!";
 
         patronGuild = false;
         devGuild = false;
@@ -85,6 +87,10 @@ public class GuildSettings {
     public String getLang() {
         return lang;
     }
+
+    public String getPrefix() {
+    	return prefix;
+	}
 
     public boolean isPatronGuild() {
         return patronGuild;
@@ -148,6 +154,10 @@ public class GuildSettings {
     public void setLang(String _lang) {
         lang = _lang;
     }
+
+    public void setPrefix(String _prefix) {
+    	prefix = _prefix;
+	}
 
     public void setPatronGuild(boolean _patronGuild) {
         patronGuild = _patronGuild;
