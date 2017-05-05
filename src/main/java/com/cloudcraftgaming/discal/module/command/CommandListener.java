@@ -46,11 +46,11 @@ class CommandListener {
                         argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
                         String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
-                        String command = argsOr[0].replaceFirst(settings.getPrefix(), "");
+                        String command = argsOr[0].replace(settings.getPrefix(), "");
                         cmd.issueCommand(command, args, event);
                     } else if (argsOr.length == 1) {
                         //Only command... no args.
-                        cmd.issueCommand(argsOr[0].replaceFirst(settings.getPrefix(), ""), new String[0], event);
+                        cmd.issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event);
                     }
                 } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getStringID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getStringID() + ">"))) {
                     String[] argsOr = event.getMessage().getContent().split(" ");
