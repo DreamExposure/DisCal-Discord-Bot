@@ -171,7 +171,7 @@ public class DatabaseManager {
                             + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
                             + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
                             + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
-                            + " LANG = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
+                            + " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
                             + " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?"
                             + " WHERE GUILD_ID = ?";
                     PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
@@ -184,11 +184,12 @@ public class DatabaseManager {
                     ps.setString(6, settings.getDiscalChannel());
                     ps.setBoolean(7, settings.usingSimpleAnnouncements());
                     ps.setString(8, settings.getLang());
-                    ps.setBoolean(9, settings.isPatronGuild());
-                    ps.setBoolean(10, settings.isDevGuild());
-                    ps.setInt(11, settings.getMaxCalendars());
-                    ps.setString(12, settings.getDmAnnouncementsString());
-                    ps.setString(13, String.valueOf(settings.getGuildID()));
+                    ps.setString(9, settings.getPrefix());
+                    ps.setBoolean(10, settings.isPatronGuild());
+                    ps.setBoolean(11, settings.isDevGuild());
+                    ps.setInt(12, settings.getMaxCalendars());
+                    ps.setString(13, settings.getDmAnnouncementsString());
+                    ps.setString(14, String.valueOf(settings.getGuildID()));
 
                     ps.executeUpdate();
 
