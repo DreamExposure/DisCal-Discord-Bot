@@ -68,7 +68,7 @@ public class PermissionChecker {
      * @param event The event received to check for the correct channel.
      * @return <code>true</code> if in correct channel, otherwise <code>false</code>.
      */
-    public static boolean inCorrectChannel(MessageReceivedEvent event) {
+    public static boolean isCorrectChannel(MessageReceivedEvent event) {
         try {
             GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
             if (settings.getDiscalChannel().equalsIgnoreCase("all")) {
