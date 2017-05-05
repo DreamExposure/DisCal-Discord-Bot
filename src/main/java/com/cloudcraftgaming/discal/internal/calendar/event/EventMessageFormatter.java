@@ -109,10 +109,14 @@ public class EventMessageFormatter {
         }
         if (event.getSummary() != null) {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", event.getGuildId()), event.getSummary(), true);
-        }
+        } else {
+        	em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", event.getGuildId()), "NOT SET", true);
+		}
         if (event.getDescription() != null) {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", event.getGuildId()), event.getDescription(), true);
-        }
+        } else {
+        	em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", event.getGuildId()), "NOT SET", true);
+		}
         if (event.shouldRecur()) {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", event.getGuildId()), event.getRecurrence().toHumanReadable(), true);
         } else {
