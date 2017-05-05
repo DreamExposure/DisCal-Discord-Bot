@@ -71,7 +71,7 @@ public class MessageManager {
 				messages = langs.get("ENGLISH");
 			}
 
-			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 1)", e, MessageManager.class);
 		}
@@ -90,7 +90,7 @@ public class MessageManager {
 				messages = langs.get("ENGLISH");
 			}
 
-			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 2)", e, MessageManager.class);
 		}
@@ -108,7 +108,7 @@ public class MessageManager {
 			messages = langs.get("ENGLISH");
 		}
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, String var, String replace, long guildId) {
@@ -122,7 +122,7 @@ public class MessageManager {
 			messages = langs.get("ENGLISH");
 		}
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, GuildSettings settings) {
@@ -134,7 +134,7 @@ public class MessageManager {
 			messages = langs.get("ENGLISH");
 		}
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
@@ -145,6 +145,6 @@ public class MessageManager {
 		} else {
 			messages = langs.get("ENGLISH");
 		}
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replaceAll(var, replace).replaceAll("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
 	}
 }
