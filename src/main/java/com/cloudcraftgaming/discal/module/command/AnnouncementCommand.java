@@ -611,7 +611,7 @@ public class AnnouncementCommand implements ICommand {
 					EventColor.TURQUOISE.getB());
 			em.withAuthorIcon(event.getClient().getApplicationIconURL());
 			em.withAuthorName("Announcement Subscribe");
-			em.withDesc("Subscribed Users: " + subscribedUsers + "\nSubsribed Roles: " + subscribedRoles);
+			em.withDesc("Subscribed Users: " + subscribedUsers + "\nSubscribed Roles: " + subscribedRoles);
 			em.withFooterText("Announcement ID: " + announcementID);
 			Message.sendMessage(em.build(), event);
 			if(updateDb) {
