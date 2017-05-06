@@ -4,35 +4,19 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.module.announcement.Announcement;
-import com.cloudcraftgaming.discal.module.announcement.AnnouncementCreator;
-import com.cloudcraftgaming.discal.module.announcement.AnnouncementCreatorResponse;
-import com.cloudcraftgaming.discal.module.announcement.AnnouncementMessageFormatter;
-import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
+import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
-import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
-import com.cloudcraftgaming.discal.utils.ChannelUtils;
-import com.cloudcraftgaming.discal.utils.EventColor;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.GeneralUtils;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.MessageManager;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
-import com.cloudcraftgaming.discal.utils.RoleUtils;
-import com.cloudcraftgaming.discal.utils.UserUtils;
+import com.cloudcraftgaming.discal.utils.*;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.*;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.EmbedBuilder;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -104,19 +88,19 @@ public class AnnouncementCommand implements ICommand {
 	/**
 	 * Issues the command this Object is responsible for.
 	 *
-	 * @param args The command arguments.
+	 * @param args  The command arguments.
 	 * @param event The event received.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
-		if(PermissionChecker.hasSufficientRole(event)) {
-			if(args.length < 1) {
+		if (PermissionChecker.hasSufficientRole(event)) {
+			if (args.length < 1) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
-			} else if(args.length >= 1) {
+			} else if (args.length >= 1) {
 				long guildId = event.getGuild().getLongID();
 				GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-				switch(args[0].toLowerCase()) {
+				switch (args[0].toLowerCase()) {
 					case "create":
 						moduleCreate(event);
 						break;
@@ -170,7 +154,7 @@ public class AnnouncementCommand implements ICommand {
 						moduleCopy(args, event);
 						break;
 					case "edit":
-						if(settings.isDevGuild()) {
+						if (settings.isDevGuild()) {
 							moduleEdit(args, event);
 						} else {
 							Message
@@ -178,7 +162,7 @@ public class AnnouncementCommand implements ICommand {
 						}
 						break;
 					case "devsub":
-						if(settings.isDevGuild()) {
+						if (settings.isDevGuild()) {
 							moduleSubscribeRewrite(args, event);
 						} else {
 							Message
@@ -186,7 +170,7 @@ public class AnnouncementCommand implements ICommand {
 						}
 						break;
 					case "devunsub":
-						if(settings.isDevGuild()) {
+						if (settings.isDevGuild()) {
 							moduleUnsubscribeRewrite(args, event);
 						} else {
 							Message
@@ -210,7 +194,7 @@ public class AnnouncementCommand implements ICommand {
 	private void moduleCreate(MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
 
-		if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreator.getCreator().init(event);
 			Message.sendMessage(
 					"Announcement creator initialized!" + Message.lineBreak + "Please specify the type:"
@@ -224,10 +208,10 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleEdit(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-			if(args.length == 2) {
+		if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			if (args.length == 2) {
 				String anId = args[1];
-				if(AnnouncementUtils.announcementExists(anId, event)) {
+				if (AnnouncementUtils.announcementExists(anId, event)) {
 					Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId);
 
 					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement),
@@ -250,10 +234,10 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleConfirm(MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(event);
-			if(acr.isSuccessful()) {
-				if(acr.getAnnouncement().isEditing()) {
+			if (acr.isSuccessful()) {
+				if (acr.getAnnouncement().isEditing()) {
 					Message.sendMessage(
 							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()),
 							"Announcement updated!", event);
@@ -273,7 +257,7 @@ public class AnnouncementCommand implements ICommand {
 	private void moduleCancel(MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
 
-		if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreator.getCreator().terminate(event);
 			Message.sendMessage("Announcement Creator terminated!", event);
 		} else {
@@ -283,16 +267,16 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleDelete(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 1) {
-			if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (args.length == 1) {
+			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage("Please specify the Id of the announcement to delete!", event);
 			} else {
 				Message.sendMessage("You cannot delete an announcement while in the Creator!", event);
 			}
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementUtils.announcementExists(value, event)) {
-				if(DatabaseManager.getManager().deleteAnnouncement(value)) {
+			if (AnnouncementUtils.announcementExists(value, event)) {
+				if (DatabaseManager.getManager().deleteAnnouncement(value)) {
 					Message.sendMessage("Announcement successfully deleted!", event);
 				} else {
 					Message.sendMessage(
@@ -311,24 +295,24 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleView(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 1) {
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (args.length == 1) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage(AnnouncementMessageFormatter
 								.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId)),
 						event);
 			} else {
 				Message.sendMessage("You must specify the ID of the announcement you wish to view!", event);
 			}
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage("You cannot view another announcement while one is in the creator!",
 						event);
 			} else {
 				try {
 					Announcement a = DatabaseManager.getManager()
 							.getAnnouncement(UUID.fromString(value), guildId);
-					if(a != null) {
+					if (a != null) {
 						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a),
 								AnnouncementMessageFormatter.getSubscriberNames(a), event);
 					} else {
@@ -336,7 +320,7 @@ public class AnnouncementCommand implements ICommand {
 								"That announcement does not exist! Are you sure you typed the ID correctly?",
 								event);
 					}
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..",
 							event);
 				}
@@ -348,16 +332,16 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleSubscribe(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 1) {
+		if (args.length == 1) {
 			Message.sendMessage("Please specify the ID of the announcement you wish to subscribe to!",
 					event);
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementUtils.announcementExists(value, event)) {
+			if (AnnouncementUtils.announcementExists(value, event)) {
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value), guildId);
 				String senderId = event.getMessage().getAuthor().getStringID();
-				if(!a.getSubscriberUserIds().contains(senderId)) {
+				if (!a.getSubscriberUserIds().contains(senderId)) {
 					a.getSubscriberUserIds().add(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage("You have subscribed to the announcement with the ID: `" + value + "`"
@@ -370,17 +354,17 @@ public class AnnouncementCommand implements ICommand {
 						"Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?",
 						event);
 			}
-		} else if(args.length == 3) {
+		} else if (args.length == 3) {
 			String value1 = args[1];
 			String value2 = args[2];
-			if(AnnouncementUtils.announcementExists(value1, event)) {
+			if (AnnouncementUtils.announcementExists(value1, event)) {
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value1), guildId);
 				IUser user = event.getMessage().getGuild()
 						.getUserByID(UserUtils.getUser(value2, event.getMessage()));
-				if(user != null) {
+				if (user != null) {
 					//Valid user, let's add that user to the announcement.
-					if(!a.getSubscriberUserIds().contains(user.getStringID())) {
+					if (!a.getSubscriberUserIds().contains(user.getStringID())) {
 						String username = user.getDisplayName(event.getMessage().getGuild());
 						a.getSubscriberUserIds().add(user.getStringID());
 						DatabaseManager.getManager().updateAnnouncement(a);
@@ -394,10 +378,10 @@ public class AnnouncementCommand implements ICommand {
 								"That user is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>`",
 								event);
 					}
-				} else if(value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
+				} else if (value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
 					//Here or everyone is to be subscribed...
 					String men = value2.toLowerCase();
-					if(!a.getSubscriberRoleIds().contains(men)) {
+					if (!a.getSubscriberRoleIds().contains(men)) {
 						a.getSubscriberRoleIds().add(men);
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
@@ -413,9 +397,9 @@ public class AnnouncementCommand implements ICommand {
 				} else {
 					//User does not exist, see if a role.
 					IRole role = RoleUtils.getRoleFromMention(value2, event);
-					if(role != null) {
+					if (role != null) {
 						//Role valid, let's add that role to the announcement.
-						if(!a.getSubscriberRoleIds().contains(role.getStringID())) {
+						if (!a.getSubscriberRoleIds().contains(role.getStringID())) {
 							String roleName = role.getName();
 							a.getSubscriberRoleIds().add(role.getStringID());
 							DatabaseManager.getManager().updateAnnouncement(a);
@@ -451,12 +435,12 @@ public class AnnouncementCommand implements ICommand {
 		IMessage message = event.getMessage();
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
-		if(AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
+		if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 			UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID())
 					.getAnnouncementId();
 			Announcement a = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 			String senderId = user.getStringID();
-			if(!a.getSubscriberUserIds().contains(senderId)) {
+			if (!a.getSubscriberUserIds().contains(senderId)) {
 				a.getSubscriberUserIds().add(senderId);
 				Message.sendMessage(
 						"You have subscribed to the announcement with the ID: `" + announcementId.toString()
@@ -476,14 +460,14 @@ public class AnnouncementCommand implements ICommand {
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
 		String value = args[1];
-		if(args[1].length() <= 32) {
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
+		if (args[1].length() <= 32) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 				IUser u = guild.getUserByID(UserUtils.getUser(value, message));
 				IRole r = guild.getRoleByID(RoleUtils.getRole(value, message));
-				if(value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
+				if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
 					String men = value.toLowerCase();
-					if(!a.getSubscriberRoleIds().contains(men)) {
+					if (!a.getSubscriberRoleIds().contains(men)) {
 						a.getSubscriberRoleIds().add(men);
 						Message.sendMessage(
 								"`" + men + "` has been subscribed to the announcement with the ID `" + a
@@ -495,8 +479,8 @@ public class AnnouncementCommand implements ICommand {
 										+ " is already subscribed to the specified announcement! To unsubscribe them use `!announcement unsubscribe <announcement ID> <value>`",
 								event);
 					}
-				} else if(u != null) {
-					if(!a.getSubscriberUserIds().contains(u.getStringID())) {
+				} else if (u != null) {
+					if (!a.getSubscriberUserIds().contains(u.getStringID())) {
 						a.getSubscriberUserIds().add(u.getStringID());
 						String username = u.getName();
 						Message.sendMessage(
@@ -505,8 +489,8 @@ public class AnnouncementCommand implements ICommand {
 										+ "To unsubscribe them use `!announcement unsubscribe <announcement ID> <value>",
 								event);
 					}
-				} else if(r != null) {
-					if(!a.getSubscriberRoleIds().contains(r.getStringID())) {
+				} else if (r != null) {
+					if (!a.getSubscriberRoleIds().contains(r.getStringID())) {
 						String username = r.getName();
 						Message.sendMessage(
 								"The role `" + username
@@ -522,11 +506,11 @@ public class AnnouncementCommand implements ICommand {
 						event);
 			}
 		} else {
-			if(AnnouncementUtils.announcementExists(value, event)) {
+			if (AnnouncementUtils.announcementExists(value, event)) {
 				String senderId = user.getStringID();
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value), guild.getLongID());
-				if(!a.getSubscriberUserIds().contains(senderId)) {
+				if (!a.getSubscriberUserIds().contains(senderId)) {
 					a.getSubscriberUserIds().add(senderId);
 					Message.sendMessage(
 							"You have subscribed to the announcement with the ID: `" + value + "`"
@@ -552,13 +536,13 @@ public class AnnouncementCommand implements ICommand {
 
 		String announcementID;
 		boolean updateDb;
-		if(args[1].length() > 32) {
+		if (args[1].length() > 32) {
 			AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 			updateDb = true;
 			announcementID = args[1];
 		} else {
 			updateDb = false;
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 				announcementID = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID())
 						.getAnnouncementId().toString();
 			} else {
@@ -567,18 +551,18 @@ public class AnnouncementCommand implements ICommand {
 			}
 		}
 
-		if(AnnouncementUtils.announcementExists(announcementID, event)) {
+		if (AnnouncementUtils.announcementExists(announcementID, event)) {
 			Announcement a = updateDb ? DatabaseManager.getManager()
 					.getAnnouncement(UUID.fromString(announcementID), guild.getLongID())
 					: AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 
-			for(int i = 1; i < args.length; i++) {
+			for (int i = 1; i < args.length; i++) {
 				IUser u = guild.getUserByID(UserUtils.getUser(args[i], message));
 				IRole r = guild.getRoleByID(RoleUtils.getRole(args[i], message));
-				if(args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
+				if (args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
 					//Here or everyone is to be subscribed...
 					String men = args[i].toLowerCase();
-					if(!a.getSubscriberRoleIds().contains(men)) {
+					if (!a.getSubscriberRoleIds().contains(men)) {
 						a.getSubscriberRoleIds().add(men);
 						Message.sendMessage(
 								"`" + men + "` has been subscribed to the announcement with the ID `" + a
@@ -593,13 +577,13 @@ public class AnnouncementCommand implements ICommand {
 					}
 				}
 
-				if(u != null) {
-					if(!a.getSubscriberUserIds().contains(u.getStringID())) {
+				if (u != null) {
+					if (!a.getSubscriberUserIds().contains(u.getStringID())) {
 						subscribedUsers.add(u.getName());
 						a.getSubscriberUserIds().add(u.getStringID());
 					}
-				} else if(r != null) {
-					if(!a.getSubscriberRoleIds().contains(r.getStringID())) {
+				} else if (r != null) {
+					if (!a.getSubscriberRoleIds().contains(r.getStringID())) {
 						subscribedRoles.add(r.getName());
 						a.getSubscriberRoleIds().add(r.getStringID());
 					}
@@ -614,7 +598,7 @@ public class AnnouncementCommand implements ICommand {
 			em.withDesc("Subscribed Users: " + subscribedUsers + "\nSubscribed Roles: " + subscribedRoles);
 			em.withFooterText("Announcement ID: " + announcementID);
 			Message.sendMessage(em.build(), event);
-			if(updateDb) {
+			if (updateDb) {
 				DatabaseManager.getManager().updateAnnouncement(a);
 			}
 		} else {
@@ -628,9 +612,9 @@ public class AnnouncementCommand implements ICommand {
 		IMessage message = event.getMessage();
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
-		if(args.length == 1) {
+		if (args.length == 1) {
 			moduleSubscribeRewriteArgsOne(args, event);
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			moduleSubscribeRewriteArgsTwo(args, event);
 		} else {
 			moduleSubscribeRewriteArgsThree(args, event);
@@ -644,15 +628,15 @@ public class AnnouncementCommand implements ICommand {
 		IChannel debug = guild.getChannelByID(267685015016570880L);
 		Message.sendMessage(debugEmbed("Args: " + Arrays.toString(args)), event);
 
-		if(args.length == 1) {
+		if (args.length == 1) {
 			Message.sendMessage(debugEmbed("Args.length == 1"), event);
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 				Message.sendMessage(debugEmbed("Announcement being created."), event);
 				UUID announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID())
 						.getAnnouncementId();
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 				String senderId = user.getStringID();
-				if(a.getSubscriberUserIds().contains(senderId)) {
+				if (a.getSubscriberUserIds().contains(senderId)) {
 					Message.sendMessage(debugEmbed("User in announcement"), event);
 					a.getSubscriberUserIds().remove(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
@@ -669,14 +653,14 @@ public class AnnouncementCommand implements ICommand {
 						.sendMessage("Please specify the ID of the announcement you wish to unsubscribe from!",
 								event);
 			}
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementUtils.announcementExists(value, event)) {
+			if (AnnouncementUtils.announcementExists(value, event)) {
 				Message.sendMessage(debugEmbed("Valid UID."), event);
 				String senderId = user.getStringID();
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value), guild.getLongID());
-				if(a.getSubscriberUserIds().contains(senderId)) {
+				if (a.getSubscriberUserIds().contains(senderId)) {
 					Message.sendMessage(debugEmbed("User subscribed"), event);
 					a.getSubscriberUserIds().remove(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
@@ -698,12 +682,12 @@ public class AnnouncementCommand implements ICommand {
 
 			String announcementId;
 			int start = 1;
-			if(args[1].length() > 32) {
+			if (args[1].length() > 32) {
 				announcementId = args[1];
 				Message.sendMessage(
 						debugEmbed("Args[1].length = " + args[1].length() + "\nArgs[1] = " + args[1]), event);
 			} else {
-				if(AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
+				if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 					announcementId = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID())
 							.getAnnouncementId().toString();
 					Message.sendMessage(debugEmbed("Announcement being created"), event);
@@ -714,7 +698,7 @@ public class AnnouncementCommand implements ICommand {
 				}
 			}
 
-			if(AnnouncementUtils.announcementExists(announcementId, event)) {
+			if (AnnouncementUtils.announcementExists(announcementId, event)) {
 				Message.sendMessage(debugEmbed("Announcement exists."), event);
 				Announcement a = start == 1 ? DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(announcementId), guild.getLongID())
@@ -722,33 +706,33 @@ public class AnnouncementCommand implements ICommand {
 				Message.sendMessage(
 						debugEmbed("Args at point of subscribing multiple users: " + Arrays.toString(args)),
 						event);
-				for(int i = start; i < args.length; i++) {
+				for (int i = start; i < args.length; i++) {
 					Message.sendMessage(debugEmbed("ARGS[I]: " + args[i]), event);
 					IUser u = guild.getUserByID(UserUtils.getUser(args[i], message));
 					IRole r = guild.getRoleByID(RoleUtils.getRole(args[i], message));
 					Message.sendMessage(
 							debugEmbed("u == null: " + (u == null) + "\n\nr == null: " + (r == null)), event);
-					if(args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
+					if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
 						//Here or everyone is to be subscribed...
 						Message.sendMessage(debugEmbed("args[i] = " + args[i]), event);
 						String men = args[i].toLowerCase();
-						if(a.getSubscriberRoleIds().contains(men)) {
+						if (a.getSubscriberRoleIds().contains(men)) {
 							a.getSubscriberRoleIds().remove(men);
 							DatabaseManager.getManager().updateAnnouncement(a);
 							subscribedUsers.add(men);
 						}
 					} else {
-						if(u != null) {
+						if (u != null) {
 							Message.sendMessage(debugEmbed("u is not null"), event);
-							if(a.getSubscriberUserIds().contains(user.getStringID())) {
+							if (a.getSubscriberUserIds().contains(user.getStringID())) {
 								String username = user.getDisplayName(event.getMessage().getGuild());
 								a.getSubscriberUserIds().remove(user.getStringID());
 								DatabaseManager.getManager().updateAnnouncement(a);
 								subscribedUsers.add(username);
 							}
-						} else if(r != null) {
+						} else if (r != null) {
 							Message.sendMessage(debugEmbed("r is not null"), event);
-							if(a.getSubscriberRoleIds().contains(r.getStringID())) {
+							if (a.getSubscriberRoleIds().contains(r.getStringID())) {
 								String roleName = r.getName();
 								a.getSubscriberRoleIds().remove(r.getName());
 								DatabaseManager.getManager().updateAnnouncement(a);
@@ -763,7 +747,7 @@ public class AnnouncementCommand implements ICommand {
 				EmbedBuilder em = new EmbedBuilder();
 				try {
 					em.withAuthorIcon(Main.client.getApplicationIconURL());
-				} catch(DiscordException ex) {
+				} catch (DiscordException ex) {
 					ExceptionHandler
 							.sendException(user, "Client author icon failed on unsubscribing members", ex,
 									ex.getClass());
@@ -788,16 +772,16 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleUnsubscribe(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 1) {
+		if (args.length == 1) {
 			Message.sendMessage("Please specify the ID of the announcement you wish to unsubscribe from!",
 					event);
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementUtils.announcementExists(value, event)) {
+			if (AnnouncementUtils.announcementExists(value, event)) {
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value), guildId);
 				String senderId = event.getMessage().getAuthor().getStringID();
-				if(a.getSubscriberUserIds().contains(senderId)) {
+				if (a.getSubscriberUserIds().contains(senderId)) {
 					a.getSubscriberUserIds().remove(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage(
@@ -812,16 +796,16 @@ public class AnnouncementCommand implements ICommand {
 						"Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?",
 						event);
 			}
-		} else if(args.length == 3) {
+		} else if (args.length == 3) {
 			String value1 = args[1];
 			String value2 = args[2];
-			if(AnnouncementUtils.announcementExists(value1, event)) {
+			if (AnnouncementUtils.announcementExists(value1, event)) {
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value1), guildId);
 				IUser user = UserUtils.getUserFromMention(value2, event);
-				if(user != null) {
+				if (user != null) {
 					//Valid user, let's add that user to the announcement.
-					if(a.getSubscriberUserIds().contains(user.getStringID())) {
+					if (a.getSubscriberUserIds().contains(user.getStringID())) {
 						String username = user.getDisplayName(event.getMessage().getGuild());
 						a.getSubscriberUserIds().remove(user.getStringID());
 						DatabaseManager.getManager().updateAnnouncement(a);
@@ -835,10 +819,10 @@ public class AnnouncementCommand implements ICommand {
 								"That user is not subscribed to the specified announcement! To subscribe them use `!announcement unsubscribe <announcement ID> <mention>`",
 								event);
 					}
-				} else if(value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
+				} else if (value2.equalsIgnoreCase("everyone") || value2.equalsIgnoreCase("here")) {
 					//Here or everyone is to be mentioned...
 					String men = value2.toLowerCase();
-					if(a.getSubscriberRoleIds().contains(men)) {
+					if (a.getSubscriberRoleIds().contains(men)) {
 						a.getSubscriberRoleIds().remove(men);
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
@@ -854,9 +838,9 @@ public class AnnouncementCommand implements ICommand {
 				} else {
 					//User does not exist, see if a role.
 					IRole role = RoleUtils.getRoleFromMention(value2, event);
-					if(role != null) {
+					if (role != null) {
 						//Role valid, let's add that role to the announcement.
-						if(a.getSubscriberRoleIds().contains(role.getStringID())) {
+						if (a.getSubscriberRoleIds().contains(role.getStringID())) {
 							String roleName = role.getName();
 							a.getSubscriberRoleIds().remove(role.getStringID());
 							DatabaseManager.getManager().updateAnnouncement(a);
@@ -890,23 +874,23 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleType(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(AnnouncementType.isValid(value)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (AnnouncementType.isValid(value)) {
 					AnnouncementType type = AnnouncementType.fromValue(value);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
-					if(type.equals(AnnouncementType.SPECIFIC)) {
+					if (type.equals(AnnouncementType.SPECIFIC)) {
 						Message.sendMessage(
 								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
 										+ "Please set the specific event ID to fire for with `!announcement event <id>`",
 								event);
-					} else if(type.equals(AnnouncementType.COLOR)) {
+					} else if (type.equals(AnnouncementType.COLOR)) {
 						Message.sendMessage(
 								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
 										+ "Please set the specific event color to fire for with `!announcement color <name or ID>`",
 								event);
-					} else if(type.equals(AnnouncementType.RECUR)) {
+					} else if (type.equals(AnnouncementType.RECUR)) {
 						Message.sendMessage(
 								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
 										+ "Please set the recurring event to fire for with `!announcement event  <ID>`",
@@ -931,9 +915,9 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleHours(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				try {
 					Integer hoursOr = Integer.valueOf(value);
 					Integer hours = Math.abs(hoursOr);
@@ -941,7 +925,7 @@ public class AnnouncementCommand implements ICommand {
 					Message.sendMessage(
 							"Announcement hours before set to: `" + hours + "`" + Message.lineBreak
 									+ "Please specify the amount of minutes before the event to fire!", event);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					Message.sendMessage("Hours must be a valid integer! (Ex: `1` or `10`)", event);
 				}
 			} else {
@@ -954,9 +938,9 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleMinutes(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				try {
 					Integer minutesOr = Integer.valueOf(value);
 					Integer minutes = Math.abs(minutesOr);
@@ -966,7 +950,7 @@ public class AnnouncementCommand implements ICommand {
 									+ "Announcement creation halted! " +
 									"If you would like to add some info text, use `!announcement info <text>` otherwise, review your announcement with `!announcement review`",
 							event);
-				} catch(NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					Message.sendMessage("Minutes must be a valid integer! (Ex: `1` or `10`)", event);
 				}
 			} else {
@@ -979,17 +963,17 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleList(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 1) {
-			if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		if (args.length == 1) {
+			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message
 						.sendMessage("Please specify how many announcements you wish to list or `all`", event);
 			} else {
 				Message.sendMessage("You cannot list existing announcements while in the creator!", event);
 			}
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(value.equalsIgnoreCase("all")) {
+			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (value.equalsIgnoreCase("all")) {
 					ArrayList<Announcement> announcements = DatabaseManager.getManager()
 							.getAnnouncements(guildId);
 					Message.sendMessage(
@@ -999,7 +983,7 @@ public class AnnouncementCommand implements ICommand {
 									+ "`" + announcements.size() + "`" + Message.lineBreak + Message.lineBreak
 									+ "Please note that this list may be delayed due to rate limiting...", event);
 					//Loop and add embeds
-					for(Announcement a : announcements) {
+					for (Announcement a : announcements) {
 						Message
 								.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event);
 					}
@@ -1013,8 +997,8 @@ public class AnnouncementCommand implements ICommand {
 								+ "Please note that this list may be delayed due to rate limiting...", event);
 
 						int posted = 0;
-						for(Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
-							if(posted < amount) {
+						for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+							if (posted < amount) {
 								Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a),
 										event);
 
@@ -1023,7 +1007,7 @@ public class AnnouncementCommand implements ICommand {
 								break;
 							}
 						}
-					} catch(NumberFormatException e) {
+					} catch (NumberFormatException e) {
 						Message.sendMessage("Amount must either be `all` or a valid integer!", event);
 					}
 				}
@@ -1038,12 +1022,12 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleEvent(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.SPECIFIC)) {
-					if(EventUtils.eventExists(guildId, value)) {
+					if (EventUtils.eventExists(guildId, value)) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
 						Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak
 										+ "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!",
@@ -1053,10 +1037,10 @@ public class AnnouncementCommand implements ICommand {
 								"Hmm... I can't seem to find an event with that ID, are you sure its correct?",
 								event);
 					}
-				} else if(AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
+				} else if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.RECUR)) {
-					if(EventUtils.eventExists(guildId, value)) {
-						if(value.contains("_")) {
+					if (EventUtils.eventExists(guildId, value)) {
+						if (value.contains("_")) {
 							String[] stuff = value.split("_");
 							value = stuff[0];
 						}
@@ -1085,11 +1069,11 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleInfo(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length < 2) {
+		if (args.length < 2) {
 			Message.sendMessage("Please use `!announcement info <your info here>`", event);
-		} else if(args.length == 2) {
+		} else if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
 				Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak
 								+ "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!",
@@ -1097,8 +1081,8 @@ public class AnnouncementCommand implements ICommand {
 			} else {
 				Message.sendMessage("Announcement Creator not initialized!", event);
 			}
-		} else if(args.length > 2) {
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+		} else if (args.length > 2) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				String value = GeneralUtils.getContent(args, 1);
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
 				Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak
@@ -1112,12 +1096,12 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleChannel(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(ChannelUtils.channelExists(value, event)) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (ChannelUtils.channelExists(value, event)) {
 					IChannel c = ChannelUtils.getChannelFromNameOrId(value, event);
-					if(c != null) {
+					if (c != null) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId)
 								.setAnnouncementChannelId(c.getStringID());
 						Message.sendMessage(
@@ -1143,12 +1127,12 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleColor(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.COLOR)) {
-					if(EventColor.exists(value)) {
+					if (EventColor.exists(value)) {
 						EventColor color = EventColor.fromNameOrHexOrID(value);
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventColor(color);
 						Message.sendMessage(
@@ -1173,10 +1157,10 @@ public class AnnouncementCommand implements ICommand {
 
 	private void moduleCopy(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
-		if(args.length == 2) {
+		if (args.length == 2) {
 			String value = args[1];
-			if(!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				if(AnnouncementUtils.announcementExists(value, event)) {
+			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				if (AnnouncementUtils.announcementExists(value, event)) {
 					Announcement a = AnnouncementCreator.getCreator().init(event, value);
 
 					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a),
