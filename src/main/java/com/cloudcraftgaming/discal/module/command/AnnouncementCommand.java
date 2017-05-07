@@ -551,7 +551,7 @@ public class AnnouncementCommand implements ICommand {
 			}
 		}
 
-		if (AnnouncementUtils.announcementExists(announcementID, event)) {
+		if (AnnouncementUtils.announcementExists(announcementID, event) || !updateDb) {
 			Announcement a = updateDb ? DatabaseManager.getManager()
 					.getAnnouncement(UUID.fromString(announcementID), guild.getLongID())
 					: AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
