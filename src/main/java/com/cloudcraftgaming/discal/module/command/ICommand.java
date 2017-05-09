@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.module.command;
 
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
@@ -37,5 +38,5 @@ interface ICommand {
      * @param event The event received.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
-    Boolean issueCommand(String[] args, MessageReceivedEvent event);
+    Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings);
 }

@@ -59,7 +59,7 @@ public class MessageManager {
 	}
 
 
-
+	@Deprecated
 	public static String getMessage(String key, MessageReceivedEvent event) {
 		try {
 			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
@@ -78,6 +78,7 @@ public class MessageManager {
 		return "***MESSAGES BROKE (ID 1)***";
 	}
 
+	@Deprecated
 	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
 		try {
 			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
@@ -97,6 +98,7 @@ public class MessageManager {
 		return "***MESSAGES BROKE (ID 2)***";
 	}
 
+	@Deprecated
 	public static String getMessage(String key, long guildId) {
 		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 
@@ -111,6 +113,7 @@ public class MessageManager {
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
 	}
 
+	@Deprecated
 	public static String getMessage(String key, String var, String replace, long guildId) {
 		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
 

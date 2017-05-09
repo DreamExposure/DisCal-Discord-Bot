@@ -257,4 +257,11 @@ public class EventCreator {
     public boolean hasCreatorMessage(long guildId) {
     	return hasPreEvent(guildId) && getPreEvent(guildId).getCreatorMessage() != null;
 	}
+
+	//Setters
+	public void setCreatorMessage(IMessage msg) {
+    	if (hasPreEvent(msg.getGuild().getLongID())) {
+    		getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
+		}
+	}
 }

@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -66,14 +67,14 @@ public class LinkCalendarCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         try {
             //TODO: Handle multiple calendars...
             CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 
             if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
                 //Does not have a calendar.
-                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", event), event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
@@ -81,7 +82,7 @@ public class LinkCalendarCommand implements ICommand {
             }
         } catch (IOException e) {
             ExceptionHandler.sendException(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
-            Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
         }
         return false;
     }

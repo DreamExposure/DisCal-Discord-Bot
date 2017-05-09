@@ -72,7 +72,7 @@ public class DevCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         long novaId = 130510525770629121L;
         long xaanitId = 233611560545812480L;
         if (event.getAuthor().getLongID() == novaId || event.getAuthor().getLongID() == xaanitId) {

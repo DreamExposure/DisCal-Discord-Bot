@@ -93,13 +93,12 @@ public class AnnouncementCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (args.length < 1) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
 			} else if (args.length >= 1) {
 				long guildId = event.getGuild().getLongID();
-				GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 				switch (args[0].toLowerCase()) {
 					case "create":
 						moduleCreate(event);

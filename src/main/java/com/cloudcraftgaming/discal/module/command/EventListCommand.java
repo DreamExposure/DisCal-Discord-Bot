@@ -68,39 +68,38 @@ public class EventListCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event)  {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings)  {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
+            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", settings), event);
         } else {
-            GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
             switch (args[0].toLowerCase()) {
                 case "search":
                     if (settings.isDevGuild()) {
                         //To search module.
                         Message.sendMessage("Uh... I'm working on it okay~", event);
                     } else {
-                        Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
+                        Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
                     }
                     break;
                 default:
-                    moduleSimpleList(args, event);
+                    moduleSimpleList(args, event, settings);
                     break;
             }
         }
         return false;
     }
 
-    private void moduleSimpleList(String[] args, MessageReceivedEvent event) {
+    private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length == 1) {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
                 if (eventNum > 15) {
-                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Over", event), event);
+                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Over", settings), event);
                     return;
                 }
                 if (eventNum < 1) {
-                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Under", event), event);
+                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Under", settings), event);
                     return;
                 }
                 try {
@@ -115,27 +114,27 @@ public class EventListCommand implements ICommand {
                             .execute();
                     List<Event> items = events.getItems();
                     if (items.size() == 0) {
-                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", event), event);
+                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
                     } else if (items.size() == 1) {
                         long guildId = event.getGuild().getLongID();
-                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), MessageManager.getMessage("Event.List.Found.One", event), event);
+                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), MessageManager.getMessage("Event.List.Found.One", settings), event);
                     } else {
                         //List events by Id only.
-                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", event), event);
+                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
                         for (Event e : items) {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, event.getGuild().getLongID()), event);
                         }
                     }
                 } catch (IOException e) {
-                    Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", event), event);
+                    Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
                     ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {
-                Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", event), event);
+                Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", event), event);
+            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", settings), event);
         }
     }
 }

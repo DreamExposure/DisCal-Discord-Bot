@@ -79,13 +79,12 @@ public class CalendarCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
             } else if (args.length >= 1) {
                 long guildId = event.getGuild().getLongID();
-                GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 //TODO: Add support for multiple calendars...
                 CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
 

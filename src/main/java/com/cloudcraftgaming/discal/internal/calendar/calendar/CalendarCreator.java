@@ -198,6 +198,13 @@ public class CalendarCreator {
         return null;
     }
 
+    public IMessage getCreatorMessage(long guildId) {
+    	if (hasPreCalendar(guildId)) {
+    		return getPreCalendar(guildId).getCreatorMessage();
+		}
+		return null;
+	}
+
     //Booleans/Checkers
     /**
      * Checks whether or not the specified Guild has a PreCalendar in the creator.
@@ -212,4 +219,15 @@ public class CalendarCreator {
         }
         return false;
     }
+
+    public boolean hasCreatorMessage(long guildId) {
+    	return hasPreCalendar(guildId) && getPreCalendar(guildId).getCreatorMessage() != null;
+	}
+
+	//Setters
+	public void setCreatorMessage(IMessage msg) {
+    	if (hasPreCalendar(msg.getGuild().getLongID())) {
+    		getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
+		}
+	}
 }

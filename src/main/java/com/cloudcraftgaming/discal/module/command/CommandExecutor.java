@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
@@ -54,10 +55,10 @@ public class CommandExecutor {
      * @param args The command arguments used.
      * @param event The Event received.
      */
-    void issueCommand(String cmd, String[] args, MessageReceivedEvent event) {
+    void issueCommand(String cmd, String[] args, MessageReceivedEvent event, GuildSettings settings) {
         for (ICommand c : commands) {
             if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase())) {
-                c.issueCommand(args, event);
+                c.issueCommand(args, event, settings);
             }
         }
 

@@ -47,10 +47,10 @@ class CommandListener {
                         String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
                         String command = argsOr[0].replace(settings.getPrefix(), "");
-                        cmd.issueCommand(command, args, event);
+                        cmd.issueCommand(command, args, event, settings);
                     } else if (argsOr.length == 1) {
                         //Only command... no args.
-                        cmd.issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event);
+                        cmd.issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event, settings);
                     }
                 } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getStringID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getStringID() + ">"))) {
                     String[] argsOr = event.getMessage().getContent().split(" ");
@@ -60,13 +60,13 @@ class CommandListener {
                         String [] args = argsOr2.toArray(new String[argsOr2.size()]);
 
                         String command = argsOr[1];
-                        cmd.issueCommand(command, args, event);
+                        cmd.issueCommand(command, args, event, settings);
                     } else if (argsOr.length == 2) {
                         //No args...
-                        cmd.issueCommand(argsOr[1], new String[0], event);
+                        cmd.issueCommand(argsOr[1], new String[0], event, settings);
                     } else if (argsOr.length == 1) {
                         //Only disCal mentioned...
-                        cmd.issueCommand("DisCal", new String[0], event);
+                        cmd.issueCommand("DisCal", new String[0], event, settings);
                     }
                 }
             }

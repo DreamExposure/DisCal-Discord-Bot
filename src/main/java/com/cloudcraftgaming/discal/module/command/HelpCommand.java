@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -57,7 +58,7 @@ public class HelpCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length < 1) {
             EmbedBuilder em = new EmbedBuilder();
             em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());

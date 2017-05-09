@@ -71,61 +71,61 @@ public class DisCalCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event) {
+    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length < 1) {
-            moduleDisCalInfo(event);
+            moduleDisCalInfo(event, settings);
         } else {
             switch (args[0].toLowerCase()) {
                 case "discal":
-                    moduleDisCalInfo(event);
+                    moduleDisCalInfo(event, settings);
                     break;
                 case "settings":
-                    moduleSettings(event);
+                    moduleSettings(event, settings);
                     break;
                 case "role":
-                    moduleControlRole(args, event);
+                    moduleControlRole(args, event, settings);
                     break;
                 case "channel":
-                    moduleDisCalChannel(args, event);
+                    moduleDisCalChannel(args, event, settings);
                     break;
                 case "simpleannouncement":
-                    moduleSimpleAnnouncement(event);
+                    moduleSimpleAnnouncement(event, settings);
                     break;
                 case "dmannouncement":
-                    moduleDmAnnouncements(event);
+                    moduleDmAnnouncements(event, settings);
                     break;
 				case "language":
-					moduleLanguage(args, event);
+					moduleLanguage(args, event, settings);
 					break;
 				case "lang":
-					moduleLanguage(args, event);
+					moduleLanguage(args, event, settings);
 					break;
 				case "prefix":
-					modulePrefix(args, event);
+					modulePrefix(args, event, settings);
 					break;
                 default:
-                    Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
+                    Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
                     break;
             }
         }
         return false;
     }
 
-    private void moduleDisCalInfo(MessageReceivedEvent event) {
+    private void moduleDisCalInfo(MessageReceivedEvent event, GuildSettings settings) {
         IGuild guild = event.getGuild();
 
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal!");
-        em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", event));
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", event), "NovaFox161", true);
-        em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", event), Main.version, true);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", event), "Discord4J, version 2.8.1", false);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", event), Main.client.getGuilds().size() + "", true);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", event), DatabaseManager.getManager().getCalendarCount() + "", true);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", event), DatabaseManager.getManager().getAnnouncementCount() + "", true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "", event), guild.getShard().getResponseTime() + "ms", false);
-        em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", event) + ": https://www.patreon.com/Novafox");
+        em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "NovaFox161", true);
+        em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), Main.version, true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 2.8.1", false);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), Main.client.getGuilds().size() + "", true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
+		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "", settings), guild.getShard().getResponseTime() + "ms", false);
+        em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
         Message.sendMessage(em.build(), event);
@@ -136,40 +136,37 @@ public class DisCalCommand implements ICommand {
      * @param args The args of the command.
      * @param event The event received.
      */
-    private void moduleControlRole(String[] args, MessageReceivedEvent event) {
+    private void moduleControlRole(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length == 2) {
                 String roleName = args[1];
-                IGuild guild = event.getGuild();
                 IRole controlRole;
 
                 if (!"everyone".equalsIgnoreCase(roleName)) {
                     controlRole = RoleUtils.getRoleFromID(roleName, event);
 
                     if (controlRole != null) {
-                        GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
                         settings.setControlRole(controlRole.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
-                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), event), event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), settings), event);
 
                     } else {
                         //Invalid role.
-                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Invalid", event), event);
+                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Invalid", settings), event);
                     }
                 } else {
                     //Role is @everyone, set this so that anyone can control the bot.
-                    GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
                     settings.setControlRole("everyone");
                     DatabaseManager.getManager().updateSettings(settings);
                     //Send message
-                    Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Reset", event), event);
+                    Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Reset", settings), event);
                 }
             } else {
-                Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Specify", event), event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Specify", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
         }
     }
 
@@ -178,49 +175,42 @@ public class DisCalCommand implements ICommand {
      * @param args The command args
      * @param event The event received.
      */
-    private void moduleDisCalChannel(String[] args, MessageReceivedEvent event) {
-        long guildId = event.getGuild().getLongID();
+    private void moduleDisCalChannel(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length == 2) {
             String channelName = args[1];
             if (channelName.equalsIgnoreCase("all")) {
                 //Reset channel info.
-                GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                 settings.setDiscalChannel("all");
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.Channel.All", event), event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.Channel.All", settings), event);
             } else {
                 if (ChannelUtils.channelExists(channelName, event)) {
                     IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
                     if (channel != null) {
-                        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
                         settings.setDiscalChannel(channel.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
                         Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
                     } else {
-                        Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", event), event);
+                        Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
                     }
                 } else {
-                    Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", event), event);
+                    Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
                 }
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Specify", event), event);
+            Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Specify", settings), event);
         }
     }
 
-    private void moduleSimpleAnnouncement(MessageReceivedEvent event) {
-        long guildId = event.getGuild().getLongID();
-        GuildSettings settings =  DatabaseManager.getManager().getSettings(guildId);
+    private void moduleSimpleAnnouncement(MessageReceivedEvent event, GuildSettings settings) {
         settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
         DatabaseManager.getManager().updateSettings(settings);
 
-        Message.sendMessage(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", event), event);
+        Message.sendMessage(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings), event);
     }
 
-    private void moduleSettings(MessageReceivedEvent event) {
+    private void moduleSettings(MessageReceivedEvent event, GuildSettings settings) {
         long guildId = event.getGuild().getLongID();
-
-        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
@@ -249,31 +239,26 @@ public class DisCalCommand implements ICommand {
         Message.sendMessage(em.build(), event);
     }
 
-    private void moduleDmAnnouncements(MessageReceivedEvent event) {
-        long guildId = event.getGuild().getLongID();
-        GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-        if (settings.isDevGuild()) {
+    private void moduleDmAnnouncements(MessageReceivedEvent event, GuildSettings settings) {
+		if (settings.isDevGuild()) {
             IUser user = event.getAuthor();
 
             if (settings.getDmAnnouncements().contains(user.getStringID())) {
                 settings.getDmAnnouncements().remove(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", event), event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", settings), event);
             } else {
                 settings.getDmAnnouncements().add(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", event), event);
+                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", event), event);
+            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
         }
     }
 
-    private void modulePrefix(String[] args, MessageReceivedEvent event) {
-    	long guildId = event.getGuild().getLongID();
-    	GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-
-    	if (settings.isDevGuild()) {
+    private void modulePrefix(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		if (settings.isDevGuild()) {
     		if (PermissionChecker.hasManageServerRole(event)) {
     			if (args.length == 2) {
     				String prefix = args[1];
@@ -281,26 +266,24 @@ public class DisCalCommand implements ICommand {
     				settings.setPrefix(prefix);
     				DatabaseManager.getManager().updateSettings(settings);
 
-    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, event), event);
+    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
 				} else {
-    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", event), event);
+    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", event), event);
+				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 			}
 		} else {
     		Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 		}
 	}
 
-    private void moduleLanguage(String[] args, MessageReceivedEvent event) {
+    private void moduleLanguage(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasManageServerRole(event)) {
 			if (args.length == 2) {
 				String value = args[1];
 				if (MessageManager.isSupported(value)) {
-					long guildId = event.getGuild().getLongID();
 					String valid = MessageManager.getValidLang(value);
-					GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 					settings.setLang(valid);
 					DatabaseManager.getManager().updateSettings(settings);
@@ -308,14 +291,14 @@ public class DisCalCommand implements ICommand {
 					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Success", settings), event);
 				} else {
 					String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
-					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Unsupported", "%values%", langs, event), event);
+					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
 				}
 			} else {
 				String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
-				Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Specify", "%values%", langs, event), event);
+				Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Specify", "%values%", langs, settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", event), event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 		}
 	}
 }
