@@ -1,9 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,75 +56,6 @@ public class MessageManager {
 		return "ENGLISH";
 	}
 
-
-	@Deprecated
-	public static String getMessage(String key, MessageReceivedEvent event) {
-		try {
-			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
-			Map<String, String> messages;
-
-			if (lang != null && langs.containsKey(lang)) {
-				messages = langs.get(lang);
-			} else {
-				messages = langs.get("ENGLISH");
-			}
-
-			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
-		} catch (Exception e) {
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 1)", e, MessageManager.class);
-		}
-		return "***MESSAGES BROKE (ID 1)***";
-	}
-
-	@Deprecated
-	public static String getMessage(String key, String var, String replace, MessageReceivedEvent event) {
-		try {
-			String lang = DatabaseManager.getManager().getSettings(event.getMessage().getGuild().getLongID()).getLang();
-
-			Map<String, String> messages;
-
-			if (lang != null && langs.containsKey(lang)) {
-				messages = langs.get(lang);
-			} else {
-				messages = langs.get("ENGLISH");
-			}
-
-			return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
-		} catch (Exception e) {
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "MESSAGES BROKE (ID 2)", e, MessageManager.class);
-		}
-		return "***MESSAGES BROKE (ID 2)***";
-	}
-
-	@Deprecated
-	public static String getMessage(String key, long guildId) {
-		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
-
-		Map<String, String> messages;
-
-		if (lang != null && langs.containsKey(lang)) {
-			messages = langs.get(lang);
-		} else {
-			messages = langs.get("ENGLISH");
-		}
-
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
-	}
-
-	@Deprecated
-	public static String getMessage(String key, String var, String replace, long guildId) {
-		String lang = DatabaseManager.getManager().getSettings(guildId).getLang();
-
-		Map<String, String> messages;
-
-		if (lang != null && langs.containsKey(lang)) {
-			messages = langs.get(lang);
-		} else {
-			messages = langs.get("ENGLISH");
-		}
-
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
-	}
 
 	public static String getMessage(String key, GuildSettings settings) {
 		Map<String, String> messages;

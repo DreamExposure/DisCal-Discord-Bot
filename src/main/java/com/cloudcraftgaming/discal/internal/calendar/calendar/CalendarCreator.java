@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
@@ -45,17 +46,17 @@ public class CalendarCreator {
      * @param calendarName The name of the calendar to create.
      * @return The PreCalendar object created.
      */
-    public PreCalendar init(MessageReceivedEvent e, String calendarName, boolean handleCreatorMessage) {
+    public PreCalendar init(MessageReceivedEvent e, String calendarName, GuildSettings settings, boolean handleCreatorMessage) {
     	long guildId = e.getMessage().getGuild().getLongID();
         if (!hasPreCalendar(guildId)) {
             PreCalendar calendar = new PreCalendar(guildId, calendarName);
 
             if (handleCreatorMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar), MessageManager.getMessage("Creator.Calendar.Create.Init", e), e);
+					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), MessageManager.getMessage("Creator.Calendar.Create.Init", settings), e);
 					calendar.setCreatorMessage(msg);
 				} else {
-            		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
+            		Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 				}
             }
             calendars.add(calendar);
@@ -65,7 +66,7 @@ public class CalendarCreator {
     }
 
     @SuppressWarnings("SameParameterValue")
-	public PreCalendar edit(MessageReceivedEvent event, boolean handleCreatorMessage) {
+	public PreCalendar edit(MessageReceivedEvent event, GuildSettings settings, boolean handleCreatorMessage) {
         long guildId = event.getMessage().getGuild().getLongID();
         if (!hasPreCalendar(guildId)) {
             //TODO: Support multiple calendars
@@ -82,10 +83,10 @@ public class CalendarCreator {
 
                 if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar), MessageManager.getMessage("Creator.Calendar.Edit.Init", event), event);
+						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", event), event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), event);
 					}
 				}
 

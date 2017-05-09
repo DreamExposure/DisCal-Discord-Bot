@@ -116,13 +116,12 @@ public class EventListCommand implements ICommand {
                     if (items.size() == 0) {
                         Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
                     } else if (items.size() == 1) {
-                        long guildId = event.getGuild().getLongID();
-                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), guildId), MessageManager.getMessage("Event.List.Found.One", settings), event);
+                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
                     } else {
                         //List events by Id only.
                         Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, event.getGuild().getLongID()), event);
+                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
                         }
                     }
                 } catch (IOException e) {

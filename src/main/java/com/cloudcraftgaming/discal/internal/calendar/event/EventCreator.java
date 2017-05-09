@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
@@ -44,7 +45,7 @@ public class EventCreator {
      * @param e The event received upon initialization.
      * @return The PreEvent for the guild.
      */
-    public PreEvent init(MessageReceivedEvent e, boolean handleMessage) {
+    public PreEvent init(MessageReceivedEvent e, GuildSettings settings, boolean handleMessage) {
         if (!hasPreEvent(e.getGuild().getLongID())) {
             PreEvent event = new PreEvent(e.getGuild().getLongID());
             try {
@@ -57,11 +58,11 @@ public class EventCreator {
             }
             if (handleMessage) {
             	if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Create.Init", e), e);
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
 					event.setCreatorMessage(message);
 					Message.deleteMessage(e);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
+					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 				}
 			}
 
@@ -71,7 +72,7 @@ public class EventCreator {
         return getPreEvent(e.getGuild().getLongID());
     }
 
-    public PreEvent init(MessageReceivedEvent e, String eventId, boolean handleMessage) {
+    public PreEvent init(MessageReceivedEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
         if (!hasPreEvent(e.getGuild().getLongID())) {
             //TODO: Handle multiple calendars...
             try {
@@ -89,11 +90,11 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Copy.Init", e), e);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Copy.Init", settings), e);
 						event.setCreatorMessage(message);
 						Message.deleteMessage(e);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 					}
 				}
 
@@ -107,7 +108,7 @@ public class EventCreator {
         return getPreEvent(e.getGuild().getLongID());
     }
 
-    public PreEvent edit(MessageReceivedEvent e, String eventId, boolean handleMessage) {
+    public PreEvent edit(MessageReceivedEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
         long guildId = e.getGuild().getLongID();
         if (!hasPreEvent(guildId)) {
             //TODO: Handle multiple calendars...
@@ -127,11 +128,11 @@ public class EventCreator {
 
 				if (handleMessage) {
                 	if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event), MessageManager.getMessage("Creator.Event.Edit.Init", e), e);
+						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Edit.Init", settings), e);
 						event.setCreatorMessage(message);
 						Message.deleteMessage(e);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", e), e);
+						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 					}
 				}
 

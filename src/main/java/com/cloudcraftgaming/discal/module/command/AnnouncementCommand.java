@@ -96,15 +96,14 @@ public class AnnouncementCommand implements ICommand {
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (args.length < 1) {
-				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", event), event);
+				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
 			} else if (args.length >= 1) {
-				long guildId = event.getGuild().getLongID();
 				switch (args[0].toLowerCase()) {
 					case "create":
 						moduleCreate(event);
 						break;
 					case "confirm":
-						moduleConfirm(event);
+						moduleConfirm(event, settings);
 						break;
 					case "cancel":
 						moduleCancel(event);
@@ -114,7 +113,7 @@ public class AnnouncementCommand implements ICommand {
 						break;
 					case "view":
 					case "review":
-						moduleView(args, event);
+						moduleView(args, event, settings);
 						break;
 					case "subscribe":
 					case "sub":
@@ -134,7 +133,7 @@ public class AnnouncementCommand implements ICommand {
 						moduleMinutes(args, event);
 						break;
 					case "list":
-						moduleList(args, event);
+						moduleList(args, event, settings);
 						break;
 					case "event":
 						moduleEvent(args, event);
@@ -150,41 +149,36 @@ public class AnnouncementCommand implements ICommand {
 						moduleColor(args, event);
 						break;
 					case "copy":
-						moduleCopy(args, event);
+						moduleCopy(args, event, settings);
 						break;
 					case "edit":
 						if (settings.isDevGuild()) {
-							moduleEdit(args, event);
+							moduleEdit(args, event, settings);
 						} else {
-							Message
-									.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					case "devsub":
 						if (settings.isDevGuild()) {
 							moduleSubscribeRewrite(args, event);
 						} else {
-							Message
-									.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					case "devunsub":
 						if (settings.isDevGuild()) {
 							moduleUnsubscribeRewrite(args, event);
 						} else {
-							Message
-									.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
 						break;
 					default:
-						Message
-								.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", event), event);
+						Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
 						break;
 				}
 			}
 		} else {
-			Message
-					.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", event), event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 		}
 		return false;
 	}
@@ -205,7 +199,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleEdit(String[] args, MessageReceivedEvent event) {
+	private void moduleEdit(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			if (args.length == 2) {
@@ -213,7 +207,7 @@ public class AnnouncementCommand implements ICommand {
 				if (AnnouncementUtils.announcementExists(anId, event)) {
 					Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId);
 
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement),
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings),
 							"Announcement Editor initiated! Edit the values and then confirm your edits with `!announcement confirm`",
 							event);
 				} else {
@@ -231,18 +225,18 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleConfirm(MessageReceivedEvent event) {
+	private void moduleConfirm(MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(event);
 			if (acr.isSuccessful()) {
 				if (acr.getAnnouncement().isEditing()) {
 					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()),
+							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings),
 							"Announcement updated!", event);
 				} else {
 					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement()),
+							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings),
 							"Announcement created " + Message.lineBreak + Message.lineBreak
 									+ "Use `!announcement subscribe <id>` to subscribe to the announcement!", event);
 				}
@@ -292,12 +286,12 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleView(String[] args, MessageReceivedEvent event) {
+	private void moduleView(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage(AnnouncementMessageFormatter
-								.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId)),
+								.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings),
 						event);
 			} else {
 				Message.sendMessage("You must specify the ID of the announcement you wish to view!", event);
@@ -312,7 +306,7 @@ public class AnnouncementCommand implements ICommand {
 					Announcement a = DatabaseManager.getManager()
 							.getAnnouncement(UUID.fromString(value), guildId);
 					if (a != null) {
-						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a),
+						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings),
 								AnnouncementMessageFormatter.getSubscriberNames(a), event);
 					} else {
 						Message.sendMessage(
@@ -602,7 +596,6 @@ public class AnnouncementCommand implements ICommand {
 			}
 		} else {
 			Message.sendMessage("There is no announcement by the ID: " + announcementID + "!", event);
-			return;
 		}
 
 	}
@@ -960,7 +953,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleList(String[] args, MessageReceivedEvent event) {
+	private void moduleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
@@ -984,7 +977,7 @@ public class AnnouncementCommand implements ICommand {
 					//Loop and add embeds
 					for (Announcement a : announcements) {
 						Message
-								.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a), event);
+								.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
 					}
 				} else {
 					//List specific amount of announcements
@@ -998,7 +991,7 @@ public class AnnouncementCommand implements ICommand {
 						int posted = 0;
 						for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 							if (posted < amount) {
-								Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a),
+								Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings),
 										event);
 
 								posted++;
@@ -1154,7 +1147,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleCopy(String[] args, MessageReceivedEvent event) {
+	private void moduleCopy(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -1162,7 +1155,7 @@ public class AnnouncementCommand implements ICommand {
 				if (AnnouncementUtils.announcementExists(value, event)) {
 					Announcement a = AnnouncementCreator.getCreator().init(event, value);
 
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a),
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings),
 							"Announcement copied! Edit any values you wish and confirm the announcement with the command `!announcement confirm`",
 							event);
 				} else {

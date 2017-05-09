@@ -78,7 +78,7 @@ public class LinkCalendarCommand implements ICommand {
             } else {
                 Calendar cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 
-                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, event.getGuild().getLongID()), event);
+                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, settings), event);
             }
         } catch (IOException e) {
             ExceptionHandler.sendException(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());

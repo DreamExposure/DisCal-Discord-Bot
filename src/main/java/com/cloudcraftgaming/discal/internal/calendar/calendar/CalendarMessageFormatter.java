@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -19,20 +20,20 @@ public class CalendarMessageFormatter {
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
 
-    public static EmbedObject getCalendarLinkEmbed(Calendar cal, long guildId) {
+    public static EmbedObject getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", guildId));
-        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Summary", guildId), cal.getSummary(), true);
+        em.withTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
         try {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Description", guildId), cal.getDescription(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
         } catch (NullPointerException | IllegalArgumentException e) {
             //Some error, desc probably never set, just ignore no need to log.
         }
-        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", guildId), cal.getTimeZone(), false);
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
         em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
-        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), guildId));
+        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings));
         em.withColor(56, 138, 237);
 
         return em.build();
@@ -43,27 +44,27 @@ public class CalendarMessageFormatter {
      * @param calendar The PreCalendar to create an EmbedObject for.
      * @return The EmbedObject for the PreCalendar.
      */
-    public static EmbedObject getPreCalendarEmbed(PreCalendar calendar) {
+    public static EmbedObject getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
-        em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", calendar.getGuildId()));
-        em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", calendar.getGuildId()), calendar.getSummary(), true);
+        em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
+        em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
         if (calendar.getDescription() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", calendar.getGuildId()), calendar.getDescription(), false);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
         } else {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", calendar.getGuildId()), "Error/Unset", false);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), "Error/Unset", false);
         }
         if (calendar.getTimezone() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", calendar.getGuildId()), calendar.getTimezone(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), calendar.getTimezone(), true);
         } else {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", calendar.getGuildId()), "***UNSET***", true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
         }
         if (calendar.isEditing()) {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", calendar.getGuildId()), calendar.getCalendarId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), true);
         } //No else needed, just don't post it.
 
-        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Pre.Key", calendar.getGuildId()));
+        em.withFooterText(MessageManager.getMessage("Embed.Calendar.Pre.Key", settings));
         em.withColor(56, 138, 237);
 
         return em.build();
