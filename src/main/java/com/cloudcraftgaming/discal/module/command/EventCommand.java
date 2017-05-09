@@ -171,8 +171,9 @@ public class EventCommand implements ICommand {
                         break;
                     default:
                     	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-							Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Notification.Args.Invalid", settings));
 							Message.deleteMessage(event);
+							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
 						}
@@ -190,8 +191,9 @@ public class EventCommand implements ICommand {
         long guildId = event.getGuild().getLongID();
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
         	if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
-        		Message.editMessage(EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Event.AlreadyInit", settings));
 				Message.deleteMessage(event);
+				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 			}
@@ -230,8 +232,9 @@ public class EventCommand implements ICommand {
                 }
             } else {
 				if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
-					Message.editMessage(EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Event.AlreadyInit", settings));
 					Message.deleteMessage(event);
+					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 				}
@@ -260,8 +263,9 @@ public class EventCommand implements ICommand {
                 }
             } else {
 				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-					Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.AlreadyInit", settings));
 					Message.deleteMessage(event);
+					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 				}
