@@ -6,7 +6,8 @@
   "Creator.Calendar.Edit.Init": "Calendar Editor initialized! Edit the values and confirm with `!calendar confirm`",
   "Creator.Calendar.Create.Name": "Please specify a name for the calendar!",
   "Creator.Calendar.Cancel.Success": "Calendar creation cancelled! Calendar Creator terminated!",
-  "Creator.Calendar.Cancel.Failure": "Failed to cancel calendar creation!",
+  "Creator.Calendar.Cancel.Edit.Success": "Calendar editing cancelled! Calendar Editor terminated!",
+  "Creator.Calendar.Cancel.Failure": "Failed to terminate Calendar Creator/Editor!",
   "Creator.Calendar.Review": "Confirm calendar to complete setup `!calendar confirm` OR edit the values!",
   "Creator.Calendar.Confirm.Edit.Success": "Calendar successfully edited!",
   "Creator.Calendar.Confirm.Edit.Failure": "Calendar Edit failed! Are you sure everything is correct?",
@@ -28,6 +29,7 @@
   "Creator.Calendar.TimeZone.Specify": "Please specify the timezone! %lb% Timezones are case sensitive. (Ex. America/New_York and not america/new_york) %lb% %lb% For a list of valid timezones: ",
 
   "Creator.Calendar.AlreadyInit": "Calendar Creator/Editor already initialized!",
+  "Creator.Calendar.NotInit": "Calendar Creator/Editor has not been initialized!",
   "Creator.Calendar.HasCalendar": "A calendar has already been created! Use `!linkCalendar` to view!",
   "Creator.Calendar.NoCalendar": "Your Guild does not have a calendar! Use `!calendar create <name, spaces allowed>` to create one!",
 

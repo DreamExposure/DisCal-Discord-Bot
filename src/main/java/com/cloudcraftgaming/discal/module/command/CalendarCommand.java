@@ -173,12 +173,22 @@ public class CalendarCommand implements ICommand {
         long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	IMessage message = CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage();
+			Boolean editing = CalendarCreator.getCreator().getPreCalendar(guildId).isEditing();
             if (CalendarCreator.getCreator().terminate(event)) {
             	if (message != null) {
-					Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Success", event));
-					Message.deleteMessage(event);
+            		if (!editing) {
+						Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Success", event));
+						Message.deleteMessage(event);
+					} else {
+						Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", event));
+						Message.deleteMessage(event);
+					}
 				} else {
-            		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Success", event), event);
+            		if (!editing) {
+						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Success", event), event);
+					} else {
+            			Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", event), event);
+					}
 				}
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Failure", event), event);
@@ -186,7 +196,7 @@ public class CalendarCommand implements ICommand {
             }
         } else {
             if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
-                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", event), event);
+                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NotInit", event), event);
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", event), event);
             }
