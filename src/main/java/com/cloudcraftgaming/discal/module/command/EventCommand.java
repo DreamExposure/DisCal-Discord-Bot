@@ -173,7 +173,7 @@ public class EventCommand implements ICommand {
                     	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Notification.Args.Invalid", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
 						}
@@ -193,7 +193,7 @@ public class EventCommand implements ICommand {
         	if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 			}
@@ -234,7 +234,7 @@ public class EventCommand implements ICommand {
 				if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 				}
@@ -265,7 +265,7 @@ public class EventCommand implements ICommand {
 				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
 				}
@@ -308,7 +308,7 @@ public class EventCommand implements ICommand {
                 	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", settings), event);
 					}
@@ -328,7 +328,7 @@ public class EventCommand implements ICommand {
             	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Event.View.Creator.Confirm", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Event.View.Creator.Confirm", settings), event));
 				} else {
 					Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Event.View.Creator.Confirm", settings), event);
 				}
@@ -392,7 +392,7 @@ public class EventCommand implements ICommand {
                     	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Confirm.Failure", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Confirm.Failure", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Confirm.Failure", settings), event);
 						}
@@ -401,7 +401,7 @@ public class EventCommand implements ICommand {
                 	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.NoCalendar", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
 					}
@@ -410,7 +410,7 @@ public class EventCommand implements ICommand {
             	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.NoRequired", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.NoRequired", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.NoRequired", settings), event);
 				}
@@ -452,7 +452,7 @@ public class EventCommand implements ICommand {
                             if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
 								Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Success.New", settings), event));
+								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Start.Success.New", settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.Start.Success", settings);
 								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV));
@@ -463,7 +463,7 @@ public class EventCommand implements ICommand {
 							if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
 								Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", settings), event));
+								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", settings), event));
 							} else {
 								Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", settings), event);
 							}
@@ -472,7 +472,7 @@ public class EventCommand implements ICommand {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event);
 						}
@@ -481,7 +481,7 @@ public class EventCommand implements ICommand {
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event);
 					}
@@ -493,7 +493,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Start.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Start.Specify", settings), event);
 			}
@@ -532,7 +532,7 @@ public class EventCommand implements ICommand {
                             if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
 								Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Success.New", settings), event));
+								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.End.Success.New", settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.End.Success", settings);
 								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV));
@@ -543,7 +543,7 @@ public class EventCommand implements ICommand {
 							if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
 								Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.EventFailure.Illegal", settings), event));
+								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.EventFailure.Illegal", settings), event));
 							} else {
 								Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Failure.Illegal", settings), event);
 							}
@@ -552,7 +552,7 @@ public class EventCommand implements ICommand {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event);
 						}
@@ -561,7 +561,7 @@ public class EventCommand implements ICommand {
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event);
 					}
@@ -573,7 +573,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.End.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Specify", settings), event);
 			}
@@ -589,7 +589,7 @@ public class EventCommand implements ICommand {
                 if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Success.New", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Summary.Success.New", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Success", "%summary%", GeneralUtils.getContent(args, 1), settings), event);
 				}
@@ -600,7 +600,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Summary.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Summary.Specify", settings), event);
 			}
@@ -616,7 +616,7 @@ public class EventCommand implements ICommand {
                 if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Success.New", settings), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Description.Success.New", settings), event));
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Success", "%description%", content, settings), event);
 				}
@@ -627,7 +627,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Description.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Description.Specify", settings), event);
 			}
@@ -649,7 +649,7 @@ public class EventCommand implements ICommand {
                 if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(list.toString().trim(), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), list.toString().trim(), event));
 				} else {
 					Message.sendMessage(list.toString().trim(), event);
 				}
@@ -662,7 +662,7 @@ public class EventCommand implements ICommand {
                         if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Success.New", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Color.Success.New", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Success", "%color%", color.name(), settings), event);
 						}
@@ -670,7 +670,7 @@ public class EventCommand implements ICommand {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Invalid", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Color.Invalid", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Invalid", settings), event);
 						}
@@ -683,7 +683,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Color.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Color.Specify", settings), event);
 			}
@@ -701,7 +701,7 @@ public class EventCommand implements ICommand {
                 	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split("_")[0], settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split("_")[0], settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split("_")[0], settings), event);
 					}
@@ -714,7 +714,7 @@ public class EventCommand implements ICommand {
                     	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.True", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.True", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.True", settings), event);
 						}
@@ -722,7 +722,7 @@ public class EventCommand implements ICommand {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.False", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.False", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.False", settings), event);
 						}
@@ -732,7 +732,7 @@ public class EventCommand implements ICommand {
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", settings), event);
 					}
@@ -744,7 +744,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Specify", settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Specify", settings), event);
 			}
@@ -763,7 +763,7 @@ public class EventCommand implements ICommand {
                         if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
                         	Message.deleteMessage(event);
                         	Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-                        	EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Success.New", settings), event));
+                        	EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Frequency.Success.New", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Success", "%freq%", freq.name(), settings), event);
 						}
@@ -772,7 +772,7 @@ public class EventCommand implements ICommand {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", value, settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", value, settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", values, settings), event);
 						}
@@ -781,7 +781,7 @@ public class EventCommand implements ICommand {
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Not", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
 					}
@@ -794,7 +794,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 				Message.deleteMessage(event);
 				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings), event));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings), event);
 			}
@@ -812,22 +812,24 @@ public class EventCommand implements ICommand {
                         if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
                         	Message.deleteMessage(event);
 							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Event.Count.Success.New", settings), event));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Count.Success.New", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Count.Success", "%count%", amount + "", settings), event);
 						}
                     } catch (NumberFormatException e) {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-							Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Notification.Args.Value.Integer", settings));
 							Message.deleteMessage(event);
+							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Notification.Args.Value.Integer", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
 						}
 					}
                 } else {
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-						Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.Recur.Not", settings));
 						Message.deleteMessage(event);
+						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Not", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
 					}
@@ -837,8 +839,9 @@ public class EventCommand implements ICommand {
             }
         } else {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-				Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.Count.Specify", settings));
 				Message.deleteMessage(event);
+				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Count.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Count.Specify", settings), event);
 			}
@@ -854,23 +857,26 @@ public class EventCommand implements ICommand {
                         Integer amount = Integer.valueOf(args[1]);
                         EventCreator.getCreator().getPreEvent(guildId).getRecurrence().setInterval(amount);
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-							Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.Interval.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings));
 							Message.deleteMessage(event);
+							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Interval.Success.New", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Creator.Event.Interval.Success", "%amount%", amount + "", settings), event);
 						}
                     } catch (NumberFormatException e) {
 						if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-							Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Notification.Args.Value.Integer", settings));
 							Message.deleteMessage(event);
+							Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+							EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Notification.Args.Value.Integer", settings), event));
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
 						}
 					}
                 } else {
                 	if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-                		Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.Recur.Not", settings));
 						Message.deleteMessage(event);
+						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Recur.Not", settings), event));
 					}
                     Message.sendMessage(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
                 }
@@ -879,8 +885,9 @@ public class EventCommand implements ICommand {
             }
         } else {
 			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-				Message.editMessage(EventCreator.getCreator().getCreatorMessage(guildId), MessageManager.getMessage("Creator.Event.Interval.Specify", settings));
 				Message.deleteMessage(event);
+				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Interval.Specify", settings), event));
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Interval.Specify", settings), event);
 			}
