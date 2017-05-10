@@ -27,6 +27,7 @@ public class StatusChanger extends TimerTask {
         statuses.add("Used on %guCount% guilds!");
         statuses.add("%calCount% calendars!");
         statuses.add("%annCount% announcements!");
+        statuses.add("%shards% shards!");
         statuses.add("Version " + Main.version);
         statuses.add("DisCal is on Patreon!");
         statuses.add("Share DisCal!!");
@@ -39,6 +40,7 @@ public class StatusChanger extends TimerTask {
         status = status.replace("%guCount%", Main.client.getGuilds().size() + "");
         status = status.replace("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
         status = status.replace("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
+        status = status.replace("%shards%", Main.client.getShardCount() + "");
         Main.client.changePlayingText(status);
 
         //Set new index.

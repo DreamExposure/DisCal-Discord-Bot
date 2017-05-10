@@ -124,7 +124,7 @@ public class DisCalCommand implements ICommand {
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), Main.client.getGuilds().size() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "", settings), guild.getShard().getResponseTime() + "ms", false);
+		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", guild.getShard().getInfo()[0] + "/" + Main.client.getShardCount(), settings), guild.getShard().getResponseTime() + "ms", false);
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
