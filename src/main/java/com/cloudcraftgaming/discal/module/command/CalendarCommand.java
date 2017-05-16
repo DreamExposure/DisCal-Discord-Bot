@@ -83,7 +83,7 @@ public class CalendarCommand implements ICommand {
         if (PermissionChecker.hasSufficientRole(event)) {
             if (args.length < 1) {
                 Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
-            } else if (args.length >= 1) {
+            } else {
                 long guildId = event.getGuild().getLongID();
                 //TODO: Add support for multiple calendars...
                 CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
@@ -144,8 +144,9 @@ public class CalendarCommand implements ICommand {
         long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
         	if (CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage() != null) {
-				Message.editMessage(CalendarCreator.getCreator().getPreCalendar(guildId).getCreatorMessage(), MessageManager.getMessage("Creator.Calendar.AlreadyInit", settings));
 				Message.deleteMessage(event);
+				Message.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(guildId));
+				CalendarCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", settings), event));
 			} else {
         		Message.sendMessage(MessageManager.getMessage("Creator.Calendar.AlreadyInit", settings), event);
 			}
