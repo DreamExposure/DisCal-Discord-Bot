@@ -177,11 +177,13 @@ public class CalendarCommand implements ICommand {
             if (CalendarCreator.getCreator().terminate(event)) {
             	if (message != null) {
             		if (!editing) {
-						Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Success", settings));
 						Message.deleteMessage(event);
+						Message.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(guildId));
+						CalendarCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Success", settings), event));
 					} else {
-						Message.editMessage(message, MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", settings));
 						Message.deleteMessage(event);
+						Message.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(guildId));
+						CalendarCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", settings), event));
 					}
 				} else {
             		if (!editing) {
