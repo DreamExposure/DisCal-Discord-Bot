@@ -57,6 +57,7 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().add("channel");
         info.getSubCommands().add("simpleAnnouncement");
         info.getSubCommands().add("dmAnnouncement");
+        info.getSubCommands().add("dmAnnouncements");
         info.getSubCommands().add("language");
         info.getSubCommands().add("lang");
         info.getSubCommands().add("prefix");
@@ -94,6 +95,9 @@ public class DisCalCommand implements ICommand {
                 case "dmannouncement":
                     moduleDmAnnouncements(event, settings);
                     break;
+				case "dmannouncements":
+					moduleDmAnnouncements(event, settings);
+					break;
 				case "language":
 					moduleLanguage(args, event, settings);
 					break;
