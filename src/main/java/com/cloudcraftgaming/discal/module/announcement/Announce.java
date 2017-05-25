@@ -136,49 +136,53 @@ public class Announce extends TimerTask {
     }
 
     private void doDmAnnouncements(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
-		IGuild guild = Main.client.getGuildByID(settings.getGuildID());
-		IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+    	//Don't do DMs unless there is at least 1 subscriber of either role or user type.
+		if (announcement.getSubscriberRoleIds().size() > 0 || announcement.getSubscriberUserIds().size() > 0) {
 
-    	if (announcement.getSubscriberRoleIds().contains("everyone") || announcement.getSubscriberRoleIds().contains("here")) {
-    		//Everyone in channel...
-			for (String uId : settings.getDmAnnouncements()) {
-				IUser user = UserUtils.getUser(uId, guild);
-				if (user != null) {
-					//First check if they have DMs enabled
-					if (channel.getUsersHere().contains(user)) {
-						//Send DM
-						AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, user, data, settings);
+			IGuild guild = Main.client.getGuildByID(settings.getGuildID());
+			IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+
+			if (announcement.getSubscriberRoleIds().contains("everyone") || announcement.getSubscriberRoleIds().contains("here")) {
+				//Everyone in channel...
+				for (String uId : settings.getDmAnnouncements()) {
+					IUser user = UserUtils.getUser(uId, guild);
+					if (user != null) {
+						//First check if they have DMs enabled
+						if (channel.getUsersHere().contains(user)) {
+							//Send DM
+							AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, user, data, settings);
+						}
 					}
 				}
-			}
-		} else {
-			//Let's only check for specific users...
-			List<IUser> usersToDm = new ArrayList<>();
+			} else {
+				//Let's only check for specific users...
+				List<IUser> usersToDm = new ArrayList<>();
 
-			for (String uId : settings.getDmAnnouncements()) {
-				if (announcement.getSubscriberUserIds().contains(uId)) {
-					//Verify user still exists and such...
-					IUser u = UserUtils.getUser(uId, guild);
-					if (u != null && !usersToDm.contains(u)) {
-						usersToDm.add(u);
-					}
-				} else {
-					//Not specifically subscribed... lets just if their role is subscribed...
-					IUser u = UserUtils.getUser(uId, guild);
-					if (u != null && !usersToDm.contains(u)) {
-						for (IRole r : u.getRolesForGuild(guild)) {
-							if (announcement.getSubscriberRoleIds().contains(r.getStringID())) {
-								usersToDm.add(u);
-								break;
+				for (String uId : settings.getDmAnnouncements()) {
+					if (announcement.getSubscriberUserIds().contains(uId)) {
+						//Verify user still exists and such...
+						IUser u = UserUtils.getUser(uId, guild);
+						if (u != null && !usersToDm.contains(u)) {
+							usersToDm.add(u);
+						}
+					} else {
+						//Not specifically subscribed... lets just if their role is subscribed...
+						IUser u = UserUtils.getUser(uId, guild);
+						if (u != null && !usersToDm.contains(u)) {
+							for (IRole r : u.getRolesForGuild(guild)) {
+								if (announcement.getSubscriberRoleIds().contains(r.getStringID())) {
+									usersToDm.add(u);
+									break;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			//Now DM...
-			for (IUser u : usersToDm) {
-				AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, u, data, settings);
+				//Now DM...
+				for (IUser u : usersToDm) {
+					AnnouncementMessageFormatter.sendAnnouncementDM(announcement, event, u, data, settings);
+				}
 			}
 		}
 	}
