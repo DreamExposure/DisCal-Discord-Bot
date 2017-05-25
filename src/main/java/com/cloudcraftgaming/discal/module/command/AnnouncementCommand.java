@@ -97,19 +97,19 @@ public class AnnouncementCommand implements ICommand {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (args.length < 1) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
-			} else if (args.length >= 1) {
+			} else {
 				switch (args[0].toLowerCase()) {
 					case "create":
-						moduleCreate(event);
+						moduleCreate(event, settings);
 						break;
 					case "confirm":
 						moduleConfirm(event, settings);
 						break;
 					case "cancel":
-						moduleCancel(event);
+						moduleCancel(event, settings);
 						break;
 					case "delete":
-						moduleDelete(args, event);
+						moduleDelete(args, event, settings);
 						break;
 					case "view":
 					case "review":
@@ -124,29 +124,29 @@ public class AnnouncementCommand implements ICommand {
 						moduleUnsubscribe(args, event);
 						break;
 					case "type":
-						moduleType(args, event);
+						moduleType(args, event, settings);
 						break;
 					case "hours":
-						moduleHours(args, event);
+						moduleHours(args, event, settings);
 						break;
 					case "minutes":
-						moduleMinutes(args, event);
+						moduleMinutes(args, event, settings);
 						break;
 					case "list":
 						moduleList(args, event, settings);
 						break;
 					case "event":
-						moduleEvent(args, event);
+						moduleEvent(args, event, settings);
 						break;
 					case "info":
-						moduleInfo(args, event);
+						moduleInfo(args, event, settings);
 						break;
 					case "channel":
-						moduleChannel(args, event);
+						moduleChannel(args, event, settings);
 						break;
 					case "color":
 					case "colour":
-						moduleColor(args, event);
+						moduleColor(args, event, settings);
 						break;
 					case "copy":
 						moduleCopy(args, event, settings);
@@ -184,18 +184,14 @@ public class AnnouncementCommand implements ICommand {
 	}
 
 
-	private void moduleCreate(MessageReceivedEvent event) {
+	private void moduleCreate(MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 
 		if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreator.getCreator().init(event);
-			Message.sendMessage(
-					"Announcement creator initialized!" + Message.lineBreak + "Please specify the type:"
-							+ Message.lineBreak
-							+ "`UNIVERSAL` for all events, or `SPECIFIC` for a specific event, `COLOR` for events with a specific color, or `RECUR` for recurring events.",
-					event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), event);
 		} else {
-			Message.sendMessage("Announcement creator has already been started!", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
 		}
 	}
 
@@ -207,21 +203,15 @@ public class AnnouncementCommand implements ICommand {
 				if (AnnouncementUtils.announcementExists(anId, event)) {
 					Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId);
 
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings),
-							"Announcement Editor initiated! Edit the values and then confirm your edits with `!announcement confirm`",
-							event);
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), event);
 				} else {
-					Message.sendMessage(
-							"I can't seem to find an announcement with that ID. Are you sure you typed it correctly?",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
 			} else {
-				Message.sendMessage(
-						"Please specify the ID of the announcement to edit with `!announcement edit <ID>`",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Edit.Specify", settings), event);
 			}
 		} else {
-			Message.sendMessage("Announcement Creator has already been initialized!", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
 		}
 	}
 
@@ -232,57 +222,51 @@ public class AnnouncementCommand implements ICommand {
 			if (acr.isSuccessful()) {
 				if (acr.getAnnouncement().isEditing()) {
 					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings),
-							"Announcement updated!", event);
+							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Edit.Success", settings), event);
 				} else {
 					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings),
-							"Announcement created " + Message.lineBreak + Message.lineBreak
-									+ "Use `!announcement subscribe <id>` to subscribe to the announcement!", event);
+							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Create.Success", settings), event);
 				}
 			} else {
-				Message.sendMessage("Oops! Something went wrong! Are you sure all of the info is correct?",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), event);
 			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 		}
 	}
 
-	private void moduleCancel(MessageReceivedEvent event) {
+	private void moduleCancel(MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 
 		if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 			AnnouncementCreator.getCreator().terminate(event);
-			Message.sendMessage("Announcement Creator terminated!", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Cancel.Success", settings), event);
 		} else {
-			Message.sendMessage("Cannot cancel creation when the Creator has not been started!", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 		}
 	}
 
-	private void moduleDelete(String[] args, MessageReceivedEvent event) {
+	private void moduleDelete(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message.sendMessage("Please specify the Id of the announcement to delete!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Specify", settings), event);
 			} else {
-				Message.sendMessage("You cannot delete an announcement while in the Creator!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.InCreator", settings), event);
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementUtils.announcementExists(value, event)) {
 				if (DatabaseManager.getManager().deleteAnnouncement(value)) {
-					Message.sendMessage("Announcement successfully deleted!", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Success", settings), event);
 				} else {
-					Message.sendMessage(
-							"Failed to delete announcement! Something may have gone wrong, the dev has been emailed!",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Failure", settings), event);
 				}
 			} else {
-				Message.sendMessage(
-						"Hmm.. it seems the specified announcement does not exist, are you sure you wrote the ID correctly?",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement delete <ID>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Specify", settings), event);
 		}
 	}
 
@@ -290,36 +274,28 @@ public class AnnouncementCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message.sendMessage(AnnouncementMessageFormatter
-								.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings),
-						event);
+				Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), event);
 			} else {
-				Message.sendMessage("You must specify the ID of the announcement you wish to view!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.Specify", settings), event);
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message.sendMessage("You cannot view another announcement while one is in the creator!",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), event);
 			} else {
 				try {
-					Announcement a = DatabaseManager.getManager()
-							.getAnnouncement(UUID.fromString(value), guildId);
+					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
 					if (a != null) {
-						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings),
-								AnnouncementMessageFormatter.getSubscriberNames(a), event);
+						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), AnnouncementMessageFormatter.getSubscriberNames(a), event);
 					} else {
-						Message.sendMessage(
-								"That announcement does not exist! Are you sure you typed the ID correctly?",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 					}
 				} catch (NumberFormatException e) {
-					Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement view` or `!announcement view <ID>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.Specify", settings), event);
 		}
 	}
 
@@ -864,7 +840,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
-	private void moduleType(String[] args, MessageReceivedEvent event) {
+	private void moduleType(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -873,39 +849,27 @@ public class AnnouncementCommand implements ICommand {
 					AnnouncementType type = AnnouncementType.fromValue(value);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
 					if (type.equals(AnnouncementType.SPECIFIC)) {
-						Message.sendMessage(
-								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
-										+ "Please set the specific event ID to fire for with `!announcement event <id>`",
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings),
 								event);
 					} else if (type.equals(AnnouncementType.COLOR)) {
-						Message.sendMessage(
-								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
-										+ "Please set the specific event color to fire for with `!announcement color <name or ID>`",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), event);
 					} else if (type.equals(AnnouncementType.RECUR)) {
-						Message.sendMessage(
-								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
-										+ "Please set the recurring event to fire for with `!announcement event  <ID>`",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), event);
 					} else {
-						Message.sendMessage(
-								"Announcement type set to: `" + type.name() + "`" + Message.lineBreak
-										+ "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), event);
 					}
 				} else {
-					Message.sendMessage("Valid types are only `UNIVERSAL`, `SPECIFIC`, `COLOR`, or `RECUR`!",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator has not been initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement type <TYPE>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
 		}
 	}
 
-	private void moduleHours(String[] args, MessageReceivedEvent event) {
+	private void moduleHours(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -914,21 +878,19 @@ public class AnnouncementCommand implements ICommand {
 					Integer hoursOr = Integer.valueOf(value);
 					Integer hours = Math.abs(hoursOr);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setHoursBefore(hours);
-					Message.sendMessage(
-							"Announcement hours before set to: `" + hours + "`" + Message.lineBreak
-									+ "Please specify the amount of minutes before the event to fire!", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.Success", "%hours%", hours + "", settings), event);
 				} catch (NumberFormatException e) {
-					Message.sendMessage("Hours must be a valid integer! (Ex: `1` or `10`)", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator has not been initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement hours <amount>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.Specify", settings), event);
 		}
 	}
 
-	private void moduleMinutes(String[] args, MessageReceivedEvent event) {
+	private void moduleMinutes(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -937,19 +899,15 @@ public class AnnouncementCommand implements ICommand {
 					Integer minutesOr = Integer.valueOf(value);
 					Integer minutes = Math.abs(minutesOr);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-					Message.sendMessage(
-							"Announcement minutes before set to: `" + minutes + "`" + Message.lineBreak
-									+ "Announcement creation halted! " +
-									"If you would like to add some info text, use `!announcement info <text>` otherwise, review your announcement with `!announcement review`",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Success", settings), event);
 				} catch (NumberFormatException e) {
-					Message.sendMessage("Minutes must be a valid integer! (Ex: `1` or `10`)", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator has not been initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement minutes <amount>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Specify", settings), event);
 		}
 	}
 
@@ -957,42 +915,30 @@ public class AnnouncementCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message
-						.sendMessage("Please specify how many announcements you wish to list or `all`", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
 			} else {
-				Message.sendMessage("You cannot list existing announcements while in the creator!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				if (value.equalsIgnoreCase("all")) {
-					ArrayList<Announcement> announcements = DatabaseManager.getManager()
-							.getAnnouncements(guildId);
-					Message.sendMessage(
-							"All (" + announcements.size()
-									+ ") announcements, use `!announcement view <id>` for more info."
-									+ Message.lineBreak
-									+ "`" + announcements.size() + "`" + Message.lineBreak + Message.lineBreak
-									+ "Please note that this list may be delayed due to rate limiting...", event);
+					ArrayList<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(guildId);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.All", "%amount%", announcements.size() + "", settings), event);
 					//Loop and add embeds
 					for (Announcement a : announcements) {
-						Message
-								.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
+						Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
 					}
 				} else {
 					//List specific amount of announcements
 					try {
 						Integer amount = Integer.valueOf(value);
-						Message.sendMessage("Displaying the first `" + amount
-								+ "` announcements found, use `!announcement view <id>` for more info."
-								+ Message.lineBreak + Message.lineBreak
-								+ "Please note that this list may be delayed due to rate limiting...", event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.Some", "%amount%", amount + "", settings), event);
 
 						int posted = 0;
 						for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 							if (posted < amount) {
-								Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings),
-										event);
+								Message.sendMessage(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
 
 								posted++;
 							} else {
@@ -1000,19 +946,18 @@ public class AnnouncementCommand implements ICommand {
 							}
 						}
 					} catch (NumberFormatException e) {
-						Message.sendMessage("Amount must either be `all` or a valid integer!", event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.NotInt", settings), event);
 					}
 				}
 			} else {
-				Message.sendMessage("You cannot list announcements while in the creator!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement list <amount>` or `!announcement list all`",
-					event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
 		}
 	}
 
-	private void moduleEvent(String[] args, MessageReceivedEvent event) {
+	private void moduleEvent(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -1021,13 +966,10 @@ public class AnnouncementCommand implements ICommand {
 						.equals(AnnouncementType.SPECIFIC)) {
 					if (EventUtils.eventExists(guildId, value)) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-						Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak
-										+ "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!",
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings),
 								event);
 					} else {
-						Message.sendMessage(
-								"Hmm... I can't seem to find an event with that ID, are you sure its correct?",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
 					}
 				} else if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.RECUR)) {
@@ -1038,55 +980,45 @@ public class AnnouncementCommand implements ICommand {
 						}
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
 
-						Message.sendMessage("Event ID set to: `" + value + "`" + Message.lineBreak
-										+ "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
 					} else {
-						Message.sendMessage(
-								"Hmm... I can't seem to find an event with that ID, are you sure its correct?",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
 					}
 				} else {
-					Message.sendMessage(
-							"You cannot set an event while the announcement Type is NOT set to `SPECIFIC`",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator has not been initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement event <Event ID>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Specify", settings), event);
 		}
 	}
 
-	private void moduleInfo(String[] args, MessageReceivedEvent event) {
+	private void moduleInfo(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length < 2) {
-			Message.sendMessage("Please use `!announcement info <your info here>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Specify", settings), event);
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-				Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak
-								+ "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
 			} else {
-				Message.sendMessage("Announcement Creator not initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
-		} else if (args.length > 2) {
+		} else {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				String value = GeneralUtils.getContent(args, 1);
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-				Message.sendMessage("Announcement info set to: ```" + value + "```" + Message.lineBreak
-								+ "Please review the announcement with `!announcement review` to confirm it is correct and then use `!announcement confirm` to create the announcement!",
-						event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
 			} else {
-				Message.sendMessage("Announcement Creator not initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		}
 	}
 
-	private void moduleChannel(String[] args, MessageReceivedEvent event) {
+	private void moduleChannel(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -1096,28 +1028,22 @@ public class AnnouncementCommand implements ICommand {
 					if (c != null) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId)
 								.setAnnouncementChannelId(c.getStringID());
-						Message.sendMessage(
-								"Announcement channel set to: `" + c.getName() + "`" + Message.lineBreak
-										+ "Please specify the amount of hours before the event this is to fire!",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Channel.Success",  "%channel%", c.getName(), settings), event);
 					} else {
-						Message.sendMessage(
-								"Are you sure you typed the channel name correctly? I can't seem to find it.",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
 					}
 				} else {
-					Message.sendMessage(
-							"Are you sure you typed the channel name correctly? I can't seem to find it.", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator has not been initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please use `!announcement channel <ChannelName>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Channel.Specify", settings), event);
 		}
 	}
 
-	private void moduleColor(String[] args, MessageReceivedEvent event) {
+	private void moduleColor(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 2) {
 			String value = args[1];
@@ -1127,23 +1053,18 @@ public class AnnouncementCommand implements ICommand {
 					if (EventColor.exists(value)) {
 						EventColor color = EventColor.fromNameOrHexOrID(value);
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventColor(color);
-						Message.sendMessage(
-								"Announcement Color set to: `" + color.name() + "`" + Message.lineBreak
-										+ Message.lineBreak
-										+ "Please specify the NAME (not ID) of the channel this announcement will post in with `!announcement channel <name>`!",
-								event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Success", "%color%", color.name(), settings), event);
 					} else {
-						Message.sendMessage("Please specify a valid color NAME, ID, or HEX!", event);
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
 					}
 				} else {
-					Message.sendMessage(
-							"You cannot set announcement color while announcement type is NOT `COLOR`", event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator not initiated!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please specify a color with `!announcement color <color>`", event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
 		}
 	}
 
@@ -1155,19 +1076,15 @@ public class AnnouncementCommand implements ICommand {
 				if (AnnouncementUtils.announcementExists(value, event)) {
 					Announcement a = AnnouncementCreator.getCreator().init(event, value);
 
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings),
-							"Announcement copied! Edit any values you wish and confirm the announcement with the command `!announcement confirm`",
-							event);
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), event);
 				} else {
-					Message.sendMessage("Hmm... is the ID correct? I seem to be having issues parsing it..",
-							event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
 			} else {
-				Message.sendMessage("Announcement creator already initialized!", event);
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
 			}
 		} else {
-			Message.sendMessage("Please specify the announcement to copy with `!announcement copy <ID>`",
-					event);
+			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Copy.Specify", settings), event);
 		}
 	}
 }
