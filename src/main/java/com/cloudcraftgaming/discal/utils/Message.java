@@ -194,30 +194,38 @@ public class Message {
     }
 
     public static boolean editMessage(IMessage message, String content) {
-        return RequestBuffer.request(() -> {
-            try {
-                if (message != null && !message.isDeleted()) {
-                    message.edit(content);
-                }
-                return true;
-            } catch (DiscordException | MissingPermissionsException e) {
-                //Failed to edit.
-                return false;
-            }
-        }).get();
+    	try {
+			return RequestBuffer.request(() -> {
+				try {
+					if (message != null && !message.isDeleted()) {
+						message.edit(content);
+					}
+					return true;
+				} catch (DiscordException | MissingPermissionsException e) {
+					//Failed to edit.
+					return false;
+				}
+			}).get();
+		} catch (NullPointerException e) {
+    		return false;
+		}
     }
 
     public static boolean editMessage(IMessage message, String content, EmbedObject embed) {
-        return RequestBuffer.request(() -> {
-            try {
-                if (!message.isDeleted()) {
-                    message.edit(content, embed);
-                }
-                return true;
-            } catch (DiscordException | MissingPermissionsException e) {
-                //Failed to edit.
-                return false;
-            }
-        }).get();
-    }
+		try {
+			return RequestBuffer.request(() -> {
+				try {
+					if (!message.isDeleted()) {
+						message.edit(content, embed);
+					}
+					return true;
+				} catch (DiscordException | MissingPermissionsException e) {
+					//Failed to edit.
+					return false;
+				}
+			}).get();
+		} catch (NullPointerException e) {
+			return false;
+		}
+	}
 }
