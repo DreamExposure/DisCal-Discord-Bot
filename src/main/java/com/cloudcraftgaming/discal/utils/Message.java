@@ -158,31 +158,39 @@ public class Message {
     }
 
     public static boolean deleteMessage(MessageReceivedEvent event) {
-        return RequestBuffer.request(() -> {
-            try {
-                if (!event.getMessage().isDeleted()) {
-                    event.getMessage().delete();
-                }
-                return true;
-            } catch (DiscordException | MissingPermissionsException e) {
-                //Failed to delete
-                return false;
-            }
-        }).get();
+    	try {
+			return RequestBuffer.request(() -> {
+				try {
+					if (!event.getMessage().isDeleted()) {
+						event.getMessage().delete();
+					}
+					return true;
+				} catch (DiscordException | MissingPermissionsException e) {
+					//Failed to delete
+					return false;
+				}
+			}).get();
+		} catch (NullPointerException e) {
+    		return false;
+		}
     }
 
     public static boolean deleteMessage(IMessage message) {
-        return RequestBuffer.request(() -> {
-           try {
-               if (!message.isDeleted()) {
-                   message.delete();
-               }
-               return true;
-           } catch (DiscordException | MissingPermissionsException e) {
-               //Failed to delete.
-               return false;
-           }
-        }).get();
+    	try {
+			return RequestBuffer.request(() -> {
+				try {
+					if (!message.isDeleted()) {
+						message.delete();
+					}
+					return true;
+				} catch (DiscordException | MissingPermissionsException e) {
+					//Failed to delete.
+					return false;
+				}
+			}).get();
+		} catch (NullPointerException e) {
+    		return false;
+		}
     }
 
     public static boolean editMessage(IMessage message, String content) {
