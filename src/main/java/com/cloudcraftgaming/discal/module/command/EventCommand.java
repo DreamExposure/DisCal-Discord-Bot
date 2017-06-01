@@ -103,7 +103,7 @@ public class EventCommand implements ICommand {
             } else {
                 switch (args[0].toLowerCase()) {
                     case "create":
-                        moduleCreate(event, calendarData, settings);
+                        moduleCreate(args, event, calendarData, settings);
                         break;
                     case "copy":
                         moduleCopy(args, event, calendarData, settings);
@@ -187,7 +187,7 @@ public class EventCommand implements ICommand {
     }
 
 
-    private void moduleCreate(MessageReceivedEvent event, CalendarData calendarData, GuildSettings settings) {
+    private void moduleCreate(String[] args, MessageReceivedEvent event, CalendarData calendarData, GuildSettings settings) {
         long guildId = event.getGuild().getLongID();
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
         	if (EventCreator.getCreator().getPreEvent(guildId).getCreatorMessage() != null) {
@@ -199,7 +199,12 @@ public class EventCommand implements ICommand {
 			}
         } else {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                PreEvent e = EventCreator.getCreator().init(event, settings, true);
+				PreEvent e;
+            	if (args.length == 1) {
+					e = EventCreator.getCreator().init(event, settings, true);
+				} else {
+            		e = EventCreator.getCreator().init(event, settings, GeneralUtils.getContent(args, 1), true);
+				}
                 if (e.getCreatorMessage() == null) {
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.Create.Init", settings), event);
 				}

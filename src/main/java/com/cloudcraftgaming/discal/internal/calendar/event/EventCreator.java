@@ -21,6 +21,7 @@ import java.util.Arrays;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("Duplicates")
 public class EventCreator {
     private static EventCreator instance;
 
@@ -72,6 +73,35 @@ public class EventCreator {
         return getPreEvent(e.getGuild().getLongID());
     }
 
+    public PreEvent init(MessageReceivedEvent e, GuildSettings settings, String summary, boolean handleMessage) {
+		if (!hasPreEvent(e.getGuild().getLongID())) {
+			PreEvent event = new PreEvent(e.getGuild().getLongID());
+			event.setSummary(summary);
+			try {
+
+				//TODO: Handle multiple calendars...
+				String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
+				event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
+			} catch (IOException exc) {
+				//Failed to get timezone, ignore safely.
+			}
+			if (handleMessage) {
+				if (PermissionChecker.botHasMessageManagePerms(e)) {
+					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
+					event.setCreatorMessage(message);
+					Message.deleteMessage(e);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+				}
+			}
+
+			events.add(event);
+			return event;
+		}
+		return getPreEvent(e.getGuild().getLongID());
+	}
+
+    //Copy event
     public PreEvent init(MessageReceivedEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
         if (!hasPreEvent(e.getGuild().getLongID())) {
             //TODO: Handle multiple calendars...

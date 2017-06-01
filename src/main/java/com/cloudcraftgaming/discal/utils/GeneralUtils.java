@@ -37,6 +37,6 @@ public class GeneralUtils {
         for (int i = start; i < args.length; i++) {
             res.append(args[i]).append(" ");
         }
-        return res.toString();
+        return res.toString().trim();
     }
 }
