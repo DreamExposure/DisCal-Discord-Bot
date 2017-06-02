@@ -40,10 +40,21 @@ public class EventMessageFormatter {
 			em.withImage(ed.getImageLink());
 		}
         if (event.getSummary() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Info.Summary", settings), event.getSummary(), true);
+			String summary = event.getSummary();
+			if (summary.length() > 250) {
+				summary = summary.substring(0, 250);
+				summary = summary + " (continues on Google Calendar View)";
+			}
+
+            em.appendField(MessageManager.getMessage("Embed.Event.Info.Summary", settings), summary, true);
         }
         if (event.getDescription() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Info.Description", settings), event.getDescription(), true);
+        	String description = event.getDescription();
+        	if (description.length() > 500) {
+        		description = description.substring(0, 500);
+        		description = description + " (continues on Google Calendar View)";
+			}
+            em.appendField(MessageManager.getMessage("Embed.Event.Info.Description", settings), description, true);
         }
         em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart()), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart()), true);
@@ -88,7 +99,12 @@ public class EventMessageFormatter {
         	em.withThumbnail(ed.getImageLink());
 		}
         if (event.getSummary() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), event.getSummary(), true);
+        	String summary = event.getSummary();
+        	if (summary.length() > 250) {
+        		summary = summary.substring(0, 250);
+        		summary = summary + " (continues on Google Calendar View)";
+			}
+            em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
         }
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart()), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), true);
@@ -121,12 +137,22 @@ public class EventMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), true);
         }
         if (event.getSummary() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), event.getSummary(), true);
+			String summary = event.getSummary();
+			if (summary.length() > 250) {
+				summary = summary.substring(0, 250);
+				summary = summary + " (continues on Google Calendar View)";
+			}
+            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), summary, true);
         } else {
         	em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
 		}
         if (event.getDescription() != null) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), event.getDescription(), true);
+			String description = event.getDescription();
+			if (description.length() > 500) {
+				description = description.substring(0, 500);
+				description = description + " (continues on Google Calendar View)";
+			}
+            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), description, true);
         } else {
         	em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
 		}
