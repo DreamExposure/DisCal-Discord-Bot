@@ -935,7 +935,7 @@ public class AnnouncementCommand implements ICommand {
 					Integer minutesOr = Integer.valueOf(value);
 					Integer minutes = Math.abs(minutesOr);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Success", settings), event);
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Success", "%minutes%", minutes + "", settings), event);
 				} catch (NumberFormatException e) {
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event);
 				}
