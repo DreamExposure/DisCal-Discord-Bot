@@ -584,7 +584,7 @@ public class EventCommand implements ICommand {
 							if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
 								Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.EventFailure.Illegal", settings), event));
+								EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.End.Failure.Illegal", settings), event));
 							} else {
 								Message.sendMessage(MessageManager.getMessage("Creator.Event.End.Failure.Illegal", settings), event);
 							}
