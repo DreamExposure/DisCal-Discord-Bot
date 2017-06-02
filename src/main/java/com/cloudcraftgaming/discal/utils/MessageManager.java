@@ -66,7 +66,7 @@ public class MessageManager {
 			messages = langs.get("ENGLISH");
 		}
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace("%lb%", Message.lineBreak);
 	}
 
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
@@ -77,6 +77,6 @@ public class MessageManager {
 		} else {
 			messages = langs.get("ENGLISH");
 		}
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!!").replace(var, replace).replace("%lb%", Message.lineBreak);
+		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace(var, replace).replace("%lb%", Message.lineBreak);
 	}
 }
