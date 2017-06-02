@@ -286,7 +286,7 @@ public class AnnouncementCommand implements ICommand {
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 					}
-				} catch (NumberFormatException e) {
+				} catch (Exception e) {
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
 			}
