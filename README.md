@@ -12,7 +12,7 @@ Discord lacks a built in calendar, so we took the chance to make one for you! Wi
 <br> <br>
 DisCal is perfect for every guild! Whether you are an RP Guild, Gaming Guild, or community Guild, DisCal was built to be versatile and unique! With DisCal no longer will you need to do any complex scheduling, DisCal handles all of that hard work for you!
 
-DisCal is developed and maintained by NovaFox161.
+DisCal is developed and maintained by NovaFox161 with help from xaanit.
 
 *WIP means "Work in Progress" or is a feature actively in development but not released yet. Features marked as WIP will be available in upcoming updates very soon!
 
@@ -28,14 +28,25 @@ DisCal is developed and maintained by NovaFox161.
 * Super responsive.
 * And much more coming soon!
 
-In addition to all of the features above, DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix it ASAP!!
+### Additional Features
+
+* DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix it ASAP!!
+* Customizable prefixes.
+* Ability to limit who can control DisCal.
+* Ability to limit what channels DisCal can be used in.
+* Can accept and handle infinite announcements, calendars, and events.
+* Announcements sent to DMs per user per guild.
+
 
 ## Planned Features
-
 * Link up to external calendar (WIP)
+* Multiple calendars (WIP)
 * Full overhaul of all creators (WIP)
 * Web Dashboard to manage DisCal settings!
-* And more!
+* More advanced announcements and notification support.
+* And so much more!!!!!
+
+Don't see something you want?? Request it today!! Contact any of the developers or support members and we will happily see what we can do to further improve DisCal!
 
 ## Contributing
 
@@ -56,6 +67,7 @@ We very much appreciate all of the translations we can get, but please follow th
 
 1. Please be fluent in the language you are translating to. We will ***NOT*** accept any translations that are made through Google Translate.
 2. The general JSON format is `"key": "value"`, which means that the "key" must remain the same in all files, so ***DO NOT*** change the key, only the values.
-3. At the beginning of the file, you will see `"Language: "LANG_NAME_HERE"` Please change `LANG_NAME_HERE` to the language you are translating the file to!
-4. Please run your translated language file through this [Online JSON Parser](http://jsonparseronline.com/) If you cannot do that, the development team will.
-5. Contact the development team in our Discord guild for any additional help or info.
+3. In many files `%value%` or something similar is seen. These are replacement variables and will never be seen by the user. ***DO NOT CHANGE THE REPLACERS!*** 
+4. At the beginning of the file, you will see `"Language: "LANG_NAME_HERE"` Please change `LANG_NAME_HERE` to the language you are translating the file to!
+5. Please run your translated language file through this [Online JSON Parser](http://jsonparseronline.com/) If you cannot do that, the development team will.
+6. Contact the development team in our Discord guild for any additional help or info.
