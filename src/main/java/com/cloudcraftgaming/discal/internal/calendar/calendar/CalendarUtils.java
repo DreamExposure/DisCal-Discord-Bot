@@ -30,6 +30,7 @@ public class CalendarUtils {
 
             //TODO: Remove??
             DatabaseManager.getManager().updateCalendar(data);
+            DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 
             return true;
         } catch (IOException e) {

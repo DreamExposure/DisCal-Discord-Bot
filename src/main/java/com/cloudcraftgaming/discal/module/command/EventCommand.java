@@ -83,6 +83,8 @@ public class EventCommand implements ICommand {
         info.getSubCommands().add("freq");
         info.getSubCommands().add("count");
         info.getSubCommands().add("interval");
+        info.getSubCommands().add("image");
+        info.getSubCommands().add("attachment");
 
         return info;
     }
@@ -155,6 +157,20 @@ public class EventCommand implements ICommand {
                     case "colour":
                         moduleColor(args, event, settings);
                         break;
+					case "image":
+						if (settings.isDevGuild()) {
+							moduleAttachment(args, event, settings);
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+						}
+						break;
+					case "attachment":
+						if (settings.isDevGuild()) {
+							moduleAttachment(args, event, settings);
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+						}
+						break;
                     case "recur":
                         moduleRecur(args, event, settings);
                         break;
@@ -714,6 +730,28 @@ public class EventCommand implements ICommand {
 			}
 		}
     }
+
+    private void moduleAttachment(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+    	long guildId = event.getGuild().getLongID();
+    	if (args.length == 2) {
+    		String value = args[1];
+			if (EventCreator.getCreator().hasPreEvent(guildId)) {
+				EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(value);
+
+				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(event);
+					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event);
+				}
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Creator.Event.Attachment.Specify", settings), event);
+		}
+	}
 
     //Event recurrence settings
     private void moduleRecur(String[] args, MessageReceivedEvent event, GuildSettings settings) {

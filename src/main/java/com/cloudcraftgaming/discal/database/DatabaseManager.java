@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.database;
 import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
@@ -18,7 +19,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("SqlResolve")
+@SuppressWarnings({"SqlResolve", "SqlNoDataSourceInspection"})
 public class DatabaseManager {
     private static DatabaseManager instance;
     private DatabaseInfo databaseInfo;
@@ -79,6 +80,7 @@ public class DatabaseManager {
             String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
             String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
             String settingsTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+            String eventTableName = databaseInfo.getPrefix() + "EVENTS";
             String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
                     "(GUILD_ID VARCHAR(255) not NULL, " +
                     " EXTERNAL_CALENDAR BOOLEAN not NULL, " +
@@ -114,9 +116,15 @@ public class DatabaseManager {
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
                     " PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER))";
+            String createEventTable = "CREATE TABLE IF NOT EXISTS " + eventTableName +
+					" (GUILD_ID VARCHAR(255) not NULL, " +
+					" EVENT_ID VARCHAR(255) not NULL, " +
+					" IMAGE_LINK LONGTEXT, " +
+					" PRIMARY KEY (GUILD_ID, EVENT_ID))";
             statement.executeUpdate(createAnnouncementTable);
             statement.executeUpdate(createSettingsTable);
             statement.executeUpdate(createCalendarTable);
+            statement.executeUpdate(createEventTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
         } catch (SQLException e) {
@@ -330,6 +338,58 @@ public class DatabaseManager {
         return false;
     }
 
+    public Boolean updateEventData(EventData data) {
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+				String eventTableName = databaseInfo.getPrefix() + "EVENTS";
+
+				if (data.getEventId().contains("_")) {
+					data.setEventId(data.getEventId().split("_")[0]);
+				}
+
+				Statement statement = databaseInfo.getConnection().createStatement();
+				String query = "SELECT * FROM " + eventTableName + " WHERE EVENT_ID = '" + data.getEventId() + "';";
+				ResultSet res = statement.executeQuery(query);
+
+				Boolean hasStuff = res.next();
+
+				if (!hasStuff || res.getString("EVENT_ID") == null) {
+					//Data not present, add to DB.
+					//Data not present, add to DB.
+					String insertCommand = "INSERT INTO " + eventTableName +
+							"(GUILD_ID, EVENT_ID, IMAGE_LINK)" +
+							" VALUES (?, ?, ?, ?;";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+					ps.setString(1, String.valueOf(data.getGuildId()));
+					ps.setString(2, data.getEventId());
+					ps.setString(3, data.getImageLink());
+
+					ps.executeUpdate();
+					ps.close();
+					statement.close();
+				} else {
+					//Data present, update.
+					String update = "UPDATE " + eventTableName
+							+ " SET IMAGE_LINK = ?"
+							+ " WHERE EVENT_ID = ?";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+
+					ps.setString(1, data.getImageLink());
+					ps.setString(2, data.getEventId());
+
+					ps.executeUpdate();
+
+					ps.close();
+					statement.close();
+				}
+				return true;
+			}
+		} catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to update/insert event data.", e, this.getClass());
+		}
+		return false;
+	}
+
     public GuildSettings getSettings(long guildId) {
         GuildSettings settings = new GuildSettings(guildId);
         try {
@@ -466,6 +526,37 @@ public class DatabaseManager {
         }
         return amount;
     }
+
+    public EventData getEventData(long guildId, String eventId) {
+		EventData data = new EventData(guildId);
+
+		if (eventId.contains("_")) {
+			eventId = eventId.split("_")[0];
+		}
+
+		data.setEventId(eventId);
+
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String eventTableName = databaseInfo.getPrefix() + "EVENTS";
+
+				Statement statement = databaseInfo.getConnection().createStatement();
+				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
+				ResultSet res = statement.executeQuery(query);
+
+				while (res.next()) {
+					if (res.getString("EVENT_ID").equals(eventId)) {
+						data.setImageLink(res.getString("IMAGE_LINK"));
+						break;
+					}
+				}
+				statement.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get event data", e, this.getClass());
+		}
+		return data;
+	}
 
     /**
      * Gets the {@link Announcement} Object with the corresponding ID for the specified Guild.
@@ -615,6 +706,49 @@ public class DatabaseManager {
         }
         return false;
     }
+
+    public Boolean deleteEventData(String eventId) {
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+    			String eventTable = databaseInfo.getPrefix() + "EVENTS";
+
+    			//Check if recurring...
+				if (eventId.contains("_")) {
+					eventId = eventId.split("_")[0];
+				}
+
+    			String query = "DELETE FROM " + eventTable + " WHERE EVENT_ID = ?";
+    			PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+    			preparedStmt.setString(1, eventId);
+
+    			preparedStmt.execute();
+    			preparedStmt.close();
+    			return true;
+			}
+		} catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to delete event data.", e, this.getClass());
+		}
+		return false;
+	}
+
+	public boolean deleteAllEventData(long guildId) {
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+    			String eventTable = databaseInfo.getPrefix() + "EVENTS";
+
+    			String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
+    			PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+    			preparedStmt.setString(1, String.valueOf(guildId));
+
+    			preparedStmt.execute();
+    			preparedStmt.close();
+    			return true;
+			}
+		} catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to delete all event data for guild.", e, this.getClass());
+		}
+		return false;
+	}
 
     public void runDatabaseUpdateIfNeeded() {}
 }

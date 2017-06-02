@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
+import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -29,6 +31,8 @@ public class PreEvent {
     private boolean recur;
     private Recurrence recurrence;
 
+    private EventData eventData;
+
     private boolean editing;
 
     private IMessage creatorMessage;
@@ -48,6 +52,8 @@ public class PreEvent {
 
         recur = false;
         recurrence = new Recurrence();
+
+        eventData = new EventData(guildId);
 
         editing = false;
     }
@@ -77,6 +83,8 @@ public class PreEvent {
 
         viewableStartDate = e.getStart();
         viewableEndDate = e.getEnd();
+
+        eventData = DatabaseManager.getManager().getEventData(guildId, e.getId());
 
         editing = false;
     }
@@ -174,6 +182,10 @@ public class PreEvent {
         return recurrence;
     }
 
+    public EventData getEventData() {
+    	return eventData;
+	}
+
     public boolean isEditing() {
         return editing;
     }
@@ -254,6 +266,10 @@ public class PreEvent {
     public void setShouldRecur(boolean _recur) {
         recur = _recur;
     }
+
+    public void setEventData(EventData _data) {
+    	eventData = _data;
+	}
 
     public void setEditing(boolean _editing) {
         editing = _editing;

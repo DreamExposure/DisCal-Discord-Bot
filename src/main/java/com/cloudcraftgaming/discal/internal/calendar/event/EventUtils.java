@@ -33,6 +33,7 @@ public class EventUtils {
                 return false;
             }
             DatabaseManager.getManager().deleteAnnouncementsForEvent(guildId, eventId);
+            DatabaseManager.getManager().deleteEventData(eventId);
             return true;
         } catch (IOException e) {
             System.out.println("Something weird happened when deleting an event!");
@@ -63,6 +64,7 @@ public class EventUtils {
         } else {
             pe.setColor(EventColor.RED);
         }
+		pe.setEventData(DatabaseManager.getManager().getEventData(guildId, event.getId()));
 
         return pe;
     }

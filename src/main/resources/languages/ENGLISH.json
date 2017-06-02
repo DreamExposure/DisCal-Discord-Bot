@@ -79,6 +79,8 @@
   "Creator.Event.Interval.Success": "Event interval set to: `%amount%` %lb% %lb% Please use `!event review` to review that all info entered is correct and confirm with `!event confirm`",
   "Creator.Event.Interval.Success.New": "Event interval set! %lb% %lb% Please use `!event review` to review that all info entered is correct and confirm with `!event confirm`",
   "Creator.Event.Interval.Specify": "Please specify the interval rule for the event with`!event interval <amount>` Defaulted to `1` %lb% %lb% The interval is how often to schedule following the frequency. (EX: if daily and interval is 2, it will be scheduled for every other day)",
+  "Creator.Event.Attachment.Success": "Image added! %lb% %lb% Not displaying? Make sure the link provided is correct and a direct image link!",
+  "Creator.Event.Attachment.Specify": "Please specify the link to the image with `!event image <linkToImage>`",
 
   "Creator.Event.AlreadyInit": "Event Creator/Editor already initialized!",
   "Creator.Event.NotInit": "Event Function failed because the Creator/Editor has never been started!",

@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.MessageManager;
@@ -30,10 +31,14 @@ public class EventMessageFormatter {
      * @return The EmbedObject of the event.
      */
     public static EmbedObject getEventEmbed(Event event, GuildSettings settings) {
+		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
+        if (ed.getImageLink() != null) {
+			em.withImage(ed.getImageLink());
+		}
         if (event.getSummary() != null) {
             em.appendField(MessageManager.getMessage("Embed.Event.Info.Summary", settings), event.getSummary(), true);
         }
@@ -78,6 +83,10 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
+        EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
+        if (ed.getImageLink() != null) {
+        	em.withThumbnail(ed.getImageLink());
+		}
         if (event.getSummary() != null) {
             em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), event.getSummary(), true);
         }
@@ -105,6 +114,9 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
+        if (event.getEventData().getImageLink() != null) {
+        	em.withImage(event.getEventData().getImageLink());
+		}
         if (event.isEditing()) {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), true);
         }
@@ -143,10 +155,14 @@ public class EventMessageFormatter {
      * @return The EmbedObject for the CreatorResponse.
      */
     public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
+    	EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), ecr.getEvent().getId());
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
+        if (ed.getImageLink() != null) {
+        	em.withImage(ed.getImageLink());
+		}
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart()), false);
         em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));

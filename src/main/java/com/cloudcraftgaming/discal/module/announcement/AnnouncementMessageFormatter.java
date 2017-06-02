@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
@@ -40,10 +41,18 @@ public class AnnouncementMessageFormatter {
         em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Type", settings), a.getAnnouncementType().name(), true);
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
+			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
+			if (ed.getImageLink() != null) {
+				em.withImage(ed.getImageLink());
+			}
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
         } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
+			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
+			if (ed.getImageLink() != null) {
+				em.withImage(ed.getImageLink());
+			}
         }
         em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
         em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
@@ -79,7 +88,10 @@ public class AnnouncementMessageFormatter {
                 //TODO: Handle multiple calendars...
                 CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
-
+				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
+				if (ed.getImageLink() != null) {
+					em.withThumbnail(ed.getImageLink());
+				}
                 if (event.getSummary() != null) {
                     em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Summary", settings), event.getSummary(), true);
                 }
@@ -116,6 +128,10 @@ public class AnnouncementMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
+		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
+		if (ed.getImageLink() != null) {
+			em.withImage(ed.getImageLink());
+		}
         if (event.getSummary() != null) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), event.getSummary(), true);
         }
@@ -173,6 +189,10 @@ public class AnnouncementMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
+		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
+		if (ed.getImageLink() != null) {
+			em.withImage(ed.getImageLink());
+		}
         if (event.getSummary() != null) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), event.getSummary(), true);
         }
