@@ -736,14 +736,22 @@ public class EventCommand implements ICommand {
     	if (args.length == 2) {
     		String value = args[1];
 			if (EventCreator.getCreator().hasPreEvent(guildId)) {
-				EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(value);
+				if (ImageUtils.validate(value)) {
+					EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(value);
 
-				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
-					Message.deleteMessage(event);
-					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event));
+					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(event);
+						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event);
+					}
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event);
+					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(event);
+						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Attachment.Failure", settings), event));
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
