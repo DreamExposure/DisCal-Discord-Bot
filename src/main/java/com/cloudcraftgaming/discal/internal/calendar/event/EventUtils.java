@@ -68,4 +68,21 @@ public class EventUtils {
 
         return pe;
     }
+
+    public static String applyHoursToRawUserInput(String dateRaw, Integer plus) {
+    	//format: yyyy/MM/dd-HH:mm:ss
+		String hoursS = dateRaw.substring(11, 13);
+		try {
+			Integer newHours = Integer.valueOf(hoursS);
+			newHours = newHours + plus;
+
+			String[] timeArray = dateRaw.split(":");
+
+			return timeArray[0] + newHours + ":" + timeArray[1] + ":" + timeArray[2];
+
+		} catch (NumberFormatException e) {
+			ExceptionHandler.sendException(null, "Failed to convert to number from: " + hoursS, e, EventUtils.class);
+		}
+		return dateRaw;
+	}
 }

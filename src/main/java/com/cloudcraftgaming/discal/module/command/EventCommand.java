@@ -474,7 +474,8 @@ public class EventCommand implements ICommand {
                             //To streamline, check if event end is null, if so, apply 2 hour duration!
 							if (EventCreator.getCreator().getPreEvent(guildId).getEndDateTime() == null) {
 								//Actual date -- Fuck me, need to do conversions again because its stupid.
-								Date endDateObj = DateUtils.addHours(dateObj, 2);
+								String endRaw = EventUtils.applyHoursToRawUserInput(dateRaw, 2);
+								Date endDateObj = sdf.parse(endRaw);
 								DateTime endDateTime = new DateTime(endDateObj);
 								EventDateTime eventEndDateTime = new EventDateTime();
 								eventDateTime.setDateTime(endDateTime);
