@@ -80,63 +80,83 @@ public class CalendarCommand implements ICommand {
      */
     @Override
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-        if (PermissionChecker.hasSufficientRole(event)) {
-            if (args.length < 1) {
-                Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
-            } else {
-                long guildId = event.getGuild().getLongID();
-                //TODO: Add support for multiple calendars...
-                CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
+		if (args.length < 1) {
+			Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
+		} else {
+			long guildId = event.getGuild().getLongID();
+			//TODO: Add support for multiple calendars...
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
 
-                switch (args[0].toLowerCase()) {
-                    case "create":
-                        moduleCreate(args, event, calendarData, settings);
-                        break;
-                    case "cancel":
-                        moduleCancel(event, calendarData, settings);
-                        break;
-                    case "view":
-                        moduleView(event, calendarData, settings);
-                        break;
-                    case "review":
-                        moduleView(event, calendarData, settings);
-                        break;
-                    case "confirm":
-                        moduleConfirm(event, calendarData, settings);
-                        break;
-                    case "delete":
-                        moduleDelete(event, calendarData, settings);
-                        break;
-                    case "remove":
-                        moduleDelete(event, calendarData, settings);
-                        break;
-                    case "name":
-                        moduleSummary(args, event, calendarData, settings);
-                        break;
-                    case "summary":
-                        moduleSummary(args, event, calendarData, settings);
-                        break;
-                    case "description":
-                        moduleDescription(args, event, calendarData, settings);
-                        break;
-                    case "timezone":
-                        moduleTimezone(args, event, calendarData, settings);
-                        break;
-                    case "edit":
-                        if (settings.isDevGuild()) {
-                            moduleEdit(event, calendarData, settings);
-                        } else {
-                            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-                        }
-                        break;
-                    default:
-                        Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
-                        break;
-                }
-            }
-        } else {
-            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-        }
+			switch (args[0].toLowerCase()) {
+				case "create":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleCreate(args, event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "cancel":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleCancel(event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "view":
+					moduleView(event, calendarData, settings);
+					break;
+				case "review":
+					moduleView(event, calendarData, settings);
+					break;
+				case "confirm":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleConfirm(event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "delete":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleDelete(event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "remove":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleDelete(event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "name":
+					moduleSummary(args, event, calendarData, settings);
+					break;
+				case "summary":
+					moduleSummary(args, event, calendarData, settings);
+					break;
+				case "description":
+					moduleDescription(args, event, calendarData, settings);
+					break;
+				case "timezone":
+					moduleTimezone(args, event, calendarData, settings);
+					break;
+				case "edit":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						if (settings.isDevGuild()) {
+							moduleEdit(event, calendarData, settings);
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+						}
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				default:
+					Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
+					break;
+			}
+		}
         return false;
     }
 

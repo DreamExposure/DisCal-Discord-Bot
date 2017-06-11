@@ -78,7 +78,7 @@ public class DevCommand implements ICommand {
         if (event.getAuthor().getLongID() == novaId || event.getAuthor().getLongID() == xaanitId) {
             if (args.length < 1) {
                 Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
-            } else if (args.length >= 1) {
+            } else {
                 switch (args[0].toLowerCase()) {
                     case "patron":
                         modulePatron(args, event);

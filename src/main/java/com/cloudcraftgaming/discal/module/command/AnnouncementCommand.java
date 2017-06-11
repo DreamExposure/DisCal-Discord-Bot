@@ -90,91 +90,111 @@ public class AnnouncementCommand implements ICommand {
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (PermissionChecker.hasSufficientRole(event)) {
-			if (args.length < 1) {
-				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
-			} else {
-				switch (args[0].toLowerCase()) {
-					case "create":
+		if (args.length < 1) {
+			Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
+		} else {
+			switch (args[0].toLowerCase()) {
+				case "create":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleCreate(event, settings);
-						break;
-					case "confirm":
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "confirm":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleConfirm(event, settings);
-						break;
-					case "cancel":
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "cancel":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleCancel(event, settings);
-						break;
-					case "delete":
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "delete":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleDelete(args, event, settings);
-						break;
-					case "view":
-					case "review":
-						moduleView(args, event, settings);
-						break;
-					case "subscribe":
-					case "sub":
-						moduleSubscribe(args, event);
-						break;
-					case "unsubscribe":
-					case "unsub":
-						moduleUnsubscribe(args, event);
-						break;
-					case "type":
-						moduleType(args, event, settings);
-						break;
-					case "hours":
-						moduleHours(args, event, settings);
-						break;
-					case "minutes":
-						moduleMinutes(args, event, settings);
-						break;
-					case "list":
-						moduleList(args, event, settings);
-						break;
-					case "event":
-						moduleEvent(args, event, settings);
-						break;
-					case "info":
-						moduleInfo(args, event, settings);
-						break;
-					case "channel":
-						moduleChannel(args, event, settings);
-						break;
-					case "color":
-					case "colour":
-						moduleColor(args, event, settings);
-						break;
-					case "copy":
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "view":
+				case "review":
+					moduleView(args, event, settings);
+					break;
+				case "subscribe":
+				case "sub":
+					moduleSubscribe(args, event);
+					break;
+				case "unsubscribe":
+				case "unsub":
+					moduleUnsubscribe(args, event);
+					break;
+				case "type":
+					moduleType(args, event, settings);
+					break;
+				case "hours":
+					moduleHours(args, event, settings);
+					break;
+				case "minutes":
+					moduleMinutes(args, event, settings);
+					break;
+				case "list":
+					moduleList(args, event, settings);
+					break;
+				case "event":
+					moduleEvent(args, event, settings);
+					break;
+				case "info":
+					moduleInfo(args, event, settings);
+					break;
+				case "channel":
+					moduleChannel(args, event, settings);
+					break;
+				case "color":
+				case "colour":
+					moduleColor(args, event, settings);
+					break;
+				case "copy":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleCopy(args, event, settings);
-						break;
-					case "edit":
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "edit":
+					if (PermissionChecker.hasSufficientRole(event)) {
 						if (settings.isDevGuild()) {
 							moduleEdit(args, event, settings);
 						} else {
 							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 						}
-						break;
-					case "devsub":
-						if (settings.isDevGuild()) {
-							moduleSubscribeRewrite(args, event);
-						} else {
-							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-						}
-						break;
-					case "devunsub":
-						if (settings.isDevGuild()) {
-							moduleUnubscribeRewrite(args, event);
-						} else {
-							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-						}
-						break;
-					default:
-						Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
-						break;
-				}
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "devsub":
+					if (settings.isDevGuild()) {
+						moduleSubscribeRewrite(args, event);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+					}
+					break;
+				case "devunsub":
+					if (settings.isDevGuild()) {
+						moduleUnubscribeRewrite(args, event);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+					}
+					break;
+				default:
+					Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
+					break;
 			}
-		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 		}
 		return false;
 	}
