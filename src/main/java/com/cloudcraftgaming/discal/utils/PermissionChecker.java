@@ -38,7 +38,7 @@ public class PermissionChecker {
 
                 if (role != null) {
                     for (IRole r : sender.getRolesForGuild(event.getMessage().getGuild())) {
-                        if (r.getStringID().equals(role.getStringID())) {
+                        if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition()) {
                             return true;
                         }
                     }
