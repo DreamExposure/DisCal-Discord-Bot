@@ -14,7 +14,6 @@ import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -771,7 +770,6 @@ public class DatabaseManager {
     	try {
     		if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
-				List<CalendarData> calendarsToDelete = new ArrayList<>();
 
 				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + ";";
@@ -779,20 +777,15 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("GUILD_ID") != null) {
-						if (Main.client.getGuildByID(res.getString("GUILD_ID")) == null) {
+						if (Main.client.getGuildByID(Long.valueOf(res.getString("GUILD_ID"))) == null) {
 							CalendarData data = new CalendarData(Long.valueOf(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
 							data.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
 							data.setCalendarId(res.getString("CALENDAR_ID"));
-							calendarsToDelete.add(data);
+							CalendarUtils.deleteCalendar(data, true);
 						}
 					}
 				}
 				statement.close();
-
-				//Delete
-				for (CalendarData cd : calendarsToDelete) {
-					CalendarUtils.deleteCalendar(cd, true);
-				}
 				return true;
 			}
 		} catch (SQLException e) {

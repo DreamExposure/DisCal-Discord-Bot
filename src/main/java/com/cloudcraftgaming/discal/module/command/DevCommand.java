@@ -223,6 +223,7 @@ public class DevCommand implements ICommand {
 	}
 
 	private void moduleCleanupCalendars(MessageReceivedEvent event) {
+    	/*
     	Message.sendMessage("Cleaning up calendars! This may take some time....", event);
 
     	if (DatabaseManager.getManager().cleanupCalendars()) {
@@ -230,6 +231,8 @@ public class DevCommand implements ICommand {
 		} else {
     		Message.sendMessage("Failed to clean up calendars! Check the error log!", event);
 		}
+		*/
+    	Message.sendMessage("Disabled because I am a dumb", event);
 	}
 
 	private long botPercent(IGuild g) {
