@@ -142,8 +142,8 @@ public class DisCalCommand implements ICommand {
      */
     private void moduleControlRole(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (PermissionChecker.hasSufficientRole(event)) {
-            if (args.length == 2) {
-                String roleName = args[1];
+            if (args.length > 1) {
+                String roleName = GeneralUtils.getContent(args, 1);
                 IRole controlRole;
 
                 if (!"everyone".equalsIgnoreCase(roleName)) {
