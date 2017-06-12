@@ -19,17 +19,19 @@ public class CalendarUtils {
      * @param data The BotData of the Guild whose deleting their calendar.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
-    public static Boolean deleteCalendar(CalendarData data) {
+    public static Boolean deleteCalendar(CalendarData data, boolean deleteFromDb) {
         try {
-            Calendar service = CalendarAuth.getCalendarService();
-            service.calendars().delete(data.getCalendarAddress()).execute();
+        	if (!data.getCalendarAddress().equalsIgnoreCase("primary")) {
+				Calendar service = CalendarAuth.getCalendarService();
+				service.calendars().delete(data.getCalendarAddress()).execute();
+			}
 
             //Remove from database
             data.setCalendarId("primary");
             data.setCalendarAddress("primary");
 
             //TODO: Remove??
-            DatabaseManager.getManager().updateCalendar(data);
+            DatabaseManager.getManager().updateCalendar(data, deleteFromDb);
             DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 
             return true;

@@ -313,7 +313,7 @@ public class CalendarCommand implements ICommand {
         }
         if (!calendarData.getCalendarId().equalsIgnoreCase("primary")) {
             //Delete calendar
-            if (CalendarUtils.deleteCalendar(calendarData)) {
+            if (CalendarUtils.deleteCalendar(calendarData, false)) {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Success", settings), event);
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.Unknown", settings), event);

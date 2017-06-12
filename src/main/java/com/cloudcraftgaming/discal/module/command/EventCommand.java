@@ -11,7 +11,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import org.apache.commons.lang3.time.DateUtils;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -491,6 +490,7 @@ public class EventCommand implements ICommand {
                             eventDateTimeV.setDateTime(dateTimeV);
                             EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
 
+                            /*
                             //To streamline, check if event end is null, if so, apply 2 hour duration!
 							if (EventCreator.getCreator().getPreEvent(guildId).getEndDateTime() == null) {
 								//Actual date -- Fuck me, need to do conversions again because its stupid.
@@ -510,6 +510,7 @@ public class EventCommand implements ICommand {
 
 								//I know, the above is stupid but I think it works :/
 							}
+							*/
 
                             if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);

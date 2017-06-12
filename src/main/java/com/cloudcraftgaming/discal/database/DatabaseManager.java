@@ -217,7 +217,7 @@ public class DatabaseManager {
         return false;
     }
 
-    public boolean updateCalendar(CalendarData calData) {
+    public boolean updateCalendar(CalendarData calData, boolean delete) {
         try {
             if (databaseInfo.getMySQL().checkConnection()) {
                 String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
@@ -228,37 +228,49 @@ public class DatabaseManager {
 
                 Boolean hasStuff = res.next();
 
-                if (!hasStuff || res.getString("GUILD_ID") == null) {
-                    //Data not present, add to DB.
-                    String insertCommand = "INSERT INTO " + calendarTableName +
-                            "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS)" +
-                            " VALUES (?, ?, ?, ?);";
-                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-                    ps.setString(1, String.valueOf(calData.getGuildId()));
-                    ps.setInt(2, calData.getCalendarNumber());
-                    ps.setString(3, calData.getCalendarId());
-                    ps.setString(4, calData.getCalendarAddress());
+                if (!delete) {
+					if (!hasStuff || res.getString("GUILD_ID") == null) {
+						//Data not present, add to DB.
+						String insertCommand = "INSERT INTO " + calendarTableName +
+								"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS)" +
+								" VALUES (?, ?, ?, ?);";
+						PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+						ps.setString(1, String.valueOf(calData.getGuildId()));
+						ps.setInt(2, calData.getCalendarNumber());
+						ps.setString(3, calData.getCalendarId());
+						ps.setString(4, calData.getCalendarAddress());
 
-                    ps.executeUpdate();
-                    ps.close();
-                    statement.close();
-                } else {
-                    //Data present, update.
-                    String update = "UPDATE " + calendarTableName
-                            + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-                            + " CALENDAR_ADDRESS = ?"
-                            + " WHERE GUILD_ID = ?";
-                    PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
-                    ps.setInt(1, calData.getCalendarNumber());
-                    ps.setString(2, calData.getCalendarId());
-                    ps.setString(3, calData.getCalendarAddress());
-                    ps.setString(4, String.valueOf(calData.getGuildId()));
+						ps.executeUpdate();
+						ps.close();
+						statement.close();
+					} else {
+						//Data present, update.
+						String update = "UPDATE " + calendarTableName
+								+ " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
+								+ " CALENDAR_ADDRESS = ?"
+								+ " WHERE GUILD_ID = ?";
+						PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+						ps.setInt(1, calData.getCalendarNumber());
+						ps.setString(2, calData.getCalendarId());
+						ps.setString(3, calData.getCalendarAddress());
+						ps.setString(4, String.valueOf(calData.getGuildId()));
 
-                    ps.executeUpdate();
+						ps.executeUpdate();
 
-					ps.close();
-                    statement.close();
-                }
+						ps.close();
+						statement.close();
+					}
+				} else {
+                	if (hasStuff) {
+                		String deleteQuery = "DELETE FROM " + calendarTableName + " WHERE GUILD_ID = ?";
+                		PreparedStatement ps = databaseInfo.getConnection().prepareStatement(deleteQuery);
+                		ps.setString(1, calData.getCalendarId());
+
+                		ps.execute();
+                		ps.close();
+					}
+					statement.close();
+				}
                 return true;
             }
         } catch (SQLException e) {
@@ -779,7 +791,7 @@ public class DatabaseManager {
 
 				//Delete
 				for (CalendarData cd : calendarsToDelete) {
-					CalendarUtils.deleteCalendar(cd);
+					CalendarUtils.deleteCalendar(cd, true);
 				}
 				return true;
 			}

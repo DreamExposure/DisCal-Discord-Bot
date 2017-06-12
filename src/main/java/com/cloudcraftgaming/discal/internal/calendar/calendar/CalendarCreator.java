@@ -139,7 +139,7 @@ public class CalendarCreator {
                         CalendarData calendarData = new CalendarData(guildId, 1);
                         calendarData.setCalendarId(confirmed.getId());
                         calendarData.setCalendarAddress(confirmed.getId());
-                        DatabaseManager.getManager().updateCalendar(calendarData);
+                        DatabaseManager.getManager().updateCalendar(calendarData, false);
                         terminate(e);
                         CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
                         response.setEdited(false);
