@@ -60,6 +60,7 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("leave");
         ci.getSubCommands().add("listGuilds");
         ci.getSubCommands().add("reloadLangs");
+        ci.getSubCommands().add("cleanupCalendars");
 
         return ci;
     }
@@ -97,6 +98,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "reloadlangs":
 						moduleReloadLangs(event);
+						break;
+					case "cleanupcalendars":
+						moduleCleanupCalendars(event);
 						break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
@@ -218,6 +222,15 @@ public class DevCommand implements ICommand {
 		Message.sendMessage("All lang files reloaded!", event);
 	}
 
+	private void moduleCleanupCalendars(MessageReceivedEvent event) {
+    	Message.sendMessage("Cleaning up calendars! This may take some time....", event);
+
+    	if (DatabaseManager.getManager().cleanupCalendars()) {
+    		Message.sendMessage("Calendar cleanup successful!", event);
+		} else {
+    		Message.sendMessage("Failed to clean up calendars! Check the error log!", event);
+		}
+	}
 
 	private long botPercent(IGuild g) {
 		return g.getUsers().stream().filter(IUser::isBot).count() * 100 / g.getTotalMemberCount();

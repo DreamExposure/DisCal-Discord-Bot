@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.database;
 
+import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
 import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
@@ -12,6 +14,7 @@ import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -751,4 +754,38 @@ public class DatabaseManager {
 	}
 
     public void runDatabaseUpdateIfNeeded() {}
+
+    public boolean cleanupCalendars() {
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+				List<CalendarData> calendarsToDelete = new ArrayList<>();
+
+				Statement statement = databaseInfo.getConnection().createStatement();
+				String query = "SELECT * FROM " + calendarTableName + ";";
+				ResultSet res = statement.executeQuery(query);
+
+				while (res.next()) {
+					if (res.getString("GUILD_ID") != null) {
+						if (Main.client.getGuildByID(res.getString("GUILD_ID")) == null) {
+							CalendarData data = new CalendarData(Long.valueOf(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
+							data.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+							data.setCalendarId(res.getString("CALENDAR_ID"));
+							calendarsToDelete.add(data);
+						}
+					}
+				}
+				statement.close();
+
+				//Delete
+				for (CalendarData cd : calendarsToDelete) {
+					CalendarUtils.deleteCalendar(cd);
+				}
+				return true;
+			}
+		} catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to cleanup Database!", e, this.getClass());
+		}
+		return false;
+	}
 }
