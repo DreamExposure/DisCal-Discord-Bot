@@ -25,20 +25,18 @@ public class CalendarUtils {
 				Calendar service = CalendarAuth.getCalendarService();
 				service.calendars().delete(data.getCalendarAddress()).execute();
 			}
+		} catch (IOException e) {
+			//Fail silently.
+			ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
+		}
 
             //Remove from database
             data.setCalendarId("primary");
             data.setCalendarAddress("primary");
 
-            //TODO: Remove??
             DatabaseManager.getManager().updateCalendar(data, deleteFromDb);
             DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 
-            return true;
-        } catch (IOException e) {
-            //Fail silently.
-            ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
-        }
-        return false;
+        return true;
     }
 }
