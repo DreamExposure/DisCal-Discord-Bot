@@ -369,7 +369,6 @@ public class DatabaseManager {
 
 				if (!hasStuff || res.getString("EVENT_ID") == null) {
 					//Data not present, add to DB.
-					//Data not present, add to DB.
 					String insertCommand = "INSERT INTO " + eventTableName +
 							"(GUILD_ID, EVENT_ID, IMAGE_LINK)" +
 							" VALUES (?, ?, ?, ?;";

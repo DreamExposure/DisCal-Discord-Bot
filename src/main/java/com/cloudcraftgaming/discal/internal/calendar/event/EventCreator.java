@@ -220,6 +220,7 @@ public class EventCreator {
                     try {
                         Event confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
                         if (preEvent.getEventData().shouldBeSaved()) {
+                        	preEvent.getEventData().setEventId(confirmed.getId());
                         	DatabaseManager.getManager().updateEventData(preEvent.getEventData());
 						}
                         terminate(e);
@@ -236,6 +237,7 @@ public class EventCreator {
                     try {
                         Event confirmed = CalendarAuth.getCalendarService().events().update(calendarId, preEvent.getEventId(), event).execute();
                         if (preEvent.getEventData().shouldBeSaved()) {
+                        	preEvent.getEventData().setEventId(confirmed.getId());
                         	DatabaseManager.getManager().updateEventData(preEvent.getEventData());
 						}
                         terminate(e);
