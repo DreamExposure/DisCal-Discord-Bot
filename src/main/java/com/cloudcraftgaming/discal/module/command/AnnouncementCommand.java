@@ -685,7 +685,7 @@ public class AnnouncementCommand implements ICommand {
 				Announcement a = DatabaseManager.getManager()
 						.getAnnouncement(UUID.fromString(value), guild.getLongID());
 				if (!a.getSubscriberUserIds().contains(senderId)) {
-					a.getSubscriberUserIds().add(senderId);
+					a.getSubscriberUserIds().remove(senderId);
 					Message.sendMessage(
 							"You have unsubscribed from the announcement with the ID: `" + value + "`"
 									+ Message.lineBreak + "To subscribe use `!announcement subscribe <id>`",
