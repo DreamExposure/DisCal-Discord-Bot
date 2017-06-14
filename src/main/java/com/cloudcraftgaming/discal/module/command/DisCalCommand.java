@@ -20,6 +20,8 @@ import java.util.ArrayList;
  * For Project: DisCal
  */
 public class DisCalCommand implements ICommand {
+	private final String INVITE_LINK = "https://discord.gg/AmAMGeN";
+
     /**
      * Gets the command this Object is responsible for.
      * @return The command this Object is responsible for.
@@ -61,6 +63,7 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().add("language");
         info.getSubCommands().add("lang");
         info.getSubCommands().add("prefix");
+        info.getSubCommands().add("invite");
 
         return info;
     }
@@ -106,6 +109,9 @@ public class DisCalCommand implements ICommand {
 					break;
 				case "prefix":
 					modulePrefix(args, event, settings);
+					break;
+				case "invite":
+					moduleInvite(event, settings);
 					break;
                 default:
                     Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
@@ -304,5 +310,9 @@ public class DisCalCommand implements ICommand {
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 		}
+	}
+
+	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
+		Message.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
 	}
 }
