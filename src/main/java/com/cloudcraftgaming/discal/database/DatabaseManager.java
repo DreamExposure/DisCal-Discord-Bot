@@ -371,7 +371,7 @@ public class DatabaseManager {
 					//Data not present, add to DB.
 					String insertCommand = "INSERT INTO " + eventTableName +
 							"(GUILD_ID, EVENT_ID, IMAGE_LINK)" +
-							" VALUES (?, ?, ?, ?;";
+							" VALUES (?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, String.valueOf(data.getGuildId()));
 					ps.setString(2, data.getEventId());
