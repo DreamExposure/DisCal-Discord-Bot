@@ -665,6 +665,7 @@ public class AnnouncementCommand implements ICommand {
 					}
 				} else if (r != null) {
 					if (a.getSubscriberRoleIds().contains(r.getStringID())) {
+						a.getSubscriberRoleIds().remove(r.getStringID());
 						String username = r.getName();
 						Message.sendMessage(
 								"The role `" + username
@@ -754,12 +755,12 @@ public class AnnouncementCommand implements ICommand {
 				if (u != null) {
 					if (a.getSubscriberUserIds().contains(u.getStringID())) {
 						subscribedUsers.remove(u.getName());
-						a.getSubscriberUserIds().add(u.getStringID());
+						a.getSubscriberUserIds().remove(u.getStringID());
 					}
 				} else if (r != null) {
 					if (a.getSubscriberRoleIds().contains(r.getStringID())) {
 						subscribedRoles.remove(r.getName());
-						a.getSubscriberRoleIds().add(r.getStringID());
+						a.getSubscriberRoleIds().remove(r.getStringID());
 					}
 				}
 			}
