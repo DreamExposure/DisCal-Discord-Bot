@@ -476,6 +476,7 @@ public class AnnouncementCommand implements ICommand {
 					}
 				} else if (r != null) {
 					if (!a.getSubscriberRoleIds().contains(r.getStringID())) {
+						a.getSubscriberRoleIds().add(r.getStringID());
 						String username = r.getName();
 						Message.sendMessage(
 								"The role `" + username
