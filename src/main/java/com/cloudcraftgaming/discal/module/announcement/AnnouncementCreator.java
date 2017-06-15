@@ -1,8 +1,13 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
+import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
+import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -36,10 +41,18 @@ public class AnnouncementCreator {
      * @param e The event received upon init.
      * @return A new Announcement.
      */
-    public Announcement init(MessageReceivedEvent e) {
+    public Announcement init(MessageReceivedEvent e, GuildSettings settings) {
         if (!hasAnnouncement(e.getGuild().getLongID())) {
             Announcement a = new Announcement(e.getGuild().getLongID());
             a.setAnnouncementChannelId(e.getChannel().getStringID());
+
+			if (PermissionChecker.botHasMessageManagePerms(e)) {
+				IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Create.Init", settings), e);
+				a.setCreatorMessage(msg);
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+			}
+
             announcements.add(a);
             return a;
         }
@@ -59,13 +72,20 @@ public class AnnouncementCreator {
         return getAnnouncement(e.getGuild().getLongID());
     }
 
-    public Announcement edit(MessageReceivedEvent e, String announcementId) {
+    public Announcement edit(MessageReceivedEvent e, String announcementId, GuildSettings settings) {
         if (!hasAnnouncement(e.getGuild().getLongID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
             Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getGuild().getLongID());
 
             //Copy
             Announcement a = new Announcement(edit, true);
             a.setEditing(true);
+
+			if (PermissionChecker.botHasMessageManagePerms(e)) {
+				IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), e);
+				a.setCreatorMessage(msg);
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+			}
 
             announcements.add(a);
             return a;
@@ -119,6 +139,22 @@ public class AnnouncementCreator {
         return null;
     }
 
+    public IMessage getCreatorMessage(long guildId) {
+    	if (hasAnnouncement(guildId)) {
+    		return getAnnouncement(guildId).getCreatorMessage();
+		}
+		return null;
+	}
+
+	//Setters
+	public void setCreatorMessage(IMessage message) {
+    	if (message != null) {
+			if (hasCreatorMessage(message.getGuild().getLongID())) {
+				getAnnouncement(message.getGuild().getLongID()).setCreatorMessage(message);
+			}
+		}
+	}
+
     //Booleans/Checkers
     /**
      * Whether or not the Guild has an announcement in the creator.
@@ -133,4 +169,8 @@ public class AnnouncementCreator {
         }
         return false;
     }
+
+    public Boolean hasCreatorMessage(long guildId) {
+    	return hasAnnouncement(guildId) && getAnnouncement(guildId).getCreatorMessage() != null;
+	}
 }

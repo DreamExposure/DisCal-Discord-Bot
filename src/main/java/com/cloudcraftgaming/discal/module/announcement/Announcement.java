@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.utils.EventColor;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,8 @@ public class Announcement {
     private int hoursBefore;
     private int minutesBefore;
     private String info;
+
+    private IMessage creatorMessage;
 
     private boolean editing;
 
@@ -223,6 +226,10 @@ public class Announcement {
         return info;
     }
 
+    public IMessage getCreatorMessage() {
+    	return creatorMessage;
+	}
+
     public boolean isEditing() {
         return editing;
     }
@@ -293,6 +300,10 @@ public class Announcement {
         String[] subs = subList.split(",");
         Collections.addAll(subscriberUserIds, subs);
     }
+
+    public void setCreatorMessage(IMessage _message) {
+    	creatorMessage = _message;
+	}
 
     public void setEditing(boolean _editing) {
         editing = _editing;

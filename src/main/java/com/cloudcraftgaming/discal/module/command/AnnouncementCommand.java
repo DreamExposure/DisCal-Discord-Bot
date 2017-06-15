@@ -186,7 +186,7 @@ public class AnnouncementCommand implements ICommand {
 					break;
 				case "devunsub":
 					if (settings.isDevGuild()) {
-						moduleUnubscribeRewrite(args, event);
+						moduleUnsubscribeRewrite(args, event);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 					}
@@ -204,10 +204,21 @@ public class AnnouncementCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 
 		if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-			AnnouncementCreator.getCreator().init(event);
-			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), event);
+			AnnouncementCreator.getCreator().init(event, settings);
+			if (!AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), event);
+			} else {
+				Message.deleteMessage(event);
+			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+			if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+				Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+				Message.deleteMessage(event);
+				AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event));
+
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+			}
 		}
 	}
 
@@ -217,9 +228,13 @@ public class AnnouncementCommand implements ICommand {
 			if (args.length == 2) {
 				String anId = args[1];
 				if (AnnouncementUtils.announcementExists(anId, event)) {
-					Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId);
+					Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId, settings);
 
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), event);
+					if (announcement.getCreatorMessage() == null) {
+						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), event);
+					} else {
+						Message.deleteMessage(event);
+					}
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
@@ -227,7 +242,13 @@ public class AnnouncementCommand implements ICommand {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Edit.Specify", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+			if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+				Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+				Message.deleteMessage(event);
+				AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event));
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+			}
 		}
 	}
 
@@ -237,14 +258,26 @@ public class AnnouncementCommand implements ICommand {
 			AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(event);
 			if (acr.isSuccessful()) {
 				if (acr.getAnnouncement().isEditing()) {
-					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Edit.Success", settings), event);
+					if (acr.getAnnouncement().getCreatorMessage() != null) {
+						Message.deleteMessage(acr.getAnnouncement().getCreatorMessage());
+						Message.deleteMessage(event);
+					}
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Edit.Success", settings), event);
 				} else {
-					Message.sendMessage(
-							AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Create.Success", settings), event);
+					if (acr.getAnnouncement().getCreatorMessage() != null) {
+						Message.deleteMessage(acr.getAnnouncement().getCreatorMessage());
+						Message.deleteMessage(event);
+					}
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Create.Success", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), event);
+				}
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -255,7 +288,13 @@ public class AnnouncementCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 
 		if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+			IMessage creatorMessage = AnnouncementCreator.getCreator().getCreatorMessage(guildId);
 			AnnouncementCreator.getCreator().terminate(event);
+
+			if (creatorMessage != null) {
+				Message.deleteMessage(creatorMessage);
+				Message.deleteMessage(event);
+			}
 			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Cancel.Success", settings), event);
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -268,6 +307,11 @@ public class AnnouncementCommand implements ICommand {
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Specify", settings), event);
 			} else {
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Delete.InCreator", settings), event));
+				}
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.InCreator", settings), event);
 			}
 		} else if (args.length == 2) {
@@ -290,14 +334,26 @@ public class AnnouncementCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), event));
+				} else {
+					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.Specify", settings), event);
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), event);
+				}
 			} else {
 				try {
 					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
@@ -315,6 +371,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
+	//TODO: Use sub rewrite in new creator.
 	private void moduleSubscribe(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
@@ -783,7 +840,7 @@ public class AnnouncementCommand implements ICommand {
 
 	}
 
-	private void moduleUnubscribeRewrite(String[] args, MessageReceivedEvent event) {
+	private void moduleUnsubscribeRewrite(String[] args, MessageReceivedEvent event) {
 		IMessage message = event.getMessage();
 		IGuild guild = message.getGuild();
 		IUser user = message.getAuthor();
@@ -796,6 +853,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 	}
 
+	//TODO: Use unsub rewrite in new creator.
 	private void moduleUnsubscribe(String[] args, MessageReceivedEvent event) {
 		long guildId = event.getGuild().getLongID();
 		if (args.length == 1) {
