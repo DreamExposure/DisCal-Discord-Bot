@@ -60,7 +60,7 @@ public class Announce extends TimerTask {
                                     if (difference <= 10) {
                                         //Right on time
                                         sendAnnouncementMessage(a, event, data, settings);
-                                        doDmAnnouncements(a, event, data, settings);
+                                        //doDmAnnouncements(a, event, data, settings);
 
                                         //Delete announcement to ensure it does not spam fire
                                         DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
@@ -101,7 +101,7 @@ public class Announce extends TimerTask {
                                             //Right on time, let's check if universal or color specific.
                                             if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
                                                 sendAnnouncementMessage(a, event, data, settings);
-                                                doDmAnnouncements(a, event, data, settings);
+                                                //doDmAnnouncements(a, event, data, settings);
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
                                                 //Color, test for color.
                                                 String colorId = event.getColorId();
@@ -109,13 +109,13 @@ public class Announce extends TimerTask {
                                                 if (color.name().equals(a.getEventColor().name())) {
                                                     //Color matches, announce
                                                     sendAnnouncementMessage(a, event, data, settings);
-													doDmAnnouncements(a, event, data, settings);
+													//doDmAnnouncements(a, event, data, settings);
                                                 }
                                             } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
                                                 //Recurring event announcement.
                                                 if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
                                                     sendAnnouncementMessage(a, event, data, settings);
-													doDmAnnouncements(a, event, data, settings);
+													//doDmAnnouncements(a, event, data, settings);
                                                 }
                                             }
                                         }
