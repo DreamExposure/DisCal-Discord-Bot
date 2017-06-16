@@ -965,17 +965,46 @@ public class AnnouncementCommand implements ICommand {
 					AnnouncementType type = AnnouncementType.fromValue(value);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementType(type);
 					if (type.equals(AnnouncementType.SPECIFIC)) {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings),
-								event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings), event);
+						}
 					} else if (type.equals(AnnouncementType.COLOR)) {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), event);
+						}
 					} else if (type.equals(AnnouncementType.RECUR)) {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), event);
+						}
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), event);
+						}
 					}
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -994,9 +1023,21 @@ public class AnnouncementCommand implements ICommand {
 					Integer hoursOr = Integer.valueOf(value);
 					Integer hours = Math.abs(hoursOr);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setHoursBefore(hours);
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.Success", "%hours%", hours + "", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Hours.Success.New", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.Success", "%hours%", hours + "", settings), event);
+					}
 				} catch (NumberFormatException e) {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), event);
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -1015,9 +1056,21 @@ public class AnnouncementCommand implements ICommand {
 					Integer minutesOr = Integer.valueOf(value);
 					Integer minutes = Math.abs(minutesOr);
 					AnnouncementCreator.getCreator().getAnnouncement(guildId).setMinutesBefore(minutes);
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Success", "%minutes%", minutes + "", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Minutes.Success.New", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.Success", "%minutes%", minutes + "", settings), event);
+					}
 				} catch (NumberFormatException e) {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event);
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -1033,7 +1086,13 @@ public class AnnouncementCommand implements ICommand {
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
+				}
 			}
 		} else if (args.length == 2) {
 			String value = args[1];
@@ -1066,7 +1125,13 @@ public class AnnouncementCommand implements ICommand {
 					}
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
+				}
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
@@ -1082,10 +1147,21 @@ public class AnnouncementCommand implements ICommand {
 						.equals(AnnouncementType.SPECIFIC)) {
 					if (EventUtils.eventExists(guildId, value)) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings),
-								event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Event.Success.New", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
+						}
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
+						}
 					}
 				} else if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.RECUR)) {
@@ -1095,13 +1171,30 @@ public class AnnouncementCommand implements ICommand {
 							value = stuff[0];
 						}
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
-
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Event.Success.New", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
+						}
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
+						}
 					}
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), event);
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
