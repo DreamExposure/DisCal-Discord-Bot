@@ -19,6 +19,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("Duplicates")
 public class AnnouncementCommand implements ICommand {
 
 	/**
@@ -1212,7 +1213,13 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Info.Success.New", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
@@ -1220,7 +1227,13 @@ public class AnnouncementCommand implements ICommand {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				String value = GeneralUtils.getContent(args, 1);
 				AnnouncementCreator.getCreator().getAnnouncement(guildId).setInfo(value);
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Info.Success.New", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
@@ -1235,14 +1248,32 @@ public class AnnouncementCommand implements ICommand {
 				if (ChannelUtils.channelExists(value, event)) {
 					IChannel c = ChannelUtils.getChannelFromNameOrId(value, event);
 					if (c != null) {
-						AnnouncementCreator.getCreator().getAnnouncement(guildId)
-								.setAnnouncementChannelId(c.getStringID());
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Channel.Success",  "%channel%", c.getName(), settings), event);
+						AnnouncementCreator.getCreator().getAnnouncement(guildId).setAnnouncementChannelId(c.getStringID());
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator
+							.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Channel.Success.New", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Channel.Success", "%channel%", c.getName(), settings), event);
+						}
+					} else {
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
+						}
+					}
+				} else {
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event));
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
 					}
-				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -1262,12 +1293,30 @@ public class AnnouncementCommand implements ICommand {
 					if (EventColor.exists(value)) {
 						EventColor color = EventColor.fromNameOrHexOrID(value);
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventColor(color);
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Success", "%color%", color.name(), settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Color.Success.New", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Success", "%color%", color.name(), settings), event);
+						}
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
+						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+							Message.deleteMessage(event);
+							AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event));
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
+						}
 					}
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), event);
+					if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+						Message.deleteMessage(event);
+						AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), event);
+					}
 				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
@@ -1283,14 +1332,22 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				if (AnnouncementUtils.announcementExists(value, event)) {
-					Announcement a = AnnouncementCreator.getCreator().init(event, value);
-
-					Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), event);
+					Announcement a = AnnouncementCreator.getCreator().init(event, value, settings);
+					
+					if (a.getCreatorMessage() == null) {
+						Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), event);
+					}
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+				if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
+					Message.deleteMessage(event);
+					AnnouncementCreator.getCreator().setCreatorMessage(Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(guildId), settings), MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
+				}
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Copy.Specify", settings), event);

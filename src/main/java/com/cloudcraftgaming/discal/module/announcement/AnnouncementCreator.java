@@ -59,12 +59,19 @@ public class AnnouncementCreator {
         return getAnnouncement(e.getGuild().getLongID());
     }
 
-    public Announcement init(MessageReceivedEvent e, String announcementId) {
+    public Announcement init(MessageReceivedEvent e, String announcementId, GuildSettings settings) {
         if (!hasAnnouncement(e.getGuild().getLongID()) && AnnouncementUtils.announcementExists(announcementId, e)) {
             Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), e.getGuild().getLongID());
 
             //Copy
             Announcement a = new Announcement(toCopy);
+	
+	        if (PermissionChecker.botHasMessageManagePerms(e)) {
+		        IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), e);
+		        a.setCreatorMessage(msg);
+	        } else {
+		        Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+	        }
 
             announcements.add(a);
             return a;
