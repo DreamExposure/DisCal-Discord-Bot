@@ -262,6 +262,10 @@
   "Embed.Event.Confirm.ID": "Event ID",
   "Embed.Event.Confirm.Date": "Event Date",
   "Embed.Event.Confirm.Footer": "Click title to view on Google Calendar!",
+  "Embed.Time.Title": "Calendar Current Time",
+  "Embed.Time.Time": "Current Time",
+  "Embed.Time.TimeZone": "TimeZone",
+  "Embed.Time.Footer": "This is the current calendar time.",
 
   "Notification.Args.Few": "You must specify a function to execute! Use '!help` for a full list of valid commands and functions!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",

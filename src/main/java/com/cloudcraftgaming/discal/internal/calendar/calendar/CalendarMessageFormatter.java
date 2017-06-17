@@ -15,7 +15,7 @@ import java.net.URI;
  * For Project: DisCal
  */
 public class CalendarMessageFormatter {
-    private static String getCalendarLink(String calId) {
+    public static String getCalendarLink(String calId) {
         URI callURI = URI.create(calId);
         return "https://calendar.google.com/calendar/embed?src=" + callURI;
     }
