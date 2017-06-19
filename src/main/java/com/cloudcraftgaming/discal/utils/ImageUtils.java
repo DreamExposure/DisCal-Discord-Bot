@@ -1,5 +1,10 @@
 package com.cloudcraftgaming.discal.utils;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+
 /**
  * Created by Nova Fox on 6/2/17.
  * Website: www.cloudcraftgaming.com
@@ -7,6 +12,11 @@ package com.cloudcraftgaming.discal.utils;
  */
 public class ImageUtils {
 	public static boolean validate(String url) {
-		return url.endsWith(".jpg") || url.endsWith(".jpeg") || url.endsWith(".png");
+		try {
+			Image image = ImageIO.read(new URL(url));
+			return image != null;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 }
