@@ -140,6 +140,14 @@
   "Creator.Announcement.Copy.Success": "Announcement copied! Edit any values you wish and confirm the announcement with the command `!announcement confirm`",
   "Creator.Announcement.Copy.Specify": "Please specify the announcement to copy with `!announcement copy <ID>`",
 
+  "Creator.Announcement.Subscribe.Self.Success": "You have subscribed to the announcement! %lb% To unsubscribe use `!announcement unsub <ID>`",
+  "Creator.Announcement.Subscribe.Self.Already": "You are already subscribed to the announcement!",
+  "Creator.Announcement.Subscribe.Self.Specify": "Please specify the ID of the announcement you wish to subscribe to with `!announcement sub <ID>`",
+  "Creator.Announcement.Subscribe.Other.Success": "%value% has been subscribed to the announcement! %lb% To unsubscribe them use `!announcement unsub <ID> <value>`",
+  "Creator.Announcement.Subscribe.Other.Already": "%value% is already subscribed to the announcement! %lb% To unsubscribe them use `!announcement unsub <ID> <value>`",
+  "Creator.Announcement.Subscribe.Other.Specify": "Please specify the ID of the announcement with `!announcement sub <ID> <value>`",
+
+
   "Creator.Announcement.AlreadyInit": "Announcement Creator/Editor has already been started!",
   "Creator.Announcement.NotInit": "Announcement Creator/Editor has not been initiated!",
   "Creator.Announcement.CannotFind.Announcement": "I can't seem to find an announcement with that ID. Are you sure you typed it correctly?",
@@ -234,6 +242,10 @@
   "Embed.Announcement.Announce.Info": "Additional Info",
   "Embed.Announcement.Announce.ID": "Announcement ID: %id%",
   "Embed.Announcement.Announce.Dm.Message": "Announcement in Guild: `%guild%` %lb% %lb% You are receiving this DM because you enabled DM announcements for the respective guild. %lb% To disable this, go to the guild and use `discal dmAnnouncements`",
+  "Embed.Announcement.Subscribe.Title": "Announcement Subscribe",
+  "Embed.Announcement.Subscribe.Footer": "Announcement ID: %id%",
+  "Embed.Announcement.Subscribe.Users": "Subscribed Users: %users%",
+  "Embed.Announcement.Subscribe.Roles": "Subscribed Roles: %roles%",
   "Embed.Event.Info.Title": "Event Info",
   "Embed.Event.Info.Summary": "Event Name/Summary",
   "Embed.Event.Info.Description": "Event Description",
