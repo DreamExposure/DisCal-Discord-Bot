@@ -299,8 +299,10 @@ public class EventCreator {
 
 	//Setters
 	public void setCreatorMessage(IMessage msg) {
-    	if (hasPreEvent(msg.getGuild().getLongID())) {
-    		getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
+		if (msg != null) {
+			if (hasPreEvent(msg.getGuild().getLongID())) {
+				getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
+			}
 		}
 	}
 }

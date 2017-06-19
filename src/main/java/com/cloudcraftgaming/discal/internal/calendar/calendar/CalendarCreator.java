@@ -227,8 +227,10 @@ public class CalendarCreator {
 
 	//Setters
 	public void setCreatorMessage(IMessage msg) {
-    	if (hasPreCalendar(msg.getGuild().getLongID())) {
-    		getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
+		if (msg != null) {
+			if (hasPreCalendar(msg.getGuild().getLongID())) {
+				getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
+			}
 		}
 	}
 }
