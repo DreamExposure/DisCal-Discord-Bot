@@ -169,11 +169,7 @@ public class AnnouncementCommand implements ICommand {
 					break;
 				case "edit":
 					if (PermissionChecker.hasSufficientRole(event)) {
-						if (settings.isDevGuild()) {
-							moduleEdit(args, event, settings);
-						} else {
-							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-						}
+						moduleEdit(args, event, settings);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					}

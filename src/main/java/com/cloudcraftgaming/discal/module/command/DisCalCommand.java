@@ -268,23 +268,19 @@ public class DisCalCommand implements ICommand {
     }
 
     private void modulePrefix(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (settings.isDevGuild()) {
-    		if (PermissionChecker.hasManageServerRole(event)) {
-    			if (args.length == 2) {
-    				String prefix = args[1];
+		if (PermissionChecker.hasManageServerRole(event)) {
+			if (args.length == 2) {
+				String prefix = args[1];
 
-    				settings.setPrefix(prefix);
-    				DatabaseManager.getManager().updateSettings(settings);
+				settings.setPrefix(prefix);
+				DatabaseManager.getManager().updateSettings(settings);
 
-    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
-				} else {
-    				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", settings), event);
-				}
+				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
+				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", settings), event);
 			}
 		} else {
-    		Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 		}
 	}
 

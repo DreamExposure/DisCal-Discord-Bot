@@ -119,11 +119,7 @@ public class EventCommand implements ICommand {
 					break;
 				case "edit":
 					if (PermissionChecker.hasSufficientRole(event)) {
-						if (settings.isDevGuild()) {
-							moduleEdit(args, event, calendarData, settings);
-						} else {
-							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-						}
+						moduleEdit(args, event, calendarData, settings);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					}
@@ -180,18 +176,10 @@ public class EventCommand implements ICommand {
 					moduleColor(args, event, settings);
 					break;
 				case "image":
-					if (settings.isDevGuild()) {
-						moduleAttachment(args, event, settings);
-					} else {
-						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-					}
+					moduleAttachment(args, event, settings);
 					break;
 				case "attachment":
-					if (settings.isDevGuild()) {
-						moduleAttachment(args, event, settings);
-					} else {
-						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-					}
+					moduleAttachment(args, event, settings);
 					break;
 				case "recur":
 					moduleRecur(args, event, settings);

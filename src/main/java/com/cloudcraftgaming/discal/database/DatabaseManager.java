@@ -21,7 +21,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"SqlResolve", "SqlNoDataSourceInspection"})
+@SuppressWarnings({"SqlResolve", "SqlNoDataSourceInspection", "UnusedReturnValue"})
 public class DatabaseManager {
     private static DatabaseManager instance;
     private DatabaseInfo databaseInfo;

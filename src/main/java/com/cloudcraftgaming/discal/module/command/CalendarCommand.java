@@ -143,11 +143,7 @@ public class CalendarCommand implements ICommand {
 					break;
 				case "edit":
 					if (PermissionChecker.hasSufficientRole(event)) {
-						if (settings.isDevGuild()) {
-							moduleEdit(event, calendarData, settings);
-						} else {
-							Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-						}
+						moduleEdit(event, calendarData, settings);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					}
