@@ -57,10 +57,15 @@ public class CommandExecutor {
      * @param event The Event received.
      */
     void issueCommand(String cmd, String[] argsOr, MessageReceivedEvent event, GuildSettings settings) {
-    	
-    	String toParse = GeneralUtils.getContent(argsOr, 0);
-    	String[] args = GeneralUtils.overkillParser(toParse).split(" ");
-    	
+
+    	String[] args;
+    	if (argsOr.length > 0) {
+			String toParse = GeneralUtils.getContent(argsOr, 0);
+			args = GeneralUtils.overkillParser(toParse).split(" ");
+		} else {
+    		args = new String[0];
+		}
+
         for (ICommand c : commands) {
             if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase())) {
                 c.issueCommand(args, event, settings);
