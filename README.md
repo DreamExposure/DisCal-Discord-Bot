@@ -41,7 +41,6 @@ DisCal is developed and maintained by NovaFox161 with help from xaanit.
 ## Planned Features
 * Link up to external calendar (WIP)
 * Multiple calendars (WIP)
-* Full overhaul of all creators (WIP)
 * Web Dashboard to manage DisCal settings!
 * More advanced announcements and notification support.
 * And so much more!!!!!
