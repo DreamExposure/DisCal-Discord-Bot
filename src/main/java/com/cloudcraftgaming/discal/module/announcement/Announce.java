@@ -56,7 +56,7 @@ public class Announce extends TimerTask {
                                 Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
                                 Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                 Long difference = minutesToEvent - announcementTime;
-                                if (difference >= 0) {
+                                if (difference > 0) {
                                     if (difference <= 10) {
                                         //Right on time
                                         sendAnnouncementMessage(a, event, data, settings);
@@ -75,10 +75,10 @@ public class Announce extends TimerTask {
                                     DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
                                 } else {
                                     //Unknown cause, send email
-                                    ExceptionHandler.sendException(null, "Something failed with google.", ge, this.getClass());
+                                    ExceptionHandler.sendException(null, "Announcement failure caused by google. CODE: A001", ge, this.getClass());
                                 }
                             } catch (Exception e) {
-                                ExceptionHandler.sendException(null, "Announcement failure.", e, this.getClass());
+                                ExceptionHandler.sendException(null, "Announcement failure CODE: A002", e, this.getClass());
                             }
                         } else {
                             try {
@@ -122,16 +122,16 @@ public class Announce extends TimerTask {
                                     }
                                 }
                             } catch (IOException e) {
-                                ExceptionHandler.sendException(null, "Announcement failure", e, this.getClass());
+                                ExceptionHandler.sendException(null, "Announcement failure CODE: A003", e, this.getClass());
                             }
                         }
                     }
                 } catch (Exception e) {
-                    ExceptionHandler.sendException(null, "Announcement failure", e, this.getClass());
+                    ExceptionHandler.sendException(null, "Announcement failure CODE: A004", e, this.getClass());
                 }
             }
         } catch (IOException e) {
-            ExceptionHandler.sendException(null, "Failed to connect to google calendar", e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to connect to google calendar CODE A004", e, this.getClass());
         }
     }
 
