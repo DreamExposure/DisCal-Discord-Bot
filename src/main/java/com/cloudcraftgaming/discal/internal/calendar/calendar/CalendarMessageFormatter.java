@@ -49,11 +49,15 @@ public class CalendarMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
-        em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
+        if (calendar.getSummary() != null) {
+			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
+		} else {
+        	em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), "***UNSET***", true);
+		}
         if (calendar.getDescription() != null) {
             em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
         } else {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), "Error/Unset", false);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), "***UNSET***", false);
         }
         if (calendar.getTimezone() != null) {
             em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), calendar.getTimezone(), true);
