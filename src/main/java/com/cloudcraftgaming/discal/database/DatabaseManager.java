@@ -1,12 +1,7 @@
 package com.cloudcraftgaming.discal.database;
 
-import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
 import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
-import com.cloudcraftgaming.discal.internal.data.BotSettings;
-import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.data.EventData;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.data.*;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.utils.EventColor;
@@ -21,7 +16,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"SqlResolve", "SqlNoDataSourceInspection", "UnusedReturnValue"})
+@SuppressWarnings({"SqlResolve", "UnusedReturnValue"})
 public class DatabaseManager {
     private static DatabaseManager instance;
     private DatabaseInfo databaseInfo;
@@ -83,6 +78,7 @@ public class DatabaseManager {
             String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
             String settingsTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
             String eventTableName = databaseInfo.getPrefix() + "EVENTS";
+            String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
             String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
                     "(GUILD_ID VARCHAR(255) not NULL, " +
                     " EXTERNAL_CALENDAR BOOLEAN not NULL, " +
@@ -121,12 +117,22 @@ public class DatabaseManager {
             String createEventTable = "CREATE TABLE IF NOT EXISTS " + eventTableName +
 					" (GUILD_ID VARCHAR(255) not NULL, " +
 					" EVENT_ID VARCHAR(255) not NULL, " +
+					" EVENT_END LONG not NULL, " +
 					" IMAGE_LINK LONGTEXT, " +
+					" PRIMARY KEY (GUILD_ID, EVENT_ID))";
+            String createRsvpTable = "CREATE TABLE IF NOT EXISTS " + rsvpTableName +
+					" (GUILD_ID VARCHAR(255) not NULL, " +
+					" EVENT_ID VARCHAR(255) not NULL, " +
+					" EVENT_END LONG not NULL, " +
+					" RSVP_GOING LONGTEXT, " +
+					" RSVP_NOT_GOING LONGTEXT, " +
+					" RSVP_UNDECIDED LONGTEXT, " +
 					" PRIMARY KEY (GUILD_ID, EVENT_ID))";
             statement.executeUpdate(createAnnouncementTable);
             statement.executeUpdate(createSettingsTable);
             statement.executeUpdate(createCalendarTable);
             statement.executeUpdate(createEventTable);
+            statement.executeUpdate(createRsvpTable);
             statement.close();
             System.out.println("Successfully created needed tables in MySQL database!");
         } catch (SQLException e) {
@@ -370,12 +376,13 @@ public class DatabaseManager {
 				if (!hasStuff || res.getString("EVENT_ID") == null) {
 					//Data not present, add to DB.
 					String insertCommand = "INSERT INTO " + eventTableName +
-							"(GUILD_ID, EVENT_ID, IMAGE_LINK)" +
-							" VALUES (?, ?, ?)";
+							"(GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)" +
+							" VALUES (?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, String.valueOf(data.getGuildId()));
 					ps.setString(2, data.getEventId());
-					ps.setString(3, data.getImageLink());
+					ps.setLong(3, data.getEventEnd());
+					ps.setString(4, data.getImageLink());
 
 					ps.executeUpdate();
 					ps.close();
@@ -383,12 +390,13 @@ public class DatabaseManager {
 				} else {
 					//Data present, update.
 					String update = "UPDATE " + eventTableName
-							+ " SET IMAGE_LINK = ?"
+							+ " SET IMAGE_LINK = ?, EVENT_END = ?"
 							+ " WHERE EVENT_ID = ?";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 
 					ps.setString(1, data.getImageLink());
-					ps.setString(2, data.getEventId());
+					ps.setLong(2, data.getEventEnd());
+					ps.setString(3, data.getEventId());
 
 					ps.executeUpdate();
 
@@ -399,6 +407,62 @@ public class DatabaseManager {
 			}
 		} catch (SQLException e) {
     		ExceptionHandler.sendException(null, "Failed to update/insert event data.", e, this.getClass());
+		}
+		return false;
+	}
+
+	public Boolean updateRsvpData(RsvpData data) {
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
+
+				Statement statement = databaseInfo.getConnection().createStatement();
+				String query = "SELECT * FROM " + rsvpTableName + " WHERE EVENT_ID = '" + data.getEventId() + "';";
+				ResultSet res = statement.executeQuery(query);
+
+				Boolean hasStuff = res.next();
+
+				if (!hasStuff || res.getString("EVENT_ID") == null) {
+					//Data not present, add to DB.
+					String insertCommand = "INSERT INTO " + rsvpTableName +
+							"(GUILD_ID, EVENT_ID, EVENT_END, RSVP_GOING, RSVP_NOT_GOING, RSVP_UNDECIDED)" +
+							" VALUES (?, ?, ?, ?, ?, ?)";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+					ps.setString(1, String.valueOf(data.getGuildId()));
+					ps.setString(2, data.getEventId());
+					ps.setLong(3, data.getEventEnd());
+					ps.setString(4, data.getRsvpGoingString());
+					ps.setString(5, data.getRsvpNotGoingString());
+					ps.setString(6, data.getRsvpUndecidedString());
+
+					ps.executeUpdate();
+					ps.close();
+					statement.close();
+				} else {
+					//Data present, update.
+					String update = "UPDATE " + rsvpTableName
+							+ " SET EVENT_END = ?, "
+							+ " RSVP_GOING = ?,"
+							+ " RSVP_NOT_GOING = ?,"
+							+ " RSVP_UNDECIDED = ?,"
+							+ " WHERE EVENT_ID = ?";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+
+					ps.setLong(1, data.getEventEnd());
+					ps.setString(2, data.getRsvpGoingString());
+					ps.setString(3, data.getRsvpNotGoingString());
+					ps.setString(4, data.getRsvpUndecidedString());
+					ps.setString(5, data.getEventId());
+
+					ps.executeUpdate();
+
+					ps.close();
+					statement.close();
+				}
+				return true;
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to update/insert event data.", e, this.getClass());
 		}
 		return false;
 	}
@@ -559,6 +623,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("EVENT_ID").equals(eventId)) {
+						data.setEventEnd(res.getLong("EVENT_END"));
 						data.setImageLink(res.getString("IMAGE_LINK"));
 						break;
 					}
@@ -567,6 +632,34 @@ public class DatabaseManager {
 			}
 		} catch (SQLException e) {
 			ExceptionHandler.sendException(null, "Failed to get event data", e, this.getClass());
+		}
+		return data;
+	}
+
+	public RsvpData getRsvpData(long guildId, String eventId) {
+    	RsvpData data = new RsvpData(guildId);
+    	data.setEventId(eventId);
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+    			String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
+
+    			Statement statement = databaseInfo.getConnection().createStatement();
+    			String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= `" + String.valueOf(guildId) + "`;";
+    			ResultSet res = statement.executeQuery(query);
+
+    			while (res.next()) {
+    				if (res.getString("EVENT_ID").equals(eventId)) {
+    					data.setEventEnd(res.getLong("EVENT_END"));
+    					data.setRsvpGoingFromString(res.getString("RSVP_GOING"));
+    					data.setRsvpNotGoingFromString(res.getString("RSVP_NOT_GOING"));
+    					data.setRsvpUndecidedFromString(res.getString("RSVP_UNDECIDED"));
+    					break;
+					}
+				}
+				statement.close();
+			}
+		} catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to get RSVP data for event", e, this.getClass());
 		}
 		return data;
 	}
@@ -764,32 +857,4 @@ public class DatabaseManager {
 	}
 
     public void runDatabaseUpdateIfNeeded() {}
-
-    public boolean cleanupCalendars() {
-    	try {
-    		if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
-
-				Statement statement = databaseInfo.getConnection().createStatement();
-				String query = "SELECT * FROM " + calendarTableName + ";";
-				ResultSet res = statement.executeQuery(query);
-
-				while (res.next()) {
-					if (res.getString("GUILD_ID") != null) {
-						if (Main.client.getGuildByID(Long.valueOf(res.getString("GUILD_ID"))) == null) {
-							CalendarData data = new CalendarData(Long.valueOf(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
-							data.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-							data.setCalendarId(res.getString("CALENDAR_ID"));
-							CalendarUtils.deleteCalendar(data, true);
-						}
-					}
-				}
-				statement.close();
-				return true;
-			}
-		} catch (SQLException e) {
-    		ExceptionHandler.sendException(null, "Failed to cleanup Database!", e, this.getClass());
-		}
-		return false;
-	}
 }

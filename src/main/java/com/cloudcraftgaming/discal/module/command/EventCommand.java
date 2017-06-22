@@ -466,7 +466,7 @@ public class EventCommand implements ICommand {
                         eventDateTime.setDateTime(dateTime);
 
                         //Wait! Lets check now if its in the future and not the past!
-                        if (!Validator.inPast(dateRaw, tz) && !Validator.startAfterEnd(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
+                        if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.startAfterEnd(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
                             //Date shuffling done, now actually apply all that damn stuff here.
                             EventCreator.getCreator().getPreEvent(guildId).setStartDateTime(eventDateTime);
 
@@ -568,7 +568,7 @@ public class EventCommand implements ICommand {
                         eventDateTime.setDateTime(dateTime);
 
                         //Wait! Lets check now if its in the future and not the past!
-                        if (!Validator.inPast(dateRaw, tz) && !Validator.endBeforeStart(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
+                        if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.endBeforeStart(dateRaw, tz, EventCreator.getCreator().getPreEvent(guildId))) {
                             //Date shuffling done, now actually apply all that damn stuff here.
                             EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventDateTime);
 

@@ -12,7 +12,7 @@ import java.util.TimeZone;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-public class Validator {
+public class TimeUtils {
     /**
      * Checks whether or not a date has already past (IE: March 3, 1990).
      * @param dateRaw The date to check in format (yyyy/MM/dd-HH:mm:ss).

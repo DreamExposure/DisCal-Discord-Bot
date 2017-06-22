@@ -9,6 +9,7 @@ public class EventData {
 	private final long guildId;
 
 	private String eventId;
+	private long eventEnd;
 	private String imageLink;
 
 	public EventData(long _guildId) {
@@ -24,6 +25,10 @@ public class EventData {
 		return eventId;
 	}
 
+	public long getEventEnd() {
+		return eventEnd;
+	}
+
 	public String getImageLink() {
 		return imageLink;
 	}
@@ -31,6 +36,10 @@ public class EventData {
 	//Setters
 	public void setEventId(String _eventId) {
 		eventId = _eventId;
+	}
+
+	public void setEventEnd(long _eventEnd) {
+		eventEnd = _eventEnd;
 	}
 
 	public void setImageLink(String _link) {
