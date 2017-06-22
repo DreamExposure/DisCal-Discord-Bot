@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ImageUtils;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -36,7 +37,7 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
-        if (ed.getImageLink() != null) {
+        if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 			em.withImage(ed.getImageLink());
 		}
         if (event.getSummary() != null) {
@@ -95,7 +96,7 @@ public class EventMessageFormatter {
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
         EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-        if (ed.getImageLink() != null) {
+        if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
         	em.withThumbnail(ed.getImageLink());
 		}
         if (event.getSummary() != null) {
@@ -130,7 +131,7 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
-        if (event.getEventData().getImageLink() != null) {
+        if (event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
         	em.withImage(event.getEventData().getImageLink());
 		}
         if (event.isEditing()) {
@@ -186,7 +187,7 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
-        if (ed.getImageLink() != null) {
+        if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
         	em.withImage(ed.getImageLink());
 		}
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);

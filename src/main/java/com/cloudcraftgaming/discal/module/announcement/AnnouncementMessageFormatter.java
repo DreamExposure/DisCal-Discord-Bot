@@ -42,7 +42,7 @@ public class AnnouncementMessageFormatter {
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
-			if (ed.getImageLink() != null) {
+			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 				em.withImage(ed.getImageLink());
 			}
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
@@ -50,7 +50,7 @@ public class AnnouncementMessageFormatter {
         } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
-			if (ed.getImageLink() != null) {
+			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 				em.withImage(ed.getImageLink());
 			}
         }
@@ -89,7 +89,7 @@ public class AnnouncementMessageFormatter {
                 CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-				if (ed.getImageLink() != null) {
+				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 					em.withThumbnail(ed.getImageLink());
 				}
                 if (event.getSummary() != null) {
@@ -134,7 +134,7 @@ public class AnnouncementMessageFormatter {
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
-		if (ed.getImageLink() != null) {
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 			em.withImage(ed.getImageLink());
 		}
         if (event.getSummary() != null) {
@@ -205,7 +205,7 @@ public class AnnouncementMessageFormatter {
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
-		if (ed.getImageLink() != null) {
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 			em.withImage(ed.getImageLink());
 		}
 		if (event.getSummary() != null) {
