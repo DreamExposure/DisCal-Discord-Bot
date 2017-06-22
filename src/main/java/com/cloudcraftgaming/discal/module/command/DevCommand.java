@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.service.ApplicationHandler;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
@@ -61,6 +62,7 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("listGuilds");
         ci.getSubCommands().add("reloadLangs");
         ci.getSubCommands().add("cleanupCalendars");
+        ci.getSubCommands().add("restart");
 
         return ci;
     }
@@ -101,6 +103,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "cleanupcalendars":
 						moduleCleanupCalendars(event);
+						break;
+					case "restart":
+						moduleRestart(event);
 						break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
@@ -233,6 +238,12 @@ public class DevCommand implements ICommand {
 		}
 		*/
     	Message.sendMessage("Disabled because I am a dumb", event);
+	}
+
+	private void moduleRestart(MessageReceivedEvent event) {
+    	Message.sendMessage("Restarting DisCal! This may take a moment!", event);
+
+		ApplicationHandler.restartApplication(null);
 	}
 
 	private long botPercent(IGuild g) {
