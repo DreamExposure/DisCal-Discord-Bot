@@ -34,7 +34,6 @@ import static com.cloudcraftgaming.discal.module.announcement.AnnouncementMessag
 public class Announce extends TimerTask {
     @Override
     public void run() {
-        //EmailSender.getSender().sendDebugEmail(this.getClass(), "01", "Announcement Runnable Start");
         DateTime now = new DateTime(System.currentTimeMillis());
         Long nowMS = System.currentTimeMillis();
         try {
@@ -97,7 +96,7 @@ public class Announce extends TimerTask {
                                         Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
                                         Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
                                         Long difference = minutesToEvent - announcementTime;
-                                        if (difference >= 0 && difference <= 10) {
+                                        if (difference > 0 && difference <= 10) {
                                             //Right on time, let's check if universal or color specific.
                                             if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
                                                 sendAnnouncementMessage(a, event, data, settings);
@@ -131,7 +130,7 @@ public class Announce extends TimerTask {
                 }
             }
         } catch (IOException e) {
-            ExceptionHandler.sendException(null, "Failed to connect to google calendar CODE A004", e, this.getClass());
+            ExceptionHandler.sendException(null, "Failed to connect to google calendar CODE A005", e, this.getClass());
         }
     }
 
