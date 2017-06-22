@@ -72,6 +72,11 @@ public class TimeCommand implements ICommand {
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		calendarTime(event, settings);
+		return false;
+	}
+
+	private void calendarTime(MessageReceivedEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
@@ -104,6 +109,5 @@ public class TimeCommand implements ICommand {
 			ExceptionHandler.sendException(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
 			Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
-		return false;
 	}
 }
