@@ -262,9 +262,8 @@ public class DevCommand implements ICommand {
 		for (IShard s : msg.getClient().getShards()) {
 			s.logout();
 			s.login();
-			Message.editMessage(msg, "Reloaded shard " + s.getInfo()[0] + "!");
 		}
-		Message.editMessage(msg, "DisCal successfully reloaded!");
+		Message.sendMessage("DisCal successfully reloaded!", event);
 	}
 
 	private void moduleShutdown(MessageReceivedEvent event) {
