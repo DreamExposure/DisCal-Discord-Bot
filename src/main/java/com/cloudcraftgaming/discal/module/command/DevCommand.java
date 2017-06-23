@@ -8,8 +8,10 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
+import sx.blah.discord.api.IShard;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.RequestBuffer;
@@ -63,6 +65,7 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("reloadLangs");
         ci.getSubCommands().add("cleanupCalendars");
         ci.getSubCommands().add("restart");
+        ci.getSubCommands().add("reload");
         ci.getSubCommands().add("shutdown");
 
         return ci;
@@ -107,6 +110,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "restart":
 						moduleRestart(event);
+						break;
+					case "reload":
+						moduleReload(event);
 						break;
 					case "shutdown":
 						moduleShutdown(event);
@@ -248,6 +254,17 @@ public class DevCommand implements ICommand {
     	Message.sendMessage("Restarting DisCal! This may take a moment!", event);
 
 		ApplicationHandler.restartApplication(null);
+	}
+
+	private void moduleReload(MessageReceivedEvent event) {
+		IMessage msg = Message.sendMessage("Reloading DisCal! This may take a moment!", event);
+
+		for (IShard s : msg.getClient().getShards()) {
+			s.logout();
+			s.login();
+			Message.editMessage(msg, "Reloaded shard " + s.getInfo()[0] + "!");
+		}
+		Message.editMessage(msg, "DisCal successfully reloaded!");
 	}
 
 	private void moduleShutdown(MessageReceivedEvent event) {
