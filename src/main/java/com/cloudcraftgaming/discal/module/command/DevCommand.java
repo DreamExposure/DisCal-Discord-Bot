@@ -63,6 +63,7 @@ public class DevCommand implements ICommand {
         ci.getSubCommands().add("reloadLangs");
         ci.getSubCommands().add("cleanupCalendars");
         ci.getSubCommands().add("restart");
+        ci.getSubCommands().add("shutdown");
 
         return ci;
     }
@@ -106,6 +107,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "restart":
 						moduleRestart(event);
+						break;
+					case "shutdown":
+						moduleShutdown(event);
 						break;
                     default:
                         Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
@@ -244,6 +248,12 @@ public class DevCommand implements ICommand {
     	Message.sendMessage("Restarting DisCal! This may take a moment!", event);
 
 		ApplicationHandler.restartApplication(null);
+	}
+
+	private void moduleShutdown(MessageReceivedEvent event) {
+    	Message.sendMessage("Shutting down DisCal! This may take a mmoment!", event);
+
+    	ApplicationHandler.exitApplication();
 	}
 
 	private long botPercent(IGuild g) {
