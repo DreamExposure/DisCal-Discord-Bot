@@ -124,9 +124,9 @@ public class DatabaseManager {
 					" (GUILD_ID VARCHAR(255) not NULL, " +
 					" EVENT_ID VARCHAR(255) not NULL, " +
 					" EVENT_END LONG not NULL, " +
-					" RSVP_GOING LONGTEXT, " +
-					" RSVP_NOT_GOING LONGTEXT, " +
-					" RSVP_UNDECIDED LONGTEXT, " +
+					" GOING LONGTEXT, " +
+					" NOT_GOING LONGTEXT, " +
+					" UNDECIDED LONGTEXT, " +
 					" PRIMARY KEY (GUILD_ID, EVENT_ID))";
             statement.executeUpdate(createAnnouncementTable);
             statement.executeUpdate(createSettingsTable);
@@ -425,15 +425,15 @@ public class DatabaseManager {
 				if (!hasStuff || res.getString("EVENT_ID") == null) {
 					//Data not present, add to DB.
 					String insertCommand = "INSERT INTO " + rsvpTableName +
-							"(GUILD_ID, EVENT_ID, EVENT_END, RSVP_GOING, RSVP_NOT_GOING, RSVP_UNDECIDED)" +
+							"(GUILD_ID, EVENT_ID, EVENT_END, GOING, NOT_GOING, UNDECIDED)" +
 							" VALUES (?, ?, ?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, String.valueOf(data.getGuildId()));
 					ps.setString(2, data.getEventId());
 					ps.setLong(3, data.getEventEnd());
-					ps.setString(4, data.getRsvpGoingString());
-					ps.setString(5, data.getRsvpNotGoingString());
-					ps.setString(6, data.getRsvpUndecidedString());
+					ps.setString(4, data.getGoingString());
+					ps.setString(5, data.getNotGoingString());
+					ps.setString(6, data.getUndecidedString());
 
 					ps.executeUpdate();
 					ps.close();
@@ -442,16 +442,16 @@ public class DatabaseManager {
 					//Data present, update.
 					String update = "UPDATE " + rsvpTableName
 							+ " SET EVENT_END = ?, "
-							+ " RSVP_GOING = ?,"
-							+ " RSVP_NOT_GOING = ?,"
-							+ " RSVP_UNDECIDED = ?,"
+							+ " GOING = ?,"
+							+ " NOT_GOING = ?,"
+							+ " UNDECIDED = ?,"
 							+ " WHERE EVENT_ID = ?";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 
 					ps.setLong(1, data.getEventEnd());
-					ps.setString(2, data.getRsvpGoingString());
-					ps.setString(3, data.getRsvpNotGoingString());
-					ps.setString(4, data.getRsvpUndecidedString());
+					ps.setString(2, data.getGoingString());
+					ps.setString(3, data.getNotGoingString());
+					ps.setString(4, data.getUndecidedString());
 					ps.setString(5, data.getEventId());
 
 					ps.executeUpdate();
@@ -650,9 +650,9 @@ public class DatabaseManager {
     			while (res.next()) {
     				if (res.getString("EVENT_ID").equals(eventId)) {
     					data.setEventEnd(res.getLong("EVENT_END"));
-    					data.setRsvpGoingFromString(res.getString("RSVP_GOING"));
-    					data.setRsvpNotGoingFromString(res.getString("RSVP_NOT_GOING"));
-    					data.setRsvpUndecidedFromString(res.getString("RSVP_UNDECIDED"));
+    					data.setGoingFromString(res.getString("GOING"));
+    					data.setNotGoingFromString(res.getString("NOT_GOING"));
+    					data.setUndecidedFromString(res.getString("UNDECIDED"));
     					break;
 					}
 				}

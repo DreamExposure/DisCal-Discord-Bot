@@ -14,9 +14,9 @@ public class RsvpData {
 	private String eventId;
 	private long eventEnd;
 
-	private final ArrayList<String> rsvpGoing = new ArrayList<>();
-	private final ArrayList<String> rsvpNotGoing = new ArrayList<>();
-	private final ArrayList<String> rsvpUndecided = new ArrayList<>();
+	private final ArrayList<String> going = new ArrayList<>();
+	private final ArrayList<String> notGoing = new ArrayList<>();
+	private final ArrayList<String> undecided = new ArrayList<>();
 
 	public RsvpData(long _guildId) {
 		guildId = _guildId;
@@ -35,22 +35,36 @@ public class RsvpData {
 		return eventEnd;
 	}
 
-	public ArrayList<String> getRsvpGoing() {
-		return rsvpGoing;
+	public ArrayList<String> getGoing() {
+		return going;
 	}
 
-	public ArrayList<String> getRsvpNotGoing() {
-		return rsvpNotGoing;
+	public ArrayList<String> getNotGoing() {
+		return notGoing;
 	}
 
-	public ArrayList<String> getRsvpUndecided() {
-		return rsvpUndecided;
+	public ArrayList<String> getUndecided() {
+		return undecided;
 	}
 
-	public String getRsvpGoingString() {
+	public String getGoingString() {
+		StringBuilder goingString = new StringBuilder();
+		Integer i = 0;
+		for (String u : going) {
+			if (i == 0) {
+				goingString = new StringBuilder(u);
+			} else {
+				goingString.append(",").append(u);
+			}
+			i++;
+		}
+		return goingString.toString();
+	}
+
+	public String getNotGoingString() {
 		StringBuilder going = new StringBuilder();
 		Integer i = 0;
-		for (String u : rsvpGoing) {
+		for (String u : notGoing) {
 			if (i == 0) {
 				going = new StringBuilder(u);
 			} else {
@@ -61,24 +75,10 @@ public class RsvpData {
 		return going.toString();
 	}
 
-	public String getRsvpNotGoingString() {
+	public String getUndecidedString() {
 		StringBuilder going = new StringBuilder();
 		Integer i = 0;
-		for (String u : rsvpNotGoing) {
-			if (i == 0) {
-				going = new StringBuilder(u);
-			} else {
-				going.append(",").append(u);
-			}
-			i++;
-		}
-		return going.toString();
-	}
-
-	public String getRsvpUndecidedString() {
-		StringBuilder going = new StringBuilder();
-		Integer i = 0;
-		for (String u : rsvpUndecided) {
+		for (String u : undecided) {
 			if (i == 0) {
 				going = new StringBuilder(u);
 			} else {
@@ -98,29 +98,29 @@ public class RsvpData {
 		eventEnd = _eventEnd;
 	}
 
-	public void setRsvpGoingFromString(String goingList) {
+	public void setGoingFromString(String goingList) {
 		if (goingList != null) {
 			String[] subs = goingList.split(",");
-			Collections.addAll(rsvpGoing, subs);
+			Collections.addAll(going, subs);
 		}
 	}
 
-	public void setRsvpNotGoingFromString(String goingList) {
+	public void setNotGoingFromString(String goingList) {
 		if (goingList != null) {
 			String[] subs = goingList.split(",");
-			Collections.addAll(rsvpNotGoing, subs);
+			Collections.addAll(notGoing, subs);
 		}
 	}
 
-	public void setRsvpUndecidedFromString(String goingList) {
+	public void setUndecidedFromString(String goingList) {
 		if (goingList != null) {
 			String[] subs = goingList.split(",");
-			Collections.addAll(rsvpUndecided, subs);
+			Collections.addAll(undecided, subs);
 		}
 	}
 
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {
-		return rsvpGoing.size() > 0 || rsvpNotGoing.size() > 0 || rsvpUndecided.size() > 0;
+		return going.size() > 0 || notGoing.size() > 0 || undecided.size() > 0;
 	}
 }
