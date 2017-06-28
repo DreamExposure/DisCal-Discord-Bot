@@ -165,6 +165,7 @@
   "Event.View.Args.Few": "To review an event you must have the event creator initialized OR use `!event view <event ID>` to view an event in the calendar!",
   "Event.View.Specify": "Please specify the ID of the event you wish to view with `!event view <ID>`",
   "Event.List.Args.Few": "Please specify how many events to list with `!events <amount>` OR the search pattern with `!events search <amount> <search pattern>`",
+  "Event.List.Args.Many": "Too many args specified! Please use `!events <amount>` OR `!events` OR the search pattern with `!events search <amount> <search pattern>`",
   "Event.List.Amount.Over": "You cannot list more than 15 events!",
   "Event.List.Amount.Under": "Valid numbers are only `1-15`",
   "Event.List.Found.None": "No upcoming events found.",

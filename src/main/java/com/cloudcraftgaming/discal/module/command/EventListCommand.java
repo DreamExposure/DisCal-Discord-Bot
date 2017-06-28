@@ -91,7 +91,29 @@ public class EventListCommand implements ICommand {
     }
 
     private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-        if (args.length == 1) {
+    	if (args.length == 0) {
+			try {
+				Calendar service = CalendarAuth.getCalendarService();
+				DateTime now = new DateTime(System.currentTimeMillis());
+				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
+				Events events = service.events().list(calendarData.getCalendarAddress())
+						.setMaxResults(1)
+						.setTimeMin(now)
+						.setOrderBy("startTime")
+						.setSingleEvents(true)
+						.execute();
+				List<Event> items = events.getItems();
+				if (items.size() == 0) {
+					Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
+				} else if (items.size() == 1) {
+					Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
+				}
+			} catch (IOException e) {
+				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+				ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
+				e.printStackTrace();
+			}
+		} else if (args.length == 1) {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
                 if (eventNum > 15) {
@@ -133,7 +155,7 @@ public class EventListCommand implements ICommand {
                 Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", settings), event);
+            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Many", settings), event);
         }
     }
 }
