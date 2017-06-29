@@ -57,6 +57,7 @@ public class Main {
         executor.registerCommand(new HelpCommand());
         executor.registerCommand(new DisCalCommand());
         executor.registerCommand(new CalendarCommand());
+        executor.registerCommand(new AddCalendarCommand());
         executor.registerCommand(new LinkCalendarCommand());
         executor.registerCommand(new TimeCommand());
         executor.registerCommand(new EventListCommand());

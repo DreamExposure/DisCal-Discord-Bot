@@ -179,34 +179,33 @@ public class Authorization {
                 gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
                 gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
                 DatabaseManager.getManager().updateSettings(gs);
-	            
+
 	            try {
 		            Calendar service = CalendarAuth.getCalendarService(gs);
 		            List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
-		            Message.sendDirectMessage("Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use! To make this easier for you, here is a list of the calendars you can select:", poll.getUser());
+		            Message.sendDirectMessage("Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use in your guild with `!addCalendar <calendar ID>`! To make this easier for you, here is a list of the calendars you can select (This may take while to list if you have a lot of calendars):", poll.getUser());
 		            for (CalendarListEntry i : items) {
-			            EmbedBuilder em = new EmbedBuilder();
-			            em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
-			            em.withAuthorName("DisCal");
-			            em.withTitle("Calendar Selection");
-			            em.appendField("Calendar Name", i.getSummary(), false);
-			            em.appendField("TimeZone", i.getTimeZone(), false);
-			            em.appendField("Calendar ID", i.getId(), false);
-			            
-			            em.withUrl(CalendarMessageFormatter.getCalendarLink(i.getId()));
-			            em.withColor(56, 138, 237);
-			            Message.sendDirectMessage(em.build(), poll.getUser());
-		            }
-		            
-		            //TODO: Find way to handle user input...
-		            /*
-		            Will be done probably by storing the poll data somewhere else and waiting to receive the message via DM, check if correct, save into Db, and tell user the process is complete, and then allow them to make events.
-		             */
-		
+		            	if (!i.isDeleted()) {
+							EmbedBuilder em = new EmbedBuilder();
+							em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
+							em.withAuthorName("DisCal");
+							em.withTitle("Calendar Selection");
+							em.appendField("Calendar Name", i.getSummary(), false);
+							em.appendField("TimeZone", i.getTimeZone(), false);
+							em.appendField("Calendar ID", i.getId(), false);
+
+							em.withUrl(CalendarMessageFormatter.getCalendarLink(i.getId()));
+							em.withColor(56, 138, 237);
+							Message.sendDirectMessage(em.build(), poll.getUser());
+						}
+					}
+
+			            //Response will be handled in guild, and will check. We already saved the tokens anyway.
+
 	            } catch (IOException e1) {
 	            	//Failed to get calendars list and check for calendars.
 		            ExceptionHandler.sendException(poll.getUser(), "Failed to list calendars from external account!", e1, this.getClass());
-		            
+
 		            Message.sendDirectMessage("I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!", poll.getUser());
 	            }
             }
