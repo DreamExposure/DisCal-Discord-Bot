@@ -2,6 +2,8 @@ package com.cloudcraftgaming.discal.internal.network.google;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
 import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
@@ -9,7 +11,9 @@ import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.CalendarListEntry;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -19,6 +23,9 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Created by Nova Fox on 3/23/2017.
@@ -172,10 +179,37 @@ public class Authorization {
                 gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
                 gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
                 DatabaseManager.getManager().updateSettings(gs);
-
-                //TODO: ask user which calendar we can use.
+	            
+	            try {
+		            Calendar service = CalendarAuth.getCalendarService(gs);
+		            List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
+		            Message.sendDirectMessage("Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use! To make this easier for you, here is a list of the calendars you can select:", poll.getUser());
+		            for (CalendarListEntry i : items) {
+			            EmbedBuilder em = new EmbedBuilder();
+			            em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
+			            em.withAuthorName("DisCal");
+			            em.withTitle("Calendar Selection");
+			            em.appendField("Calendar Name", i.getSummary(), false);
+			            em.appendField("TimeZone", i.getTimeZone(), false);
+			            em.appendField("Calendar ID", i.getId(), false);
+			            
+			            em.withUrl(CalendarMessageFormatter.getCalendarLink(i.getId()));
+			            em.withColor(56, 138, 237);
+			            Message.sendDirectMessage(em.build(), poll.getUser());
+		            }
+		            
+		            //TODO: Find way to handle user input...
+		            /*
+		            Will be done probably by storing the poll data somewhere else and waiting to receive the message via DM, check if correct, save into Db, and tell user the process is complete, and then allow them to make events.
+		             */
+		
+	            } catch (IOException e1) {
+	            	//Failed to get calendars list and check for calendars.
+		            ExceptionHandler.sendException(poll.getUser(), "Failed to list calendars from external account!", e1, this.getClass());
+		            
+		            Message.sendDirectMessage("I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!", poll.getUser());
+	            }
             }
-
         } catch (Exception e) {
             //Handle exception.
             ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass());
