@@ -12,12 +12,16 @@ public class CalendarData {
     private String calendarId;
     private String calendarAddress;
 
+    private boolean external;
+
     public CalendarData(long _guildID, Integer _calendarNumber) {
         guildId = _guildID;
         calendarNumber = _calendarNumber;
 
         calendarId = "primary";
         calendarAddress = "primary";
+
+        external = false;
     }
 
     //Getters
@@ -37,6 +41,10 @@ public class CalendarData {
         return calendarAddress;
     }
 
+    public boolean isExternal() {
+    	return external;
+	}
+
     //Setters
     public void setCalendarId(String _calendarId) {
         calendarId = _calendarId;
@@ -45,4 +53,8 @@ public class CalendarData {
     public void setCalendarAddress(String _calendarAddress) {
         calendarAddress = _calendarAddress;
     }
+
+    public void setExternal(boolean _external) {
+    	external = _external;
+	}
 }

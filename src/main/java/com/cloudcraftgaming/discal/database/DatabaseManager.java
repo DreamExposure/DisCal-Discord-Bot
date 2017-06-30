@@ -113,6 +113,7 @@ public class DatabaseManager {
                     " CALENDAR_NUMBER INTEGER not NULL, " +
                     " CALENDAR_ID VARCHAR(255) not NULL, " +
                     " CALENDAR_ADDRESS LONGTEXT not NULL, " +
+					" EXTERNAL BOOLEAN not NULL , " +
                     " PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER))";
             String createEventTable = "CREATE TABLE IF NOT EXISTS " + eventTableName +
 					" (GUILD_ID VARCHAR(255) not NULL, " +
@@ -237,13 +238,14 @@ public class DatabaseManager {
 					if (!hasStuff || res.getString("GUILD_ID") == null) {
 						//Data not present, add to DB.
 						String insertCommand = "INSERT INTO " + calendarTableName +
-								"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS)" +
-								" VALUES (?, ?, ?, ?);";
+								"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS, EXTERNAL)" +
+								" VALUES (?, ?, ?, ?, ?);";
 						PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 						ps.setString(1, String.valueOf(calData.getGuildId()));
 						ps.setInt(2, calData.getCalendarNumber());
 						ps.setString(3, calData.getCalendarId());
 						ps.setString(4, calData.getCalendarAddress());
+						ps.setBoolean(5, calData.isExternal());
 
 						ps.executeUpdate();
 						ps.close();
@@ -252,13 +254,14 @@ public class DatabaseManager {
 						//Data present, update.
 						String update = "UPDATE " + calendarTableName
 								+ " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-								+ " CALENDAR_ADDRESS = ?"
+								+ " CALENDAR_ADDRESS = ?, EXTERNAL = ?"
 								+ " WHERE GUILD_ID = ?";
 						PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 						ps.setInt(1, calData.getCalendarNumber());
 						ps.setString(2, calData.getCalendarId());
 						ps.setString(3, calData.getCalendarAddress());
-						ps.setString(4, String.valueOf(calData.getGuildId()));
+						ps.setBoolean(4, calData.isExternal());
+						ps.setString(5, String.valueOf(calData.getGuildId()));
 
 						ps.executeUpdate();
 
@@ -521,6 +524,7 @@ public class DatabaseManager {
                     if (res.getInt("CALENDAR_NUMBER") == 1) {
                         calData.setCalendarId(res.getString("CALENDAR_ID"));
                         calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                        calData.setExternal(res.getBoolean("EXTERNAL"));
                         break;
                     }
                 }
@@ -546,6 +550,7 @@ public class DatabaseManager {
                     if (res.getInt("CALENDAR_NUMBER") == calendarNumber) {
                         calData.setCalendarId(res.getString("CALENDAR_ID"));
                         calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                        calData.setExternal(res.getBoolean("EXTERNAL"));
                         break;
                     }
                 }
@@ -571,6 +576,7 @@ public class DatabaseManager {
                     CalendarData calData = new CalendarData(guildId, res.getInt("CALENDAR_NUMBER"));
                     calData.setCalendarId(res.getString("CALENDAR_ID"));
                     calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+                    calData.setExternal(res.getBoolean("EXTERNAL"));
                     calendars.add(calData);
                 }
                 statement.close();
