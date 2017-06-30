@@ -42,7 +42,7 @@ public class AddCalendarCommand implements ICommand {
 	@Override
 	public ArrayList<String> getAliases() {
 		ArrayList<String> aliases = new ArrayList<>();
-		aliases.add("addCal");
+		aliases.add("addcal");
 
 		return aliases;
 	}
@@ -66,14 +66,13 @@ public class AddCalendarCommand implements ICommand {
 	 *
 	 * @param args     The command arguments.
 	 * @param event    The event received.
-	 * @param settings
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (settings.isDevGuild()) {
 			if (args.length == 0) {
-				if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+				if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
 					//TODO: add check to make sure process has not been started!!!!!!!!
 					Message.sendMessage("Please check your DMs for instructions on how to add an external calendar!", event);
 					Authorization.getAuth().requestCode(event);
@@ -101,6 +100,7 @@ public class AddCalendarCommand implements ICommand {
 							CalendarData data = new CalendarData(event.getGuild().getLongID(), 1);
 							data.setCalendarId(args[0]);
 							data.setCalendarAddress(args[0]);
+							data.setExternal(true);
 							DatabaseManager.getManager().updateCalendar(data, false);
 
 							//Update guild settings
@@ -118,8 +118,10 @@ public class AddCalendarCommand implements ICommand {
 					}
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+				Message.sendMessage("Too many args!", event);
 			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 		}
 		return false;
 	}

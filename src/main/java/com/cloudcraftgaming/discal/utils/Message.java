@@ -124,7 +124,6 @@ public class Message {
         return RequestBuffer.request(() -> {
            try {
                IPrivateChannel pc = user.getOrCreatePMChannel();
-               pc.sendMessage(message);
                return new MessageBuilder(Main.client).withChannel(pc).appendContent(message).build();
            } catch (DiscordException | MissingPermissionsException e) {
                //Failed to send message.

@@ -11,20 +11,20 @@ import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -51,76 +51,72 @@ public class Authorization {
     }
 
     public void requestCode(MessageReceivedEvent event) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
         try {
-            HttpPost request = new HttpPost("https://accounts.google.com/o/oauth2/device/code");
-            CodeRequest cr = new CodeRequest();
-            cr.client_id = clientData.getClientId();
-            cr.scope = CalendarScopes.CALENDAR;
-            String json = Main.gson.toJson(cr);
-            request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
+			String body = "client_id=" + clientData.getClientId() + "&scope=" + CalendarScopes.CALENDAR;
 
-            HttpResponse httpResponse = httpClient.execute(request);
+			com.mashape.unirest.http.HttpResponse<JsonNode> response = Unirest.post("https://accounts.google.com/o/oauth2/device/code").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
 
-            CodeResponse response = Main.gson.fromJson(httpResponse.getEntity().toString(), CodeResponse.class);
+			if (response.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
+				Type type = new TypeToken<CodeResponse>(){}.getType();
+				CodeResponse cr = new Gson().fromJson(response.getBody().toString(), type);
 
+				//Send DM to user with code.
+				EmbedBuilder em = new EmbedBuilder();
+				em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
+				em.withAuthorName("DisCal");
+				em.withTitle("User Auth");
+				em.appendField("Code", cr.user_code, true);
+				em.withFooterText("Please visit the URL and enter the code!");
 
-            //Send DM to user with code.
-            EmbedBuilder em = new EmbedBuilder();
-            em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
-            em.withAuthorName("DisCal");
-            em.withTitle("User Auth");
-            em.appendField("Code", response.user_code, true);
-            em.withFooterText("Please visit the URL and enter the code!");
+				em.withUrl(cr.verification_url);
+				em.withColor(36, 153, 153);
 
-            em.withUrl(response.verification_url);
-            em.withColor(36, 153, 153);
+				IUser user = event.getAuthor();
+				Message.sendDirectMessage("Please authorize DisCal access to your Google Calendar so that it can use your external calendar!", em.build(), user);
 
-            IUser user = event.getAuthor();
-            Message.sendDirectMessage("Please authorize DisCal access to your Google Calendar so that it can use your external calendar!", em.build(), user);
+				//Start timer to poll Google Cal for auth
+				Poll poll = new Poll(user, event.getGuild());
 
-            //Start timer to poll Google Cal for auth
-            Poll poll = new Poll(user, event.getGuild());
+				poll.setDevice_code(cr.device_code);
+				poll.setRemainingSeconds(cr.expires_in);
+				poll.setExpires_in(cr.expires_in);
+				poll.setInterval(cr.interval);
+				pollForAuth(poll);
+			} else {
+				Message.sendDirectMessage("Error requesting access code! The development team has been alerted to the issue! Try again later!", event.getAuthor());
 
-            poll.setDevice_code(response.device_code);
-            poll.setRemainingSeconds(response.expires_in);
-            poll.setExpires_in(response.expires_in);
-            poll.setInterval(response.interval);
-            pollForAuth(poll);
-
+				ExceptionHandler.sendDebug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
+			}
         } catch (Exception e) {
             //Failed, report issue to dev.
             ExceptionHandler.sendException(event.getAuthor(), "Failed to request Google Access Code", e, this.getClass());
             IUser u = event.getAuthor();
-            Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", u);
+            Message.sendDirectMessage("Uh oh... something failed. I have alerted the development team! Please try again!", u);
         }
     }
 
     public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
         try {
-            HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
+			String body = "client_id=" + clientData.getClientId() + "&client_secret=" + clientData.getClientSecret() + "&refresh_token=" + encryption.decrypt(settings.getEncryptedRefreshToken()) + "&grant_type=refresh_token";
 
-            AuthRefreshRequest arr = new AuthRefreshRequest();
-            arr.client_id = clientData.getClientId();
-            arr.client_secret = clientData.getClientSecret();
-            arr.refresh_token = encryption.decrypt(settings.getEncryptedRefreshToken());
+			com.mashape.unirest.http.HttpResponse<JsonNode> httpResponse = Unirest.post("https://www.googleapis.com/oauth2/v4/token").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
 
-            String json = Main.gson.toJson(arr);
-            request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
+			if (httpResponse.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
 
-            HttpResponse httpResponse = httpClient.execute(request);
+				Type type = new TypeToken<AuthRefreshResponse>(){}.getType();
+				AuthRefreshResponse response = new Gson().fromJson(httpResponse.getBody().toString(), type);
 
-            AuthRefreshResponse response = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthRefreshResponse.class);
+				//Update Db data.
+				settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
+				DatabaseManager.getManager().updateSettings(settings);
 
-            //Update Db data.
-            settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
-            DatabaseManager.getManager().updateSettings(settings);
-
-            //Okay, we can return the access token to be used when this method is called.
-            return response.access_token;
+				//Okay, we can return the access token to be used when this method is called.
+				return response.access_token;
+			} else {
+				//Failed to get OK. Send debug info.
+				ExceptionHandler.sendDebug(null, "Error requesting new access token.", "Status code: " + httpResponse.getStatus() + " | " + httpResponse.getStatusText() + " | " + httpResponse.getBody().toString(), this.getClass());
+				return null;
+			}
 
         } catch (Exception e) {
             //Error occurred, lets just log it and return null.
@@ -130,48 +126,42 @@ public class Authorization {
     }
 
     public void pollForAuth(Poll poll) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-
         try {
-            AuthPollRequest apr = new AuthPollRequest();
-            apr.client_id = clientData.getClientId();
-            apr.client_secret = clientData.getClientSecret();
-            apr.code = poll.getDevice_code();
-            apr.grant_type = "http://oauth.net/grant_type/device/1.0";
-
-            HttpPost request = new HttpPost("https://www.googleapis.com/oauth2/v4/token");
-
-            String json = Main.gson.toJson(apr);
-            request.setEntity(new StringEntity(json, ContentType.create("application/x-www-form-urlencoded")));
+            String body = "client_id=" + clientData.getClientId() + "&client_secret=" + clientData.getClientSecret() + "&code=" + poll.getDevice_code() + "&grant_type=http://oauth.net/grant_type/device/1.0";
 
             //Execute
-            HttpResponse httpResponse = httpClient.execute(request);
+			com.mashape.unirest.http.HttpResponse<JsonNode> response = Unirest.post("https://www.googleapis.com/oauth2/v4/token").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
 
             //Handle response.
-            if (httpResponse.getStatusLine().getStatusCode() == 403) {
+            if (response.getStatus() == 403) {
                 //Handle access denied
                 Message.sendDirectMessage("You have denied DisCal use of your calendars! If this was a mistake just restart the process!", poll.getUser());
-            } else if (httpResponse.getStatusLine().getStatusCode() == 400) {
+            } else if (response.getStatus() == 400) {
                 try {
                     //See if auth is pending, if so, just reschedule.
-                    AuthPollResponseError apre = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthPollResponseError.class);
+					Type type = new TypeToken<AuthPollResponseError>(){}.getType();
+					AuthPollResponseError apre = new Gson().fromJson(response.getBody().toString(), type);
+
                     if (apre.error.equalsIgnoreCase("authorization_pending")) {
                         //Response pending
                         PollManager.getManager().scheduleNextPoll(poll);
                     } else {
                         Message.sendDirectMessage("There was a network error.. Please try again!", poll.getUser());
+						ExceptionHandler.sendDebug(poll.getUser(), "Poll Failure!", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
                     }
                 } catch (Exception e) {
                     //Auth is not pending, error occurred.
                     ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account.", e, this.getClass());
+					ExceptionHandler.sendDebug(poll.getUser(), "More info on failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
                     Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", poll.getUser());
                 }
-            } else if (httpResponse.getStatusLine().getStatusCode() == 429) {
+            } else if (response.getStatus() == 429) {
                 //We got rate limited... oops. Let's just poll half as often.
                 poll.setInterval(poll.getInterval() * 2);
-            } else {
+            } else if (response.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
                 //Access granted
-                AuthPollResponseGrant aprg = Main.gson.fromJson(httpResponse.getEntity().toString(), AuthPollResponseGrant.class);
+				Type type = new TypeToken<AuthPollResponseGrant>(){}.getType();
+				AuthPollResponseGrant aprg = new Gson().fromJson(response.getBody().toString(), type);
 
                 //Save credentials securely.
                 GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
@@ -199,9 +189,7 @@ public class Authorization {
 							Message.sendDirectMessage(em.build(), poll.getUser());
 						}
 					}
-
-			            //Response will be handled in guild, and will check. We already saved the tokens anyway.
-
+					//Response will be handled in guild, and will check. We already saved the tokens anyway.
 	            } catch (IOException e1) {
 	            	//Failed to get calendars list and check for calendars.
 		            ExceptionHandler.sendException(poll.getUser(), "Failed to list calendars from external account!", e1, this.getClass());
@@ -213,7 +201,6 @@ public class Authorization {
             //Handle exception.
             ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass());
             Message.sendDirectMessage("Uh oh... An error has occurred! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
-
         }
     }
 }
