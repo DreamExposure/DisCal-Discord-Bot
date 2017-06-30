@@ -243,7 +243,7 @@ public class CalendarCommand implements ICommand {
     private void moduleConfirm(MessageReceivedEvent event, CalendarData calendarData, GuildSettings settings) {
         long guildId = event.getGuild().getLongID();
         if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
-            CalendarCreatorResponse response = CalendarCreator.getCreator().confirmCalendar(event);
+            CalendarCreatorResponse response = CalendarCreator.getCreator().confirmCalendar(event, settings);
             if (response.isSuccessful()) {
                 if (response.isEdited()) {
                 	if (response.getCreatorMessage() != null) {
@@ -309,7 +309,7 @@ public class CalendarCommand implements ICommand {
         }
         if (!calendarData.getCalendarId().equalsIgnoreCase("primary")) {
             //Delete calendar
-            if (CalendarUtils.deleteCalendar(calendarData, false)) {
+            if (CalendarUtils.deleteCalendar(calendarData, settings, false)) {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Success", settings), event);
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.Unknown", settings), event);

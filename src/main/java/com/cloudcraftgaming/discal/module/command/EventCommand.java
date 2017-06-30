@@ -14,7 +14,6 @@ import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -244,7 +243,7 @@ public class EventCommand implements ICommand {
             if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (args.length == 2) {
                     String eventId = args[1];
-                    if (EventUtils.eventExists(guildId, eventId)) {
+                    if (EventUtils.eventExists(settings, eventId)) {
                         PreEvent preEvent = EventCreator.getCreator().init(event, eventId, settings, true);
                         if (preEvent != null) {
                         	if (preEvent.getCreatorMessage() == null) {
@@ -279,7 +278,7 @@ public class EventCommand implements ICommand {
             if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (args.length == 2) {
                     String eventId = args[1];
-                    if (EventUtils.eventExists(guildId, eventId)) {
+                    if (EventUtils.eventExists(settings, eventId)) {
                         PreEvent preEvent = EventCreator.getCreator().edit(event, eventId, settings, true);
 						if (preEvent.getCreatorMessage() == null) {
 							Message.sendMessage(EventMessageFormatter.getPreEventEmbed(preEvent, settings), MessageManager.getMessage("Creator.Event.Edit.Init", settings), event);
@@ -328,7 +327,7 @@ public class EventCommand implements ICommand {
         if (args.length == 2) {
             if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 if (!EventCreator.getCreator().hasPreEvent(guildId)) {
-                    if (EventUtils.deleteEvent(guildId, args[1])) {
+                    if (EventUtils.deleteEvent(settings, args[1])) {
                         Message.sendMessage(MessageManager.getMessage("Creator.Event.Delete.Success", settings), event);
                     } else {
                         Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
@@ -369,10 +368,15 @@ public class EventCommand implements ICommand {
             if (!EventCreator.getCreator().hasPreEvent(guildId)) {
                 if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                     try {
-                        Calendar service = CalendarAuth.getCalendarService();
+                    	Calendar service;
+                    	if (settings.useExternalCalendar()) {
+                    		service = CalendarAuth.getCalendarService(settings);
+						} else {
+							service = CalendarAuth.getCalendarService();
+						}
                         Event calEvent = service.events().get(calendarData.getCalendarAddress(), args[1]).execute();
                         Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent, settings), event);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         //Event probably doesn't exist...
                         Message.sendMessage(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
                     }
@@ -398,7 +402,7 @@ public class EventCommand implements ICommand {
         if (EventCreator.getCreator().hasPreEvent(guildId)) {
             if (EventCreator.getCreator().getPreEvent(guildId).hasRequiredValues()) {
                 if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                    EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event);
+                    EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event, settings);
                     if (response.isSuccessful()) {
                     	if (!response.isEdited()) {
                     		if (EventCreator.getCreator().hasCreatorMessage(guildId)) {

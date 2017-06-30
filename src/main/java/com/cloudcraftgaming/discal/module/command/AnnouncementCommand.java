@@ -1147,7 +1147,7 @@ public class AnnouncementCommand implements ICommand {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
 				if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.SPECIFIC)) {
-					if (EventUtils.eventExists(guildId, value)) {
+					if (EventUtils.eventExists(settings, value)) {
 						AnnouncementCreator.getCreator().getAnnouncement(guildId).setEventId(value);
 						if (AnnouncementCreator.getCreator().hasCreatorMessage(guildId)) {
 							Message.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(guildId));
@@ -1167,7 +1167,7 @@ public class AnnouncementCommand implements ICommand {
 					}
 				} else if (AnnouncementCreator.getCreator().getAnnouncement(guildId).getAnnouncementType()
 						.equals(AnnouncementType.RECUR)) {
-					if (EventUtils.eventExists(guildId, value)) {
+					if (EventUtils.eventExists(settings, value)) {
 						if (value.contains("_")) {
 							String[] stuff = value.split("_");
 							value = stuff[0];

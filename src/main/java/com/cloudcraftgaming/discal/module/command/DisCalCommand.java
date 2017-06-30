@@ -20,9 +20,8 @@ import java.util.ArrayList;
  * For Project: DisCal
  */
 public class DisCalCommand implements ICommand {
-	private final String INVITE_LINK = "https://discord.gg/AmAMGeN";
 
-    /**
+	/**
      * Gets the command this Object is responsible for.
      * @return The command this Object is responsible for.
      */
@@ -309,6 +308,7 @@ public class DisCalCommand implements ICommand {
 	}
 
 	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
+		String INVITE_LINK = "https://discord.gg/AmAMGeN";
 		Message.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
 	}
 }

@@ -15,7 +15,6 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +92,13 @@ public class EventListCommand implements ICommand {
     private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
     	if (args.length == 0) {
 			try {
-				Calendar service = CalendarAuth.getCalendarService();
+				Calendar service;
+				if (settings.useExternalCalendar()) {
+					service = CalendarAuth.getCalendarService(settings);
+				} else {
+					service = CalendarAuth.getCalendarService();
+				}
+
 				DateTime now = new DateTime(System.currentTimeMillis());
 				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 				Events events = service.events().list(calendarData.getCalendarAddress())
@@ -108,7 +113,7 @@ public class EventListCommand implements ICommand {
 				} else if (items.size() == 1) {
 					Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
 				}
-			} catch (IOException e) {
+			} catch (Exception e) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 				ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
 				e.printStackTrace();
@@ -125,7 +130,12 @@ public class EventListCommand implements ICommand {
                     return;
                 }
                 try {
-                    Calendar service = CalendarAuth.getCalendarService();
+                	Calendar service;
+                	if (settings.useExternalCalendar()) {
+                		service = CalendarAuth.getCalendarService(settings);
+					} else {
+						service = CalendarAuth.getCalendarService();
+					}
                     DateTime now = new DateTime(System.currentTimeMillis());
                     CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
                     Events events = service.events().list(calendarData.getCalendarAddress())
@@ -146,7 +156,7 @@ public class EventListCommand implements ICommand {
                             Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
                         }
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
                     ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
                     e.printStackTrace();

@@ -17,8 +17,6 @@ import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
-import java.io.IOException;
-
 /**
  * Created by Nova Fox on 3/4/2017.
  * Website: www.cloudcraftgaming.com
@@ -88,7 +86,12 @@ public class AnnouncementMessageFormatter {
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
             try {
-                Calendar service = CalendarAuth.getCalendarService();
+            	Calendar service;
+            	if (settings.useExternalCalendar()) {
+            		service = CalendarAuth.getCalendarService(settings);
+				} else {
+					service = CalendarAuth.getCalendarService();
+				}
                 //TODO: Handle multiple calendars...
                 CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
@@ -104,7 +107,7 @@ public class AnnouncementMessageFormatter {
 					}
                     em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Summary", settings), summary, true);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //Failed to get from google cal.
                 ExceptionHandler.sendException(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class);
             }

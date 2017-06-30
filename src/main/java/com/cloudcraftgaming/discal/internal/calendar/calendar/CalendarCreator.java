@@ -13,7 +13,6 @@ import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -73,7 +72,12 @@ public class CalendarCreator {
             CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
 
             try {
-                com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService();
+				com.google.api.services.calendar.Calendar service;
+				if (settings.useExternalCalendar()) {
+					service = CalendarAuth.getCalendarService(settings);
+				} else {
+					service = CalendarAuth.getCalendarService();
+				}
 
                 Calendar calendar = service.calendars().get(data.getCalendarAddress()).execute();
 
@@ -92,7 +96,7 @@ public class CalendarCreator {
 
                 calendars.add(preCalendar);
                 return preCalendar;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to init calendar editor", e, this.getClass());
                 return null;
             }
@@ -119,7 +123,7 @@ public class CalendarCreator {
      * @param e The event received upon confirmation.
      * @return A CalendarCreatorResponse Object with detailed info about the confirmation.
      */
-    public CalendarCreatorResponse confirmCalendar(MessageReceivedEvent e) {
+    public CalendarCreatorResponse confirmCalendar(MessageReceivedEvent e, GuildSettings settings) {
         if (hasPreCalendar(e.getMessage().getGuild().getLongID())) {
             long guildId = e.getMessage().getGuild().getLongID();
             PreCalendar preCalendar = getPreCalendar(guildId);
@@ -130,7 +134,12 @@ public class CalendarCreator {
                     calendar.setDescription(preCalendar.getDescription());
                     calendar.setTimeZone(preCalendar.getTimezone());
                     try {
-                        Calendar confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
+                        Calendar confirmed;
+                        if (settings.useExternalCalendar()) {
+                        	confirmed = CalendarAuth.getCalendarService(settings).calendars().insert(calendar).execute();
+						} else {
+							confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
+						}
                         AclRule rule = new AclRule();
                         AclRule.Scope scope = new AclRule.Scope();
                         scope.setType("default");
@@ -145,7 +154,7 @@ public class CalendarCreator {
                         response.setEdited(false);
                         response.setCreatorMessage(preCalendar.getCreatorMessage());
                         return response;
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to confirm calendar.", ex, this.getClass());
                         CalendarCreatorResponse response = new CalendarCreatorResponse(false);
                         response.setEdited(false);
@@ -160,7 +169,12 @@ public class CalendarCreator {
                     calendar.setTimeZone(preCalendar.getTimezone());
 
                     try {
-                        Calendar confirmed = CalendarAuth.getCalendarService().calendars().update(preCalendar.getCalendarId(), calendar).execute();
+                    	Calendar confirmed;
+                    	if (settings.useExternalCalendar()) {
+                    		confirmed = CalendarAuth.getCalendarService(settings).calendars().update(preCalendar.getCalendarId(), calendar).execute();
+						} else {
+							confirmed = CalendarAuth.getCalendarService().calendars().update(preCalendar.getCalendarId(), calendar).execute();
+						}
                         AclRule rule = new AclRule();
                         AclRule.Scope scope = new AclRule.Scope();
                         scope.setType("default");
@@ -171,7 +185,7 @@ public class CalendarCreator {
                         response.setEdited(true);
                         response.setCreatorMessage(preCalendar.getCreatorMessage());
                         return response;
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update calendar.", ex, this.getClass());
                         CalendarCreatorResponse response = new CalendarCreatorResponse(false);
                         response.setEdited(true);

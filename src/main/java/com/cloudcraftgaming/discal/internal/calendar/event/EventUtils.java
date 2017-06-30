@@ -2,12 +2,11 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-
-import java.io.IOException;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -17,25 +16,30 @@ import java.io.IOException;
 public class EventUtils {
     /**
      * Deletes an event from the calendar.
-     * @param guildId The ID of the guild.
+     * @param settings Guild settings
      * @param eventId The ID of the event to delete.
      * @return <code>true</code> if successfully deleted, otherwise <code>false</code>.
      */
-    public static Boolean deleteEvent(long guildId, String eventId) {
+    public static Boolean deleteEvent(GuildSettings settings, String eventId) {
         //TODO: Support multiple calendars...
-        String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
+        String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
         try {
-            Calendar service = CalendarAuth.getCalendarService();
+        	Calendar service;
+        	if (settings.useExternalCalendar()) {
+        		service = CalendarAuth.getCalendarService(settings);
+			} else {
+				service = CalendarAuth.getCalendarService();
+			}
             try {
                 service.events().delete(calendarId, eventId).execute();
             } catch (Exception e) {
                 //Failed to delete event...
                 return false;
             }
-            DatabaseManager.getManager().deleteAnnouncementsForEvent(guildId, eventId);
+            DatabaseManager.getManager().deleteAnnouncementsForEvent(settings.getGuildID(), eventId);
             DatabaseManager.getManager().deleteEventData(eventId);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println("Something weird happened when deleting an event!");
             ExceptionHandler.sendException(null, "Failed to delete event.", e, EventUtils.class);
             e.printStackTrace();
@@ -43,13 +47,18 @@ public class EventUtils {
         return false;
     }
 
-    public static boolean eventExists(long guildId, String eventId) {
+    public static boolean eventExists(GuildSettings settings, String eventId) {
         //TODO: Support multiple calendars...
-        String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
+        String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
         try {
-            Calendar service = CalendarAuth.getCalendarService();
+        	Calendar service;
+        	if (settings.useExternalCalendar()) {
+        		service = CalendarAuth.getCalendarService(settings);
+			} else {
+				service = CalendarAuth.getCalendarService();
+			}
             return service.events().get(calendarId, eventId).execute() != null;
-        } catch (IOException e) {
+        } catch (Exception e) {
             //Failed to check event, probably doesn't exist, safely ignore.
         }
         return false;
