@@ -56,7 +56,7 @@ public class AddCalendarCommand implements ICommand {
 	public CommandInfo getCommandInfo() {
 		CommandInfo info = new CommandInfo("addCalendar");
 		info.setDescription("Starts the process of adding an external calendar");
-		info.setExample("!addCalendar");
+		info.setExample("!addCalendar (calendar ID)");
 
 		return info;
 	}
@@ -73,16 +73,17 @@ public class AddCalendarCommand implements ICommand {
 		if (settings.isDevGuild()) {
 			if (args.length == 0) {
 				if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
-					//TODO: add check to make sure process has not been started!!!!!!!!
-					Message.sendMessage("Please check your DMs for instructions on how to add an external calendar!", event);
-					Authorization.getAuth().requestCode(event);
+					Message.sendMessage(MessageManager.getMessage("AddCalendar.Start", settings), event);
+					Authorization.getAuth().requestCode(event, settings);
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
 				}
 			} else if (args.length == 1) {
 				//Check if arg is calendar ID that is supported, if so, complete the setup.
-				if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
-					Message.sendMessage("An external account has not been authorized yet! Use `!addCalendar` to start the authorization process if not started!", event);
+				if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
+				} else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
+					Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
 				} else {
 					try {
 						Calendar service = CalendarAuth.getCalendarService(settings);
@@ -107,18 +108,18 @@ public class AddCalendarCommand implements ICommand {
 							settings.setUseExternalCalendar(true);
 							DatabaseManager.getManager().updateSettings(settings);
 
-							Message.sendMessage("Calendar successfully connected! You may start making events on it!!!", event);
+							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
 						} else {
 							//Invalid
-							Message.sendMessage("Calendar ID is invalid! Please make sure the ID specified is valid!", event);
+							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
 						}
 					} catch (Exception e) {
-						Message.sendMessage("An error occurred! The development team has been alerted!", event);
+						Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
 						ExceptionHandler.sendException(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass());
 					}
 				}
 			} else {
-				Message.sendMessage("Too many args!", event);
+				Message.sendMessage(MessageManager.getMessage("AddCalendar.Specify", settings), event);
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);

@@ -190,6 +190,29 @@
   "DisCal.Prefix.Specify": "Please specify the preferred prefix with `!discal prefix <prefix>` **SPACES ARE NOT ALLOWED**!",
   "DisCal.InviteLink": "Here is the invite to my official support guild: %link%",
 
+  "AddCalendar.Start": "Please check your DMs for instructions on how to add an external calendar!",
+  "AddCalendar.Select.NotAuth": "An external account has not been authorized yet! Use `!addCalendar` to start the authorization process if not started!",
+  "AddCalendar.Select.Success": "Calendar successfully connected! You may start making events on it!!!",
+  "AddCalendar.Select.Failure.Invalid": "Calendar ID is invalid! Please make sure the ID specified is valid!",
+  "AddCalendar.Select.Failure.Unknown": "An error occurred! The development team has been alerted!",
+  "AddCalendar.Specify": "Use `!addCalendar` to start the auth process or `!addCalendar <Calendar ID>` to select which calendar to use!",
+
+  "AddCalendar.Auth.Code.Request.Success": "Please authorize DisCal access to your Google Calendar so that it can use your external calendar!",
+  "AddCalendar.Auth.Code.Request.Failure.NotOkay": "Error requesting access code! The development team has been alerted to the issue! Try again later!",
+  "AddCalendar.Auth.Code.Request.Failure.Unknown": "Uh oh... something failed. I have alerted the development team! Please try again!",
+
+  "AddCalendar.Auth.Poll.Failure.Deny": "You have denied DisCal use of your calendars! If this was a mistake just restart the process!",
+  "AddCalendar.Auth.Poll.Failure.Expired": "Token expired! Please restart the authorization process if you have not connected to Google Calendar!",
+  "AddCalendar.Auth.Poll.Failure.ListCalendars": "I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!",
+  "AddCalendar.Auth.Poll.Success": "Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use in your guild with `!addCalendar <calendar ID>`! To make this easier for you, here is a list of the calendars you can select (This may take while to list if you have a lot of calendars):",
+
+  "Embed.AddCalendar.Code.Title": "User Auth",
+  "Embed.AddCalendar.Code.Code": "Code",
+  "Embed.AddCalendar.Code.Footer": "Please visit the URL (title) and enter the code!",
+  "Embed.AddCalendar.List.Title": "Calendar Selection",
+  "Embed.AddCalendar.List.Name": "Calendar Name",
+  "Embed.AddCalendar.List.TimeZone": "TimeZone",
+  "Embed.AddCalendar.List.ID": "Calendar ID",
   "Embed.Calendar.Link.Title": "Guild Calendar",
   "Embed.Calendar.Link.Summary": "Calendar Name/Summary",
   "Embed.Calendar.Link.Description": "Description",
@@ -296,5 +319,6 @@
   "Notification.Disabled": "This option is disabled for testing only!",
   "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!",
   "Notification.Perm.MANAGE_SERVER": "You must have the \"Manage Server\" permission to use this command!",
-  "Notification.Error.Unknown": "Oops! Something has failed terribly! I have messaged my development team!"
+  "Notification.Error.Unknown": "Oops! Something has failed terribly! I have messaged my development team!",
+  "Notification.Error.Network": "There was a network error! I have alerted the development team! Please try again!"
 }

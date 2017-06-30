@@ -11,6 +11,7 @@ import com.cloudcraftgaming.discal.internal.network.google.json.*;
 import com.cloudcraftgaming.discal.internal.network.google.utils.Poll;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
@@ -32,7 +33,6 @@ import java.util.List;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("WeakerAccess")
 public class Authorization {
     private static Authorization instance;
     private ClientData clientData;
@@ -50,7 +50,7 @@ public class Authorization {
         clientData = new ClientData(settings.getGoogleClientId(), settings.getGoogleClientSecret());
     }
 
-    public void requestCode(MessageReceivedEvent event) {
+    public void requestCode(MessageReceivedEvent event, GuildSettings settings) {
         try {
 			String body = "client_id=" + clientData.getClientId() + "&scope=" + CalendarScopes.CALENDAR;
 
@@ -64,15 +64,15 @@ public class Authorization {
 				EmbedBuilder em = new EmbedBuilder();
 				em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
 				em.withAuthorName("DisCal");
-				em.withTitle("User Auth");
-				em.appendField("Code", cr.user_code, true);
-				em.withFooterText("Please visit the URL and enter the code!");
+				em.withTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
+				em.appendField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), cr.user_code, true);
+				em.withFooterText(MessageManager.getMessage("Embed.AddCalendar.Code.Footer", settings));
 
 				em.withUrl(cr.verification_url);
 				em.withColor(36, 153, 153);
 
 				IUser user = event.getAuthor();
-				Message.sendDirectMessage("Please authorize DisCal access to your Google Calendar so that it can use your external calendar!", em.build(), user);
+				Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Success", settings), em.build(), user);
 
 				//Start timer to poll Google Cal for auth
 				Poll poll = new Poll(user, event.getGuild());
@@ -83,7 +83,7 @@ public class Authorization {
 				poll.setInterval(cr.interval);
 				pollForAuth(poll);
 			} else {
-				Message.sendDirectMessage("Error requesting access code! The development team has been alerted to the issue! Try again later!", event.getAuthor());
+				Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
 
 				ExceptionHandler.sendDebug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
 			}
@@ -91,7 +91,7 @@ public class Authorization {
             //Failed, report issue to dev.
             ExceptionHandler.sendException(event.getAuthor(), "Failed to request Google Access Code", e, this.getClass());
             IUser u = event.getAuthor();
-            Message.sendDirectMessage("Uh oh... something failed. I have alerted the development team! Please try again!", u);
+            Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), u);
         }
     }
 
@@ -125,7 +125,8 @@ public class Authorization {
         }
     }
 
-    public void pollForAuth(Poll poll) {
+    void pollForAuth(Poll poll) {
+    	GuildSettings settings = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
         try {
             String body = "client_id=" + clientData.getClientId() + "&client_secret=" + clientData.getClientSecret() + "&code=" + poll.getDevice_code() + "&grant_type=http://oauth.net/grant_type/device/1.0";
 
@@ -135,7 +136,7 @@ public class Authorization {
             //Handle response.
             if (response.getStatus() == 403) {
                 //Handle access denied
-                Message.sendDirectMessage("You have denied DisCal use of your calendars! If this was a mistake just restart the process!", poll.getUser());
+                Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Deny", settings), poll.getUser());
             } else if (response.getStatus() == 400) {
                 try {
                     //See if auth is pending, if so, just reschedule.
@@ -143,21 +144,24 @@ public class Authorization {
 					AuthPollResponseError apre = new Gson().fromJson(response.getBody().toString(), type);
 
                     if (apre.error.equalsIgnoreCase("authorization_pending")) {
-                        //Response pending
-                        PollManager.getManager().scheduleNextPoll(poll);
+						//Response pending
+						PollManager.getManager().scheduleNextPoll(poll);
+					} else if (apre.error.equalsIgnoreCase("expired_token")) {
+                    	Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings), poll.getUser());
                     } else {
-                        Message.sendDirectMessage("There was a network error.. Please try again!", poll.getUser());
+                        Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
 						ExceptionHandler.sendDebug(poll.getUser(), "Poll Failure!", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
                     }
                 } catch (Exception e) {
                     //Auth is not pending, error occurred.
                     ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account.", e, this.getClass());
 					ExceptionHandler.sendDebug(poll.getUser(), "More info on failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
-                    Message.sendDirectMessage("Uh oh... something failed. I have emailed the developer! Please try again!", poll.getUser());
+                    Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
                 }
             } else if (response.getStatus() == 429) {
                 //We got rate limited... oops. Let's just poll half as often.
                 poll.setInterval(poll.getInterval() * 2);
+                PollManager.getManager().scheduleNextPoll(poll);
             } else if (response.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
                 //Access granted
 				Type type = new TypeToken<AuthPollResponseGrant>(){}.getType();
@@ -173,16 +177,16 @@ public class Authorization {
 	            try {
 		            Calendar service = CalendarAuth.getCalendarService(gs);
 		            List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
-		            Message.sendDirectMessage("Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use in your guild with `!addCalendar <calendar ID>`! To make this easier for you, here is a list of the calendars you can select (This may take while to list if you have a lot of calendars):", poll.getUser());
+		            Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Success", settings), poll.getUser());
 		            for (CalendarListEntry i : items) {
 		            	if (!i.isDeleted()) {
 							EmbedBuilder em = new EmbedBuilder();
 							em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
 							em.withAuthorName("DisCal");
-							em.withTitle("Calendar Selection");
-							em.appendField("Calendar Name", i.getSummary(), false);
-							em.appendField("TimeZone", i.getTimeZone(), false);
-							em.appendField("Calendar ID", i.getId(), false);
+							em.withTitle(MessageManager.getMessage("Embed.AddCalendar.List.Title", settings));
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.Name", settings), i.getSummary(), false);
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.TimeZone", settings), i.getTimeZone(), false);
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.ID", settings), i.getId(), false);
 
 							em.withUrl(CalendarMessageFormatter.getCalendarLink(i.getId()));
 							em.withColor(56, 138, 237);
@@ -194,13 +198,17 @@ public class Authorization {
 	            	//Failed to get calendars list and check for calendars.
 		            ExceptionHandler.sendException(poll.getUser(), "Failed to list calendars from external account!", e1, this.getClass());
 
-		            Message.sendDirectMessage("I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!", poll.getUser());
+		            Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", settings), poll.getUser());
 	            }
-            }
+            } else {
+            	//Unknown network error...
+				Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
+				ExceptionHandler.sendDebug(poll.getUser(), "Network error; poll failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass());
+			}
         } catch (Exception e) {
             //Handle exception.
             ExceptionHandler.sendException(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass());
-            Message.sendDirectMessage("Uh oh... An error has occurred! DisCal is sorry. I has emailed the developer for you! Please try again, I will try I my hardest!", poll.getUser());
+            Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), poll.getUser());
         }
     }
 }
