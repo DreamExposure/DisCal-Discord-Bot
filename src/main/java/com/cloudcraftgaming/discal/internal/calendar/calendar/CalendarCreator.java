@@ -134,17 +134,19 @@ public class CalendarCreator {
                     calendar.setDescription(preCalendar.getDescription());
                     calendar.setTimeZone(preCalendar.getTimezone());
                     try {
-                        Calendar confirmed;
-                        if (settings.useExternalCalendar()) {
-                        	confirmed = CalendarAuth.getCalendarService(settings).calendars().insert(calendar).execute();
+                    	 com.google.api.services.calendar.Calendar service;
+						if (settings.useExternalCalendar()) {
+							service = CalendarAuth.getCalendarService(settings);
 						} else {
-							confirmed = CalendarAuth.getCalendarService().calendars().insert(calendar).execute();
+							service = CalendarAuth.getCalendarService();
 						}
+
+                        Calendar confirmed = service.calendars().insert(calendar).execute();
                         AclRule rule = new AclRule();
                         AclRule.Scope scope = new AclRule.Scope();
                         scope.setType("default");
                         rule.setScope(scope).setRole("reader");
-                        CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
+                        service.acl().insert(confirmed.getId(), rule).execute();
                         CalendarData calendarData = new CalendarData(guildId, 1);
                         calendarData.setCalendarId(confirmed.getId());
                         calendarData.setCalendarAddress(confirmed.getId());
@@ -169,17 +171,19 @@ public class CalendarCreator {
                     calendar.setTimeZone(preCalendar.getTimezone());
 
                     try {
-                    	Calendar confirmed;
-                    	if (settings.useExternalCalendar()) {
-                    		confirmed = CalendarAuth.getCalendarService(settings).calendars().update(preCalendar.getCalendarId(), calendar).execute();
+						com.google.api.services.calendar.Calendar service;
+						if (settings.useExternalCalendar()) {
+							service = CalendarAuth.getCalendarService(settings);
 						} else {
-							confirmed = CalendarAuth.getCalendarService().calendars().update(preCalendar.getCalendarId(), calendar).execute();
+							service = CalendarAuth.getCalendarService();
 						}
+
+                    	Calendar confirmed = service.calendars().update(preCalendar.getCalendarId(), calendar).execute();
                         AclRule rule = new AclRule();
                         AclRule.Scope scope = new AclRule.Scope();
                         scope.setType("default");
                         rule.setScope(scope).setRole("reader");
-                        CalendarAuth.getCalendarService().acl().insert(confirmed.getId(), rule).execute();
+                        service.acl().insert(confirmed.getId(), rule).execute();
                         terminate(e);
                         CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
                         response.setEdited(true);
