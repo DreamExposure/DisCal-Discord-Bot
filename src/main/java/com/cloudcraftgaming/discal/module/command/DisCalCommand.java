@@ -129,7 +129,7 @@ public class DisCalCommand implements ICommand {
         em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "NovaFox161", true);
         em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), Main.version, true);
-        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 2.8.1", false);
+        em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 2.8.4", false);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), Main.client.getGuilds().size() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
