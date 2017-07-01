@@ -9,6 +9,7 @@ import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
+import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -71,55 +72,59 @@ public class AddCalendarCommand implements ICommand {
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (settings.isDevGuild()) {
-			if (args.length == 0) {
-				if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
-					Message.sendMessage(MessageManager.getMessage("AddCalendar.Start", settings), event);
-					Authorization.getAuth().requestCode(event, settings);
-				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-				}
-			} else if (args.length == 1) {
-				//Check if arg is calendar ID that is supported, if so, complete the setup.
-				if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
-					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-				} else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
-					Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
-				} else {
-					try {
-						Calendar service = CalendarAuth.getCalendarService(settings);
-						List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
-						boolean valid = false;
-						for (CalendarListEntry i : items) {
-							if (!i.isDeleted() && i.getId().equals(args[0])) {
-								//valid
-								valid = true;
-								break;
-							}
-						}
-						if (valid) {
-							//Update and save.
-							CalendarData data = new CalendarData(event.getGuild().getLongID(), 1);
-							data.setCalendarId(args[0]);
-							data.setCalendarAddress(args[0]);
-							data.setExternal(true);
-							DatabaseManager.getManager().updateCalendar(data, false);
-
-							//Update guild settings
-							settings.setUseExternalCalendar(true);
-							DatabaseManager.getManager().updateSettings(settings);
-
-							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
-						} else {
-							//Invalid
-							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
-						}
-					} catch (Exception e) {
-						Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-						ExceptionHandler.sendException(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass());
+			if (PermissionChecker.hasManageServerRole(event)) {
+				if (args.length == 0) {
+					if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+						Message.sendMessage(MessageManager.getMessage("AddCalendar.Start", settings), event);
+						Authorization.getAuth().requestCode(event, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
 					}
+				} else if (args.length == 1) {
+					//Check if arg is calendar ID that is supported, if so, complete the setup.
+					if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
+					} else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
+						Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
+					} else {
+						try {
+							Calendar service = CalendarAuth.getCalendarService(settings);
+							List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
+							boolean valid = false;
+							for (CalendarListEntry i : items) {
+								if (!i.isDeleted() && i.getId().equals(args[0])) {
+									//valid
+									valid = true;
+									break;
+								}
+							}
+							if (valid) {
+								//Update and save.
+								CalendarData data = new CalendarData(event.getGuild().getLongID(), 1);
+								data.setCalendarId(args[0]);
+								data.setCalendarAddress(args[0]);
+								data.setExternal(true);
+								DatabaseManager.getManager().updateCalendar(data, false);
+
+								//Update guild settings
+								settings.setUseExternalCalendar(true);
+								DatabaseManager.getManager().updateSettings(settings);
+
+								Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
+							} else {
+								//Invalid
+								Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
+							}
+						} catch (Exception e) {
+							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
+							ExceptionHandler.sendException(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass());
+						}
+					}
+				} else {
+					Message.sendMessage(MessageManager.getMessage("AddCalendar.Specify", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("AddCalendar.Specify", settings), event);
+				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
