@@ -108,7 +108,7 @@ public class EventMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
         }
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
         em.withUrl(event.getHtmlLink());
         try {
             EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
@@ -135,7 +135,7 @@ public class EventMessageFormatter {
         	em.withImage(event.getEventData().getImageLink());
 		}
         if (event.isEditing()) {
-            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
         }
         if (event.getSummary() != null) {
 			String summary = event.getSummary();
