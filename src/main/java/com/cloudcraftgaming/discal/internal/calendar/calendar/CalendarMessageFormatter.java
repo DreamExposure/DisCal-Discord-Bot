@@ -65,7 +65,7 @@ public class CalendarMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
         }
         if (calendar.isEditing()) {
-            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), true);
+            em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), false);
         } //No else needed, just don't post it.
 
         em.withFooterText(MessageManager.getMessage("Embed.Calendar.Pre.Key", settings));
