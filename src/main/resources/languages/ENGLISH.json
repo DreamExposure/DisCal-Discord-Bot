@@ -23,7 +23,7 @@
   "Creator.Calendar.Description.N.Success": "Calendar description set! Please specify the timezone! %lb% For a list of valid timezones: ",
   "Creator.Calendar.Description.O.Success": "Calendar description set to %desc%! Please specify the timezone! %lb% For a list of valid timezones: ",
   "Creator.Calendar.Description.Specify": "Please specify the calendar description with `!calendar description <desc, spaces allowed>`",
-  "Creator.Calendar.TimeZone.N.Success": "TimeZone Set!",
+  "Creator.Calendar.TimeZone.N.Success": "TimeZone Set! Use `!cal confirm` to create the calendar!",
   "Creator.Calendar.TimeZone.O.Success": "TimeZone set to `'%tz%' %lb% Please review your calendar with `!calendar review` to verify that the values are correct and confirm with `!calendar confirm`",
   "Creator.Calendar.TimeZone.Invalid": "Invalid or unsupported timezone specified! Please make sure the timezone is on this list: <%tz_db%> %lb% %lb% It is very important that you input the timezone correctly because it is case sensitive! (EX: Not `america/new_york` but rather `America/New_York`)",
   "Creator.Calendar.TimeZone.Specify": "Please specify the timezone! %lb% Timezones are case sensitive. (Ex. America/New_York and not america/new_york) %lb% %lb% For a list of valid timezones: ",
