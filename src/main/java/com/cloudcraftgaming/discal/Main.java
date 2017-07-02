@@ -21,7 +21,6 @@ import sx.blah.discord.util.DiscordException;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("SameParameterValue")
 public class Main {
     public static String version = "1.0.0";
     public static IDiscordClient client;
@@ -34,7 +33,7 @@ public class Main {
         //Get bot settings
         botSettings = ReadFile.readBotSettings(args[0]);
 
-        client = createClient(botSettings.getBotToken(), true);
+        client = createClient(botSettings.getBotToken());
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
 
@@ -77,18 +76,13 @@ public class Main {
      * Creates the DisCal bot client.
      *
      * @param token The Bot Token.
-     * @param login Whether or not to login.
      * @return The client if successful, otherwise <code>null</code>.
      */
-    private static IDiscordClient createClient(String token, boolean login) {
+    private static IDiscordClient createClient(String token) {
         ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
         clientBuilder.withToken(token).withRecommendedShardCount(); // Adds the login info to the builder
         try {
-            if (login) {
-                return clientBuilder.login();
-            } else {
-                return clientBuilder.build();
-            }
+			return clientBuilder.login();
         } catch (DiscordException e) {
             e.printStackTrace();
         }

@@ -104,7 +104,7 @@ public class AddCalendarCommand implements ICommand {
 								data.setCalendarId(args[0]);
 								data.setCalendarAddress(args[0]);
 								data.setExternal(true);
-								DatabaseManager.getManager().updateCalendar(data, false);
+								DatabaseManager.getManager().updateCalendar(data);
 
 								//Update guild settings
 								settings.setUseExternalCalendar(true);
