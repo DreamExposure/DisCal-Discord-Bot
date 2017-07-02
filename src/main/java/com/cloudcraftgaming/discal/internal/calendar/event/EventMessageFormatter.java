@@ -65,7 +65,8 @@ public class EventMessageFormatter {
         try {
             //TODO: add support for multiple calendars...
             CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
-            Calendar service = CalendarAuth.getCalendarService();
+            Calendar service;
+			service = settings.useExternalCalendar() ? CalendarAuth.getCalendarService(settings) : CalendarAuth.getCalendarService();
             String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
             em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
         } catch (Exception e1) {
@@ -167,7 +168,6 @@ public class EventMessageFormatter {
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate()), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate()), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
-        //TODO: Add info on recurrence here.
 
         em.withFooterText(MessageManager.getMessage("Embed.Event.Pre.Key", settings));
         EventColor ec = event.getColor();
