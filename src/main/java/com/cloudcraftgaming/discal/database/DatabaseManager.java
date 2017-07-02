@@ -861,6 +861,64 @@ public class DatabaseManager {
 		}
 		return false;
 	}
+	
+	public boolean deleteAllAnnouncementData(long guildId) {
+    	try {
+    		if (databaseInfo.getMySQL().checkConnection()) {
+    			String announcementTable = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+    			
+    			String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
+			    PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+			    preparedStmt.setString(1, String.valueOf(guildId));
+			    
+			    preparedStmt.execute();
+			    preparedStmt.close();
+			    return true;
+		    }
+	    } catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to delete all announcements for guild.", e, this.getClass());
+	    }
+	    return false;
+	}
+	
+	public boolean deleteAllRSVPData(long guildId) {
+    	try {
+    	    if (databaseInfo.getMySQL().checkConnection()) {
+    	    	String rsvpTable = databaseInfo.getPrefix() + "RSVP";
+    	    	
+    	    	String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
+    	    	PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+    	    	preparedStmt.setString(1, String.valueOf(guildId));
+    	    	
+    	    	preparedStmt.execute();
+    	    	preparedStmt.close();
+    	    	return true;
+	        }
+	    } catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to delete all RSVP data for guild.", e, this.getClass());
+	    }
+	    return false;
+	}
+	
+	public boolean deleteCalendar(CalendarData data) {
+    	try {
+		    if (databaseInfo.getMySQL().checkConnection()) {
+			    String calendarTable = databaseInfo.getPrefix() + "CALENDARS";
+			    
+			    String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?";
+			    PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
+			    preparedStmt.setString(1, String.valueOf(data.getGuildId()));
+			    preparedStmt.setString(2, data.getCalendarAddress());
+			    
+			    preparedStmt.execute();
+			    preparedStmt.close();
+			    return true;
+		    }
+	    } catch (SQLException e) {
+    		ExceptionHandler.sendException(null, "Failed to delete calendar from database for guild.", e, this.getClass());
+	    }
+	    return false;
+	}
 
     public void runDatabaseUpdateIfNeeded() {}
 }

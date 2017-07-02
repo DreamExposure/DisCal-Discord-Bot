@@ -31,23 +31,19 @@ public class CalendarUtils {
 			//Fail silently.
 			ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
 		}
-
-            //Remove from database
-            data.setCalendarId("primary");
-            data.setCalendarAddress("primary");
             if (settings.useExternalCalendar()) {
-            	data.setExternal(false);
-
-            	//Update settings
+            	//Update settings.
 				settings.setUseExternalCalendar(false);
 				settings.setEncryptedAccessToken("N/a");
 				settings.setEncryptedRefreshToken("N/a");
 				DatabaseManager.getManager().updateSettings(settings);
 			}
-
-            DatabaseManager.getManager().updateCalendar(data, deleteFromDb);
+   
+			//Delete everything that is specific to the calendar...
+	        DatabaseManager.getManager().deleteCalendar(data);
             DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
-
+            DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
+            DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
         return true;
     }
 }
