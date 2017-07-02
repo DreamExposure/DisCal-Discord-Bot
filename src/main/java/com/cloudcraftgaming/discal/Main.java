@@ -10,7 +10,6 @@ import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.module.command.*;
 import com.cloudcraftgaming.discal.utils.MessageManager;
-import com.google.gson.Gson;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -27,7 +26,6 @@ public class Main {
     public static String version = "1.0.0";
     public static IDiscordClient client;
     public static BotSettings botSettings;
-    public static Gson gson;
 
     public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
@@ -70,9 +68,6 @@ public class Main {
 
         //Accept commands
         ConsoleCommandExecutor.init();
-
-		// Make Gson
-		gson = new Gson();
 
 		//Load language files.
 		MessageManager.loadLangs();
