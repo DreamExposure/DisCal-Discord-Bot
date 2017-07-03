@@ -186,7 +186,9 @@ public class AnnouncementMessageFormatter {
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
         }
-        em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+        if (!announcement.getInfo().equalsIgnoreCase("None")) {
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+		}
         em.withUrl(event.getHtmlLink());
         if (!settings.usingSimpleAnnouncements()) {
             em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
