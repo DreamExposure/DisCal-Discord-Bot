@@ -76,7 +76,7 @@ public class EventListCommand implements ICommand {
                 case "search":
                     if (settings.isDevGuild()) {
                         //To search module.
-                        Message.sendMessage("Uh... Listen, I never said I would code this quickly!!!", event);
+						moduleSearch(args, event, settings);
                     } else {
                         Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
                     }
@@ -168,4 +168,8 @@ public class EventListCommand implements ICommand {
             Message.sendMessage(MessageManager.getMessage("Event.List.Args.Many", settings), event);
         }
     }
+
+    private void moduleSearch(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+
+	}
 }
