@@ -56,18 +56,18 @@ public class CalendarCommand implements ICommand {
         info.setDescription("Used for direct interaction with your DisCal Calendar.");
         info.setExample("!calendar <subCommand> (value)");
 
-        info.getSubCommands().add("create");
-        info.getSubCommands().add("cancel");
-        info.getSubCommands().add("view");
-        info.getSubCommands().add("review");
-        info.getSubCommands().add("confirm");
-        info.getSubCommands().add("delete");
-        info.getSubCommands().add("remove");
-        info.getSubCommands().add("name");
-        info.getSubCommands().add("summary");
-        info.getSubCommands().add("description");
-        info.getSubCommands().add("timezone");
-        info.getSubCommands().add("edit");
+        info.getSubCommands().put("create", "Starts the creation of a new calendar.");
+        info.getSubCommands().put("cancel", "Cancels the creator/editor");
+        info.getSubCommands().put("view", "Views the calendar in the creator/editor");
+        info.getSubCommands().put("review", "Views the calendar in the creator/editor");
+        info.getSubCommands().put("confirm", "Confirms and creates/edits the calendar.");
+        info.getSubCommands().put("delete", "Deletes the calendar");
+        info.getSubCommands().put("remove", "Deletes the calendar");
+        info.getSubCommands().put("name", "Sets the calendar's name/summary");
+        info.getSubCommands().put("summary", "Sets the calendar's name/summary");
+        info.getSubCommands().put("description", "Sets the calendar's description");
+        info.getSubCommands().put("timezone", "Sets teh calendar's timezone.");
+        info.getSubCommands().put("edit", "Edits the calendar.");
 
         return info;
     }

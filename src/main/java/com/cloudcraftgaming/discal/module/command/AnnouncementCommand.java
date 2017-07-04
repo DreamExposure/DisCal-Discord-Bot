@@ -62,22 +62,25 @@ public class AnnouncementCommand implements ICommand {
 		info.setDescription("Used for all announcement functions.");
 		info.setExample("!announcement <function> (value(s))");
 
-		info.getSubCommands().add("create");
-		info.getSubCommands().add("copy");
-		info.getSubCommands().add("edit");
-		info.getSubCommands().add("confirm");
-		info.getSubCommands().add("cancel");
-		info.getSubCommands().add("delete");
-		info.getSubCommands().add("view");
-		info.getSubCommands().add("review");
-		info.getSubCommands().add("subscribe");
-		info.getSubCommands().add("unsubscribe");
-		info.getSubCommands().add("type");
-		info.getSubCommands().add("hours");
-		info.getSubCommands().add("minutes");
-		info.getSubCommands().add("list");
-		info.getSubCommands().add("event");
-		info.getSubCommands().add("info");
+		info.getSubCommands().put("create", "Starts the announcement creator.");
+		info.getSubCommands().put("copy", "Copies an existing announcement.");
+		info.getSubCommands().put("edit", "Edits an existing announcement.");
+		info.getSubCommands().put("confirm", "Confirms and creates/edits the announcement.");
+		info.getSubCommands().put("cancel", "Cancels the current announcement creator/editor");
+		info.getSubCommands().put("delete", "Deletes an existing announcement.");
+		info.getSubCommands().put("view", "Views the specified announcement.");
+		info.getSubCommands().put("review", "Reviews the announcement in the creator/editor.");
+		info.getSubCommands().put("subscribe", "Subscribes users/roles to the announcement.");
+		info.getSubCommands().put("sub", "Subscribes users/roles to the announcement.");
+		info.getSubCommands().put("unsubscribe", "Unsubscribes users/roles to the announcement.");
+		info.getSubCommands().put("unsub", "Unsubscribes users/roles to the announcement.");
+		info.getSubCommands().put("type", "Sets the announcement's type.");
+		info.getSubCommands().put("hours", "Sets the amount of hours before the event to fire (added to minutes)");
+		info.getSubCommands().put("minutes", "Sets the amount of minutes before the event to fire (added to hours)");
+		info.getSubCommands().put("list", "Lists an amount of events.");
+		info.getSubCommands().put("event", "Sets the event the announcement is for (if applicable)");
+		info.getSubCommands().put("color", "Sets the color the announcement is for (if applicable)");
+		info.getSubCommands().put("info", "Sets an additional info.");
 
 		return info;
 	}

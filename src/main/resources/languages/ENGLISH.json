@@ -315,6 +315,7 @@
 
   "Notification.Args.Few": "You must specify a function to execute! Use '!help` for a full list of valid commands and functions!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
+  "Notification.Args.InvalidSubCmd": "Invalid sub command!",
   "Notification.Args.Value.Integer": "The specified value must be a number! (EX: `1` or `13`)",
   "Notification.Disabled": "This option is disabled for testing only!",
   "Notification.Perm.CONTROL_ROLE": "You do not have sufficient permissions to use this DisCal command!",

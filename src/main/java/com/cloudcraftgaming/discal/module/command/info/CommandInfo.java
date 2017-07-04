@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.module.command.info;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -12,7 +12,7 @@ public class CommandInfo {
     private String description;
     private String example;
 
-    private ArrayList<String> subCommands = new ArrayList<>();
+    private HashMap<String, String> subCommands = new HashMap<>();
 
     public CommandInfo(String _name) {
         name = _name;
@@ -31,7 +31,7 @@ public class CommandInfo {
         return example;
     }
 
-    public ArrayList<String> getSubCommands() {
+    public HashMap<String, String> getSubCommands() {
         return subCommands;
     }
 

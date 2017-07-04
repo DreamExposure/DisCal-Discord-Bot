@@ -64,17 +64,17 @@ public class DevCommand implements ICommand {
 		CommandInfo ci = new CommandInfo("dev");
 		ci.setDescription("Used for developer commands. Only able to be used by registered developers");
 		ci.setExample("!dev <function> (value)");
-		ci.getSubCommands().add("patron");
-		ci.getSubCommands().add("dev");
-		ci.getSubCommands().add("maxcal");
-		ci.getSubCommands().add("leave");
-		ci.getSubCommands().add("listGuilds");
-		ci.getSubCommands().add("reloadLangs");
-		ci.getSubCommands().add("cleanupCalendars");
-		ci.getSubCommands().add("restart");
-		ci.getSubCommands().add("reload");
-		ci.getSubCommands().add("shutdown");
-		ci.getSubCommands().add("eval");
+		ci.getSubCommands().put("patron", "Sets a guild as a patron.");
+		ci.getSubCommands().put("dev", "Sets a guild as a test/dev guild.");
+		ci.getSubCommands().put("maxcal", "Sets the max amount of calendars a guild may have.");
+		ci.getSubCommands().put("leave", "Leaves the specified guild.");
+		ci.getSubCommands().put("listguilds", "Lists ALL guilds.");
+		ci.getSubCommands().put("reloadlangs", "Reloads the lang files for changes.");
+		ci.getSubCommands().put("cleanupcalendars", "Cleans up calendars in the database.");
+		ci.getSubCommands().put("restart", "Completely restarts the bot application.");
+		ci.getSubCommands().put("reload", "Logs out and then logs in every shard.");
+		ci.getSubCommands().put("shutdown", "Shuts down the bot application.");
+		ci.getSubCommands().put("eval", "Evaluates the given code.");
 
 		return ci;
 	}

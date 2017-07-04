@@ -53,16 +53,16 @@ public class DisCalCommand implements ICommand {
         info.setDescription("Used to configure DisCal");
         info.setExample("!DisCal (function) (value)");
 
-        info.getSubCommands().add("settings");
-        info.getSubCommands().add("role");
-        info.getSubCommands().add("channel");
-        info.getSubCommands().add("simpleAnnouncement");
-        info.getSubCommands().add("dmAnnouncement");
-        info.getSubCommands().add("dmAnnouncements");
-        info.getSubCommands().add("language");
-        info.getSubCommands().add("lang");
-        info.getSubCommands().add("prefix");
-        info.getSubCommands().add("invite");
+        info.getSubCommands().put("settings", "Displays the bot's settings.");
+        info.getSubCommands().put("role", "Sets the control role for the bot.");
+        info.getSubCommands().put("channel", "Sets the channel bot commands can be used in.");
+        info.getSubCommands().put("simpleannouncement", "Removes \"Advanced\" info from announcements.");
+        info.getSubCommands().put("dmannouncement", "Allows the bot to DM a user an announcement.");
+        info.getSubCommands().put("dmannouncements", "Alias for \"dmAnnouncement\"");
+        info.getSubCommands().put("language", "Sets the bot's language.");
+        info.getSubCommands().put("lang", "Sets the bot's language.");
+        info.getSubCommands().put("prefix", "Sets the bot's prefix.");
+        info.getSubCommands().put("invite", "Displays an invite to the support guild.");
 
         return info;
     }

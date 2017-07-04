@@ -56,7 +56,7 @@ public class EventListCommand implements ICommand {
         info.setDescription("Lists the specified amount of events from the guild calendar.");
         info.setExample("!events (number or function) (other args if applicable)");
 
-        info.getSubCommands().add("search");
+        info.getSubCommands().put("search", "Searches for events based on specific criteria rather than just the next upcoming events");
         return info;
     }
 

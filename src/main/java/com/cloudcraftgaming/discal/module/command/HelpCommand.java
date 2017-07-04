@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
+import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
@@ -82,7 +83,19 @@ public class HelpCommand implements ICommand {
             if (cmd != null) {
                 Message.sendMessage(getCommandInfoEmbed(cmd), event);
             }
-        }
+        } else if (args.length == 2) {
+        	//Display sub command info
+			String cmdFor = args[0];
+			ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
+			if (cmd != null) {
+				if (cmd.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase())) {
+					Message.sendMessage(getSubCommandEmbed(cmd, args[1].toLowerCase()), event);
+				} else {
+					//Sub command does not exist.
+					Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
+				}
+			}
+		}
 
         return false;
     }
@@ -98,15 +111,35 @@ public class HelpCommand implements ICommand {
 
         //Loop through sub commands
         if (cmd.getCommandInfo().getSubCommands().size() > 0) {
-            String subs = cmd.getCommandInfo().getSubCommands().toString();
-            subs = subs.replace("[", "").replace("]", "");
-            em.appendField("Sub-Commands", subs, false);
-        }
+			String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
+			subs = subs.replace("[", "").replace("]", "");
+			em.appendField("Sub-Commands", subs, false);
+		}
 
         em.withFooterText("<> = required | () = optional");
+
+        em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
 
         em.withColor(56, 138, 237);
 
         return em.build();
     }
+
+    private EmbedObject getSubCommandEmbed(ICommand cmd, String subCommand) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorName("DisCal");
+		em.appendField("Command", cmd.getCommand(), true);
+		em.appendField("Sub Command", subCommand, true);
+
+		em.appendField("Usage", cmd.getCommandInfo().getSubCommands().get(subCommand), false);
+
+		em.withFooterText("<> = required | () = optional");
+
+		em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
+
+		em.withColor(56, 138, 237);
+
+		return em.build();
+	}
 }
