@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -25,6 +26,14 @@ public class UserUtils {
     }
 
 
+    public static long getUser(String toLookFor, IDiscordClient client) {
+    	return getUser(toLookFor, null, client);
+	}
+
+    public static long getUser(String toLookFor, IMessage m) {
+    	return getUser(toLookFor, m, m.getClient());
+	}
+
     /**
      * Gets a user on the guild
      *
@@ -32,13 +41,13 @@ public class UserUtils {
      * @param m         The message, incase of mention
      * @return The ID of the user found.
      */
-    public static long getUser(String toLookFor, IMessage m) {
+    public static long getUser(String toLookFor, IMessage m, IDiscordClient client) {
         toLookFor = toLookFor.trim();
         final String lower = toLookFor.toLowerCase();
 
         long res = 0;
 
-        if (!m.getMentions().isEmpty())
+        if (m != null && !m.getMentions().isEmpty())
             res = m.getMentions().get(0).getLongID();
 
         List<IUser> users = m.getGuild().getUsers().stream()

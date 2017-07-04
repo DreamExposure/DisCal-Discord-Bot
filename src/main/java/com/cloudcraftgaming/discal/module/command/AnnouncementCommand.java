@@ -608,8 +608,8 @@ public class AnnouncementCommand implements ICommand {
 			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), guild.getLongID()) : AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 
 			for (int i = 1; i < args.length; i++) {
-				IUser u = guild.getUserByID(UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], message));
-				IRole r = guild.getRoleByID(RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], message));
+				IUser u = guild.getUserByID(UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], event.getClient()));
+				IRole r = guild.getRoleByID(RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], event.getClient()));
 				if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
 					//Here or everyone is to be subscribed...
 					String men = args[i].toLowerCase();
@@ -698,8 +698,8 @@ public class AnnouncementCommand implements ICommand {
 		if (args[1].length() <= 32) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(guild.getLongID())) {
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
-				IUser u = guild.getUserByID(UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, message));
-				IRole r = guild.getRoleByID(RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, message));
+				IUser u = guild.getUserByID(UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, event.getClient()));
+				IRole r = guild.getRoleByID(RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, event.getClient()));
 				if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
 					String men = value.toLowerCase();
 					if (a.getSubscriberRoleIds().contains(men)) {
@@ -806,8 +806,8 @@ public class AnnouncementCommand implements ICommand {
 			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), guild.getLongID()) : AnnouncementCreator.getCreator().getAnnouncement(guild.getLongID());
 
 			for (int i = 1; i < args.length; i++) {
-				IUser u = guild.getUserByID(UserUtils.getUser(args[i], message));
-				IRole r = guild.getRoleByID(RoleUtils.getRole(args[i], message));
+				IUser u = guild.getUserByID(UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], event.getClient()));
+				IRole r = guild.getRoleByID(RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], event.getClient()));
 				if (args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
 					//Here or everyone is to be subscribed...
 					String men = args[i].toLowerCase();
@@ -822,12 +822,12 @@ public class AnnouncementCommand implements ICommand {
 
 				if (u != null) {
 					if (a.getSubscriberUserIds().contains(u.getStringID())) {
-						subscribedUsers.remove(u.getName());
+						subscribedUsers.add(u.getName());
 						a.getSubscriberUserIds().remove(u.getStringID());
 					}
 				} else if (r != null) {
 					if (a.getSubscriberRoleIds().contains(r.getStringID())) {
-						subscribedRoles.remove(r.getName());
+						subscribedRoles.add(r.getName());
 						a.getSubscriberRoleIds().remove(r.getStringID());
 					}
 				}

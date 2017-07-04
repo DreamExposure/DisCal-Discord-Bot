@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -59,7 +60,15 @@ public class RoleUtils {
         }
     }
 
-    public static long getRole(String toLookFor, IMessage m) {
+	public static long getRole(String toLookFor, IDiscordClient client) {
+		return getRole(toLookFor, null, client);
+	}
+
+	public static long getRole(String toLookFor, IMessage m) {
+		return getRole(toLookFor, m, m.getClient());
+	}
+
+    public static long getRole(String toLookFor, IMessage m, IDiscordClient client) {
         toLookFor = toLookFor.trim();
         final String lower = toLookFor.toLowerCase();
         long res = 0;
