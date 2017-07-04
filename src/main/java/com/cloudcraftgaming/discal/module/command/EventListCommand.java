@@ -70,13 +70,13 @@ public class EventListCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings)  {
         //Get events from calendar
         if (args.length < 1) {
-            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Few", settings), event);
+            moduleSimpleList(args, event, settings);
         } else {
             switch (args[0].toLowerCase()) {
                 case "search":
                     if (settings.isDevGuild()) {
                         //To search module.
-                        Message.sendMessage("Uh... I'm working on it okay~", event);
+                        Message.sendMessage("Uh... Listen, I never said I would code this quickly!!!", event);
                     } else {
                         Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
                     }
