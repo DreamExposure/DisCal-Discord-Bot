@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.utils;
 
-import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -15,58 +14,48 @@ import java.util.stream.Collectors;
  * For Project: DisCal
  */
 public class UserUtils {
-    public static IUser getUserFromMention(String mention, MessageReceivedEvent event) {
-        for (IUser u : event.getGuild().getUsers()) {
-            if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">")) {
-                return u;
-            }
-        }
+	public static IUser getUserFromMention(String mention, MessageReceivedEvent event) {
+		for (IUser u : event.getGuild().getUsers()) {
+			if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">")) {
+				return u;
+			}
+		}
 
-        return null;
-    }
-
-
-    public static long getUser(String toLookFor, IDiscordClient client) {
-    	return getUser(toLookFor, null, client);
+		return null;
 	}
 
-    public static long getUser(String toLookFor, IMessage m) {
-    	return getUser(toLookFor, m, m.getClient());
+
+	public static long getUser(String toLookFor, IGuild guild) {
+		return getUser(toLookFor, null, guild);
 	}
 
-    /**
-     * Gets a user on the guild
-     *
-     * @param toLookFor The name or ID, if the user was mentioned this can be anything
-     * @param m         The message, incase of mention
-     * @return The ID of the user found.
-     */
-    public static long getUser(String toLookFor, IMessage m, IDiscordClient client) {
-        toLookFor = toLookFor.trim();
-        final String lower = toLookFor.toLowerCase();
+	public static long getUser(String toLookFor, IMessage m) {
+		return getUser(toLookFor, m, m.getGuild());
+	}
 
-        long res = 0;
-
-        if (m != null && !m.getMentions().isEmpty())
-            res = m.getMentions().get(0).getLongID();
-
-        List<IUser> users = m.getGuild().getUsers().stream()
-                .filter(u -> u.getName().toLowerCase().contains(lower)
-                        || u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
-                        || u.getDisplayName(m.getGuild()).toLowerCase().contains(lower)
-                        || u.getDisplayName(m.getGuild()).equalsIgnoreCase(lower))
-                .collect(Collectors.toList());
-        if (!users.isEmpty())
-            res = users.get(0).getLongID();
-
-        return res;
-    }
-
-	public static IUser getUser(String toLookFor, IGuild guild) {
+	/**
+	 * Gets a user on the guild
+	 *
+	 * @param toLookFor The name or ID, if the user was mentioned this can be anything
+	 * @param m         The message, incase of mention
+	 * @return The ID of the user found.
+	 */
+	public static long getUser(String toLookFor, IMessage m, IGuild guild) {
 		toLookFor = toLookFor.trim();
 		final String lower = toLookFor.toLowerCase();
 
-		IUser res = null;
+		long res = 0;
+
+		if (m != null && !m.getMentions().isEmpty())
+			res = m.getMentions().get(0).getLongID();
+
+		if (toLookFor.matches("[0-9]+")) {
+			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor));
+			if (u != null) {
+				return Long.parseUnsignedLong(toLookFor);
+			}
+		}
+
 		List<IUser> users = guild.getUsers().stream()
 				.filter(u -> u.getName().toLowerCase().contains(lower)
 						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
@@ -74,8 +63,9 @@ public class UserUtils {
 						|| u.getDisplayName(guild).equalsIgnoreCase(lower))
 				.collect(Collectors.toList());
 		if (!users.isEmpty())
-			res = users.get(0);
+			res = users.get(0).getLongID();
 
 		return res;
 	}
+
 }
