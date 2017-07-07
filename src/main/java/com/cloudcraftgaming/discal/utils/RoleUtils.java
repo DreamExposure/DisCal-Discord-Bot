@@ -72,7 +72,7 @@ public class RoleUtils {
 		final String lower = toLookFor.toLowerCase();
 		long res = 0;
 
-		if (!m.getRoleMentions().isEmpty()) {
+		if (m !=null && !m.getRoleMentions().isEmpty()) {
 			res = m.getRoleMentions().get(0).getLongID();
 		}
 
