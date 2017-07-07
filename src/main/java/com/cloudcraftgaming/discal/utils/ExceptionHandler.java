@@ -35,8 +35,8 @@ public class ExceptionHandler {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         String error = sw.toString(); // stack trace as a string
-        if (error.length() > 1500) {
-            error = error.substring(0, 1500);
+        if (error.length() > 1250) {
+            error = error.substring(0, 1250);
         }
         pw.close();
 
@@ -46,9 +46,14 @@ public class ExceptionHandler {
             //Can ignore silently...
         }
 
+
         em.appendField("Time", timeStamp, true);
         if (e.getMessage() != null) {
-            em.appendField("Exception", e.getMessage(), true);
+        	if (e.getMessage().length() > 1024) {
+        		em.appendField("Exception", e.getMessage().substring(0, 1024), true);
+			} else {
+				em.appendField("Exception", e.getMessage(), true);
+			}
         }
         if (message != null) {
             em.appendField("Message", message, true);
