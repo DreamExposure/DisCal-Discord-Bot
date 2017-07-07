@@ -68,4 +68,32 @@ public class UserUtils {
 		return res;
 	}
 
+	public static IUser getIUser(String toLookFor, IMessage m, IGuild guild) {
+		toLookFor = toLookFor.trim();
+		final String lower = toLookFor.toLowerCase();
+
+		IUser res = null;
+
+		if (m != null && !m.getMentions().isEmpty())
+			res = m.getMentions().get(0);
+
+		if (toLookFor.matches("[0-9]+")) {
+			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor));
+			if (u != null) {
+				return u;
+			}
+		}
+
+		List<IUser> users = guild.getUsers().stream()
+				.filter(u -> u.getName().toLowerCase().contains(lower)
+						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
+						|| u.getDisplayName(guild).toLowerCase().contains(lower)
+						|| u.getDisplayName(guild).equalsIgnoreCase(lower))
+				.collect(Collectors.toList());
+		if (!users.isEmpty())
+			res = users.get(0);
+
+		return res;
+	}
+
 }

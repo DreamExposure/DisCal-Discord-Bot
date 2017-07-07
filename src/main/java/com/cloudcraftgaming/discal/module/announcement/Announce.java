@@ -157,7 +157,7 @@ public class Announce extends TimerTask {
 			if (announcement.getSubscriberRoleIds().contains("everyone") || announcement.getSubscriberRoleIds().contains("here")) {
 				//Everyone in channel...
 				for (String uId : settings.getDmAnnouncements()) {
-					IUser user = UserUtils.getUser(uId, guild);
+					IUser user = UserUtils.getIUser(uId, null, guild);
 					if (user != null) {
 						//First check if they have DMs enabled
 						if (channel.getUsersHere().contains(user)) {
@@ -173,13 +173,13 @@ public class Announce extends TimerTask {
 				for (String uId : settings.getDmAnnouncements()) {
 					if (announcement.getSubscriberUserIds().contains(uId)) {
 						//Verify user still exists and such...
-						IUser u = UserUtils.getUser(uId, guild);
+						IUser u = UserUtils.getIUser(uId, null, guild);
 						if (u != null && !usersToDm.contains(u)) {
 							usersToDm.add(u);
 						}
 					} else {
 						//Not specifically subscribed... lets just if their role is subscribed...
-						IUser u = UserUtils.getUser(uId, guild);
+						IUser u = UserUtils.getIUser(uId, null, guild);
 						if (u != null && !usersToDm.contains(u)) {
 							for (IRole r : u.getRolesForGuild(guild)) {
 								if (announcement.getSubscriberRoleIds().contains(r.getStringID())) {
