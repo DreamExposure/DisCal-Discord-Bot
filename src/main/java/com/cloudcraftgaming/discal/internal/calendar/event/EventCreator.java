@@ -3,10 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.MessageManager;
-import com.cloudcraftgaming.discal.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.utils.*;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -219,7 +216,9 @@ public class EventCreator {
                 event.setStart(preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone()));
                 event.setEnd(preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone()));
                 event.setVisibility("public");
-                event.setColorId(String.valueOf(preEvent.getColor().getId()));
+                if (!preEvent.getColor().equals(EventColor.NONE)) {
+					event.setColorId(String.valueOf(preEvent.getColor().getId()));
+				}
 
                 //Set recurrence
                 if (preEvent.shouldRecur()) {
