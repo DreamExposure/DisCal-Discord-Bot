@@ -38,36 +38,40 @@ class CommandListener {
             if (event.getMessage() != null && event.getGuild() != null && event.getChannel() != null && !event.getChannel().isPrivate() && event.getMessage().getContent() != null && event.getMessage().getContent().length() > 0) {
                 //Message is a valid guild message (not DM). Check if in correct channel.
 				GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
-                if (PermissionChecker.isCorrectChannel(event) && event.getMessage().getContent().startsWith(settings.getPrefix())) {
-                    //Prefixed with ! which should mean it is a command, convert and confirm.
-                    String[] argsOr = event.getMessage().getContent().split(" ");
-                    if (argsOr.length > 1) {
-                        ArrayList<String> argsOr2 = new ArrayList<>();
-                        argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
-                        String[] args = argsOr2.toArray(new String[argsOr2.size()]);
+                if (event.getMessage().getContent().startsWith(settings.getPrefix())) {
+                	if (PermissionChecker.isCorrectChannel(event)) {
+						//Prefixed with ! which should mean it is a command, convert and confirm.
+						String[] argsOr = event.getMessage().getContent().split(" ");
+						if (argsOr.length > 1) {
+							ArrayList<String> argsOr2 = new ArrayList<>();
+							argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
+							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
-                        String command = argsOr[0].replace(settings.getPrefix(), "");
-                        cmd.issueCommand(command, args, event, settings);
-                    } else if (argsOr.length == 1) {
-                        //Only command... no args.
-                        cmd.issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event, settings);
-                    }
+							String command = argsOr[0].replace(settings.getPrefix(), "");
+							cmd.issueCommand(command, args, event, settings);
+						} else if (argsOr.length == 1) {
+							//Only command... no args.
+							cmd.issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event, settings);
+						}
+					}
                 } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getStringID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getStringID() + ">"))) {
-                    String[] argsOr = event.getMessage().getContent().split(" ");
-                    if (argsOr.length > 2) {
-                        ArrayList<String> argsOr2 = new ArrayList<>();
-                        argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
-                        String [] args = argsOr2.toArray(new String[argsOr2.size()]);
+					if (PermissionChecker.isCorrectChannel(event)) {
+						String[] argsOr = event.getMessage().getContent().split(" ");
+						if (argsOr.length > 2) {
+							ArrayList<String> argsOr2 = new ArrayList<>();
+							argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
-                        String command = argsOr[1];
-                        cmd.issueCommand(command, args, event, settings);
-                    } else if (argsOr.length == 2) {
-                        //No args...
-                        cmd.issueCommand(argsOr[1], new String[0], event, settings);
-                    } else if (argsOr.length == 1) {
-                        //Only disCal mentioned...
-                        cmd.issueCommand("DisCal", new String[0], event, settings);
-                    }
+							String command = argsOr[1];
+							cmd.issueCommand(command, args, event, settings);
+						} else if (argsOr.length == 2) {
+							//No args...
+							cmd.issueCommand(argsOr[1], new String[0], event, settings);
+						} else if (argsOr.length == 1) {
+							//Only disCal mentioned...
+							cmd.issueCommand("DisCal", new String[0], event, settings);
+						}
+					}
                 }
             }
         } catch (Exception e) {
