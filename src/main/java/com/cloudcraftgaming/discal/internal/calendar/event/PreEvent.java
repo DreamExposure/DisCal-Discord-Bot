@@ -48,7 +48,7 @@ public class PreEvent {
 
         timeZone = "Unknown";
 
-        color = EventColor.BLUE;
+        color = EventColor.NONE;
 
         recur = false;
         recurrence = new Recurrence();
