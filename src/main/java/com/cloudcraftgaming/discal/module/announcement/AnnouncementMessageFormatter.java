@@ -204,8 +204,12 @@ public class AnnouncementMessageFormatter {
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
         IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
-
-        Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
+		
+	    if (announcement.getSubscriberRoleIds().size() > 0 || announcement.getSubscriberUserIds().size() > 0) {
+		    Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
+	    } else {
+	    	Message.sendMessage(em.build(), channel);
+	    }
     }
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
