@@ -146,6 +146,112 @@ public class Announce extends TimerTask {
 			}
 		}
 	}
+	
+	//@Override
+	public void runRewrite() {
+		DateTime now = new DateTime(System.currentTimeMillis());
+		Long nowMS = System.currentTimeMillis();
+		Calendar discalService;
+		try {
+			discalService = CalendarAuth.getCalendarService();
+		} catch (IOException e) {
+			ExceptionHandler.sendException(null, "Failed to connect to google calendar CODE A007", e, this.getClass());
+			return;
+		}
+		for (IGuild guild : Main.client.getGuilds()) {
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
+			Calendar service;
+			try {
+				if (settings.useExternalCalendar()) {
+					service = CalendarAuth.getCalendarService(settings);
+				} else {
+					service = discalService;
+				}
+			} catch (Exception e) {
+				ExceptionHandler.sendException(null, "Failed to connect to google calendar CODE A005", e, this.getClass());
+				continue;
+			}
+			try {
+				long guildId = guild.getLongID();
+				//TODO: Add multiple calendar support...
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+					if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+						try {
+							Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
+							
+							//Test for the time...
+							Long eventMS = event.getStart().getDateTime().getValue();
+							Long timeUntilEvent = eventMS - nowMS;
+							Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+							Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+							Long difference = minutesToEvent - announcementTime;
+							if (difference > 0) {
+								if (difference <= 10) {
+									//TODO: Add to queue
+								}
+							} else {
+								//Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
+								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+							}
+						} catch (GoogleJsonResponseException ge) {
+							if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
+								//Event deleted or not found, delete announcement.
+								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+							} else {
+								//Unknown cause, send email
+								ExceptionHandler.sendException(null, "Announcement failure caused by google. CODE: A001", ge, this.getClass());
+							}
+						} catch (Exception e) {
+							ExceptionHandler.sendException(null, "Announcement failure CODE: A002", e, this.getClass());
+						}
+					} else {
+						try {
+							Events events = service.events().list(data.getCalendarAddress())
+									.setMaxResults(20)
+									.setTimeMin(now)
+									.setOrderBy("startTime")
+									.setSingleEvents(true)
+									.execute();
+							List<Event> items = events.getItems();
+							if (items.size() > 0) {
+								for (Event event : items) {
+									//Test for the time...
+									Long eventMS = event.getStart().getDateTime().getValue();
+									Long timeUntilEvent = eventMS - nowMS;
+									Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+									Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+									Long difference = minutesToEvent - announcementTime;
+									if (difference > 0 && difference <= 10) {
+										//Right on time, let's check if universal or color specific.
+										if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
+											//TODO: Add to queue
+										} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+											//Color, test for color.
+											String colorId = event.getColorId();
+											EventColor color = EventColor.fromNameOrHexOrID(colorId);
+											if (color.name().equals(a.getEventColor().name())) {
+												//TODO: Add to queue
+											}
+										} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+											//Recurring event announcement.
+											if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
+												//TODO: Add to queue
+											}
+										}
+									}
+								}
+							}
+						} catch (IOException e) {
+							ExceptionHandler.sendException(null, "Announcement failure CODE: A003", e, this.getClass());
+						}
+					}
+				}
+			} catch (Exception e) {
+				ExceptionHandler.sendException(null, "Announcement failure CODE: A004", e, this.getClass());
+			}
+		}
+	}
 
 	private void doDmAnnouncements(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
 		//Don't do DMs unless there is at least 1 subscriber of either role or user type.
