@@ -76,6 +76,12 @@ public class RoleUtils {
 			res = m.getRoleMentions().get(0).getLongID();
 		}
 
+		if (toLookFor.matches("<@&[0-9]+>")) {
+			IRole u = guild.getRoleByID(Long.parseUnsignedLong(toLookFor.replaceAll("[^0-9]", "")));
+			if (u != null) {
+				return u.getLongID();
+			}
+		}
 		List<IRole> roles = guild.getRoles().stream().filter(r -> r.getName().toLowerCase().contains(lower)
 				|| r.getName().equalsIgnoreCase(lower)
 				|| r.getStringID().equals(lower)).collect(Collectors.toList());

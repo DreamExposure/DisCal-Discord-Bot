@@ -49,13 +49,13 @@ public class UserUtils {
 		if (m != null && !m.getMentions().isEmpty())
 			res = m.getMentions().get(0).getLongID();
 
+
 		if (toLookFor.matches("[0-9]+")) {
 			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor));
 			if (u != null) {
 				return Long.parseUnsignedLong(toLookFor);
 			}
 		}
-
 		List<IUser> users = guild.getUsers().stream()
 				.filter(u -> u.getName().toLowerCase().contains(lower)
 						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
@@ -77,8 +77,8 @@ public class UserUtils {
 		if (m != null && !m.getMentions().isEmpty())
 			res = m.getMentions().get(0);
 
-		if (toLookFor.matches("[0-9]+")) {
-			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor));
+		if (toLookFor.matches("<@!?[0-9]+>")) {
+			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor.replaceAll("[^0-9]", "")));
 			if (u != null) {
 				return u;
 			}
