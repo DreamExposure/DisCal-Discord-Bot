@@ -9,31 +9,33 @@ import com.google.api.services.calendar.model.Event;
  */
 public class AnnouncementQueueItem {
 	private final Announcement announcement;
-	
+
 	private Event event;
 	private long timeToAnnounceMs;
-	
+
 	public AnnouncementQueueItem(Announcement _announcement, Event _event) {
 		announcement = _announcement;
 		event = _event;
-		
-		timeToAnnounceMs = event.getStart().getDateTime().getTimeZoneShift();
 	}
-	
+
 	//Getters
 	public Announcement getAnnouncement() {
 		return announcement;
 	}
-	
+
 	public Event getEvent() {
 		return event;
 	}
-	
+
 	public long getTimeToAnnounceMs() {
 		return timeToAnnounceMs;
 	}
-	
+
 	//Setters
+	public void setEvent(Event e) {
+		event = e;
+	}
+
 	public void setTimeToAnnounceMs(long _time) {
 		timeToAnnounceMs = _time;
 	}
