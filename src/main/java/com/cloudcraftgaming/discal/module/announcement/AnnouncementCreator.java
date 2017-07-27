@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
@@ -125,6 +126,9 @@ public class AnnouncementCreator {
             if (a.hasRequiredValues()) {
                 DatabaseManager.getManager().updateAnnouncement(a);
                 terminate(e);
+                if (a.isEditing()) {
+	                AnnouncementQueueManager.getManager().update(a);
+                }
                 return new AnnouncementCreatorResponse(true, a);
             }
         }

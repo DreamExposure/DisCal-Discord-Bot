@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.UserUtils;
@@ -188,7 +189,8 @@ public class Announce extends TimerTask {
 							Long difference = minutesToEvent - announcementTime;
 							if (difference > 0) {
 								if (difference <= 10) {
-									//TODO: Add to queue
+									//Add to queue
+									AnnouncementQueueManager.getManager().queue(a, event, settings, data);
 								}
 							} else {
 								//Event past... Delete announcement so we need not worry about useless data in the Db costing memory.
@@ -199,7 +201,7 @@ public class Announce extends TimerTask {
 								//Event deleted or not found, delete announcement.
 								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
 							} else {
-								//Unknown cause, send email
+								//Unknown cause, send message
 								ExceptionHandler.sendException(null, "Announcement failure caused by google. CODE: A001", ge, this.getClass());
 							}
 						} catch (Exception e) {
@@ -225,18 +227,21 @@ public class Announce extends TimerTask {
 									if (difference > 0 && difference <= 10) {
 										//Right on time, let's check if universal or color specific.
 										if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
-											//TODO: Add to queue
+											//Add to queue
+											AnnouncementQueueManager.getManager().queue(a, event, settings, data);
 										} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 											//Color, test for color.
 											String colorId = event.getColorId();
 											EventColor color = EventColor.fromNameOrHexOrID(colorId);
 											if (color.name().equals(a.getEventColor().name())) {
-												//TODO: Add to queue
+												//Add to queue
+												AnnouncementQueueManager.getManager().queue(a, event, settings, data);
 											}
 										} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
 											//Recurring event announcement.
 											if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
-												//TODO: Add to queue
+												//Add to queue
+												AnnouncementQueueManager.getManager().queue(a, event, settings, data);
 											}
 										}
 									}
@@ -250,6 +255,33 @@ public class Announce extends TimerTask {
 			} catch (Exception e) {
 				ExceptionHandler.sendException(null, "Announcement failure CODE: A004", e, this.getClass());
 			}
+		}
+	}
+	
+	public static boolean accurateAnnounce(AnnouncementQueueItem i) {
+		if (Main.client.getGuildByID(i.getGuildId()) == null) {
+			return true;
+		}
+		
+		//Check if times are correct (within 1 minute), if so, announce...
+		long nowMs = System.currentTimeMillis();
+		long announceMs = i.getTimeToAnnounceMs();
+		
+		long difference = nowMs - announceMs;
+		
+		//Check MS difference rather than minute difference for better accuracy and no rounding.
+		if (difference > 60000) {
+			//too early
+			return false;
+		} else if (difference < 0) {
+			//Too late, remove from queue
+			return true;
+		} else {
+			//Right in the 1 minute (60000 ms) range.
+			sendAnnouncementMessage(i.getAnnouncement(), i.getEvent(), i.getData(), i.getSettings());
+			//TODO: Send DM announcements
+			
+			return true;
 		}
 	}
 

@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;
@@ -38,6 +39,7 @@ public class EventUtils {
             }
             DatabaseManager.getManager().deleteAnnouncementsForEvent(settings.getGuildID(), eventId);
             DatabaseManager.getManager().deleteEventData(eventId);
+	        AnnouncementQueueManager.getManager().dequeue(eventId);
             return true;
         } catch (Exception e) {
             System.out.println("Something weird happened when deleting an event!");
