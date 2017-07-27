@@ -259,30 +259,36 @@ public class Announce extends TimerTask {
 	}
 	
 	public static boolean accurateAnnounce(AnnouncementQueueItem i) {
-		if (Main.client.getGuildByID(i.getGuildId()) == null) {
-			return true;
-		}
-		
-		//Check if times are correct (within 1 minute), if so, announce...
-		long nowMs = System.currentTimeMillis();
-		long announceMs = i.getTimeToAnnounceMs();
-		
-		long difference = nowMs - announceMs;
-		
-		//Check MS difference rather than minute difference for better accuracy and no rounding.
-		if (difference > 60000) {
-			//too early
-			return false;
-		} else if (difference < 0) {
-			//Too late, remove from queue
-			return true;
-		} else {
-			//Right in the 1 minute (60000 ms) range.
-			sendAnnouncementMessage(i.getAnnouncement(), i.getEvent(), i.getData(), i.getSettings());
-			//TODO: Send DM announcements
+		try {
+			if (Main.client.getGuildByID(i.getGuildId()) == null) {
+				return true;
+			}
 			
-			return true;
+			//Check if times are correct (within 1 minute), if so, announce...
+			long nowMs = System.currentTimeMillis();
+			long announceMs = i.getTimeToAnnounceMs();
+			
+			long difference = nowMs - announceMs;
+			
+			//Check MS difference rather than minute difference for better accuracy and no rounding.
+			if (difference > 60000) {
+				//too early
+				return false;
+			} else if (difference < 0) {
+				//Too late, remove from queue
+				return true;
+			} else {
+				//Right in the 1 minute (60000 ms) range.
+				sendAnnouncementMessage(i.getAnnouncement(), i.getEvent(), i.getData(), i.getSettings());
+				//TODO: Send DM announcements
+				
+				return true;
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to accurate announce. CODE: A012", e, Announce.class);
+			i.setTimesErrored(i.getTimesErrored() + 1);
 		}
+		return false;
 	}
 
 	private void doDmAnnouncements(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
@@ -336,4 +342,4 @@ public class Announce extends TimerTask {
 			}
 		}
 	}
-}
+} 
