@@ -103,6 +103,7 @@ public class Announce extends TimerTask {
 									.setTimeMin(now)
 									.setOrderBy("startTime")
 									.setSingleEvents(true)
+									.setShowDeleted(false)
 									.execute();
 							List<Event> items = events.getItems();
 							if (items.size() > 0) {
@@ -135,6 +136,7 @@ public class Announce extends TimerTask {
 											}
 										}
 									}
+									
 								}
 							}
 						} catch (IOException e) {
@@ -342,4 +344,4 @@ public class Announce extends TimerTask {
 			}
 		}
 	}
-} 
+}

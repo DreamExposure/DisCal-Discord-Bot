@@ -106,6 +106,7 @@ public class EventListCommand implements ICommand {
 						.setTimeMin(now)
 						.setOrderBy("startTime")
 						.setSingleEvents(true)
+						.setShowDeleted(false)
 						.execute();
 				List<Event> items = events.getItems();
 				if (items.size() == 0) {
