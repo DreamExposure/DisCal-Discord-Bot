@@ -62,10 +62,10 @@ public class EventMessageFormatter {
 			}
             em.appendField(MessageManager.getMessage("Embed.Event.Info.Description", settings), description, true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart(), settings, false), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart(), settings, false), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd(), settings, false), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd(), settings, false), true);
 
         try {
             //TODO: add support for multiple calendars...
@@ -113,7 +113,7 @@ public class EventMessageFormatter {
 			}
             em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings, false), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
         em.withUrl(event.getHtmlLink());
         try {
@@ -168,10 +168,10 @@ public class EventMessageFormatter {
         } else {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings, true), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings, true), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings, true), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
         em.withFooterText(MessageManager.getMessage("Embed.Event.Pre.Key", settings));
@@ -196,7 +196,7 @@ public class EventMessageFormatter {
         	em.withImage(ed.getImageLink());
 		}
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
-        em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings), false);
+        em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
         em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));
         em.withUrl(ecr.getEvent().getHtmlLink());
         try {
@@ -215,7 +215,7 @@ public class EventMessageFormatter {
      * @param eventDateTime The object to get the date from.
      * @return A formatted date.
      */
-    public static String getHumanReadableDate(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+    public static String getHumanReadableDate(@Nullable EventDateTime eventDateTime, GuildSettings settings, boolean preEvent) {
     	try {
 			if (eventDateTime == null) {
 				return "NOT SET";
@@ -224,10 +224,14 @@ public class EventMessageFormatter {
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 
 				String timezone;
-				if (settings.useExternalCalendar()) {
-					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				if (!preEvent) {
+					if (settings.useExternalCalendar()) {
+						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					} else {
+						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					}
 				} else {
-					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					timezone = "America/Chicago";
 				}
 				if (eventDateTime.getDateTime() != null) {
 					long dateTime = eventDateTime.getDateTime().getValue();
@@ -255,7 +259,7 @@ public class EventMessageFormatter {
      * @param eventDateTime The object to get the time from.
      * @return A formatted time.
      */
-    public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+    public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime, GuildSettings settings, boolean preEvent) {
 		try {
 			if (eventDateTime == null) {
 				return "NOT SET";
@@ -264,10 +268,14 @@ public class EventMessageFormatter {
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 
 				String timezone;
-				if (settings.useExternalCalendar()) {
-					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				if (!preEvent) {
+					if (settings.useExternalCalendar()) {
+						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					} else {
+						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					}
 				} else {
-					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					timezone = "America/Chicago";
 				}
 				if (eventDateTime.getDateTime() != null) {
 					long dateTime = eventDateTime.getDateTime().getValue();
@@ -290,7 +298,7 @@ public class EventMessageFormatter {
 		}
     }
 
-    public static String getHumanReadableDateTime(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+    public static String getHumanReadableDateTime(@Nullable EventDateTime eventDateTime, GuildSettings settings, boolean preEvent) {
 		try {
 			if (eventDateTime == null) {
 				return "NOT SET";
@@ -299,10 +307,14 @@ public class EventMessageFormatter {
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 
 				String timezone;
-				if (settings.useExternalCalendar()) {
-					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				if (!preEvent) {
+					if (settings.useExternalCalendar()) {
+						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					} else {
+						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					}
 				} else {
-					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					timezone = "America/Chicago";
 				}
 				if (eventDateTime.getDateTime() != null) {
 					long dateTime = eventDateTime.getDateTime().getValue();

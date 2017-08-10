@@ -161,8 +161,8 @@ public class AnnouncementMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
         }
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings), true);
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -171,7 +171,7 @@ public class AnnouncementMessageFormatter {
                 em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
-            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings);
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -238,8 +238,8 @@ public class AnnouncementMessageFormatter {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
 		}
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings), true);
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -248,7 +248,7 @@ public class AnnouncementMessageFormatter {
                 em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
-            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings);
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
