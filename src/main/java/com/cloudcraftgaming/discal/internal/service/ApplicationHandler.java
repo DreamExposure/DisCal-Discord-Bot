@@ -3,7 +3,6 @@ package com.cloudcraftgaming.discal.internal.service;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.module.announcement.Announcer;
-import com.cloudcraftgaming.discal.module.misc.TimeManager;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import sx.blah.discord.util.DiscordException;
 

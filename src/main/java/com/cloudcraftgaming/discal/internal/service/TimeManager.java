@@ -1,6 +1,7 @@
-package com.cloudcraftgaming.discal.module.misc;
+package com.cloudcraftgaming.discal.internal.service;
 
 import com.cloudcraftgaming.discal.internal.network.discordpw.TimedUpdate;
+import com.cloudcraftgaming.discal.module.misc.StatusChanger;
 
 import java.util.Timer;
 
