@@ -7,6 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.ImageUtils;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.Calendar;
@@ -16,6 +17,10 @@ import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.EmbedBuilder;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -57,10 +62,10 @@ public class EventMessageFormatter {
 			}
             em.appendField(MessageManager.getMessage("Embed.Event.Info.Description", settings), description, true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd()), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd(), settings), true);
 
         try {
             //TODO: add support for multiple calendars...
@@ -108,7 +113,7 @@ public class EventMessageFormatter {
 			}
             em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart()), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
         em.withUrl(event.getHtmlLink());
         try {
@@ -163,10 +168,10 @@ public class EventMessageFormatter {
         } else {
             em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
         }
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate()), true);
-        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate()), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings), true);
+        em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
         em.withFooterText(MessageManager.getMessage("Embed.Event.Pre.Key", settings));
@@ -191,7 +196,7 @@ public class EventMessageFormatter {
         	em.withImage(ed.getImageLink());
 		}
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
-        em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart()), false);
+        em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings), false);
         em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));
         em.withUrl(ecr.getEvent().getHtmlLink());
         try {
@@ -210,26 +215,39 @@ public class EventMessageFormatter {
      * @param eventDateTime The object to get the date from.
      * @return A formatted date.
      */
-    public static String getHumanReadableDate(@Nullable EventDateTime eventDateTime) {
-        if (eventDateTime == null) {
-            return "NOT SET";
-        } else {
-            if (eventDateTime.getDateTime() != null) {
-                String[] dateArray = eventDateTime.getDateTime().toStringRfc3339().split("-");
-                String year = dateArray[0];
-                String month = dateArray[1];
-                String day = dateArray[2].substring(0, 2);
+    public static String getHumanReadableDate(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+    	try {
+			if (eventDateTime == null) {
+				return "NOT SET";
+			} else {
+				//Get timezone
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 
-                return year + "/" + month + "/" + day;
-            } else {
-                String[] dateArray = eventDateTime.getDate().toStringRfc3339().split("-");
-                String year = dateArray[0];
-                String month = dateArray[1];
-                String day = dateArray[2].substring(0, 2);
+				String timezone;
+				if (settings.useExternalCalendar()) {
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				} else {
+					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				}
+				if (eventDateTime.getDateTime() != null) {
+					long dateTime = eventDateTime.getDateTime().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
-                return year + "/" + month + "/" + day;
-            }
-        }
+					return format.format(ldt);
+
+				} else {
+					long dateTime = eventDateTime.getDate().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+					return format.format(ldt);
+				}
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			return "ERROR! Code: E001";
+		}
     }
 
     /**
@@ -237,53 +255,73 @@ public class EventMessageFormatter {
      * @param eventDateTime The object to get the time from.
      * @return A formatted time.
      */
-    public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime) {
-        if (eventDateTime == null) {
-            return "NOT SET";
-        } else {
-            if (eventDateTime.getDateTime() != null) {
-                String[] timeArray = eventDateTime.getDateTime().toStringRfc3339().split(":");
-                String suffix = "";
-                String hour = timeArray[0].substring(11, 13);
+    public static String getHumanReadableTime(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+		try {
+			if (eventDateTime == null) {
+				return "NOT SET";
+			} else {
+				//Get timezone
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 
-                //Convert hour from 24 to 12...
-                try {
-                    Integer hRaw = Integer.valueOf(hour);
-                    if (hRaw > 12) {
-                        hour = String.valueOf(hRaw - 12);
-                        suffix = "PM";
-                    } else {
-                        suffix = "AM";
-                    }
-                } catch (NumberFormatException e) {
-                    //I Dunno... just should catch the error now and not crash anything...
-                }
+				String timezone;
+				if (settings.useExternalCalendar()) {
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				} else {
+					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				}
+				if (eventDateTime.getDateTime() != null) {
+					long dateTime = eventDateTime.getDateTime().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
 
-                String minute = timeArray[1];
+					return format.format(ldt);
 
-                return hour + ":" + minute + suffix;
-            } else {
-                String[] timeArray = eventDateTime.getDate().toStringRfc3339().split(":");
-                String suffix = "";
-                String hour = timeArray[0].substring(11, 13);
+				} else {
+					long dateTime = eventDateTime.getDate().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
 
-                //Convert hour from 24 to 12...
-                try {
-                    Integer hRaw = Integer.valueOf(hour);
-                    if (hRaw > 12) {
-                        hour = String.valueOf(hRaw - 12);
-                        suffix = "PM";
-                    } else {
-                        suffix = "AM";
-                    }
-                } catch (NumberFormatException e) {
-                    //I Dunno... just should catch the error now and not crash anything...
-                }
-
-                String minute = timeArray[1];
-
-                return hour + ":" + minute + suffix;
-            }
-        }
+					return format.format(ldt);
+				}
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			return "ERROR! Code: E002";
+		}
     }
+
+    public static String getHumanReadableDateTime(@Nullable EventDateTime eventDateTime, GuildSettings settings) {
+		try {
+			if (eventDateTime == null) {
+				return "NOT SET";
+			} else {
+				//Get timezone
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+
+				String timezone;
+				if (settings.useExternalCalendar()) {
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				} else {
+					timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+				}
+				if (eventDateTime.getDateTime() != null) {
+					long dateTime = eventDateTime.getDateTime().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+
+					return format.format(ldt);
+
+				} else {
+					long dateTime = eventDateTime.getDate().getValue();
+					LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.of(timezone));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+
+					return format.format(ldt);
+				}
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			return "ERROR! Code: E003";
+		}
+	}
 }

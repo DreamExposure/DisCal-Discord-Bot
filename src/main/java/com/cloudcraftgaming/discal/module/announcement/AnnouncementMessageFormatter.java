@@ -161,8 +161,8 @@ public class AnnouncementMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
         }
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -171,7 +171,7 @@ public class AnnouncementMessageFormatter {
                 em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
-            String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -204,7 +204,7 @@ public class AnnouncementMessageFormatter {
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
         IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
-		
+
 	    if (announcement.getSubscriberRoleIds().size() > 0 || announcement.getSubscriberUserIds().size() > 0) {
 		    Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
 	    } else {
@@ -238,8 +238,8 @@ public class AnnouncementMessageFormatter {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
 		}
         if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart()), true);
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart()), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings), true);
+            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings), true);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
@@ -248,7 +248,7 @@ public class AnnouncementMessageFormatter {
                 em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
             }
         } else {
-            String start = EventMessageFormatter.getHumanReadableDate(event.getStart()) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart());
+            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings);
             try {
                 Calendar service = CalendarAuth.getCalendarService();
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
