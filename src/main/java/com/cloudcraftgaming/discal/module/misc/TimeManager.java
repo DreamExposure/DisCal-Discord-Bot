@@ -40,6 +40,8 @@ public class TimeManager {
      * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
      */
     public void shutdown() {
-        timer.cancel();
+    	if (timer != null) {
+			timer.cancel();
+		}
     }
 }
