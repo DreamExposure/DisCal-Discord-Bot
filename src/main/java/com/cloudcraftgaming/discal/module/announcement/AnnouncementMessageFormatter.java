@@ -205,10 +205,10 @@ public class AnnouncementMessageFormatter {
 
         IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 
-	    if (announcement.getSubscriberRoleIds().size() > 0 || announcement.getSubscriberUserIds().size() > 0) {
-		    Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
-	    } else {
+	    if (announcement.getSubscriberRoleIds().isEmpty() && announcement.getSubscriberUserIds().isEmpty()) {
 	    	Message.sendMessage(em.build(), channel);
+	    } else {
+	    	Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
 	    }
     }
 
