@@ -71,7 +71,7 @@ public class AddCalendarCommand implements ICommand {
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (settings.isDevGuild()) {
+		if (settings.isDevGuild() || settings.isPatronGuild()) {
 			if (PermissionChecker.hasManageServerRole(event)) {
 				if (args.length == 0) {
 					if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
@@ -127,7 +127,7 @@ public class AddCalendarCommand implements ICommand {
 				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
 		}
 		return false;
 	}
