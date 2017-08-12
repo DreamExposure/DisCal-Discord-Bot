@@ -67,8 +67,13 @@ public class Announce extends TimerTask {
 							Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 
 							//Test for the time...
-							Long eventMS = event.getStart().getDateTime().getValue();
-							Long timeUntilEvent = eventMS - nowMS;
+							Long eventMs;
+							if (event.getStart().getDateTime() != null) {
+								eventMs = event.getStart().getDateTime().getValue();
+							} else {
+								eventMs = event.getStart().getDate().getValue();
+							}
+							Long timeUntilEvent = eventMs - nowMS;
 							Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
 							Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
 							Long difference = minutesToEvent - announcementTime;
@@ -109,8 +114,13 @@ public class Announce extends TimerTask {
 							if (items.size() > 0) {
 								for (Event event : items) {
 									//Test for the time...
-									Long eventMS = event.getStart().getDateTime().getValue();
-									Long timeUntilEvent = eventMS - nowMS;
+									Long eventMs;
+									if (event.getStart().getDateTime() != null) {
+										eventMs = event.getStart().getDateTime().getValue();
+									} else {
+										eventMs = event.getStart().getDate().getValue();
+									}
+									Long timeUntilEvent = eventMs - nowMS;
 									Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
 									Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
 									Long difference = minutesToEvent - announcementTime;
@@ -184,8 +194,13 @@ public class Announce extends TimerTask {
 							Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 							
 							//Test for the time...
-							Long eventMS = event.getStart().getDateTime().getValue();
-							Long timeUntilEvent = eventMS - nowMS;
+							Long eventMs;
+							if (event.getStart().getDateTime() != null) {
+								eventMs = event.getStart().getDateTime().getValue();
+							} else {
+								eventMs = event.getStart().getDate().getValue();
+							}
+							Long timeUntilEvent = eventMs - nowMS;
 							Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
 							Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
 							Long difference = minutesToEvent - announcementTime;
@@ -221,8 +236,13 @@ public class Announce extends TimerTask {
 							if (items.size() > 0) {
 								for (Event event : items) {
 									//Test for the time...
-									Long eventMS = event.getStart().getDateTime().getValue();
-									Long timeUntilEvent = eventMS - nowMS;
+									Long eventMs;
+									if (event.getStart().getDateTime() != null) {
+										eventMs = event.getStart().getDateTime().getValue();
+									} else {
+										eventMs = event.getStart().getDate().getValue();
+									}
+									Long timeUntilEvent = eventMs - nowMS;
 									Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
 									Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
 									Long difference = minutesToEvent - announcementTime;
