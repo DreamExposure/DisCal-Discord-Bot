@@ -204,12 +204,8 @@ public class AnnouncementMessageFormatter {
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
         IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
-
-	    if (announcement.getSubscriberRoleIds().isEmpty() && announcement.getSubscriberUserIds().isEmpty()) {
-	    	Message.sendMessage(em.build(), channel);
-	    } else {
-	    	Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
-	    }
+	    
+	    Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
@@ -370,6 +366,9 @@ public class AnnouncementMessageFormatter {
                     //Role does not exist, safely ignore.
                 }
             }
+        }
+        if (!mentionEveryone && !mentionHere && userMentions.toString().equals("") && roleMentions.toString().equals("")) {
+        	return "";
         }
 
         String message = "Subscribers: " + userMentions + " " + roleMentions;
