@@ -3,6 +3,8 @@ package com.cloudcraftgaming.discal.module.announcement;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
+import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
@@ -61,6 +63,10 @@ public class Announce extends TimerTask {
 				long guildId = guild.getLongID();
 				//TODO: Add multiple calendar support...
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+				if (!CalendarUtils.calendarExists(data, settings)) {
+					//Calendar does not exist... skip this guild.
+					continue;
+				}
 				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
 						try {
@@ -113,40 +119,41 @@ public class Announce extends TimerTask {
 							List<Event> items = events.getItems();
 							if (items.size() > 0) {
 								for (Event event : items) {
-									//Test for the time...
-									Long eventMs;
-									if (event.getStart().getDateTime() != null) {
-										eventMs = event.getStart().getDateTime().getValue();
-									} else {
-										eventMs = event.getStart().getDate().getValue();
-									}
-									Long timeUntilEvent = eventMs - nowMS;
-									Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
-									Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
-									Long difference = minutesToEvent - announcementTime;
-									if (difference > 0 && difference <= 10) {
-										//Right on time, let's check if universal or color specific.
-										if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
-											sendAnnouncementMessage(a, event, data, settings);
-											//doDmAnnouncements(a, event, data, settings);
-										} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-											//Color, test for color.
-											String colorId = event.getColorId();
-											EventColor color = EventColor.fromNameOrHexOrID(colorId);
-											if (color.name().equals(a.getEventColor().name())) {
-												//Color matches, announce
+									if (event != null && EventUtils.eventExists(settings, event.getId())) {
+										//Test for the time...
+										Long eventMs;
+										if (event.getStart().getDateTime() != null) {
+											eventMs = event.getStart().getDateTime().getValue();
+										} else {
+											eventMs = event.getStart().getDate().getValue();
+										}
+										Long timeUntilEvent = eventMs - nowMS;
+										Long minutesToEvent = TimeUnit.MILLISECONDS.toMinutes(timeUntilEvent);
+										Long announcementTime = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60));
+										Long difference = minutesToEvent - announcementTime;
+										if (difference > 0 && difference <= 10) {
+											//Right on time, let's check if universal or color specific.
+											if (a.getAnnouncementType().equals(AnnouncementType.UNIVERSAL)) {
 												sendAnnouncementMessage(a, event, data, settings);
 												//doDmAnnouncements(a, event, data, settings);
-											}
-										} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
-											//Recurring event announcement.
-											if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
-												sendAnnouncementMessage(a, event, data, settings);
-												//doDmAnnouncements(a, event, data, settings);
+											} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+												//Color, test for color.
+												String colorId = event.getColorId();
+												EventColor color = EventColor.fromNameOrHexOrID(colorId);
+												if (color.name().equals(a.getEventColor().name())) {
+													//Color matches, announce
+													sendAnnouncementMessage(a, event, data, settings);
+													//doDmAnnouncements(a, event, data, settings);
+												}
+											} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+												//Recurring event announcement.
+												if (event.getId().startsWith(a.getEventId()) || event.getId().contains(a.getEventId())) {
+													sendAnnouncementMessage(a, event, data, settings);
+													//doDmAnnouncements(a, event, data, settings);
+												}
 											}
 										}
 									}
-									
 								}
 							}
 						} catch (IOException e) {
@@ -159,7 +166,7 @@ public class Announce extends TimerTask {
 			}
 		}
 	}
-	
+
 	//@Override
 	public void runRewrite() {
 		DateTime now = new DateTime(System.currentTimeMillis());
@@ -192,7 +199,7 @@ public class Announce extends TimerTask {
 					if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
 						try {
 							Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
-							
+
 							//Test for the time...
 							Long eventMs;
 							if (event.getStart().getDateTime() != null) {
@@ -279,19 +286,19 @@ public class Announce extends TimerTask {
 			}
 		}
 	}
-	
+
 	public static boolean accurateAnnounce(AnnouncementQueueItem i) {
 		try {
 			if (Main.client.getGuildByID(i.getGuildId()) == null) {
 				return true;
 			}
-			
+
 			//Check if times are correct (within 1 minute), if so, announce...
 			long nowMs = System.currentTimeMillis();
 			long announceMs = i.getTimeToAnnounceMs();
-			
+
 			long difference = nowMs - announceMs;
-			
+
 			//Check MS difference rather than minute difference for better accuracy and no rounding.
 			if (difference > 60000) {
 				//too early
@@ -303,7 +310,7 @@ public class Announce extends TimerTask {
 				//Right in the 1 minute (60000 ms) range.
 				sendAnnouncementMessage(i.getAnnouncement(), i.getEvent(), i.getData(), i.getSettings());
 				//TODO: Send DM announcements
-				
+
 				return true;
 			}
 		} catch (Exception e) {

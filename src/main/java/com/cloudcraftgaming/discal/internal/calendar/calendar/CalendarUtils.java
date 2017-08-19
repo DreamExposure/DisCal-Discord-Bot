@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
 
 import java.io.IOException;
@@ -40,14 +41,46 @@ public class CalendarUtils {
 			settings.setEncryptedRefreshToken("N/a");
 			DatabaseManager.getManager().updateSettings(settings);
 		}
-		
+
 		//Delete everything that is specific to the calendar...
 		DatabaseManager.getManager().deleteCalendar(data);
 		DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 		DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
 		DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
 		AnnouncementQueueManager.getManager().dequeue(settings.getGuildID());
-		
+
 		return true;
+	}
+
+	public static boolean calendarExists(CalendarData data, GuildSettings settings) {
+		try {
+			if (settings.useExternalCalendar()) {
+				return CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute() != null;
+			} else {
+				return CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute() != null;
+			}
+		} catch (GoogleJsonResponseException ge) {
+			if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
+				//Calendar does not exist... remove from db...
+				settings.setUseExternalCalendar(false);
+				settings.setEncryptedRefreshToken("N/a");
+				settings.setEncryptedAccessToken("N/a");
+				DatabaseManager.getManager().updateSettings(settings);
+
+				DatabaseManager.getManager().deleteCalendar(data);
+				DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
+				DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
+				DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
+				AnnouncementQueueManager.getManager().dequeue(settings.getGuildID());
+
+				return false;
+			} else {
+				ExceptionHandler.sendException(null, "Unknown google error when checking for calendar exist", ge, CalendarUtils.class);
+				return false;
+			}
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Unknown error when checking for calendar exist", e, CalendarUtils.class);
+			return false;
+		}
 	}
 }
