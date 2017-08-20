@@ -76,11 +76,11 @@ public class CalendarUtils {
 				return false;
 			} else {
 				ExceptionHandler.sendException(null, "Unknown google error when checking for calendar exist", ge, CalendarUtils.class);
-				return false;
+				return true;
 			}
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "Unknown error when checking for calendar exist", e, CalendarUtils.class);
-			return false;
+			return true;
 		}
 	}
 }

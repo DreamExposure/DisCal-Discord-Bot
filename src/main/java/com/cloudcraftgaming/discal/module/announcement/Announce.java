@@ -195,6 +195,10 @@ public class Announce extends TimerTask {
 				long guildId = guild.getLongID();
 				//TODO: Add multiple calendar support...
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+				if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
+					continue;
+				}
+
 				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
 						try {
