@@ -32,13 +32,6 @@ public class UserUtils {
 	}
 
 	/**
-	 * Gets a user on the guild
-	 *
-	 * @param toLookFor The name or ID, if the user was mentioned this can be anything
-	 * @param m         The message, incase of mention
-	 * @return The ID of the user found.
-	 */
-	/**
 	 * Grabs a user from a string
 	 *
 	 * @param toLookFor The String to look with
@@ -47,9 +40,6 @@ public class UserUtils {
 	 */
 	public static long getUser(String toLookFor, IGuild guild) {
 		toLookFor = toLookFor.trim();
-
-		List<String> lol = new ArrayList<>();
-		String k = lol.stream().filter(s -> s.length() == 4).findFirst().orElse(null);
 
 		if (toLookFor.matches("<@!?[0-9]+>")) {
 			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
