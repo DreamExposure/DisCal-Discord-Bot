@@ -5,6 +5,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,38 +60,29 @@ public class RoleUtils {
 		}
 	}
 
-	public static long getRole(String toLookFor, IGuild guild) {
-		return getRole(toLookFor, null, guild);
-	}
 
 	public static long getRole(String toLookFor, IMessage m) {
-		return getRole(toLookFor, m, m.getGuild());
+		return getRole(toLookFor, m.getGuild());
 	}
 
-	public static long getRole(String toLookFor, IMessage m, IGuild guild) {
+	public static long getRole(String toLookFor, IGuild guild) {
 		toLookFor = toLookFor.trim();
 		final String lower = toLookFor.toLowerCase();
-		long res = 0;
-
-		if (m !=null && !m.getRoleMentions().isEmpty()) {
-			res = m.getRoleMentions().get(0).getLongID();
-		}
 
 		if (toLookFor.matches("<@&[0-9]+>")) {
-			IRole u = guild.getRoleByID(Long.parseUnsignedLong(toLookFor.replaceAll("[^0-9]", "")));
-			if (u != null) {
-				return u.getLongID();
+			IRole exists = guild.getRoleByID(Long.parseLong(toLookFor.replaceAll("[<@&>]", "")));
+			if (exists != null) {
+				return exists.getLongID();
 			}
 		}
-		List<IRole> roles = guild.getRoles().stream().filter(r -> r.getName().toLowerCase().contains(lower)
-				|| r.getName().equalsIgnoreCase(lower)
-				|| r.getStringID().equals(lower)).collect(Collectors.toList());
-		if (res == 0) {
-			if (!roles.isEmpty()) {
-				res = roles.get(0).getLongID();
-			}
+		List<IRole> roles = new ArrayList<>();
+		List<IRole> rs = guild.getRoles();
+		roles.addAll(rs.stream().filter(r -> r.getName().equalsIgnoreCase(lower)).collect(Collectors.toList()));
+		roles.addAll(rs.stream().filter(r -> r.getName().toLowerCase().contains(lower)).collect(Collectors.toList()));
+		if (!roles.isEmpty()) {
+			return roles.get(0).getLongID();
 		}
 
-		return res;
+		return 0;
 	}
 }

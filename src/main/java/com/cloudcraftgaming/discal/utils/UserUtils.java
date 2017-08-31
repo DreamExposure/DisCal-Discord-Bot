@@ -5,6 +5,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +26,9 @@ public class UserUtils {
 	}
 
 
-	public static long getUser(String toLookFor, IGuild guild) {
-		return getUser(toLookFor, null, guild);
-	}
 
 	public static long getUser(String toLookFor, IMessage m) {
-		return getUser(toLookFor, m, m.getGuild());
+		return getUser(toLookFor,m.getGuild());
 	}
 
 	/**
@@ -40,32 +38,40 @@ public class UserUtils {
 	 * @param m         The message, incase of mention
 	 * @return The ID of the user found.
 	 */
-	public static long getUser(String toLookFor, IMessage m, IGuild guild) {
+	/**
+	 * Grabs a user from a string
+	 *
+	 * @param toLookFor The String to look with
+	 * @param guild     The guild
+	 * @return The user if found, null otherwise
+	 */
+	public static long getUser(String toLookFor, IGuild guild) {
 		toLookFor = toLookFor.trim();
-		final String lower = toLookFor.toLowerCase();
 
-		long res = 0;
+		List<String> lol = new ArrayList<>();
+		String k = lol.stream().filter(s -> s.length() == 4).findFirst().orElse(null);
 
-		if (m != null && !m.getMentions().isEmpty())
-			res = m.getMentions().get(0).getLongID();
-
-
-		if (toLookFor.matches("[0-9]+")) {
-			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor));
-			if (u != null) {
-				return Long.parseUnsignedLong(toLookFor);
+		if (toLookFor.matches("<@!?[0-9]+>")) {
+			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
+			if (exists != null) {
+				return exists.getLongID();
 			}
 		}
-		List<IUser> users = guild.getUsers().stream()
-				.filter(u -> u.getName().toLowerCase().contains(lower)
-						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
-						|| u.getDisplayName(guild).toLowerCase().contains(lower)
-						|| u.getDisplayName(guild).equalsIgnoreCase(lower))
-				.collect(Collectors.toList());
-		if (!users.isEmpty())
-			res = users.get(0).getLongID();
 
-		return res;
+		final String lower = toLookFor.toLowerCase();
+		List<IUser> users = new ArrayList<>();
+		List<IUser> us = guild.getUsers();
+		users.addAll(us.stream().filter(u -> u.getName().equalsIgnoreCase(lower)).collect(Collectors.toList()));
+		users.addAll(us.stream().filter(u -> u.getName().toLowerCase().contains(lower)).collect(Collectors.toList()));
+		users.addAll(us.stream().filter(u -> (u.getName() + "#" + u.getDiscriminator()).equalsIgnoreCase(lower)).collect(Collectors.toList()));
+		users.addAll(us.stream().filter(u -> u.getDiscriminator().equalsIgnoreCase(lower)).collect(Collectors.toList()));
+		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).equalsIgnoreCase(lower)).collect(Collectors.toList()));
+		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).toLowerCase().contains(lower)).collect(Collectors.toList()));
+		if (!users.isEmpty()) {
+			return users.get(0).getLongID();
+		}
+
+		return 0;
 	}
 
 	public static IUser getIUser(String toLookFor, IMessage m, IGuild guild) {
