@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.internal.data;
 
+import javax.annotation.Nullable;
+
 /**
  * Created by Nova Fox on 6/1/17.
  * Website: www.cloudcraftgaming.com
@@ -42,7 +44,7 @@ public class EventData {
 		eventEnd = _eventEnd;
 	}
 
-	public void setImageLink(String _link) {
+	public void setImageLink(@Nullable String _link) {
 		imageLink = _link;
 	}
 

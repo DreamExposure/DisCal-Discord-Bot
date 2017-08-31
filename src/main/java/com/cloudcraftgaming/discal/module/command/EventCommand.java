@@ -750,7 +750,18 @@ public class EventCommand implements ICommand {
     	if (args.length == 2) {
     		String value = args[1];
 			if (EventCreator.getCreator().hasPreEvent(guildId)) {
-				if (ImageUtils.validate(value)) {
+				if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove") || value.equalsIgnoreCase("clear")) {
+					//Delete picture from event
+					EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(null);
+					
+					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+						Message.deleteMessage(event);
+						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+						EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), event));
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), event);
+					}
+				} else if (ImageUtils.validate(value)) {
 					EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(value);
 
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
