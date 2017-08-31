@@ -22,12 +22,11 @@ import java.util.UUID;
 public class AnnouncementQueueManager {
 	private static AnnouncementQueueManager instance;
 	
-	private final Timer timer;
+	private Timer timer;
 
 	private ArrayList<AnnouncementQueueItem> queue = new ArrayList<>();
 
 	private AnnouncementQueueManager() {
-		timer = new Timer();
 	} //Prevent initialization
 
 	public static AnnouncementQueueManager getManager() {
@@ -38,6 +37,7 @@ public class AnnouncementQueueManager {
 	}
 	
 	public void init() {
+		timer = new Timer();
 		//Start main queue
 		timer.schedule(new TimerTask() {
 			@Override
