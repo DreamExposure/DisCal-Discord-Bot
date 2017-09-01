@@ -60,6 +60,7 @@ public class Main {
         executor.registerCommand(new TimeCommand());
         executor.registerCommand(new EventListCommand());
         executor.registerCommand(new EventCommand());
+        executor.registerCommand(new RsvpCommand());
         executor.registerCommand(new AnnouncementCommand());
         executor.registerCommand(new DevCommand());
 
