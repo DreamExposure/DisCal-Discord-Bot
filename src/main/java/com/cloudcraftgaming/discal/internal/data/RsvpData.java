@@ -14,7 +14,8 @@ public class RsvpData {
 	private String eventId;
 	private long eventEnd;
 
-	private final ArrayList<String> going = new ArrayList<>();
+	private final ArrayList<String> goingOnTime = new ArrayList<>();
+	private final ArrayList<String> goingLate = new ArrayList<>();
 	private final ArrayList<String> notGoing = new ArrayList<>();
 	private final ArrayList<String> undecided = new ArrayList<>();
 
@@ -35,8 +36,12 @@ public class RsvpData {
 		return eventEnd;
 	}
 
-	public ArrayList<String> getGoing() {
-		return going;
+	public ArrayList<String> getGoingOnTime() {
+		return goingOnTime;
+	}
+	
+	public ArrayList<String> getGoingLate() {
+		return goingLate;
 	}
 
 	public ArrayList<String> getNotGoing() {
@@ -47,10 +52,24 @@ public class RsvpData {
 		return undecided;
 	}
 
-	public String getGoingString() {
+	public String getGoingOnTimeString() {
 		StringBuilder goingString = new StringBuilder();
 		Integer i = 0;
-		for (String u : going) {
+		for (String u : goingOnTime) {
+			if (i == 0) {
+				goingString = new StringBuilder(u);
+			} else {
+				goingString.append(",").append(u);
+			}
+			i++;
+		}
+		return goingString.toString();
+	}
+	
+	public String getGoingLateString() {
+		StringBuilder goingString = new StringBuilder();
+		Integer i = 0;
+		for (String u : goingLate) {
 			if (i == 0) {
 				goingString = new StringBuilder(u);
 			} else {
@@ -98,10 +117,17 @@ public class RsvpData {
 		eventEnd = _eventEnd;
 	}
 
-	public void setGoingFromString(String goingList) {
+	public void setGoingOnTimeFromString(String goingList) {
 		if (goingList != null) {
 			String[] subs = goingList.split(",");
-			Collections.addAll(going, subs);
+			Collections.addAll(goingOnTime, subs);
+		}
+	}
+	
+	public void setGoingLateFromString(String goingList) {
+		if (goingList != null) {
+			String[] subs = goingList.split(",");
+			Collections.addAll(goingLate, subs);
 		}
 	}
 
@@ -121,6 +147,6 @@ public class RsvpData {
 
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {
-		return going.size() > 0 || notGoing.size() > 0 || undecided.size() > 0;
+		return goingOnTime.size() > 0 || goingLate.size() > 0 || notGoing.size() > 0 || undecided.size() > 0;
 	}
 }
