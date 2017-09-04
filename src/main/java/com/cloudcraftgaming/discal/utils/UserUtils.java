@@ -91,5 +91,15 @@ public class UserUtils {
 
 		return res;
 	}
-
+	
+	public static ArrayList<IUser> getUsers(ArrayList<String> userIds, IGuild guild) {
+		ArrayList<IUser> users = new ArrayList<>();
+		for (String u : userIds) {
+			IUser user = getIUser(u, null, guild);
+			if (user != null) {
+				users.add(user);
+			}
+		}
+		return users;
+	}
 }

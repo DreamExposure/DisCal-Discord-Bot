@@ -144,6 +144,22 @@ public class RsvpData {
 			Collections.addAll(undecided, subs);
 		}
 	}
+	
+	//Functions
+	public void removeCompletely(String userId) {
+		if (goingOnTime.contains(userId)) {
+			goingOnTime.remove(userId);
+		}
+		if (goingLate.contains(userId)) {
+			goingLate.remove(userId);
+		}
+		if (notGoing.contains(userId)) {
+			notGoing.remove(userId);
+		}
+		if (undecided.contains(userId)) {
+			undecided.remove(userId);
+		}
+	}
 
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {

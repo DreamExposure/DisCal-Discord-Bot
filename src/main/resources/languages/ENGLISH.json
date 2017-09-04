@@ -207,6 +207,16 @@
   "AddCalendar.Auth.Poll.Failure.ListCalendars": "I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!",
   "AddCalendar.Auth.Poll.Success": "Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use in your guild with `!addCalendar <calendar ID>` **IN YOUR GUILD**! %lb% %lb% To make this easier for you, here is a list of the calendars you can select (This may take while to list if you have a lot of calendars):",
 
+  "RSVP.going.specify": "Please specify the event ID with `!rsvp going <event ID>`",
+  "RSVP.going.success": "You have successfully RSVPed that you will be going on time to the event!",
+  "RSVP.late.specify": "Please specify the event ID with `!rsvp late <event ID>`",
+  "RSVP.late.success": "You have successfully RSVPed that you will be going late to the event!",
+  "RSVP.not.specify": "Please specify the event ID with `!rsvp not <event ID>`",
+  "RSVP.not.success": "You have successfully RSVPed that you will NOT be going to the event!",
+  "RSVP.unsure.specify": "Please specify the event ID with `!rsvp unsure <event ID>`",
+  "RSVP.unsure.success": "You have successfully RSVPed that you are unsure if you are going to the event!",
+  "RSVP.list.specify": "Please specify the event ID with `!rsvp list <event ID>`",
+
   "Embed.AddCalendar.Code.Title": "User Auth",
   "Embed.AddCalendar.Code.Code": "Code",
   "Embed.AddCalendar.Code.Footer": "Please visit the URL (title) and enter the code!",
@@ -313,10 +323,15 @@
   "Embed.Time.Time": "Current Time",
   "Embed.Time.TimeZone": "TimeZone",
   "Embed.Time.Footer": "This is the current calendar time.",
+  "Embed.RSVP.List.Title": "RSVPs for Event",
 
+  "Embed.RSVP.List.Footer": "`!event view <ID>` for event info",
+
+
+  "Notifications.Event.NotExist": "The specified event does not exist and/or has been deleted!",
   "Notification.Args.Few": "You must specify a function to execute! Use '!help` for a full list of valid commands and functions!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
-  "Notification.Args.InvalidSubCmd": "Invalid sub command!",
+  "Notification.Args.InvalidSubCmd": "Invalid sub command! Use `!help <command>` for more info!",
   "Notification.Args.Value.Integer": "The specified value must be a number! (EX: `1` or `13`)",
   "Notification.Disabled": "This option is disabled for testing only!",
   "Notification.Patron": "This feature is currently patron only! Want access to it first? Support us on patreon here: https://www.patreon.com/Novafox",
