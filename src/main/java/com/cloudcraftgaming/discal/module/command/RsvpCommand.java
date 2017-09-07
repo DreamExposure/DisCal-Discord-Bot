@@ -32,7 +32,7 @@ public class RsvpCommand implements ICommand {
 	public String getCommand() {
 		return "rsvp";
 	}
-	
+
 	/**
 	 * Gets the short aliases of the command this object is responsible for.
 	 * </br>
@@ -44,7 +44,7 @@ public class RsvpCommand implements ICommand {
 	public ArrayList<String> getAliases() {
 		return new ArrayList<>();
 	}
-	
+
 	/**
 	 * Gets the info on the command (not sub command) to be used in help menus.
 	 *
@@ -55,16 +55,16 @@ public class RsvpCommand implements ICommand {
 		CommandInfo info = new CommandInfo("rsvp");
 		info.setDescription("Confirms attendance to an event");
 		info.setExample("!rsvp <subCommand> <eventId>");
-		
+
 		info.getSubCommands().put("going", "Marks you are going to event");
 		info.getSubCommands().put("late", "Marks that you will be late to event");
 		info.getSubCommands().put("not", "Marks that you are NOT going to event");
 		info.getSubCommands().put("unsure", "Marks that you may or may not go to event");
 		info.getSubCommands().put("list", "Lists who has RSVPed to event");
-		
+
 		return info;
 	}
-	
+
 	/**
 	 * Issues the command this Object is responsible for.
 	 *
@@ -89,6 +89,9 @@ public class RsvpCommand implements ICommand {
 					case "unsure":
 						moduleUnsure(args, event, settings);
 						break;
+					case "remove":
+						moduleRemove(args, event, settings);
+						break;
 					case "list":
 						moduleList(args, event, settings);
 						break;
@@ -104,7 +107,7 @@ public class RsvpCommand implements ICommand {
 		}
 		return false;
 	}
-	
+
 	private void moduleGoing(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
@@ -112,7 +115,7 @@ public class RsvpCommand implements ICommand {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
 				data.removeCompletely(event.getAuthor().getStringID());
 				data.getGoingOnTime().add(event.getAuthor().getStringID());
-				
+
 				DatabaseManager.getManager().updateRsvpData(data);
 				Message.sendMessage(MessageManager.getMessage("RSVP.going.success", settings), event);
 			} else {
@@ -122,7 +125,7 @@ public class RsvpCommand implements ICommand {
 			Message.sendMessage(MessageManager.getMessage("RSVP.going.specify", settings), event);
 		}
 	}
-	
+
 	private void moduleGoingLate(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
@@ -130,7 +133,7 @@ public class RsvpCommand implements ICommand {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
 				data.removeCompletely(event.getAuthor().getStringID());
 				data.getGoingLate().add(event.getAuthor().getStringID());
-				
+
 				DatabaseManager.getManager().updateRsvpData(data);
 				Message.sendMessage(MessageManager.getMessage("RSVP.late.success", settings), event);
 			} else {
@@ -140,7 +143,7 @@ public class RsvpCommand implements ICommand {
 			Message.sendMessage(MessageManager.getMessage("RSVP.late.specify", settings), event);
 		}
 	}
-	
+
 	private void moduleNotGoing(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
@@ -148,7 +151,7 @@ public class RsvpCommand implements ICommand {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
 				data.removeCompletely(event.getAuthor().getStringID());
 				data.getNotGoing().add(event.getAuthor().getStringID());
-				
+
 				DatabaseManager.getManager().updateRsvpData(data);
 				Message.sendMessage(MessageManager.getMessage("RSVP.not.success", settings), event);
 			} else {
@@ -158,7 +161,24 @@ public class RsvpCommand implements ICommand {
 			Message.sendMessage(MessageManager.getMessage("RSVP.not.specify", settings), event);
 		}
 	}
-	
+
+	private void moduleRemove(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		if (args.length == 2) {
+			String eventId = args[1];
+			if (EventUtils.eventExists(settings, eventId)) {
+				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+				data.removeCompletely(event.getAuthor().getStringID());
+
+				DatabaseManager.getManager().updateRsvpData(data);
+				Message.sendMessage(MessageManager.getMessage("RSVP.remove.success", settings), event);
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("RSVP.remove.specify", settings), event);
+		}
+	}
+
 	private void moduleUnsure(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
@@ -166,7 +186,7 @@ public class RsvpCommand implements ICommand {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
 				data.removeCompletely(event.getAuthor().getStringID());
 				data.getUndecided().add(event.getAuthor().getStringID());
-				
+
 				DatabaseManager.getManager().updateRsvpData(data);
 				Message.sendMessage(MessageManager.getMessage("RSVP.unsure.success", settings), event);
 			} else {
@@ -176,13 +196,13 @@ public class RsvpCommand implements ICommand {
 			Message.sendMessage(MessageManager.getMessage("RSVP.unsure.specify", settings), event);
 		}
 	}
-	
+
 	private void moduleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				
+
 				Message.sendMessage(getRsvpEmbed(data, settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NoExist", settings), event);
@@ -191,17 +211,17 @@ public class RsvpCommand implements ICommand {
 			Message.sendMessage(MessageManager.getMessage("RSVP.list.specify", settings), event);
 		}
 	}
-	
-	
+
+
 	private EmbedObject getRsvpEmbed(RsvpData data, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
 		em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
 		em.appendField("Event ID", data.getEventId(), false);
-		
+
 		IGuild g = Main.client.getGuildByID(settings.getGuildID());
-		
+
 		StringBuilder onTime = new StringBuilder();
 		for (IUser u : UserUtils.getUsers(data.getGoingOnTime(), g)) {
 			onTime.append(u.getName());
@@ -218,15 +238,15 @@ public class RsvpCommand implements ICommand {
 		for (IUser u : UserUtils.getUsers(data.getNotGoing(), g)) {
 			notGoing.append(u.getName());
 		}
-		
+
 		em.appendField("On Time", onTime.toString(), true);
 		em.appendField("Late", late.toString(), true);
 		em.appendField("Unsure", unsure.toString(), true);
 		em.appendField("Not Going", notGoing.toString(), true);
-		
+
 		em.withFooterText(MessageManager.getMessage("Embed.RSVP.List.Footer", settings));
 		em.withColor(56, 138, 237);
-		
+
 		return em.build();
 	}
 }

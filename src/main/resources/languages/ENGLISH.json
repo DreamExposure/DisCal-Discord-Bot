@@ -215,6 +215,8 @@
   "RSVP.not.success": "You have successfully RSVPed that you will NOT be going to the event!",
   "RSVP.unsure.specify": "Please specify the event ID with `!rsvp unsure <event ID>`",
   "RSVP.unsure.success": "You have successfully RSVPed that you are unsure if you are going to the event!",
+  "RSVP.remove.specify": "Please specify the event ID with `!rsvp remove <event ID>`",
+  "RSVP.remove.success": "You have successfully removed your RSVP to the event!",
   "RSVP.list.specify": "Please specify the event ID with `!rsvp list <event ID>`",
 
   "Embed.AddCalendar.Code.Title": "User Auth",
