@@ -60,6 +60,7 @@ public class RsvpCommand implements ICommand {
 		info.getSubCommands().put("late", "Marks that you will be late to event");
 		info.getSubCommands().put("not", "Marks that you are NOT going to event");
 		info.getSubCommands().put("unsure", "Marks that you may or may not go to event");
+		info.getSubCommands().put("remove", "Removes your RSVP from the event");
 		info.getSubCommands().put("list", "Lists who has RSVPed to event");
 
 		return info;
@@ -224,25 +225,41 @@ public class RsvpCommand implements ICommand {
 
 		StringBuilder onTime = new StringBuilder();
 		for (IUser u : UserUtils.getUsers(data.getGoingOnTime(), g)) {
-			onTime.append(u.getName());
+			onTime.append(u.getName()).append(", ");
 		}
 		StringBuilder late = new StringBuilder();
 		for (IUser u : UserUtils.getUsers(data.getGoingLate(), g)) {
-			late.append(u.getName());
+			late.append(u.getName()).append(", ");
 		}
 		StringBuilder unsure = new StringBuilder();
 		for (IUser u : UserUtils.getUsers(data.getUndecided(), g)) {
-			unsure.append(u.getName());
+			unsure.append(u.getName()).append(", ");
 		}
 		StringBuilder notGoing = new StringBuilder();
 		for (IUser u : UserUtils.getUsers(data.getNotGoing(), g)) {
-			notGoing.append(u.getName());
+			notGoing.append(u.getName()).append(", ");
 		}
 
-		em.appendField("On Time", onTime.toString(), true);
-		em.appendField("Late", late.toString(), true);
-		em.appendField("Unsure", unsure.toString(), true);
-		em.appendField("Not Going", notGoing.toString(), true);
+		if (onTime.toString().isEmpty()) {
+			em.appendField("On time", "N/a", true);
+		} else {
+			em.appendField("On Time", onTime.toString(), true);
+		}
+		if (late.toString().isEmpty()) {
+			em.appendField("Late", "N/a", true);
+		} else {
+			em.appendField("Late", late.toString(), true);
+		}
+		if (unsure.toString().isEmpty()) {
+			em.appendField("Unsure", "N/a", true);
+		} else {
+			em.appendField("Unsure", unsure.toString(), true);
+		}
+		if (notGoing.toString().isEmpty()) {
+			em.appendField("Not Going", "N/a", true);
+		} else {
+			em.appendField("Not Going", notGoing.toString(), true);
+		}
 
 		em.withFooterText(MessageManager.getMessage("Embed.RSVP.List.Footer", settings));
 		em.withColor(56, 138, 237);

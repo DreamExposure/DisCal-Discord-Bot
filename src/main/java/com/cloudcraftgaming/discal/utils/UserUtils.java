@@ -91,11 +91,20 @@ public class UserUtils {
 
 		return res;
 	}
-	
+
+	public static IUser getUserFromID(String id, IGuild guild) {
+		try {
+			return guild.getUserByID(Long.parseUnsignedLong(id));
+		} catch (Exception e) {
+			//Ignore. Probably invalid ID.
+			return null;
+		}
+	}
+
 	public static ArrayList<IUser> getUsers(ArrayList<String> userIds, IGuild guild) {
 		ArrayList<IUser> users = new ArrayList<>();
 		for (String u : userIds) {
-			IUser user = getIUser(u, null, guild);
+			IUser user = getUserFromID(u, guild);
 			if (user != null) {
 				users.add(user);
 			}
