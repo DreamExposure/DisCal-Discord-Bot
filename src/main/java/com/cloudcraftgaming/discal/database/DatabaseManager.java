@@ -217,7 +217,7 @@ public class DatabaseManager {
 
 					ps.close();
 					statement.close();
-					
+
 					//Since settings can be changed in a lot of places, this is the only easy place to call this.
 					AnnouncementQueueManager.getManager().update(settings);
 				}
@@ -442,11 +442,11 @@ public class DatabaseManager {
 				} else {
 					//Data present, update.
 					String update = "UPDATE " + rsvpTableName
-							+ " SET EVENT_END = ?, "
+							+ " SET EVENT_END = ?,"
 							+ " GOING_ON_TIME = ?,"
 							+ " GOING_LATE = ?,"
 							+ " NOT_GOING = ?,"
-							+ " UNDECIDED = ?,"
+							+ " UNDECIDED = ?"
 							+ " WHERE EVENT_ID = ?";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 
@@ -650,7 +650,7 @@ public class DatabaseManager {
 				String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
 
 				Statement statement = databaseInfo.getConnection().createStatement();
-				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= `" + String.valueOf(guildId) + "`;";
+				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
 				ResultSet res = statement.executeQuery(query);
 
 				while (res.next()) {
