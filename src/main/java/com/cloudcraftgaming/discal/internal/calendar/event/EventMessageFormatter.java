@@ -137,7 +137,7 @@ public class EventMessageFormatter {
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
-        if (event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
+		if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
         	em.withImage(event.getEventData().getImageLink());
 		}
         if (event.isEditing()) {
