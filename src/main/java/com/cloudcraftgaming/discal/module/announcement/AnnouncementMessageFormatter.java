@@ -183,6 +183,10 @@ public class AnnouncementMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
         }
 
+		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+		}
+
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
         }
@@ -204,7 +208,7 @@ public class AnnouncementMessageFormatter {
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
         IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
-	    
+
 	    Message.sendMessage(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
 
@@ -255,6 +259,10 @@ public class AnnouncementMessageFormatter {
 
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
         }
+
+		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+		}
 
         if (!settings.usingSimpleAnnouncements()) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
@@ -335,7 +343,7 @@ public class AnnouncementMessageFormatter {
         return message;
     }
 
-    public static String getSubscriberMentions(Announcement a, IGuild guild) {
+    private static String getSubscriberMentions(Announcement a, IGuild guild) {
         StringBuilder userMentions = new StringBuilder();
         for (String userId : a.getSubscriberUserIds()) {
             try {

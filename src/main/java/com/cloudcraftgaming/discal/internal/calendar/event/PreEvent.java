@@ -28,6 +28,8 @@ public class PreEvent {
 
     private EventColor color;
 
+	private String location;
+
     private boolean recur;
     private Recurrence recurrence;
 
@@ -77,6 +79,9 @@ public class PreEvent {
         if (e.getDescription() != null) {
             description = e.getDescription();
         }
+		if (e.getLocation() != null) {
+			location = e.getLocation();
+		}
 
         startDateTime = e.getStart();
         endDateTime = e.getEnd();
@@ -165,6 +170,10 @@ public class PreEvent {
     EventColor getColor() {
         return color;
     }
+
+	public String getLocation() {
+		return location;
+	}
 
     /**
      * Gets whether or not the vent should recur.
@@ -258,6 +267,10 @@ public class PreEvent {
     public void setColor(EventColor _color) {
         color = _color;
     }
+
+	public void setLocation(String _location) {
+		location = _location;
+	}
 
     /**
      * Sets whether or not the event should recur.

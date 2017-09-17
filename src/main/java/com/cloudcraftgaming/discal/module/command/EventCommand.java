@@ -76,6 +76,8 @@ public class EventCommand implements ICommand {
         info.getSubCommands().put("description", "Sets the description of the event");
         info.getSubCommands().put("color", "Sets the color of the event");
         info.getSubCommands().put("colour", "Sets the colour of the event");
+		info.getSubCommands().put("location", "Sets the location of the event");
+		info.getSubCommands().put("loc", "Sets the location of the event");
         info.getSubCommands().put("recur", "True/False whether or not the event should recur");
         info.getSubCommands().put("frequency", "Sets how often the event should recur");
         info.getSubCommands().put("freq", "Sets how often the event should recur");
@@ -173,6 +175,12 @@ public class EventCommand implements ICommand {
 					break;
 				case "colour":
 					moduleColor(args, event, settings);
+					break;
+				case "location":
+					moduleLocation(args, event, settings);
+					break;
+				case "loc":
+					moduleLocation(args, event, settings);
 					break;
 				case "image":
 					moduleAttachment(args, event, settings);
@@ -745,6 +753,33 @@ public class EventCommand implements ICommand {
 		}
     }
 
+	private void moduleLocation(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		long guildId = event.getGuild().getLongID();
+		if (args.length > 1) {
+			if (EventCreator.getCreator().hasPreEvent(guildId)) {
+				String content = GeneralUtils.getContent(args, 1);
+				EventCreator.getCreator().getPreEvent(guildId).setLocation(content);
+				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+					Message.deleteMessage(event);
+					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Location.Success.New", settings), event));
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Creator.Event.Location.Success", "%location%", content, settings), event);
+				}
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+			}
+		} else {
+			if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
+				Message.deleteMessage(event);
+				Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
+				EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), MessageManager.getMessage("Creator.Event.Location.Specify", settings), event));
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Creator.Event.Location.Specify", settings), event);
+			}
+		}
+	}
+
     private void moduleAttachment(String[] args, MessageReceivedEvent event, GuildSettings settings) {
     	long guildId = event.getGuild().getLongID();
     	if (args.length == 2) {
@@ -753,7 +788,7 @@ public class EventCommand implements ICommand {
 				if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove") || value.equalsIgnoreCase("clear")) {
 					//Delete picture from event
 					EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(null);
-					
+
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 						Message.deleteMessage(event);
 						Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));

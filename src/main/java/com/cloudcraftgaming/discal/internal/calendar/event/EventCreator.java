@@ -220,6 +220,10 @@ public class EventCreator {
                 if (!preEvent.getColor().equals(EventColor.NONE)) {
 					event.setColorId(String.valueOf(preEvent.getColor().getId()));
 				}
+				if (preEvent.getLocation() != null || !preEvent.getLocation().equalsIgnoreCase("")) {
+					event.setLocation(preEvent.getLocation());
+				}
+
 
                 //Set recurrence
                 if (preEvent.shouldRecur()) {
@@ -268,8 +272,8 @@ public class EventCreator {
 						}
                         terminate(e);
 	                    AnnouncementQueueManager.getManager().update(confirmed);
-	                    
-                        EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
+
+						EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
                         response.setEdited(true);
                         return response;
                     } catch (Exception ex) {

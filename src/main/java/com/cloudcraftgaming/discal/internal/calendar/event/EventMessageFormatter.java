@@ -77,6 +77,9 @@ public class EventMessageFormatter {
         } catch (Exception e1) {
             em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), "Error/Unknown", true);
         }
+		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+		}
         //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
         em.withFooterText(MessageManager.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings));
@@ -114,6 +117,9 @@ public class EventMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
         }
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings, false), true);
+		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+		}
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
         em.withUrl(event.getHtmlLink());
         try {
@@ -174,6 +180,12 @@ public class EventMessageFormatter {
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
+		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+		} else {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
+		}
+
         em.withFooterText(MessageManager.getMessage("Embed.Event.Pre.Key", settings));
         EventColor ec = event.getColor();
         em.withColor(ec.getR(), ec.getG(), ec.getB());
@@ -197,6 +209,9 @@ public class EventMessageFormatter {
 		}
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
+		if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), false);
+		}
         em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));
         em.withUrl(ecr.getEvent().getHtmlLink());
         try {

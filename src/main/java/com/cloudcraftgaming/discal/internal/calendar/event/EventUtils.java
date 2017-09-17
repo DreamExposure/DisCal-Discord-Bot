@@ -70,6 +70,7 @@ public class EventUtils {
         PreEvent pe = new PreEvent(guildId);
         pe.setSummary(event.getSummary());
         pe.setDescription(event.getDescription());
+		pe.setLocation(event.getLocation());
         if (event.getColorId() != null) {
             pe.setColor(EventColor.fromNameOrHexOrID(event.getColorId()));
         } else {
