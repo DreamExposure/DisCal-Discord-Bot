@@ -220,7 +220,7 @@ public class EventCreator {
                 if (!preEvent.getColor().equals(EventColor.NONE)) {
 					event.setColorId(String.valueOf(preEvent.getColor().getId()));
 				}
-				if (preEvent.getLocation() != null || !preEvent.getLocation().equalsIgnoreCase("")) {
+				if (preEvent.getLocation() != null && !preEvent.getLocation().equalsIgnoreCase("")) {
 					event.setLocation(preEvent.getLocation());
 				}
 
