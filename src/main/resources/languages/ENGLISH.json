@@ -334,6 +334,7 @@
 
 
   "Notifications.Event.NotExist": "The specified event does not exist and/or has been deleted!",
+  "Notifications.Event.InPast": "The specified event has already happened! You cannot use this function for a past event!",
   "Notification.Args.Few": "You must specify a function to execute! Use '!help` for a full list of valid commands and functions!",
   "Notification.Args.Invalid": "Invalid function! Please view `!help` for a full list of valid commands and functions!",
   "Notification.Args.InvalidSubCmd": "Invalid sub command! Use `!help <command>` for more info!",

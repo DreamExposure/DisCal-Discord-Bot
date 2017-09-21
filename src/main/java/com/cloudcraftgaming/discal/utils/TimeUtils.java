@@ -1,6 +1,13 @@
 package com.cloudcraftgaming.discal.utils;
 
+import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.calendar.event.PreEvent;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -19,7 +26,7 @@ public class TimeUtils {
      * @param timezone The timezone of the calendar this event is for.
      * @return <code>true</code> if the date is in the past, otherwise <code>false</code>.
      */
-    public static Boolean inPast(String dateRaw, TimeZone timezone) {
+	public static boolean inPast(String dateRaw, TimeZone timezone) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
             sdf.setTimeZone(timezone);
@@ -32,6 +39,44 @@ public class TimeUtils {
         }
     }
 
+	public static boolean inPast(Event event) {
+		if (event.getStart().getDateTime() != null) {
+			return event.getStart().getDateTime().getValue() > System.currentTimeMillis();
+		} else {
+			return event.getStart().getDate().getValue() > System.currentTimeMillis();
+		}
+	}
+
+	public static boolean inPast(String eventId, GuildSettings settings) {
+		//TODO: Support multiple calendars
+		if (EventUtils.eventExists(settings, eventId)) {
+			if (settings.useExternalCalendar()) {
+				try {
+					Calendar service = CalendarAuth.getCalendarService(settings);
+					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
+					return inPast(e);
+				} catch (Exception e) {
+					ExceptionHandler.sendException(null, "Failed to get external calendar auth", e, TimeUtils.class);
+					//Return false and allow RSVP so user is not adversely affected.
+					return false;
+				}
+			} else {
+				try {
+					Calendar service = CalendarAuth.getCalendarService();
+					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
+					return inPast(e);
+				} catch (Exception e) {
+					ExceptionHandler.sendException(null, "Failed to get calendar auth", e, TimeUtils.class);
+					//Return false and allow RSVP so user is not adversely affected.
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+
     /**
      * Checks whether or not the end date is before the start date of the event.
      * @param endRaw The date to check in format (yyyy/MM/dd-HH:mm:ss).
@@ -39,7 +84,7 @@ public class TimeUtils {
      * @param event The event that is currently being created.
      * @return <code>true</code> if the end is before the start, otherwise <code>false</code>.
      */
-    public static Boolean endBeforeStart(String endRaw, TimeZone timezone, PreEvent event) {
+	public static boolean endBeforeStart(String endRaw, TimeZone timezone, PreEvent event) {
         if (event.getStartDateTime() != null) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
@@ -62,7 +107,7 @@ public class TimeUtils {
      * @param event The event that is currently being created.
      * @return <code>true</code> of the start is after the end, otherwise <code>false</code>.
      */
-    public static Boolean startAfterEnd(String startRaw, TimeZone timezone, PreEvent event) {
+	public static boolean startAfterEnd(String startRaw, TimeZone timezone, PreEvent event) {
         if (event.getEndDateTime() != null) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");

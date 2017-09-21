@@ -8,6 +8,7 @@ import com.cloudcraftgaming.discal.internal.data.RsvpData;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
+import com.cloudcraftgaming.discal.utils.TimeUtils;
 import com.cloudcraftgaming.discal.utils.UserUtils;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -113,12 +114,16 @@ public class RsvpCommand implements ICommand {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
-				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				data.removeCompletely(event.getAuthor().getStringID());
-				data.getGoingOnTime().add(event.getAuthor().getStringID());
+				if (!TimeUtils.inPast(eventId, settings)) {
+					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+					data.removeCompletely(event.getAuthor().getStringID());
+					data.getGoingOnTime().add(event.getAuthor().getStringID());
 
-				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.going.success", settings), event);
+					DatabaseManager.getManager().updateRsvpData(data);
+					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.going.success", settings), event);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -131,12 +136,16 @@ public class RsvpCommand implements ICommand {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
-				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				data.removeCompletely(event.getAuthor().getStringID());
-				data.getGoingLate().add(event.getAuthor().getStringID());
+				if (!TimeUtils.inPast(eventId, settings)) {
+					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+					data.removeCompletely(event.getAuthor().getStringID());
+					data.getGoingLate().add(event.getAuthor().getStringID());
 
-				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.late.success", settings), event);
+					DatabaseManager.getManager().updateRsvpData(data);
+					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.late.success", settings), event);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -149,12 +158,16 @@ public class RsvpCommand implements ICommand {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
-				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				data.removeCompletely(event.getAuthor().getStringID());
-				data.getNotGoing().add(event.getAuthor().getStringID());
+				if (!TimeUtils.inPast(eventId, settings)) {
+					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+					data.removeCompletely(event.getAuthor().getStringID());
+					data.getNotGoing().add(event.getAuthor().getStringID());
 
-				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.not.success", settings), event);
+					DatabaseManager.getManager().updateRsvpData(data);
+					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.not.success", settings), event);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -167,11 +180,15 @@ public class RsvpCommand implements ICommand {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
-				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				data.removeCompletely(event.getAuthor().getStringID());
+				if (!TimeUtils.inPast(eventId, settings)) {
+					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+					data.removeCompletely(event.getAuthor().getStringID());
 
-				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.remove.success", settings), event);
+					DatabaseManager.getManager().updateRsvpData(data);
+					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.remove.success", settings), event);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -184,12 +201,16 @@ public class RsvpCommand implements ICommand {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
-				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-				data.removeCompletely(event.getAuthor().getStringID());
-				data.getUndecided().add(event.getAuthor().getStringID());
+				if (!TimeUtils.inPast(eventId, settings)) {
+					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
+					data.removeCompletely(event.getAuthor().getStringID());
+					data.getUndecided().add(event.getAuthor().getStringID());
 
-				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.unsure.success", settings), event);
+					DatabaseManager.getManager().updateRsvpData(data);
+					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.unsure.success", settings), event);
+				} else {
+					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
