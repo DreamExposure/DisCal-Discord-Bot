@@ -209,8 +209,7 @@
   "AddCalendar.Auth.Poll.Failure.Expired": "Token expired! Please restart the authorization process if you have not connected to Google Calendar!",
   "AddCalendar.Auth.Poll.Failure.ListCalendars": "I have failed to list your calendars! Please specify the ID of the calendar that you want DisCal to use!",
   "AddCalendar.Auth.Poll.Success": "Calendars found! Please send the message of the ID of the calendar you wish to have DisCal use in your guild with `!addCalendar <calendar ID>` **IN YOUR GUILD**! %lb% %lb% To make this easier for you, here is a list of the calendars you can select (This may take while to list if you have a lot of calendars):",
-
-  "RSVP.going.specify": "Please specify the event ID with `!rsvp going <event ID>`",
+  "RSVP.going.specify": "Please specify the event ID with `!rsvp ontime <event ID>`",
   "RSVP.going.success": "You have successfully RSVPed that you will be going on time to the event!",
   "RSVP.late.specify": "Please specify the event ID with `!rsvp late <event ID>`",
   "RSVP.late.success": "You have successfully RSVPed that you will be going late to the event!",

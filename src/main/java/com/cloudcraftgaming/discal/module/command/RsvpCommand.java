@@ -56,7 +56,7 @@ public class RsvpCommand implements ICommand {
 		info.setDescription("Confirms attendance to an event");
 		info.setExample("!rsvp <subCommand> <eventId>");
 
-		info.getSubCommands().put("going", "Marks you are going to event");
+		info.getSubCommands().put("onTime", "Marks you are going to event");
 		info.getSubCommands().put("late", "Marks that you will be late to event");
 		info.getSubCommands().put("not", "Marks that you are NOT going to event");
 		info.getSubCommands().put("unsure", "Marks that you may or may not go to event");
@@ -78,7 +78,7 @@ public class RsvpCommand implements ICommand {
 		if (settings.isDevGuild()) {
 			if (args.length > 0) {
 				switch (args[0].toLowerCase()) {
-					case "going":
+					case "ontime":
 						moduleGoing(args, event, settings);
 						break;
 					case "late":
