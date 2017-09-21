@@ -78,7 +78,12 @@ public class EventMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), "Error/Unknown", true);
         }
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			if (event.getLocation().length() > 300) {
+				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			}
 		}
         //TODO: Add info on recurrence here.
         em.withUrl(event.getHtmlLink());
@@ -118,7 +123,12 @@ public class EventMessageFormatter {
         }
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings, false), true);
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			if (event.getLocation().length() > 300) {
+				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			}
 		}
         em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
         em.withUrl(event.getHtmlLink());
@@ -181,7 +191,12 @@ public class EventMessageFormatter {
         em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			if (event.getLocation().length() > 300) {
+				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			}
 		} else {
 			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
 		}
@@ -210,7 +225,12 @@ public class EventMessageFormatter {
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
         em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
 		if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), false);
+			if (ecr.getEvent().getLocation().length() > 300) {
+				String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), true);
+			}
 		}
         em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));
         em.withUrl(ecr.getEvent().getHtmlLink());

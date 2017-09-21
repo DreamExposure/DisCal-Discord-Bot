@@ -184,7 +184,12 @@ public class AnnouncementMessageFormatter {
         }
 
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			if (event.getLocation().length() > 300) {
+				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			}
 		}
 
         if (!settings.usingSimpleAnnouncements()) {
@@ -261,7 +266,12 @@ public class AnnouncementMessageFormatter {
         }
 
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			if (event.getLocation().length() > 300) {
+				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+			} else {
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+			}
 		}
 
         if (!settings.usingSimpleAnnouncements()) {
