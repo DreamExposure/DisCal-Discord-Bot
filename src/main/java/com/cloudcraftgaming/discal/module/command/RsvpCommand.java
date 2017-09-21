@@ -118,7 +118,7 @@ public class RsvpCommand implements ICommand {
 				data.getGoingOnTime().add(event.getAuthor().getStringID());
 
 				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(MessageManager.getMessage("RSVP.going.success", settings), event);
+				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.going.success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -136,7 +136,7 @@ public class RsvpCommand implements ICommand {
 				data.getGoingLate().add(event.getAuthor().getStringID());
 
 				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(MessageManager.getMessage("RSVP.late.success", settings), event);
+				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.late.success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -154,7 +154,7 @@ public class RsvpCommand implements ICommand {
 				data.getNotGoing().add(event.getAuthor().getStringID());
 
 				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(MessageManager.getMessage("RSVP.not.success", settings), event);
+				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.not.success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -171,7 +171,7 @@ public class RsvpCommand implements ICommand {
 				data.removeCompletely(event.getAuthor().getStringID());
 
 				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(MessageManager.getMessage("RSVP.remove.success", settings), event);
+				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.remove.success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
@@ -189,7 +189,7 @@ public class RsvpCommand implements ICommand {
 				data.getUndecided().add(event.getAuthor().getStringID());
 
 				DatabaseManager.getManager().updateRsvpData(data);
-				Message.sendMessage(MessageManager.getMessage("RSVP.unsure.success", settings), event);
+				Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.unsure.success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
