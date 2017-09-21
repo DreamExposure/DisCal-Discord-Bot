@@ -61,6 +61,7 @@
   "Creator.Event.Description.Specify": "Please specify the description with `!event description <desc, spaces allowed>`",
   "Creator.Event.Location.Success": "Event location set to `%location%`",
   "Creator.Event.Location.Success.New": "Event location set!",
+  "Creator.Event.Location.Success.Clear": "Event location cleared!",
   "Creator.Event.Location.Specify": "Please specify the location with `!event location <location, spaces allowed>`",
   "Creator.Event.Color.List": "Use `!event color <name OR ID>` to set an event's color!",
   "Creator.Event.Color.Success": "Event color set to: `%color%` %lb% %lb% Review the event with `!event review` to verify everything is correct and then confirm it with `!event confirm`",
