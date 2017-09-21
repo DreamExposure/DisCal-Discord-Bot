@@ -87,6 +87,7 @@ public class ApplicationHandler {
 			}
 			Announcer.getAnnouncer().shutdown();
 			TimeManager.getManager().shutdown();
+			AnnouncementQueueManager.getManager().shutdown();
 			DatabaseManager.getManager().disconnectFromMySQL();
 
 			// exit
@@ -109,6 +110,7 @@ public class ApplicationHandler {
 		}
 		Announcer.getAnnouncer().shutdown();
 		TimeManager.getManager().shutdown();
+		AnnouncementQueueManager.getManager().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();
 		System.exit(0);
 	}
