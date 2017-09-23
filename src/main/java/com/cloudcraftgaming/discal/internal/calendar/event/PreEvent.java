@@ -7,14 +7,12 @@ import com.cloudcraftgaming.discal.internal.data.EventData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.TimeUtils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.handle.obj.IMessage;
-
-import java.time.ZoneId;
-import java.util.TimeZone;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -116,20 +114,12 @@ public class PreEvent {
 			//Check if either DateTime or just Date...
 			if (e.getStart().getDateTime() != null) {
 				//DateTime
-				DateTime vsd = new DateTime(e.getStart().getDateTime().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getStart().getDateTime().getValue()));
-				DateTime ved = new DateTime(e.getEnd().getDateTime().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getEnd().getDateTime().getValue()));
-
-				//Think that's it, just make the date stuffs... somehow...
-				viewableStartDate = new EventDateTime().setDateTime(vsd);
-				viewableEndDate = new EventDateTime().setDateTime(ved);
+				viewableStartDate = new EventDateTime().setDateTime(new DateTime(TimeUtils.applyTimeZoneOffset(e.getStart().getDateTime().getValue(), cal.getTimeZone())));
+				viewableEndDate = new EventDateTime().setDateTime(new DateTime(TimeUtils.applyTimeZoneOffset(e.getEnd().getDateTime().getValue(), cal.getTimeZone())));
 			} else {
 				//Just Date
-				DateTime vsd = new DateTime(e.getStart().getDate().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getStart().getDate().getValue()));
-				DateTime ved = new DateTime(e.getEnd().getDate().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getEnd().getDate().getValue()));
-
-				//Think that's it, just make the date stuffs... somehow...
-				viewableStartDate = new EventDateTime().setDate(vsd);
-				viewableEndDate = new EventDateTime().setDate(ved);
+				viewableStartDate = new EventDateTime().setDate(new DateTime(TimeUtils.applyTimeZoneOffset(e.getStart().getDate().getValue(), cal.getTimeZone())));
+				viewableEndDate = new EventDateTime().setDate(new DateTime(TimeUtils.applyTimeZoneOffset(e.getEnd().getDate().getValue(), cal.getTimeZone())));
 			}
 		} else {
 			//Almost definitely not correct, but we need something displayed here.
