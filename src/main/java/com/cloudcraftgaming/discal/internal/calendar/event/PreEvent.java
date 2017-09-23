@@ -1,11 +1,20 @@
 package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.EventData;
+import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.utils.EventColor;
+import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.handle.obj.IMessage;
+
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -61,33 +70,72 @@ public class PreEvent {
     }
 
     PreEvent(long _guildId, Event e) {
-        guildId = _guildId;
-        eventId = e.getId();
+		guildId = _guildId;
+		eventId = e.getId();
 
-        color = EventColor.fromNameOrHexOrID(e.getColorId());
+		color = EventColor.fromNameOrHexOrID(e.getColorId());
 
-        recurrence = new Recurrence();
+		recurrence = new Recurrence();
 
-        if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
-            recur = true;
-            recurrence.fromRRule(e.getRecurrence().get(0));
-        }
+		if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
+			recur = true;
+			recurrence.fromRRule(e.getRecurrence().get(0));
+		}
 
-        if (e.getSummary() != null) {
-            summary = e.getSummary();
-        }
-        if (e.getDescription() != null) {
-            description = e.getDescription();
-        }
+		if (e.getSummary() != null) {
+			summary = e.getSummary();
+		}
+		if (e.getDescription() != null) {
+			description = e.getDescription();
+		}
 		if (e.getLocation() != null) {
 			location = e.getLocation();
 		}
 
-        startDateTime = e.getStart();
-        endDateTime = e.getEnd();
+		startDateTime = e.getStart();
+		endDateTime = e.getEnd();
 
-        viewableStartDate = e.getStart();
-        viewableEndDate = e.getEnd();
+		//Here is where I need to fix the display times
+		GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+		//TODO: Support multiple calendars
+		CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+
+		Calendar cal = null;
+		try {
+			if (settings.useExternalCalendar()) {
+				cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
+			} else {
+				cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
+			}
+		} catch (Exception ex) {
+			ExceptionHandler.sendException(null, "Failed to get proper date time for event!", ex, this.getClass());
+		}
+
+		if (cal != null) {
+
+			//Check if either DateTime or just Date...
+			if (e.getStart().getDateTime() != null) {
+				//DateTime
+				DateTime vsd = new DateTime(e.getStart().getDateTime().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getStart().getDateTime().getValue()));
+				DateTime ved = new DateTime(e.getEnd().getDateTime().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getEnd().getDateTime().getValue()));
+
+				//Think that's it, just make the date stuffs... somehow...
+				viewableStartDate = new EventDateTime().setDateTime(vsd);
+				viewableEndDate = new EventDateTime().setDateTime(ved);
+			} else {
+				//Just Date
+				DateTime vsd = new DateTime(e.getStart().getDate().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getStart().getDate().getValue()));
+				DateTime ved = new DateTime(e.getEnd().getDate().getValue(), TimeZone.getTimeZone(ZoneId.of(cal.getTimeZone())).getOffset(e.getEnd().getDate().getValue()));
+
+				//Think that's it, just make the date stuffs... somehow...
+				viewableStartDate = new EventDateTime().setDate(vsd);
+				viewableEndDate = new EventDateTime().setDate(ved);
+			}
+		} else {
+			//Almost definitely not correct, but we need something displayed here.
+			viewableStartDate = e.getStart();
+			viewableEndDate = e.getEnd();
+		}
 
         eventData = DatabaseManager.getManager().getEventData(guildId, e.getId());
 
