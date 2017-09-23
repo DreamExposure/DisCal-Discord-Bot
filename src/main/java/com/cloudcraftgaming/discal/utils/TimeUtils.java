@@ -41,9 +41,9 @@ public class TimeUtils {
 
 	public static boolean inPast(Event event) {
 		if (event.getStart().getDateTime() != null) {
-			return event.getStart().getDateTime().getValue() > System.currentTimeMillis();
+			return event.getStart().getDateTime().getValue() <= System.currentTimeMillis();
 		} else {
-			return event.getStart().getDate().getValue() > System.currentTimeMillis();
+			return event.getStart().getDate().getValue() <= System.currentTimeMillis();
 		}
 	}
 
