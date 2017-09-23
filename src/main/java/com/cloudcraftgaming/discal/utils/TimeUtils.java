@@ -128,7 +128,7 @@ public class TimeUtils {
 		long timeZoneOffset = TimeZone.getTimeZone(ZoneId.of(timezone)).getRawOffset();
 		long chicagoOffset = TimeZone.getTimeZone(ZoneId.of("America/Chicago")).getRawOffset();
 
-		long toAdd = chicagoOffset - timeZoneOffset;
+		long toAdd = timeZoneOffset - chicagoOffset;
 
 		return epochTime + toAdd;
 	}
