@@ -70,42 +70,38 @@ public class RsvpCommand implements ICommand {
 	/**
 	 * Issues the command this Object is responsible for.
 	 *
-	 * @param args     The command arguments.
-	 * @param event    The event received.
+	 * @param args  The command arguments.
+	 * @param event The event received.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (settings.isDevGuild()) {
-			if (args.length > 0) {
-				switch (args[0].toLowerCase()) {
-					case "ontime":
-						moduleGoing(args, event, settings);
-						break;
-					case "late":
-						moduleGoingLate(args, event, settings);
-						break;
-					case "not":
-						moduleNotGoing(args, event, settings);
-						break;
-					case "unsure":
-						moduleUnsure(args, event, settings);
-						break;
-					case "remove":
-						moduleRemove(args, event, settings);
-						break;
-					case "list":
-						moduleList(args, event, settings);
-						break;
-					default:
-						Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
-						break;
-				}
-			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
+		if (args.length > 0) {
+			switch (args[0].toLowerCase()) {
+				case "ontime":
+					moduleGoing(args, event, settings);
+					break;
+				case "late":
+					moduleGoingLate(args, event, settings);
+					break;
+				case "not":
+					moduleNotGoing(args, event, settings);
+					break;
+				case "unsure":
+					moduleUnsure(args, event, settings);
+					break;
+				case "remove":
+					moduleRemove(args, event, settings);
+					break;
+				case "list":
+					moduleList(args, event, settings);
+					break;
+				default:
+					Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
+					break;
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+			Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
 		}
 		return false;
 	}
