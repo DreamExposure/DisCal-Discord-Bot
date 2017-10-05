@@ -37,6 +37,7 @@ import static com.cloudcraftgaming.discal.module.announcement.AnnouncementMessag
 public class Announce extends TimerTask {
 	@Override
 	public void run() {
+		ExceptionHandler.sendDebug(null, "Starting announcements!", null, this.getClass());
 		DateTime now = new DateTime(System.currentTimeMillis());
 		Long nowMS = System.currentTimeMillis();
 		Calendar discalService;
@@ -165,6 +166,7 @@ public class Announce extends TimerTask {
 				ExceptionHandler.sendException(null, "Announcement failure CODE: A004", e, this.getClass());
 			}
 		}
+		ExceptionHandler.sendDebug(null, "Finished announcements!", null, this.getClass());
 	}
 
 	//@Override
