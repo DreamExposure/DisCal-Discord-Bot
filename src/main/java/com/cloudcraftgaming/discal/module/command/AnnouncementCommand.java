@@ -3,7 +3,6 @@ package com.cloudcraftgaming.discal.module.command;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.module.announcement.*;
 import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
@@ -305,9 +304,7 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (AnnouncementUtils.announcementExists(value, event)) {
 				if (DatabaseManager.getManager().deleteAnnouncement(value)) {
-					//Delete from queue if needed.
-					AnnouncementQueueManager.getManager().dequeue(UUID.fromString(value));
-					
+
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Success", settings), event);
 				} else {
 					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.Delete.Failure", settings), event);

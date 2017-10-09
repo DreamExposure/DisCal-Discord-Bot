@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.internal.service;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.module.announcement.Announcer;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import sx.blah.discord.util.DiscordException;
 
@@ -85,9 +84,7 @@ public class ApplicationHandler {
 			} catch (DiscordException e) {
 				//No need to print, exiting anyway.
 			}
-			Announcer.getAnnouncer().shutdown();
 			TimeManager.getManager().shutdown();
-			AnnouncementQueueManager.getManager().shutdown();
 			DatabaseManager.getManager().disconnectFromMySQL();
 
 			// exit
@@ -108,9 +105,7 @@ public class ApplicationHandler {
 		} catch (DiscordException e) {
 			//No need to print, exiting anyway.
 		}
-		Announcer.getAnnouncer().shutdown();
 		TimeManager.getManager().shutdown();
-		AnnouncementQueueManager.getManager().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();
 		System.exit(0);
 	}

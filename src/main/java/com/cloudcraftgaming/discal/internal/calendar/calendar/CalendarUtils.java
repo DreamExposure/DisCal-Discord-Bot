@@ -4,7 +4,6 @@ import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.data.CalendarData;
 import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
@@ -47,7 +46,6 @@ public class CalendarUtils {
 		DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 		DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
 		DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
-		AnnouncementQueueManager.getManager().dequeue(settings.getGuildID());
 
 		return true;
 	}
@@ -71,7 +69,6 @@ public class CalendarUtils {
 				DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
 				DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
 				DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
-				AnnouncementQueueManager.getManager().dequeue(settings.getGuildID());
 
 				return false;
 			} else {

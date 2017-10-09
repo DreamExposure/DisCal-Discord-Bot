@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.internal.service;
 
 import com.cloudcraftgaming.discal.internal.network.discordpw.TimedUpdate;
+import com.cloudcraftgaming.discal.module.announcement.Announce;
 import com.cloudcraftgaming.discal.module.misc.StatusChanger;
 
 import java.util.Timer;
@@ -13,9 +14,11 @@ import java.util.Timer;
 public class TimeManager {
     private static TimeManager instance;
 
-    private Timer timer;
+	private final Timer timer;
 
-    private TimeManager() {} //Prevent initialization
+	private TimeManager() {
+		timer = new Timer();
+	} //Prevent initialization
 
     /**
      * Gets the instance of the TimeManager that is loaded.
@@ -32,17 +35,15 @@ public class TimeManager {
      * Initializes the TimeManager and schedules the appropriate Timers.
      */
     public void init() {
-        timer = new Timer();
         timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
         timer.schedule(new TimedUpdate(), 60 * 60 * 1000, 60 * 60 * 1000);
+		timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
     }
 
     /**
      * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
      */
     public void shutdown() {
-    	if (timer != null) {
 			timer.cancel();
-		}
     }
 }

@@ -7,8 +7,7 @@ import com.cloudcraftgaming.discal.internal.data.BotSettings;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.network.google.Authorization;
-import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
-import com.cloudcraftgaming.discal.module.announcement.Announcer;
+import com.cloudcraftgaming.discal.internal.service.TimeManager;
 import com.cloudcraftgaming.discal.module.command.*;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.ClientBuilder;
@@ -65,8 +64,7 @@ public class Main {
         executor.registerCommand(new DevCommand());
 
         //Init a few more modules
-        Announcer.getAnnouncer().init();
-	    AnnouncementQueueManager.getManager().init();
+		TimeManager.getManager().init();
 
         //Accept commands
         ConsoleCommandExecutor.init();

@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.database;
 
 import com.cloudcraftgaming.discal.internal.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.internal.data.*;
-import com.cloudcraftgaming.discal.internal.service.AnnouncementQueueManager;
 import com.cloudcraftgaming.discal.module.announcement.Announcement;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.utils.EventColor;
@@ -217,9 +216,6 @@ public class DatabaseManager {
 
 					ps.close();
 					statement.close();
-
-					//Since settings can be changed in a lot of places, this is the only easy place to call this.
-					AnnouncementQueueManager.getManager().update(settings);
 				}
 				return true;
 			}
