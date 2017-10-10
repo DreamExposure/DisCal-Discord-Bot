@@ -1,10 +1,8 @@
 package com.cloudcraftgaming.discal.internal.service;
 
-import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.internal.network.discordpw.TimedUpdate;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementTask;
 import com.cloudcraftgaming.discal.module.misc.StatusChanger;
-import sx.blah.discord.api.IShard;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -44,11 +42,9 @@ public class TimeManager {
 		timers.add(timer);
 		//timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
 
-		for (IShard s : Main.client.getShards()) {
-			Timer ts = new Timer();
-			ts.schedule(new AnnouncementTask(s.getInfo()[0]), 10 * 1000 * 60, 10 * 1000 * 60);
-			timers.add(ts);
-		}
+		Timer at = new Timer(true);
+		at.schedule(new AnnouncementTask(), 10 * 1000 * 60, 10 * 1000 * 60);
+		timers.add(at);
     }
 
     /**

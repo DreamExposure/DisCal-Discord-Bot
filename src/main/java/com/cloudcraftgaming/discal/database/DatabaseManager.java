@@ -750,6 +750,42 @@ public class DatabaseManager {
 		return announcements;
 	}
 
+	public ArrayList<Announcement> getAnnouncements() {
+		ArrayList<Announcement> announcements = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName);
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("ANNOUNCEMENT_ID") != null) {
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
+						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
+						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
+						announcement.setAnnouncementType(AnnouncementType.valueOf(res.getString("ANNOUNCEMENT_TYPE")));
+						announcement.setEventId(res.getString("EVENT_ID"));
+						announcement.setEventColor(EventColor.fromNameOrHexOrID(res.getString("EVENT_COLOR")));
+						announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
+						announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+						announcement.setInfo(res.getString("INFO"));
+
+						announcements.add(announcement);
+					}
+				}
+
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get all announcements.", e, this.getClass());
+		}
+
+		return announcements;
+	}
+
+
 	public Integer getAnnouncementCount() {
 		Integer amount = -1;
 		try {
