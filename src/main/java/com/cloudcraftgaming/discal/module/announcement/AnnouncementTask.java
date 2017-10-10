@@ -14,7 +14,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import sx.blah.discord.handle.obj.IGuild;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -34,10 +34,14 @@ public class AnnouncementTask extends TimerTask {
 
 	@Override
 	public void run() {
+		ExceptionHandler.sendDebug(null, "Starting announcements for shard: " + shard, null, this.getClass());
 		try {
+			Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("announcement-log" + shard + "-" + System.currentTimeMillis() + ".txt"), "utf-8"));
+			writer.write("Starting announcements: " + System.currentTimeMillis() + "\r\n");
 			//Get base calendar service
 			Calendar discalService = CalendarAuth.getCalendarService();
 			for (IGuild guild : Main.client.getShards().get(shard).getGuilds()) {
+				writer.write("Starting guild: " + guild.getStringID() + " | Time: " + System.currentTimeMillis() + "\r\n");
 				GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
 				CalendarData calendar = DatabaseManager.getManager().getMainCalendar(guild.getLongID());
 				Calendar service = discalService;
@@ -51,7 +55,18 @@ public class AnnouncementTask extends TimerTask {
 				}
 
 				//Loop through announcements...
+				Events events = service.events().list(calendar.getCalendarAddress())
+						.setMaxResults(15)
+						.setTimeMin(new DateTime(System.currentTimeMillis()))
+						.setOrderBy("startTime")
+						.setSingleEvents(true)
+						.setShowDeleted(false)
+						.setQuotaUser(guild.getStringID())
+						.execute();
+				List<Event> items = events.getItems();
+
 				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guild.getLongID())) {
+					writer.write("Starting announcement: " + a.getAnnouncementId() + "Type: " + a.getAnnouncementType() + " | Time: " + System.currentTimeMillis() + "\r\n");
 					try {
 						if (a.getAnnouncementType() == AnnouncementType.SPECIFIC) {
 							if (EventUtils.eventExists(settings, a.getEventId())) {
@@ -68,32 +83,27 @@ public class AnnouncementTask extends TimerTask {
 								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
 							}
 						} else {
-							//Check the next 20 events, if matches, we can announce...
+							//Check the next events, if matches, we can announce...
 							try {
-								Events events = service.events().list(calendar.getCalendarAddress())
-										.setMaxResults(20)
-										.setTimeMin(new DateTime(System.currentTimeMillis()))
-										.setOrderBy("startTime")
-										.setSingleEvents(true)
-										.setShowDeleted(false)
-										.setQuotaUser(guild.getStringID())
-										.execute();
-								List<Event> items = events.getItems();
 								if (items.size() > 0) {
 									for (Event e : items) {
 										if (e != null && EventUtils.eventExists(settings, e.getId())) {
-											if (inRange(a, getEventStartMs(e))) {
-												if (a.getAnnouncementType() == AnnouncementType.UNIVERSAL) {
+											if (a.getAnnouncementType() == AnnouncementType.UNIVERSAL) {
+												if (inRange(a, getEventStartMs(e))) {
 													//It fits! Lets announce!
 													AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-												} else if (a.getAnnouncementType() == AnnouncementType.COLOR) {
-													EventColor color = EventColor.fromNameOrHexOrID(e.getColorId());
-													if (color.name().equals(a.getEventColor().name())) {
+												}
+											} else if (a.getAnnouncementType() == AnnouncementType.COLOR) {
+												EventColor color = EventColor.fromNameOrHexOrID(e.getColorId());
+												if (color.name().equals(a.getEventColor().name())) {
+													if (inRange(a, getEventStartMs(e))) {
 														//Color matches! Lets announce!
 														sendAnnouncementMessage(a, e, calendar, settings);
 													}
-												} else if (a.getAnnouncementType() == AnnouncementType.RECUR) {
-													if (e.getId().startsWith(a.getEventId()) || e.getId().contains(a.getEventId())) {
+												}
+											} else if (a.getAnnouncementType() == AnnouncementType.RECUR) {
+												if (inRange(a, getEventStartMs(e))) {
+													if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
 														//It fits! Lets announce!
 														sendAnnouncementMessage(a, e, calendar, settings);
 													}
@@ -114,9 +124,13 @@ public class AnnouncementTask extends TimerTask {
 
 
 			}
+			writer.write("Finished announcements! Time: " + System.currentTimeMillis() + "\r\n");
+			writer.close();
 		} catch (IOException e) {
 			ExceptionHandler.sendException(null, "Failed to get calendar service! 00a001", e, this.getClass());
 		}
+		ExceptionHandler.sendDebug(null, "Finished announcements for shard: " + shard, null, this.getClass());
+
 	}
 
 	private boolean inRange(Announcement a, long eventTime) {

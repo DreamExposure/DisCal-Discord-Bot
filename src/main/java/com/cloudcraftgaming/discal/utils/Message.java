@@ -120,6 +120,16 @@ public class Message {
         }).get();
     }
 
+	public static void sendMessageAsync(EmbedObject embedObject, String message, IChannel channel) {
+		RequestBuffer.request(() -> {
+			try {
+				new MessageBuilder(Main.client).appendContent(message).withEmbed(embedObject).withChannel(channel).build();
+			} catch (DiscordException | MissingPermissionsException e) {
+				//No reason to print exception.
+			}
+		});
+	}
+
     public static IMessage sendDirectMessage(String message, IUser user) {
         return RequestBuffer.request(() -> {
            try {

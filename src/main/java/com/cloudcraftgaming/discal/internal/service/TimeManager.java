@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.module.announcement.AnnouncementTask;
 import com.cloudcraftgaming.discal.module.misc.StatusChanger;
 import sx.blah.discord.api.IShard;
 
+import java.util.ArrayList;
 import java.util.Timer;
 
 /**
@@ -16,10 +17,9 @@ import java.util.Timer;
 public class TimeManager {
     private static TimeManager instance;
 
-	private final Timer timer;
+	private final ArrayList<Timer> timers = new ArrayList<>();
 
 	private TimeManager() {
-		timer = new Timer();
 	} //Prevent initialization
 
     /**
@@ -37,12 +37,17 @@ public class TimeManager {
      * Initializes the TimeManager and schedules the appropriate Timers.
      */
     public void init() {
+		Timer timer = new Timer(true);
         timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
         timer.schedule(new TimedUpdate(), 60 * 60 * 1000, 60 * 60 * 1000);
+
+		timers.add(timer);
 		//timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
 
 		for (IShard s : Main.client.getShards()) {
-			timer.schedule(new AnnouncementTask(s.getInfo()[0]), 10 * 1000 * 60, 10 * 1000 * 60);
+			Timer ts = new Timer();
+			ts.schedule(new AnnouncementTask(s.getInfo()[0]), 10 * 1000 * 60, 10 * 1000 * 60);
+			timers.add(ts);
 		}
     }
 
@@ -50,6 +55,8 @@ public class TimeManager {
      * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
      */
     public void shutdown() {
-			timer.cancel();
+		for (Timer t : timers) {
+			t.cancel();
+		}
     }
 }
