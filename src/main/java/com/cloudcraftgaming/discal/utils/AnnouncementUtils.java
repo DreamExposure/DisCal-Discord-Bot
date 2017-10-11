@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.module.announcement.Announcement;
+import com.cloudcraftgaming.discal.object.announcement.Announcement;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 /**

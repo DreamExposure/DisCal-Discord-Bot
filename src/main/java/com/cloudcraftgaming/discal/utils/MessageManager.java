@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.file.ReadFile;
+import com.cloudcraftgaming.discal.object.GuildSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,8 @@ public class MessageManager {
 	}
 
 	public static List<String> getLangs() {
-		List<String> allLangs = new ArrayList<>();
 
-		allLangs.addAll(langs.keySet());
-
-		return allLangs;
+		return new ArrayList<>(langs.keySet());
 	}
 
 	public static boolean isSupported(String _value) {

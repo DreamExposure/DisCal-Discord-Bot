@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.discal.internal.calendar;
 
 import com.cloudcraftgaming.discal.internal.crypto.AESEncryption;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
 import com.cloudcraftgaming.discal.internal.network.google.Authorization;
+import com.cloudcraftgaming.discal.object.GuildSettings;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;

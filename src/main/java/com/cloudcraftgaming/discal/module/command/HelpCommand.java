@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;

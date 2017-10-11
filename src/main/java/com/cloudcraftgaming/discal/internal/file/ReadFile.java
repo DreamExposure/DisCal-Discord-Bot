@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.internal.file;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.data.BotSettings;
+import com.cloudcraftgaming.discal.object.BotSettings;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

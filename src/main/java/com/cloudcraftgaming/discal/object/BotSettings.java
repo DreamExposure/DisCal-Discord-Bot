@@ -1,4 +1,4 @@
-package com.cloudcraftgaming.discal.internal.data;
+package com.cloudcraftgaming.discal.object;
 
 /**
  * Created by Nova Fox on 3/29/2017.

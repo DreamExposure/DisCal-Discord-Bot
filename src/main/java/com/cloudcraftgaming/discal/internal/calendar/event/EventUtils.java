@@ -2,7 +2,8 @@ package com.cloudcraftgaming.discal.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.event.PreEvent;
 import com.cloudcraftgaming.discal.utils.EventColor;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.services.calendar.Calendar;

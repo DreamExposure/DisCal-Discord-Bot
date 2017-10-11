@@ -1,4 +1,4 @@
-package com.cloudcraftgaming.discal.internal.data;
+package com.cloudcraftgaming.discal.object;
 
 import java.util.ArrayList;
 import java.util.Collections;

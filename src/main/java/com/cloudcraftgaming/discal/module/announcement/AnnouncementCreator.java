@@ -1,7 +1,9 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.announcement.Announcement;
+import com.cloudcraftgaming.discal.object.announcement.AnnouncementCreatorResponse;
 import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;

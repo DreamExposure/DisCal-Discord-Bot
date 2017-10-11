@@ -2,8 +2,10 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.calendar.CalendarCreatorResponse;
+import com.cloudcraftgaming.discal.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.object.calendar.PreCalendar;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.Message;
 import com.cloudcraftgaming.discal.utils.MessageManager;

@@ -3,9 +3,9 @@ package com.cloudcraftgaming.discal.utils;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
-import com.cloudcraftgaming.discal.internal.calendar.event.PreEvent;
-import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.object.event.PreEvent;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -40,7 +40,7 @@ public class TimeUtils {
         }
     }
 
-	public static boolean inPast(Event event) {
+	private static boolean inPast(Event event) {
 		if (event.getStart().getDateTime() != null) {
 			return event.getStart().getDateTime().getValue() <= System.currentTimeMillis();
 		} else {

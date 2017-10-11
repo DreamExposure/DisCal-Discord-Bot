@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.internal.crypto;
 
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;

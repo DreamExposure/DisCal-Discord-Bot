@@ -1,7 +1,8 @@
 package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.calendar.PreCalendar;
 import com.cloudcraftgaming.discal.utils.MessageManager;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;

@@ -1,10 +1,14 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.*;
-import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
-import com.cloudcraftgaming.discal.module.command.info.CommandInfo;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarCreator;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarUtils;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.calendar.CalendarCreatorResponse;
+import com.cloudcraftgaming.discal.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.object.calendar.PreCalendar;
+import com.cloudcraftgaming.discal.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;

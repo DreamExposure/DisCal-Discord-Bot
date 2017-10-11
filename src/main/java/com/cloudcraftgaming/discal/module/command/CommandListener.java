@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.api.events.EventSubscriber;
@@ -43,8 +43,7 @@ class CommandListener {
 						//Prefixed with ! which should mean it is a command, convert and confirm.
 						String[] argsOr = event.getMessage().getContent().split(" ");
 						if (argsOr.length > 1) {
-							ArrayList<String> argsOr2 = new ArrayList<>();
-							argsOr2.addAll(Arrays.asList(argsOr).subList(1, argsOr.length));
+							ArrayList<String> argsOr2 = new ArrayList<>(Arrays.asList(argsOr).subList(1, argsOr.length));
 							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
 							String command = argsOr[0].replace(settings.getPrefix(), "");
@@ -58,8 +57,7 @@ class CommandListener {
 					if (PermissionChecker.isCorrectChannel(event)) {
 						String[] argsOr = event.getMessage().getContent().split(" ");
 						if (argsOr.length > 2) {
-							ArrayList<String> argsOr2 = new ArrayList<>();
-							argsOr2.addAll(Arrays.asList(argsOr).subList(2, argsOr.length));
+							ArrayList<String> argsOr2 = new ArrayList<>(Arrays.asList(argsOr).subList(2, argsOr.length));
 							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
 
 							String command = argsOr[1];

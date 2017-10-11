@@ -2,8 +2,8 @@ package com.cloudcraftgaming.discal.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.data.CalendarData;
-import com.cloudcraftgaming.discal.internal.data.GuildSettings;
+import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.utils.ExceptionHandler;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
