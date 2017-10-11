@@ -40,10 +40,9 @@ public class TimeManager {
         timer.schedule(new TimedUpdate(), 60 * 60 * 1000, 60 * 60 * 1000);
 
 		timers.add(timer);
-		//timer.schedule(new Announce(), 10 * 1000 * 60, 10 * 1000 * 60);
 
 		Timer at = new Timer(true);
-		at.schedule(new AnnouncementTask(), 10 * 1000 * 60, 10 * 1000 * 60);
+		at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
 		timers.add(at);
     }
 

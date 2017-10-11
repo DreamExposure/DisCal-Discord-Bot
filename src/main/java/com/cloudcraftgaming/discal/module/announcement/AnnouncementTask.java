@@ -123,7 +123,7 @@ public class AnnouncementTask extends TimerTask {
 	}
 
 	private boolean inRange(Announcement a, Event e) {
-		long maxDifferenceMs = 10 * 60 * 1000; //10 minutes
+		long maxDifferenceMs = 5 * 60 * 1000; //5 minutes
 
 		long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
 		long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
