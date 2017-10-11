@@ -5,6 +5,8 @@
 
 [Official Website](https://www.cloudcraftgaming.com/discal)
 
+[Trello Board](https://trello.com/b/OuFo5aXu/discal)
+
 DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
 <br> <br>
 It was built to be powerful yet easy to use! 
@@ -68,5 +70,5 @@ We very much appreciate all of the translations we can get, but please follow th
 2. The general JSON format is `"key": "value"`, which means that the "key" must remain the same in all files, so ***DO NOT*** change the key, only the values.
 3. In many files `%value%` or something similar is seen. These are replacement variables and will never be seen by the user. ***DO NOT CHANGE THE REPLACERS!*** 
 4. At the beginning of the file, you will see `"Language: "LANG_NAME_HERE"` Please change `LANG_NAME_HERE` to the language you are translating the file to!
-5. Please run your translated language file through this [Online JSON Parser](http://jsonparseronline.com/) If you cannot do that, the development team will.
+5. Please run your translated language file through this [Online JSON Parser](http://jsonparseronline.com) If you cannot do that, the development team will.
 6. Contact the development team in our Discord guild for any additional help or info.
