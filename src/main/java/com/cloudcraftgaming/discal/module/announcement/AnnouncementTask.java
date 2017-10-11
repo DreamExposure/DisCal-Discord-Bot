@@ -14,7 +14,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import com.sun.javafx.scene.control.skin.VirtualFlow;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,109 +34,91 @@ public class AnnouncementTask extends TimerTask {
 	private HashMap<Long, List<Event>> allEvents = new HashMap<>();
 
 
-
 	@Override
 	public void run() {
-		ExceptionHandler.sendDebug(null, "Starting announcements!", null, this.getClass());
-
+		//Get the default stuff.
 		try {
-			Writer writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("announcement-log" + "-" + System.currentTimeMillis() + ".txt"), "utf-8"));
-			writer.write("Starting announcements: " + System.currentTimeMillis() + "\r\n");
+			discalService = CalendarAuth.getCalendarService();
+		} catch (IOException e) {
+			ExceptionHandler.sendException(null, "Failed to get service! 00a0101", e, this.getClass());
+		}
 
-			//Get the default stuff.
+		ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getAnnouncements();
+
+		for (Announcement a : allAnnouncements) {
+			//Check if guild is part of DisCal's guilds. This way we can clear out the database...
+			if (!active(a)) {
+				DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+				continue;
+			}
+			//Get everything we need ready.
+			GuildSettings settings = getSettings(a);
+			CalendarData calendar = getCalendarData(a);
+			Calendar service;
 			try {
-				discalService = CalendarAuth.getCalendarService();
-			} catch (IOException e) {
-				ExceptionHandler.sendException(null, "Failed to get service! 00a0101", e, this.getClass());
+				service = getService(settings);
+			} catch (Exception e) {
+				ExceptionHandler.sendException(null, "Failed to handle custom service! 00a102", e, this.getClass());
+				continue;
 			}
 
-			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getAnnouncements();
-
-			for (Announcement a : allAnnouncements) {
-				writer.write("Starting announcement: " + a.getAnnouncementId() + " Type: " + a.getAnnouncementType() + " | Time: " + System.currentTimeMillis() + "\r\n");
-
-				//Check if guild is part of DisCal's guilds. This way we can clear out the database...
-				if (!active(a)) {
-					DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
-					continue;
-				}
-				//Get everything we need ready.
-				GuildSettings settings = getSettings(a);
-				CalendarData calendar = getCalendarData(a);
-				Calendar service;
-				try {
-					service = getService(settings);
-				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "Failed to handle custom service! 00a102", e, this.getClass());
-					continue;
-				}
-
-				//Now we can check the announcement type and do all the actual logic here.
-				switch (a.getAnnouncementType()) {
-					case SPECIFIC:
-						if (EventUtils.eventExists(settings, a.getEventId())) {
-							try {
-								Event e = service.events().get(calendar.getCalendarId(), a.getEventId()).execute();
-								if (inRange(a, e)) {
-									//We can announce it.
-									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-									//And now lets delete it
-									DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
-								}
-							} catch (IOException e) {
-								//Event getting error, we know it exists tho
-								ExceptionHandler.sendException(null, "Failed to get event! 00a103", e, this.getClass());
+			//Now we can check the announcement type and do all the actual logic here.
+			switch (a.getAnnouncementType()) {
+				case SPECIFIC:
+					if (EventUtils.eventExists(settings, a.getEventId())) {
+						try {
+							Event e = service.events().get(calendar.getCalendarId(), a.getEventId()).execute();
+							if (inRange(a, e)) {
+								//We can announce it.
+								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+								//And now lets delete it
+								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
 							}
-						} else {
-							//Event is gone, we can just delete this shit.
-							DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+						} catch (IOException e) {
+							//Event getting error, we know it exists tho
+							ExceptionHandler.sendException(null, "Failed to get event! 00a103", e, this.getClass());
 						}
-						break;
-					case UNIVERSAL:
-						for (Event e : getEvents(settings, calendar, service)) {
+					} else {
+						//Event is gone, we can just delete this shit.
+						DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+					}
+					break;
+				case UNIVERSAL:
+					for (Event e : getEvents(settings, calendar, service)) {
+						if (inRange(a, e)) {
+							//It fits! Let's do it!
+							AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+						}
+					}
+					break;
+				case COLOR:
+					for (Event e : getEvents(settings, calendar, service)) {
+						if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
 							if (inRange(a, e)) {
 								//It fits! Let's do it!
 								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
 							}
 						}
-						break;
-					case COLOR:
-						for (Event e : getEvents(settings, calendar, service)) {
-							if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
-								if (inRange(a, e)) {
-									//It fits! Let's do it!
-									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-								}
+					}
+					break;
+				case RECUR:
+					for (Event e : getEvents(settings, calendar, service)) {
+						if (inRange(a, e)) {
+							if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
+								//It fits! Lets announce!
+								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
 							}
 						}
-						break;
-					case RECUR:
-						for (Event e : getEvents(settings, calendar, service)) {
-							if (inRange(a, e)) {
-								if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
-									//It fits! Lets announce!
-									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-								}
-							}
-						}
-						break;
-				}
+					}
+					break;
 			}
-
-			//Just clear everything immediately.
-			allSettings.clear();
-			calendars.clear();
-			customServices.clear();
-			allEvents.clear();
-
-			//And now we are done. Hopefully it all works!!!!
-			writer.write("Finished announcements! Time: " + System.currentTimeMillis() + "\r\n");
-			writer.close();
-
-		} catch (IOException e) {
-			ExceptionHandler.sendException(null, "Fuck you log!", e, this.getClass());
 		}
-		ExceptionHandler.sendDebug(null, "Finished announcements!!!", null, this.getClass());
+
+		//Just clear everything immediately.
+		allSettings.clear();
+		calendars.clear();
+		customServices.clear();
+		allEvents.clear();
 	}
 
 	private boolean inRange(Announcement a, Event e) {
