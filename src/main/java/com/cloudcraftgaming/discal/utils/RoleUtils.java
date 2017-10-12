@@ -66,7 +66,7 @@ public class RoleUtils {
 	}
 
 	public static long getRole(String toLookFor, IGuild guild) {
-		toLookFor = toLookFor.trim();
+		toLookFor = GeneralUtils.trim(toLookFor);
 		final String lower = toLookFor.toLowerCase();
 
 		if (toLookFor.matches("<@&[0-9]+>")) {

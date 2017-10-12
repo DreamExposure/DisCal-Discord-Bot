@@ -24,6 +24,19 @@ public class GeneralUtils {
         return content.toString().trim();
     }
 
+	/**
+	 * Trims the string front to back.
+	 *
+ 	 * @param str The String to trim.
+	 * @return The trimmed string.
+	 */
+	public static String trim(String str) {
+      while(str.length() > 1 && str.charAt(0) == ' ') {
+	        str = str.substring(1);
+	    }
+	    return str.trim();
+	}
+
     /**
      * Combines the arguments of a String array
      *
@@ -41,7 +54,7 @@ public class GeneralUtils {
         }
         return res.toString().trim();
     }
-	
+
 	/**
 	 * This is an overkill parser made by xaanit. You can thank him for this nightmare.
 	 * <br> <br>

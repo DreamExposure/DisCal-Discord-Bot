@@ -39,7 +39,7 @@ public class UserUtils {
 	 * @return The user if found, null otherwise
 	 */
 	public static long getUser(String toLookFor, IGuild guild) {
-		toLookFor = toLookFor.trim();
+		toLookFor = GeneralUtils.trim(toLookFor);
 
 		if (toLookFor.matches("<@!?[0-9]+>")) {
 			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
