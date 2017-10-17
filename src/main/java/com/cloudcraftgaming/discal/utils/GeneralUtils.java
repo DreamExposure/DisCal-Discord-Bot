@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.utils;
 
+import com.cloudcraftgaming.discal.Main;
+
 import java.util.Random;
 
 /**
@@ -72,5 +74,9 @@ public class GeneralUtils {
 			rightFace.append(alphabet.charAt(random.nextInt(alphabet.length())));
 		}
 		return str.replace("<<", leftFace.toString()).replace(">>", rightFace.toString()).replace("<", "").replace(">", "").replace(leftFace.toString(), "<").replace(rightFace.toString(), ">");
+	}
+
+	private boolean active(long id) {
+		return Main.client.getGuildByID(id) != null;
 	}
 }

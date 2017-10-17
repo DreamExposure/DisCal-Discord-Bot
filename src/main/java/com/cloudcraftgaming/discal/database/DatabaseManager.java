@@ -510,6 +510,43 @@ public class DatabaseManager {
 		return settings;
 	}
 
+	public ArrayList<GuildSettings> getAllSettings() {
+		ArrayList<GuildSettings> allSettings = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELCT * FROM " + dataTableName);
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("GUILD_ID") != null) {
+						GuildSettings settings = new GuildSettings(Long.valueOf(res.getString("GUILD_ID")));
+						settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
+						settings.setPrivateKey(res.getString("PRIVATE_KEY"));
+						settings.setEncryptedAccessToken(res.getString("ACCESS_TOKEN"));
+						settings.setEncryptedRefreshToken(res.getString("REFRESH_TOKEN"));
+						settings.setControlRole(res.getString("CONTROL_ROLE"));
+						settings.setDiscalChannel(res.getString("DISCAL_CHANNEL"));
+						settings.setSimpleAnnouncements(res.getBoolean("SIMPLE_ANNOUNCEMENT"));
+						settings.setLang(res.getString("LANG"));
+						settings.setPrefix(res.getString("PREFIX"));
+						settings.setPatronGuild(res.getBoolean("PATRON_GUILD"));
+						settings.setDevGuild(res.getBoolean("DEV_GUILD"));
+						settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
+						settings.setDmAnnouncementsFromString(res.getString("DM_ANNOUNCEMENTS"));
+
+						allSettings.add(settings);
+					}
+				}
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get all guild settings", e, this.getClass());
+		}
+		return allSettings;
+	}
+
 	public CalendarData getMainCalendar(long guildId) {
 		CalendarData calData = new CalendarData(guildId, 1);
 		try {
@@ -587,6 +624,30 @@ public class DatabaseManager {
 		return calendars;
 	}
 
+	public ArrayList<CalendarData> getAllCalendars() {
+		ArrayList<CalendarData> calendars = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + calendarTableName);
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					CalendarData calData = new CalendarData(Long.valueOf(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
+					calData.setCalendarId(res.getString("CALENDAR_ID"));
+					calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+					calData.setExternal(res.getBoolean("EXTERNAL"));
+					calendars.add(calData);
+				}
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get all calendars!", e, this.getClass());
+		}
+		return calendars;
+	}
+
 	public Integer getCalendarCount() {
 		Integer amount = -1;
 		try {
@@ -642,6 +703,34 @@ public class DatabaseManager {
 		return data;
 	}
 
+	public ArrayList<EventData> getAllEventData() {
+		ArrayList<EventData> allData = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String eventTableName = databaseInfo.getPrefix() + "EVENTS";
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + eventTableName);
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("EVENT_ID") != null) {
+						EventData data = new EventData(Long.valueOf(res.getString("GUILD_ID")));
+
+						data.setEventId(res.getString("EVENT_ID"));
+						data.setEventEnd(res.getLong("EVENT_END"));
+						data.setImageLink(res.getString("IMAGE_LINK"));
+
+						allData.add(data);
+					}
+				}
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get all event data", e, this.getClass());
+		}
+		return allData;
+	}
+
 	public RsvpData getRsvpData(long guildId, String eventId) {
 		RsvpData data = new RsvpData(guildId);
 		data.setEventId(eventId);
@@ -669,6 +758,35 @@ public class DatabaseManager {
 			ExceptionHandler.sendException(null, "Failed to get RSVP data for event", e, this.getClass());
 		}
 		return data;
+	}
+
+	public ArrayList<RsvpData> getAllRsvpData() {
+		ArrayList<RsvpData> dataList = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + rsvpTableName);
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("GUILD_ID") != null) {
+						RsvpData data = new RsvpData(Long.valueOf(res.getString("GUILD_ID")));
+						data.setEventId(res.getString("EVENT_ID"));
+						data.setEventEnd(res.getLong("EVENT_END"));
+						data.setGoingOnTimeFromString(res.getString("GOING_ON_TIME"));
+						data.setGoingLateFromString(res.getString("GOING_LATE"));
+						data.setNotGoingFromString(res.getString("NOT_GOING"));
+						data.setUndecidedFromString(res.getString("UNDECIDED"));
+
+						dataList.add(data);
+					}
+				}
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get all RSVP Data!", e, this.getClass());
+		}
+		return dataList;
 	}
 
 	/**
@@ -788,7 +906,6 @@ public class DatabaseManager {
 
 		return announcements;
 	}
-
 
 	public Integer getAnnouncementCount() {
 		Integer amount = -1;
@@ -960,6 +1077,8 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public void runDatabaseUpdateIfNeeded() {
+	public void cleanupDatabase() {
+		//This runs every 24 hours (or manually) and removes everything that is not needed in the database.
+		
 	}
 }

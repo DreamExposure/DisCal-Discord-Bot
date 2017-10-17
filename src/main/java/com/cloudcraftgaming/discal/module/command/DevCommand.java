@@ -70,7 +70,7 @@ public class DevCommand implements ICommand {
 		ci.getSubCommands().put("leave", "Leaves the specified guild.");
 		ci.getSubCommands().put("listguilds", "Lists ALL guilds.");
 		ci.getSubCommands().put("reloadlangs", "Reloads the lang files for changes.");
-		ci.getSubCommands().put("cleanupcalendars", "Cleans up calendars in the database.");
+		ci.getSubCommands().put("cleanupdatabase", "Cleans up the entire database.");
 		ci.getSubCommands().put("restart", "Completely restarts the bot application.");
 		ci.getSubCommands().put("reload", "Logs out and then logs in every shard.");
 		ci.getSubCommands().put("shutdown", "Shuts down the bot application.");
@@ -113,8 +113,8 @@ public class DevCommand implements ICommand {
 					case "reloadlangs":
 						moduleReloadLangs(event);
 						break;
-					case "cleanupcalendars":
-						moduleCleanupCalendars(event);
+					case "cleanupdatabase":
+						moduleCleanupDatabase(event);
 						break;
 					case "restart":
 						moduleRestart(event);
@@ -290,17 +290,13 @@ public class DevCommand implements ICommand {
 		Message.sendMessage("All lang files reloaded!", event);
 	}
 
-	private void moduleCleanupCalendars(MessageReceivedEvent event) {
-		/*
-    	Message.sendMessage("Cleaning up calendars! This may take some time....", event);
+	private void moduleCleanupDatabase(MessageReceivedEvent event) {
+		Message.sendMessage("Cleaning up database! This may take some time....", event);
 
-    	if (DatabaseManager.getManager().cleanupCalendars()) {
-    		Message.sendMessage("Calendar cleanup successful!", event);
-		} else {
-    		Message.sendMessage("Failed to clean up calendars! Check the error log!", event);
-		}
-		*/
-		Message.sendMessage("Disabled because I am a dumb", event);
+		DatabaseManager.getManager().cleanupDatabase();
+
+		Message.sendMessage("Cleaned up database!", event);
+		//Message.sendMessage("Disabled because I am a dumb", event);
 	}
 
 	private void moduleRestart(MessageReceivedEvent event) {

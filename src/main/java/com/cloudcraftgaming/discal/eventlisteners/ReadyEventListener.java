@@ -1,7 +1,5 @@
 package com.cloudcraftgaming.discal.eventlisteners;
 
-import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.service.TimeManager;
 import com.cloudcraftgaming.discal.utils.MessageManager;
@@ -21,10 +19,5 @@ public class ReadyEventListener {
         UpdateListData.updateSiteBotMeta();
 
 		MessageManager.reloadLangs();
-
-        //Run any Db updating...
-        if (Main.botSettings.shouldRunDatabaseUpdater()) {
-            DatabaseManager.getManager().runDatabaseUpdateIfNeeded();
-        }
     }
 }
