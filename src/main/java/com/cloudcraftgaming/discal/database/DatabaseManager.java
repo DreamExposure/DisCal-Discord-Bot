@@ -159,9 +159,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(settings.getGuildID()) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -236,9 +236,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(calData.getGuildId()) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -294,9 +294,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcement.getAnnouncementId() + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -367,9 +367,9 @@ public class DatabaseManager {
 					data.setEventId(data.getEventId().split("_")[0]);
 				}
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + eventTableName + " WHERE EVENT_ID = '" + data.getEventId() + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -416,9 +416,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + rsvpTableName + " WHERE EVENT_ID = '" + data.getEventId() + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -476,9 +476,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String dataTableName = databaseInfo.getPrefix() + "GUILD_SETTINGS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -553,9 +553,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					if (res.getInt("CALENDAR_NUMBER") == 1) {
@@ -579,9 +579,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					if (res.getInt("CALENDAR_NUMBER") == calendarNumber) {
@@ -605,9 +605,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					CalendarData calData = new CalendarData(guildId, res.getInt("CALENDAR_NUMBER"));
@@ -654,9 +654,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = databaseInfo.getPrefix() + "CALENDARS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + calendarTableName + ";";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 				if (res.last()) {
 					amount = res.getRow();
 				} else {
@@ -684,9 +684,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String eventTableName = databaseInfo.getPrefix() + "EVENTS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					if (res.getString("EVENT_ID").equals(eventId)) {
@@ -738,9 +738,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String rsvpTableName = databaseInfo.getPrefix() + "RSVP";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					if (res.getString("EVENT_ID").equals(eventId)) {
@@ -801,9 +801,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcementId.toString() + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				Boolean hasStuff = res.next();
 
@@ -842,9 +842,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
 					if (res.getString("ANNOUNCEMENT_ID") != null) {
@@ -913,9 +913,9 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = databaseInfo.getPrefix() + "ANNOUNCEMENTS";
 
-				Statement statement = databaseInfo.getConnection().createStatement();
 				String query = "SELECT * FROM " + announcementTableName + ";";
-				ResultSet res = statement.executeQuery(query);
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
 				if (res.last()) {
 					amount = res.getRow();
 				} else {
@@ -1079,6 +1079,6 @@ public class DatabaseManager {
 
 	public void cleanupDatabase() {
 		//This runs every 24 hours (or manually) and removes everything that is not needed in the database.
-		
+
 	}
 }
