@@ -70,6 +70,7 @@ public class EventCommand implements ICommand {
 		info.getSubCommands().put("copy", "Copies an existing event");
 		info.getSubCommands().put("edit", "Edits an existing event");
 		info.getSubCommands().put("cancel", "Cancels the creator/editor");
+		info.getSubCommands().put("restart", "Restarts the creator/editor");
 		info.getSubCommands().put("delete", "Deletes an existing event");
 		info.getSubCommands().put("view", "Views an existing event");
 		info.getSubCommands().put("review", "Reviews the event in the creator/editor");
@@ -128,6 +129,13 @@ public class EventCommand implements ICommand {
 				case "edit":
 					if (PermissionChecker.hasSufficientRole(event)) {
 						moduleEdit(args, event, calendarData, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+					}
+					break;
+				case "restart":
+					if (PermissionChecker.hasSufficientRole(event)) {
+						moduleRestart(args, event, calendarData, settings);
 					} else {
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					}
@@ -331,6 +339,33 @@ public class EventCommand implements ICommand {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+		}
+	}
+
+	private void moduleRestart(String[] args, MessageReceivedEvent event, CalendarData calendarData, GuildSettings settings) {
+		long guildId = event.getGuild().getLongID();
+		IMessage msg = null;
+		boolean editing = false;
+		if (EventCreator.getCreator().hasPreEvent(guildId)) {
+			editing = EventCreator.getCreator().getPreEvent(guildId).isEditing();
+		}
+
+
+		if (EventCreator.getCreator().hasCreatorMessage(guildId))
+			msg = EventCreator.getCreator().getCreatorMessage(guildId);
+
+		if (EventCreator.getCreator().terminate(event)) {
+			if (msg != null) {
+				Message.deleteMessage(msg);
+				Message.deleteMessage(event);
+			}
+			if (!editing) {
+				moduleCreate(args, event, calendarData, settings);
+			} else {
+				moduleEdit(args, event, calendarData, settings);
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
