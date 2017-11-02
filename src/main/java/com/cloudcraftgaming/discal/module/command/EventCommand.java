@@ -134,10 +134,14 @@ public class EventCommand implements ICommand {
 					}
 					break;
 				case "restart":
-					if (PermissionChecker.hasSufficientRole(event)) {
-						moduleRestart(args, event, calendarData, settings);
+					if (settings.isDevGuild()) {
+						if (PermissionChecker.hasSufficientRole(event)) {
+							moduleRestart(args, event, calendarData, settings);
+						} else {
+							Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+						}
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 					}
 					break;
 				case "cancel":
