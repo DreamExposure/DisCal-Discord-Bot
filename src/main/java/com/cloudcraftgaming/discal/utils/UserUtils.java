@@ -1,14 +1,15 @@
 package com.cloudcraftgaming.discal.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.RequestBuffer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -46,7 +47,7 @@ public class UserUtils {
 		RequestBuffer.request(() -> debugging.sendMessage(String.format("toLookFor: --%s--", a))); // DEBUG
 		final String lower = toLookFor.toLowerCase();
 		RequestBuffer.request(() -> debugging.sendMessage(String.format("toLookFor.toLowerCase: --%s--", lower))); // DEBUG
-		if (lower.matches("<@!?[0-9]+>") || lower.matches("[0-9]+")) {
+		if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
 			RequestBuffer.request(() -> debugging.sendMessage(String.format("TO LOOK FOR MATCHES USER REGEX")));// DEBUG
 			final String parse = toLookFor.replaceAll("[<@!>]", "");
 			RequestBuffer.request(() -> debugging.sendMessage(String.format("PARSE: `%s`", parse))); // DEBUG
