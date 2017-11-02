@@ -1,11 +1,9 @@
 package com.cloudcraftgaming.discal.utils;
 
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,25 +39,15 @@ public class UserUtils {
 	 * @return The user if found, null otherwise
 	 */
 	public static long getUser(String toLookFor, IGuild guild) {
-		final IChannel debugging = guild.getClient().getChannelByID(267685015016570880L); // DEBUG
 		toLookFor = GeneralUtils.trim(toLookFor);
-		final String a = toLookFor; // DEBUG
-		RequestBuffer.request(() -> debugging.sendMessage(String.format("toLookFor: --%s--", a))); // DEBUG
 		final String lower = toLookFor.toLowerCase();
-		RequestBuffer.request(() -> debugging.sendMessage(String.format("toLookFor.toLowerCase: --%s--", lower))); // DEBUG
 		if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
-			RequestBuffer.request(() -> debugging.sendMessage(String.format("TO LOOK FOR MATCHES USER REGEX")));// DEBUG
 			final String parse = toLookFor.replaceAll("[<@!>]", "");
-			RequestBuffer.request(() -> debugging.sendMessage(String.format("PARSE: `%s`", parse))); // DEBUG
 			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
-			RequestBuffer.request(() -> debugging.sendMessage(String.format("USER IS NULL? %s", exists == null))); // DEBUG
 			if (exists != null) {
-				RequestBuffer.request(() -> debugging.sendMessage(String.format("RETURNING ID %s WHICH IS EQUAL TO USER WITH NAME %s", exists.getStringID(), exists.getName()))); // DEBUG
 				return exists.getLongID();
 			}
 		}
-
-		RequestBuffer.request(() -> debugging.sendMessage(String.format("NOT A VALID USER PING OR ID", a))); // DEBUG
 
 
 		List<IUser> users = new ArrayList<>();
@@ -71,16 +59,10 @@ public class UserUtils {
 		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).equalsIgnoreCase(lower)).collect(Collectors.toList()));
 		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).toLowerCase().contains(lower)).collect(Collectors.toList()));
 
-		final StringBuilder builder = new StringBuilder(); // DEBUG
-		users.forEach(r -> builder.append(r.getName()).append(", ")); // DEBUG
-		RequestBuffer.request(() -> debugging.sendMessage(String.format("USER LIST: %s", builder.toString()))); // DEBUG
 
 		if (!users.isEmpty()) {
-			RequestBuffer.request(() -> debugging.sendMessage(String.format("NOT EMPTY RETURNING ID %s WHICH IS EQUAL TO ROLE WITH NAME %s", users.get(0).getStringID(), users.get(0).getName()))); // DEBUG
 			return users.get(0).getLongID();
 		}
-
-		RequestBuffer.request(() -> debugging.sendMessage(String.format("RETURNING 0 (no role found)"))); // DEBUG
 
 		return 0;
 	}
