@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.discal.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.object.BotSettings;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;

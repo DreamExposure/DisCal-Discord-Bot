@@ -1,14 +1,15 @@
 package com.cloudcraftgaming.discal;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.DisCalAPI;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.file.ReadFile;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.network.google.Authorization;
+import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.discal.internal.consolecommand.ConsoleCommandExecutor;
-import com.cloudcraftgaming.discal.internal.file.ReadFile;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
-import com.cloudcraftgaming.discal.internal.network.google.Authorization;
 import com.cloudcraftgaming.discal.module.command.*;
-import com.cloudcraftgaming.discal.object.BotSettings;
-import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -35,6 +36,8 @@ public class Main {
         client = createClient(botSettings.getBotToken());
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
+
+		DisCalAPI.init(client, botSettings);
 
         UpdateListData.init(botSettings);
 

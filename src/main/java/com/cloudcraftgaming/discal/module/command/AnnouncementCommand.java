@@ -1,14 +1,19 @@
 package com.cloudcraftgaming.discal.module.command;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
+import com.cloudcraftgaming.discal.api.enums.event.EventColor;
+import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
+import com.cloudcraftgaming.discal.api.object.announcement.AnnouncementCreatorResponse;
+import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.utils.AnnouncementUtils;
+import com.cloudcraftgaming.discal.api.utils.EventUtils;
+import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementCreator;
 import com.cloudcraftgaming.discal.module.announcement.AnnouncementMessageFormatter;
-import com.cloudcraftgaming.discal.module.announcement.AnnouncementType;
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.announcement.Announcement;
-import com.cloudcraftgaming.discal.object.announcement.AnnouncementCreatorResponse;
-import com.cloudcraftgaming.discal.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.utils.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
@@ -379,7 +384,7 @@ public class AnnouncementCommand implements ICommand {
 					a.getSubscriberUserIds().add(senderId);
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage("You have subscribed to the announcement with the ID: `" + value + "`"
-							+ Message.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event);
+							+ MessageUtils.lineBreak + "To unsubscribe use `!announcement unsubscribe <id>`", event);
 				} else {
 					Message.sendMessage("You are already subscribed to that event!", event);
 				}
@@ -404,7 +409,7 @@ public class AnnouncementCommand implements ICommand {
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
 								"`" + username + "` has been subscribed to the announcement with the ID `" + a
-										.getAnnouncementId() + "`" + Message.lineBreak
+										.getAnnouncementId() + "`" + MessageUtils.lineBreak
 										+ "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>",
 								event);
 					} else {
@@ -420,7 +425,7 @@ public class AnnouncementCommand implements ICommand {
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
 								"`" + men + "` has been subscribed to the announcement with the ID `" + a
-										.getAnnouncementId() + "`" + Message.lineBreak
+										.getAnnouncementId() + "`" + MessageUtils.lineBreak
 										+ "To unsubscribe them use `!announcement unsubscribe <announcement ID> <value>",
 								event);
 					} else {
@@ -439,7 +444,7 @@ public class AnnouncementCommand implements ICommand {
 							DatabaseManager.getManager().updateAnnouncement(a);
 							Message.sendMessage(
 									"`" + roleName + "` has been subscribed to the announcement with the ID `" + a
-											.getAnnouncementId() + "`" + Message.lineBreak
+											.getAnnouncementId() + "`" + MessageUtils.lineBreak
 											+ "To unsubscribe them use `!announcement unsubscribe <announcement ID> <mention>",
 									event);
 						} else {
@@ -644,7 +649,7 @@ public class AnnouncementCommand implements ICommand {
 			em.withColor(EventColor.TURQUOISE.getR(), EventColor.TURQUOISE.getG(), EventColor.TURQUOISE.getB());
 			em.withAuthorIcon(event.getClient().getApplicationIconURL());
 			em.withAuthorName(MessageManager.getMessage("Embed.Announcement.Subscribe.Title", settings));
-			em.withDesc(MessageManager.getMessage("Embed.Announcement.Subscribe.Users", "%users%", subscribedUsers.toString(), settings) + Message.lineBreak + MessageManager.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
+			em.withDesc(MessageManager.getMessage("Embed.Announcement.Subscribe.Users", "%users%", subscribedUsers.toString(), settings) + MessageUtils.lineBreak + MessageManager.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
 			em.withFooterText(MessageManager.getMessage("Embed.Announcement.Subscribe.Footer", "%id%", a.getAnnouncementId().toString(), settings));
 			Message.sendMessage(em.build(), event);
 			if (updateDb) {
@@ -842,7 +847,7 @@ public class AnnouncementCommand implements ICommand {
 			em.withColor(EventColor.TURQUOISE.getR(), EventColor.TURQUOISE.getG(), EventColor.TURQUOISE.getB());
 			em.withAuthorIcon(event.getClient().getApplicationIconURL());
 			em.withAuthorName(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Title", settings));
-			em.withDesc(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%", subscribedUsers.toString(), settings) + Message.lineBreak + MessageManager.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
+			em.withDesc(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%", subscribedUsers.toString(), settings) + MessageUtils.lineBreak + MessageManager.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
 			em.withFooterText(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%", a.getAnnouncementId().toString(), settings));
 			Message.sendMessage(em.build(), event);
 			if (updateDb) {
@@ -882,7 +887,7 @@ public class AnnouncementCommand implements ICommand {
 					DatabaseManager.getManager().updateAnnouncement(a);
 					Message.sendMessage(
 							"You have unsubscribed to the announcement with the ID: `" + value + "`"
-									+ Message.lineBreak + "To re-subscribe use `!announcement subscribe <id>`",
+									+ MessageUtils.lineBreak + "To re-subscribe use `!announcement subscribe <id>`",
 							event);
 				} else {
 					Message.sendMessage("You are not subscribed to this event!", event);
@@ -907,7 +912,7 @@ public class AnnouncementCommand implements ICommand {
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
 								"`" + username + "` has been unsubscribed from the announcement with the ID `" + a
-										.getAnnouncementId() + "`" + Message.lineBreak
+										.getAnnouncementId() + "`" + MessageUtils.lineBreak
 										+ "To re-subscribe them use `!announcement subscribe <announcement ID> <mention>",
 								event);
 					} else {
@@ -923,7 +928,7 @@ public class AnnouncementCommand implements ICommand {
 						DatabaseManager.getManager().updateAnnouncement(a);
 						Message.sendMessage(
 								"`" + men + "` has been unsubscribed from the announcement with the ID `" + a
-										.getAnnouncementId() + "`" + Message.lineBreak
+										.getAnnouncementId() + "`" + MessageUtils.lineBreak
 										+ "To re-subscribe them use `!announcement subscribe <announcement ID> <value>",
 								event);
 					} else {
@@ -942,7 +947,7 @@ public class AnnouncementCommand implements ICommand {
 							DatabaseManager.getManager().updateAnnouncement(a);
 							Message.sendMessage(
 									"`" + roleName + "` has been unsubscribed from the announcement with the ID `" + a
-											.getAnnouncementId() + "`" + Message.lineBreak
+											.getAnnouncementId() + "`" + MessageUtils.lineBreak
 											+ "To re-subscribe them use `!announcement subscribe <announcement ID> <mention>",
 									event);
 						} else {

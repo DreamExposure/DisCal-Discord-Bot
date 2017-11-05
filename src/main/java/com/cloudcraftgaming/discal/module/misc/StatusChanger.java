@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.module.misc;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 
 import java.util.ArrayList;
 import java.util.TimerTask;

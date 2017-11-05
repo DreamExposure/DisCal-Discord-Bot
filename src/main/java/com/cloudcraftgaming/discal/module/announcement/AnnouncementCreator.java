@@ -1,12 +1,12 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.announcement.Announcement;
-import com.cloudcraftgaming.discal.object.announcement.AnnouncementCreatorResponse;
-import com.cloudcraftgaming.discal.utils.AnnouncementUtils;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.MessageManager;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
+import com.cloudcraftgaming.discal.api.object.announcement.AnnouncementCreatorResponse;
+import com.cloudcraftgaming.discal.api.utils.AnnouncementUtils;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;

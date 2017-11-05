@@ -1,14 +1,14 @@
 package com.cloudcraftgaming.discal.module.command;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
-import com.cloudcraftgaming.discal.internal.network.google.Authorization;
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.calendar.CalendarData;
-import com.cloudcraftgaming.discal.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.MessageManager;
+import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.network.google.Authorization;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;

@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.discal.internal.service;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import sx.blah.discord.util.DiscordException;
 
 import java.io.File;

@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.module.command;
 
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;

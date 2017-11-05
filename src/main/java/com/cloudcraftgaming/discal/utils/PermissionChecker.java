@@ -1,8 +1,9 @@
 package com.cloudcraftgaming.discal.utils;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IRole;

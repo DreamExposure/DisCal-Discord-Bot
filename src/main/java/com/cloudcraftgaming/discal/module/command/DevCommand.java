@@ -1,13 +1,14 @@
 package com.cloudcraftgaming.discal.module.command;
 
 import com.cloudcraftgaming.discal.Main;
-import com.cloudcraftgaming.discal.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import com.cloudcraftgaming.discal.internal.service.ApplicationHandler;
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.utils.Message;
-import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -270,7 +271,7 @@ public class DevCommand implements ICommand {
 		StringBuilder msg = new StringBuilder();
 
 		for (IGuild g : Main.client.getGuilds()) {
-			msg.append(Message.lineBreak).append(g.getName()).append(" | ").append(g.getLongID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
+			msg.append(MessageUtils.lineBreak).append(g.getName()).append(" | ").append(g.getLongID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
 
 			if (msg.length() >= 1500) {
 				Message.sendMessage(msg.toString(), event);
@@ -293,7 +294,7 @@ public class DevCommand implements ICommand {
 	private void moduleCleanupDatabase(MessageReceivedEvent event) {
 		Message.sendMessage("Cleaning up database! This may take some time....", event);
 
-		DatabaseManager.getManager().cleanupDatabase();
+		//DatabaseManager.getManager().cleanupDatabase();
 
 		Message.sendMessage("Cleaned up database!", event);
 		//Message.sendMessage("Disabled because I am a dumb", event);

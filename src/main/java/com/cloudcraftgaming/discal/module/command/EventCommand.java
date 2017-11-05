@@ -1,17 +1,24 @@
 package com.cloudcraftgaming.discal.module.command;
 
-import com.cloudcraftgaming.discal.database.DatabaseManager;
-import com.cloudcraftgaming.discal.internal.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.enums.event.EventColor;
+import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
+import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.object.event.EventCreatorResponse;
+import com.cloudcraftgaming.discal.api.object.event.PreEvent;
+import com.cloudcraftgaming.discal.api.utils.EventUtils;
+import com.cloudcraftgaming.discal.api.utils.ImageUtils;
+import com.cloudcraftgaming.discal.api.utils.MessageUtils;
+import com.cloudcraftgaming.discal.api.utils.TimeUtils;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventCreator;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventFrequency;
 import com.cloudcraftgaming.discal.internal.calendar.event.EventMessageFormatter;
-import com.cloudcraftgaming.discal.internal.calendar.event.EventUtils;
-import com.cloudcraftgaming.discal.object.GuildSettings;
-import com.cloudcraftgaming.discal.object.calendar.CalendarData;
-import com.cloudcraftgaming.discal.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.object.event.EventCreatorResponse;
-import com.cloudcraftgaming.discal.object.event.PreEvent;
-import com.cloudcraftgaming.discal.utils.*;
+import com.cloudcraftgaming.discal.utils.GeneralUtils;
+import com.cloudcraftgaming.discal.utils.PermissionChecker;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -751,9 +758,9 @@ public class EventCommand implements ICommand {
 				//TODO: Make this list pretty!!!
 				StringBuilder list = new StringBuilder("All Colors: ");
 				for (EventColor ec : EventColor.values()) {
-					list.append(Message.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
+					list.append(MessageUtils.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
 				}
-				list.append(Message.lineBreak).append(Message.lineBreak).append(MessageManager.getMessage("Creator.Event.Color.List", settings));
+				list.append(MessageUtils.lineBreak).append(MessageUtils.lineBreak).append(MessageManager.getMessage("Creator.Event.Color.List", settings));
 
 				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);

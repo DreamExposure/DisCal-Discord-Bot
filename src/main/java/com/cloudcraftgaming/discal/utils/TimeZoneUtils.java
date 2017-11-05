@@ -1,6 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
-import com.cloudcraftgaming.discal.internal.calendar.timezone.BadTimezone;
+import com.cloudcraftgaming.discal.api.enums.BadTimezone;
 import org.joda.time.DateTimeZone;
 
 /**

@@ -1,8 +1,8 @@
 package com.cloudcraftgaming.discal.eventlisteners;
 
+import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.internal.service.TimeManager;
-import com.cloudcraftgaming.discal.utils.MessageManager;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 
