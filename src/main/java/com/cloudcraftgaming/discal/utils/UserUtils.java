@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.utils;
 
+import com.cloudcraftgaming.discal.api.utils.GeneralUtils;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;

@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.module.announcement;
 
-import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
@@ -10,6 +9,7 @@ import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.utils.GuildUtils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -49,7 +49,7 @@ public class AnnouncementTask extends TimerTask {
 
 		for (Announcement a : allAnnouncements) {
 			//Check if guild is part of DisCal's guilds. This way we can clear out the database...
-			if (!active(a)) {
+			if (!GuildUtils.active(a.getGuildId())) {
 				DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
 				continue;
 			}
@@ -192,10 +192,5 @@ public class AnnouncementTask extends TimerTask {
 			}
 		}
 		return allEvents.get(gs.getGuildID());
-	}
-
-
-	private boolean active(Announcement a) {
-		return Main.client.getGuildByID(a.getGuildId()) != null;
 	}
 }
