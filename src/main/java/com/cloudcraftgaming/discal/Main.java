@@ -9,28 +9,34 @@ import com.cloudcraftgaming.discal.eventlisteners.ReadyEventListener;
 import com.cloudcraftgaming.discal.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.discal.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.module.command.*;
+import com.cloudcraftgaming.discal.web.endpoints.v1.AnnouncementEndpoint;
+import com.cloudcraftgaming.discal.web.endpoints.v1.CalendarEndpoint;
+import com.cloudcraftgaming.discal.web.endpoints.v1.GuildEndpoint;
+import com.cloudcraftgaming.discal.web.endpoints.v1.RsvpEndpoint;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 
+import static spark.Spark.*;
+
 /**
  * Created by Nova Fox on 1/2/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("ThrowableNotThrown")
 public class Main {
 	public static String version = "1.1.0";
     public static IDiscordClient client;
-    public static BotSettings botSettings;
 
-    public static void main(String[] args) {
+	public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
             throw new IllegalArgumentException("BotSettings file has not been specified!!");
 
         //Get bot settings
-        botSettings = ReadFile.readBotSettings(args[0]);
+		BotSettings botSettings = ReadFile.readBotSettings(args[0]);
 
         client = createClient(botSettings.getBotToken());
         if (client == null)
@@ -67,9 +73,49 @@ public class Main {
 
 		//Load language files.
 		MessageManager.loadLangs();
+
+		//Register Spark endpoints...
+		before("/api/*", (request, response) -> {
+			if (!request.requestMethod().equalsIgnoreCase("POST")) {
+				System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
+				halt(405, "Method not allowed");
+			}
+			//Check authorization
+			if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
+				halt(401, "Unauthorized");
+			}
+			if (!request.contentType().equalsIgnoreCase("application/json")) {
+				halt(400, "Bad Request");
+			}
+		});
+
+		path("/api/v1/discal", () -> {
+			before("/*", (q, a) -> System.out.println("Received API call from: " + q.ip() + "; Host:" + q.host()));
+			path("/guild", () -> {
+				path("/settings", () -> {
+					post("/get", GuildEndpoint::getSettings);
+					post("/update", GuildEndpoint::updateSettings);
+				});
+			});
+			path("/announcement", () -> {
+				post("/get", AnnouncementEndpoint::getAnnouncement);
+				post("/create", AnnouncementEndpoint::createAnnouncement);
+				post("/update", AnnouncementEndpoint::updateAnnouncement);
+				post("/delete", AnnouncementEndpoint::deleteAnnouncement);
+				post("/list", AnnouncementEndpoint::listAnnouncements);
+			});
+			path("/calendar", () -> {
+				post("/get", CalendarEndpoint::getCalendar);
+				post("/list", CalendarEndpoint::listCalendars);
+			});
+			path("/rsvp", () -> {
+				post("/get", RsvpEndpoint::getRsvp);
+				post("/update", RsvpEndpoint::updateRsvp);
+			});
+		});
 	}
 
-    /**
+	/**
      * Creates the DisCal bot client.
      *
      * @param token The Bot Token.
