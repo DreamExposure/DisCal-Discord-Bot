@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal;
 
-import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.file.ReadFile;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
@@ -36,8 +35,6 @@ public class Main {
         client = createClient(botSettings.getBotToken());
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
-
-		DisCalAPI.init(client, botSettings);
 
         UpdateListData.init(botSettings);
 

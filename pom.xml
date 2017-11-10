@@ -27,12 +27,6 @@
     </repositories>
 
     <dependencies>
-		<!--DisCal API-->
-		<dependency>
-			<groupId>com.github.NovaFox161</groupId>
-			<artifactId>discal-api</artifactId>
-			<version>1.0.1</version>
-		</dependency>
         <!--Discord4J API-->
         <dependency>
             <groupId>com.github.austinv11</groupId>
