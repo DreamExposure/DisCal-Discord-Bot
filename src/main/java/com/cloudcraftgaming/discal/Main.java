@@ -69,9 +69,6 @@ public class Main {
         executor.registerCommand(new AnnouncementCommand());
         executor.registerCommand(new DevCommand());
 
-        //Accept commands
-        ConsoleCommandExecutor.init();
-
 		//Load language files.
 		MessageManager.loadLangs();
 
@@ -114,6 +111,9 @@ public class Main {
 				post("/update", RsvpEndpoint::updateRsvp);
 			});
 		});
+
+		//Accept commands
+		ConsoleCommandExecutor.init();
 	}
 
 	/**
