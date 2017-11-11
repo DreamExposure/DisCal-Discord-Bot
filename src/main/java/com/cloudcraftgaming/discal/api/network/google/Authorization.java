@@ -15,7 +15,7 @@ import com.cloudcraftgaming.discal.api.object.json.google.CodeResponse;
 import com.cloudcraftgaming.discal.api.object.network.google.ClientData;
 import com.cloudcraftgaming.discal.api.object.network.google.Poll;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.discal.bot.internal.calendar.calendar.CalendarMessageFormatter;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
