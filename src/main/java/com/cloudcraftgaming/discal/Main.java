@@ -94,6 +94,7 @@ public class Main {
 					post("/get", GuildEndpoint::getSettings);
 					post("/update", GuildEndpoint::updateSettings);
 				});
+				path("/info", () -> post("/from-user/list", GuildEndpoint::getUserGuilds));
 			});
 			path("/announcement", () -> {
 				post("/get", AnnouncementEndpoint::getAnnouncement);

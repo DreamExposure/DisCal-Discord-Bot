@@ -5,10 +5,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.*;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -60,9 +57,50 @@ public class PermissionChecker {
 		return true;
 	}
 
+	public static boolean hasSufficientRole(IGuild guild, IUser user) {
+		//TODO: Figure out exactly what is causing a NPE here...
+		try {
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
+			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
+				String roleId = settings.getControlRole();
+				IRole role = null;
+
+				for (IRole r : guild.getRoles()) {
+					if (r.getStringID().equals(roleId)) {
+						role = r;
+						break;
+					}
+				}
+
+				if (role != null) {
+					for (IRole r : user.getRolesForGuild(guild)) {
+						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition()) {
+							return true;
+						}
+					}
+					return false;
+				} else {
+					//Role not found... reset Db...
+					settings.setControlRole("everyone");
+					DatabaseManager.getManager().updateSettings(settings);
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			//Something broke so we will harmlessly allow access and email the dev.
+			ExceptionHandler.sendException(user, "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			return true;
+		}
+		return true;
+	}
+
 	public static boolean hasManageServerRole(MessageReceivedEvent event) {
 		return event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
 				Permissions.MANAGE_SERVER);
+	}
+
+	public static boolean hasManageServerRole(IGuild g, IUser u) {
+		return u.getPermissionsForGuild(g).contains(Permissions.MANAGE_SERVER);
 	}
 
 	/**
