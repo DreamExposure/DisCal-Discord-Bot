@@ -30,13 +30,14 @@ import static spark.Spark.*;
 public class Main {
 	public static String version = "1.1.0";
     public static IDiscordClient client;
+	public static BotSettings botSettings;
 
 	public static void main(String[] args) {
         if (args.length < 1) // Needs a bot token provided
             throw new IllegalArgumentException("BotSettings file has not been specified!!");
 
         //Get bot settings
-		BotSettings botSettings = ReadFile.readBotSettings(args[0]);
+		botSettings = ReadFile.readBotSettings(args[0]);
 
         client = createClient(botSettings.getBotToken());
         if (client == null)
