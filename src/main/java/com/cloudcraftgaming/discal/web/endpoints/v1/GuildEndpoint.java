@@ -124,7 +124,7 @@ public class GuildEndpoint {
 				JSONObject d = new JSONObject();
 				d.put("GUILD_ID", g.getLongID());
 				d.put("IS_OWNER", g.getOwnerLongID() == userId);
-				d.put("MANAGER_SERVER", PermissionChecker.hasManageServerRole(g, user));
+				d.put("MANAGE_SERVER", PermissionChecker.hasManageServerRole(g, user));
 				d.put("DISCAL_CONTROL", PermissionChecker.hasSufficientRole(g, user));
 
 				guildData.add(d);
