@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,7 +59,7 @@ public class AnnouncementEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal get announcement error", e, AnnouncementEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -97,7 +98,7 @@ public class AnnouncementEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal create announcement error", e, AnnouncementEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -148,7 +149,7 @@ public class AnnouncementEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal update announcement error", e, AnnouncementEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -179,7 +180,7 @@ public class AnnouncementEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal delete announcement error", e, AnnouncementEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -247,7 +248,7 @@ public class AnnouncementEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal list announcements error", e, AnnouncementEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();

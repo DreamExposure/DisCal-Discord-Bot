@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.web.endpoints.v1;
 
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.event.RsvpData;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,7 +42,7 @@ public class RsvpEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal get RSVP data error", e, RsvpEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -104,7 +105,7 @@ public class RsvpEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB-API] Internal update RSVP data error", e, RsvpEndpoint.class);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
