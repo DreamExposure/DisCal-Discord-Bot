@@ -26,10 +26,10 @@ public class AnnouncementEndpoint {
 	public static String getAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Long.valueOf(guildId));
+			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
 			if (a != null) {
 
@@ -68,9 +68,9 @@ public class AnnouncementEndpoint {
 	public static String createAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 
-			Announcement a = new Announcement(Long.valueOf(guildId));
+			Announcement a = new Announcement(guildId);
 
 			JSONObject body = new JSONObject(request.body());
 			a.setAnnouncementChannelId(body.getString("ANNOUNCEMENT_CHANNEL"));
@@ -107,10 +107,10 @@ public class AnnouncementEndpoint {
 	public static String updateAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Long.valueOf(guildId));
+			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
 			if (a != null) {
 
@@ -158,10 +158,10 @@ public class AnnouncementEndpoint {
 	public static String deleteAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
 
-			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Long.valueOf(guildId)) != null) {
+			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId) != null) {
 				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
 					response.type("application/json");
 					response.status(200);
@@ -189,13 +189,13 @@ public class AnnouncementEndpoint {
 	public static String listAnnouncements(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 
 			Integer amount = jsonMain.getInt("AMOUNT");
 
 			ArrayList<JSONObject> announcements = new ArrayList<>();
 			if (amount == -1) {
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Long.valueOf(guildId))) {
+				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					JSONObject obj = new JSONObject();
 					obj.put("GUILD_ID", a.getGuildId());
 					obj.put("ANNOUNCEMENT_ID", a.getAnnouncementId().toString());
@@ -213,7 +213,7 @@ public class AnnouncementEndpoint {
 				}
 			} else {
 				int i = 0;
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Long.valueOf(guildId))) {
+				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					if (i < amount) {
 						JSONObject obj = new JSONObject();
 						obj.put("GUILD_ID", a.getGuildId());

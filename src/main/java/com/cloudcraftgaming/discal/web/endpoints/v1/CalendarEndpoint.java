@@ -23,10 +23,10 @@ public class CalendarEndpoint {
 	public static String getCalendar(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 			Integer calNumber = jsonMain.getInt("CALENDAR_NUMBER");
 
-			CalendarData calendar = DatabaseManager.getManager().getCalendar(Long.valueOf(guildId), calNumber);
+			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 
@@ -58,10 +58,10 @@ public class CalendarEndpoint {
 	public static String listCalendars(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 
 			ArrayList<JSONObject> cals = new ArrayList<>();
-			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(Long.valueOf(guildId))) {
+			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(guildId)) {
 				if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
 					JSONObject body = new JSONObject();
 					body.put("GUILD_ID", guildId);

@@ -27,9 +27,9 @@ public class GuildEndpoint {
 	public static String getSettings(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
+			Long guildId = jsonMain.getLong("GUILD_ID");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(guildId));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 			response.type("application/json");
 			response.status(200);
@@ -61,9 +61,9 @@ public class GuildEndpoint {
 		try {
 			JSONObject body = new JSONObject((request.body()));
 
-			String guildId = body.getString("GUILD_ID");
+			Long guildId = body.getLong("GUILD_ID");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(guildId));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 			if (body.has("EXTERNAL_CALENDAR"))
 				settings.setUseExternalCalendar(body.getBoolean("EXTERNAL_CALENDAR"));
