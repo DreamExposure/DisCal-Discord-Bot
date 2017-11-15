@@ -219,7 +219,18 @@ public class AnnouncementMessageFormatter {
 
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
-        IChannel channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+		IChannel channel = null;
+		try {
+			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue.", e, AnnouncementMessageFormatter.class);
+		}
+
+		if (channel == null) {
+			//Channel does not exist or could not be found, automatically delete announcement to prevent issues.
+			DatabaseManager.getManager().deleteAnnouncement(announcement.getAnnouncementId().toString());
+			return;
+		}
 
 		Message.sendMessageAsync(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
