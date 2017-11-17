@@ -220,6 +220,9 @@ public class AnnouncementMessageFormatter {
         IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
 		IChannel channel = null;
+
+		assert guild != null;
+
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 		} catch (Exception e) {

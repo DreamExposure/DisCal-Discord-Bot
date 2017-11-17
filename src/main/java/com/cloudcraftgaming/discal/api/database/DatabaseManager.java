@@ -185,8 +185,8 @@ public class DatabaseManager {
 					ps.setBoolean(11, settings.isPatronGuild());
 					ps.setBoolean(12, settings.isDevGuild());
 					ps.setInt(13, settings.getMaxCalendars());
-					ps.setBoolean(14, settings.useTwelveHour());
-					ps.setString(15, settings.getDmAnnouncementsString());
+					ps.setString(14, settings.getDmAnnouncementsString());
+					ps.setBoolean(15, settings.useTwelveHour());
 
 
 					ps.executeUpdate();
