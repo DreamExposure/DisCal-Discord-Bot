@@ -87,6 +87,7 @@ public class AnnouncementCommand implements ICommand {
 		info.getSubCommands().put("sub", "Subscribes users/roles to the announcement.");
 		info.getSubCommands().put("unsubscribe", "Unsubscribes users/roles to the announcement.");
 		info.getSubCommands().put("unsub", "Unsubscribes users/roles to the announcement.");
+		info.getSubCommands().put("channel", "Sets the channel the announcement will be sent in.");
 		info.getSubCommands().put("type", "Sets the announcement's type.");
 		info.getSubCommands().put("hours", "Sets the amount of hours before the event to fire (added to minutes)");
 		info.getSubCommands().put("minutes", "Sets the amount of minutes before the event to fire (added to hours)");
