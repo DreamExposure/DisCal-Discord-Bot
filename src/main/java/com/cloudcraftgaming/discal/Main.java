@@ -9,10 +9,7 @@ import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExe
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
-import com.cloudcraftgaming.discal.web.endpoints.v1.AnnouncementEndpoint;
-import com.cloudcraftgaming.discal.web.endpoints.v1.CalendarEndpoint;
-import com.cloudcraftgaming.discal.web.endpoints.v1.GuildEndpoint;
-import com.cloudcraftgaming.discal.web.endpoints.v1.RsvpEndpoint;
+import com.cloudcraftgaming.discal.web.endpoints.v1.*;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -106,6 +103,7 @@ public class Main {
 			path("/calendar", () -> {
 				post("/get", CalendarEndpoint::getCalendar);
 				post("/list", CalendarEndpoint::listCalendars);
+				post("time", TimeEndpoint::getTime); 
 			});
 			path("/rsvp", () -> {
 				post("/get", RsvpEndpoint::getRsvp);
