@@ -987,7 +987,8 @@ public class DatabaseManager {
 
 				//Check if recurring...
 				if (eventId.contains("_")) {
-					eventId = eventId.split("_")[0];
+					//Don't delete if child event of recurring event.
+					return false;
 				}
 
 				String query = "DELETE FROM " + eventTable + " WHERE EVENT_ID = ?";
