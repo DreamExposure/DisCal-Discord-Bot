@@ -212,6 +212,14 @@ public class EventCreator {
 		return false;
 	}
 
+	public boolean terminate(long guildId) {
+		if (hasPreEvent(guildId)) {
+			events.remove(getPreEvent(guildId));
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Confirms the event in the creator for the specific guild.
 	 *
@@ -310,6 +318,7 @@ public class EventCreator {
 	public PreEvent getPreEvent(long guildId) {
 		for (PreEvent e : events) {
 			if (e.getGuildId() == guildId) {
+				e.setLastEdit(System.currentTimeMillis());
 				return e;
 			}
 		}
@@ -321,6 +330,10 @@ public class EventCreator {
 			return getPreEvent(guildId).getCreatorMessage();
 		}
 		return null;
+	}
+
+	public ArrayList<PreEvent> getAllPreEvents() {
+		return events;
 	}
 
 	//Booleans/Checkers

@@ -20,6 +20,8 @@ public class PreCalendar {
 
 	private IMessage creatorMessage;
 
+	private long lastEdit;
+
 	/**
 	 * Creates a new PreCalendar for the Guild.
 	 *
@@ -31,6 +33,8 @@ public class PreCalendar {
 		summary = _summary;
 
 		editing = false;
+
+		lastEdit = System.currentTimeMillis();
 	}
 
 	public PreCalendar(long _guildId, Calendar calendar) {
@@ -45,6 +49,8 @@ public class PreCalendar {
 		}
 
 		editing = false;
+
+		lastEdit = System.currentTimeMillis();
 	}
 
 	//Getters
@@ -97,6 +103,10 @@ public class PreCalendar {
 		return creatorMessage;
 	}
 
+	public long getLastEdit() {
+		return lastEdit;
+	}
+
 	//Setters
 
 	/**
@@ -136,6 +146,10 @@ public class PreCalendar {
 
 	public void setCreatorMessage(IMessage _message) {
 		creatorMessage = _message;
+	}
+
+	public void setLastEdit(long _lastEdit) {
+		lastEdit = _lastEdit;
 	}
 
 	//Booleans/Checkers

@@ -115,6 +115,14 @@ public class AnnouncementCreator {
         return false;
     }
 
+	public boolean terminate(long guildId) {
+		if (hasAnnouncement(guildId)) {
+			announcements.remove(getAnnouncement(guildId));
+			return true;
+		}
+		return false;
+	}
+
     /**
      * Confirms the announcement and enters it into the Database.
      * @param e The event received upon confirmation.
@@ -142,6 +150,7 @@ public class AnnouncementCreator {
     public Announcement getAnnouncement(long guildId) {
         for (Announcement a : announcements) {
             if (a.getGuildId() == guildId) {
+				a.setLastEdit(System.currentTimeMillis());
                 return a;
             }
         }
@@ -153,6 +162,10 @@ public class AnnouncementCreator {
     		return getAnnouncement(guildId).getCreatorMessage();
 		}
 		return null;
+	}
+
+	public ArrayList<Announcement> getAllAnnouncements() {
+		return announcements;
 	}
 
 	//Setters

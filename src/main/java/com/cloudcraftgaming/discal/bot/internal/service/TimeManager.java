@@ -44,6 +44,9 @@ public class TimeManager {
 
 		Timer at = new Timer(true);
 		at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
+
+		Timer cc = new Timer(true);
+		cc.schedule(new CreatorCleaner(), 60 * 1000 * 60, 60 * 1000 * 60);
 		timers.add(at);
 	}
 

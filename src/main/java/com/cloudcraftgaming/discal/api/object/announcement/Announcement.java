@@ -33,6 +33,8 @@ public class Announcement {
 
 	private boolean editing;
 
+	private long lastEdit;
+
 	/**
 	 * Use this constructor when creating NEW announcements!!!
 	 *
@@ -48,6 +50,8 @@ public class Announcement {
 		hoursBefore = 0;
 		minutesBefore = 0;
 		info = "None";
+
+		lastEdit = System.currentTimeMillis();
 	}
 
 	/**
@@ -68,6 +72,7 @@ public class Announcement {
 		info = "None";
 
 		editing = false;
+		lastEdit = System.currentTimeMillis();
 	}
 
 	public Announcement(Announcement from) {
@@ -85,6 +90,7 @@ public class Announcement {
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
 
 		editing = false;
+		lastEdit = System.currentTimeMillis();
 	}
 
 	public Announcement(Announcement from, boolean copyId) {
@@ -106,6 +112,7 @@ public class Announcement {
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
 
 		editing = false;
+		lastEdit = System.currentTimeMillis();
 	}
 
 	//Getters
@@ -250,6 +257,10 @@ public class Announcement {
 		return editing;
 	}
 
+	public long getLastEdit() {
+		return lastEdit;
+	}
+
 	//Setters
 
 	/**
@@ -331,6 +342,10 @@ public class Announcement {
 
 	public void setEditing(boolean _editing) {
 		editing = _editing;
+	}
+
+	public void setLastEdit(long _lastEdit) {
+		lastEdit = _lastEdit;
 	}
 
 	//Booleans/Checkers

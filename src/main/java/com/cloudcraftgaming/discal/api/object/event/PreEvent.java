@@ -45,6 +45,8 @@ public class PreEvent {
 
 	private IMessage creatorMessage;
 
+	private long lastEdit;
+
 
 	/**
 	 * Creates a new PreEvent for the specified Guild.
@@ -65,6 +67,7 @@ public class PreEvent {
 		eventData = new EventData(guildId);
 
 		editing = false;
+		lastEdit = System.currentTimeMillis();
 	}
 
 	public PreEvent(long _guildId, Event e) {
@@ -130,6 +133,7 @@ public class PreEvent {
 		eventData = DatabaseManager.getManager().getEventData(guildId, e.getId());
 
 		editing = false;
+		lastEdit = System.currentTimeMillis();
 	}
 
 	//Getters
@@ -253,6 +257,10 @@ public class PreEvent {
 		return creatorMessage;
 	}
 
+	public long getLastEdit() {
+		return lastEdit;
+	}
+
 	//Setters
 
 	/**
@@ -350,6 +358,10 @@ public class PreEvent {
 
 	public void setCreatorMessage(IMessage _creatorMessage) {
 		creatorMessage = _creatorMessage;
+	}
+
+	public void setLastEdit(long _lastEdit) {
+		lastEdit = _lastEdit;
 	}
 
 	//Booleans/Checkers

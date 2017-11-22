@@ -125,6 +125,14 @@ public class CalendarCreator {
 		return false;
 	}
 
+	public boolean terminate(long guildId) {
+		if (hasPreCalendar(guildId)) {
+			calendars.remove(getPreCalendar(guildId));
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Confirms the calendar and creates it within Google Calendar.
 	 *
@@ -221,6 +229,7 @@ public class CalendarCreator {
 	public PreCalendar getPreCalendar(long guildId) {
 		for (PreCalendar c : calendars) {
 			if (c.getGuildId() == guildId) {
+				c.setLastEdit(System.currentTimeMillis());
 				return c;
 			}
 		}
@@ -232,6 +241,10 @@ public class CalendarCreator {
 			return getPreCalendar(guildId).getCreatorMessage();
 		}
 		return null;
+	}
+
+	public ArrayList<PreCalendar> getAllPreCalendars() {
+		return calendars;
 	}
 
 	//Booleans/Checkers
