@@ -70,46 +70,48 @@ public class Main {
 		MessageManager.loadLangs();
 
 		//Register Spark endpoints...
-		before("/api/*", (request, response) -> {
-			if (!request.requestMethod().equalsIgnoreCase("POST")) {
-				System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
-				halt(405, "Method not allowed");
-			}
-			//Check authorization
-			if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
-				halt(401, "Unauthorized");
-			}
-			if (!request.contentType().equalsIgnoreCase("application/json")) {
-				halt(400, "Bad Request");
-			}
-		});
+		if (botSettings.shouldRunWebAPI()) {
+			before("/api/*", (request, response) -> {
+				if (!request.requestMethod().equalsIgnoreCase("POST")) {
+					System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
+					halt(405, "Method not allowed");
+				}
+				//Check authorization
+				if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
+					halt(401, "Unauthorized");
+				}
+				if (!request.contentType().equalsIgnoreCase("application/json")) {
+					halt(400, "Bad Request");
+				}
+			});
 
-		path("/api/v1/discal", () -> {
-			before("/*", (q, a) -> System.out.println("Received API call from: " + q.ip() + "; Host:" + q.host()));
-			path("/guild", () -> {
-				path("/settings", () -> {
-					post("/get", GuildEndpoint::getSettings);
-					post("/update", GuildEndpoint::updateSettings);
+			path("/api/v1/discal", () -> {
+				before("/*", (q, a) -> System.out.println("Received API call from: " + q.ip() + "; Host:" + q.host()));
+				path("/guild", () -> {
+					path("/settings", () -> {
+						post("/get", GuildEndpoint::getSettings);
+						post("/update", GuildEndpoint::updateSettings);
+					});
+					path("/info", () -> post("/from-user/list", GuildEndpoint::getUserGuilds));
 				});
-				path("/info", () -> post("/from-user/list", GuildEndpoint::getUserGuilds));
+				path("/announcement", () -> {
+					post("/get", AnnouncementEndpoint::getAnnouncement);
+					post("/create", AnnouncementEndpoint::createAnnouncement);
+					post("/update", AnnouncementEndpoint::updateAnnouncement);
+					post("/delete", AnnouncementEndpoint::deleteAnnouncement);
+					post("/list", AnnouncementEndpoint::listAnnouncements);
+				});
+				path("/calendar", () -> {
+					post("/get", CalendarEndpoint::getCalendar);
+					post("/list", CalendarEndpoint::listCalendars);
+					post("time", TimeEndpoint::getTime);
+				});
+				path("/rsvp", () -> {
+					post("/get", RsvpEndpoint::getRsvp);
+					post("/update", RsvpEndpoint::updateRsvp);
+				});
 			});
-			path("/announcement", () -> {
-				post("/get", AnnouncementEndpoint::getAnnouncement);
-				post("/create", AnnouncementEndpoint::createAnnouncement);
-				post("/update", AnnouncementEndpoint::updateAnnouncement);
-				post("/delete", AnnouncementEndpoint::deleteAnnouncement);
-				post("/list", AnnouncementEndpoint::listAnnouncements);
-			});
-			path("/calendar", () -> {
-				post("/get", CalendarEndpoint::getCalendar);
-				post("/list", CalendarEndpoint::listCalendars);
-				post("time", TimeEndpoint::getTime); 
-			});
-			path("/rsvp", () -> {
-				post("/get", RsvpEndpoint::getRsvp);
-				post("/update", RsvpEndpoint::updateRsvp);
-			});
-		});
+		}
 
 		//Accept commands
 		ConsoleCommandExecutor.init();

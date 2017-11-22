@@ -66,6 +66,9 @@ public class ReadFile {
 				if (line == 12) {
 					settings.setRunDatabaseUpdater(strLine.equalsIgnoreCase("true"));
 				}
+				if (line == 13) {
+					settings.setRunWebAPI(strLine.equalsIgnoreCase("true"));
+				}
 				line++;
 
 			}

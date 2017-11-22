@@ -24,6 +24,8 @@ public class BotSettings {
 
 	private boolean runDatabaseUpdater;
 
+	private boolean runWebAPI;
+
 	//Getters
 	public String getBotToken() {
 		return botToken;
@@ -73,6 +75,10 @@ public class BotSettings {
 		return runDatabaseUpdater;
 	}
 
+	public boolean shouldRunWebAPI() {
+		return runWebAPI;
+	}
+
 	//Setters
 	public void setBotToken(String _botToken) {
 		botToken = _botToken;
@@ -120,5 +126,9 @@ public class BotSettings {
 
 	public void setRunDatabaseUpdater(boolean _run) {
 		runDatabaseUpdater = _run;
+	}
+
+	public void setRunWebAPI(boolean _run) {
+		runWebAPI = _run;
 	}
 }
