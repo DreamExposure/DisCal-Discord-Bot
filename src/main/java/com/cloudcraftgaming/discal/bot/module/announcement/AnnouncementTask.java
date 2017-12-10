@@ -191,7 +191,7 @@ public class AnnouncementTask extends TimerTask {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				ExceptionHandler.sendException(null, "Failed to get events list! 00x2304", e, this.getClass());
+				ExceptionHandler.sendException(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID(), e, this.getClass());
 				allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
 			}
 		}
