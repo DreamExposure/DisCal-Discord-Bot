@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.web.oauth;
 
-import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
@@ -29,7 +28,7 @@ public class DiscordLoginHandler {
 			String code = request.queryParams("code");
 
 			//POST request to discord for access...
-			HttpResponse<JsonNode> httpResponse = Unirest.post("https://discordapp.com/api/v6/oauth2/token").header("Content-Type", "application/x-www-form-urlencoded").field("client_id", Main.client.getApplicationClientID()).field("client_secret", BotSettings.SECRET.get()).field("grant_type", "authorization_code").field("code", code).field("redirect_uri", "http://localhost:4567/account/login").asJson();
+			HttpResponse<JsonNode> httpResponse = Unirest.post("https://discordapp.com/api/v6/oauth2/token").header("Content-Type", "application/x-www-form-urlencoded").field("client_id", BotSettings.ID.get()).field("client_secret", BotSettings.SECRET.get()).field("grant_type", "authorization_code").field("code", code).field("redirect_uri", "http://localhost:4567/account/login").asJson();
 
 			JSONObject info = new JSONObject(httpResponse.getBody()).getJSONObject("object");
 
@@ -55,7 +54,7 @@ public class DiscordLoginHandler {
 			response.redirect("/dashboard");
 		} catch (JSONException e) {
 			e.printStackTrace();
-			response.redirect("/dashboard");
+			halt(500, "Internal Server Exception");
 		} catch (Exception e) {
 			e.printStackTrace();
 			halt(500, "Internal Server Exception");

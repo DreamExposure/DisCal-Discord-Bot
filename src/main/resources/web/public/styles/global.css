@@ -22,7 +22,7 @@ footer {
 
 h1, h2, h3, h4, h5, h6 {
 	text-align: center;
-	color: #E67C3F;
+	color: #5566c2;
 }
 
 h1 {
@@ -50,7 +50,7 @@ p {
 
 button {
 	font-size: 18px;
-	background-color: #E67C3F;
+	background-color: #5566c2;
 	color: white;
 	padding: 10px;
 	border: 2px black;
@@ -64,8 +64,8 @@ button:hover {
 }
 
 hr {
-	color: #E67C3F;
-	background-color: #E67C3F;
+	color: #5566c2;
+	background-color: #5566c2;
 	border-color: transparent;
 
 	height: 1px;
@@ -101,8 +101,8 @@ select {
 input.submit {
 	padding-top: 8px;
 	padding-bottom: 8px;
-	border: 1px solid #E67C3F;
-	background: #E67C3F;
+	border: 1px solid #5566c2;
+	background: #5566c2;
 }
 
 input.submit:hover {
@@ -155,7 +155,7 @@ label {
 
 	background: #bcbcbc;
 	border-radius: 6px;
-	border: 4px #E67C3F;
+	border: 4px #5566c2;
 
 	max-width: 400px;
 	height: auto;
@@ -182,14 +182,14 @@ label {
 
 	float: left;
 
-	border: #E67C3F 2px solid;
+	border: #5566c2 2px solid;
 	border-radius: 10px;
 }
 
 /* Navigation bar */
 .top-nav {
 	overflow: hidden;
-	background-color: #E67C3F;
+	background-color: #5566c2;
 }
 
 .top-nav h1 {
@@ -199,7 +199,6 @@ label {
 	margin-left: 15px;
 	margin-top: auto;
 	margin-bottom: auto;
-	font-family: 'Spectral SC', serif;
 	font-size: 25pt;
 }
 
