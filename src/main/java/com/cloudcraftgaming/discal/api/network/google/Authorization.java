@@ -51,8 +51,8 @@ public class Authorization {
 		return instance;
 	}
 
-	public void init(BotSettings settings) {
-		clientData = new ClientData(settings.getGoogleClientId(), settings.getGoogleClientSecret());
+	public void init() {
+		clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
 	}
 
 	public void requestCode(MessageReceivedEvent event, GuildSettings settings) {

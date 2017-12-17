@@ -14,15 +14,12 @@ import org.json.JSONObject;
  * For Project: DisCal
  */
 public class UpdateListData {
-	private static String token;
 
 	/**
 	 * Initiates the data updater with a valid token.
 	 *
-	 * @param settings BotSettings containing the API token.
 	 */
-	public static void init(BotSettings settings) {
-		token = settings.getBotsPwToken();
+	public static void init() {
 	}
 
 	/**
@@ -34,7 +31,7 @@ public class UpdateListData {
 
 			JSONObject json = new JSONObject().put("server_count", serverCount);
 
-			HttpResponse<JsonNode> response = Unirest.post("https://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", token).header("Content-Type", "application/json").body(json).asJson();
+			HttpResponse<JsonNode> response = Unirest.post("https://bots.discord.pw/api/bots/265523588918935552/stats").header("Authorization", BotSettings.PW_TOKEN.get()).header("Content-Type", "application/json").body(json).asJson();
 		} catch (Exception e) {
 			//Handle issue.
 			System.out.println("Failed to update Discord PW list metadata!");

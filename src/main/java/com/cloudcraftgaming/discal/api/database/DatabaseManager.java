@@ -43,11 +43,10 @@ public class DatabaseManager {
 	/**
 	 * Connects to the MySQL server specified.
 	 *
-	 * @param bs The BotSettings with Db info to connect to.
 	 */
-	public void connectToMySQL(BotSettings bs) {
+	public void connectToMySQL() {
 		try {
-			MySQL mySQL = new MySQL(bs.getDbHostName(), bs.getDbPort(), bs.getDbDatabase(), bs.getDbPrefix(), bs.getDbUser(), bs.getDbPass());
+			MySQL mySQL = new MySQL(BotSettings.SQL_HOST.get(), BotSettings.SQL_PORT.get(), BotSettings.SQL_DB.get(), BotSettings.SQL_PREFIX.get(), BotSettings.SQL_USER.get(), BotSettings.SQL_PASSWORD.get());
 
 			Connection mySQLConnection = mySQL.openConnection();
 			databaseInfo = new DatabaseInfo(mySQL, mySQLConnection, mySQL.getPrefix());
