@@ -1,10 +1,6 @@
 package com.cloudcraftgaming.discal.web.utils;
 
 import com.cloudcraftgaming.discal.web.endpoints.v1.*;
-import com.cloudcraftgaming.discal.web.handler.DashboardHandler;
-import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
-import com.cloudcraftgaming.discal.web.oauth.DiscordLoginHandler;
-import spark.ModelAndView;
 
 import static spark.Spark.*;
 
@@ -62,24 +58,5 @@ public class SparkUtils {
 				post("/update", RsvpEndpoint::updateRsvp);
 			});
 		});
-
-		//Various endpoints for thyme because yeah...
-		path("/account", () -> {
-			get("/login", DiscordLoginHandler::handleDiscordCode);
-			get("/logout", DiscordLoginHandler::handleLogout);
-
-			path("/dashboard", () -> {
-				get("/select", DashboardHandler::handleGuildSelect);
-				get("/guild", DashboardHandler::handleSettingsSelect);
-				get("/update", DashboardHandler::handleSettingsUpdate);
-			});
-		});
-
-		//Templates and pages...
-		get("/", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/index"), new ThymeleafTemplateEngine());
-		get("/home", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/index"), new ThymeleafTemplateEngine());
-		get("/dashboard", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/"), new ThymeleafTemplateEngine());
-		get("/dashboard", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/dashboard"), new ThymeleafTemplateEngine());
-		get("/dashboard/guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/guild"), new ThymeleafTemplateEngine());
 	}
 }

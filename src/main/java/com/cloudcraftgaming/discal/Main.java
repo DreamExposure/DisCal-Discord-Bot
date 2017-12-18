@@ -48,6 +48,9 @@ public class Main {
 		DatabaseManager.getManager().connectToMySQL();
         DatabaseManager.getManager().createTables();
 
+		//Start spark
+		SparkUtils.initSpark();
+
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();
         dispatcher.registerListener(new ReadyEventListener());
@@ -68,9 +71,6 @@ public class Main {
 
 		//Load language files.
 		MessageManager.loadLangs();
-
-		//Start spark
-		SparkUtils.initSpark();
 
 		//Accept commands
 		ConsoleCommandExecutor.init();
