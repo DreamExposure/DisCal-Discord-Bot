@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>Dashboard - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+		<script src="/scripts/dashboard/main.js"></script>
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a class="active" href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<!--TODO: Change this when bot goes live to proper auth url-->
+			<a class="account" th:unless="${loggedIn}"
+			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
+				in</a>
+		</div>
+
+		<div id="content">
+			<!--Check if logged in, if not, handle login...-->
+			<div th:if="${loggedIn}">
+				<h1 th:text="'Welcome, ' + ${username} + '!'"></h1>
+				<h3>Select a guild below!</h3>
+
+				<!--TODO: IF YOU CAN MAKE THIS LOOP WORK WITH THE METHOD CALL I WILL PAY YOU-->
+				<th:block th:each="guild : ${guilds}">
+					<button onclick="goToGuild(this.id)" class="guild" th:id="${guild.id}"
+					        th:text="${guild.name}"></button>
+					<br>
+				</th:block>
+
+			</div>
+			<div th:unless="${loggedIn}">
+				<h1>YOU ARE NOT LOGGED IN!</h1>
+				<p>Please login to continue.</p>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>

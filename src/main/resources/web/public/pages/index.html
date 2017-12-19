@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>Home - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a class="active" href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<!--TODO: Change this when bot goes live to proper auth url-->
+			<a class="account" th:unless="${loggedIn}"
+			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
+				in</a>
+		</div>
+
+		<div id="content">
+			<div class="image-wrapper" style="float: left">
+				<img src="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png"
+				     style="max-width: 200px; max-height: 200px;">
+			</div>
+			<h1>DisCal Bot</h1>
+			<h3>The Official Discord Calendar Bot</h3>
+
+			<p>
+				DisCal is a powerful Discord bot allowing you to connect Google Calendar to Discord in a seamless
+				fashion. With superior support and features such as custom calendars, events, automated announcements,
+				RSVPs and more, DisCal is the ultimate calendar bot.
+			</p>
+
+			<a href="https://discordapp.com/oauth2/authorize?client_id=265523588918935552&scope=bot&permissions=201845824redirect_uri=https%3A%2F%2Fwww.discalbot.com%2Fpages%2Fsetup.html"
+			   target="_blank">
+				<button>Add To Discord!</button>
+			</a>
+
+			<hr>
+			<h2>See What Actual Users Are Saying</h2>
+			<div class="quote-block">
+				<div class="quote">
+					<h4>Casey#8173</h4>
+					<p>"Keep up the good work guys, this is so desperately needed!"</p>
+				</div>
+
+				<div class="quote">
+					<h4>ConfigSys.boy!#0189</h4>
+					<p>"Kudos for finally doing something I've been waiting for since my first day in Discord. Our
+						multi-game community has been using Google Docs, Images and Calendars for years and linking the
+						Calendar to Discord will be a huge boon."</p>
+				</div>
+
+				<div class="quote">
+					<h4>Bank_CW [DD-R]#3927</h4>
+					<p>"It is a bot that I see a great demand for"</p>
+				</div>
+			</div>
+
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>

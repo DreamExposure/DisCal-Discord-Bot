@@ -1,6 +1,10 @@
 package com.cloudcraftgaming.discal.web.utils;
 
+import com.cloudcraftgaming.discal.api.network.discord.DiscordLoginHandler;
 import com.cloudcraftgaming.discal.web.endpoints.v1.*;
+import com.cloudcraftgaming.discal.web.handler.DashboardHandler;
+import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
+import spark.ModelAndView;
 
 import static spark.Spark.*;
 
@@ -58,5 +62,30 @@ public class SparkUtils {
 				post("/update", RsvpEndpoint::updateRsvp);
 			});
 		});
+
+
+		//Various endpoints for thyme because yeah...
+		path("/account", () -> {
+			get("/login", DiscordLoginHandler::handleDiscordCode);
+			get("/logout", DiscordLoginHandler::handleLogout);
+
+			path("/dashboard", () -> {
+				get("/select", DashboardHandler::handleGuildSelect);
+				get("/guild", DashboardHandler::handleSettingsSelect);
+				get("/update", DashboardHandler::handleSettingsUpdate);
+			});
+		});
+
+		//Templates and pages...
+		get("/", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/index"), new ThymeleafTemplateEngine());
+		get("/home", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/index"), new ThymeleafTemplateEngine());
+		get("/about", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/about"), new ThymeleafTemplateEngine());
+		get("/commands", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/commands"), new ThymeleafTemplateEngine());
+		get("/lazy-discal", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/lazy-discal"), new ThymeleafTemplateEngine());
+		get("/setup", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/setup"), new ThymeleafTemplateEngine());
+		get("/policy/privacy", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/policy/privacy"), new ThymeleafTemplateEngine());
+
+		get("/dashboard", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/dashboard"), new ThymeleafTemplateEngine());
+		get("/dashboard/guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/guild"), new ThymeleafTemplateEngine());
 	}
 }

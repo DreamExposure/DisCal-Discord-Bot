@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>Dashboard - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+		<script src="/scripts/dashboard/main.js"></script>
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a class="active" href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<!--TODO: Change this when bot goes live to proper auth url-->
+			<a class="account" th:unless="${loggedIn}"
+			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
+				in</a>
+		</div>
+
+		<div id="content">
+			<!--Check if logged in, if not, handle login...-->
+			<div th:if="${loggedIn}">
+				<div id="side-nav">
+					<h4>Main Settings</h4>
+					<a href="/account/dashboard/guild?settings=bot">
+						<button>Bot Settings</button>
+					</a>
+					<br>
+					<a href="/account/dashboard/guild?settings=guild">
+						<button>Guild Settings</button>
+					</a>
+					<hr>
+					<h4>Extensions</h4>
+					<a href="/account/dashboard/guild?settings=ext?ext=test">
+						<button>Example</button>
+					</a>
+				</div>
+				<div style="display: flow-root">
+					<img th:src="${selected.icon}"
+					     style="display: flex;float: left;max-width: 64px;margin-right: 15px;">
+					<h3 th:text="'Managing Server: ' + ${selected.name}" style="text-align: left;"></h3>
+					<hr>
+					<p th:if="${settings} == null">Please select the settings to edit on the left.</p>
+					<div th:if="${settings} != null">
+						<div th:if="${settings} == bot">
+							<h6>Bot Settings</h6>
+							<form action="/account/dashboard/update" style="text-align: left">
+								<label>Bot Nickname
+									<br>
+									<input type="text" name="bot-nick" maxlength="32" th:value="${selected.botnick}">
+								</label>
+								<input type="submit" class="submit" value="Update">
+							</form>
+							<br>
+							<br>
+							<form action="/account/dashboard/update" style="text-align: left">
+								<label>Bot Prefix
+									<br>
+									<input type="text" name="prefix" maxlength="32" th:value="${selected.prefix}">
+									<input type="submit" class="submit" value="Update">
+								</label>
+							</form>
+							<br>
+						</div>
+						<div th:if="${settings} == guild">
+							<h6>Guild Settings</h6>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div th:unless="${loggedIn}">
+				<h1>YOU ARE NOT LOGGED IN!</h1>
+				<p>Please login to continue.</p>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>

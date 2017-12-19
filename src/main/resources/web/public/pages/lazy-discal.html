@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>Lazy DisCal - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a class="active" href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<!--TODO: Change this when bot goes live to proper auth url-->
+			<a class="account" th:unless="${loggedIn}"
+			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
+				in</a>
+		</div>
+
+		<div id="content">
+			<div id="about">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/lazy-discal/lazy-discal-program.jpg"
+					     style="max-width: 300px; max-height: 300px;">
+				</div>
+				<h3>About Lazy DisCal</h3>
+				<p>
+					Lazy DisCal is an application scripted by Callador using Auto Hotkey. This application helps to make
+					it easy to create events, announcements, and calendars for DisCal with a very simple and easy to use
+					GUI.
+					<br>
+					<br>
+					Built for one purpose: Making your life easier by remembering all the DisCal commands for you! Can't
+					remember what format to put your start date? No problem!
+					<br>
+					<br>
+					All you have to do is fill out the various fields in LD and then click one of the submit buttons. LD
+					will wait a few seconds for you to bring up discord and then send all the appropriate commands to
+					your channel for you.
+					<br>
+					<br>
+					It supports saving and loading of events as text files for quick event creation. It can build events
+					and announcements separately or together and has the capability to build up to 50 announcements at
+					one time.
+				</p>
+
+				<a download="" href="/assets/files/Lazy-DisCal/Windows/Lazy_Discal_GUI-1.0.8.0.exe">
+					<button>Windows</button>
+				</a>
+
+				<hr>
+				<p>*Note: until Lazy DisCal is developed for linux/mac you can run it via Wine.</p>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>

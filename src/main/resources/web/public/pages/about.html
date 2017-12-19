@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>About - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a class="active" href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<!--TODO: Change this when bot goes live to proper auth url-->
+			<a class="account" th:unless="${loggedIn}"
+			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
+				in</a>
+		</div>
+
+		<div id="content">
+			<h1>DisCal Bot - About</h1>
+
+			<div id="invite">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/logos/discord-logo-white.png" style="max-width: 300px; max-height: 300px;">
+				</div>
+				<h3>Invite To Discord Server</h3>
+				<p>
+					Seen enough of this amazing bot? Add it to your Discord server by clicking the button below!
+					<br><br>
+					Once you add, scroll down to the "DisCal Setup" Button and click it!
+				</p>
+				<a href="https://discordapp.com/oauth2/authorize?client_id=265523588918935552&scope=bot&permissions=201845824redirect_uri=https%3A%2F%2Fwww.discalbot.com%2Fpages%2Fsetup.html"
+				   target="_blank">
+					<button>Invite to Server Now!</button>
+				</a>
+
+				<p>
+					Need to see more to convince you? Scroll down the page! You'll learn just how useful DisCal really
+					is and why you need it!
+				</p>
+			</div>
+
+			<hr>
+
+			<div id="commands">
+				<div class="image-wrapper" style="float: right">
+					<img src="/assets/images/examples/DisCal-Event-Creation.jpg"
+					     style="max-width: 300px; max-height: 300px;">
+				</div>
+				<h3>Commands</h3>
+				<p>
+					DisCal is designed to be intuitive and powerful.
+					<br><br><br>
+					Discal uses simple to understand commands. With a customizable prefix, ability to mention DisCal
+					directly, and more DisCal's command system is designed for users in mind.
+					<br><br><br>
+					Because of this, DisCal has a ton of commands that allow you to fully utilize it! View all of the
+					documentation on the commands for DisCal by clicking the button below!
+				</p>
+				<a href="/pages/commands.html">
+					<button>View Commands</button>
+				</a>
+			</div>
+
+			<hr>
+
+			<div id="trello">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/other/discal-trello.png" style="max-width: 450px; max-height: 300px;">
+				</div>
+				<h3>Trello & To-Do</h3>
+				<p>
+					DisCal is meant to be useful, collaborative, and easy to use.
+					<br><br><br>
+					We use Trello to track everything we are currently working on. This way, you can see what our
+					progress is, comment on what you want us to work on, or add suggestions and requests.
+					<br><br><br>
+				</p>
+				<a href="https://trello.com/b/OuFo5aXu/discal" target="_blank">
+					<button>Check out DisCal's Trello</button>
+				</a>
+			</div>
+
+			<hr>
+
+			<div id="support">
+				<div class="image-wrapper" style="float: right">
+					<img src="/assets/images/other/support-server.png" style="max-width: 450px; max-height: 300px;">
+				</div>
+				<h3>Official Support Server</h3>
+				<p>
+					If DisCal was meant to be useful, so are we! Join our official DisCal Discord server for extra info
+					and help.
+					<br><br><br>
+					Need help with something? Visit our support channel!
+					<br><br>
+					Want to request a feature we somehow didn't think to add? Send us a message in our feature request
+					channel!
+					<br><br><br>
+					Just want to be part of the amazing community using this Bot? Join the discord!
+				</p>
+				<a href="https://discord.gg/AmAMGeN" target="_blank">
+					<button>Join The Support Server</button>
+				</a>
+			</div>
+
+			<hr>
+
+			<div id="source">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/other/discal-github.jpg" style="max-width: 450px; max-height: 300px;">
+				</div>
+				<h3>Source Code</h3>
+				<p>
+					DisCal was built upon open source APIs. It wouldn't be fair if we didn't open source DisCal.
+					<br><br><br>
+					All of the source code behind this amazing bot can be found on the GitHub repo linked below!
+					<br><br><br>
+					We encourage those who can to fork the repository and help code DisCal! We are community driven and
+					really love any help we can get. Even just a simple typo fix.
+					<br><br>
+					And of course, we will credit you with the changes and even give you a special contributor role!!!
+				</p>
+				<a href="https://github.com/NovaFox161/DisCal-Discord-Bot" target="_blank">
+					<button>DisCal GitHub</button>
+				</a>
+			</div>
+
+			<hr>
+
+			<div id="patreon">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/other/novafox-patreon-page.png"
+					     style="max-width: 450px; max-height: 300px;">
+				</div>
+				<h3>Become a Patron Today!</h3>
+				<p>
+					DisCal is developed freely, open source, and completely unlimited. However, we still need to support
+					ourselves.
+					<br> <br>
+					Rather than making DisCal limited for free users, we decided to open a patreon, by becoming a patron
+					you help support and fund the further development and support for DisCal. Please consider becoming a
+					patron!
+				</p>
+				<a target="_blank" href="https://www.patreon.com/Novafox">
+					<button>Become a Patron!</button>
+				</a>
+				<p>
+					By becoming a patron, you not only support us and DisCal's development, but will get exclusive
+					access to features early before anyone else!
+				</p>
+			</div>
+
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>
