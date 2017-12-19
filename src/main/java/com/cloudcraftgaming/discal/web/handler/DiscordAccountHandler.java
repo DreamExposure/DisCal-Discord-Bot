@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.web.handler;
 
+import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 
 import java.util.HashMap;
@@ -40,6 +41,7 @@ public class DiscordAccountHandler {
 			//Not logged in...
 			Map m = new HashMap();
 			m.put("loggedIn", false);
+			m.put("client", BotSettings.ID.get());
 			return m;
 		}
 	}

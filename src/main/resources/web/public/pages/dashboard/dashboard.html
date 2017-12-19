@@ -32,8 +32,8 @@
 			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
 			<!--TODO: Change this when bot goes live to proper auth url-->
 			<a class="account" th:unless="${loggedIn}"
-			   href="https://discordapp.com/oauth2/authorize?client_id=348893450227286017&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin">Log
-				in</a>
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin'">Log
+				In</a>
 		</div>
 
 		<div id="content">
