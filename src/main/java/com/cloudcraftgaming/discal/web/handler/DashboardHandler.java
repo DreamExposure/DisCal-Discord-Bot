@@ -63,12 +63,6 @@ public class DashboardHandler {
 			Map m = new HashMap();
 			m.put("settings", settings);
 
-			if (settings.equalsIgnoreCase("ext")) {
-				//Extension handling
-				String ext = request.queryParams("ext");
-				m.put("ext", ext);
-			}
-
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 
 			response.redirect("/dashboard/guild", 301);
@@ -103,6 +97,17 @@ public class DashboardHandler {
 
 				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
 				settings.setPrefix(g.getPrefix());
+
+				DatabaseManager.getManager().updateSettings(settings);
+			} else if (request.queryParams().contains("lang")) {
+				//Update lang...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				g.setLang(request.queryParams("lang"));
+
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
+				settings.setLang(g.getLang());
 
 				DatabaseManager.getManager().updateSettings(settings);
 			}

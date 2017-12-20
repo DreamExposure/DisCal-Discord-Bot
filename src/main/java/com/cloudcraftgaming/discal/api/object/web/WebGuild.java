@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.api.object.web;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import sx.blah.discord.handle.obj.IGuild;
 
 /**
@@ -17,6 +18,7 @@ public class WebGuild {
 	//Bot settings
 	private String botNick;
 	private String prefix;
+	private String lang;
 
 	//Getters
 	public String getId() {
@@ -37,6 +39,10 @@ public class WebGuild {
 
 	public String getPrefix() {
 		return prefix;
+	}
+
+	public String getLang() {
+		return lang;
 	}
 
 	//Setters
@@ -60,6 +66,10 @@ public class WebGuild {
 		prefix = _prefix;
 	}
 
+	public void setLang(String _lang) {
+		lang = _lang;
+	}
+
 
 	//Functions
 	public WebGuild fromGuild(IGuild g) {
@@ -67,7 +77,11 @@ public class WebGuild {
 		name = g.getName();
 		iconUrl = g.getIconURL();
 		botNick = Main.client.getOurUser().getNicknameForGuild(g);
-		prefix = DatabaseManager.getManager().getSettings(g.getLongID()).getPrefix();
+
+		GuildSettings s = DatabaseManager.getManager().getSettings(g.getLongID());
+		prefix = s.getPrefix();
+		lang = s.getLang();
+
 		return this;
 	}
 }
