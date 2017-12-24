@@ -55,7 +55,10 @@ public class EventCommand implements ICommand {
 	 */
 	@Override
 	public ArrayList<String> getAliases() {
-		return new ArrayList<>();
+		ArrayList<String> a = new ArrayList<>();
+		a.add("e");
+
+		return a;
 	}
 
 	/**
