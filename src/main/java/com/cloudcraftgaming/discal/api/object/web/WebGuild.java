@@ -16,8 +16,9 @@ public class WebGuild {
 	private String iconUrl;
 
 	//Bot settings
+	private GuildSettings settings;
+
 	private String botNick;
-	private String prefix;
 	private String lang;
 
 	//Getters
@@ -33,12 +34,12 @@ public class WebGuild {
 		return iconUrl;
 	}
 
-	public String getBotNick() {
-		return botNick;
+	public GuildSettings getSettings() {
+		return settings;
 	}
 
-	public String getPrefix() {
-		return prefix;
+	public String getBotNick() {
+		return botNick;
 	}
 
 	public String getLang() {
@@ -58,12 +59,12 @@ public class WebGuild {
 		iconUrl = _url;
 	}
 
-	public void setBotNick(String _nick) {
-		botNick = _nick;
+	public void setSettings(GuildSettings _settings) {
+		settings = _settings;
 	}
 
-	public void setPrefix(String _prefix) {
-		prefix = _prefix;
+	public void setBotNick(String _nick) {
+		botNick = _nick;
 	}
 
 	public void setLang(String _lang) {
@@ -78,9 +79,8 @@ public class WebGuild {
 		iconUrl = g.getIconURL();
 		botNick = Main.client.getOurUser().getNicknameForGuild(g);
 
-		GuildSettings s = DatabaseManager.getManager().getSettings(g.getLongID());
-		prefix = s.getPrefix();
-		lang = s.getLang();
+		settings = DatabaseManager.getManager().getSettings(g.getLongID());
+		lang = settings.getLang();
 
 		return this;
 	}

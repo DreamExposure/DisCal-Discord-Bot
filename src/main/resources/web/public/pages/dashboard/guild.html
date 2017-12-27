@@ -87,7 +87,8 @@
 							<form action="/account/dashboard/update" style="text-align: left">
 								<label>Bot Prefix
 									<br>
-									<input type="text" name="prefix" maxlength="32" th:value="${selected.prefix}">
+									<input type="text" name="prefix" maxlength="32"
+									       th:value="${selected.settings.prefix}">
 								</label>
 								<input type="submit" class="submit" value="Update">
 							</form>

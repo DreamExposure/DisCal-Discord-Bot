@@ -93,12 +93,10 @@ public class DashboardHandler {
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setPrefix(request.queryParams("prefix"));
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				g.getSettings().setPrefix(request.queryParams("prefix"));
 
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
-				settings.setPrefix(g.getPrefix());
-
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.getManager().updateSettings(g.getSettings());
 			} else if (request.queryParams().contains("lang")) {
 				//Update lang...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
