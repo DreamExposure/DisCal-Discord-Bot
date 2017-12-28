@@ -46,7 +46,8 @@ public class AnnouncementTask extends TimerTask {
 				ExceptionHandler.sendException(null, "Failed to get service! 00a0101", e, this.getClass());
 			}
 
-			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getAnnouncements();
+			//NOTE: This list EXCLUDES disabled announcements!!!!!!!
+			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements();
 
 			for (Announcement a : allAnnouncements) {
 				//Check if guild is part of DisCal's guilds. This way we can clear out the database...
