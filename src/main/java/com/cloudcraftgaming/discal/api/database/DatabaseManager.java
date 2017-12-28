@@ -114,6 +114,7 @@ public class DatabaseManager {
 					" HOURS_BEFORE INTEGER not NULL, " +
 					" MINUTES_BEFORE INTEGER not NULL, " +
 					" INFO LONGTEXT not NULL, " +
+					" ENABLED BOOLEAN not NULL, " +
 					" PRIMARY KEY (ANNOUNCEMENT_ID))";
 			String createCalendarTable = "CREATE TABLE IF NOT EXISTS " + calendarTableName +
 					" (GUILD_ID VARCHAR(255) not NULL, " +
@@ -305,8 +306,8 @@ public class DatabaseManager {
 				if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
 					//Data not present, add to db.
 					String insertCommand = "INSERT INTO " + announcementTableName +
-							"(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, HOURS_BEFORE, MINUTES_BEFORE, INFO)" +
-							" VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+							"(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED)" +
+							" VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, announcement.getAnnouncementId().toString());
 					ps.setString(2, String.valueOf(announcement.getGuildId()));
@@ -319,6 +320,7 @@ public class DatabaseManager {
 					ps.setInt(9, announcement.getHoursBefore());
 					ps.setInt(10, announcement.getMinutesBefore());
 					ps.setString(11, announcement.getInfo());
+					ps.setBoolean(12, announcement.isEnabled());
 
 					ps.executeUpdate();
 					ps.close();
@@ -330,7 +332,7 @@ public class DatabaseManager {
 							+ " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
 							+ " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
 							+ " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
-							+ " INFO = ?"
+							+ " INFO = ?, ENABLED = ?"
 							+ " WHERE ANNOUNCEMENT_ID = ?";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 
@@ -343,7 +345,9 @@ public class DatabaseManager {
 					ps.setInt(7, announcement.getHoursBefore());
 					ps.setInt(8, announcement.getMinutesBefore());
 					ps.setString(9, announcement.getInfo());
-					ps.setString(10, announcement.getAnnouncementId().toString());
+					ps.setBoolean(10, announcement.isEnabled());
+
+					ps.setString(11, announcement.getAnnouncementId().toString());
 
 					ps.executeUpdate();
 
@@ -821,6 +825,7 @@ public class DatabaseManager {
 					announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
 					announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
 					announcement.setInfo(res.getString("INFO"));
+					announcement.setEnabled(res.getBoolean("ENABLED"));
 
 					statement.close();
 					return announcement;
@@ -861,6 +866,7 @@ public class DatabaseManager {
 						announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
 						announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
 						announcement.setInfo(res.getString("INFO"));
+						announcement.setEnabled(res.getBoolean("ENABLED"));
 
 						announcements.add(announcement);
 					}

@@ -95,6 +95,8 @@ public class AnnouncementCommand implements ICommand {
 		info.getSubCommands().put("event", "Sets the event the announcement is for (if applicable)");
 		info.getSubCommands().put("color", "Sets the color the announcement is for (if applicable)");
 		info.getSubCommands().put("info", "Sets an additional info.");
+		info.getSubCommands().put("enable", "Enables or Disables the announcement (alias for `disable`)");
+		info.getSubCommands().put("disable", "Enables or Disables the announcement (alias for `enable`)");
 
 		return info;
 	}
@@ -169,6 +171,12 @@ public class AnnouncementCommand implements ICommand {
 					break;
 				case "info":
 					moduleInfo(args, event, settings);
+					break;
+				case "enable":
+				case "enabled":
+				case "disable":
+				case "disabled":
+					moduleEnable(args, event, settings);
 					break;
 				case "channel":
 					moduleChannel(args, event, settings);
@@ -1258,6 +1266,33 @@ public class AnnouncementCommand implements ICommand {
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
 			}
+		}
+	}
+
+	private void moduleEnable(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		if (settings.isDevGuild()) {
+			long guildId = event.getGuild().getLongID();
+			if (args.length == 2) {
+				if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+					Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Creator", settings), event);
+				} else {
+					String value = args[1];
+					if (AnnouncementUtils.announcementExists(value, event)) {
+						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+					} else {
+						Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
+						a.setEnabled(!a.isEnabled());
+
+						DatabaseManager.getManager().updateAnnouncement(a);
+
+						Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Success", "%value%", a.isEnabled() + "", settings), event);
+					}
+				}
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Specify", settings), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 		}
 	}
 

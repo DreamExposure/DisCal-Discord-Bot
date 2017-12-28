@@ -29,6 +29,8 @@ public class Announcement {
 	private int minutesBefore;
 	private String info;
 
+	private boolean enabled;
+
 	private IMessage creatorMessage;
 
 	private boolean editing;
@@ -249,6 +251,10 @@ public class Announcement {
 		return info;
 	}
 
+	public boolean isEnabled() {
+		return enabled;
+	}
+
 	public IMessage getCreatorMessage() {
 		return creatorMessage;
 	}
@@ -314,6 +320,10 @@ public class Announcement {
 
 	public void setInfo(String _info) {
 		info = _info;
+	}
+
+	public void setEnabled(boolean _enabled) {
+		enabled = _enabled;
 	}
 
 	/**
