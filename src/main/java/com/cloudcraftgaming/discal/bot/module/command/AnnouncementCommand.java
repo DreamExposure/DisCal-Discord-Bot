@@ -1277,7 +1277,7 @@ public class AnnouncementCommand implements ICommand {
 					Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Creator", settings), event);
 				} else {
 					String value = args[1];
-					if (AnnouncementUtils.announcementExists(value, event)) {
+					if (!AnnouncementUtils.announcementExists(value, event)) {
 						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 					} else {
 						Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
