@@ -88,7 +88,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case UNIVERSAL:
-						for (Event e : getEvents(settings, calendar, service)) {
+						for (Event e : getEvents(settings, calendar, service, a)) {
 							if (inRange(a, e)) {
 								//It fits! Let's do it!
 								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
@@ -96,7 +96,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case COLOR:
-						for (Event e : getEvents(settings, calendar, service)) {
+						for (Event e : getEvents(settings, calendar, service, a)) {
 							if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
 								if (inRange(a, e)) {
 									//It fits! Let's do it!
@@ -106,7 +106,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case RECUR:
-						for (Event e : getEvents(settings, calendar, service)) {
+						for (Event e : getEvents(settings, calendar, service, a)) {
 							if (inRange(a, e)) {
 								if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
 									//It fits! Lets announce!
@@ -179,7 +179,7 @@ public class AnnouncementTask extends TimerTask {
 		return discalService;
 	}
 
-	private List<Event> getEvents(GuildSettings gs, CalendarData cd, Calendar service) {
+	private List<Event> getEvents(GuildSettings gs, CalendarData cd, Calendar service, Announcement a) {
 		if (!allEvents.containsKey(gs.getGuildID())) {
 			try {
 				Events events = service.events().list(cd.getCalendarAddress())
@@ -192,7 +192,7 @@ public class AnnouncementTask extends TimerTask {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				ExceptionHandler.sendException(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID(), e, this.getClass());
+				ExceptionHandler.sendException(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass());
 				allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
 			}
 		}
