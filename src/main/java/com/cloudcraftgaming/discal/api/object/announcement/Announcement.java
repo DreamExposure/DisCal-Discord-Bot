@@ -52,6 +52,7 @@ public class Announcement {
 		hoursBefore = 0;
 		minutesBefore = 0;
 		info = "None";
+		enabled = true;
 
 		lastEdit = System.currentTimeMillis();
 	}
@@ -72,6 +73,7 @@ public class Announcement {
 		hoursBefore = 0;
 		minutesBefore = 0;
 		info = "None";
+		enabled = true;
 
 		editing = false;
 		lastEdit = System.currentTimeMillis();
@@ -87,6 +89,7 @@ public class Announcement {
 		hoursBefore = from.getHoursBefore();
 		minutesBefore = from.getMinutesBefore();
 		info = from.getInfo();
+		enabled = from.enabled;
 
 		setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
@@ -109,6 +112,7 @@ public class Announcement {
 		hoursBefore = from.getHoursBefore();
 		minutesBefore = from.getMinutesBefore();
 		info = from.getInfo();
+		enabled = from.enabled;
 
 		setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
