@@ -74,6 +74,8 @@ public class AnnouncementMessageFormatter {
             em.withColor(56, 138, 237);
         }
 
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+
         return em.build();
     }
 
@@ -131,6 +133,8 @@ public class AnnouncementMessageFormatter {
         } else {
             em.withColor(56, 138, 237);
         }
+
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
 
         return em.build();
     }

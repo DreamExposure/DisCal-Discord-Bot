@@ -272,6 +272,7 @@
   "Embed.Announcement.Info.Minutes": "Minutes Before",
   "Embed.Announcement.Info.Channel": "In Channel (Name)",
   "Embed.Announcement.Info.Info": "Additional Info",
+  "Embed.Announcement.Info.Enabled": "Enabled",
   "Embed.Announcement.Condensed.Title": "Condensed Announcement Info",
   "Embed.Announcement.Condensed.ID": "Announcement ID",
   "Embed.Announcement.Condensed.Time": "Time Before",

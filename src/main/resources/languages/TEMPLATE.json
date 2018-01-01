@@ -272,6 +272,7 @@
   "Embed.Announcement.Info.Minutes": "Minutes Before",
   "Embed.Announcement.Info.Channel": "In Channel (Name)",
   "Embed.Announcement.Info.Info": "Additional Info",
+  "Embed.Announcement.Info.Enabled": "Enabled",
   "Embed.Announcement.Condensed.Title": "Condensed Announcement Info",
   "Embed.Announcement.Condensed.ID": "Announcement ID",
   "Embed.Announcement.Condensed.Time": "Time Before",
@@ -333,6 +334,7 @@
   "Embed.Time.TimeZone": "TimeZone",
   "Embed.Time.Footer": "This is the current calendar time.",
   "Embed.RSVP.List.Title": "RSVPs for Event",
+
   "Embed.RSVP.List.Footer": "`!event view <ID>` for event info",
   "Notifications.Event.NotExist": "The specified event does not exist and/or has been deleted!",
   "Notifications.Event.InPast": "The specified event has already happened! You cannot use this function for a past event!",
