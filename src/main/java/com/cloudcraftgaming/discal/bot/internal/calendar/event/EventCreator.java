@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.bot.internal.calendar.event;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.message.Message;
@@ -255,6 +256,7 @@ public class EventCreator {
 				String calendarId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
 
 				if (!preEvent.isEditing()) {
+					event.setId(KeyGenerator.generateEventId());
 					try {
 						Event confirmed;
 						if (settings.useExternalCalendar()) {
