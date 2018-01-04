@@ -6,7 +6,7 @@ package com.cloudcraftgaming.discal.api.enums.event;
  * For Project: DisCal-Discord-Bot
  */
 public enum EventFrequency {
-	DAILY, WEEKLY, MONTHLY, YEARLY;
+	HOURLY, DAILY, WEEKLY, MONTHLY, YEARLY;
 
 	/**
 	 * Checks if the value is a valid enum value.
@@ -15,7 +15,7 @@ public enum EventFrequency {
 	 * @return <code>true</code> if valid, else <code>false</code>.
 	 */
 	public static boolean isValid(String value) {
-		return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
+		return value.equalsIgnoreCase("HOURLY") || value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
 	}
 
 	/**
@@ -26,6 +26,8 @@ public enum EventFrequency {
 	 */
 	public static EventFrequency fromValue(String value) {
 		switch (value.toUpperCase()) {
+			case "HOURLY":
+				return HOURLY;
 			case "DAILY":
 				return DAILY;
 			case "WEEKLY":
