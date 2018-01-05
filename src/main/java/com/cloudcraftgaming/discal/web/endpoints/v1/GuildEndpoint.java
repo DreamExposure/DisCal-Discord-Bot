@@ -4,7 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.bot.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;

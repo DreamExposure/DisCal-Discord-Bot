@@ -7,7 +7,7 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.announcement.AnnouncementCreatorResponse;
 import com.cloudcraftgaming.discal.api.utils.AnnouncementUtils;
-import com.cloudcraftgaming.discal.bot.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 

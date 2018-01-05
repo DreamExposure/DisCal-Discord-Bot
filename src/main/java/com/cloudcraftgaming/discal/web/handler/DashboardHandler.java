@@ -2,12 +2,13 @@ package com.cloudcraftgaming.discal.web.handler;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
+import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import org.json.JSONException;
 import spark.Request;
 import spark.Response;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,9 +26,12 @@ public class DashboardHandler {
 		try {
 			String guildId = request.queryParams("guild");
 
-			WebGuild wg = new WebGuild().fromGuild(Main.client.getGuildByID(Long.valueOf(guildId)));
+			IGuild g = Main.client.getGuildByID(Long.valueOf(guildId));
+			WebGuild wg = new WebGuild().fromGuild(g);
 
 			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+
+			IUser u = Main.client.getUserByID(Long.valueOf((String) m.get("id")));
 
 			if (m.containsKey("selected")) {
 				m.remove("selected");
@@ -39,9 +43,13 @@ public class DashboardHandler {
 				m.remove("settings");
 			}
 
-			if (m.containsKey("ext")) {
-				m.remove("ext");
+			if (m.containsKey("admin")) {
+				m.remove("admin");
 			}
+
+			//Check if admin/manage server and/or has control role...
+			m.put("admin", PermissionChecker.hasManageServerRole(g, u));
+			m.put("controller", PermissionChecker.hasSufficientRole(g, u));
 
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 
@@ -102,12 +110,19 @@ public class DashboardHandler {
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setLang(request.queryParams("lang"));
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				g.getSettings().setLang(request.queryParams("lang"));
 
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
-				settings.setLang(g.getLang());
+				DatabaseManager.getManager().updateSettings(g.getSettings());
+			} else if (request.queryParams().contains("simple-ann")) {
+				//Update simple announcements...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
 
-				DatabaseManager.getManager().updateSettings(settings);
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
+
+				DatabaseManager.getManager().updateSettings(g.getSettings());
 			}
 
 			//Finally redirect back to the dashboard

@@ -9,7 +9,7 @@ import com.cloudcraftgaming.discal.api.object.calendar.CalendarCreatorResponse;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.calendar.PreCalendar;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.bot.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;

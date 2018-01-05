@@ -17,9 +17,7 @@ public class WebGuild {
 
 	//Bot settings
 	private GuildSettings settings;
-
 	private String botNick;
-	private String lang;
 
 	//Getters
 	public String getId() {
@@ -40,10 +38,6 @@ public class WebGuild {
 
 	public String getBotNick() {
 		return botNick;
-	}
-
-	public String getLang() {
-		return lang;
 	}
 
 	//Setters
@@ -67,10 +61,6 @@ public class WebGuild {
 		botNick = _nick;
 	}
 
-	public void setLang(String _lang) {
-		lang = _lang;
-	}
-
 
 	//Functions
 	public WebGuild fromGuild(IGuild g) {
@@ -80,7 +70,6 @@ public class WebGuild {
 		botNick = Main.client.getOurUser().getNicknameForGuild(g);
 
 		settings = DatabaseManager.getManager().getSettings(g.getLongID());
-		lang = settings.getLang();
 
 		return this;
 	}

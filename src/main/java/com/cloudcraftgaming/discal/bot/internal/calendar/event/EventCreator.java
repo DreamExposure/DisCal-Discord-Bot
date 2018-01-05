@@ -11,7 +11,7 @@ import com.cloudcraftgaming.discal.api.object.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
-import com.cloudcraftgaming.discal.bot.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;

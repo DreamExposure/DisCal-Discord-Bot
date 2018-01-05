@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 	<head>
 		<!--Meta stuffs-->
 		<meta charset="utf-8">
@@ -73,6 +73,7 @@
 					<hr>
 					<p th:if="${settings} == null">Please select the settings to edit on the left.</p>
 					<div th:if="${settings} != null">
+						<!--Bot Settings-->
 						<div th:if="${settings} == bot">
 							<h6>Bot Settings</h6>
 							<form action="/account/dashboard/update" style="text-align: left">
@@ -98,27 +99,70 @@
 								<label>Bot Language
 									<br>
 									<select name="lang" disabled>
-										<option th:value="${selected.lang}" selected
-										        th:text="${selected.lang}"></option>
-										<option value="ENGLISH" th:unless="${selected.lang} == ENGLISH">English</option>
+										<option th:value="${selected.settings.lang}" selected
+										        th:text="${selected.settings.lang}"></option>
+										<option value="ENGLISH" th:unless="${selected.settings.lang} == ENGLISH">
+											English
+										</option>
 									</select>
 								</label>
 								<input disabled type="submit" class="submit" value="Update">
 							</form>
 							<br>
 						</div>
+						<!--Guild Settings-->
 						<div th:if="${settings} == guild">
 							<h6>Guild Settings</h6>
+							<form style="text-align: left">
+								<label> Patron Guild
+									<br>
+									<input type="checkbox" name="patron" disabled
+									       th:checked="${selected.settings.patronGuild} == true">
+								</label>
+							</form>
+							<br>
+							<br>
+
 						</div>
+						<!--Calendar Settings-->
 						<div th:if="${settings} == calendar">
 							<h6>Calendar Settings</h6>
+							<form style="text-align: left">
+								<label> Using External Calendar
+									<br>
+									<input type="checkbox" name="ext-cal" disabled
+									       th:checked="${selected.settings.externalCalendar} == true">
+								</label>
+							</form>
+							<br>
+							<br>
+							<form style="text-align: left">
+								<label> Maximum Calendars Allowed
+									<br>
+									<input type="text" maxlength="2" th:value="${selected.settings.maxCalendars}"
+									       disabled>
+								</label>
+							</form>
+							<br>
+							<br>
 						</div>
+						<!--Event Settings-->
 						<div th:if="${settings} == events">
 							<h6>Event Settings</h6>
 						</div>
+						<!--Announcement Settings-->
 						<div th:if="${settings} == announcements">
 							<h6>Announcement Settings</h6>
+							<form action="/account/dashboard/update" style="text-align: left">
+								<label> Use Simple Announcements
+									<br>
+									<input type="checkbox" name="simple-ann"
+									       th:checked="${selected.settings.simpleAnnouncements} == true"
+									       onclick="useSimpleAnnouncements(this.checked)">
+								</label>
+							</form>
 						</div>
+						<!--RSVP Settings-->
 						<div th:if="${settings} == rsvp">
 							<h6>RSVP Settings</h6>
 						</div>

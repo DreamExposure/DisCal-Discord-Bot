@@ -14,7 +14,6 @@ import com.cloudcraftgaming.discal.api.object.event.PreEvent;
 import com.cloudcraftgaming.discal.api.utils.*;
 import com.cloudcraftgaming.discal.bot.internal.calendar.event.EventCreator;
 import com.cloudcraftgaming.discal.bot.internal.calendar.event.EventMessageFormatter;
-import com.cloudcraftgaming.discal.bot.utils.PermissionChecker;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;

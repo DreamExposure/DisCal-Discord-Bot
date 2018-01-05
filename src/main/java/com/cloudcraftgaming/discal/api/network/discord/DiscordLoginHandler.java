@@ -41,6 +41,7 @@ public class DiscordLoginHandler {
 			//Saving session info and access info to memory until moved into the database...
 			Map m = new HashMap();
 			m.put("loggedIn", true);
+			m.put("client", BotSettings.ID.get());
 
 			m.put("id", userInfo.getString("id"));
 			m.put("username", userInfo.getString("username"));
