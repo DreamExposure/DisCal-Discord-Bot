@@ -1266,29 +1266,25 @@ public class AnnouncementCommand implements ICommand {
 	}
 
 	private void moduleEnable(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (settings.isDevGuild()) {
-			long guildId = event.getGuild().getLongID();
-			if (args.length == 2) {
-				if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
-					Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Creator", settings), event);
-				} else {
-					String value = args[1];
-					if (!AnnouncementUtils.announcementExists(value, event)) {
-						Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-					} else {
-						Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
-						a.setEnabled(!a.isEnabled());
-
-						DatabaseManager.getManager().updateAnnouncement(a);
-
-						Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Success", "%value%", a.isEnabled() + "", settings), event);
-					}
-				}
+		long guildId = event.getGuild().getLongID();
+		if (args.length == 2) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Creator", settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Specify", settings), event);
+				String value = args[1];
+				if (!AnnouncementUtils.announcementExists(value, event)) {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+				} else {
+					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
+					a.setEnabled(!a.isEnabled());
+
+					DatabaseManager.getManager().updateAnnouncement(a);
+
+					Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Success", "%value%", a.isEnabled() + "", settings), event);
+				}
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+			Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Specify", settings), event);
 		}
 	}
 

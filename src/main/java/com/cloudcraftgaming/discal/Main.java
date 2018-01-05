@@ -27,7 +27,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("ThrowableNotThrown")
 public class Main {
-	public static String version = "1.1.0";
+	public static String version = "1.2.0";
     public static IDiscordClient client;
 
 	public static void main(String[] args) throws IOException {
