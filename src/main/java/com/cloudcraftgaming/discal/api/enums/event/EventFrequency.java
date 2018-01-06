@@ -15,7 +15,7 @@ public enum EventFrequency {
 	 * @return <code>true</code> if valid, else <code>false</code>.
 	 */
 	public static boolean isValid(String value) {
-		return value.equalsIgnoreCase("HOURLY") || value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
+		return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
 	}
 
 	/**
@@ -26,8 +26,6 @@ public enum EventFrequency {
 	 */
 	public static EventFrequency fromValue(String value) {
 		switch (value.toUpperCase()) {
-			case "HOURLY":
-				return HOURLY;
 			case "DAILY":
 				return DAILY;
 			case "WEEKLY":
