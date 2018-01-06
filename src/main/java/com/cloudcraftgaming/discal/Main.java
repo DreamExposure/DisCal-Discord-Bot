@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateListData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
@@ -48,8 +49,12 @@ public class Main {
 		DatabaseManager.getManager().connectToMySQL();
         DatabaseManager.getManager().createTables();
 
-		//Start spark
-		SparkUtils.initSpark();
+		//Start spark (catch any issues from it so only the site goes down without affecting bot....
+		try {
+			SparkUtils.initSpark();
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class);
+		}
 
         //Register events
         EventDispatcher dispatcher = client.getDispatcher();

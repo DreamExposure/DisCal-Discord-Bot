@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.api.network.discord;
 
 import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.mashape.unirest.http.HttpResponse;
@@ -55,10 +56,10 @@ public class DiscordLoginHandler {
 			//Finally redirect to the dashboard seamlessly.
 			response.redirect("/dashboard", 301);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] JSON || Discord login failed!", e, DiscordLoginHandler.class);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] Discord login failed!", e, DiscordLoginHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -70,7 +71,7 @@ public class DiscordLoginHandler {
 
 			response.redirect("/", 301);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] Discord logout failed!", e, DiscordLoginHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();

@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
+import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import org.json.JSONException;
 import spark.Request;
@@ -55,10 +56,10 @@ public class DashboardHandler {
 
 			response.redirect("/dashboard/guild", 301);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] JSON || Guild Select failed!", e, DashboardHandler.class);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] Guild Select failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -75,10 +76,10 @@ public class DashboardHandler {
 
 			response.redirect("/dashboard/guild", 301);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] Settings Selected failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -128,7 +129,7 @@ public class DashboardHandler {
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
