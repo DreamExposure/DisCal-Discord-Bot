@@ -18,6 +18,8 @@ public class SparkUtils {
 	@SuppressWarnings("ThrowableNotThrown")
 	public static void initSpark() {
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+			port(Integer.valueOf(BotSettings.PORT.get()));
+
 			staticFileLocation("/web/public"); // Main site location
 
 			//Register the API Endpoints
