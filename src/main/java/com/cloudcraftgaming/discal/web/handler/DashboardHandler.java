@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.web.handler;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.web.WebChannel;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.object.web.WebRole;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
@@ -9,6 +10,7 @@ import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import org.json.JSONException;
 import spark.Request;
 import spark.Response;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -149,6 +151,35 @@ public class DashboardHandler {
 
 				for (IRole r : guild.getRoles()) {
 					g.getRoles().add(new WebRole().fromRole(r, g.getSettings()));
+				}
+			} else if (request.queryParams().contains("discal-channel")) {
+				//Update control role...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+
+				IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
+
+				if (request.queryParams("discal-channel").equalsIgnoreCase("0")) {
+					//All channels
+					g.getSettings().setDiscalChannel("all");
+				} else {
+					g.getSettings().setDiscalChannel(request.queryParams("discal-channel"));
+				}
+
+				DatabaseManager.getManager().updateSettings(g.getSettings());
+
+				//Update channel list to display properly...
+				g.getChannels().clear();
+
+				WebChannel all = new WebChannel();
+				all.setId(0);
+				all.setName("All Channels");
+				all.setDiscalChannel(g.getSettings().getDiscalChannel().equalsIgnoreCase("all"));
+				g.getChannels().add(all);
+				for (IChannel c : guild.getChannels()) {
+					g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
 				}
 			}
 

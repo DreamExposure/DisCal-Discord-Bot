@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.api.object.web;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 
@@ -25,6 +26,7 @@ public class WebGuild {
 
 	//Lists and stuffs
 	private List<WebRole> roles = new ArrayList<>();
+	private List<WebChannel> channels = new ArrayList<>();
 
 	//Getters
 	public String getId() {
@@ -49,6 +51,10 @@ public class WebGuild {
 
 	public List<WebRole> getRoles() {
 		return roles;
+	}
+
+	public List<WebChannel> getChannels() {
+		return channels;
 	}
 
 	//Setters
@@ -85,6 +91,15 @@ public class WebGuild {
 		//Handle lists and stuffs
 		for (IRole r : g.getRoles()) {
 			roles.add(new WebRole().fromRole(r, settings));
+		}
+
+		WebChannel all = new WebChannel();
+		all.setId(0);
+		all.setName("All Channels");
+		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
+		channels.add(all);
+		for (IChannel c : g.getChannels()) {
+			channels.add(new WebChannel().fromChannel(c, settings));
 		}
 
 		return this;

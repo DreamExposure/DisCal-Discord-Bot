@@ -136,6 +136,20 @@
 							</form>
 							<br>
 							<br>
+							<form action="/account/dashboard/update" style="text-align: left">
+								<label>DisCal Channel
+									<br>
+									<select name="discal-channel">
+										<th:block th:each="chan : ${selected.channels}">
+											<option th:value="${chan.id}" th:text="${chan.name}"
+											        th:selected="${chan.discalChannel} == true"></option>
+										</th:block>
+									</select>
+								</label>
+								<input type="submit" class="submit" value="Update">
+							</form>
+							<br>
+							<br>
 						</div>
 						<!--Calendar Settings-->
 						<div th:if="${settings} == calendar">
