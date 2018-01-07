@@ -77,6 +77,9 @@ public class SparkUtils {
 					get("/select", DashboardHandler::handleGuildSelect);
 					get("/guild", DashboardHandler::handleSettingsSelect);
 					get("/update", DashboardHandler::handleSettingsUpdate);
+					path("/create", () -> {
+						get("/calendar", DashboardHandler::handleCalendarCreate);
+					});
 				});
 			});
 

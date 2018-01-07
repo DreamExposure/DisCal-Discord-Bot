@@ -172,10 +172,85 @@
 							</form>
 							<br>
 							<br>
+							<!--TODO: Add support for multiple calendars-->
+							<!--Does NOT have a calendar-->
+							<div th:if="${selected.calendar.id} == primary" style="text-align: left">
+								<hr>
+								<h6>Create A Calendar Below!</h6>
+								<form action="/account/dashboard/create/calendar" name="calendar-create">
+									<label>Calendar Name/Summary
+										<br>
+										<input type="text" name="cal-name" value="Calendar Name">
+									</label>
+									<br>
+									<br>
+									<label>Calendar Description
+										<br>
+										<input type="text" name="cal-desc" value="Calendar Description">
+									</label>
+									<br>
+									<br>
+									<label>Calendar Timezone
+										<br>
+										<select name="cal-tz">
+											<th:block th:each="tz : ${goodTz}">
+												<option th:value="${tz.name}" th:text="${tz.name}"></option>
+											</th:block>
+										</select>
+									</label>
+									<br>
+									<br>
+									<input type="submit" class="submit" value="Create Calendar!">
+								</form>
+							</div>
+							<!--Has MAIN calendar-->
+							<div th:unless="${selected.calendar.id} == primary">
+								<hr>
+								<h6>Edit Your Calendar Below</h6>
+								<a th:href="${selected.calendar.link}" target="_blank">
+									<button>View Calendar!</button>
+								</a>
+								<br><br>
+								<form action="/account/dashboard/update" style="text-align: left">
+									<label>Calendar Name/Summary
+										<br>
+										<input type="text" name="cal-name" th:value="${selected.calendar.name}">
+									</label>
+									<input type="submit" class="submit" value="Update">
+								</form>
+								<br>
+								<br>
+								<form action="/account/dashboard/update" style="text-align: left">
+									<label>Calendar Description
+										<br>
+										<input type="text" name="cal-desc" th:value="${selected.calendar.description}">
+									</label>
+									<input type="submit" class="submit" value="Update">
+								</form>
+								<br>
+								<br>
+								<form action="/account/dashboard/update" style="text-align: left">
+									<label>Calendar Timezone
+										<br>
+										<select name="cal-tz">
+											<th:block th:each="tz : ${goodTz}">
+												<option th:value="${tz.name}" th:text="${tz.name}"
+												        th:selected="${tz.name} == ${selected.calendar.timezone}"></option>
+											</th:block>
+										</select>
+									</label>
+									<input type="submit" class="submit" value="Update">
+								</form>
+							</div>
 						</div>
 						<!--Event Settings-->
 						<div th:if="${settings} == events">
 							<h6>Event Settings</h6>
+							<br>
+							<p>
+								It's a work in progress. Soon you will be able to create/edit/manage/delete events from
+								here!!
+							</p>
 						</div>
 						<!--Announcement Settings-->
 						<div th:if="${settings} == announcements">
@@ -188,10 +263,20 @@
 									       onclick="useSimpleAnnouncements(this.checked)">
 								</label>
 							</form>
+							<br>
+							<br>
+							<p>
+								It's a work in progress. Soon you will be able to create/edit/manage/delete
+								announcements from here!!
+							</p>
 						</div>
 						<!--RSVP Settings-->
 						<div th:if="${settings} == rsvp">
 							<h6>RSVP Settings</h6>
+							<br>
+							<p>
+								It's a work in progress. Soon you will be able to control RSVPs from here!!
+							</p>
 						</div>
 					</div>
 				</div>

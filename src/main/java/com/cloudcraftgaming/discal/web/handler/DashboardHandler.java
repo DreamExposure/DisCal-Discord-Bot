@@ -182,11 +182,33 @@ public class DashboardHandler {
 					g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
 				}
 			}
+			//TODO: Handle calendar name/description/timezone updating.
 
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			halt(500, "Internal Server Exception");
+		}
+		return response.body();
+	}
+
+	public static String handleCalendarCreate(Request request, Response response) {
+		try {
+			String name = request.queryParams("cal-name");
+			String desc = request.queryParams("cal-desc");
+			String tz = request.queryParams("cal-timezone").replace("___", "/");
+
+			//TODO: Create calendar
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+
+			//TODO: refresh selected guild's calendar to display properly...
+
+			//Finally redirect back to the dashboard
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();

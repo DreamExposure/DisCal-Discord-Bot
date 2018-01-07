@@ -28,6 +28,8 @@ public class WebGuild {
 	private List<WebRole> roles = new ArrayList<>();
 	private List<WebChannel> channels = new ArrayList<>();
 
+	private WebCalendar calendar;
+
 	//Getters
 	public String getId() {
 		return id;
@@ -57,6 +59,10 @@ public class WebGuild {
 		return channels;
 	}
 
+	public WebCalendar getCalendar() {
+		return calendar;
+	}
+
 	//Setters
 	public void setId(String _id) {
 		id = _id;
@@ -76,6 +82,10 @@ public class WebGuild {
 
 	public void setBotNick(String _nick) {
 		botNick = _nick;
+	}
+
+	public void setCalendar(WebCalendar _cal) {
+		calendar = _cal;
 	}
 
 
@@ -101,6 +111,8 @@ public class WebGuild {
 		for (IChannel c : g.getChannels()) {
 			channels.add(new WebChannel().fromChannel(c, settings));
 		}
+
+		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(id)), settings);
 
 		return this;
 	}

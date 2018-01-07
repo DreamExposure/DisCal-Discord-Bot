@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.api.network.discord;
 
+import com.cloudcraftgaming.discal.api.enums.GoodTimezone;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
@@ -50,6 +51,8 @@ public class DiscordLoginHandler {
 
 			//Get guilds...
 			m.put("guilds", GuildUtils.getGuilds(userInfo.getString("id")));
+
+			m.put("goodTz", GoodTimezone.values());
 
 			DiscordAccountHandler.getHandler().addAccount(m, request.session().id());
 
