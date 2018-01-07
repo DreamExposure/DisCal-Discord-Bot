@@ -3,12 +3,14 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
+import com.cloudcraftgaming.discal.api.object.web.WebRole;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import org.json.JSONException;
 import spark.Request;
 import spark.Response;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 
 import java.util.HashMap;
@@ -124,6 +126,30 @@ public class DashboardHandler {
 				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
 
 				DatabaseManager.getManager().updateSettings(g.getSettings());
+			} else if (request.queryParams().contains("con-role")) {
+				//Update control role...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+
+				IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
+				IRole role = guild.getRoleByID(Long.valueOf(request.queryParams("con-role")));
+
+				if (role.isEveryoneRole()) {
+					g.getSettings().setControlRole("everyone");
+				} else {
+					g.getSettings().setControlRole(role.getStringID());
+				}
+
+				DatabaseManager.getManager().updateSettings(g.getSettings());
+
+				//Update role list to display properly...
+				g.getRoles().clear();
+
+				for (IRole r : guild.getRoles()) {
+					g.getRoles().add(new WebRole().fromRole(r, g.getSettings()));
+				}
 			}
 
 			//Finally redirect back to the dashboard

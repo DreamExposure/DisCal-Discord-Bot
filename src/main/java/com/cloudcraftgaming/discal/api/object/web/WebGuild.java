@@ -4,6 +4,10 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -18,6 +22,9 @@ public class WebGuild {
 	//Bot settings
 	private GuildSettings settings;
 	private String botNick;
+
+	//Lists and stuffs
+	private List<WebRole> roles = new ArrayList<>();
 
 	//Getters
 	public String getId() {
@@ -38,6 +45,10 @@ public class WebGuild {
 
 	public String getBotNick() {
 		return botNick;
+	}
+
+	public List<WebRole> getRoles() {
+		return roles;
 	}
 
 	//Setters
@@ -70,6 +81,11 @@ public class WebGuild {
 		botNick = Main.client.getOurUser().getNicknameForGuild(g);
 
 		settings = DatabaseManager.getManager().getSettings(g.getLongID());
+
+		//Handle lists and stuffs
+		for (IRole r : g.getRoles()) {
+			roles.add(new WebRole().fromRole(r, settings));
+		}
 
 		return this;
 	}

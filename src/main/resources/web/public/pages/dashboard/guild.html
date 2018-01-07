@@ -122,7 +122,20 @@
 							</form>
 							<br>
 							<br>
-
+							<form action="/account/dashboard/update" style="text-align: left">
+								<label>Control Role
+									<br>
+									<select name="con-role">
+										<th:block th:each="role : ${selected.roles}">
+											<option th:value="${role.id}" th:text="${role.name}"
+											        th:selected="${role.controlRole} == true"></option>
+										</th:block>
+									</select>
+								</label>
+								<input type="submit" class="submit" value="Update">
+							</form>
+							<br>
+							<br>
 						</div>
 						<!--Calendar Settings-->
 						<div th:if="${settings} == calendar">
