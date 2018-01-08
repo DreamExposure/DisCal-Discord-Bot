@@ -230,7 +230,7 @@ public class AnnouncementMessageFormatter {
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue.", e, AnnouncementMessageFormatter.class);
+			ExceptionHandler.sendException(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class);
 		}
 
 		if (channel == null) {
