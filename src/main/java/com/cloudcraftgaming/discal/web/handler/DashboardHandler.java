@@ -1,12 +1,14 @@
 package com.cloudcraftgaming.discal.web.handler;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.web.WebChannel;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.object.web.WebRole;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.google.api.services.calendar.model.Calendar;
 import org.json.JSONException;
 import spark.Request;
 import spark.Response;
@@ -181,8 +183,67 @@ public class DashboardHandler {
 				for (IChannel c : guild.getChannels()) {
 					g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
 				}
+			} else if (request.queryParams().contains("cal-name")) {
+				//Update calendar name/summary...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				try {
+					if (g.getCalendar().isExternal()) {
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setSummary(request.queryParams("cal-name"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+					} else {
+						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+						cal.setSummary(request.queryParams("cal-name"));
+						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+					}
+
+					g.getCalendar().setName(request.queryParams("cal-name"));
+				} catch (Exception e) {
+					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
+				}
+			} else if (request.queryParams().contains("cal-desc")) {
+				//Update calendar name/summary...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				try {
+					if (g.getCalendar().isExternal()) {
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setDescription(request.queryParams("cal-desc"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+					} else {
+						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+						cal.setDescription(request.queryParams("cal-desc"));
+						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+					}
+
+					g.getCalendar().setDescription(request.queryParams("cal-desc"));
+				} catch (Exception e) {
+					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
+				}
+			} else if (request.queryParams().contains("cal-tz")) {
+				//Update calendar name/summary...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				try {
+					if (g.getCalendar().isExternal()) {
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+					} else {
+						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+						cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
+						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+					}
+
+					g.getCalendar().setTimezone(request.queryParams("cal-tz"));
+				} catch (Exception e) {
+					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
+				}
 			}
-			//TODO: Handle calendar name/description/timezone updating.
 
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
