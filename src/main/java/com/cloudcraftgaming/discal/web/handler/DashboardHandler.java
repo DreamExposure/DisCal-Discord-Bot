@@ -3,11 +3,14 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.api.object.web.WebCalendar;
 import com.cloudcraftgaming.discal.api.object.web.WebChannel;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.object.web.WebRole;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import org.json.JSONException;
 import spark.Request;
@@ -204,7 +207,7 @@ public class DashboardHandler {
 					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
 				}
 			} else if (request.queryParams().contains("cal-desc")) {
-				//Update calendar name/summary...
+				//Update calendar description...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
@@ -224,7 +227,7 @@ public class DashboardHandler {
 					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
 				}
 			} else if (request.queryParams().contains("cal-tz")) {
-				//Update calendar name/summary...
+				//Update calendar timezone
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
@@ -258,13 +261,39 @@ public class DashboardHandler {
 		try {
 			String name = request.queryParams("cal-name");
 			String desc = request.queryParams("cal-desc");
-			String tz = request.queryParams("cal-timezone").replace("___", "/");
+			String tz = request.queryParams("cal-tz");
 
-			//TODO: Create calendar
 			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 			WebGuild g = (WebGuild) m.get("selected");
 
-			//TODO: refresh selected guild's calendar to display properly...
+			Calendar calendar = new Calendar();
+			calendar.setSummary(name);
+			calendar.setDescription(desc);
+			calendar.setTimeZone(tz.replace("___", "/"));
+			try {
+				com.google.api.services.calendar.Calendar service;
+				if (g.getSettings().useExternalCalendar()) {
+					service = CalendarAuth.getCalendarService(g.getSettings());
+				} else {
+					service = CalendarAuth.getCalendarService();
+				}
+
+				Calendar confirmed = service.calendars().insert(calendar).execute();
+				AclRule rule = new AclRule();
+				AclRule.Scope scope = new AclRule.Scope();
+				scope.setType("default");
+				rule.setScope(scope).setRole("reader");
+				service.acl().insert(confirmed.getId(), rule).execute();
+				CalendarData calendarData = new CalendarData(Long.valueOf(g.getId()), 1);
+				calendarData.setCalendarId(confirmed.getId());
+				calendarData.setCalendarAddress(confirmed.getId());
+				DatabaseManager.getManager().updateCalendar(calendarData);
+
+				//Refresh to display correct info...
+				g.setCalendar(new WebCalendar().fromCalendar(calendarData, g.getSettings()));
+			} catch (Exception ex) {
+				ExceptionHandler.sendException(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class);
+			}
 
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
