@@ -57,6 +57,10 @@ public class DiscordAccountHandler {
 		return null;
 	}
 
+	public int accountCount() {
+		return discordAccounts.size();
+	}
+
 	//Functions
 	public void addAccount(Map m, String sessionId) {
 		if (discordAccounts.containsKey(sessionId)) {
