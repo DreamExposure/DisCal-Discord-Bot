@@ -31,6 +31,7 @@ public class CalendarUtils {
 		} catch (IOException e) {
 			//Fail silently.
 			ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
+			return false;
 		}
 		if (settings.useExternalCalendar()) {
 			//Update settings.

@@ -67,6 +67,22 @@ button:hover {
 	color: black;
 }
 
+button.danger {
+	font-size: 18px;
+	background-color: #ef0813;
+	color: white;
+	padding: 10px;
+	border: 2px black;
+	margin: 10px;
+	width: auto;
+	height: auto;
+}
+
+button.danger:hover {
+	color: #ef0813;
+	background-color: white;
+}
+
 hr {
 	color: #5566c2;
 	background-color: #5566c2;

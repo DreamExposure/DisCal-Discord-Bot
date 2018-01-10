@@ -80,6 +80,9 @@ public class SparkUtils {
 					path("/create", () -> {
 						get("/calendar", DashboardHandler::handleCalendarCreate);
 					});
+					path("/delete", () -> {
+						get("/calendar", DashboardHandler::deleteCalendar);
+					});
 				});
 			});
 

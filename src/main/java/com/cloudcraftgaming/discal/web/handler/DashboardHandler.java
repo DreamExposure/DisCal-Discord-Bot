@@ -3,11 +3,13 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.web.WebCalendar;
 import com.cloudcraftgaming.discal.api.object.web.WebChannel;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.object.web.WebRole;
+import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import com.google.api.services.calendar.model.AclRule;
@@ -300,6 +302,25 @@ public class DashboardHandler {
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
+		}
+		return response.body();
+	}
+
+	public static String deleteCalendar(Request request, Response response) {
+		try {
+			//TODO: Handle multiple calendars...
+			String calId = request.queryParams("calendar-id");
+
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			CalendarData data = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
+			CalendarUtils.deleteCalendar(data, settings);
+
+			g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId())), DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()))));
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class);
 		}
 		return response.body();
 	}

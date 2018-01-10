@@ -241,6 +241,11 @@
 									</label>
 									<input type="submit" class="submit" value="Update">
 								</form>
+								<br>
+								<br>
+								<a th:href="'/account/dashboard/delete/calendar?calendar-id=' + ${selected.calendar.id}">
+									<button class="danger">Delete Calendar</button>
+								</a>
 							</div>
 						</div>
 						<!--Event Settings-->
