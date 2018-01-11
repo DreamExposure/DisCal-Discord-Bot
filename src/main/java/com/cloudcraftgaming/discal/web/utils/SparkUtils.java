@@ -22,6 +22,11 @@ public class SparkUtils {
 
 			staticFileLocation("/web/public"); // Main site location
 
+			notFound(((request, response) -> {
+				response.redirect("/");
+				return response.body();
+			}));
+
 			//Register the API Endpoints
 			before("/api/*", (request, response) -> {
 				if (!request.requestMethod().equalsIgnoreCase("POST")) {

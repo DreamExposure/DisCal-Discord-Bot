@@ -104,6 +104,7 @@ public class ApplicationHandler {
 			Main.client.logout();
 		} catch (DiscordException e) {
 			//No need to print, exiting anyway.
+			e.printStackTrace();
 		}
 		TimeManager.getManager().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();
