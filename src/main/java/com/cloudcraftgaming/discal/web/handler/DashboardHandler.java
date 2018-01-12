@@ -135,7 +135,7 @@ public class DashboardHandler {
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				//Guess this one never checked for perms so... 
+				//Guess this one never checked for perms so...
 
 				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
