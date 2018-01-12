@@ -101,33 +101,41 @@ public class DashboardHandler {
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setBotNick(request.queryParams("bot-nick"));
+				if (g.isManageServer()) {
+					g.setBotNick(request.queryParams("bot-nick"));
 
-				IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
+					IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
 
-				guild.setUserNickname(Main.client.getOurUser(), g.getBotNick());
+					guild.setUserNickname(Main.client.getOurUser(), g.getBotNick());
+				}
 			} else if (request.queryParams().contains("prefix")) {
 				//Update prefix...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-				g.getSettings().setPrefix(request.queryParams("prefix"));
+				if (g.isManageServer()) {
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+					g.getSettings().setPrefix(request.queryParams("prefix"));
 
-				DatabaseManager.getManager().updateSettings(g.getSettings());
+					DatabaseManager.getManager().updateSettings(g.getSettings());
+				}
 			} else if (request.queryParams().contains("lang")) {
 				//Update lang...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-				g.getSettings().setLang(request.queryParams("lang"));
+				if (g.isManageServer()) {
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+					g.getSettings().setLang(request.queryParams("lang"));
 
-				DatabaseManager.getManager().updateSettings(g.getSettings());
+					DatabaseManager.getManager().updateSettings(g.getSettings());
+				}
 			} else if (request.queryParams().contains("simple-ann")) {
 				//Update simple announcements...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
+
+				//Guess this one never checked for perms so... 
 
 				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
@@ -138,113 +146,123 @@ public class DashboardHandler {
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				if (g.isManageServer()) {
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
-				IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
-				IRole role = guild.getRoleByID(Long.valueOf(request.queryParams("con-role")));
+					IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
+					IRole role = guild.getRoleByID(Long.valueOf(request.queryParams("con-role")));
 
-				if (role.isEveryoneRole()) {
-					g.getSettings().setControlRole("everyone");
-				} else {
-					g.getSettings().setControlRole(role.getStringID());
-				}
+					if (role.isEveryoneRole()) {
+						g.getSettings().setControlRole("everyone");
+					} else {
+						g.getSettings().setControlRole(role.getStringID());
+					}
 
-				DatabaseManager.getManager().updateSettings(g.getSettings());
+					DatabaseManager.getManager().updateSettings(g.getSettings());
 
-				//Update role list to display properly...
-				g.getRoles().clear();
+					//Update role list to display properly...
+					g.getRoles().clear();
 
-				for (IRole r : guild.getRoles()) {
-					g.getRoles().add(new WebRole().fromRole(r, g.getSettings()));
+					for (IRole r : guild.getRoles()) {
+						g.getRoles().add(new WebRole().fromRole(r, g.getSettings()));
+					}
 				}
 			} else if (request.queryParams().contains("discal-channel")) {
 				//Update control role...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				if (g.isDiscalRole()) {
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
-				IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
+					IGuild guild = Main.client.getGuildByID(Long.valueOf(g.getId()));
 
-				if (request.queryParams("discal-channel").equalsIgnoreCase("0")) {
-					//All channels
-					g.getSettings().setDiscalChannel("all");
-				} else {
-					g.getSettings().setDiscalChannel(request.queryParams("discal-channel"));
-				}
+					if (request.queryParams("discal-channel").equalsIgnoreCase("0")) {
+						//All channels
+						g.getSettings().setDiscalChannel("all");
+					} else {
+						g.getSettings().setDiscalChannel(request.queryParams("discal-channel"));
+					}
 
-				DatabaseManager.getManager().updateSettings(g.getSettings());
+					DatabaseManager.getManager().updateSettings(g.getSettings());
 
-				//Update channel list to display properly...
-				g.getChannels().clear();
+					//Update channel list to display properly...
+					g.getChannels().clear();
 
-				WebChannel all = new WebChannel();
-				all.setId(0);
-				all.setName("All Channels");
-				all.setDiscalChannel(g.getSettings().getDiscalChannel().equalsIgnoreCase("all"));
-				g.getChannels().add(all);
-				for (IChannel c : guild.getChannels()) {
-					g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
+					WebChannel all = new WebChannel();
+					all.setId(0);
+					all.setName("All Channels");
+					all.setDiscalChannel(g.getSettings().getDiscalChannel().equalsIgnoreCase("all"));
+					g.getChannels().add(all);
+					for (IChannel c : guild.getChannels()) {
+						g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
+					}
 				}
 			} else if (request.queryParams().contains("cal-name")) {
 				//Update calendar name/summary...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				try {
-					if (g.getCalendar().isExternal()) {
-						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-						cal.setSummary(request.queryParams("cal-name"));
-						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-					} else {
-						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-						cal.setSummary(request.queryParams("cal-name"));
-						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-					}
+				if (g.isDiscalRole()) {
+					try {
+						if (g.getCalendar().isExternal()) {
+							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+							cal.setSummary(request.queryParams("cal-name"));
+							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+						} else {
+							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+							cal.setSummary(request.queryParams("cal-name"));
+							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+						}
 
-					g.getCalendar().setName(request.queryParams("cal-name"));
-				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
+						g.getCalendar().setName(request.queryParams("cal-name"));
+					} catch (Exception e) {
+						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
+					}
 				}
 			} else if (request.queryParams().contains("cal-desc")) {
 				//Update calendar description...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				try {
-					if (g.getCalendar().isExternal()) {
-						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-						cal.setDescription(request.queryParams("cal-desc"));
-						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-					} else {
-						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-						cal.setDescription(request.queryParams("cal-desc"));
-						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-					}
+				if (g.isDiscalRole()) {
+					try {
+						if (g.getCalendar().isExternal()) {
+							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+							cal.setDescription(request.queryParams("cal-desc"));
+							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+						} else {
+							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+							cal.setDescription(request.queryParams("cal-desc"));
+							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+						}
 
-					g.getCalendar().setDescription(request.queryParams("cal-desc"));
-				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
+						g.getCalendar().setDescription(request.queryParams("cal-desc"));
+					} catch (Exception e) {
+						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
+					}
 				}
 			} else if (request.queryParams().contains("cal-tz")) {
 				//Update calendar timezone
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
 
-				try {
-					if (g.getCalendar().isExternal()) {
-						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-						cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
-						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-					} else {
-						Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-						cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
-						CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-					}
+				if (g.isDiscalRole()) {
+					try {
+						if (g.getCalendar().isExternal()) {
+							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+							cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
+							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
+						} else {
+							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
+							cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
+							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
+						}
 
-					g.getCalendar().setTimezone(request.queryParams("cal-tz"));
-				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
+						g.getCalendar().setTimezone(request.queryParams("cal-tz"));
+					} catch (Exception e) {
+						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
+					}
 				}
 			}
 
@@ -266,35 +284,36 @@ public class DashboardHandler {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 			WebGuild g = (WebGuild) m.get("selected");
 
-			Calendar calendar = new Calendar();
-			calendar.setSummary(name);
-			calendar.setDescription(desc);
-			calendar.setTimeZone(tz.replace("___", "/"));
-			try {
-				com.google.api.services.calendar.Calendar service;
-				if (g.getSettings().useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(g.getSettings());
-				} else {
-					service = CalendarAuth.getCalendarService();
+			if (g.isDiscalRole()) {
+				Calendar calendar = new Calendar();
+				calendar.setSummary(name);
+				calendar.setDescription(desc);
+				calendar.setTimeZone(tz.replace("___", "/"));
+				try {
+					com.google.api.services.calendar.Calendar service;
+					if (g.getSettings().useExternalCalendar()) {
+						service = CalendarAuth.getCalendarService(g.getSettings());
+					} else {
+						service = CalendarAuth.getCalendarService();
+					}
+
+					Calendar confirmed = service.calendars().insert(calendar).execute();
+					AclRule rule = new AclRule();
+					AclRule.Scope scope = new AclRule.Scope();
+					scope.setType("default");
+					rule.setScope(scope).setRole("reader");
+					service.acl().insert(confirmed.getId(), rule).execute();
+					CalendarData calendarData = new CalendarData(Long.valueOf(g.getId()), 1);
+					calendarData.setCalendarId(confirmed.getId());
+					calendarData.setCalendarAddress(confirmed.getId());
+					DatabaseManager.getManager().updateCalendar(calendarData);
+
+					//Refresh to display correct info...
+					g.setCalendar(new WebCalendar().fromCalendar(calendarData, g.getSettings()));
+				} catch (Exception ex) {
+					ExceptionHandler.sendException(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class);
 				}
-
-				Calendar confirmed = service.calendars().insert(calendar).execute();
-				AclRule rule = new AclRule();
-				AclRule.Scope scope = new AclRule.Scope();
-				scope.setType("default");
-				rule.setScope(scope).setRole("reader");
-				service.acl().insert(confirmed.getId(), rule).execute();
-				CalendarData calendarData = new CalendarData(Long.valueOf(g.getId()), 1);
-				calendarData.setCalendarId(confirmed.getId());
-				calendarData.setCalendarAddress(confirmed.getId());
-				DatabaseManager.getManager().updateCalendar(calendarData);
-
-				//Refresh to display correct info...
-				g.setCalendar(new WebCalendar().fromCalendar(calendarData, g.getSettings()));
-			} catch (Exception ex) {
-				ExceptionHandler.sendException(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class);
 			}
-
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
 		} catch (Exception e) {
@@ -311,12 +330,17 @@ public class DashboardHandler {
 
 			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 			WebGuild g = (WebGuild) m.get("selected");
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
-			CalendarUtils.deleteCalendar(data, settings);
 
-			g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId())), DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()))));
-			response.redirect("/dashboard/guild", 301);
+			if (g.isManageServer()) {
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
+				CalendarUtils.deleteCalendar(data, settings);
+
+				g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId())), DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()))));
+				response.redirect("/dashboard/guild", 301);
+			} else {
+				response.redirect("/dashboard/guild", 301);
+			}
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class);
 		}
