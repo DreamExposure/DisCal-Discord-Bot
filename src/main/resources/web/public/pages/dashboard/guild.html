@@ -81,7 +81,8 @@
 									<br>
 									<input type="text" name="bot-nick" maxlength="32" th:value="${selected.botnick}">
 								</label>
-								<input type="submit" class="submit" value="Update">
+								<input type="submit" class="submit" value="Update"
+								       th:disabled="${selected.manageServer} == false">
 							</form>
 							<br>
 							<br>
@@ -91,7 +92,8 @@
 									<input type="text" name="prefix" maxlength="32"
 									       th:value="${selected.settings.prefix}">
 								</label>
-								<input type="submit" class="submit" value="Update">
+								<input type="submit" class="submit" value="Update"
+								       th:disabled="${selected.manageServer} == false">
 							</form>
 							<br>
 							<br>
@@ -106,7 +108,8 @@
 										</option>
 									</select>
 								</label>
-								<input disabled type="submit" class="submit" value="Update">
+								<input disabled type="submit" class="submit" value="Update"
+								       th:disabled="${selected.manageServer} == false">
 							</form>
 							<br>
 						</div>
@@ -132,7 +135,8 @@
 										</th:block>
 									</select>
 								</label>
-								<input type="submit" class="submit" value="Update">
+								<input type="submit" class="submit" value="Update"
+								       th:disabled="${selected.manageServer} == false">
 							</form>
 							<br>
 							<br>
@@ -146,7 +150,8 @@
 										</th:block>
 									</select>
 								</label>
-								<input type="submit" class="submit" value="Update">
+								<input type="submit" class="submit" value="Update"
+								       th:disabled="${selected.discalRole} == false">
 							</form>
 							<br>
 							<br>
@@ -200,7 +205,8 @@
 									</label>
 									<br>
 									<br>
-									<input type="submit" class="submit" value="Create Calendar!">
+									<input type="submit" class="submit" value="Create Calendar!"
+									       th:disabled="${selected.discalRole} == false">
 								</form>
 							</div>
 							<!--Has MAIN calendar-->
@@ -216,7 +222,8 @@
 										<br>
 										<input type="text" name="cal-name" th:value="${selected.calendar.name}">
 									</label>
-									<input type="submit" class="submit" value="Update">
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
 								</form>
 								<br>
 								<br>
@@ -225,7 +232,8 @@
 										<br>
 										<input type="text" name="cal-desc" th:value="${selected.calendar.description}">
 									</label>
-									<input type="submit" class="submit" value="Update">
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
 								</form>
 								<br>
 								<br>
@@ -239,11 +247,13 @@
 											</th:block>
 										</select>
 									</label>
-									<input type="submit" class="submit" value="Update">
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
 								</form>
 								<br>
 								<br>
-								<a th:href="'/account/dashboard/delete/calendar?calendar-id=' + ${selected.calendar.id}">
+								<a th:if="${selected.manageServer} == true"
+								   th:href="'/account/dashboard/delete/calendar?calendar-id=' + ${selected.calendar.id}">
 									<button class="danger">Delete Calendar</button>
 								</a>
 							</div>

@@ -24,6 +24,10 @@ public class WebGuild {
 	private GuildSettings settings;
 	private String botNick;
 
+	//User info
+	private boolean manageServer;
+	private boolean discalRole;
+
 	//Lists and stuffs
 	private List<WebRole> roles = new ArrayList<>();
 	private List<WebChannel> channels = new ArrayList<>();
@@ -63,6 +67,14 @@ public class WebGuild {
 		return calendar;
 	}
 
+	public boolean isManageServer() {
+		return manageServer;
+	}
+
+	public boolean isDiscalRole() {
+		return discalRole;
+	}
+
 	//Setters
 	public void setId(String _id) {
 		id = _id;
@@ -86,6 +98,14 @@ public class WebGuild {
 
 	public void setCalendar(WebCalendar _cal) {
 		calendar = _cal;
+	}
+
+	public void setManageServer(boolean _ms) {
+		manageServer = _ms;
+	}
+
+	public void setDiscalRole(boolean _dr) {
+		discalRole = _dr;
 	}
 
 

@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.api.utils;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +16,13 @@ import java.util.List;
 public class GuildUtils {
 	public static List<WebGuild> getGuilds(String userId) {
 		List<WebGuild> guilds = new ArrayList<>();
+		IUser user = Main.client.getUserByID(Long.valueOf(userId));
 		for (IGuild g : Main.client.getGuilds()) {
 			if (g.getUserByID(Long.valueOf(userId)) != null) {
-				guilds.add(new WebGuild().fromGuild(g));
+				WebGuild wg = new WebGuild().fromGuild(g);
+				wg.setManageServer(PermissionChecker.hasManageServerRole(g, user));
+				wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, user));
+				guilds.add(wg);
 			}
 		}
 		return guilds;

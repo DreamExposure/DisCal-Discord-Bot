@@ -43,8 +43,10 @@ public class DashboardHandler {
 
 			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 
-			IUser u = Main.client.getUserByID(Long.valueOf((String) m.get("id")));
+			IUser u = g.getUserByID(Long.valueOf((String) m.get("id")));
 
+			wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, u));
+			wg.setManageServer(PermissionChecker.hasManageServerRole(g, u));
 			if (m.containsKey("selected")) {
 				m.remove("selected");
 			}
@@ -58,10 +60,6 @@ public class DashboardHandler {
 			if (m.containsKey("admin")) {
 				m.remove("admin");
 			}
-
-			//Check if admin/manage server and/or has control role...
-			m.put("admin", PermissionChecker.hasManageServerRole(g, u));
-			m.put("controller", PermissionChecker.hasSufficientRole(g, u));
 
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 

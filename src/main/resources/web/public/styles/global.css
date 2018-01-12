@@ -216,9 +216,7 @@ label {
 	float: left;
 	color: white;
 	text-align: center;
-	margin-left: 15px;
-	margin-top: auto;
-	margin-bottom: auto;
+	margin: auto 15px;
 	font-size: 25pt;
 }
 

@@ -44,11 +44,17 @@
 
 				<!--TODO: IF YOU CAN MAKE THIS LOOP WORK WITH THE METHOD CALL I WILL PAY YOU-->
 				<th:block th:each="guild : ${guilds}">
-					<button onclick="goToGuild(this.id)" class="guild" th:id="${guild.id}"
-					        th:text="${guild.name}"></button>
-					<br>
+					<!--TODO: Remove patron/dev only  on full release-->
+					<th:block th:if="${guild.settings.patronGuild} == true or ${guild.settings.devGuild} == true">
+						<button onclick="goToGuild(this.id)" class="guild" th:id="${guild.id}"
+						        th:text="${guild.name}"></button>
+						<br>
+					</th:block>
 				</th:block>
-
+				<br>
+				<br>
+				<br>
+				<p>*Guild not listed? Until the full release, only patron guilds are supported!</p>
 			</div>
 			<div th:unless="${loggedIn}">
 				<h1>YOU ARE NOT LOGGED IN!</h1>
