@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
+import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.api.utils.GeneralUtils;
@@ -139,7 +140,10 @@ public class DisCalCommand implements ICommand {
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), Main.client.getGuilds().size() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
-		em.appendField("Users in Dashboard", DiscordAccountHandler.getHandler().accountCount() + "", true);
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("True")) {
+			//TODO: Add to translations
+			em.appendField("Users in Dashboard", DiscordAccountHandler.getHandler().accountCount() + "", true);
+		}
 		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", (guild.getShard().getInfo()[0] + 1) + "/" + Main.client.getShardCount(), settings), guild.getShard().getResponseTime() + "ms", false);
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");

@@ -5,7 +5,9 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import com.cloudcraftgaming.discal.bot.internal.service.ApplicationHandler;
@@ -294,7 +296,14 @@ public class DevCommand implements ICommand {
 	private void moduleCleanupDatabase(MessageReceivedEvent event) {
 		Message.sendMessage("Cleaning up database! This may take some time....", event);
 
-		//DatabaseManager.getManager().cleanupDatabase();
+		Message.sendMessage("Cleaning out calendars....", event);
+		for (CalendarData cd : DatabaseManager.getManager().getAllCalendars()) {
+			if (Main.client.getGuildByID(cd.getGuildId()) == null) {
+				//Guild not connected... delete calendar...
+				CalendarUtils.deleteCalendar(cd, DatabaseManager.getManager().getSettings(cd.getGuildId()));
+			}
+		}
+		Message.sendMessage("Calendars cleaned up!", event);
 
 		Message.sendMessage("Cleaned up database!", event);
 		//Message.sendMessage("Disabled because I am a dumb", event);
@@ -317,7 +326,7 @@ public class DevCommand implements ICommand {
 	}
 
 	private void moduleShutdown(MessageReceivedEvent event) {
-		Message.sendMessage("Shutting down DisCal! This may take a mmoment!", event);
+		Message.sendMessage("Shutting down DisCal! This may take a moment!", event);
 
 		ApplicationHandler.exitApplication();
 	}
