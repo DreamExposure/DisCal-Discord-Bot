@@ -70,6 +70,7 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().put("lang", "Sets the bot's language.");
         info.getSubCommands().put("prefix", "Sets the bot's prefix.");
         info.getSubCommands().put("invite", "Displays an invite to the support guild.");
+		info.getSubCommands().put("brand", "Enables/Disables server branding.");
 
         return info;
     }
@@ -118,6 +119,9 @@ public class DisCalCommand implements ICommand {
 					break;
 				case "invite":
 					moduleInvite(event, settings);
+					break;
+				case "brand":
+					moduleBrand(event, settings);
 					break;
                 default:
                     Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
@@ -321,5 +325,20 @@ public class DisCalCommand implements ICommand {
 	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
 		String INVITE_LINK = "https://discord.gg/AmAMGeN";
 		Message.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
+	}
+
+	private void moduleBrand(MessageReceivedEvent event, GuildSettings settings) {
+		if (PermissionChecker.hasSufficientRole(event)) {
+			if (settings.isPatronGuild()) {
+				settings.setBranded(!settings.isBranded());
+				DatabaseManager.getManager().updateSettings(settings);
+
+				Message.sendMessage(MessageManager.getMessage("DisCal.Brand", "%value%", settings.isBranded() + "", settings), event);
+			} else {
+				Message.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+		}
 	}
 }

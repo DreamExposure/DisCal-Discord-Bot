@@ -149,7 +149,16 @@ public class AnnouncementMessageFormatter {
     static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
         em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
-        em.withAuthorName("DisCal");
+
+		IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
+
+		assert guild != null;
+
+		if (settings.isBranded()) {
+			em.withAuthorName(guild.getName());
+		} else {
+			em.withAuthorName("DisCal");
+		}
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
@@ -221,11 +230,8 @@ public class AnnouncementMessageFormatter {
             em.withColor(56, 138, 237);
         }
 
-        IGuild guild = Main.client.getGuildByID(announcement.getGuildId());
 
 		IChannel channel = null;
-
-		assert guild != null;
 
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
