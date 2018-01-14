@@ -2,6 +2,7 @@ package com.cloudcraftgaming.discal.bot.module.misc;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 
 import java.util.ArrayList;
@@ -29,7 +30,9 @@ public class StatusChanger extends TimerTask {
         statuses.add("%calCount% calendars!");
         statuses.add("%annCount% announcements!");
         statuses.add("%shards% shards!");
-		statuses.add("%users% using Dashboard!");
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+			statuses.add("%users% using Dashboard!");
+		}
         statuses.add("Version " + Main.version);
         statuses.add("DisCal is on Patreon!");
         statuses.add("Share DisCal!!");
