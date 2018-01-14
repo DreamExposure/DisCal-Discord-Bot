@@ -76,7 +76,8 @@
 						<!--Bot Settings-->
 						<div th:if="${settings} == bot">
 							<h6>Bot Settings</h6>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form action="/account/dashboard/update" method="post"
+							      enctype="application/x-www-form-urlencoded" style="text-align: left">
 								<label>Bot Nickname
 									<br>
 									<input type="text" name="bot-nick" maxlength="32" th:value="${selected.botnick}">
@@ -86,7 +87,8 @@
 							</form>
 							<br>
 							<br>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
 								<label>Bot Prefix
 									<br>
 									<input type="text" name="prefix" maxlength="32"
@@ -97,7 +99,8 @@
 							</form>
 							<br>
 							<br>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
 								<label>Bot Language
 									<br>
 									<select name="lang" disabled>
@@ -125,7 +128,8 @@
 							</form>
 							<br>
 							<br>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
 								<label>Control Role
 									<br>
 									<select name="con-role">
@@ -140,7 +144,8 @@
 							</form>
 							<br>
 							<br>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
 								<label>DisCal Channel
 									<br>
 									<select name="discal-channel">
@@ -182,7 +187,8 @@
 							<div th:if="${selected.calendar.id} == primary" style="text-align: left">
 								<hr>
 								<h6>Create A Calendar Below!</h6>
-								<form action="/account/dashboard/create/calendar" name="calendar-create">
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/create/calendar" name="calendar-create">
 									<label>Calendar Name/Summary
 										<br>
 										<input type="text" name="cal-name" value="Calendar Name">
@@ -217,7 +223,8 @@
 									<button>View Calendar!</button>
 								</a>
 								<br><br>
-								<form action="/account/dashboard/update" style="text-align: left">
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update" style="text-align: left">
 									<label>Calendar Name/Summary
 										<br>
 										<input type="text" name="cal-name" th:value="${selected.calendar.name}">
@@ -227,7 +234,8 @@
 								</form>
 								<br>
 								<br>
-								<form action="/account/dashboard/update" style="text-align: left">
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update" style="text-align: left">
 									<label>Calendar Description
 										<br>
 										<input type="text" name="cal-desc" th:value="${selected.calendar.description}">
@@ -237,7 +245,8 @@
 								</form>
 								<br>
 								<br>
-								<form action="/account/dashboard/update" style="text-align: left">
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update" style="text-align: left">
 									<label>Calendar Timezone
 										<br>
 										<select name="cal-tz">
@@ -270,7 +279,8 @@
 						<!--Announcement Settings-->
 						<div th:if="${settings} == announcements">
 							<h6>Announcement Settings</h6>
-							<form action="/account/dashboard/update" style="text-align: left">
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
 								<label> Use Simple Announcements
 									<br>
 									<input type="checkbox" name="simple-ann"

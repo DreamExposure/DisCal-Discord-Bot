@@ -81,12 +81,12 @@ public class SparkUtils {
 				path("/dashboard", () -> {
 					get("/select", DashboardHandler::handleGuildSelect);
 					get("/guild", DashboardHandler::handleSettingsSelect);
-					get("/update", DashboardHandler::handleSettingsUpdate);
+					post("/update", DashboardHandler::handleSettingsUpdate);
 					path("/create", () -> {
-						get("/calendar", DashboardHandler::handleCalendarCreate);
+						post("/calendar", DashboardHandler::handleCalendarCreate);
 					});
 					path("/delete", () -> {
-						get("/calendar", DashboardHandler::deleteCalendar);
+						post("/calendar", DashboardHandler::deleteCalendar);
 					});
 				});
 			});
