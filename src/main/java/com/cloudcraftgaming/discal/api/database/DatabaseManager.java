@@ -101,6 +101,7 @@ public class DatabaseManager {
 					" MAX_CALENDARS INTEGER not NULL, " +
 					" DM_ANNOUNCEMENTS LONGTEXT not NULL, " +
 					" 12_HOUR BOOLEAN not NULL, " +
+					" BRANDED BOOLEAN not NULL, " +
 					" PRIMARY KEY (GUILD_ID))";
 			String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
 					" (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
@@ -169,8 +170,8 @@ public class DatabaseManager {
 				if (!hasStuff || res.getString("GUILD_ID") == null) {
 					//Data not present, add to DB.
 					String insertCommand = "INSERT INTO " + dataTableName +
-							"(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR)" +
-							" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+							"(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR, BRANDED)" +
+							" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, String.valueOf(settings.getGuildID()));
 					ps.setBoolean(2, settings.useExternalCalendar());
@@ -187,6 +188,7 @@ public class DatabaseManager {
 					ps.setInt(13, settings.getMaxCalendars());
 					ps.setString(14, settings.getDmAnnouncementsString());
 					ps.setBoolean(15, settings.useTwelveHour());
+					ps.setBoolean(16, settings.isBranded());
 
 
 					ps.executeUpdate();
@@ -199,8 +201,8 @@ public class DatabaseManager {
 							+ " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
 							+ " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
 							+ " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
-							+ " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?"
-							+ " WHERE GUILD_ID = ?";
+							+ " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?,"
+							+ " BRANDED = ? WHERE GUILD_ID = ?";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
 
 					ps.setBoolean(1, settings.useExternalCalendar());
@@ -217,7 +219,8 @@ public class DatabaseManager {
 					ps.setInt(12, settings.getMaxCalendars());
 					ps.setString(13, settings.getDmAnnouncementsString());
 					ps.setBoolean(14, settings.useTwelveHour());
-					ps.setString(15, String.valueOf(settings.getGuildID()));
+					ps.setBoolean(15, settings.isBranded());
+					ps.setString(16, String.valueOf(settings.getGuildID()));
 
 					ps.executeUpdate();
 
@@ -503,6 +506,7 @@ public class DatabaseManager {
 					settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
 					settings.setDmAnnouncementsFromString(res.getString("DM_ANNOUNCEMENTS"));
 					settings.setTwelveHour(res.getBoolean("12_HOUR"));
+					settings.setBranded(res.getBoolean("BRANDED"));
 
 					statement.close();
 				} else {
@@ -542,6 +546,7 @@ public class DatabaseManager {
 						settings.setDevGuild(res.getBoolean("DEV_GUILD"));
 						settings.setMaxCalendars(res.getInt("MAX_CALENDARS"));
 						settings.setDmAnnouncementsFromString(res.getString("DM_ANNOUNCEMENTS"));
+						settings.setBranded(res.getBoolean("BRANDED"));
 
 						allSettings.add(settings);
 					}

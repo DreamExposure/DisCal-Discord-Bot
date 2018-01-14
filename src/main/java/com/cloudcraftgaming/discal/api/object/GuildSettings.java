@@ -29,6 +29,7 @@ public class GuildSettings {
 	private Integer maxCalendars;
 
 	private boolean twelveHour;
+	private boolean branded;
 
 	private final ArrayList<String> dmAnnouncements = new ArrayList<>();
 
@@ -112,6 +113,10 @@ public class GuildSettings {
 		return twelveHour;
 	}
 
+	public boolean isBranded() {
+		return branded;
+	}
+
 	public ArrayList<String> getDmAnnouncements() {
 		return dmAnnouncements;
 	}
@@ -190,6 +195,10 @@ public class GuildSettings {
 
 	public void setTwelveHour(boolean _twelveHour) {
 		twelveHour = _twelveHour;
+	}
+
+	public void setBranded(boolean _branded) {
+		branded = _branded;
 	}
 
 	public void setDmAnnouncementsFromString(String userList) {
