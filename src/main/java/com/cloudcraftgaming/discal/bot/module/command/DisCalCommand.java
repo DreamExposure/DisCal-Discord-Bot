@@ -257,6 +257,8 @@ public class DisCalCommand implements ICommand {
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", settings), String.valueOf(settings.getMaxCalendars()), true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
+		//TODO: Add translations...
+		em.appendField("Using Branding", settings.isBranded() + "", true);
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
