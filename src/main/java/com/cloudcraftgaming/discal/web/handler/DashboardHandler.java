@@ -130,17 +130,6 @@ public class DashboardHandler {
 
 					DatabaseManager.getManager().updateSettings(g.getSettings());
 				}
-			} else if (request.queryParams().contains("simple-ann")) {
-				//Update simple announcements...
-				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-				WebGuild g = (WebGuild) m.get("selected");
-
-				//Guess this one never checked for perms so...
-
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
-
-				DatabaseManager.getManager().updateSettings(g.getSettings());
 			} else if (request.queryParams().contains("con-role")) {
 				//Update control role...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
@@ -264,6 +253,41 @@ public class DashboardHandler {
 						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
 					}
 				}
+			}
+
+			//Finally redirect back to the dashboard
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			halt(500, "Internal Server Exception");
+		}
+		return response.body();
+	}
+
+	public static String handleSAettingsUpdateGet(Request request, Response response) {
+		try {
+			if (request.queryParams().contains("branding")) {
+				//Update bot nickname...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				if (g.isManageServer()) {
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+					g.getSettings().setBranded(request.queryParams("branding").equalsIgnoreCase("true"));
+
+					DatabaseManager.getManager().updateSettings(g.getSettings());
+				}
+			} else if (request.queryParams().contains("simple-ann")) {
+				//Update simple announcements...
+				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+				WebGuild g = (WebGuild) m.get("selected");
+
+				//Guess this one never checked for perms so...
+
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
+
+				DatabaseManager.getManager().updateSettings(g.getSettings());
 			}
 
 			//Finally redirect back to the dashboard

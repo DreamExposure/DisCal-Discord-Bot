@@ -120,10 +120,22 @@
 						<div th:if="${settings} == guild">
 							<h6>Guild Settings</h6>
 							<form style="text-align: left">
-								<label> Patron Guild
+								<label>Patron Guild
 									<br>
 									<input type="checkbox" name="patron" disabled
 									       th:checked="${selected.settings.patronGuild} == true">
+								</label>
+							</form>
+							<br>
+							<br>
+							<form method="post" enctype="application/x-www-form-urlencoded"
+							      action="/account/dashboard/update" style="text-align: left">
+								<label>Enable Server Branding (Patron Only)
+									<br>
+									<input type="checkbox" name="branding"
+									       th:disabled="${selected.settings.patronGuild != true}"
+									       th:checked="${selected.settings.branded} == true"
+									       onclick="enableBranding(this.checked)">
 								</label>
 							</form>
 							<br>

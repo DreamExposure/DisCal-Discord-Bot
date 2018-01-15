@@ -3,5 +3,9 @@ function goToGuild(guildId) {
 }
 
 function useSimpleAnnouncements(useSimple) {
-	window.location.href = "/account/dashboard/update?simple-ann=" + useSimple;
+	window.location.href = "/account/dashboard/update/get?simple-ann=" + useSimple;
+}
+
+function enableBranding(useBranding) {
+	window.location.href = "/account/dashboard/update/get?branding=" + useBranding;
 }
