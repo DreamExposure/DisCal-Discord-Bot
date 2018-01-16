@@ -3,7 +3,10 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
+import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
+import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.web.WebCalendar;
 import com.cloudcraftgaming.discal.api.object.web.WebChannel;
@@ -264,7 +267,7 @@ public class DashboardHandler {
 		return response.body();
 	}
 
-	public static String handleSAettingsUpdateGet(Request request, Response response) {
+	public static String handleSettingsUpdateGet(Request request, Response response) {
 		try {
 			if (request.queryParams().contains("branding")) {
 				//Update bot nickname...
@@ -342,6 +345,55 @@ public class DashboardHandler {
 			response.redirect("/dashboard/guild", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
+			halt(500, "Internal Server Exception");
+		}
+		return response.body();
+	}
+
+	public static String handleAnnouncementCreate(Request request, Response response) {
+		try {
+			String channelId = request.queryParams("channel");
+			AnnouncementType type = AnnouncementType.fromValue(request.queryParams("type"));
+			//Skip event ID or color here, only get it later if needed.
+			String minutesRaw = request.queryParams("minutes");
+			String hoursRaw = request.queryParams("hours");
+			String info = request.queryParams("info");
+
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+
+			if (g.isDiscalRole()) {
+				Announcement a = new Announcement(Long.valueOf(g.getId()));
+				a.setAnnouncementChannelId(channelId);
+				a.setMinutesBefore(Integer.valueOf(minutesRaw));
+				a.setHoursBefore(Integer.valueOf(hoursRaw));
+				a.setInfo(info);
+				a.setAnnouncementType(type);
+
+				if (type == AnnouncementType.COLOR) {
+					a.setEventColor(EventColor.fromNameOrHexOrID(request.queryParams("color")));
+				} else if (type == AnnouncementType.SPECIFIC) {
+					a.setEventId(request.queryParams("event-id"));
+				} else if (type == AnnouncementType.RECUR) {
+					String value = request.queryParams("event-id");
+					if (value.contains("_")) {
+						String[] stuff = value.split("_");
+						value = stuff[0];
+					}
+					a.setEventId(value);
+				}
+
+				//Create announcement
+				DatabaseManager.getManager().updateAnnouncement(a);
+
+				//Update WebGuild to display correctly...
+				g.getAnnouncements().clear();
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
+			}
+			//Finally redirect back to the dashboard
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Announcement create failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();

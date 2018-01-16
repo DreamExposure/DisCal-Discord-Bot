@@ -82,9 +82,10 @@ public class SparkUtils {
 					get("/select", DashboardHandler::handleGuildSelect);
 					get("/guild", DashboardHandler::handleSettingsSelect);
 					post("/update", DashboardHandler::handleSettingsUpdate);
-					get("/update/get", DashboardHandler::handleSAettingsUpdateGet); //Handle get requests for specific params...
+					get("/update/get", DashboardHandler::handleSettingsUpdateGet); //Handle get requests for specific params...
 					path("/create", () -> {
 						post("/calendar", DashboardHandler::handleCalendarCreate);
+						post("announcement", DashboardHandler::handleAnnouncementCreate);
 					});
 					path("/delete", () -> {
 						post("/calendar", DashboardHandler::deleteCalendar);
