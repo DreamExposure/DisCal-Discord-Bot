@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.api.object.web;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -31,6 +32,7 @@ public class WebGuild {
 	//Lists and stuffs
 	private List<WebRole> roles = new ArrayList<>();
 	private List<WebChannel> channels = new ArrayList<>();
+	private List<Announcement> announcements = new ArrayList<>();
 
 	private WebCalendar calendar;
 
@@ -61,6 +63,10 @@ public class WebGuild {
 
 	public List<WebChannel> getChannels() {
 		return channels;
+	}
+
+	public List<Announcement> getAnnouncements() {
+		return announcements;
 	}
 
 	public WebCalendar getCalendar() {
@@ -131,6 +137,7 @@ public class WebGuild {
 		for (IChannel c : g.getChannels()) {
 			channels.add(new WebChannel().fromChannel(c, settings));
 		}
+		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getLongID()));
 
 		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(id)), settings);
 

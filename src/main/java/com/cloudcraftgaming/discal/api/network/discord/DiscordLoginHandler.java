@@ -1,6 +1,8 @@
 package com.cloudcraftgaming.discal.api.network.discord;
 
 import com.cloudcraftgaming.discal.api.enums.GoodTimezone;
+import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
+import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
@@ -53,6 +55,8 @@ public class DiscordLoginHandler {
 			m.put("guilds", GuildUtils.getGuilds(userInfo.getString("id")));
 
 			m.put("goodTz", GoodTimezone.values());
+			m.put("anTypes", AnnouncementType.values());
+			m.put("eventColors", EventColor.values());
 
 			DiscordAccountHandler.getHandler().addAccount(m, request.session().id());
 

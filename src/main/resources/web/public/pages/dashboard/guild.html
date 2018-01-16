@@ -15,9 +15,10 @@
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
 		<script src="/scripts/dashboard/main.js"></script>
+		<script src="/scripts/dashboard/announcement.js"></script>
 	</head>
 
-	<body>
+	<body onload="handleVisibility()">
 		<div class="top-nav">
 			<h1>DISCAL</h1>
 			<a href="/">Home</a>
@@ -302,10 +303,90 @@
 							</form>
 							<br>
 							<br>
-							<p>
-								It's a work in progress. Soon you will be able to create/edit/manage/delete
-								announcements from here!!
-							</p>
+							<hr>
+							<h6>Announcement List</h6>
+							<!--TODO: Add pagination for larger guilds....-->
+							<th:block th:each="ann : ${selected.announcements}">
+								<!--TODO: Implement permission handling-->
+								<div>
+									<p style="float: left" th:text="${ann.announcementId}"></p>
+									<a th:href="'/account/dashboard/edit/announcement?id=' + ${ann.announcementId}">
+										<button>Edit</button>
+									</a>
+									<a th:href="'/account/dashboard/delete/announcement?id=' + ${ann.announcementId}">
+										<button class="danger">Delete</button>
+									</a>
+								</div>
+								<br>
+							</th:block>
+							<br>
+							<br>
+							<hr>
+							<h6>Create An Announcement Below!</h6>
+							<!--TODO: Actually make announcement create form-->
+							<p>THIS IS NOT ACTIVE! ITS JUST TO TEST STYLING!</p>
+							<div id="create-announcement">
+								<form style="text-align: left;" method="post"
+								      enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/create/announcement" name="announcement-create">
+									<label>Channel
+										<br>
+										<select name="channel">
+											<th:block th:each="chan : ${selected.channels}">
+												<option th:value="${chan.id}" th:text="${chan.name}"></option>
+											</th:block>
+										</select>
+									</label>
+									<br>
+									<br>
+									<label>Type
+										<br>
+										<select name="type" id="create-ann-type" onchange="handleVisibility()">
+											<th:block th:each="ty : ${anTypes}">
+												<option th:value="${ty.name}" th:text="${ty.name}"></option>
+											</th:block>
+										</select>
+									</label>
+									<br>
+									<br>
+									<label id="create-ann-event">Event ID
+										<br>
+										<input name="event-id" type="text">
+									</label>
+									<br>
+									<br>
+									<label id="create-ann-color">Color
+										<br>
+										<select name="color">
+											<th:block th:each="c : ${eventColors}">
+												<option th:value="${c.id}" th:text="${c.name}"></option>
+											</th:block>
+										</select>
+									</label>
+									<br>
+									<br>
+									<label>Minutes Before
+										<br>
+										<input name="minutes" type="number" value="0">
+									</label>
+									<br>
+									<br>
+									<label>Hours Before
+										<br>
+										<input name="hours" type="number" value="0">
+									</label>
+									<br>
+									<br>
+									<label>Info (Leave as "None" if you don't want it to display).
+										<br>
+										<input name="info" type="text" value="None">
+									</label>
+									<br>
+									<br>
+									<input type="submit" class="submit" value="Create Announcement!"
+									       th:disabled="${selected.discalRole} == false">
+								</form>
+							</div>
 						</div>
 						<!--RSVP Settings-->
 						<div th:if="${settings} == rsvp">
