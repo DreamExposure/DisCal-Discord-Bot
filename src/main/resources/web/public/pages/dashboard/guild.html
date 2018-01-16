@@ -14,6 +14,8 @@
 
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/fix.css" rel="stylesheet">
+
 		<script src="/scripts/dashboard/main.js"></script>
 		<script src="/scripts/dashboard/announcement.js"></script>
 	</head>
@@ -333,7 +335,9 @@
 										<br>
 										<select name="channel">
 											<th:block th:each="chan : ${selected.channels}">
-												<option th:value="${chan.id}" th:text="${chan.name}"></option>
+												<th:block th:if="${chan.id} != 0">
+													<option th:value="${chan.id}" th:text="${chan.name}"></option>
+												</th:block>
 											</th:block>
 										</select>
 									</label>

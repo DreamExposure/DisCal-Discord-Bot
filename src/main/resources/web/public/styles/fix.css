@@ -1,0 +1,33 @@
+/* Handle input type number */
+
+/* Remove controls from Firefox */
+input[type=number] {
+	-moz-appearance: textfield;
+	/* Fix sizing */
+	height: 10px;
+}
+
+/* Re-applies the controls on :hover and :focus */
+input[type="number"]:hover,
+input[type="number"]:focus {
+	-moz-appearance: textfield;
+}
+
+/* Remove controls from Safari and Chrome */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0; /* Removes leftover margin */
+}
+
+/* Adds a box around the numeric value in Safari and Chrome */
+input[type=number]::-webkit-textfield-decoration-container {
+	border: 1px #1b1f20 solid;
+	background: #232729;
+}
+
+html:not([dir="rtl"]) input {
+	text-align: left;
+}
+
+/* End of handling input type number */
