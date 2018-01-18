@@ -78,6 +78,7 @@ public class DevCommand implements ICommand {
 		ci.getSubCommands().put("reload", "Logs out and then logs in every shard.");
 		ci.getSubCommands().put("shutdown", "Shuts down the bot application.");
 		ci.getSubCommands().put("eval", "Evaluates the given code.");
+		ci.getSubCommands().put("testShards", "Tests to make sure all shards respond.");
 
 		return ci;
 	}
@@ -133,6 +134,8 @@ public class DevCommand implements ICommand {
 					case "eval":
 						moduleEval(event);
 						break;
+					case "testshards":
+						moduleTestShards(event);
 					default:
 						Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
 						break;
@@ -331,6 +334,17 @@ public class DevCommand implements ICommand {
 		Message.sendMessage("Shutting down DisCal! This may take a moment!", event);
 
 		ApplicationHandler.exitApplication();
+	}
+
+	private void moduleTestShards(MessageReceivedEvent event) {
+		Message.sendMessage("Testing shard responses...", event);
+
+		StringBuilder r = new StringBuilder();
+		for (IShard s : Main.client.getShards()) {
+			r.append(s.getInfo()[0]).append(": ").append(s.isReady()).append("\n");
+		}
+
+		Message.sendMessage(r.toString(), event);
 	}
 
 	private long botPercent(IGuild g) {
