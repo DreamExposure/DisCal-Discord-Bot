@@ -23,7 +23,7 @@ public class SparkUtils {
 			staticFileLocation("/web/public"); // Main site location
 
 			notFound(((request, response) -> {
-				response.redirect("/");
+				response.redirect("/", 301);
 				return response.body();
 			}));
 
@@ -85,10 +85,11 @@ public class SparkUtils {
 					get("/update/get", DashboardHandler::handleSettingsUpdateGet); //Handle get requests for specific params...
 					path("/create", () -> {
 						post("/calendar", DashboardHandler::handleCalendarCreate);
-						post("announcement", DashboardHandler::handleAnnouncementCreate);
+						post("/announcement", DashboardHandler::handleAnnouncementCreate);
 					});
 					path("/delete", () -> {
-						post("/calendar", DashboardHandler::deleteCalendar);
+						get("/calendar", DashboardHandler::deleteCalendar);
+						get("/announcement", DashboardHandler::deleteAnnouncement);
 					});
 				});
 			});

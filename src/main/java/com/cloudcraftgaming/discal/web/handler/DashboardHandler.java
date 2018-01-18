@@ -422,4 +422,25 @@ public class DashboardHandler {
 		}
 		return response.body();
 	}
+
+	public static String deleteAnnouncement(Request request, Response response) {
+		try {
+			String announcementId = request.queryParams("id");
+
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+
+			if (g.isManageServer()) {
+				DatabaseManager.getManager().deleteAnnouncement(announcementId);
+
+				g.getAnnouncements().clear();
+				//Update announcements list to display correctly.
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
+			}
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class);
+		}
+		return response.body();
+	}
 }
