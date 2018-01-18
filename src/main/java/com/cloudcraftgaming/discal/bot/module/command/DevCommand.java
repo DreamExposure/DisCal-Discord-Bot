@@ -93,7 +93,9 @@ public class DevCommand implements ICommand {
 	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long novaId = 130510525770629121L;
 		long xaanitId = 233611560545812480L;
-		if (event.getAuthor().getLongID() == novaId || event.getAuthor().getLongID() == xaanitId) {
+		long calId = 142107863307780097L;
+		long dreamId = 282662248365817867L;
+		if (event.getAuthor().getLongID() == novaId || event.getAuthor().getLongID() == xaanitId || event.getAuthor().getLongID() == calId || event.getAuthor().getLongID() == dreamId) {
 			if (args.length < 1) {
 				Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
 			} else {
