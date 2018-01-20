@@ -86,7 +86,17 @@ public class DashboardHandler {
 
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 
-			response.redirect("/dashboard/guild", 301);
+			if (settings.equalsIgnoreCase("calendar")) {
+				response.redirect("/dashboard/guild/calendar", 301);
+			} else if (settings.equalsIgnoreCase("events")) {
+				response.redirect("/dashboard/guild/events", 301);
+			} else if (settings.equalsIgnoreCase("announcements")) {
+				response.redirect("/dashboard/guild/announcements", 301);
+			} else if (settings.equalsIgnoreCase("rsvp")) {
+				response.redirect("/dashboard/guild/rsvp", 301);
+			} else {
+				response.redirect("/dashboard/guild", 301);
+			}
 		} catch (JSONException e) {
 			ExceptionHandler.sendException(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class);
 			response.redirect("/dashboard", 301);
@@ -190,7 +200,20 @@ public class DashboardHandler {
 						g.getChannels().add(new WebChannel().fromChannel(c, g.getSettings()));
 					}
 				}
-			} else if (request.queryParams().contains("cal-name")) {
+			}
+
+			//Finally redirect back to the dashboard
+			response.redirect("/dashboard/guild", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			halt(500, "Internal Server Exception");
+		}
+		return response.body();
+	}
+
+	public static String handleCalendarUpdate(Request request, Response response) {
+		try {
+			if (request.queryParams().contains("cal-name")) {
 				//Update calendar name/summary...
 				Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 				WebGuild g = (WebGuild) m.get("selected");
@@ -259,9 +282,9 @@ public class DashboardHandler {
 			}
 
 			//Finally redirect back to the dashboard
-			response.redirect("/dashboard/guild", 301);
+			response.redirect("/dashboard/guild/calendar", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			ExceptionHandler.sendException(null, "[WEB] Calendar update failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -291,6 +314,9 @@ public class DashboardHandler {
 				g.getSettings().setSimpleAnnouncements(Boolean.valueOf(request.queryParams("simple-ann")));
 
 				DatabaseManager.getManager().updateSettings(g.getSettings());
+
+				response.redirect("/dashboard/guild/announcements", 301);
+				return response.body();
 			}
 
 			//Finally redirect back to the dashboard
@@ -342,7 +368,7 @@ public class DashboardHandler {
 				}
 			}
 			//Finally redirect back to the dashboard
-			response.redirect("/dashboard/guild", 301);
+			response.redirect("/dashboard/guild/calendar", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
@@ -391,7 +417,7 @@ public class DashboardHandler {
 				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
 			//Finally redirect back to the dashboard
-			response.redirect("/dashboard/guild", 301);
+			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Announcement create failed!", e, DashboardHandler.class);
 			halt(500, "Internal Server Exception");
@@ -413,9 +439,9 @@ public class DashboardHandler {
 				CalendarUtils.deleteCalendar(data, settings);
 
 				g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId())), DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()))));
-				response.redirect("/dashboard/guild", 301);
+				response.redirect("/dashboard/guild/calendar", 301);
 			} else {
-				response.redirect("/dashboard/guild", 301);
+				response.redirect("/dashboard/guild/calendar", 301);
 			}
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class);
@@ -437,7 +463,7 @@ public class DashboardHandler {
 				//Update announcements list to display correctly.
 				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
-			response.redirect("/dashboard/guild", 301);
+			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class);
 		}

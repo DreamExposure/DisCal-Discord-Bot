@@ -82,6 +82,7 @@ public class SparkUtils {
 					get("/select", DashboardHandler::handleGuildSelect);
 					get("/guild", DashboardHandler::handleSettingsSelect);
 					post("/update", DashboardHandler::handleSettingsUpdate);
+					post("/update/calendar", DashboardHandler::handleCalendarUpdate);
 					get("/update/get", DashboardHandler::handleSettingsUpdateGet); //Handle get requests for specific params...
 					path("/create", () -> {
 						post("/calendar", DashboardHandler::handleCalendarCreate);
@@ -105,6 +106,10 @@ public class SparkUtils {
 
 			get("/dashboard", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/dashboard"), new ThymeleafTemplateEngine());
 			get("/dashboard/guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/guild"), new ThymeleafTemplateEngine());
+			get("/dashboard/guild/calendar", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/calendar"), new ThymeleafTemplateEngine());
+			get("/dashboard/guild/events", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/events"), new ThymeleafTemplateEngine());
+			get("/dashboard/guild/announcements", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/announcements"), new ThymeleafTemplateEngine());
+			get("/dashboard/guild/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/rsvp"), new ThymeleafTemplateEngine());
 		}
 	}
 }

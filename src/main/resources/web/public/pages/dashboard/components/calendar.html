@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>Dashboard - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/fix.css" rel="stylesheet">
+
+		<script src="/scripts/dashboard/main.js"></script>
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a class="active" href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin'">Log
+				In</a>
+		</div>
+
+		<div id="content">
+			<!--Check if logged in, if not, handle login...-->
+			<div th:if="${loggedIn}">
+				<div id="side-nav">
+					<h4>Main Settings</h4>
+					<a href="/account/dashboard/guild?settings=bot">
+						<button>Bot Settings</button>
+					</a>
+					<br>
+					<a href="/account/dashboard/guild?settings=guild">
+						<button>Guild Settings</button>
+					</a>
+					<hr>
+					<h4>Components</h4>
+					<a href="/account/dashboard/guild?settings=calendar">
+						<button>Calendar</button>
+					</a>
+					<br>
+					<a href="/account/dashboard/guild?settings=events">
+						<button>Events</button>
+					</a>
+					<br>
+					<a href="/account/dashboard/guild?settings=announcements">
+						<button>Announcements</button>
+					</a>
+					<br>
+					<a href="/account/dashboard/guild?settings=rsvp">
+						<button>RSVPs</button>
+					</a>
+				</div>
+				<div style="display: flow-root">
+					<img th:src="${selected.icon}"
+					     style="display: flex;float: left;max-width: 64px;margin-right: 15px;">
+					<h3 th:text="'Managing Server: ' + ${selected.name}" style="text-align: left;"></h3>
+					<hr>
+					<p th:if="${settings} == null">Please select the settings to edit on the left.</p>
+					<div th:if="${settings} != null">
+						<!--Calendar Settings-->
+						<div th:if="${settings} == calendar">
+							<h6>Calendar Settings</h6>
+							<form style="text-align: left">
+								<label> Using External Calendar
+									<br>
+									<input type="checkbox" name="ext-cal" disabled
+									       th:checked="${selected.settings.externalCalendar} == true">
+								</label>
+							</form>
+							<br>
+							<br>
+							<form style="text-align: left">
+								<label> Maximum Calendars Allowed
+									<br>
+									<input type="text" maxlength="2" th:value="${selected.settings.maxCalendars}"
+									       disabled>
+								</label>
+							</form>
+							<br>
+							<br>
+							<!--TODO: Add support for multiple calendars-->
+							<!--Does NOT have a calendar-->
+							<div th:if="${selected.calendar.id} == primary" style="text-align: left">
+								<hr>
+								<h6>Create A Calendar Below!</h6>
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/create/calendar" name="calendar-create">
+									<label>Calendar Name/Summary
+										<br>
+										<input type="text" name="cal-name" value="Calendar Name">
+									</label>
+									<br>
+									<br>
+									<label>Calendar Description
+										<br>
+										<input type="text" name="cal-desc" value="Calendar Description">
+									</label>
+									<br>
+									<br>
+									<label>Calendar Timezone
+										<br>
+										<select name="cal-tz">
+											<th:block th:each="tz : ${goodTz}">
+												<option th:value="${tz.name}" th:text="${tz.name}"></option>
+											</th:block>
+										</select>
+									</label>
+									<br>
+									<br>
+									<input type="submit" class="submit" value="Create Calendar!"
+									       th:disabled="${selected.discalRole} == false">
+								</form>
+							</div>
+							<!--Has MAIN calendar-->
+							<div th:unless="${selected.calendar.id} == primary">
+								<hr>
+								<h6>Edit Your Calendar Below</h6>
+								<a th:href="${selected.calendar.link}" target="_blank">
+									<button>View Calendar!</button>
+								</a>
+								<br><br>
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update/calendar" style="text-align: left">
+									<label>Calendar Name/Summary
+										<br>
+										<input type="text" name="cal-name" th:value="${selected.calendar.name}">
+									</label>
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
+								</form>
+								<br>
+								<br>
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update/calendar" style="text-align: left">
+									<label>Calendar Description
+										<br>
+										<input type="text" name="cal-desc" th:value="${selected.calendar.description}">
+									</label>
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
+								</form>
+								<br>
+								<br>
+								<form method="post" enctype="application/x-www-form-urlencoded"
+								      action="/account/dashboard/update/calendar" style="text-align: left">
+									<label>Calendar Timezone
+										<br>
+										<select name="cal-tz">
+											<th:block th:each="tz : ${goodTz}">
+												<option th:value="${tz.name}" th:text="${tz.name}"
+												        th:selected="${tz.name} == ${selected.calendar.timezone}"></option>
+											</th:block>
+										</select>
+									</label>
+									<input type="submit" class="submit" value="Update"
+									       th:disabled="${selected.discalRole} == false">
+								</form>
+								<br>
+								<br>
+								<a th:if="${selected.manageServer} == true"
+								   th:href="'/account/dashboard/delete/calendar?calendar-id=' + ${selected.calendar.id}">
+									<button class="danger">Delete Calendar</button>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div th:unless="${loggedIn}">
+				<h1>YOU ARE NOT LOGGED IN!</h1>
+				<p>Please login to continue.</p>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>© Nova Maday 2017. All rights reserved. <a href="/policy/privacy">Privacy Policy</a></p>
+	</footer>
+</html>
