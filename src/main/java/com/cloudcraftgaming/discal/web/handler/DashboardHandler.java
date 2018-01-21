@@ -27,6 +27,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static spark.Spark.halt;
 
@@ -459,13 +460,54 @@ public class DashboardHandler {
 			if (g.isManageServer()) {
 				DatabaseManager.getManager().deleteAnnouncement(announcementId);
 
-				g.getAnnouncements().clear();
 				//Update announcements list to display correctly.
+				g.getAnnouncements().clear();
 				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
 			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class);
+		}
+		return response.body();
+	}
+
+	public static String handleAnnouncementUpdate(Request request, Response response) {
+		try {
+			String announcementId = request.queryParams("id");
+
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+
+			if (g.isManageServer()) {
+				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Long.valueOf(g.getId()));
+
+				a.setAnnouncementChannelId(request.queryParams("channel"));
+				a.setAnnouncementType(AnnouncementType.fromValue(request.queryParams("type")));
+
+				if (a.getAnnouncementType() == AnnouncementType.COLOR) {
+					a.setEventColor(EventColor.fromNameOrHexOrID(request.queryParams("color")));
+				} else if (a.getAnnouncementType() == AnnouncementType.SPECIFIC || a.getAnnouncementType() == AnnouncementType.RECUR) {
+					String value = request.queryParams("event-id");
+					if (value.contains("_")) {
+						String[] stuff = value.split("_");
+						value = stuff[0];
+					}
+					a.setEventId(value);
+				}
+
+				a.setMinutesBefore(Integer.valueOf(request.queryParams("minutes")));
+				a.setHoursBefore(Integer.valueOf(request.queryParams("hours")));
+				a.setInfo(request.queryParams("info"));
+
+				DatabaseManager.getManager().updateAnnouncement(a);
+
+				//Update announcements list to display correctly.
+				g.getAnnouncements().clear();
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
+			}
+			response.redirect("/dashboard/guild/announcements", 301);
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Failed to update/edit announcement!", e, DashboardHandler.class);
 		}
 		return response.body();
 	}

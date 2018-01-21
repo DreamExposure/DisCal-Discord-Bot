@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress HtmlUnknownTarget -->
 <html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 	<head>
 		<!--Meta stuffs-->
@@ -15,14 +16,14 @@
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
 		<link href="/styles/fix.css" rel="stylesheet">
+		<link href="/styles/bootstrap/modal-only.css" rel="stylesheet">
 
 		<script src="/scripts/dashboard/main.js"></script>
 		<script src="/scripts/dashboard/announcement.js"></script>
 
 		<!--Externally hosted-->
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-		        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-		        crossorigin="anonymous"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	</head>
 
 	<body onload="handleVisibility()">
@@ -102,12 +103,102 @@
 								<!--TODO: Implement permission handling-->
 								<div>
 									<p style="float: left" th:text="${ann.announcementId}"></p>
-									<a th:href="'/account/dashboard/edit/announcement?id=' + ${ann.announcementId}">
-										<button>Edit</button>
-									</a>
+									<button type="button" data-toggle="modal"
+									        th:data-target="'#modal-' + ${ann.announcementId}">Edit
+									</button>
 									<a th:href="'/account/dashboard/delete/announcement?id=' + ${ann.announcementId}">
 										<button class="danger">Delete</button>
 									</a>
+
+									<!-- Edit Modal -->
+									<div class="modal fade" th:id="'modal-' + ${ann.announcementId}" role="dialog">
+										<div class="modal-dialog">
+
+											<!-- Modal content-->
+											<div class="modal-content">
+												<div class="modal-header">
+													<h4 class="modal-title">Editing Announcement</h4>
+												</div>
+												<div class="modal-body">
+													<form style="text-align: left;" method="post"
+													      enctype="application/x-www-form-urlencoded"
+													      action="/account/dashboard/update/announcement">
+														<label>Channel
+															<br>
+															<select name="channel">
+																<th:block th:each="chan : ${selected.channels}">
+																	<th:block th:if="${chan.id} != 0">
+																		<option th:value="${chan.id}"
+																		        th:text="${chan.name}"
+																		        th:selected="${ann.announcementChannelId} == ${chan.id}"></option>
+																	</th:block>
+																</th:block>
+															</select>
+														</label>
+														<br>
+														<br>
+														<label>Type
+															<br>
+															<select name="type">
+																<th:block th:each="ty : ${anTypes}">
+																	<option th:value="${ty.name}" th:text="${ty.name}"
+																	        th:selected="${ty.name} == ${ann.announcementType.name}"></option>
+																</th:block>
+															</select>
+														</label>
+														<br>
+														<br>
+														<label>Event ID (only needed if type of RECUR or SPECIFIC)
+															<br>
+															<input name="event-id" type="text"
+															       th:value="${ann.eventId}">
+														</label>
+														<br>
+														<br>
+														<label>Color (Only needed if type of COLOR)
+															<br>
+															<select name="color">
+																<th:block th:each="c : ${eventColors}">
+																	<option th:value="${c.id}" th:text="${c.name}"
+																	        th:selected="${c.id} == ${ann.eventColor.id}"></option>
+																</th:block>
+															</select>
+														</label>
+														<br>
+														<br>
+														<label>Minutes Before
+															<br>
+															<input name="minutes" type="number"
+															       th:value="${ann.minutesBefore}">
+														</label>
+														<br>
+														<br>
+														<label>Hours Before
+															<br>
+															<input name="hours" type="number"
+															       th:value="${ann.hoursBefore}">
+														</label>
+														<br>
+														<br>
+														<label>Info (Leave as "None" if you don't want it to display).
+															<br>
+															<input name="info" type="text" th:value="${ann.info}">
+														</label>
+														<br>
+														<br>
+														<input type="hidden" name="id" th:value="${ann.announcementid}">
+
+														<input type="submit" class="submit" value="Update Announcement!"
+														       th:disabled="${selected.discalRole} == false">
+													</form>
+												</div>
+												<div class="modal-footer">
+													<button type="button" data-dismiss="modal">Close</button>
+												</div>
+											</div>
+
+										</div>
+									</div>
 								</div>
 								<br>
 							</th:block>
