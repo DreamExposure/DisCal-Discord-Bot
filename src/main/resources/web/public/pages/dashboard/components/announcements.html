@@ -47,34 +47,39 @@
 
 		<div id="content">
 			<!--Check if logged in, if not, handle login...-->
-			<div th:if="${loggedIn}">
-				<div id="side-nav">
-					<h4>Main Settings</h4>
-					<a href="/account/dashboard/guild?settings=bot">
-						<button>Bot Settings</button>
-					</a>
-					<br>
-					<a href="/account/dashboard/guild?settings=guild">
-						<button>Guild Settings</button>
-					</a>
-					<hr>
-					<h4>Components</h4>
-					<a href="/account/dashboard/guild?settings=calendar">
-						<button>Calendar</button>
-					</a>
-					<br>
-					<a href="/account/dashboard/guild?settings=events">
-						<button>Events</button>
-					</a>
-					<br>
-					<a href="/account/dashboard/guild?settings=announcements">
-						<button>Announcements</button>
-					</a>
-					<br>
-					<a href="/account/dashboard/guild?settings=rsvp">
-						<button>RSVPs</button>
-					</a>
-				</div>
+			<div id="side-nav">
+				<h4>Main Settings</h4>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="bot">
+					<button type="submit">Bot Settings</button>
+				</form>
+				<br>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="guild">
+					<button type="submit">Guild Settings</button>
+				</form>
+				<hr>
+				<h4>Components</h4>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="calendar">
+					<button type="submit">Calendar</button>
+				</form>
+				<br>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="events">
+					<button type="submit">Events</button>
+				</form>
+				<br>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="announcements">
+					<button type="submit">Announcements</button>
+				</form>
+				<br>
+				<form method="post" action="/api/v1/dashboard/select/settings">
+					<input type="hidden" name="settings" value="rsvp">
+					<button type="submit">RSVPs</button>
+				</form>
+			</div>
 				<div style="display: flow-root">
 					<img th:src="${selected.icon}"
 					     style="display: flex;float: left;max-width: 64px;margin-right: 15px;">
@@ -86,7 +91,7 @@
 						<div th:if="${settings} == announcements">
 							<h6>Announcement Settings</h6>
 							<form method="post" enctype="application/x-www-form-urlencoded"
-							      action="/account/dashboard/update" style="text-align: left">
+							      action="/api/v1/dashboard/update/settings" style="text-align: left">
 								<label> Use Simple Announcements
 									<br>
 									<input type="checkbox" name="simple-ann"
@@ -106,9 +111,10 @@
 									<button type="button" data-toggle="modal"
 									        th:data-target="'#modal-' + ${ann.announcementId}">Edit
 									</button>
-									<a th:href="'/account/dashboard/delete/announcement?id=' + ${ann.announcementId}">
-										<button class="danger">Delete</button>
-									</a>
+									<form method="post" action="/api/v1/dashboard/delete/announcement">
+										<input type="hidden" name="id" th:value="${ann.announcemntId}">
+										<button class="danger" type="submit">Delete</button>
+									</form>
 
 									<!-- Edit Modal -->
 									<div class="modal fade" th:id="'modal-' + ${ann.announcementId}" role="dialog">
@@ -122,7 +128,7 @@
 												<div class="modal-body">
 													<form style="text-align: left;" method="post"
 													      enctype="application/x-www-form-urlencoded"
-													      action="/account/dashboard/update/announcement">
+													      action="/api/v1/dashboard/update/announcement">
 														<label>Channel
 															<br>
 															<select name="channel">
@@ -209,7 +215,7 @@
 							<div id="create-announcement">
 								<form style="text-align: left;" method="post"
 								      enctype="application/x-www-form-urlencoded"
-								      action="/account/dashboard/create/announcement" name="announcement-create">
+								      action="/api/v1/dashboard/create/announcement" name="announcement-create">
 									<label>Channel
 										<br>
 										<select name="channel">

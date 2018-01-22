@@ -29,19 +29,23 @@ public class SparkUtils {
 
 			//Register the API Endpoints
 			before("/api/*", (request, response) -> {
+				/*
 				if (!request.requestMethod().equalsIgnoreCase("POST")) {
 					System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
 					halt(405, "Method not allowed");
 				}
+				*/
 				//Check authorization
 				if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
 					//TODO: Actually check auth!!! < Just lazy right now
 					halt(401, "Unauthorized");
 				}
 				//Only accept json because its easier to parse and handle.
+				/*
 				if (!request.contentType().equalsIgnoreCase("application/json")) {
 					halt(400, "Bad Request");
 				}
+				*/
 			});
 
 			//API endpoints
@@ -70,6 +74,27 @@ public class SparkUtils {
 					post("/get", RsvpEndpoint::getRsvp);
 					post("/update", RsvpEndpoint::updateRsvp);
 				});
+				path("/dashboard", () -> {
+					path("/select", () -> {
+						post("/guild", DashboardHandler::handleGuildSelect);
+						post("/settings", DashboardHandler::handleSettingsSelect);
+					});
+
+					path("/create", () -> {
+						post("/calendar", DashboardHandler::handleCalendarCreate);
+						post("/announcement", DashboardHandler::handleAnnouncementCreate);
+					});
+					path("/update", () -> {
+						post("/announcement", DashboardHandler::handleAnnouncementUpdate);
+						post("/calendar", DashboardHandler::handleCalendarUpdate);
+						post("/settings", DashboardHandler::handleSettingsUpdate);
+						get("/settings", DashboardHandler::handleSettingsUpdateGet);
+					});
+					path("/delete", () -> {
+						post("/calendar", DashboardHandler::deleteCalendar);
+						post("/announcement", DashboardHandler::deleteAnnouncement);
+					});
+				});
 			});
 
 
@@ -77,23 +102,6 @@ public class SparkUtils {
 			path("/account", () -> {
 				get("/login", DiscordLoginHandler::handleDiscordCode);
 				get("/logout", DiscordLoginHandler::handleLogout);
-
-				path("/dashboard", () -> {
-					get("/select", DashboardHandler::handleGuildSelect);
-					get("/guild", DashboardHandler::handleSettingsSelect);
-					post("/update", DashboardHandler::handleSettingsUpdate);
-					post("/update/calendar", DashboardHandler::handleCalendarUpdate);
-					get("/update/get", DashboardHandler::handleSettingsUpdateGet); //Handle get requests for specific params...
-					post("/update/announcement", DashboardHandler::handleAnnouncementUpdate);
-					path("/create", () -> {
-						post("/calendar", DashboardHandler::handleCalendarCreate);
-						post("/announcement", DashboardHandler::handleAnnouncementCreate);
-					});
-					path("/delete", () -> {
-						get("/calendar", DashboardHandler::deleteCalendar);
-						get("/announcement", DashboardHandler::deleteAnnouncement);
-					});
-				});
 			});
 
 			//Templates and pages...

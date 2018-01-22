@@ -43,30 +43,36 @@
 			<div th:if="${loggedIn}">
 				<div id="side-nav">
 					<h4>Main Settings</h4>
-					<a href="/account/dashboard/guild?settings=bot">
-						<button>Bot Settings</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="bot">
+						<button type="submit">Bot Settings</button>
+					</form>
 					<br>
-					<a href="/account/dashboard/guild?settings=guild">
-						<button>Guild Settings</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="guild">
+						<button type="submit">Guild Settings</button>
+					</form>
 					<hr>
 					<h4>Components</h4>
-					<a href="/account/dashboard/guild?settings=calendar">
-						<button>Calendar</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="calendar">
+						<button type="submit">Calendar</button>
+					</form>
 					<br>
-					<a href="/account/dashboard/guild?settings=events">
-						<button>Events</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="events">
+						<button type="submit">Events</button>
+					</form>
 					<br>
-					<a href="/account/dashboard/guild?settings=announcements">
-						<button>Announcements</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="announcements">
+						<button type="submit">Announcements</button>
+					</form>
 					<br>
-					<a href="/account/dashboard/guild?settings=rsvp">
-						<button>RSVPs</button>
-					</a>
+					<form method="post" action="/api/v1/dashboard/select/settings">
+						<input type="hidden" name="settings" value="rsvp">
+						<button type="submit">RSVPs</button>
+					</form>
 				</div>
 				<div style="display: flow-root">
 					<img th:src="${selected.icon}"

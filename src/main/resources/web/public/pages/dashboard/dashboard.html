@@ -46,8 +46,10 @@
 				<th:block th:each="guild : ${guilds}">
 					<!--TODO: Remove patron/dev only  on full release-->
 					<th:block th:if="${guild.settings.patronGuild} == true or ${guild.settings.devGuild} == true">
-						<button onclick="goToGuild(this.id)" class="guild" th:id="${guild.id}"
-						        th:text="${guild.name}"></button>
+						<form method="post" action="/api/v1/dashboard/select/guild">
+							<input type="hidden" name="guild" th:value="${guild.id}">
+							<button type="submit" class="guild" th:text="${guild.name}"></button>
+						</form>
 						<br>
 					</th:block>
 				</th:block>
