@@ -29,12 +29,10 @@ public class SparkUtils {
 
 			//Register the API Endpoints
 			before("/api/*", (request, response) -> {
-				/*
 				if (!request.requestMethod().equalsIgnoreCase("POST")) {
 					System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
 					halt(405, "Method not allowed");
 				}
-				*/
 				//Check authorization
 				if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
 					//TODO: Actually check auth!!! < Just lazy right now
@@ -88,7 +86,6 @@ public class SparkUtils {
 						post("/announcement", DashboardHandler::handleAnnouncementUpdate);
 						post("/calendar", DashboardHandler::handleCalendarUpdate);
 						post("/settings", DashboardHandler::handleSettingsUpdate);
-						get("/settings", DashboardHandler::handleSettingsUpdateGet);
 					});
 					path("/delete", () -> {
 						post("/calendar", DashboardHandler::deleteCalendar);

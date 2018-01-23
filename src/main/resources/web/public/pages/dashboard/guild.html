@@ -135,14 +135,14 @@
 							</form>
 							<br>
 							<br>
-							<form method="post" enctype="application/x-www-form-urlencoded"
-							      action="/api/v1/dashboard/update/settings" style="text-align: left">
+							<form method="post" action="/api/v1/dashboard/update/settings" style="text-align: left;">
+								<input type="hidden" name="branding" value="branding">
 								<label>Enable Server Branding (Patron Only)
 									<br>
-									<input type="checkbox" name="branding"
-									       th:disabled="${selected.settings.patronGuild != true}"
+									<input type="checkbox" name="value"
+									       th:disabled="${selected.settings.patronGuild} != true"
 									       th:checked="${selected.settings.branded} == true"
-									       onclick="enableBranding(this.checked)">
+									       onchange="this.form.submit()">
 								</label>
 							</form>
 							<br>
