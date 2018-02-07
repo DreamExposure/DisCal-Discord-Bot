@@ -179,6 +179,9 @@
   "Announcement.Enable.Specify": "Please specify the ID of the announcement you wish to enable/disable with `!a enable <ID>`",
   "Announcement.Enable.Creator": "Cannot enable/disable an announcement while the creator is active >.<",
   "Announcement.Enable.Success": "Announcement enabled set to: `%value%`",
+  "Announcement.InfoOnly.Specify": "Please specify the ID of the announcement you wish to enable/disable info only mode on with `!a enable <ID>`",
+  "Announcement.InfoOnly.Creator": "Cannot enable/disable info only mode of an announcement while the creator is active >.<",
+  "Announcement.InfoOnly.Success": "Announcement info only mode set to: `%value%`",
 
   "DisCal.ControlRole.Set": "Required control role set to: `%role%`",
   "DisCal.ControlRole.Reset": "Specific role no longer required! Everyone may edit/create!",
@@ -197,6 +200,7 @@
   "DisCal.Prefix.Set": "Prefix set to `%prefix%` DisCal will now accept commands starting with the new prefix **OR** by mentioning DisCal!",
   "DisCal.Prefix.Specify": "Please specify the preferred prefix with `!discal prefix <prefix>` **SPACES ARE NOT ALLOWED**!",
   "DisCal.InviteLink": "Here is the invite to my official support guild: %link%",
+  "DisCal.Brand": "Sever Branding enabled: `%value%`",
 
   "AddCalendar.Start": "Please check your DMs for instructions on how to add an external calendar!",
   "AddCalendar.Select.NotAuth": "An external account has not been authorized yet! Use `!addCalendar` to start the authorization process if not started!",

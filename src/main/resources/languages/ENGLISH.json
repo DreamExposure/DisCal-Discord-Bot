@@ -179,6 +179,9 @@
   "Announcement.Enable.Specify": "Please specify the ID of the announcement you wish to enable/disable with `!a enable <ID>`",
   "Announcement.Enable.Creator": "Cannot enable/disable an announcement while the creator is active >.<",
   "Announcement.Enable.Success": "Announcement enabled set to: `%value%`",
+  "Announcement.InfoOnly.Specify": "Please specify the ID of the announcement you wish to enable/disable info only mode on with `!a enable <ID>`",
+  "Announcement.InfoOnly.Creator": "Cannot enable/disable info only mode of an announcement while the creator is active >.<",
+  "Announcement.InfoOnly.Success": "Announcement info only mode set to: `%value%`",
 
   "DisCal.ControlRole.Set": "Required control role set to: `%role%`",
   "DisCal.ControlRole.Reset": "Specific role no longer required! Everyone may edit/create!",

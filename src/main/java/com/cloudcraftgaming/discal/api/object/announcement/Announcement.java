@@ -30,6 +30,7 @@ public class Announcement {
 	private String info;
 
 	private boolean enabled;
+	private boolean infoOnly;
 
 	private IMessage creatorMessage;
 
@@ -53,6 +54,7 @@ public class Announcement {
 		minutesBefore = 0;
 		info = "None";
 		enabled = true;
+		infoOnly = false;
 
 		lastEdit = System.currentTimeMillis();
 	}
@@ -74,11 +76,13 @@ public class Announcement {
 		minutesBefore = 0;
 		info = "None";
 		enabled = true;
+		infoOnly = false;
 
 		editing = false;
 		lastEdit = System.currentTimeMillis();
 	}
 
+	@SuppressWarnings("CopyConstructorMissesField")
 	public Announcement(Announcement from) {
 		guildId = from.getGuildId();
 		announcementId = UUID.randomUUID();
@@ -89,7 +93,8 @@ public class Announcement {
 		hoursBefore = from.getHoursBefore();
 		minutesBefore = from.getMinutesBefore();
 		info = from.getInfo();
-		enabled = from.enabled;
+		enabled = from.isEnabled();
+		infoOnly = from.isInfoOnly();
 
 		setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
@@ -112,7 +117,8 @@ public class Announcement {
 		hoursBefore = from.getHoursBefore();
 		minutesBefore = from.getMinutesBefore();
 		info = from.getInfo();
-		enabled = from.enabled;
+		enabled = from.isEnabled();
+		infoOnly = from.isInfoOnly();
 
 		setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
 		setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
@@ -259,6 +265,10 @@ public class Announcement {
 		return enabled;
 	}
 
+	public boolean isInfoOnly() {
+		return infoOnly;
+	}
+
 	public IMessage getCreatorMessage() {
 		return creatorMessage;
 	}
@@ -328,6 +338,10 @@ public class Announcement {
 
 	public void setEnabled(boolean _enabled) {
 		enabled = _enabled;
+	}
+
+	public void setInfoOnly(boolean _infoOnly) {
+		infoOnly = _infoOnly;
 	}
 
 	/**

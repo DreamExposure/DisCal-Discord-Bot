@@ -93,6 +93,7 @@ public class AnnouncementCommand implements ICommand {
 		info.getSubCommands().put("info", "Sets an additional info.");
 		info.getSubCommands().put("enable", "Enables or Disables the announcement (alias for `disable`)");
 		info.getSubCommands().put("disable", "Enables or Disables the announcement (alias for `enable`)");
+		info.getSubCommands().put("infoOnly", "Allows for setting an announcement to ONLY display the ' extra info'");
 
 		return info;
 	}
@@ -174,6 +175,8 @@ public class AnnouncementCommand implements ICommand {
 				case "disabled":
 					moduleEnable(args, event, settings);
 					break;
+				case "infoonly":
+					moduleInfoOnly(args, event, settings);
 				case "channel":
 					moduleChannel(args, event, settings);
 					break;
@@ -1285,6 +1288,29 @@ public class AnnouncementCommand implements ICommand {
 			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Announcement.Enable.Specify", settings), event);
+		}
+	}
+
+	private void moduleInfoOnly(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		long guildId = event.getGuild().getLongID();
+		if (args.length == 2) {
+			if (AnnouncementCreator.getCreator().hasAnnouncement(guildId)) {
+				Message.sendMessage(MessageManager.getMessage("Announcement.InfoOnly.Creator", settings), event);
+			} else {
+				String value = args[1];
+				if (!AnnouncementUtils.announcementExists(value, event)) {
+					Message.sendMessage(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+				} else {
+					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), guildId);
+					a.setInfoOnly(!a.isInfoOnly());
+
+					DatabaseManager.getManager().updateAnnouncement(a);
+
+					Message.sendMessage(MessageManager.getMessage("Announcement.InfoOnly.Success", "%value%", a.isInfoOnly() + "", settings), event);
+				}
+			}
+		} else {
+			Message.sendMessage(MessageManager.getMessage("Announcement.InfoOnly.Specify", settings), event);
 		}
 	}
 

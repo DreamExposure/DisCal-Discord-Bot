@@ -154,6 +154,7 @@ public class AnnouncementMessageFormatter {
 
 		assert guild != null;
 
+		//Set all of the stuff for embeds regardless of announcement settings
 		if (settings.isBranded()) {
 			em.withAuthorName(guild.getName());
 		} else {
@@ -164,71 +165,81 @@ public class AnnouncementMessageFormatter {
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
 			em.withImage(ed.getImageLink());
 		}
-        if (event.getSummary() != null) {
-			String summary = event.getSummary();
-			if (summary.length() > 250) {
-				summary = summary.substring(0, 250);
-				summary = summary + " (continues on Google Calendar View)";
-			}
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
-        }
-        if (event.getDescription() != null) {
-			String description = event.getDescription();
-			if (description.length() > 250) {
-				description = description.substring(0, 250);
-				description = description + " (continues on Google Calendar View)";
-			}
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
-        }
-        if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
-            try {
-                Calendar service = CalendarAuth.getCalendarService();
-                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
-            } catch (Exception e1) {
-                em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
-            }
-        } else {
-            String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
-            try {
-                Calendar service = CalendarAuth.getCalendarService();
-                String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-                start = start + " " + tz;
-            } catch (Exception e1) {
-                start = start + " (TZ UNKNOWN/ERROR)";
-            }
 
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
-        }
+		em.withUrl(event.getHtmlLink());
 
-		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
-			if (event.getLocation().length() > 300) {
-				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
-			} else {
-				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
-			}
+		try {
+			EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+			em.withColor(ec.getR(), ec.getG(), ec.getB());
+		} catch (Exception e) {
+			//I dunno, color probably null.
+			em.withColor(56, 138, 237);
 		}
 
-        if (!settings.usingSimpleAnnouncements()) {
-            em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
-        }
-        if (!announcement.getInfo().equalsIgnoreCase("None")) {
+		if (!settings.usingSimpleAnnouncements()) {
+			em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
+		}
+
+		if (announcement.isInfoOnly()) {
+			//Only send info...
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+		} else {
+			//Requires all announcement data
+			if (event.getSummary() != null) {
+				String summary = event.getSummary();
+				if (summary.length() > 250) {
+					summary = summary.substring(0, 250);
+					summary = summary + " (continues on Google Calendar View)";
+				}
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
+			}
+			if (event.getDescription() != null) {
+				String description = event.getDescription();
+				if (description.length() > 250) {
+					description = description.substring(0, 250);
+					description = description + " (continues on Google Calendar View)";
+				}
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
+			}
+			if (!settings.usingSimpleAnnouncements()) {
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
+				try {
+					Calendar service = CalendarAuth.getCalendarService();
+					String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
+				} catch (Exception e1) {
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
+				}
+			} else {
+				String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
+				try {
+					Calendar service = CalendarAuth.getCalendarService();
+					String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
+					start = start + " " + tz;
+				} catch (Exception e1) {
+					start = start + " (TZ UNKNOWN/ERROR)";
+				}
+
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
+			}
+
+			if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+				if (event.getLocation().length() > 300) {
+					String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+					em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				} else {
+					em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+				}
+			}
+
+			if (!settings.usingSimpleAnnouncements()) {
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
+			}
+			if (!announcement.getInfo().equalsIgnoreCase("None")) {
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+			}
 		}
-        em.withUrl(event.getHtmlLink());
-        if (!settings.usingSimpleAnnouncements()) {
-            em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
-        }
-        try {
-            EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
-            em.withColor(ec.getR(), ec.getG(), ec.getB());
-        } catch (Exception e) {
-            //I dunno, color probably null.
-            em.withColor(56, 138, 237);
-        }
 
 
 		IChannel channel = null;
