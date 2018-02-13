@@ -3,6 +3,8 @@ package com.cloudcraftgaming.discal.bot.internal.service;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
+import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import sx.blah.discord.util.DiscordException;
 
 import java.io.File;
@@ -106,6 +108,8 @@ public class ApplicationHandler {
 			//No need to print, exiting anyway.
 			e.printStackTrace();
 		}
+		UpdateDisBotData.shutdown();
+		UpdateDisPwData.shutdown();
 		TimeManager.getManager().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();
 		System.exit(0);

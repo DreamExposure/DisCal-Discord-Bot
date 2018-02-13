@@ -6,7 +6,7 @@ import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExecutor;
-import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateListData;
+import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
 import com.cloudcraftgaming.discal.web.utils.SparkUtils;
@@ -41,7 +41,7 @@ public class Main {
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
 
-		UpdateListData.init();
+		UpdateDisPwData.init();
 
 		Authorization.getAuth().init();
 

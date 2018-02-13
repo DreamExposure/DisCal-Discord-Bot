@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.bot.internal.service;
 
-import com.cloudcraftgaming.discal.bot.internal.network.discordpw.TimedUpdate;
 import com.cloudcraftgaming.discal.bot.module.announcement.AnnouncementTask;
 import com.cloudcraftgaming.discal.bot.module.misc.StatusChanger;
 
@@ -38,7 +37,6 @@ public class TimeManager {
 	public void init() {
 		Timer timer = new Timer(true);
 		timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-		timer.schedule(new TimedUpdate(), 60 * 60 * 1000, 60 * 60 * 1000);
 
 		timers.add(timer);
 
@@ -53,7 +51,7 @@ public class TimeManager {
 	/**
 	 * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
 	 */
-	public void shutdown() {
+	void shutdown() {
 		for (Timer t : timers) {
 			t.cancel();
 		}
