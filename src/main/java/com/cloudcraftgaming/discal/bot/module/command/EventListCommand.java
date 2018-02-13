@@ -81,6 +81,13 @@ public class EventListCommand implements ICommand {
                         Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
                     }
                     break;
+				case "today":
+					if (settings.isDevGuild()) {
+						moduleDay(args, event, settings);
+					} else {
+						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+					}
+					break;
                 default:
                     moduleSimpleList(args, event, settings);
                     break;
@@ -89,7 +96,8 @@ public class EventListCommand implements ICommand {
         return false;
     }
 
-    private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	@SuppressWarnings("Duplicates")
+	private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
     	if (args.length == 0) {
 			try {
 				Calendar service;
@@ -172,5 +180,46 @@ public class EventListCommand implements ICommand {
 
     private void moduleSearch(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 
+	}
+
+	@SuppressWarnings("Duplicates")
+	private void moduleDay(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		if (args.length == 1) {
+			//Get the upcoming events in the next 24 hours.
+			try {
+				Calendar service;
+				if (settings.useExternalCalendar()) {
+					service = CalendarAuth.getCalendarService(settings);
+				} else {
+					service = CalendarAuth.getCalendarService();
+				}
+				DateTime now = new DateTime(System.currentTimeMillis());
+				DateTime twentyFourHoursFromNow = new DateTime(System.currentTimeMillis() + 86400000L);
+				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
+				Events events = service.events().list(calendarData.getCalendarAddress())
+						.setMaxResults(20)
+						.setTimeMin(now)
+						.setTimeMax(twentyFourHoursFromNow)
+						.setOrderBy("startTime")
+						.setSingleEvents(true)
+						.execute();
+				List<Event> items = events.getItems();
+				if (items.size() == 0) {
+					Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
+				} else if (items.size() == 1) {
+					Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
+				} else {
+					//List events by Id only.
+					Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
+					for (Event e : items) {
+						Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
+					}
+				}
+			} catch (Exception e) {
+				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+				ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
+				e.printStackTrace();
+			}
+		}
 	}
 }
