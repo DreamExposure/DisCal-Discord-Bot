@@ -20,17 +20,21 @@ public class UpdateDisPwData {
 	private static Timer timer;
 
 	public static void init() {
-		timer = new Timer(true);
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				updateSiteBotMeta();
-			}
-		}, 60 * 60 * 1000);
+		if (BotSettings.UPDATE_SITES.get().equalsIgnoreCase("true")) {
+			timer = new Timer(true);
+			timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					updateSiteBotMeta();
+				}
+			}, 60 * 60 * 1000);
+		}
 	}
 
 	public static void shutdown() {
-		timer.cancel();
+		if (timer != null) {
+			timer.cancel();
+		}
 	}
 
 	private static void updateSiteBotMeta() {

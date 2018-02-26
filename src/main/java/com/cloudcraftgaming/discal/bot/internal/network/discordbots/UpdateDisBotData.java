@@ -17,22 +17,29 @@ public class UpdateDisBotData {
 	private static Timer timer;
 
 	public static void init() {
-		api = new DiscordBotListAPI.Builder().token(BotSettings.DBO_TOKEN.get()).build();
+		if (BotSettings.UPDATE_SITES.get().equalsIgnoreCase("true")) {
 
-		timer = new Timer(true);
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				updateStats();
-			}
-		}, 60 * 60 * 1000);
+			api = new DiscordBotListAPI.Builder().token(BotSettings.DBO_TOKEN.get()).build();
+
+			timer = new Timer(true);
+			timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					updateStats();
+				}
+			}, 60 * 60 * 1000);
+		}
 	}
 
 	public static void shutdown() {
-		timer.cancel();
+		if (timer != null) {
+			timer.cancel();
+		}
 	}
 
 	private static void updateStats() {
-		api.setStats(BotSettings.ID.get(), Main.client.getGuilds().size());
+		if (api != null) {
+			api.setStats(BotSettings.ID.get(), Main.client.getGuilds().size());
+		}
 	}
 }
