@@ -194,7 +194,7 @@ public class EventListCommand implements ICommand {
 					service = CalendarAuth.getCalendarService();
 				}
 				DateTime now = new DateTime(System.currentTimeMillis());
-				DateTime twentyFourHoursFromNow = new DateTime(System.currentTimeMillis() + 86400000L);
+				DateTime twentyFourHoursFromNow = new DateTime(now.getValue() + 86400000L);
 				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 				Events events = service.events().list(calendarData.getCalendarAddress())
 						.setMaxResults(20)
@@ -202,6 +202,7 @@ public class EventListCommand implements ICommand {
 						.setTimeMax(twentyFourHoursFromNow)
 						.setOrderBy("startTime")
 						.setSingleEvents(true)
+						.setShowDeleted(false)
 						.execute();
 				List<Event> items = events.getItems();
 				if (items.size() == 0) {
