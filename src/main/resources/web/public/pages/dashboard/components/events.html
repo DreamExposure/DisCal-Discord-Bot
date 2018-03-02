@@ -16,6 +16,12 @@
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
 		<link href="/styles/fix.css" rel="stylesheet">
+		<link href="/styles/calendar.css" rel="stylesheet">
+
+		<script src="/scripts/dashboard/calendar.js"></script>
+
+		<!--Externally hosted-->
+
 	</head>
 
 	<body>
@@ -83,10 +89,85 @@
 						<div th:if="${settings} == events">
 							<h6>Event Settings</h6>
 							<br>
-							<p>
-								It's a work in progress. Soon you will be able to create/edit/manage/delete events from
-								here!!
-							</p>
+							<!--TODO: Add support for more calendars-->
+							<!--No calendar-->
+							<div th:if="${selected.calendar.id} == primary" style="text-align: left">
+								<p>You do not have a calendar! Please make a calendar in order to use this page!</p>
+							</div>
+							<!--Has calendar-->
+
+							<div th:unless="${selected.calendar.id} == primary" style="text-align: left">
+								<div id="calendar-container">
+									<table id="calendar" style="border-color: #ef0813;" border="#ef0813" cellpadding="4"
+									       cellspacing="0">
+										<tbody>
+										<tr>
+											<th>Sunday</th>
+											<th>Monday</th>
+											<th>Tuesday</th>
+											<th>Wednesday</th>
+											<th>Thursday</th>
+											<th>Friday</th>
+											<th>Saturday</th>
+										</tr>
+										<tr>
+											<td>r1c1</td>
+											<td>r1c2</td>
+											<td>r1c3</td>
+											<td>r1c4</td>
+											<td>r1c5</td>
+											<td>r1c6</td>
+											<td>r1c7</td>
+										</tr>
+										<tr>
+											<td>r2c1</td>
+											<td>r2c2</td>
+											<td>r2c3</td>
+											<td>r2c4</td>
+											<td>r2c5</td>
+											<td>r2c6</td>
+											<td>r2c7</td>
+										</tr>
+										<tr>
+											<td>r3c1</td>
+											<td>r3c2</td>
+											<td>r3c3</td>
+											<td>r3c4</td>
+											<td>r3c5</td>
+											<td>r3c6</td>
+											<td>r3c7</td>
+										</tr>
+										<tr>
+											<td>r4c1</td>
+											<td>r4c2</td>
+											<td>r4c3</td>
+											<td>r4c4</td>
+											<td>r4c5</td>
+											<td>r4c6</td>
+											<td>r4c7</td>
+										</tr>
+										<tr>
+											<td>r5c1</td>
+											<td>r5c2</td>
+											<td>r5c3</td>
+											<td>r5c4</td>
+											<td>r5c5</td>
+											<td>r5c6</td>
+											<td>r5c7</td>
+										</tr>
+										<tr>
+											<td>r6c1</td>
+											<td>r6c2</td>
+											<td>r6c3</td>
+											<td>r6c4</td>
+											<td>r6c5</td>
+											<td>r6c6</td>
+											<td>r6c7</td>
+										</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
