@@ -1,3 +1,27 @@
+td {
+	text-align: center;
+}
+
 td:hover {
 	background-color: #ef0813;
+}
+
+td.selected {
+	background-color: #e8810b;
+}
+
+th {
+	text-align: center;
+	background-color: white;
+	border: transparent;
+	width: 75px;
+}
+
+th.nav:hover {
+	background-color: #ef0813;
+}
+
+tr {
+	height: 75px;
+	width: 75px;
 }
