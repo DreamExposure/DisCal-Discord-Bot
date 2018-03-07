@@ -67,7 +67,9 @@ function setMonth(parameters) {
 
 	var tcc = dateDisplays();
 	for (var ii = 0; ii < tcc.length; ii++) {
-		document.getElementById(tcc[ii]).innerHTML = "";
+		var e = document.getElementById(tcc[ii]);
+		e.innerHTML = "";
+		e.className = "";
 	}
 
 	var tc = dateDisplaysToChange(findFirstDayOfMonthPosition());
@@ -75,7 +77,18 @@ function setMonth(parameters) {
 	for (var i = 0; i < tc.length; i++) {
 		var d = i + 1;
 		if (d <= count) {
-			document.getElementById(tc[i]).innerHTML = d + "";
+			var el = document.getElementById(tc[i]);
+			el.innerHTML = d + "";
+
+			var thisDate = new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth(), d);
+			if (d === calendar.selectedDate.getDate()) {
+				el.className = "selected";
+			}
+			if (thisDate.getMonth() === calendar.todaysDate.getMonth()
+				&& thisDate.getFullYear() === calendar.todaysDate.getFullYear()
+				&& thisDate.getDate() === calendar.todaysDate.getDate()) {
+				el.className = "today";
+			}
 		}
 	}
 }
@@ -92,6 +105,18 @@ function nextMonth() {
 	calendar.selectedDate.setDate(1);
 
 	setMonth({date: calendar.selectedDate});
+}
+
+function selectDate(clickedId) {
+	var e = document.getElementById(clickedId);
+	var dateString = e.innerHTML;
+	if (dateString !== "") {
+		var dateNum = parseInt(dateString);
+
+		calendar.selectedDate.setDate(dateNum);
+
+		setMonth({date: calendar.selectedDate});
+	}
 }
 
 function init() {

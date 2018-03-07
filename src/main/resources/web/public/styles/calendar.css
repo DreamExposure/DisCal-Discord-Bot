@@ -10,6 +10,10 @@ td.selected {
 	background-color: #e8810b;
 }
 
+td.today {
+	background-color: #efcb15;
+}
+
 th {
 	text-align: center;
 	background-color: white;
