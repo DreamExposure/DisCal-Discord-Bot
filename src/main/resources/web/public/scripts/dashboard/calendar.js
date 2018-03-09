@@ -121,10 +121,6 @@ function getEventsForMonth() {
 
 
 	var bodyRaw = {
-		"StartDate": "1",
-		"SelectedDate": calendar.selectedDate.getDate().toString(),
-		"Month": ds.getMonth().toString(),
-		"Year": ds.getFullYear().toString(),
 		"DaysInMonth": daysInMonth().toString(),
 		"StartEpoch": ds.getTime().toString()
 	};
@@ -145,16 +141,98 @@ function getEventsForMonth() {
 			}
 		}
 
-
-		//Display the selected day's event details for editing and such.
-
-
 	})
 		.fail(function () {
-			alert("Internal error! Failed to get events from google! >.<");
+			alert("Our hippos failed to find your events! Try again in a minute and we will do better this time!");
 		}, "json");
+}
+
+function getEventsForSelectedDate() {
+	var ds = new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth(), calendar.selectedDate.getDate());
+	ds.setHours(0, 0, 0, 0);
 
 
+	var bodyRaw = {
+		"DaysInMonth": daysInMonth().toString(),
+		"StartEpoch": ds.getTime().toString()
+	};
+
+	var q = $.post("/api/v1/events/list/date", JSON.stringify(bodyRaw), function (response) {
+		var obj = JSON.parse(response);
+
+		//Display the selected day's event details for editing and such.
+		var container = document.getElementById("event-container");
+
+		while (container.firstChild) {
+			container.removeChild(container.firstChild);
+		}
+
+		for (var i = 0; i < obj.count; i++) {
+			var event = obj.events[i];
+
+			//Create button
+			var button = document.createElement("button");
+			button.type = "button";
+			button.setAttribute("data-toggle", "modal");
+			button.setAttribute("data-target", "#modal-" + event.id);
+			button.innerHTML = "Edit";
+			container.appendChild(button);
+
+			//Create modal container
+			var modalContainer = document.createElement("div");
+			modalContainer.className = "modal fade";
+			modalContainer.id = "modal-" + event.id;
+			modalContainer.role = "dialog";
+			container.appendChild(modalContainer);
+
+			//Create modal-dialog
+			var modalDia = document.createElement("div");
+			modalDia.className = "modal-dialog";
+			modalContainer.appendChild(modalDia);
+
+			//Create Modal Content
+			var modalCon = document.createElement("div");
+			modalCon.className = "modal-content";
+			modalDia.appendChild(modalCon);
+
+			//Create modal header and title
+			var modalHeader = document.createElement("div");
+			modalHeader.className = "modal-header";
+			modalCon.appendChild(modalHeader);
+			var modalTitle = document.createElement("h4");
+			modalTitle.className = "modal-title";
+			modalTitle.innerHTML = "Editing Event";
+			modalHeader.appendChild(modalTitle);
+
+			//Create Modal Body
+			var modalBody = document.createElement("div");
+			modalBody.className = "modal-body";
+			modalCon.appendChild(modalBody);
+
+			var form = document.createElement("form");
+			form.method = "POST";
+			form.enctype = "application/x-www-form-urlencoded";
+			form.action = "/api/v1/dashboard/update/event";
+			modalBody.appendChild(form);
+
+			
+			//Create modal footer
+			var modalFooter = document.createElement("div");
+			modalFooter.className = "modal-footer";
+			modalCon.append(modalFooter);
+
+			var closeButton = document.createElement("button");
+			closeButton.type = "button";
+			closeButton.setAttribute("data-dismiss", "modal");
+			closeButton.innerHTML = "Close";
+			modalFooter.appendChild(closeButton);
+			//Oh my god finally done!!!
+
+		}
+	})
+		.fail(function () {
+			alert("Our hippos failed to find your events for the day! Try again in a minute and we will do better this time!");
+		}, "json");
 }
 
 function selectDate(clickedId) {
@@ -168,6 +246,8 @@ function selectDate(clickedId) {
 		setMonth({date: calendar.selectedDate});
 
 		getEventsForMonth();
+
+		getEventsForSelectedDate();
 	}
 }
 

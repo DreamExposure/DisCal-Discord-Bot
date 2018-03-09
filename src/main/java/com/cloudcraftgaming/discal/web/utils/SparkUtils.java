@@ -73,6 +73,7 @@ public class SparkUtils {
 				path("/events", () -> {
 					path("/list", () -> {
 						post("/month", EventEndpoint::getEventsForMonth);
+						post("/date", EventEndpoint::getEventsForSelectedDate);
 					});
 				});
 				path("/rsvp", () -> {
