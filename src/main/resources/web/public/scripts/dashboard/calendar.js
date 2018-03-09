@@ -136,7 +136,13 @@ function getEventsForMonth() {
 		for (var i = 0; i < obj.events.length; i++) {
 			var d = new Date(obj.events[i].epochStart);
 
-			document.getElementById(calendar.displays[d.getDate()]).innerHTML = d.getDate() + "[1]";
+			var e = document.getElementById(calendar.displays[d.getDate()]);
+
+			if (e.innerHTML.indexOf("[") === -1) {
+				e.innerHTML = d.getDate() + "[1]";
+			} else {
+				e.innerHTML = d.getDate().toString() + "[" + (parseInt(e.innerHTML.split("[")[1][0]) + 1).toString() + "]";
+			}
 		}
 
 
