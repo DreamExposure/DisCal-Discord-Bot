@@ -6,6 +6,8 @@ import com.cloudcraftgaming.discal.web.endpoints.v1.*;
 import com.cloudcraftgaming.discal.web.handler.DashboardHandler;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import spark.ModelAndView;
+import spark.Request;
+import spark.Response;
 
 import static spark.Spark.*;
 
@@ -68,6 +70,11 @@ public class SparkUtils {
 					post("/list", CalendarEndpoint::listCalendars);
 					post("time", TimeEndpoint::getTime);
 				});
+				path("/events", () -> {
+					path("/list", () -> {
+						post("/month", EventEndpoint::getEventsForMonth);
+					});
+				});
 				path("/rsvp", () -> {
 					post("/get", RsvpEndpoint::getRsvp);
 					post("/update", RsvpEndpoint::updateRsvp);
@@ -117,5 +124,12 @@ public class SparkUtils {
 			get("/dashboard/guild/announcements", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/announcements"), new ThymeleafTemplateEngine());
 			get("/dashboard/guild/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/rsvp"), new ThymeleafTemplateEngine());
 		}
+	}
+
+	private static String hw(Request r, Response response) {
+		System.out.print("AJAX Hello World Request Success!");
+		response.body("Hello World!");
+
+		return response.body();
 	}
 }

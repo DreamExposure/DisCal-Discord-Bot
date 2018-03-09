@@ -1,6 +1,7 @@
 var calendar = {
 	todaysDate: new Date(),
-	selectedDate: new Date()
+	selectedDate: new Date(),
+	displays: []
 };
 
 
@@ -65,6 +66,8 @@ function setMonth(parameters) {
 
 	document.getElementById("month-display").innerHTML = getMonthName(date.getMonth()) + " " + date.getFullYear();
 
+	calendar.displays = [];
+
 	var tcc = dateDisplays();
 	for (var ii = 0; ii < tcc.length; ii++) {
 		var e = document.getElementById(tcc[ii]);
@@ -79,6 +82,7 @@ function setMonth(parameters) {
 		if (d <= count) {
 			var el = document.getElementById(tc[i]);
 			el.innerHTML = d + "";
+			calendar.displays[d] = tc[i];
 
 			var thisDate = new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth(), d);
 			if (d === calendar.selectedDate.getDate()) {
@@ -98,6 +102,8 @@ function previousMonth() {
 	calendar.selectedDate.setDate(1);
 
 	setMonth({date: calendar.selectedDate});
+
+	getEventsForMonth();
 }
 
 function nextMonth() {
@@ -105,20 +111,62 @@ function nextMonth() {
 	calendar.selectedDate.setDate(1);
 
 	setMonth({date: calendar.selectedDate});
+
+	getEventsForMonth();
+}
+
+function getEventsForMonth() {
+	var ds = new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth(), 1);
+	ds.setHours(0, 0, 0, 0);
+
+
+	var bodyRaw = {
+		"StartDate": "1",
+		"SelectedDate": calendar.selectedDate.getDate().toString(),
+		"Month": ds.getMonth().toString(),
+		"Year": ds.getFullYear().toString(),
+		"DaysInMonth": daysInMonth().toString(),
+		"StartEpoch": ds.getTime().toString()
+	};
+
+	var q = $.post("/api/v1/events/list/month", JSON.stringify(bodyRaw), function (response) {
+		var obj = JSON.parse(response);
+
+		//Display the event counts on the calendar...
+		for (var i = 0; i < obj.events.length; i++) {
+			var d = new Date(obj.events[i].epochStart);
+
+			document.getElementById(calendar.displays[d.getDate()]).innerHTML = d.getDate() + "[1]";
+		}
+
+
+		//Display the selected day's event details for editing and such.
+
+
+	})
+		.fail(function () {
+			alert("Internal error! Failed to get events from google! >.<");
+		}, "json");
+
+
 }
 
 function selectDate(clickedId) {
 	var e = document.getElementById(clickedId);
-	var dateString = e.innerHTML;
+	var dateString = e.innerHTML.split("[")[0];
 	if (dateString !== "") {
 		var dateNum = parseInt(dateString);
 
 		calendar.selectedDate.setDate(dateNum);
 
 		setMonth({date: calendar.selectedDate});
+
+		getEventsForMonth();
 	}
 }
 
 function init() {
 	setMonth({date: calendar.todaysDate});
+
+	getEventsForMonth();
 }
