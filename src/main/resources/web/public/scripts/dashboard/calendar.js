@@ -4,7 +4,6 @@ var calendar = {
 	displays: []
 };
 
-
 function getMonthName(index) {
 	return ["January", "February",
 		"March", "April",
@@ -215,11 +214,99 @@ function getEventsForSelectedDate() {
 			form.action = "/api/v1/dashboard/update/event";
 			modalBody.appendChild(form);
 
-			
+			//Summary
+			var summaryLabel = document.createElement("label");
+			summaryLabel.innerHTML = "Summary";
+			summaryLabel.appendChild(document.createElement("br"));
+			form.appendChild(summaryLabel);
+			var summary = document.createElement("input");
+			summary.name = "summary";
+			summary.type = "text";
+			summary.value = event.summary;
+			summaryLabel.appendChild(summary);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
+			//Description
+			var descriptionLabel = document.createElement("label");
+			descriptionLabel.innerHTML = "Description";
+			descriptionLabel.appendChild(document.createElement("br"));
+			form.appendChild(descriptionLabel);
+			var description = document.createElement("input");
+			description.name = "description";
+			description.type = "text";
+			description.value = event.description;
+			descriptionLabel.appendChild(description);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
+			//Start time
+
+
+			//End time
+
+
+			//Timezone (read only)
+			var timezoneLabel = document.createElement("label");
+			timezoneLabel.innerHTML = "Timezone";
+			timezoneLabel.appendChild(document.createElement("br"));
+			form.appendChild(timezoneLabel);
+			var timezone = document.createElement("input");
+			timezone.name = "timezone";
+			timezone.type = "text";
+			timezone.value = event.timezone;
+			timezone.disabled = true;
+			timezoneLabel.appendChild(timezone);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
+			//Location
+			var locationLabel = document.createElement("label");
+			locationLabel.innerHTML = "Location";
+			locationLabel.appendChild(document.createElement("br"));
+			form.appendChild(locationLabel);
+			var location = document.createElement("input");
+			location.name = "location";
+			location.type = "text";
+			location.value = event.location;
+			locationLabel.appendChild(location);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
+			//Color
+			var colorLabel = document.createElement("label");
+			colorLabel.innerHTML = "Color";
+			colorLabel.appendChild(document.createElement("br"));
+			form.appendChild(colorLabel);
+			var color = document.createElement("input");
+			color.name = "color";
+			color.type = "text";
+			color.value = event.color;
+			colorLabel.appendChild(color);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
+			//Recurrence
+
+			//ID for API
+			var hiddenId = document.createElement("input");
+			hiddenId.type = "hidden";
+			hiddenId.name = "id";
+			hiddenId.innerHTML = event.id;
+			form.appendChild(hiddenId);
+
+			//Submit button
+			var submit = document.createElement("input");
+			submit.type = "submit";
+			submit.className = "submit";
+			submit.value = "Update Event!";
+			form.appendChild(submit);
+			//TODO: permission handling for submit button!!!!
+
 			//Create modal footer
 			var modalFooter = document.createElement("div");
 			modalFooter.className = "modal-footer";
-			modalCon.append(modalFooter);
+			modalCon.appendChild(modalFooter);
 
 			var closeButton = document.createElement("button");
 			closeButton.type = "button";
@@ -227,7 +314,6 @@ function getEventsForSelectedDate() {
 			closeButton.innerHTML = "Close";
 			modalFooter.appendChild(closeButton);
 			//Oh my god finally done!!!
-
 		}
 	})
 		.fail(function () {

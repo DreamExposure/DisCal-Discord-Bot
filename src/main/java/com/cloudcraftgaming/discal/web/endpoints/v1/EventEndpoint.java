@@ -99,12 +99,19 @@ public class EventEndpoint {
 					.execute();
 			List<Event> items = events.getItems();
 
+			String tz = "Error/Unknown";
+			try {
+				tz = service.calendars().get(calendarData.getCalendarAddress()).execute().getTimeZone();
+			} catch (Exception ignore) {
+			}
+
 			List<JSONObject> eventsJson = new ArrayList<>();
 			for (Event e : items) {
 				JSONObject jo = new JSONObject();
 				jo.put("id", e.getId());
 				jo.put("epochStart", e.getStart().getDateTime().getValue());
 				jo.put("epochEnd", e.getEnd().getDateTime().getValue());
+				jo.put("timezone", tz);
 				jo.put("summary", e.getSummary());
 				jo.put("description", e.getDescription());
 				jo.put("location", e.getLocation());
