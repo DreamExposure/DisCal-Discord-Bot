@@ -111,7 +111,7 @@ public class Recurrence {
 	 *
 	 * @param rrule The RRules to convert from.
 	 */
-	public void fromRRule(String rrule) {
+	public Recurrence fromRRule(String rrule) {
 		rrule = rrule.replaceAll("RRULE:", "");
 		String[] contents = rrule.split(";");
 		for (String c : contents) {
@@ -138,5 +138,6 @@ public class Recurrence {
 				}
 			}
 		}
+		return this;
 	}
 }

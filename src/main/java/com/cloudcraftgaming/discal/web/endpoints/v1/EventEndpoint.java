@@ -3,7 +3,9 @@ package com.cloudcraftgaming.discal.web.endpoints.v1;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
+import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.api.object.event.Recurrence;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
@@ -116,6 +118,28 @@ public class EventEndpoint {
 				jo.put("description", e.getDescription());
 				jo.put("location", e.getLocation());
 				jo.put("color", EventColor.fromNameOrHexOrID(e.getColorId()).name());
+				jo.put("isParent", !(e.getId().contains("_")));
+
+				if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
+					jo.put("recur", true);
+					Recurrence r = new Recurrence().fromRRule(e.getRecurrence().get(0));
+
+					JSONObject rjo = new JSONObject();
+					rjo.put("frequency", r.getFrequency().name());
+					rjo.put("count", r.getCount());
+					rjo.put("interval", r.getInterval());
+
+					jo.put("recurrence", rjo);
+				} else {
+					jo.put("recur", false);
+
+					JSONObject rjo = new JSONObject();
+					rjo.put("frequency", EventFrequency.DAILY.name());
+					rjo.put("recurCount", -1);
+					rjo.put("interval", 1);
+
+					jo.put("recurrence", rjo);
+				}
 
 				eventsJson.add(jo);
 			}

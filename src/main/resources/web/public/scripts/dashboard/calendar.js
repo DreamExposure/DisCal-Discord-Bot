@@ -208,6 +208,7 @@ function getEventsForSelectedDate() {
 			modalBody.className = "modal-body";
 			modalCon.appendChild(modalBody);
 
+			//TODO: Don't make this POST, intercept and send it in JSON!!!!!
 			var form = document.createElement("form");
 			form.method = "POST";
 			form.enctype = "application/x-www-form-urlencoded";
@@ -274,6 +275,7 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 
 			//Color
+			//TODO: Make this a proper dropdown
 			var colorLabel = document.createElement("label");
 			colorLabel.innerHTML = "Color";
 			colorLabel.appendChild(document.createElement("br"));
@@ -287,6 +289,73 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 
 			//Recurrence
+			var recurrenceLabel = document.createElement("label");
+			recurrenceLabel.innerHTML = "Recurrence";
+			recurrenceLabel.appendChild(document.createElement("br"));
+			form.appendChild(recurrenceLabel);
+
+			if (event.isParent) {
+				var enableRecurrence = document.createElement("input");
+				enableRecurrence.name = "enable-recurrence";
+				enableRecurrence.type = "checkbox";
+				enableRecurrence.checked = false;
+				recurrenceLabel.appendChild(enableRecurrence);
+				form.appendChild(document.createElement("br"));
+				form.appendChild(document.createElement("br"));
+
+				//TODO: Make this a proper dropdown
+				//Frequency
+				var frequencyLabel = document.createElement("label");
+				frequencyLabel.innerHTML = "Recurrence - Frequency";
+				frequencyLabel.appendChild(document.createElement("br"));
+				form.appendChild(frequencyLabel);
+				var frequency = document.createElement("input");
+				frequency.name = "frequency";
+				frequency.type = "text";
+				frequency.value = event.recurrence.frequency;
+				frequencyLabel.appendChild(frequency);
+				form.appendChild(document.createElement("br"));
+				form.appendChild(document.createElement("br"));
+
+				//Count
+				var countLabel = document.createElement("label");
+				countLabel.innerHTML = "Recurrence - Count";
+				countLabel.appendChild(document.createElement("br"));
+				form.appendChild(countLabel);
+				var count = document.createElement("input");
+				count.name = "count";
+				count.type = "number";
+				count.valueAsNumber = parseInt(event.recurrence.recurCount);
+				count.min = "-1";
+				countLabel.appendChild(count);
+				form.appendChild(document.createElement("br"));
+				form.appendChild(document.createElement("br"));
+
+				//Interval
+				var intervalLabel = document.createElement("label");
+				intervalLabel.innerHTML = "Recurrence - Interval";
+				intervalLabel.appendChild(document.createElement("br"));
+				form.appendChild(intervalLabel);
+				var interval = document.createElement("input");
+				interval.name = "interval";
+				interval.type = "number";
+				interval.valueAsNumber = parseInt(event.recurrence.interval);
+				interval.min = "1";
+				intervalLabel.appendChild(interval);
+				form.appendChild(document.createElement("br"));
+				form.appendChild(document.createElement("br"));
+
+			} else {
+				//Cannot edit recurrence
+				var cannotEditRecur = document.createElement("input");
+				cannotEditRecur.name = "ignore-cer";
+				cannotEditRecur.type = "text";
+				cannotEditRecur.disabled = true;
+				cannotEditRecur.value = "Cannot edit child";
+				recurrenceLabel.appendChild(cannotEditRecur);
+			}
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
 
 			//ID for API
 			var hiddenId = document.createElement("input");
