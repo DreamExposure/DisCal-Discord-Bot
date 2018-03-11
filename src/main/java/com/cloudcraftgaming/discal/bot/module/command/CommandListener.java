@@ -41,7 +41,7 @@ class CommandListener {
                 if (event.getMessage().getContent().startsWith(settings.getPrefix())) {
                 	if (PermissionChecker.isCorrectChannel(event)) {
 						//Prefixed with ! which should mean it is a command, convert and confirm.
-						String[] argsOr = event.getMessage().getContent().split(" ");
+						String[] argsOr = event.getMessage().getContent().split("\\s+");
 						if (argsOr.length > 1) {
 							ArrayList<String> argsOr2 = new ArrayList<>(Arrays.asList(argsOr).subList(1, argsOr.length));
 							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
@@ -55,7 +55,7 @@ class CommandListener {
 					}
                 } else if (!event.getMessage().mentionsEveryone() && !event.getMessage().mentionsHere() && (event.getMessage().toString().startsWith("<@" + Main.getSelfUser().getStringID() + ">") || event.getMessage().toString().startsWith("<@!" + Main.getSelfUser().getStringID() + ">"))) {
 					if (PermissionChecker.isCorrectChannel(event)) {
-						String[] argsOr = event.getMessage().getContent().split(" ");
+						String[] argsOr = event.getMessage().getContent().split("\\s+");
 						if (argsOr.length > 2) {
 							ArrayList<String> argsOr2 = new ArrayList<>(Arrays.asList(argsOr).subList(2, argsOr.length));
 							String[] args = argsOr2.toArray(new String[argsOr2.size()]);
