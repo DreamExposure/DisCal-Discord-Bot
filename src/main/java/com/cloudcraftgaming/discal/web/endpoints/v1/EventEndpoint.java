@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.Recurrence;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
@@ -140,6 +141,10 @@ public class EventEndpoint {
 
 					jo.put("recurrence", rjo);
 				}
+
+				EventData ed = DatabaseManager.getManager().getEventData(Long.valueOf(g.getId()), e.getId());
+
+				jo.put("image", ed.getImageLink());
 
 				eventsJson.add(jo);
 			}

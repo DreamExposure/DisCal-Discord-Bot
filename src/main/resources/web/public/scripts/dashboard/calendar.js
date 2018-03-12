@@ -390,6 +390,19 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
 
+			//Image
+			var imageLabel = document.createElement("label");
+			imageLabel.innerHTML = "Image";
+			imageLabel.appendChild(document.createElement("br"));
+			form.appendChild(imageLabel);
+			var image = document.createElement("input");
+			image.name = "image";
+			image.type = "text";
+			image.value = event.image;
+			imageLabel.appendChild(image);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
+
 			//ID for API
 			var hiddenId = document.createElement("input");
 			hiddenId.type = "hidden";
