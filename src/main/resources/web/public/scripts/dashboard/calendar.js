@@ -241,10 +241,43 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
 
-			//Start time
+			//Start date and time
+			var sd = new Date(event.epochStart);
+			var startLabel = document.createElement("label");
+			startLabel.innerHTML = "Start Date and Time";
+			startLabel.appendChild(document.createElement("br"));
+			form.appendChild(startLabel);
+			var startDate = document.createElement("input");
+			startDate.name = "start-date";
+			startDate.type = "date";
+			startDate.valueAsDate = sd;
+			startLabel.appendChild(startDate);
+			var startTime = document.createElement("input");
+			startTime.name = "start-time";
+			startTime.type = "time";
+			startTime.value = (sd.getHours() < 10 ? "0" : "") + sd.getHours() + ":" + (sd.getMinutes() < 10 ? "0" : "") + sd.getMinutes();
+			startLabel.appendChild(startTime);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
 
-
-			//End time
+			//End date and time
+			var ed = new Date(event.epochEnd);
+			var endLabel = document.createElement("label");
+			endLabel.innerHTML = "End Date and Time";
+			endLabel.appendChild(document.createElement("br"));
+			form.appendChild(endLabel);
+			var endDate = document.createElement("input");
+			endDate.name = "end-date";
+			endDate.type = "date";
+			endDate.valueAsDate = ed;
+			endLabel.appendChild(endDate);
+			var endTime = document.createElement("input");
+			endTime.name = "end-time";
+			endTime.type = "time";
+			endTime.value = (ed.getHours() < 10 ? "0" : "") + ed.getHours() + ":" + (ed.getMinutes() < 10 ? "0" : "") + ed.getMinutes();
+			endLabel.appendChild(endTime);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
 
 
 			//Timezone (read only)
@@ -371,6 +404,8 @@ function getEventsForSelectedDate() {
 			submit.value = "Update Event!";
 			form.appendChild(submit);
 			//TODO: permission handling for submit button!!!!
+
+			//Reset button
 
 			//Create modal footer
 			var modalFooter = document.createElement("div");
