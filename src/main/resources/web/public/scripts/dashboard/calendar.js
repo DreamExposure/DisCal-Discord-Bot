@@ -175,13 +175,27 @@ function getEventsForSelectedDate() {
 		for (var i = 0; i < obj.count; i++) {
 			var event = obj.events[i];
 
-			//Create button
-			var button = document.createElement("button");
-			button.type = "button";
-			button.setAttribute("data-toggle", "modal");
-			button.setAttribute("data-target", "#modal-" + event.id);
-			button.innerHTML = "Edit";
-			container.appendChild(button);
+			//Create Edit Button
+			var editButton = document.createElement("button");
+			editButton.type = "button";
+			editButton.setAttribute("data-toggle", "modal");
+			editButton.setAttribute("data-target", "#modal-" + event.id);
+			editButton.innerHTML = "Edit";
+			container.appendChild(editButton);
+
+			//Create Delete button
+			var deleteButton = document.createElement("button");
+			deleteButton.type = "button";
+			deleteButton.innerHTML = "Delete";
+			deleteButton.className = "danger";
+			deleteButton.id = "delete-" + event.id;
+			deleteButton.onclick = function (ev) {
+				deleteEvent(this.id)
+			};
+			container.appendChild(deleteButton);
+
+			container.appendChild(document.createElement("br"));
+			container.appendChild(document.createElement("br"));
 
 			//Create modal container
 			var modalContainer = document.createElement("div");
@@ -314,7 +328,6 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 
 			//Color
-			//TODO: Make this a proper dropdown
 			var colorLabel = document.createElement("label");
 			colorLabel.innerHTML = "Color";
 			colorLabel.appendChild(document.createElement("br"));
@@ -464,6 +477,20 @@ function selectDate(clickedId) {
 
 		getEventsForSelectedDate();
 	}
+}
+
+function deleteEvent(clickedId) {
+	var eventId = clickedId.replace("delete-", "");
+	var bodyRaw = {"id": eventId};
+
+	var q = $.post("/api/v1/events/delete", JSON.stringify(bodyRaw), function (response) {
+		var obj = JSON.parse(response);
+
+		location.reload();
+	})
+		.fail(function () {
+			alert("Our hippos failed to delete your event! If this continues contact the devs so we can get them working again");
+		}, "json");
 }
 
 function init() {

@@ -8,6 +8,7 @@ import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.Recurrence;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
+import com.cloudcraftgaming.discal.api.utils.EventUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.google.api.client.util.DateTime;
@@ -175,6 +176,26 @@ public class EventEndpoint {
 	}
 
 	public static String deleteEvent(Request request, Response response) {
+		JSONObject requestBody = new JSONObject(request.body());
+		String eventId = requestBody.getString("id");
+
+		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		WebGuild g = (WebGuild) m.get("selected");
+		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+
+		//okay, time to properly delete the event
+		if (EventUtils.deleteEvent(g.getSettings(), eventId)) {
+			//Deleted!
+			JSONObject r = new JSONObject();
+			r.put("message", "Successfully deleted event!");
+			response.body(r.toString());
+		} else {
+			//Oh nos! we failed >.<
+			JSONObject r = new JSONObject();
+			r.put("message", "Failed to delete event!");
+			response.status(500);
+			response.body(r.toString());
+		}
 
 		return response.body();
 	}
