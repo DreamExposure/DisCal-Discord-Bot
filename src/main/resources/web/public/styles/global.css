@@ -133,6 +133,22 @@ input.submit:hover {
 	color: black;
 }
 
+input.reset {
+	padding-top: 8px;
+	padding-bottom: 8px;
+	border: 1px solid black;
+	background: #ef0813;
+	color: white;
+}
+
+input.reset:hover {
+	padding-top: 8px;
+	padding-bottom: 8px;
+	border: 1px solid white;
+	background: white;
+	color: black;
+}
+
 label {
 	color: white;
 }

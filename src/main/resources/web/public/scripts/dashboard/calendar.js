@@ -29,6 +29,12 @@ function dateDisplays() {
 		"r6c1", "r6c2", "r6c3", "r6c4", "r6c5", "r6c6", "r6c7"];
 }
 
+function colors() {
+	return ["MELROSE", "RIPTIDE", "MAUVE", "TANGERINE",
+		"DANDELION", "MAC_AND_CHEESE", "TURQUOISE",
+		"MERCURY", "BLUE", "GREED", "RED", "NONE"];
+}
+
 function dateDisplaysToChange(str) {
 	return dateDisplays().slice(dateDisplays().indexOf(str), dateDisplays().length - 1);
 }
@@ -313,11 +319,17 @@ function getEventsForSelectedDate() {
 			colorLabel.innerHTML = "Color";
 			colorLabel.appendChild(document.createElement("br"));
 			form.appendChild(colorLabel);
-			var color = document.createElement("input");
-			color.name = "color";
-			color.type = "text";
-			color.value = event.color;
-			colorLabel.appendChild(color);
+			var colorSelect = document.createElement("select");
+			colorSelect.name = "color";
+			colorLabel.appendChild(colorSelect);
+
+			for (var c = 0; c < colors().length; c++) {
+				var option = document.createElement("option");
+				option.value = colors()[c];
+				option.text = colors()[c];
+				option.selected = (event.color === colors()[c]);
+				colorSelect.appendChild(option);
+			}
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
 
@@ -418,7 +430,7 @@ function getEventsForSelectedDate() {
 			form.appendChild(submit);
 			//TODO: permission handling for submit button!!!!
 
-			//Reset button
+			//TODO: Reset button
 
 			//Create modal footer
 			var modalFooter = document.createElement("div");

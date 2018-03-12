@@ -73,6 +73,9 @@ public class SparkUtils {
 						post("/month", EventEndpoint::getEventsForMonth);
 						post("/date", EventEndpoint::getEventsForSelectedDate);
 					});
+					post("/update", EventEndpoint::updateEvent);
+					post("/create", EventEndpoint::createEvent);
+					post("/delete", EventEndpoint::deleteEvent);
 				});
 				path("/rsvp", () -> {
 					post("/get", RsvpEndpoint::getRsvp);

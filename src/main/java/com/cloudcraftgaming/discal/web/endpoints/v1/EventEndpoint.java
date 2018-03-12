@@ -161,4 +161,21 @@ public class EventEndpoint {
 		}
 		return response.body();
 	}
+
+	public static String updateEvent(Request request, Response response) {
+
+
+		return response.body();
+	}
+
+	public static String createEvent(Request request, Response response) {
+
+
+		return response.body();
+	}
+
+	public static String deleteEvent(Request request, Response response) {
+
+		return response.body();
+	}
 }
