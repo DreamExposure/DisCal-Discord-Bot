@@ -35,6 +35,10 @@ function colors() {
 		"MERCURY", "BLUE", "GREED", "RED", "NONE"];
 }
 
+function frequencies() {
+	return ["DAILY", "WEEKLY", "MONTHLY", "YEARLY"];
+}
+
 function dateDisplaysToChange(str) {
 	return dateDisplays().slice(dateDisplays().indexOf(str), dateDisplays().length - 1);
 }
@@ -148,7 +152,7 @@ function getEventsForMonth() {
 
 	})
 		.fail(function () {
-			alert("Our hippos failed to find your events! Try again in a minute and we will do better this time!");
+			showSnackbar("Our hippos failed to find your events!");
 		}, "json");
 }
 
@@ -230,9 +234,6 @@ function getEventsForSelectedDate() {
 
 			//TODO: Don't make this POST, intercept and send it in JSON!!!!!
 			var form = document.createElement("form");
-			form.method = "POST";
-			form.enctype = "application/x-www-form-urlencoded";
-			form.action = "/api/v1/dashboard/update/event";
 			modalBody.appendChild(form);
 
 			//Summary
@@ -244,6 +245,7 @@ function getEventsForSelectedDate() {
 			summary.name = "summary";
 			summary.type = "text";
 			summary.value = event.summary;
+			summary.id = "editSummary-" + event.id;
 			summaryLabel.appendChild(summary);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -254,9 +256,10 @@ function getEventsForSelectedDate() {
 			descriptionLabel.appendChild(document.createElement("br"));
 			form.appendChild(descriptionLabel);
 			var description = document.createElement("input");
-			description.name = "description";
+			description.name = "edit-description";
 			description.type = "text";
 			description.value = event.description;
+			description.id = "editDescription-" + event.id;
 			descriptionLabel.appendChild(description);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -271,11 +274,13 @@ function getEventsForSelectedDate() {
 			startDate.name = "start-date";
 			startDate.type = "date";
 			startDate.valueAsDate = sd;
+			startDate.id = "editStartDate-" + event.id;
 			startLabel.appendChild(startDate);
 			var startTime = document.createElement("input");
 			startTime.name = "start-time";
 			startTime.type = "time";
 			startTime.value = (sd.getHours() < 10 ? "0" : "") + sd.getHours() + ":" + (sd.getMinutes() < 10 ? "0" : "") + sd.getMinutes();
+			startTime.id = "editStartTime-" + event.id;
 			startLabel.appendChild(startTime);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -290,11 +295,13 @@ function getEventsForSelectedDate() {
 			endDate.name = "end-date";
 			endDate.type = "date";
 			endDate.valueAsDate = ed;
+			endDate.id = "editEndDate-" + event.id;
 			endLabel.appendChild(endDate);
 			var endTime = document.createElement("input");
 			endTime.name = "end-time";
 			endTime.type = "time";
 			endTime.value = (ed.getHours() < 10 ? "0" : "") + ed.getHours() + ":" + (ed.getMinutes() < 10 ? "0" : "") + ed.getMinutes();
+			endTime.id = "editEndTime-" + event.id;
 			endLabel.appendChild(endTime);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -323,6 +330,7 @@ function getEventsForSelectedDate() {
 			location.name = "location";
 			location.type = "text";
 			location.value = event.location;
+			location.id = "editLocation-" + event.id;
 			locationLabel.appendChild(location);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -334,6 +342,7 @@ function getEventsForSelectedDate() {
 			form.appendChild(colorLabel);
 			var colorSelect = document.createElement("select");
 			colorSelect.name = "color";
+			colorSelect.id = "editColor-" + event.id;
 			colorLabel.appendChild(colorSelect);
 
 			for (var c = 0; c < colors().length; c++) {
@@ -357,6 +366,7 @@ function getEventsForSelectedDate() {
 				enableRecurrence.name = "enable-recurrence";
 				enableRecurrence.type = "checkbox";
 				enableRecurrence.checked = false;
+				enableRecurrence.id = "editEnableRecur-" + event.id;
 				recurrenceLabel.appendChild(enableRecurrence);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -367,11 +377,19 @@ function getEventsForSelectedDate() {
 				frequencyLabel.innerHTML = "Recurrence - Frequency";
 				frequencyLabel.appendChild(document.createElement("br"));
 				form.appendChild(frequencyLabel);
-				var frequency = document.createElement("input");
-				frequency.name = "frequency";
-				frequency.type = "text";
-				frequency.value = event.recurrence.frequency;
-				frequencyLabel.appendChild(frequency);
+				var freqSelect = document.createElement("select");
+				freqSelect.name = "frequency";
+				freqSelect.id = "editFrequency-" + event.id;
+				frequencyLabel.appendChild(freqSelect);
+
+				for (var f = 0; f < frequencies().length; f++) {
+					var op = document.createElement("option");
+					op.value = frequencies()[f];
+					op.text = frequencies()[f];
+					op.selected = (event.recurrence.frequency === frequencies()[f]);
+					freqSelect.appendChild(op);
+				}
+				frequencyLabel.appendChild(freqSelect);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
 
@@ -385,6 +403,7 @@ function getEventsForSelectedDate() {
 				count.type = "number";
 				count.valueAsNumber = parseInt(event.recurrence.recurCount);
 				count.min = "-1";
+				count.id = "editCount-" + event.id;
 				countLabel.appendChild(count);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -399,6 +418,7 @@ function getEventsForSelectedDate() {
 				interval.type = "number";
 				interval.valueAsNumber = parseInt(event.recurrence.interval);
 				interval.min = "1";
+				interval.id = "editInterval-" + event.id;
 				intervalLabel.appendChild(interval);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -424,6 +444,7 @@ function getEventsForSelectedDate() {
 			image.name = "image";
 			image.type = "text";
 			image.value = event.image;
+			image.id = "editImage-" + event.id;
 			imageLabel.appendChild(image);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -436,10 +457,14 @@ function getEventsForSelectedDate() {
 			form.appendChild(hiddenId);
 
 			//Submit button
-			var submit = document.createElement("input");
-			submit.type = "submit";
+			var submit = document.createElement("button");
 			submit.className = "submit";
-			submit.value = "Update Event!";
+			submit.type = "button";
+			submit.id = "editsubmit-" + event.id;
+			submit.innerHTML = "Update Event!";
+			submit.onclick = function (ev) {
+				updateEvent(this.id);
+			};
 			form.appendChild(submit);
 			//TODO: permission handling for submit button!!!!
 
@@ -459,7 +484,7 @@ function getEventsForSelectedDate() {
 		}
 	})
 		.fail(function () {
-			alert("Our hippos failed to find your events for the day! Try again in a minute and we will do better this time!");
+			showSnackbar("Our hippos failed to find your events for the day!");
 		}, "json");
 }
 
@@ -479,6 +504,58 @@ function selectDate(clickedId) {
 	}
 }
 
+function updateEvent(editSubmitId) {
+	var eventId = editSubmitId.split("-")[1];
+
+	//TODO: Handle date/times
+	//TODO: Handle whether or not there is recurrence.
+	var colorElement = document.getElementById("editColor-" + eventId);
+	if (document.getElementById("editEnableRecur-" + eventId) !== null) {
+		var freqElement = document.getElementById("editFrequency-" + eventId);
+		var bodyRaw = {
+			"id": eventId,
+			"summary": document.getElementById("editSummary-" + eventId).value,
+			"description": document.getElementById("editDescription-" + eventId).value,
+			"location": document.getElementById("editLocation-" + eventId).value,
+			"image": document.getElementById("editImage-" + eventId).value,
+			"color": colorElement.options[colorElement.selectedIndex].value,
+			"enableRecurrence": document.getElementById("editEnableRecur-" + eventId).checked,
+			"frequency": freqElement.options[freqElement.selectedIndex].value,
+			"count": document.getElementById("editCount-" + eventId).valueAsNumber,
+			"interval": document.getElementById("editInterval-" + eventId).valueAsNumber
+		};
+	} else {
+		bodyRaw = {
+			"id": eventId,
+			"summary": document.getElementById("editSummary-" + eventId).value,
+			"description": document.getElementById("editDescription-" + eventId).value,
+			"location": document.getElementById("editLocation-" + eventId).value,
+			"image": document.getElementById("editImage-" + eventId).value,
+			"color": colorElement.options[colorElement.selectedIndex].value,
+			"enableRecurrence": false,
+			"frequency": "DAILY",
+			"count": -1,
+			"interval": 1
+		};
+	}
+
+	alert(JSON.stringify(bodyRaw));
+
+	var q = $.post("/api/v1/events/update", JSON.stringify(bodyRaw), function (response) {
+		//TODO: close modal
+		showSnackbar("Event successfully updated!");
+
+		setMonth({date: calendar.selectedDate});
+		getEventsForMonth();
+
+		getEventsForSelectedDate();
+	})
+		.fail(function () {
+			showSnackbar("Our hippos failed to update your event!");
+		}, "json");
+
+}
+
 function deleteEvent(clickedId) {
 	var eventId = clickedId.replace("delete-", "");
 	var bodyRaw = {"id": eventId};
@@ -486,10 +563,15 @@ function deleteEvent(clickedId) {
 	var q = $.post("/api/v1/events/delete", JSON.stringify(bodyRaw), function (response) {
 		var obj = JSON.parse(response);
 
-		location.reload();
+		showSnackbar("Successfully deleted event!");
+
+		setMonth({date: calendar.selectedDate});
+		getEventsForMonth();
+
+		getEventsForSelectedDate();
 	})
 		.fail(function () {
-			alert("Our hippos failed to delete your event! If this continues contact the devs so we can get them working again");
+			showSnackbar("Our hippos failed to delete your event!");
 		}, "json");
 }
 

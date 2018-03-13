@@ -164,7 +164,14 @@ public class EventEndpoint {
 	}
 
 	public static String updateEvent(Request request, Response response) {
+		JSONObject requestBody = new JSONObject(request.body());
+		String eventId = requestBody.getString("id");
 
+		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		WebGuild g = (WebGuild) m.get("selected");
+		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+
+		//TODO: Okay, time to update the event
 
 		return response.body();
 	}
