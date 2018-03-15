@@ -232,7 +232,6 @@ function getEventsForSelectedDate() {
 			modalBody.className = "modal-body";
 			modalCon.appendChild(modalBody);
 
-			//TODO: Don't make this POST, intercept and send it in JSON!!!!!
 			var form = document.createElement("form");
 			modalBody.appendChild(form);
 
@@ -371,7 +370,6 @@ function getEventsForSelectedDate() {
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
 
-				//TODO: Make this a proper dropdown
 				//Frequency
 				var frequencyLabel = document.createElement("label");
 				frequencyLabel.innerHTML = "Recurrence - Frequency";
@@ -449,12 +447,19 @@ function getEventsForSelectedDate() {
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
 
-			//ID for API
+			//ID (readonly) for API
+			var idLabel = document.createElement("label");
+			idLabel.innerHTML = "Event ID (Changing this does nothing)";
+			idLabel.appendChild(document.createElement("br"));
+			form.appendChild(idLabel);
 			var hiddenId = document.createElement("input");
-			hiddenId.type = "hidden";
+			hiddenId.type = "text";
 			hiddenId.name = "id";
-			hiddenId.innerHTML = event.id;
-			form.appendChild(hiddenId);
+			hiddenId.value = event.id;
+			hiddenId.id = "editId-" + event.id;
+			idLabel.appendChild(hiddenId);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
 
 			//Submit button
 			var submit = document.createElement("button");
@@ -462,7 +467,7 @@ function getEventsForSelectedDate() {
 			submit.type = "button";
 			submit.id = "editsubmit-" + event.id;
 			submit.innerHTML = "Update Event!";
-			submit.onclick = function (ev) {
+			submit.onclick = function (ignore) {
 				updateEvent(this.id);
 			};
 			form.appendChild(submit);
@@ -508,7 +513,16 @@ function updateEvent(editSubmitId) {
 	var eventId = editSubmitId.split("-")[1];
 
 	//TODO: Handle date/times
-	//TODO: Handle whether or not there is recurrence.
+	var startTimeString = document.getElementById("editStartTime-" + eventId).value.split(":");
+	var startDate = document.getElementById("editStartDate-" + eventId).valueAsDate;
+
+	var endTimeString = document.getElementById("editEndTime-" + eventId).value.split(":");
+	var endDate = document.getElementById("editEndDate-" + eventId).valueAsDate;
+
+	startDate.setHours(parseInt(startTimeString[0]), parseInt(startTimeString[1]), 0, 0);
+
+	endDate.setHours(parseInt(endTimeString[0]), parseInt(endTimeString[1]), 0, 0);
+
 	var colorElement = document.getElementById("editColor-" + eventId);
 	if (document.getElementById("editEnableRecur-" + eventId) !== null) {
 		var freqElement = document.getElementById("editFrequency-" + eventId);
@@ -522,7 +536,9 @@ function updateEvent(editSubmitId) {
 			"enableRecurrence": document.getElementById("editEnableRecur-" + eventId).checked,
 			"frequency": freqElement.options[freqElement.selectedIndex].value,
 			"count": document.getElementById("editCount-" + eventId).valueAsNumber,
-			"interval": document.getElementById("editInterval-" + eventId).valueAsNumber
+			"interval": document.getElementById("editInterval-" + eventId).valueAsNumber,
+			"epochStart": startDate.getTime() + 86400000,
+			"epochEnd": endDate.getTime() + 86400000
 		};
 	} else {
 		bodyRaw = {
@@ -535,11 +551,11 @@ function updateEvent(editSubmitId) {
 			"enableRecurrence": false,
 			"frequency": "DAILY",
 			"count": -1,
-			"interval": 1
+			"interval": 1,
+			"epochStart": startDate.getTime(),
+			"epochEnd": endDate.getTime()
 		};
 	}
-
-	alert(JSON.stringify(bodyRaw));
 
 	var q = $.post("/api/v1/events/update", JSON.stringify(bodyRaw), function (response) {
 		//TODO: close modal
@@ -560,8 +576,7 @@ function deleteEvent(clickedId) {
 	var eventId = clickedId.replace("delete-", "");
 	var bodyRaw = {"id": eventId};
 
-	var q = $.post("/api/v1/events/delete", JSON.stringify(bodyRaw), function (response) {
-		var obj = JSON.parse(response);
+	var q = $.post("/api/v1/events/delete", JSON.stringify(bodyRaw), function (ignore) {
 
 		showSnackbar("Successfully deleted event!");
 

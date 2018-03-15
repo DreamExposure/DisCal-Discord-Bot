@@ -10,19 +10,24 @@ import com.cloudcraftgaming.discal.api.object.event.Recurrence;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.api.utils.ImageUtils;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
+import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+//TODO: Make endpoints compatible with both dashboard && general API usage.
 public class EventEndpoint {
 	public static String getEventsForMonth(Request request, Response response) {
 		JSONObject requestBody = new JSONObject(request.body());
@@ -164,14 +169,80 @@ public class EventEndpoint {
 	}
 
 	public static String updateEvent(Request request, Response response) {
-		JSONObject requestBody = new JSONObject(request.body());
-		String eventId = requestBody.getString("id");
+		JSONObject body = new JSONObject(request.body());
+		String eventId = body.getString("id");
 
 		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
 		WebGuild g = (WebGuild) m.get("selected");
 		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
-		//TODO: Okay, time to update the event
+		//Okay, time to update the event
+		try {
+			Calendar service;
+			if (g.getSettings().useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(g.getSettings());
+			} else {
+				service = CalendarAuth.getCalendarService();
+			}
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
+
+			Event event = new Event();
+			event.setId(eventId);
+			event.setVisibility("public");
+			event.setSummary(body.getString("summary"));
+			event.setDescription(body.getString("description"));
+
+			EventDateTime start = new EventDateTime();
+			start.setDateTime(new DateTime(body.getLong("epochStart")));
+			event.setStart(start.setTimeZone(cal.getTimeZone()));
+
+			EventDateTime end = new EventDateTime();
+			end.setDateTime(new DateTime(body.getLong("epochEnd")));
+			event.setEnd(end.setTimeZone(cal.getTimeZone()));
+
+			if (!body.getString("color").equalsIgnoreCase("NONE")) {
+				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId().toString());
+			}
+
+			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a")) {
+				event.setLocation(body.getString("location"));
+			}
+
+			if (body.getBoolean("enableRecurrence")) {
+				//Handle recur
+				Recurrence recurrence = new Recurrence();
+				recurrence.setFrequency(EventFrequency.fromValue(body.getString("frequency")));
+				recurrence.setCount(body.getInt("count"));
+				recurrence.setInterval(body.getInt("interval"));
+
+				String[] rr = new String[]{recurrence.toRRule()};
+				event.setRecurrence(Arrays.asList(rr));
+			}
+
+			EventData ed = new EventData(Long.valueOf(g.getId()));
+			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
+				ed.setImageLink(body.getString("image"));
+				ed.setEventId(eventId);
+				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+			}
+
+			if (ed.shouldBeSaved()) {
+				DatabaseManager.getManager().updateEventData(ed);
+			}
+
+			service.events().update(calendarData.getCalendarId(), eventId, event).execute();
+
+			response.status(200);
+			response.body(ResponseUtils.getJsonResponseMessage("Successfully updated event!"));
+
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Failed to update event!", e, EventEndpoint.class);
+			e.printStackTrace();
+
+			response.status(500);
+			response.body(ResponseUtils.getJsonResponseMessage("Failed to update event!"));
+		}
 
 		return response.body();
 	}
