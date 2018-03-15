@@ -70,6 +70,22 @@ function daysInMonth() {
 	return new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth() + 1, 0).getDate();
 }
 
+function changeReccurenceEditDisplays(checkbox) {
+	var eventId = checkbox.id.split("-")[1];
+	if (checkbox.checked) {
+		//Enable recur input
+		document.getElementById("editFrequency-" + eventId).disabled = false;
+		document.getElementById("editCount-" + eventId).disabled = false;
+		document.getElementById("editInterval-" + eventId).disabled = false;
+
+	} else {
+		//Disable recur input
+		document.getElementById("editFrequency-" + eventId).disabled = true;
+		document.getElementById("editCount-" + eventId).disabled = true;
+		document.getElementById("editInterval-" + eventId).disabled = true;
+	}
+}
+
 function setMonth(parameters) {
 	var date = parameters.date;
 
@@ -366,6 +382,9 @@ function getEventsForSelectedDate() {
 				enableRecurrence.type = "checkbox";
 				enableRecurrence.checked = false;
 				enableRecurrence.id = "editEnableRecur-" + event.id;
+				enableRecurrence.onclick = function (ev) {
+					changeReccurenceEditDisplays(this);
+				};
 				recurrenceLabel.appendChild(enableRecurrence);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -387,6 +406,7 @@ function getEventsForSelectedDate() {
 					op.selected = (event.recurrence.frequency === frequencies()[f]);
 					freqSelect.appendChild(op);
 				}
+				freqSelect.disabled = true;
 				frequencyLabel.appendChild(freqSelect);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -402,6 +422,7 @@ function getEventsForSelectedDate() {
 				count.valueAsNumber = parseInt(event.recurrence.recurCount);
 				count.min = "-1";
 				count.id = "editCount-" + event.id;
+				count.disabled = true;
 				countLabel.appendChild(count);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -417,6 +438,7 @@ function getEventsForSelectedDate() {
 				interval.valueAsNumber = parseInt(event.recurrence.interval);
 				interval.min = "1";
 				interval.id = "editInterval-" + event.id;
+				interval.disabled = true;
 				intervalLabel.appendChild(interval);
 				form.appendChild(document.createElement("br"));
 				form.appendChild(document.createElement("br"));
@@ -449,7 +471,7 @@ function getEventsForSelectedDate() {
 
 			//ID (readonly) for API
 			var idLabel = document.createElement("label");
-			idLabel.innerHTML = "Event ID (Changing this does nothing)";
+			idLabel.innerHTML = "Event ID";
 			idLabel.appendChild(document.createElement("br"));
 			form.appendChild(idLabel);
 			var hiddenId = document.createElement("input");
@@ -457,6 +479,7 @@ function getEventsForSelectedDate() {
 			hiddenId.name = "id";
 			hiddenId.value = event.id;
 			hiddenId.id = "editId-" + event.id;
+			hiddenId.readOnly = true;
 			idLabel.appendChild(hiddenId);
 			form.appendChild(document.createElement("br"));
 			form.appendChild(document.createElement("br"));
@@ -551,8 +574,8 @@ function updateEvent(editSubmitId) {
 			"frequency": "DAILY",
 			"count": -1,
 			"interval": 1,
-			"epochStart": startDate.getTime(),
-			"epochEnd": endDate.getTime()
+			"epochStart": startDate.getTime() + 86400000,
+			"epochEnd": endDate.getTime() + 86400000
 		};
 	}
 
