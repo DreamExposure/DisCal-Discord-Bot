@@ -193,6 +193,92 @@
 								<div id="event-container">
 
 								</div>
+								<hr>
+								<br>
+								<div id="create-event-container">
+									<h6>Create New Event Below</h6>
+									<form style="text-align: left;" id="create-form"
+									      action="javascript:createNewEvent()">
+										<label>Summary/Name
+											<br>
+											<input required type="text" name="summary" id="create-summary">
+										</label>
+										<br>
+										<br>
+										<label>Description
+											<br>
+											<input required type="text" name="description" id="create-description">
+										</label>
+										<br>
+										<br>
+										<label>Location
+											<br>
+											<input name="location" type="text" id="create-location">
+										</label>
+										<br>
+										<br>
+										<label>Color
+											<br>
+											<select name="color" id="create-color">
+												<th:block th:each="c : ${eventColors}">
+													<option th:value="${c.name}" th:text="${c.name}"></option>
+												</th:block>
+											</select>
+										</label>
+										<br>
+										<br>
+										<label>Image
+											<br>
+											<input name="image" type="text" id="create-image">
+										</label>
+										<br>
+										<br>
+										<label>Start Date/Time
+											<input required type="date" name="start-date" id="create-start-date">
+											<input required type="time" name="start-time" id="create-start-time">
+										</label>
+										<br>
+										<br>
+										<label>End Date/Time
+											<input required type="date" name="end-date" id="create-end-date">
+											<input required type="time" name="end-time" id="create-end-time">
+										</label>
+										<br>
+										<br>
+										<label>Recurrence
+											<br>
+											<input type="checkbox" id="create-enableRecur"
+											       onclick="changeRecurrenceCreateDisplays(this)">
+										</label>
+										<br>
+										<label>Recurrence - Frequency
+											<br>
+											<select name="frequency" id="create-frequency" disabled>
+												<option value="DAILY" selected>DAILY</option>
+												<option value="WEEKLY">WEEKLY</option>
+												<option value="MONTHLY">MONTHLY</option>
+												<option value="YEARLY">YEARLY</option>
+											</select>
+										</label>
+										<br>
+										<br>
+										<label>Recurrence - Count
+											<br>
+											<input name="count" disabled type="number" min="-1" value="-1"
+											       id="create-count">
+										</label>
+										<br>
+										<br>
+										<label>Recurrence - Interval
+											<br>
+											<input name="interval" disabled type="number" min="1" value="1"
+											       id="create-interval">
+										</label>
+										<br>
+										<br>
+										<input type="submit" class="submit" value="Create Event!">
+									</form>
+								</div>
 								<div id="snackbar"></div>
 							</div>
 						</div>

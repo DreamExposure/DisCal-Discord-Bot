@@ -70,7 +70,7 @@ function daysInMonth() {
 	return new Date(calendar.selectedDate.getFullYear(), calendar.selectedDate.getMonth() + 1, 0).getDate();
 }
 
-function changeReccurenceEditDisplays(checkbox) {
+function changeRecurrenceEditDisplays(checkbox) {
 	var eventId = checkbox.id.split("-")[1];
 	if (checkbox.checked) {
 		//Enable recur input
@@ -83,6 +83,21 @@ function changeReccurenceEditDisplays(checkbox) {
 		document.getElementById("editFrequency-" + eventId).disabled = true;
 		document.getElementById("editCount-" + eventId).disabled = true;
 		document.getElementById("editInterval-" + eventId).disabled = true;
+	}
+}
+
+function changeRecurrenceCreateDisplays(checkbox) {
+	if (checkbox.checked) {
+		//Enable recur input
+		document.getElementById("create-frequency").disabled = false;
+		document.getElementById("create-count").disabled = false;
+		document.getElementById("create-interval").disabled = false;
+
+	} else {
+		//Disable recur input
+		document.getElementById("create-frequency").disabled = true;
+		document.getElementById("create-count").disabled = true;
+		document.getElementById("create-interval").disabled = true;
 	}
 }
 
@@ -383,7 +398,7 @@ function getEventsForSelectedDate() {
 				enableRecurrence.checked = false;
 				enableRecurrence.id = "editEnableRecur-" + event.id;
 				enableRecurrence.onclick = function (ev) {
-					changeReccurenceEditDisplays(this);
+					changeRecurrenceEditDisplays(this);
 				};
 				recurrenceLabel.appendChild(enableRecurrence);
 				form.appendChild(document.createElement("br"));
@@ -594,6 +609,52 @@ function updateEvent(editSubmitId) {
 			showSnackbar("Our hippos failed to update your event!");
 		}, "json");
 
+}
+
+function createNewEvent() {
+	var startTimeString = document.getElementById("create-start-time").value.split(":");
+	var startDate = document.getElementById("create-start-date").valueAsDate;
+
+	var endTimeString = document.getElementById("create-end-time").value.split(":");
+	var endDate = document.getElementById("create-end-date").valueAsDate;
+
+	startDate.setHours(parseInt(startTimeString[0]), parseInt(startTimeString[1]), 0, 0);
+
+	endDate.setHours(parseInt(endTimeString[0]), parseInt(endTimeString[1]), 0, 0);
+
+	var colorElement = document.getElementById("create-color");
+	var freqElement = document.getElementById("create-frequency");
+	var bodyRaw = {
+		"summary": document.getElementById("create-summary").value,
+		"description": document.getElementById("create-description").value,
+		"location": document.getElementById("create-location").value,
+		"image": document.getElementById("create-image").value,
+		"color": colorElement.options[colorElement.selectedIndex].value,
+		"enableRecurrence": document.getElementById("create-enableRecur").checked,
+		"frequency": freqElement.options[freqElement.selectedIndex].value,
+		"count": document.getElementById("create-count").valueAsNumber,
+		"interval": document.getElementById("create-interval").valueAsNumber,
+		"epochStart": startDate.getTime() + 86400000,
+		"epochEnd": endDate.getTime() + 86400000
+	};
+
+	var q = $.post("/api/v1/events/create", JSON.stringify(bodyRaw), function (response) {
+		showSnackbar("Event successfully created!");
+
+		$('html:not(:animated), body:not(:animated)').animate({
+			scrollTop: $("#calendar").offset().top
+		}, 2000);
+
+		document.getElementById("create-form").reset();
+
+		setMonth({date: calendar.selectedDate});
+		getEventsForMonth();
+
+		getEventsForSelectedDate();
+	})
+		.fail(function () {
+			showSnackbar("Our hippos failed to create your event!");
+		}, "json");
 }
 
 function deleteEvent(clickedId) {

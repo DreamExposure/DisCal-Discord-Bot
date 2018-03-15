@@ -1,6 +1,7 @@
 package com.cloudcraftgaming.discal.web.endpoints.v1;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
+import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 //TODO: Make endpoints compatible with both dashboard && general API usage.
+@SuppressWarnings("Duplicates")
 public class EventEndpoint {
 	public static String getEventsForMonth(Request request, Response response) {
 		JSONObject requestBody = new JSONObject(request.body());
@@ -248,7 +250,82 @@ public class EventEndpoint {
 	}
 
 	public static String createEvent(Request request, Response response) {
+		JSONObject body = new JSONObject(request.body());
 
+		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		WebGuild g = (WebGuild) m.get("selected");
+		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+
+		//Okay, time to update the event
+		try {
+			Calendar service;
+			if (g.getSettings().useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(g.getSettings());
+			} else {
+				service = CalendarAuth.getCalendarService();
+			}
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
+
+			Event event = new Event();
+			event.setId(KeyGenerator.generateEventId());
+			event.setVisibility("public");
+			event.setSummary(body.getString("summary"));
+			event.setDescription(body.getString("description"));
+
+			EventDateTime start = new EventDateTime();
+			start.setDateTime(new DateTime(body.getLong("epochStart")));
+			event.setStart(start.setTimeZone(cal.getTimeZone()));
+
+			EventDateTime end = new EventDateTime();
+			end.setDateTime(new DateTime(body.getLong("epochEnd")));
+			event.setEnd(end.setTimeZone(cal.getTimeZone()));
+
+			if (!body.getString("color").equalsIgnoreCase("NONE")) {
+				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId().toString());
+			}
+
+			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a")) {
+				event.setLocation(body.getString("location"));
+			}
+
+			if (body.getBoolean("enableRecurrence")) {
+				//Handle recur
+				Recurrence recurrence = new Recurrence();
+				recurrence.setFrequency(EventFrequency.fromValue(body.getString("frequency")));
+				recurrence.setCount(body.getInt("count"));
+				recurrence.setInterval(body.getInt("interval"));
+
+				String[] rr = new String[]{recurrence.toRRule()};
+				event.setRecurrence(Arrays.asList(rr));
+			}
+
+			EventData ed = new EventData(Long.valueOf(g.getId()));
+			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
+				ed.setImageLink(body.getString("image"));
+				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+			}
+
+			if (ed.shouldBeSaved()) {
+				DatabaseManager.getManager().updateEventData(ed);
+			}
+
+			Event confirmed = service.events().insert(calendarData.getCalendarId(), event).execute();
+
+			response.status(200);
+			JSONObject respondBody = new JSONObject();
+			respondBody.put("Message", "Successfully create event!");
+			respondBody.put("id", confirmed.getId());
+
+			response.body(respondBody.toString());
+
+		} catch (Exception e) {
+			ExceptionHandler.sendException(null, "[WEB] Failed to update event!", e, EventEndpoint.class);
+			e.printStackTrace();
+
+			response.status(500);
+			response.body(ResponseUtils.getJsonResponseMessage("Failed to update event!"));
+		}
 
 		return response.body();
 	}
