@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.web.handler;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +43,7 @@ public class DiscordAccountHandler {
 			Map m = new HashMap();
 			m.put("loggedIn", false);
 			m.put("client", BotSettings.ID.get());
+			m.put("year", LocalDate.now().getYear());
 			return m;
 		}
 	}
@@ -63,9 +65,7 @@ public class DiscordAccountHandler {
 
 	//Functions
 	public void addAccount(Map m, String sessionId) {
-		if (discordAccounts.containsKey(sessionId)) {
-			discordAccounts.remove(sessionId);
-		}
+		discordAccounts.remove(sessionId);
 		discordAccounts.put(sessionId, m);
 	}
 

@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +47,7 @@ public class DiscordLoginHandler {
 			Map m = new HashMap();
 			m.put("loggedIn", true);
 			m.put("client", BotSettings.ID.get());
+			m.put("year", LocalDate.now().getYear());
 
 			m.put("id", userInfo.getString("id"));
 			m.put("username", userInfo.getString("username"));
