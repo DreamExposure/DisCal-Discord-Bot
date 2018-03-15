@@ -512,7 +512,6 @@ function selectDate(clickedId) {
 function updateEvent(editSubmitId) {
 	var eventId = editSubmitId.split("-")[1];
 
-	//TODO: Handle date/times
 	var startTimeString = document.getElementById("editStartTime-" + eventId).value.split(":");
 	var startDate = document.getElementById("editStartDate-" + eventId).valueAsDate;
 
@@ -558,7 +557,9 @@ function updateEvent(editSubmitId) {
 	}
 
 	var q = $.post("/api/v1/events/update", JSON.stringify(bodyRaw), function (response) {
-		//TODO: close modal
+
+		$('#modal-' + bodyRaw.id).modal('hide');
+
 		showSnackbar("Event successfully updated!");
 
 		setMonth({date: calendar.selectedDate});
