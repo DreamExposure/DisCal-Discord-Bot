@@ -6,6 +6,8 @@ import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -15,6 +17,7 @@ import java.util.Map;
 @SuppressWarnings("unchecked")
 public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
+	private static Timer timer;
 
 	private HashMap<String, Map> discordAccounts = new HashMap<>();
 
@@ -29,6 +32,24 @@ public class DiscordAccountHandler {
 		return instance;
 	}
 
+	public void init() {
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+			timer = new Timer(true);
+			timer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					removeTimedOutAccounts();
+				}
+			}, 60 * 30 * 1000);
+		}
+	}
+
+	public void shutdown() {
+		if (timer != null) {
+			timer.cancel();
+		}
+	}
+
 	//Boolean/checkers
 	public boolean hasAccount(String sessionId) {
 		return discordAccounts.containsKey(sessionId);
@@ -37,7 +58,10 @@ public class DiscordAccountHandler {
 	//Getters
 	public Map getAccount(String sessionId) {
 		if (discordAccounts.containsKey(sessionId)) {
-			return discordAccounts.get(sessionId);
+			Map m = discordAccounts.get(sessionId);
+			m.remove("lastUse");
+			m.put("lastUse", System.currentTimeMillis());
+			return m;
 		} else {
 			//Not logged in...
 			Map m = new HashMap();
@@ -52,6 +76,8 @@ public class DiscordAccountHandler {
 		for (Map m : discordAccounts.values()) {
 			if (m.containsKey("id")) {
 				if (m.get("id").equals(userId)) {
+					m.remove("lastUse");
+					m.put("lastUse", System.currentTimeMillis());
 					return m;
 				}
 			}
@@ -66,12 +92,16 @@ public class DiscordAccountHandler {
 	//Functions
 	public void addAccount(Map m, String sessionId) {
 		discordAccounts.remove(sessionId);
+		m.remove("lastUse");
+		m.put("lastUse", System.currentTimeMillis());
 		discordAccounts.put(sessionId, m);
 	}
 
 	public void appendAccount(Map m, String sessionId) {
 		if (discordAccounts.containsKey(sessionId)) {
 			Map exist = discordAccounts.get(sessionId);
+			exist.remove("lastUse");
+			exist.put("lastUse", System.currentTimeMillis());
 			exist.putAll(m);
 		} else {
 			discordAccounts.put(sessionId, m);
@@ -83,12 +113,27 @@ public class DiscordAccountHandler {
 		if (m != null) {
 			m.remove("guilds");
 			m.put("guilds", GuildUtils.getGuilds(userId));
+			m.remove("lastUse");
+			m.put("lastUse", System.currentTimeMillis());
 		}
 	}
 
 	public void removeAccount(String sessionId) {
 		if (hasAccount(sessionId)) {
 			discordAccounts.remove(sessionId);
+		}
+	}
+
+	private void removeTimedOutAccounts() {
+		long limit = Long.valueOf(BotSettings.TIME_OUT.get());
+		final HashMap<String, Map> accounts = discordAccounts;
+		for (String id : accounts.keySet()) {
+			Map m = accounts.get(id);
+			long lastUse = (long) m.get("lastUse");
+			if (System.currentTimeMillis() - lastUse > limit) {
+				//Timed out, remove account info and require sign in.
+				discordAccounts.remove(id);
+			}
 		}
 	}
 }

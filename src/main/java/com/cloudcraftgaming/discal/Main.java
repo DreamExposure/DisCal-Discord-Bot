@@ -9,6 +9,7 @@ import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExe
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
+import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.cloudcraftgaming.discal.web.utils.SparkUtils;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -51,6 +52,7 @@ public class Main {
 
 		//Start spark (catch any issues from it so only the site goes down without affecting bot....
 		try {
+			DiscordAccountHandler.getHandler().init();
 			SparkUtils.initSpark();
 		} catch (Exception e) {
 			ExceptionHandler.sendException(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class);

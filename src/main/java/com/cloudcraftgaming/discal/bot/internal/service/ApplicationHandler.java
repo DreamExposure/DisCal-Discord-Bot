@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
+import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import sx.blah.discord.util.DiscordException;
 
 import java.io.File;
@@ -111,6 +112,7 @@ public class ApplicationHandler {
 		UpdateDisBotData.shutdown();
 		UpdateDisPwData.shutdown();
 		TimeManager.getManager().shutdown();
+		DiscordAccountHandler.getHandler().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();
 		System.exit(0);
 	}
