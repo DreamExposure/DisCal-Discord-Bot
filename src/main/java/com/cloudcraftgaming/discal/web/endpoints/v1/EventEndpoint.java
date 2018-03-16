@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
+import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.Recurrence;
@@ -28,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-//TODO: Make endpoints compatible with both dashboard && general API usage.
 @SuppressWarnings("Duplicates")
 public class EventEndpoint {
 	public static String getEventsForMonth(Request request, Response response) {
@@ -37,20 +37,27 @@ public class EventEndpoint {
 		Integer daysInMonth = Integer.valueOf(requestBody.getString("DaysInMonth"));
 		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
 		Long endEpoch = startEpoch + (86400000L * daysInMonth);
+		GuildSettings settings;
 
-		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-		WebGuild g = (WebGuild) m.get("selected");
-		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else {
+			long guildId = requestBody.getLong("guild_id");
+			settings = DatabaseManager.getManager().getSettings(guildId);
+		}
 
 		//okay, lets actually get the month's events.
 		try {
 			Calendar service;
-			if (g.getSettings().useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(g.getSettings());
+			if (settings.useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(settings);
 			} else {
 				service = CalendarAuth.getCalendarService();
 			}
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))
@@ -87,20 +94,27 @@ public class EventEndpoint {
 		JSONObject requestBody = new JSONObject(request.body());
 		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
 		Long endEpoch = startEpoch + 86400000L;
+		GuildSettings settings;
 
-		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-		WebGuild g = (WebGuild) m.get("selected");
-		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else {
+			long guildId = requestBody.getLong("guild_id");
+			settings = DatabaseManager.getManager().getSettings(guildId);
+		}
 
 		//okay, lets actually get the month's events.
 		try {
 			Calendar service;
-			if (g.getSettings().useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(g.getSettings());
+			if (settings.useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(settings);
 			} else {
 				service = CalendarAuth.getCalendarService();
 			}
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))
@@ -150,7 +164,7 @@ public class EventEndpoint {
 					jo.put("recurrence", rjo);
 				}
 
-				EventData ed = DatabaseManager.getManager().getEventData(Long.valueOf(g.getId()), e.getId());
+				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), e.getId());
 
 				jo.put("image", ed.getImageLink());
 
@@ -173,20 +187,27 @@ public class EventEndpoint {
 	public static String updateEvent(Request request, Response response) {
 		JSONObject body = new JSONObject(request.body());
 		String eventId = body.getString("id");
+		GuildSettings settings;
 
-		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-		WebGuild g = (WebGuild) m.get("selected");
-		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else {
+			long guildId = body.getLong("guild_id");
+			settings = DatabaseManager.getManager().getSettings(guildId);
+		}
 
 		//Okay, time to update the event
 		try {
 			Calendar service;
-			if (g.getSettings().useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(g.getSettings());
+			if (settings.useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(settings);
 			} else {
 				service = CalendarAuth.getCalendarService();
 			}
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
 			Event event = new Event();
@@ -222,7 +243,7 @@ public class EventEndpoint {
 				event.setRecurrence(Arrays.asList(rr));
 			}
 
-			EventData ed = new EventData(Long.valueOf(g.getId()));
+			EventData ed = new EventData(settings.getGuildID());
 			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventId(eventId);
@@ -251,20 +272,27 @@ public class EventEndpoint {
 
 	public static String createEvent(Request request, Response response) {
 		JSONObject body = new JSONObject(request.body());
+		GuildSettings settings;
 
-		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-		WebGuild g = (WebGuild) m.get("selected");
-		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else {
+			long guildId = body.getLong("guild_id");
+			settings = DatabaseManager.getManager().getSettings(guildId);
+		}
 
 		//Okay, time to update the event
 		try {
 			Calendar service;
-			if (g.getSettings().useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(g.getSettings());
+			if (settings.useExternalCalendar()) {
+				service = CalendarAuth.getCalendarService(settings);
 			} else {
 				service = CalendarAuth.getCalendarService();
 			}
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
 			Event event = new Event();
@@ -300,7 +328,7 @@ public class EventEndpoint {
 				event.setRecurrence(Arrays.asList(rr));
 			}
 
-			EventData ed = new EventData(Long.valueOf(g.getId()));
+			EventData ed = new EventData(settings.getGuildID());
 			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
@@ -333,23 +361,27 @@ public class EventEndpoint {
 	public static String deleteEvent(Request request, Response response) {
 		JSONObject requestBody = new JSONObject(request.body());
 		String eventId = requestBody.getString("id");
+		GuildSettings settings;
 
-		Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
-		WebGuild g = (WebGuild) m.get("selected");
-		g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+		//Check if logged in, else get guild ID from body.
+		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else {
+			Long guildId = requestBody.getLong("guild_id");
+			settings = DatabaseManager.getManager().getSettings(guildId);
+		}
 
 		//okay, time to properly delete the event
-		if (EventUtils.deleteEvent(g.getSettings(), eventId)) {
+		if (EventUtils.deleteEvent(settings, eventId)) {
 			//Deleted!
-			JSONObject r = new JSONObject();
-			r.put("message", "Successfully deleted event!");
-			response.body(r.toString());
+			response.body(ResponseUtils.getJsonResponseMessage("Successfully deleted event!"));
 		} else {
 			//Oh nos! we failed >.<
-			JSONObject r = new JSONObject();
-			r.put("message", "Failed to delete event!");
 			response.status(500);
-			response.body(r.toString());
+			response.body(ResponseUtils.getJsonResponseMessage("Failed to delete event!"));
 		}
 
 		return response.body();
