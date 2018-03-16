@@ -173,7 +173,7 @@ public class EventEndpoint {
 
 			JSONObject body = new JSONObject();
 			body.put("events", eventsJson);
-			body.put("count", eventsJson.size() + "");
+			body.put("count", eventsJson.size());
 
 			response.body(body.toString());
 		} catch (Exception e) {
@@ -232,6 +232,7 @@ public class EventEndpoint {
 				event.setLocation(body.getString("location"));
 			}
 
+			//TODO: STANDARDIZE THIS
 			if (body.getBoolean("enableRecurrence")) {
 				//Handle recur
 				Recurrence recurrence = new Recurrence();
@@ -317,6 +318,7 @@ public class EventEndpoint {
 				event.setLocation(body.getString("location"));
 			}
 
+			//TODO: STANDARDIZE THIS
 			if (body.getBoolean("enableRecurrence")) {
 				//Handle recur
 				Recurrence recurrence = new Recurrence();

@@ -41,6 +41,10 @@
 				<a href="/docs/api/overview">
 					<button>Overview</button>
 				</a>
+				<br>
+				<a href="/docs/api/errors">
+					<button>Errors</button>
+				</a>
 				<hr>
 				<h4>v1 Endpoints</h4>
 				<a href="/docs/api/v1/announcement">
@@ -73,7 +77,8 @@
 	</body>
 
 	<footer id="footer">
-		<p><span th:text="'© Nova Maday ' + ${year} + ' All rights reserved.'"></span><a href="/policy/privacy"> Privacy
-			Policy</a></p>
+		<p><span th:text="'© Nova Maday ' + ${year} + ' All rights reserved.'"></span><span> - </span><a
+				href="/policy/privacy">Privacy
+			Policy</a><span> - </span><a href="/docs/api/overview">Developer API</a></p>
 	</footer>
 </html>

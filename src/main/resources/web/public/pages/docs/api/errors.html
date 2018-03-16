@@ -70,9 +70,81 @@
 				<a href="/docs/api/v1/time">
 					<button>Time</button>
 				</a>
+				<hr>
+				<h4>Jump</h4>
+				<a href="/docs/api/errors#405">
+					<button>405</button>
+				</a>
+				<br>
+				<a href="/docs/api/errors#401">
+					<button>401</button>
+				</a>
+				<br>
+				<a href="/docs/api/errors#400">
+					<button>400</button>
+				</a>
+				<br>
+				<a href="/docs/api/errors#500">
+					<button>500</button>
+				</a>
 			</div>
-			<h1>API v1 Docs - Guild Endpoint</h1>
+			<h1>API Docs - Errors</h1>
+			<p>
+				When using the API provided by DisCal, it is good to be aware of, and be able to correctly handle
+				various errors.
+			</p>
+			<br>
+			<br>
 
+			<hr>
+
+			<h2 id="405">405 - Method not allowed</h2>
+			<p>
+				If you receive this error, it means you are improperly accessing the API.
+				<br>
+				DisCal's REST API requires <strong>POST</strong> requests. This is to securely handle various data with
+				ease.
+			</p>
+			<br>
+			<br>
+
+			<hr>
+
+			<h2 id="401">401 - Unauthorized</h2>
+			<p>
+				If you receive this error, it means you either forgot to include the authorization header with a valid
+				auth key or you are not allowed to use the API endpoint you are accessing (for example the login/logout
+				endpoints).
+				<br>
+				<br>
+				To correct this, make sure you include the <strong>Authorization</strong> header with a valid auth key.
+				<br>
+				Furthermore, make sure you are allowed to access the API endpoint.
+			</p>
+			<br>
+			<br>
+
+			<hr>
+
+			<h2 id="400">400 - Bad Request</h2>
+			<p>
+				This error means your request was invalid in some form. Make sure the POST request's content type is set
+				to <strong>"application/json"</strong> and that you are not missing any required values in the request
+				body.
+			</p>
+			<br>
+			<br>
+
+			<hr>
+
+			<h2 id="500">500 - Internal Server Exception</h2>
+			<p>
+				An error occurred on our end. Everything you did was likely right, but our system failed in some way.
+				<br>
+				<br>
+				We log all errors that occur and will do our best to correct them. Should you get this error numerous
+				times, contact the development team for further help.
+			</p>
 		</div>
 	</body>
 

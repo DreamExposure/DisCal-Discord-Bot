@@ -127,8 +127,11 @@ public class SparkUtils {
 			get("/dashboard/guild/announcements", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/announcements"), new ThymeleafTemplateEngine());
 			get("/dashboard/guild/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/rsvp"), new ThymeleafTemplateEngine());
 
-			//API v1 Doc pages
+			//API Doc Pages
 			get("/docs/api/overview", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/overview"), new ThymeleafTemplateEngine());
+			get("/docs/api/errors", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/errors"), new ThymeleafTemplateEngine());
+
+			//API v1 Doc Pages
 			get("/docs/api/v1/announcement", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/announcement"), new ThymeleafTemplateEngine());
 			get("/docs/api/v1/calendar", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/calendar"), new ThymeleafTemplateEngine());
 			get("/docs/api/v1/events", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/events"), new ThymeleafTemplateEngine());
