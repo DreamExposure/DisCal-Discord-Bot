@@ -434,7 +434,7 @@ function getEventsForSelectedDate() {
 				var count = document.createElement("input");
 				count.name = "count";
 				count.type = "number";
-				count.valueAsNumber = parseInt(event.recurrence.recurCount);
+				count.valueAsNumber = parseInt(event.recurrence.count);
 				count.min = "-1";
 				count.id = "editCount-" + event.id;
 				count.disabled = true;
@@ -570,10 +570,12 @@ function updateEvent(editSubmitId) {
 			"location": document.getElementById("editLocation-" + eventId).value,
 			"image": document.getElementById("editImage-" + eventId).value,
 			"color": colorElement.options[colorElement.selectedIndex].value,
-			"enableRecurrence": document.getElementById("editEnableRecur-" + eventId).checked,
-			"frequency": freqElement.options[freqElement.selectedIndex].value,
-			"count": document.getElementById("editCount-" + eventId).valueAsNumber,
-			"interval": document.getElementById("editInterval-" + eventId).valueAsNumber,
+			recurrence: {
+				"recur": document.getElementById("editEnableRecur-" + eventId).checked,
+				"frequency": freqElement.options[freqElement.selectedIndex].value,
+				"count": document.getElementById("editCount-" + eventId).valueAsNumber,
+				"interval": document.getElementById("editInterval-" + eventId).valueAsNumber,
+			},
 			"epochStart": startDate.getTime() + 86400000,
 			"epochEnd": endDate.getTime() + 86400000
 		};
@@ -585,10 +587,12 @@ function updateEvent(editSubmitId) {
 			"location": document.getElementById("editLocation-" + eventId).value,
 			"image": document.getElementById("editImage-" + eventId).value,
 			"color": colorElement.options[colorElement.selectedIndex].value,
-			"enableRecurrence": false,
-			"frequency": "DAILY",
-			"count": -1,
-			"interval": 1,
+			"recurrence": {
+				"recur": false,
+				"frequency": "DAILY",
+				"count": -1,
+				"interval": 1
+			},
 			"epochStart": startDate.getTime() + 86400000,
 			"epochEnd": endDate.getTime() + 86400000
 		};
@@ -630,10 +634,12 @@ function createNewEvent() {
 		"location": document.getElementById("create-location").value,
 		"image": document.getElementById("create-image").value,
 		"color": colorElement.options[colorElement.selectedIndex].value,
-		"enableRecurrence": document.getElementById("create-enableRecur").checked,
-		"frequency": freqElement.options[freqElement.selectedIndex].value,
-		"count": document.getElementById("create-count").valueAsNumber,
-		"interval": document.getElementById("create-interval").valueAsNumber,
+		"recurrence": {
+			"recur": document.getElementById("create-enableRecur").checked,
+			"frequency": freqElement.options[freqElement.selectedIndex].value,
+			"count": document.getElementById("create-count").valueAsNumber,
+			"interval": document.getElementById("create-interval").valueAsNumber,
+		},
 		"epochStart": startDate.getTime() + 86400000,
 		"epochEnd": endDate.getTime() + 86400000
 	};

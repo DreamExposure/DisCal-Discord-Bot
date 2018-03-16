@@ -158,7 +158,7 @@ public class EventEndpoint {
 
 					JSONObject rjo = new JSONObject();
 					rjo.put("frequency", EventFrequency.DAILY.name());
-					rjo.put("recurCount", -1);
+					rjo.put("count", -1);
 					rjo.put("interval", 1);
 
 					jo.put("recurrence", rjo);
@@ -232,13 +232,13 @@ public class EventEndpoint {
 				event.setLocation(body.getString("location"));
 			}
 
-			//TODO: STANDARDIZE THIS
-			if (body.getBoolean("enableRecurrence")) {
+			JSONObject recur = body.getJSONObject("recurrence");
+			if (recur.getBoolean("recur")) {
 				//Handle recur
 				Recurrence recurrence = new Recurrence();
-				recurrence.setFrequency(EventFrequency.fromValue(body.getString("frequency")));
-				recurrence.setCount(body.getInt("count"));
-				recurrence.setInterval(body.getInt("interval"));
+				recurrence.setFrequency(EventFrequency.fromValue(recur.getString("frequency")));
+				recurrence.setCount(recur.getInt("count"));
+				recurrence.setInterval(recur.getInt("interval"));
 
 				String[] rr = new String[]{recurrence.toRRule()};
 				event.setRecurrence(Arrays.asList(rr));
@@ -318,13 +318,13 @@ public class EventEndpoint {
 				event.setLocation(body.getString("location"));
 			}
 
-			//TODO: STANDARDIZE THIS
-			if (body.getBoolean("enableRecurrence")) {
+			JSONObject recur = body.getJSONObject("recurrence");
+			if (recur.getBoolean("recur")) {
 				//Handle recur
 				Recurrence recurrence = new Recurrence();
-				recurrence.setFrequency(EventFrequency.fromValue(body.getString("frequency")));
-				recurrence.setCount(body.getInt("count"));
-				recurrence.setInterval(body.getInt("interval"));
+				recurrence.setFrequency(EventFrequency.fromValue(recur.getString("frequency")));
+				recurrence.setCount(recur.getInt("count"));
+				recurrence.setInterval(recur.getInt("interval"));
 
 				String[] rr = new String[]{recurrence.toRRule()};
 				event.setRecurrence(Arrays.asList(rr));
