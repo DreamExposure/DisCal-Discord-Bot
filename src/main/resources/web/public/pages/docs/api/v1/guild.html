@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<!--meta property="og:image" content="I WILL PUT THE LOGO IN WHEN I MAKE IT SMALL"/-->
+		<title>API Docs - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<h1>DISCAL</h1>
+			<a href="/">Home</a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/AmAMGeN" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A4567%2Faccount%2Flogin'">Log
+				In</a>
+		</div>
+
+		<div id="content">
+			<div id="side-nav">
+				<h4>API</h4>
+				<a href="/docs/api/overview">
+					<button>Overview</button>
+				</a>
+				<hr>
+				<h4>v1 Endpoints</h4>
+				<a href="/docs/api/v1/announcement">
+					<button>Announcements</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/calendar">
+					<button>Calendar</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events">
+					<button>Events</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/guild">
+					<button>Guild</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/rsvp">
+					<button>RSVP</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/time">
+					<button>Time</button>
+				</a>
+			</div>
+			<h1>API v1 Docs - Guild Endpoint</h1>
+
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p><span th:text="'© Nova Maday ' + ${year} + ' All rights reserved.'"></span><a href="/policy/privacy"> Privacy
+			Policy</a></p>
+	</footer>
+</html>
