@@ -70,6 +70,7 @@ public class DisCalCommand implements ICommand {
         info.getSubCommands().put("lang", "Sets the bot's language.");
         info.getSubCommands().put("prefix", "Sets the bot's prefix.");
         info.getSubCommands().put("invite", "Displays an invite to the support guild.");
+		info.getSubCommands().put("dashboard", "Displays the link to the web control dashboard.");
 		info.getSubCommands().put("brand", "Enables/Disables server branding.");
 
         return info;
@@ -119,6 +120,9 @@ public class DisCalCommand implements ICommand {
 					break;
 				case "invite":
 					moduleInvite(event, settings);
+					break;
+				case "dashboard":
+					moduleDashboard(event, settings);
 					break;
 				case "brand":
 					moduleBrand(event, settings);
@@ -342,5 +346,10 @@ public class DisCalCommand implements ICommand {
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 		}
+	}
+
+	private void moduleDashboard(MessageReceivedEvent event, GuildSettings settings) {
+		String DASHBOARD_LINK = "https://www.discalbot.com/dashboard";
+		Message.sendMessage(MessageManager.getMessage("DisCal.DashboardLink", "%link%", DASHBOARD_LINK, settings), event);
 	}
 }

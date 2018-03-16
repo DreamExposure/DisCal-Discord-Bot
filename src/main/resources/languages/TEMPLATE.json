@@ -200,6 +200,7 @@
   "DisCal.Prefix.Set": "Prefix set to `%prefix%` DisCal will now accept commands starting with the new prefix **OR** by mentioning DisCal!",
   "DisCal.Prefix.Specify": "Please specify the preferred prefix with `!discal prefix <prefix>` **SPACES ARE NOT ALLOWED**!",
   "DisCal.InviteLink": "Here is the invite to my official support guild: %link%",
+  "DisCal.DashboardLink": "Here is the link to my control dashboard: %link%",
   "DisCal.Brand": "Sever Branding enabled: `%value%`",
 
   "AddCalendar.Start": "Please check your DMs for instructions on how to add an external calendar!",
