@@ -27,7 +27,7 @@ public class GuildEndpoint {
 	public static String getSettings(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
+			Long guildId = jsonMain.getLong("guild_id");
 
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
@@ -35,16 +35,15 @@ public class GuildEndpoint {
 			response.status(200);
 
 			JSONObject body = new JSONObject();
-			body.put("GUILD_ID", settings.getGuildID());
-			body.put("EXTERNAL_CALENDAR", settings.useExternalCalendar());
-			body.put("CONTROL_ROLE", settings.getControlRole());
-			body.put("DISCAL_CHANNEL", settings.getDiscalChannel());
-			body.put("SIMPLE_ANNOUNCEMENT", settings.usingSimpleAnnouncements());
-			body.put("LANG", settings.getLang());
-			body.put("PREFIX", settings.getPrefix());
-			body.put("PATRON_GUILD", settings.isPatronGuild());
-			body.put("DEV_GUILD", settings.isDevGuild());
-			body.put("MAX_CALENDARS", settings.getMaxCalendars());
+			body.put("external_calendar", settings.useExternalCalendar());
+			body.put("control_role", settings.getControlRole());
+			body.put("discal_channel", settings.getDiscalChannel());
+			body.put("simple_announcement", settings.usingSimpleAnnouncements());
+			body.put("lang", settings.getLang());
+			body.put("prefix", settings.getPrefix());
+			body.put("patron_guild", settings.isPatronGuild());
+			body.put("dev_guild", settings.isDevGuild());
+			body.put("max_calendars", settings.getMaxCalendars());
 
 			response.body(body.toString());
 		} catch (JSONException e) {
@@ -61,33 +60,25 @@ public class GuildEndpoint {
 		try {
 			JSONObject body = new JSONObject((request.body()));
 
-			Long guildId = body.getLong("GUILD_ID");
+			Long guildId = body.getLong("guild_id");
 
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
-			if (body.has("EXTERNAL_CALENDAR"))
-				settings.setUseExternalCalendar(body.getBoolean("EXTERNAL_CALENDAR"));
-			if (body.has("CONTROL_ROLE"))
-				settings.setControlRole(body.getString("CONTROL_ROLE"));
-			if (body.has("DISCAL_CHANNEL"))
-				settings.setDiscalChannel(body.getString("DISCAL_CHANNEL"));
-			if (body.has("SIMPLE_ANNOUNCEMENT"))
-				settings.setSimpleAnnouncements(body.getBoolean("SIMPLE_ANNOUNCEMENT"));
-			if (body.has("LANG"))
-				settings.setLang(body.getString("LANG"));
-			if (body.has("PREFIX"))
-				settings.setPrefix(body.getString("PREFIX"));
-			if (body.has("PATRON_GUILD"))
-				settings.setPatronGuild(body.getBoolean("PATRON_GUILD"));
-			if (body.has("DEV_GUILD"))
-				settings.setDevGuild(body.getBoolean("DEV_GUILD"));
-			if (body.has("MAX_CALENDARS"))
-				settings.setMaxCalendars(body.getInt("MAX_CALENDARS"));
+			if (body.has("control_role"))
+				settings.setControlRole(body.getString("control_role"));
+			if (body.has("discal_channel"))
+				settings.setDiscalChannel(body.getString("discal_channel"));
+			if (body.has("simple_announcement"))
+				settings.setSimpleAnnouncements(body.getBoolean("simple_announcement"));
+			if (body.has("lang"))
+				settings.setLang(body.getString("lang"));
+			if (body.has("prefix"))
+				settings.setPrefix(body.getString("prefix"));
 
 			if (DatabaseManager.getManager().updateSettings(settings)) {
 				response.type("application/json");
 				response.status(200);
-				response.body(ResponseUtils.getJsonResponseMessage("Successfully updated settings!"));
+				response.body(ResponseUtils.getJsonResponseMessage("Successfully updated guild settings!"));
 			} else {
 				response.type("application/json");
 				response.status(500);

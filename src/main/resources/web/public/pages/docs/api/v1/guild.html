@@ -15,6 +15,7 @@
 
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/docs.css" rel="stylesheet">
 	</head>
 
 	<body>
@@ -70,9 +71,226 @@
 				<a href="/docs/api/v1/time">
 					<button>Time</button>
 				</a>
+				<hr>
+				<h4>Jump</h4>
+				<a href="/docs/api/v1/guild#settings-get">
+					<button>/settings/get</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/guild#settings-update">
+					<button>/settings/update</button>
+				</a>
 			</div>
 			<h1>API v1 Docs - Guild Endpoint</h1>
+			<p>
+				The Guild endpoints allows you to get and edit guild settings for the specified guild.
+			</p>
+			<br>
 
+			<hr>
+
+			<h2 id="settings-get">/settings/get</h2>
+			<p>
+				Returns the specified guild's settings.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"external_calendar": false,
+				"control_role": "everyone",
+				"discal_channel": "all",
+				"simple_announcement": false,
+				"lang": "ENGLISH",
+				"prefix": "!",
+				"patron_guild": false,
+				"dev_guild": true,
+				"max_calendars": 1
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>external_calendar</td>
+					<td>Boolean</td>
+					<td>Whether or not the guild has an external calendar</td>
+				</tr>
+				<tr>
+					<td>control_role</td>
+					<td>String</td>
+					<td>Role ID of the role required to use DisCal ("everyone") for no role</td>
+				</tr>
+				<tr>
+					<td>discal_channel</td>
+					<td>String</td>
+					<td>Channel ID of the channel DisCal can be used in. ("all" for no channel limits)</td>
+				</tr>
+				<tr>
+					<td>simple_announcement</td>
+					<td>Boolean</td>
+					<td>Whether or not the guild has simple announcements enabled</td>
+				</tr>
+				<tr>
+					<td>lang</td>
+					<td>String</td>
+					<td>The language DisCal will post messages in (default "ENGLISH")</td>
+				</tr>
+				<tr>
+					<td>prefix</td>
+					<td>String</td>
+					<td>Prefix to be used for DisCal commands (default "!")</td>
+				</tr>
+				<tr>
+					<td>patron_guild</td>
+					<td>Boolean</td>
+					<td>Whether or not the guild has access to patron only features</td>
+				</tr>
+				<tr>
+					<td>dev_guild</td>
+					<td>Boolean</td>
+					<td>Whether or not the guild has access to features currently being developed</td>
+				</tr>
+				<tr>
+					<td>max_calendars</td>
+					<td>int</td>
+					<td>The maximum amount of calendars the guild can have (default 1)</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="settings-update">/settings/update</h2>
+			<p>
+				Updates the specified guild's settings.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"control_role": "everyone",
+				"discal_channel": "all",
+				"simple_announcement": true,
+				"lang", "ENGLISH",
+				"prefix": "?"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully updated guild settings"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>control_role</td>
+					<td>String</td>
+					<td>Role ID of the role required to use DisCal ("everyone") for no role</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>discal_channel</td>
+					<td>String</td>
+					<td>Channel ID of the channel DisCal can be used in. ("all" for no channel limits)</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>simple_announcement</td>
+					<td>Boolean</td>
+					<td>Whether or not the guild has simple announcements enabled</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>lang</td>
+					<td>String</td>
+					<td>The language DisCal will post messages in (default "ENGLISH")</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>prefix</td>
+					<td>String</td>
+					<td>Prefix to be used for DisCal commands (default "!")</td>
+					<td>False</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of settings update</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
 		</div>
 	</body>
 
