@@ -26,8 +26,8 @@ public class AnnouncementEndpoint {
 	public static String getAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
-			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
+			Long guildId = jsonMain.getLong("guild_id");
+			String announcementId = jsonMain.getString("id");
 
 			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
@@ -37,17 +37,15 @@ public class AnnouncementEndpoint {
 				response.status(200);
 
 				JSONObject body = new JSONObject();
-				body.put("GUILD_ID", a.getGuildId());
-				body.put("ANNOUNCEMENT_ID", a.getAnnouncementId().toString());
-				body.put("ANNOUNCEMENT_CHANNEL", a.getAnnouncementChannelId());
-				body.put("EVENT_ID", a.getEventId());
-				body.put("EVENT_COLOR", a.getEventColor().name());
-				body.put("TYPE", a.getAnnouncementType().name());
-				body.put("HOURS", a.getHoursBefore());
-				body.put("MINUTES", a.getMinutesBefore());
-				body.put("INFO", a.getInfo());
-				body.put("SUBSCRIBERS_ROLE", a.getSubscriberRoleIds());
-				body.put("SUBSCRIBERS_USER", a.getSubscriberUserIds());
+				body.put("channel", a.getAnnouncementChannelId());
+				body.put("event_id", a.getEventId());
+				body.put("event_color", a.getEventColor().name());
+				body.put("type", a.getAnnouncementType().name());
+				body.put("hours", a.getHoursBefore());
+				body.put("minutes", a.getMinutesBefore());
+				body.put("info", a.getInfo());
+				body.put("subscribers_role", a.getSubscriberRoleIds());
+				body.put("subscribers_user", a.getSubscriberUserIds());
 
 				response.body(body.toString());
 			} else {
@@ -68,26 +66,32 @@ public class AnnouncementEndpoint {
 	public static String createAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
+			Long guildId = jsonMain.getLong("guild_id");
 
 			Announcement a = new Announcement(guildId);
 
 			JSONObject body = new JSONObject(request.body());
-			a.setAnnouncementChannelId(body.getString("ANNOUNCEMENT_CHANNEL"));
-			a.setEventId(body.getString("EVENT_ID"));
-			a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("EVENT_COLOR")));
-			a.setAnnouncementType(AnnouncementType.fromValue(body.getString("TYPE")));
-			a.setHoursBefore(body.getInt("HOURS"));
-			a.setMinutesBefore(body.getInt("MINUTES"));
-			a.setInfo(body.getString("INFO"));
+			a.setAnnouncementChannelId(body.getString("channel"));
+			a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+
+			if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+				a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
+			}
+			if (a.getAnnouncementType().equals(AnnouncementType.RECUR) || a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+				a.setEventId(body.getString("event_id"));
+			}
+
+			a.setHoursBefore(body.getInt("hours"));
+			a.setMinutesBefore(body.getInt("minutes"));
+			a.setInfo(body.getString("info"));
 
 			if (DatabaseManager.getManager().updateAnnouncement(a)) {
 				response.type("application/json");
 				response.status(200);
 
 				JSONObject responseBody = new JSONObject();
-				responseBody.put("Message", "Successfully updated announcement!");
-				responseBody.put("ANNOUNCEMENT_ID", a.getAnnouncementId().toString());
+				responseBody.put("Message", "Successfully created announcement");
+				responseBody.put("id", a.getAnnouncementId().toString());
 				response.body(responseBody.toString());
 			} else {
 				response.type("application/json");
@@ -107,8 +111,8 @@ public class AnnouncementEndpoint {
 	public static String updateAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
-			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
+			Long guildId = jsonMain.getLong("guild_id");
+			String announcementId = jsonMain.getString("id");
 
 			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
@@ -116,25 +120,25 @@ public class AnnouncementEndpoint {
 
 				JSONObject body = new JSONObject(request.body());
 
-				if (body.has("ANNOUNCEMENT_CHANNEL"))
-					a.setAnnouncementChannelId(body.getString("ANNOUNCEMENT_CHANNEL"));
-				if (body.has("EVENT_ID"))
-					a.setEventId(body.getString("EVENT_ID"));
-				if (body.has("EVENT_COLOR"))
-					a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("EVENT_COLOR")));
-				if (body.has("TYPE"))
-					a.setAnnouncementType(AnnouncementType.fromValue(body.getString("TYPE")));
-				if (body.has("HOURS"))
-					a.setHoursBefore(body.getInt("HOURS"));
-				if (body.has("MINUTES"))
-					a.setMinutesBefore(body.getInt("MINUTES"));
-				if (body.has("INFO"))
-					a.setInfo(body.getString("INFO"));
+				if (body.has("channel"))
+					a.setAnnouncementChannelId(body.getString("channel"));
+				if (body.has("event_id"))
+					a.setEventId(body.getString("event_id"));
+				if (body.has("event_color"))
+					a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
+				if (body.has("type"))
+					a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+				if (body.has("hours"))
+					a.setHoursBefore(body.getInt("hours"));
+				if (body.has("minutes"))
+					a.setMinutesBefore(body.getInt("minutes"));
+				if (body.has("info"))
+					a.setInfo(body.getString("info"));
 
 				if (DatabaseManager.getManager().updateAnnouncement(a)) {
 					response.type("application/json");
 					response.status(200);
-					response.body(ResponseUtils.getJsonResponseMessage("Announcement successfully updated!"));
+					response.body(ResponseUtils.getJsonResponseMessage("Successfully updated announcement"));
 				} else {
 					response.type("application/json");
 					response.status(500);
@@ -158,8 +162,8 @@ public class AnnouncementEndpoint {
 	public static String deleteAnnouncement(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
-			String announcementId = jsonMain.getString("ANNOUNCEMENT_ID");
+			Long guildId = jsonMain.getLong("guild_id");
+			String announcementId = jsonMain.getString("id");
 
 			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId) != null) {
 				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
@@ -189,25 +193,24 @@ public class AnnouncementEndpoint {
 	public static String listAnnouncements(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
+			Long guildId = jsonMain.getLong("guild_id");
 
-			Integer amount = jsonMain.getInt("AMOUNT");
+			Integer amount = jsonMain.getInt("amount");
 
 			ArrayList<JSONObject> announcements = new ArrayList<>();
 			if (amount == -1) {
 				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					JSONObject obj = new JSONObject();
-					obj.put("GUILD_ID", a.getGuildId());
-					obj.put("ANNOUNCEMENT_ID", a.getAnnouncementId().toString());
-					obj.put("ANNOUNCEMENT_CHANNEL", a.getAnnouncementChannelId());
-					obj.put("EVENT_ID", a.getEventId());
-					obj.put("EVENT_COLOR", a.getEventColor().name());
-					obj.put("TYPE", a.getAnnouncementType().name());
-					obj.put("HOURS", a.getHoursBefore());
-					obj.put("MINUTES", a.getMinutesBefore());
-					obj.put("INFO", a.getInfo());
-					obj.put("SUBSCRIBERS_ROLE", a.getSubscriberRoleIds());
-					obj.put("SUBSCRIBERS_USER", a.getSubscriberUserIds());
+					obj.put("id", a.getAnnouncementId().toString());
+					obj.put("channel", a.getAnnouncementChannelId());
+					obj.put("event_id", a.getEventId());
+					obj.put("event_color", a.getEventColor().name());
+					obj.put("type", a.getAnnouncementType().name());
+					obj.put("hours", a.getHoursBefore());
+					obj.put("minutes", a.getMinutesBefore());
+					obj.put("info", a.getInfo());
+					obj.put("subscribers_role", a.getSubscriberRoleIds());
+					obj.put("subscribers_user", a.getSubscriberUserIds());
 
 					announcements.add(obj);
 				}
@@ -216,17 +219,16 @@ public class AnnouncementEndpoint {
 				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					if (i < amount) {
 						JSONObject obj = new JSONObject();
-						obj.put("GUILD_ID", a.getGuildId());
-						obj.put("ANNOUNCEMENT_ID", a.getAnnouncementId().toString());
-						obj.put("ANNOUNCEMENT_CHANNEL", a.getAnnouncementChannelId());
-						obj.put("EVENT_ID", a.getEventId());
-						obj.put("EVENT_COLOR", a.getEventColor().name());
-						obj.put("TYPE", a.getAnnouncementType().name());
-						obj.put("HOURS", a.getHoursBefore());
-						obj.put("MINUTES", a.getMinutesBefore());
-						obj.put("INFO", a.getInfo());
-						obj.put("SUBSCRIBERS_ROLE", a.getSubscriberRoleIds());
-						obj.put("SUBSCRIBERS_USER", a.getSubscriberUserIds());
+						obj.put("id", a.getAnnouncementId().toString());
+						obj.put("channel", a.getAnnouncementChannelId());
+						obj.put("event_id", a.getEventId());
+						obj.put("event_color", a.getEventColor().name());
+						obj.put("type", a.getAnnouncementType().name());
+						obj.put("hours", a.getHoursBefore());
+						obj.put("minutes", a.getMinutesBefore());
+						obj.put("info", a.getInfo());
+						obj.put("subscribers_role", a.getSubscriberRoleIds());
+						obj.put("subscribers_user", a.getSubscriberUserIds());
 
 						announcements.add(obj);
 						i++;
@@ -237,8 +239,8 @@ public class AnnouncementEndpoint {
 			}
 
 			JSONObject body = new JSONObject();
-			body.put("AMOUNT", announcements.size());
-			body.put("ANNOUNCEMENTS", announcements);
+			body.put("amount", announcements.size());
+			body.put("announcements", announcements);
 
 			response.type("application/json");
 			response.status(200);

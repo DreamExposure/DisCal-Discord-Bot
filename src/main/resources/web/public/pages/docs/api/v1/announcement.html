@@ -15,6 +15,7 @@
 
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/docs.css" rel="stylesheet">
 	</head>
 
 	<body>
@@ -70,9 +71,579 @@
 				<a href="/docs/api/v1/time">
 					<button>Time</button>
 				</a>
+				<hr>
+				<h4>Jump</h4>
+				<a href="/docs/api/v1/announcement#get">
+					<button>/get</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/announcement#create">
+					<button>/create</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/announcement#update">
+					<button>/update</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/announcement#delete">
+					<button>/delete</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/announcement#list">
+					<button>/list</button>
+				</a>
 			</div>
 			<h1>API v1 Docs - Announcement Endpoint</h1>
+			<p>
+				The announcement endpoints allows you to create, edit, delete, and list announcements for a specific
+				guild.
+			</p>
+			<br>
 
+			<hr>
+
+			<h2 id="get">/get</h2>
+			<p>
+				Returns the specified announcement's data.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"id": "b067378e-2565-4116-aa20-08cc144d1fdb"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"channel": "266666669542342656",
+				"event_id": "divq9ihqhoq9hbm2tncj8set04_20180317T030000Z",
+				"event_color": "NONE",
+				"type": "RECUR",
+				"hours": 1,
+				"minutes": 30,
+				"info": "Event is in 1 hour and thirty minutes!",
+				"subscribers_role": ["everyone", "378479752186560512"],
+				"subscribers_user": ["130510525770629121"]
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>The ID of the announcement</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>channel</td>
+					<td>String</td>
+					<td>ID of the channel the announcement will announce in</td>
+				</tr>
+				<tr>
+					<td>event_id</td>
+					<td>String</td>
+					<td>ID of the event the announcement is for</td>
+				</tr>
+				<tr>
+					<td>event_color</td>
+					<td>String</td>
+					<td>Event Color the announcement will check for</td>
+				</tr>
+				<tr>
+					<td>type</td>
+					<td>String</td>
+					<td>The announcement's type</td>
+				</tr>
+				<tr>
+					<td>event_color</td>
+					<td>String</td>
+					<td>Event Color the announcement will check for</td>
+				</tr>
+				<tr>
+					<td>hours</td>
+					<td>int</td>
+					<td>The amount of hours before the event to fire (added to minutes)</td>
+				</tr>
+				<tr>
+					<td>minutes</td>
+					<td>int</td>
+					<td>The amount of minutes before the event to fire (added to hours)</td>
+				</tr>
+				<tr>
+					<td>info</td>
+					<td>String</td>
+					<td>Additional info for the announcement</td>
+				</tr>
+				<tr>
+					<td>subscribers_role</td>
+					<td>List(of Strings)</td>
+					<td>List of roles subscribed to the announcement</td>
+				</tr>
+				<tr>
+					<td>subscribers_user</td>
+					<td>List(of Strings)</td>
+					<td>List of users subscribed to the announcement</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="create">/create</h2>
+			<p>
+				Creates a new announcement with the specified information
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"channel": "266666669542342656",
+				"event_id": "divq9ihqhoq9hbm2tncj8set04",
+				"type": "RECUR",
+				"hours": 1,
+				"minutes": 30,
+				"info": ""
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully created announcement",
+				"id": "b067378e-2565-4116-aa20-08cc144d1fdb"
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>channel</td>
+					<td>String</td>
+					<td>ID of channel to post announcement in</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>type</td>
+					<td>String</td>
+					<td>The announcement type</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>event_id</td>
+					<td>String</td>
+					<td>ID of event for announcement to check</td>
+					<td>Required if type equals "RECUR" or "SPECIFIC"</td>
+				</tr>
+				<tr>
+					<td>event_color</td>
+					<td>String</td>
+					<td>Color of events to check</td>
+					<td>Required if type equals "COLOR"</td>
+				</tr>
+				<tr>
+					<td>hours</td>
+					<td>int</td>
+					<td>Amount of hours before event to announce (added to minutes)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>minutes</td>
+					<td>int</td>
+					<td>Amount of minutes before event to announce (added to hours)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>info</td>
+					<td>String</td>
+					<td>Additional announcement info (leave blank to ignore)</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of Creation</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>ID of the new announcement</td>
+				</tr>
+
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="update">/update</h2>
+			<p>
+				Updates an announcement with the specified information
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+				"channel": "266666669542342656",
+				"event_id": "divq9ihqhoq9hbm2tncj8set04",
+				"type": "RECUR",
+				"hours": 4,
+				"info": "I just updated this announcement through the API!"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully updated announcement"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>The Announcement ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>channel</td>
+					<td>String</td>
+					<td>ID of channel to post announcement in</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>type</td>
+					<td>String</td>
+					<td>The announcement type</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>event_id</td>
+					<td>String</td>
+					<td>ID of event for announcement to check</td>
+					<td>Required if type changed AND equals "RECUR" or "SPECIFIC"</td>
+				</tr>
+				<tr>
+					<td>event_color</td>
+					<td>String</td>
+					<td>Color of events to check</td>
+					<td>Required if type changed AND equals "COLOR"</td>
+				</tr>
+				<tr>
+					<td>hours</td>
+					<td>int</td>
+					<td>Amount of hours before event to announce (added to minutes)</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>minutes</td>
+					<td>int</td>
+					<td>Amount of minutes before event to announce (added to hours)</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>info</td>
+					<td>String</td>
+					<td>Additional announcement info</td>
+					<td>False</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of update</td>
+				</tr>
+
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="delete">/delete</h2>
+			<p>
+				Deletes the specified announcement if it exists
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully deleted announcement"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>The announcement ID</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of deletion</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="list">/list</h2>
+			<p>
+				Lists the specified amount of announcements from the guild.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"amount": -1,
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"amount": 1,
+				"announcements": [{
+					"id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+					"channel": "266666669542342656",
+					"event_id": "divq9ihqhoq9hbm2tncj8set04",
+					"event_color": "NONE",
+					"type": "RECUR",
+					"hours": 4,
+					"minutes": 30,
+					"info": "4 hours and 30 minutes until event!",
+					"subscribers_role": ["everyone", "378479752186560512"],
+					"subscribers_user": ["130510525770629121"]
+				}]
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>amount</td>
+					<td>int</td>
+					<td>Amount of announcements to list, "-1" for all</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>amount</td>
+					<td>int</td>
+					<td>Amount of announcements returned</td>
+				</tr>
+				<tr>
+					<td>announcements.channel</td>
+					<td>String</td>
+					<td>ID of channel to post announcement in</td>
+				</tr>
+				<tr>
+					<td>announcements.type</td>
+					<td>String</td>
+					<td>The announcement type</td>
+				</tr>
+				<tr>
+					<td>announcements.event_id</td>
+					<td>String</td>
+					<td>ID of event for announcement to check</td>
+				</tr>
+				<tr>
+					<td>announcements.event_color</td>
+					<td>String</td>
+					<td>Color of events to check</td>
+				</tr>
+				<tr>
+					<td>announcements.hours</td>
+					<td>int</td>
+					<td>Amount of hours before event to announce (added to minutes)</td>
+				</tr>
+				<tr>
+					<td>announcements.minutes</td>
+					<td>int</td>
+					<td>Amount of minutes before event to announce (added to hours)</td>
+				</tr>
+				<tr>
+					<td>announcements.info</td>
+					<td>String</td>
+					<td>Additional announcement info (leave blank to ignore)</td>
+				</tr>
+				<tr>
+					<td>announcements.subscribers_role</td>
+					<td>List(of Strings)</td>
+					<td>List of roles subscribed to the announcement</td>
+				</tr>
+				<tr>
+					<td>announcements.subscribers_user</td>
+					<td>List(of Strings)</td>
+					<td>List of users subscribed to the announcement</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
 		</div>
 	</body>
 
