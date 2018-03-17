@@ -23,19 +23,17 @@ public class CalendarEndpoint {
 	public static String getCalendar(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
-			Integer calNumber = jsonMain.getInt("CALENDAR_NUMBER");
+			Long guildId = jsonMain.getLong("guild_id");
+			Integer calNumber = jsonMain.getInt("number");
 
 			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 
 				JSONObject body = new JSONObject();
-				body.put("GUILD_ID", guildId);
-				body.put("CALENDAR_NUMBER", calNumber);
-				body.put("EXTERNAL", calendar.isExternal());
-				body.put("CALENDAR_ID", calendar.getCalendarId());
-				body.put("CALENDAR_ADDRESS", calendar.getCalendarAddress());
+				body.put("external", calendar.isExternal());
+				body.put("id", calendar.getCalendarId());
+				body.put("address", calendar.getCalendarAddress());
 
 				response.type("application/json");
 				response.status(200);
@@ -58,26 +56,24 @@ public class CalendarEndpoint {
 	public static String listCalendars(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			Long guildId = jsonMain.getLong("GUILD_ID");
+			Long guildId = jsonMain.getLong("guild_id");
 
 			ArrayList<JSONObject> cals = new ArrayList<>();
 			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(guildId)) {
 				if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
 					JSONObject body = new JSONObject();
-					body.put("GUILD_ID", guildId);
-					body.put("CALENDAR_NUMBER", cal.getCalendarNumber());
-					body.put("EXTERNAL", cal.isExternal());
-					body.put("CALENDAR_ID", cal.getCalendarId());
-					body.put("CALENDAR_ADDRESS", cal.getCalendarAddress());
+					body.put("number", cal.getCalendarNumber());
+					body.put("external", cal.isExternal());
+					body.put("id", cal.getCalendarId());
+					body.put("address", cal.getCalendarAddress());
 
 					cals.add(body);
 				}
 			}
 
 			JSONObject body = new JSONObject();
-			body.put("GUILD_ID", guildId);
-			body.put("COUNT", cals.size());
-			body.put("CALENDARS", cals);
+			body.put("count", cals.size());
+			body.put("calendars", cals);
 
 			response.type("application/json");
 			response.status(200);
