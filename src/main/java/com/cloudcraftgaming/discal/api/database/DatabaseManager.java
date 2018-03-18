@@ -9,6 +9,7 @@ import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.RsvpData;
+import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 
 import java.sql.*;
@@ -85,6 +86,7 @@ public class DatabaseManager {
 			String settingsTableName = String.format("%sGUILD_SETTINGS", databaseInfo.getPrefix());
 			String eventTableName = String.format("%sEVENTS", databaseInfo.getPrefix());
 			String rsvpTableName = String.format("%sRSVP", databaseInfo.getPrefix());
+			String apiTableName = String.format("%sAPI", databaseInfo.getPrefix());
 			String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
 					"(GUILD_ID VARCHAR(255) not NULL, " +
 					" EXTERNAL_CALENDAR BOOLEAN not NULL, " +
@@ -140,11 +142,19 @@ public class DatabaseManager {
 					" NOT_GOING LONGTEXT, " +
 					" UNDECIDED LONGTEXT, " +
 					" PRIMARY KEY (GUILD_ID, EVENT_ID))";
+			String createAPITable = "CREATE TABLE IF NOT EXISTS " + apiTableName +
+					" (USER_ID varchar(255) not NULL, " +
+					" API_KEY varchar(64) not NULL, " +
+					" BLOCKED BOOLEAN not NULL, " +
+					" TIME_ISSUED LONG not NULL, " +
+					" USES INT not NULL, " +
+					" PRIMARY KEY (USER_ID, API_KEY))";
 			statement.executeUpdate(createAnnouncementTable);
 			statement.executeUpdate(createSettingsTable);
 			statement.executeUpdate(createCalendarTable);
 			statement.executeUpdate(createEventTable);
 			statement.executeUpdate(createRsvpTable);
+			statement.executeUpdate(createAPITable);
 			statement.close();
 			System.out.println("Successfully created needed tables in MySQL database!");
 		} catch (SQLException e) {
@@ -152,6 +162,58 @@ public class DatabaseManager {
 			ExceptionHandler.sendException(null, "Creating MySQL tables failed", e, this.getClass());
 			e.printStackTrace();
 		}
+	}
+
+	public boolean updateAPIAccount(UserAPIAccount acc) {
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String tableName = String.format("%sAPI", databaseInfo.getPrefix());
+
+				String query = "SELECT * FROM " + tableName + " WHERE API_KEY = '" + String.valueOf(acc.getAPIKey()) + "';";
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
+
+				Boolean hasStuff = res.next();
+
+				if (!hasStuff || res.getString("API_KEY") == null) {
+					//Data not present, add to DB.
+					String insertCommand = "INSERT INTO " + tableName +
+							"(USER_ID, API_KEY, BLOCKED, TIME_ISSUED, USES)" +
+							" VALUES (?, ?, ?, ?, ?);";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
+					ps.setString(1, acc.getUserId());
+					ps.setString(2, acc.getAPIKey());
+					ps.setBoolean(3, acc.isBlocked());
+					ps.setLong(4, acc.getTimeIssued());
+					ps.setInt(5, acc.getUses());
+
+					ps.executeUpdate();
+					ps.close();
+					statement.close();
+				} else {
+					//Data present, update.
+					String update = "UPDATE " + tableName
+							+ " SET USER_ID = ?, BLOCKED = ?,"
+							+ " USES = ? WHERE API_KEY = ?";
+					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(update);
+
+					ps.setString(1, acc.getUserId());
+					ps.setBoolean(2, acc.isBlocked());
+					ps.setInt(3, acc.getUses());
+					ps.setString(4, acc.getAPIKey());
+
+					ps.executeUpdate();
+
+					ps.close();
+					statement.close();
+				}
+				return true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			ExceptionHandler.sendException(null, "Failed to update API account", e, this.getClass());
+		}
+		return false;
 	}
 
 	public boolean updateSettings(GuildSettings settings) {
@@ -480,6 +542,40 @@ public class DatabaseManager {
 			ExceptionHandler.sendException(null, "Failed to update/insert event data.", e, this.getClass());
 		}
 		return false;
+	}
+
+	public UserAPIAccount getAPIAccount(String APIKey) {
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String dataTableName = String.format("%sAPI", databaseInfo.getPrefix());
+
+				String query = "SELECT * FROM " + dataTableName + " WHERE API_KEY = '" + APIKey + "';";
+				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
+				ResultSet res = statement.executeQuery();
+
+				Boolean hasStuff = res.next();
+
+				if (hasStuff && res.getString("API_KEY") != null) {
+					UserAPIAccount account = new UserAPIAccount();
+					account.setAPIKey(APIKey);
+					account.setUserId(res.getString("USER_ID"));
+					account.setBlocked(res.getBoolean("BLOCKED"));
+					account.setTimeIssued(res.getLong("TIME_ISSUED"));
+					account.setUses(res.getInt("USES"));
+
+					statement.close();
+
+					return account;
+				} else {
+					//Data not present.
+					statement.close();
+					return null;
+				}
+			}
+		} catch (SQLException e) {
+			ExceptionHandler.sendException(null, "Failed to get API Account.", e, this.getClass());
+		}
+		return null;
 	}
 
 	public GuildSettings getSettings(long guildId) {

@@ -1,12 +1,14 @@
 package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
+import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
 import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.MessageUtils;
@@ -79,6 +81,8 @@ public class DevCommand implements ICommand {
 		ci.getSubCommands().put("shutdown", "Shuts down the bot application.");
 		ci.getSubCommands().put("eval", "Evaluates the given code.");
 		ci.getSubCommands().put("testShards", "Tests to make sure all shards respond.");
+		ci.getSubCommands().put("api-register", "Register new API key");
+		ci.getSubCommands().put("api-block", "Block API usage by key");
 
 		return ci;
 	}
@@ -136,6 +140,13 @@ public class DevCommand implements ICommand {
 						break;
 					case "testshards":
 						moduleTestShards(event);
+						break;
+					case "api-register":
+						registerApiKey(args, event);
+						break;
+					case "api-block":
+						blockAPIKey(args, event);
+						break;
 					default:
 						Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
 						break;
@@ -345,6 +356,49 @@ public class DevCommand implements ICommand {
 		}
 
 		Message.sendMessage(r.toString(), event);
+	}
+
+	private void registerApiKey(String[] args, MessageReceivedEvent event) {
+		if (args.length == 2) {
+			Message.sendMessage("Registering new API key...", event);
+
+			String userId = args[1];
+
+			UserAPIAccount account = new UserAPIAccount();
+			account.setUserId(userId);
+			account.setAPIKey(KeyGenerator.csRandomAlphaNumericString(64));
+			account.setTimeIssued(System.currentTimeMillis());
+			account.setBlocked(false);
+			account.setUses(0);
+
+			if (DatabaseManager.getManager().updateAPIAccount(account)) {
+				Message.sendMessage("Check your DMs for the new API Key!", event);
+				Message.sendDirectMessage(account.getAPIKey(), event.getAuthor());
+			} else {
+				Message.sendMessage("Error occurred! Could not register new API key!", event);
+			}
+		} else {
+			Message.sendMessage("Please specify the USER ID linked to the key!", event);
+		}
+	}
+
+	private void blockAPIKey(String[] args, MessageReceivedEvent event) {
+		if (args.length == 2) {
+			Message.sendMessage("Blocking API key...", event);
+
+			String key = args[1];
+
+			UserAPIAccount account = DatabaseManager.getManager().getAPIAccount(key);
+			account.setBlocked(true);
+
+			if (DatabaseManager.getManager().updateAPIAccount(account)) {
+				Message.sendMessage("Successfully blocked API key!", event);
+			} else {
+				Message.sendMessage("Error occurred! Could not block API key!", event);
+			}
+		} else {
+			Message.sendMessage("Please specify the API KEY!", event);
+		}
 	}
 
 	private long botPercent(IGuild g) {

@@ -1,7 +1,9 @@
 package com.cloudcraftgaming.discal.web.utils;
 
+import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.network.discord.DiscordLoginHandler;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.web.endpoints.v1.*;
 import com.cloudcraftgaming.discal.web.handler.DashboardHandler;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
@@ -34,9 +36,30 @@ public class SparkUtils {
 					halt(405, "Method not allowed");
 				}
 				//Check authorization
-				if (request.headers().contains("Authorization") && !request.headers("Authorization").equals("API_KEY")) {
-					//TODO: Actually check auth!!! < Just lazy right now
-					halt(401, "Unauthorized");
+				if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
+					//User is logged in from website, no API key needed
+					System.out.println("API Call from website. Origin IP: " + request.ip());
+				} else {
+					//Requires "Authorization Header
+					if (request.headers().contains("Authorization")) {
+						String key = request.headers("Authorization");
+						UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
+						if (acc != null) {
+							if (acc.isBlocked()) {
+								System.out.println("Attempted to use blocked API Key: " + acc.getAPIKey() + "; IP: " + request.ip());
+								halt(401, "Unauthorized");
+							} else {
+								//Everything checks out!
+								acc.setUses(acc.getUses() + 1);
+								DatabaseManager.getManager().updateAPIAccount(acc);
+							}
+						} else {
+							System.out.println("Attempted to use invalid API Key: " + key + "; IP: " + request.ip());
+							halt(401, "Unauthorized");
+						}
+					} else {
+						halt(400, "Bad Request");
+					}
 				}
 				//Only accept json because its easier to parse and handle.
 				/*
