@@ -21,19 +21,16 @@ public class RsvpEndpoint {
 	public static String getRsvp(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
-			String eventId = jsonMain.getString("EVENT_ID");
+			String guildId = jsonMain.getString("guild_id");
+			String eventId = jsonMain.getString("id");
 
 			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Long.valueOf(guildId), eventId);
 
 			JSONObject body = new JSONObject();
-			body.put("GUILD_ID", guildId);
-			body.put("EVENT_ID", eventId);
-			body.put("EVENT_END", rsvp.getEventEnd());
-			body.put("ON_TIME", rsvp.getGoingOnTime());
-			body.put("LATE", rsvp.getGoingLate());
-			body.put("UNDECIDED", rsvp.getUndecided());
-			body.put("NOT_GOING", rsvp.getNotGoing());
+			body.put("on_time", rsvp.getGoingOnTime());
+			body.put("late", rsvp.getGoingLate());
+			body.put("undecided", rsvp.getUndecided());
+			body.put("not_going", rsvp.getNotGoing());
 
 			response.type("application/json");
 			response.status(200);
@@ -51,39 +48,39 @@ public class RsvpEndpoint {
 	public static String updateRsvp(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("GUILD_ID");
-			String eventId = jsonMain.getString("EVENT_ID");
+			String guildId = jsonMain.getString("guild_id");
+			String eventId = jsonMain.getString("id");
 
 			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Long.valueOf(guildId), eventId);
 
-			if (jsonMain.has("ON_TIME")) {
+			if (jsonMain.has("on_time")) {
 				rsvp.getGoingOnTime().clear();
-				for (int i = 0; i < jsonMain.getJSONArray("ON_TIME").length(); i++) {
-					String s = jsonMain.getJSONArray("ON_TIME").getString(i);
+				for (int i = 0; i < jsonMain.getJSONArray("on_time").length(); i++) {
+					String s = jsonMain.getJSONArray("on_time").getString(i);
 					rsvp.getGoingOnTime().add(s);
 				}
 			}
 
-			if (jsonMain.has("LATE")) {
+			if (jsonMain.has("late")) {
 				rsvp.getGoingOnTime().clear();
-				for (int i = 0; i < jsonMain.getJSONArray("LATE").length(); i++) {
-					String s = jsonMain.getJSONArray("LATE").getString(i);
+				for (int i = 0; i < jsonMain.getJSONArray("late").length(); i++) {
+					String s = jsonMain.getJSONArray("late").getString(i);
 					rsvp.getGoingLate().add(s);
 				}
 			}
 
-			if (jsonMain.has("UNDECIDED")) {
+			if (jsonMain.has("undecided")) {
 				rsvp.getGoingOnTime().clear();
-				for (int i = 0; i < jsonMain.getJSONArray("UNDECIDED").length(); i++) {
-					String s = jsonMain.getJSONArray("UNDECIDED").getString(i);
+				for (int i = 0; i < jsonMain.getJSONArray("undecided").length(); i++) {
+					String s = jsonMain.getJSONArray("undecided").getString(i);
 					rsvp.getUndecided().add(s);
 				}
 			}
 
-			if (jsonMain.has("NOT_GOING")) {
+			if (jsonMain.has("not_going")) {
 				rsvp.getGoingOnTime().clear();
-				for (int i = 0; i < jsonMain.getJSONArray("NOT_GOING").length(); i++) {
-					String s = jsonMain.getJSONArray("NOT_GOING").getString(i);
+				for (int i = 0; i < jsonMain.getJSONArray("not_going").length(); i++) {
+					String s = jsonMain.getJSONArray("not_going").getString(i);
 					rsvp.getNotGoing().add(s);
 				}
 			}
@@ -91,11 +88,7 @@ public class RsvpEndpoint {
 			if (DatabaseManager.getManager().updateRsvpData(rsvp)) {
 				response.type("application/json");
 				response.status(200);
-				JSONObject body = new JSONObject();
-				body.put("GUILD_ID", guildId);
-				body.put("EVENT_ID", eventId);
-				body.put("MESSAGE", "Successfully updated RSVP Data");
-				response.body(body.toString());
+				response.body(ResponseUtils.getJsonResponseMessage("Successfully updated RSVP data"));
 			} else {
 				response.type("application/json");
 				response.status(500);

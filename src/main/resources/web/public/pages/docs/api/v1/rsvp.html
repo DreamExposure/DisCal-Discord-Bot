@@ -15,6 +15,7 @@
 
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/docs.css" rel="stylesheet">
 	</head>
 
 	<body>
@@ -70,8 +71,200 @@
 				<a href="/docs/api/v1/time">
 					<button>Time</button>
 				</a>
+				<h4>Jump</h4>
+				<a href="/docs/api/v1/rsvp#get">
+					<button>/get</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/rsvp#update">
+					<button>/update</button>
+				</a>
 			</div>
 			<h1>API v1 Docs - RSVP Endpoint</h1>
+			<p>
+				The RSVP endpoints allows you to get and edit RSVP status for events in a guild.
+			</p>
+			<br>
+
+			<hr>
+
+			<h2 id="get">/get</h2>
+			<p>
+				Returns the specified event's RSVP details.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"id": "divq9ihqhoq9hbm2tncj8set04"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"on_time": ["130510525770629121"],
+				"late": ["233611560545812480", "142107863307780097"],
+				"undecided": [],
+				"not_going": []
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>The Event ID</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>on_time</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "on time"</td>
+				</tr>
+				<tr>
+					<td>late</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "late"</td>
+				</tr>
+				<tr>
+					<td>undecided</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "unsure"/"undecided"</td>
+				</tr>
+				<tr>
+					<td>not_going</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "not going"</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="update">/update</h2>
+			<p>
+				Updates the specified event's RSVP data.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"id": "divq9ihqhoq9hbm2tncj8set04",
+				"on_time": ["130510525770629121"],
+				"late": ["233611560545812480", "142107863307780097"]
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"message": "Successfully updated RSVP data"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>The Event ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>on_time</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "on time"</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>late</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "late"</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>undecided</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "unsure"/"undecided"</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>not_going</td>
+					<td>List (of Strings)</td>
+					<td>List of users that RSVPed as "not going"</td>
+					<td>False</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of the update</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
 
 		</div>
 	</body>
