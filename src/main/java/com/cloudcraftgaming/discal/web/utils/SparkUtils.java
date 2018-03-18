@@ -66,7 +66,6 @@ public class SparkUtils {
 				path("/calendar", () -> {
 					post("/get", CalendarEndpoint::getCalendar);
 					post("/list", CalendarEndpoint::listCalendars);
-					post("time", TimeEndpoint::getTime);
 				});
 				path("/events", () -> {
 					path("/list", () -> {
