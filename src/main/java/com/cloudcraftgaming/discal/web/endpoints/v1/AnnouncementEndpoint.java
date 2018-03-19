@@ -44,6 +44,8 @@ public class AnnouncementEndpoint {
 				body.put("hours", a.getHoursBefore());
 				body.put("minutes", a.getMinutesBefore());
 				body.put("info", a.getInfo());
+				body.put("enabled", a.isEnabled());
+				body.put("info_only", a.isInfoOnly());
 				body.put("subscribers_role", a.getSubscriberRoleIds());
 				body.put("subscribers_user", a.getSubscriberUserIds());
 
@@ -134,6 +136,11 @@ public class AnnouncementEndpoint {
 					a.setMinutesBefore(body.getInt("minutes"));
 				if (body.has("info"))
 					a.setInfo(body.getString("info"));
+				if (body.has("enabled"))
+					a.setEnabled(body.getBoolean("enabled"));
+				if (body.has("info_only")) {
+					a.setInfoOnly(body.getBoolean("info_only"));
+				}
 
 				if (DatabaseManager.getManager().updateAnnouncement(a)) {
 					response.type("application/json");
@@ -209,6 +216,8 @@ public class AnnouncementEndpoint {
 					obj.put("hours", a.getHoursBefore());
 					obj.put("minutes", a.getMinutesBefore());
 					obj.put("info", a.getInfo());
+					obj.put("enabled", a.isEnabled());
+					obj.put("info_only", a.isInfoOnly());
 					obj.put("subscribers_role", a.getSubscriberRoleIds());
 					obj.put("subscribers_user", a.getSubscriberUserIds());
 
@@ -227,6 +236,8 @@ public class AnnouncementEndpoint {
 						obj.put("hours", a.getHoursBefore());
 						obj.put("minutes", a.getMinutesBefore());
 						obj.put("info", a.getInfo());
+						obj.put("enabled", a.isEnabled());
+						obj.put("info_only", a.isInfoOnly());
 						obj.put("subscribers_role", a.getSubscriberRoleIds());
 						obj.put("subscribers_user", a.getSubscriberUserIds());
 

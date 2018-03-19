@@ -124,6 +124,8 @@
 				"hours": 1,
 				"minutes": 30,
 				"info": "Event is in 1 hour and thirty minutes!",
+				"enabled": true,
+				"info_only:: false,
 				"subscribers_role": ["everyone", "378479752186560512"],
 				"subscribers_user": ["130510525770629121"]
 				}
@@ -202,6 +204,16 @@
 					<td>info</td>
 					<td>String</td>
 					<td>Additional info for the announcement</td>
+				</tr>
+				<tr>
+					<td>enabled</td>
+					<td>Boolean</td>
+					<td>Whether or not the announcement is enabled</td>
+				</tr>
+				<tr>
+					<td>info_only</td>
+					<td>Boolean</td>
+					<td>Whether or not the announcement will display just the "info" box</td>
 				</tr>
 				<tr>
 					<td>subscribers_role</td>
@@ -349,7 +361,9 @@
 				"event_id": "divq9ihqhoq9hbm2tncj8set04",
 				"type": "RECUR",
 				"hours": 4,
-				"info": "I just updated this announcement through the API!"
+				"info": "I just updated this announcement through the API!",
+				"enabled": true,
+				"info_only": false
 				}
 			</code></pre>
 			<br>
@@ -424,6 +438,18 @@
 					<td>info</td>
 					<td>String</td>
 					<td>Additional announcement info</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>enabled</td>
+					<td>Boolean</td>
+					<td>Whether or not the announcement is enabled</td>
+					<td>False</td>
+				</tr>
+				<tr>
+					<td>info_only</td>
+					<td>Boolean</td>
+					<td>Whether or not it will display just the "info" box</td>
 					<td>False</td>
 				</tr>
 				</tbody>
@@ -547,6 +573,8 @@
 					"hours": 4,
 					"minutes": 30,
 					"info": "4 hours and 30 minutes until event!",
+					"enabled": true,
+					"info_only": false,
 					"subscribers_role": ["everyone", "378479752186560512"],
 					"subscribers_user": ["130510525770629121"]
 				}]
@@ -625,7 +653,17 @@
 				<tr>
 					<td>announcements.info</td>
 					<td>String</td>
-					<td>Additional announcement info (leave blank to ignore)</td>
+					<td>Additional announcement info.</td>
+				</tr>
+				<tr>
+					<td>announcements.enabled</td>
+					<td>Boolean</td>
+					<td>Whether or not the announcement is enabled</td>
+				</tr>
+				<tr>
+					<td>announcements.info_only</td>
+					<td>Boolean</td>
+					<td>Whether or not the announcement will only display the "info" box</td>
 				</tr>
 				<tr>
 					<td>announcements.subscribers_role</td>
