@@ -3,7 +3,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1675502e1b844a46b1a59960b8a7c37c)](https://www.codacy.com/app/NovaFox161/DisCal-Discord-Bot?utm_source=github.com&utm_medium=referral&utm_content=NovaFox161/DisCal-Discord-Bot&utm_campaign=badger)
 [![CircleCI](https://circleci.com/gh/NovaFox161/DisCal-Discord-Bot.svg?style=svg)](https://circleci.com/gh/NovaFox161/DisCal-Discord-Bot)
 
-[Official Website](https://www.cloudcraftgaming.com/discal)
+[Official Website](https://www.discalbot.com)
 
 [Trello Board](https://trello.com/b/OuFo5aXu/discal)
 
