@@ -34,7 +34,7 @@ public class DiscordLoginHandler {
 			String code = request.queryParams("code");
 
 			//POST request to discord for access...
-			HttpResponse<JsonNode> httpResponse = Unirest.post("https://discordapp.com/api/v6/oauth2/token").header("Content-Type", "application/x-www-form-urlencoded").field("client_id", BotSettings.ID.get()).field("client_secret", BotSettings.SECRET.get()).field("grant_type", "authorization_code").field("code", code).field("redirect_uri", "http://localhost:4567/account/login").asJson();
+			HttpResponse<JsonNode> httpResponse = Unirest.post("https://discordapp.com/api/v6/oauth2/token").header("Content-Type", "application/x-www-form-urlencoded").field("client_id", BotSettings.ID.get()).field("client_secret", BotSettings.SECRET.get()).field("grant_type", "authorization_code").field("code", code).field("redirect_uri", BotSettings.REDIR_URL.get()).asJson();
 
 			JSONObject info = new JSONObject(httpResponse.getBody()).getJSONObject("object");
 
@@ -48,6 +48,7 @@ public class DiscordLoginHandler {
 			m.put("loggedIn", true);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
+			m.put("redirUri", BotSettings.REDIR_URI.get());
 
 			m.put("id", userInfo.getString("id"));
 			m.put("username", userInfo.getString("username"));

@@ -68,6 +68,7 @@ public class DiscordAccountHandler {
 			m.put("loggedIn", false);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
+			m.put("redirUri", BotSettings.REDIR_URI.get());
 			return m;
 		}
 	}
