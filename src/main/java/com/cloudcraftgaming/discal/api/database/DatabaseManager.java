@@ -81,12 +81,12 @@ public class DatabaseManager {
 		try {
 			Statement statement = databaseInfo.getConnection().createStatement();
 
-			String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
-			String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
-			String settingsTableName = String.format("%sGUILD_SETTINGS", databaseInfo.getPrefix());
-			String eventTableName = String.format("%sEVENTS", databaseInfo.getPrefix());
-			String rsvpTableName = String.format("%sRSVP", databaseInfo.getPrefix());
-			String apiTableName = String.format("%sAPI", databaseInfo.getPrefix());
+			String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
+			String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
+			String settingsTableName = String.format("%sguild_settings", databaseInfo.getPrefix());
+			String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
+			String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
+			String apiTableName = String.format("%sapi", databaseInfo.getPrefix());
 			String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
 					"(GUILD_ID VARCHAR(255) not NULL, " +
 					" EXTERNAL_CALENDAR BOOLEAN not NULL, " +
@@ -167,7 +167,7 @@ public class DatabaseManager {
 	public boolean updateAPIAccount(UserAPIAccount acc) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String tableName = String.format("%sAPI", databaseInfo.getPrefix());
+				String tableName = String.format("%sapi", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + tableName + " WHERE API_KEY = '" + String.valueOf(acc.getAPIKey()) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -222,7 +222,7 @@ public class DatabaseManager {
 		}
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String dataTableName = String.format("%sGUILD_SETTINGS", databaseInfo.getPrefix());
+				String dataTableName = String.format("%sguild_settings", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(settings.getGuildID()) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -303,7 +303,7 @@ public class DatabaseManager {
 	public boolean updateCalendar(CalendarData calData) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(calData.getGuildId()) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -361,7 +361,7 @@ public class DatabaseManager {
 	public Boolean updateAnnouncement(Announcement announcement) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcement.getAnnouncementId() + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -435,7 +435,7 @@ public class DatabaseManager {
 	public Boolean updateEventData(EventData data) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String eventTableName = String.format("%sEVENTS", databaseInfo.getPrefix());
+				String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
 
 				if (data.getEventId().contains("_")) {
 					data.setEventId(data.getEventId().split("_")[0]);
@@ -488,7 +488,7 @@ public class DatabaseManager {
 	public Boolean updateRsvpData(RsvpData data) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String rsvpTableName = String.format("%sRSVP", databaseInfo.getPrefix());
+				String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + rsvpTableName + " WHERE EVENT_ID = '" + data.getEventId() + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -547,7 +547,7 @@ public class DatabaseManager {
 	public UserAPIAccount getAPIAccount(String APIKey) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String dataTableName = String.format("%sAPI", databaseInfo.getPrefix());
+				String dataTableName = String.format("%sapi", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + dataTableName + " WHERE API_KEY = '" + APIKey + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -582,7 +582,7 @@ public class DatabaseManager {
 		GuildSettings settings = new GuildSettings(guildId);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String dataTableName = String.format("%sGUILD_SETTINGS", databaseInfo.getPrefix());
+				String dataTableName = String.format("%sguild_settings", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -624,7 +624,7 @@ public class DatabaseManager {
 		ArrayList<GuildSettings> allSettings = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String dataTableName = String.format("%sGUILD_SETTINGS", databaseInfo.getPrefix());
+				String dataTableName = String.format("%sguild_settings", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + dataTableName);
 				ResultSet res = stmt.executeQuery();
@@ -662,7 +662,7 @@ public class DatabaseManager {
 		CalendarData calData = new CalendarData(guildId, 1);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -688,7 +688,7 @@ public class DatabaseManager {
 		CalendarData calData = new CalendarData(guildId, calendarNumber);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -714,7 +714,7 @@ public class DatabaseManager {
 		ArrayList<CalendarData> calendars = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -739,7 +739,7 @@ public class DatabaseManager {
 		ArrayList<CalendarData> calendars = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + calendarTableName);
 				ResultSet res = stmt.executeQuery();
@@ -763,7 +763,7 @@ public class DatabaseManager {
 		Integer amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTableName = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + calendarTableName + ";";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -793,7 +793,7 @@ public class DatabaseManager {
 
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String eventTableName = String.format("%sEVENTS", databaseInfo.getPrefix());
+				String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -818,7 +818,7 @@ public class DatabaseManager {
 		ArrayList<EventData> allData = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String eventTableName = String.format("%sEVENTS", databaseInfo.getPrefix());
+				String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + eventTableName);
 				ResultSet res = stmt.executeQuery();
@@ -847,7 +847,7 @@ public class DatabaseManager {
 		data.setEventId(eventId);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String rsvpTableName = String.format("%sRSVP", databaseInfo.getPrefix());
+				String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -875,7 +875,7 @@ public class DatabaseManager {
 		ArrayList<RsvpData> dataList = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String rsvpTableName = String.format("%sRSVP", databaseInfo.getPrefix());
+				String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + rsvpTableName);
 				ResultSet res = stmt.executeQuery();
 
@@ -910,7 +910,7 @@ public class DatabaseManager {
 	public Announcement getAnnouncement(UUID announcementId, long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = '" + announcementId.toString() + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -953,7 +953,7 @@ public class DatabaseManager {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + String.valueOf(guildId) + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -991,7 +991,7 @@ public class DatabaseManager {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName);
 				ResultSet res = stmt.executeQuery();
@@ -1028,7 +1028,7 @@ public class DatabaseManager {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1");
 				ResultSet res = stmt.executeQuery();
@@ -1067,7 +1067,7 @@ public class DatabaseManager {
 		Integer amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "SELECT * FROM " + announcementTableName + ";";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
@@ -1095,7 +1095,7 @@ public class DatabaseManager {
 	public Boolean deleteAnnouncement(String announcementId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
@@ -1114,7 +1114,7 @@ public class DatabaseManager {
 	public Boolean deleteAnnouncementsForEvent(long guildId, String eventId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTableName = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
@@ -1135,7 +1135,7 @@ public class DatabaseManager {
 	public Boolean deleteEventData(String eventId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String eventTable = String.format("%sEVENTS", databaseInfo.getPrefix());
+				String eventTable = String.format("%sevents", databaseInfo.getPrefix());
 
 				//Check if recurring...
 				if (eventId.contains("_")) {
@@ -1160,7 +1160,7 @@ public class DatabaseManager {
 	public boolean deleteAllEventData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String eventTable = String.format("%sEVENTS", databaseInfo.getPrefix());
+				String eventTable = String.format("%sevents", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
@@ -1179,7 +1179,7 @@ public class DatabaseManager {
 	public boolean deleteAllAnnouncementData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String announcementTable = String.format("%sANNOUNCEMENTS", databaseInfo.getPrefix());
+				String announcementTable = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
@@ -1198,7 +1198,7 @@ public class DatabaseManager {
 	public boolean deleteAllRSVPData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String rsvpTable = String.format("%sRSVP", databaseInfo.getPrefix());
+				String rsvpTable = String.format("%srsvp", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
@@ -1217,7 +1217,7 @@ public class DatabaseManager {
 	public boolean deleteCalendar(CalendarData data) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
-				String calendarTable = String.format("%sCALENDARS", databaseInfo.getPrefix());
+				String calendarTable = String.format("%scalendars", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
