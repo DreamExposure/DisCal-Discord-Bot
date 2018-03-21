@@ -561,6 +561,10 @@ function updateEvent(editSubmitId) {
 	endDate.setHours(parseInt(endTimeString[0]), parseInt(endTimeString[1]), 0, 0);
 
 	var colorElement = document.getElementById("editColor-" + eventId);
+	var timeOffset = 0;
+	if (is.firefox()) {
+		timeOffset = 86400000;
+	}
 	if (document.getElementById("editEnableRecur-" + eventId) !== null) {
 		var freqElement = document.getElementById("editFrequency-" + eventId);
 		var bodyRaw = {
@@ -576,8 +580,8 @@ function updateEvent(editSubmitId) {
 				"count": document.getElementById("editCount-" + eventId).valueAsNumber,
 				"interval": document.getElementById("editInterval-" + eventId).valueAsNumber,
 			},
-			"epochStart": startDate.getTime() + 86400000,
-			"epochEnd": endDate.getTime() + 86400000
+			"epochStart": startDate.getTime() + timeOffset,
+			"epochEnd": endDate.getTime() + timeOffset
 		};
 	} else {
 		bodyRaw = {
@@ -593,8 +597,8 @@ function updateEvent(editSubmitId) {
 				"count": -1,
 				"interval": 1
 			},
-			"epochStart": startDate.getTime() + 86400000,
-			"epochEnd": endDate.getTime() + 86400000
+			"epochStart": startDate.getTime() + timeOffset,
+			"epochEnd": endDate.getTime() + timeOffset
 		};
 	}
 
@@ -628,6 +632,12 @@ function createNewEvent() {
 
 	var colorElement = document.getElementById("create-color");
 	var freqElement = document.getElementById("create-frequency");
+
+	var timeOffset = 0;
+	if (is.firefox()) {
+		timeOffset = 86400000;
+	}
+
 	var bodyRaw = {
 		"summary": document.getElementById("create-summary").value,
 		"description": document.getElementById("create-description").value,
@@ -640,8 +650,8 @@ function createNewEvent() {
 			"count": document.getElementById("create-count").valueAsNumber,
 			"interval": document.getElementById("create-interval").valueAsNumber,
 		},
-		"epochStart": startDate.getTime() + 86400000,
-		"epochEnd": endDate.getTime() + 86400000
+		"epochStart": startDate.getTime() + timeOffset,
+		"epochEnd": endDate.getTime() + timeOffset
 	};
 
 	var q = $.post("/api/v1/events/create", JSON.stringify(bodyRaw), function (response) {
