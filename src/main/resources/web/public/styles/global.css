@@ -96,9 +96,7 @@ hr {
 table {
 	max-width: 820px;
 	border: #ef0813 2px;
-	margin-left: 10px;
-	margin-right: 10px;
-	position: center;
+	margin: auto;
 }
 
 td {
