@@ -23,7 +23,6 @@ input[type=number]::-webkit-outer-spin-button {
 /* Adds a box around the numeric value in Safari and Chrome */
 input[type=number]::-webkit-textfield-decoration-container {
 	border: 1px #1b1f20 solid;
-	background: #232729;
 }
 
 html:not([dir="rtl"]) input {
