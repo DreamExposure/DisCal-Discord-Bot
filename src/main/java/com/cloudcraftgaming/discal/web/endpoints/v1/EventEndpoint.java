@@ -139,7 +139,11 @@ public class EventEndpoint {
 				jo.put("timezone", tz);
 				jo.put("summary", e.getSummary());
 				jo.put("description", e.getDescription());
-				jo.put("location", e.getLocation());
+				if (e.getLocked() != null) {
+					jo.put("location", e.getLocation());
+				} else {
+					jo.put("location", "N/a");
+				}
 				jo.put("color", EventColor.fromNameOrHexOrID(e.getColorId()).name());
 				jo.put("isParent", !(e.getId().contains("_")));
 
