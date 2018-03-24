@@ -45,6 +45,12 @@
 				and every command DisCal has to offer.
 				<br> <br>
 				Since many commands have sub-commands and functions, this page will be split into sections for each.
+				<br>
+				<br>
+				<br>
+				<strong>[] = required</strong>
+				<br>
+				<strong>() = optional</strong>
 			</p>
 
 			<hr>
@@ -72,82 +78,70 @@
 						<th>Description</th>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!calendar create</td>
-						<td style="text-align: center;">&nbsp;!calendar create &lt;name, spaces allowed&gt;</td>
-						<td style="text-align: center;">&nbsp;!calendar create example Calendar</td>
-						<td style="text-align: center;">&nbsp;Creates a calendar with the specified name (and starts the
-							creation process). DisCal will walk you through this process as well.
-						</td>
+						<td>!cal create</td>
+						<td>!cal create [name w/ spaces]</td>
+						<td>!cal create cool calendar</td>
+						<td>Starts the calendar creator</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!calendar edit</td>
-						<td style="text-align: center;">&nbsp;!calendar edit</td>
-						<td style="text-align: center;">&nbsp;!calendar edit</td>
-						<td style="text-align: center;">&nbsp;This launches the calendar editor if you have already
-							created a calendar. Use this to change any calendar values with the regular calendar
-							creation commands if you entered something wrong.
-						</td>
+						<td>!cal summary</td>
+						<td>!cal summary [summary w/ spaces]</td>
+						<td>!cal summary cool calendar</td>
+						<td>Sets the calendar's name/summary</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!calendar description</td>
-						<td style="text-align: center;">&nbsp;!calendar description &lt;desc, spaces allowed)</td>
-						<td style="text-align: center;">&nbsp;!calendar create My example calendar</td>
-						<td style="text-align: center;">&nbsp;Sets the description of the new calendar.</td>
+						<td>!cal name</td>
+						<td>!cal name [name w/ spaces]</td>
+						<td>!cal name cool calendar</td>
+						<td>Sets the calendar's name/summary</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!calendar timezone&nbsp;</td>
-						<td style="text-align: center;">!calendar timezone &lt;timezone&gt;&nbsp;</td>
-						<td style="text-align: center;">!calendar timezone America/Chicago&nbsp;</td>
-						<td style="text-align: center;">&nbsp;Sets the calendar's timezone. Must be a valid timezone
-							according to the&nbsp;<a
-									href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List"
-									target="_blank">TZ database.</a></td>
+						<td>!cal description</td>
+						<td>!cal description [desc. w/ spaces]</td>
+						<td>!cal description my awesome calendar</td>
+						<td>Sets the calendar's description</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!calendar review</td>
-						<td style="text-align: center;">!calendar review</td>
-						<td style="text-align: center;">!calendar review</td>
-						<td style="text-align: center;">Displays info about the calendar you are creating, allows
-							verifying of correct date before creation.&nbsp;&nbsp;&nbsp;
-						</td>
+						<td>!cal timezone</td>
+						<td>!cal timezone [timezone]</td>
+						<td>!cal timezone America/Chicago</td>
+						<td>Sets the calendar's timezone.</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!calendar cancel</td>
-						<td style="text-align: center;">!calendar cancel</td>
-						<td style="text-align: center;">!calendar cancel</td>
-						<td style="text-align: center;">Cancels the creation of a calendar.&nbsp;</td>
+						<td>!cal view</td>
+						<td>!cal view</td>
+						<td>!cal view</td>
+						<td>Displays the calendar currently in the editor/creator</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!calendar confirm</td>
-						<td style="text-align: center;">&nbsp;!calendar confirm</td>
-						<td style="text-align: center;">&nbsp;!calendar confirm</td>
-						<td style="text-align: center;">&nbsp;Confirms that the calendar info is correct and creates the
-							new calendar
-						</td>
+						<td>!cal review</td>
+						<td>!cal review</td>
+						<td>!cal review</td>
+						<td>Displays the calendar currently in the editor/creator</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!calendar delete</td>
-						<td style="text-align: center;">!calendar delete</td>
-						<td style="text-align: center;">!calendar delete</td>
-						<td style="text-align: center;">Deletes the calendar from Google and DisCal's database.
-							<br><br>
-							<strong>NOTE:&nbsp;</strong>You must have the "MANAGE SERVER" permission in order to delete
-							the calendar!!!
-							<br><br>
-							<strong>NOTE:&nbsp;</strong>Once deleted, you may create a new calendar.
-						</td>
+						<td>!cal confirm</td>
+						<td>!cal confirm</td>
+						<td>!cal confirm</td>
+						<td>Confirms the creation/edits and updates on Google.</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!calendar&nbsp;remove</td>
-						<td style="text-align: center;">!calendar&nbsp;remove</td>
-						<td style="text-align: center;">!calendar&nbsp;remove</td>
-						<td style="text-align: center;">Deletes the calendar from Google and DisCal's database.
-							<br><br>
-							<strong>NOTE:&nbsp;</strong>You must have the "MANAGE SERVER" permission in order to delete
-							the calendar!!!
-							<br><br>
-							<strong>NOTE:&nbsp;</strong>Once deleted, you may create a new calendar.
-						</td>
+						<td>!cal cancel</td>
+						<td>!cal cancel</td>
+						<td>!cal cancel</td>
+						<td>Cancels the creation/edits of a calendar</td>
+					</tr>
+					<tr>
+						<td>!cal delete</td>
+						<td>!cal delete</td>
+						<td>!cal delete</td>
+						<td>Deletes the calendar from your Guild and Google</td>
+					</tr>
+					<tr>
+						<td>!cal remove</td>
+						<td>!cal remove</td>
+						<td>!cal remove</td>
+						<td>Deletes the calendar from your Guild and Google</td>
 					</tr>
 					</tbody>
 				</table>
@@ -161,6 +155,153 @@
 				<table style="border-color: #ef0813;" border="#ef0813" cellspacing="0" cellpadding="4">
 					<tbody>
 					<tr>
+						<th>Command</th>
+						<th>Acceptable Arguments</th>
+						<th>Example</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>!event create</td>
+						<td>!event create (name w/ spaces)</td>
+						<td>!event create my cool event</td>
+						<td>Start the event creator</td>
+					</tr>
+					<tr>
+						<td>!event summary</td>
+						<td>!event summary [summary w/ spaces]</td>
+						<td>!event summary my cool event</td>
+						<td>Sets the event name/summary</td>
+					</tr>
+					<tr>
+						<td>!event description</td>
+						<td>!event description [desc. w/ spaces]</td>
+						<td>!event description This is my super cool event</td>
+						<td>Sets the event description</td>
+					</tr>
+					<tr>
+						<td>!event start</td>
+						<td>!event start [yyyy/MM/dd-HH:mm:ss]</td>
+						<td>!event start 2018/03/21-14:30:00</td>
+						<td>Sets the event's start time (in 24 hour format)</td>
+					</tr>
+					<tr>
+						<td>!event end</td>
+						<td>!event end [yyyy/MM/dd-HH:mm:ss]</td>
+						<td>!event end 2018/03/21-20:00:00</td>
+						<td>Sets the event's end time (in 24 hour format)</td>
+					</tr>
+					<tr>
+						<td>!event color</td>
+						<td>!event color [color]</td>
+						<td>!event color GREEN</td>
+						<td>Set's the event's <a href="/docs/events/event-colors">Color</a></td>
+					</tr>
+					<tr>
+						<td>!event location</td>
+						<td>!event location [location]</td>
+						<td>!event location Room 253</td>
+						<td>Sets the event's location</td>
+					</tr>
+					<tr>
+						<td>!event image</td>
+						<td>!event image [link]</td>
+						<td>!event image <a href="https://life.has-destroyed.me/CoXnNvOVq.jpg">https://life.has-destroyed.me/CoXnNvOVq.jpg</a>
+						</td>
+						<td>Sets the event's image. Must be a valid link to image directly. NO GIFS!</td>
+					</tr>
+					<tr>
+						<td>!event confirm</td>
+						<td>!event confirm</td>
+						<td>!event confirm</td>
+						<td>Confirms the event's creation/edit.</td>
+					</tr>
+					<tr>
+						<td>!event review</td>
+						<td>!event review</td>
+						<td>!event review</td>
+						<td>Displays the event currently in the creator/editor</td>
+					</tr>
+					<tr>
+						<td>!event confirm</td>
+						<td>!event confirm</td>
+						<td>!event confirm</td>
+						<td>Confirms the event's creation/edit.</td>
+					</tr>
+					<tr>
+						<td>!event cancel</td>
+						<td>!event cancel</td>
+						<td>!event cancel</td>
+						<td>Cancels the event creation/edits.</td>
+					</tr>
+					<tr>
+						<td>!event recur</td>
+						<td>!event recur [true/false]</td>
+						<td>!event recur true</td>
+						<td>Set's whether or not the event will recur</td>
+					</tr>
+					<tr>
+						<td>!event freq</td>
+						<td>!event freq [frequency]</td>
+						<td>!event freq DAILY</td>
+						<td>Set's the event recurrence frequency to DAILY. Valid options: DAILY, WEEKLY, MONTHLY,
+							YEARLY
+						</td>
+					</tr>
+					<tr>
+						<td>!event count</td>
+						<td>!event count [count]</td>
+						<td>!event count -1</td>
+						<td>Sets how many times the event will recur. (Use 0 or -1 for infinite)</td>
+					</tr>
+					<tr>
+						<td>!event interval</td>
+						<td>!event interval [interval]</td>
+						<td>!event interval 2</td>
+						<td>Sets the recurrence interval. 1 is every time (according to frequency), 2 means every other
+							time, etc etc
+						</td>
+					</tr>
+					<tr>
+						<td>!event edit</td>
+						<td>!event edit [event ID]</td>
+						<td>!event edit eihctjdgmf</td>
+						<td>Starts the event editor for the specified event</td>
+					</tr>
+					<tr>
+						<td>!event copy</td>
+						<td>!event copy [event ID]</td>
+						<td>!event copy eihctjdgmf</td>
+						<td>Copies the specified event details into a new event creator</td>
+					</tr>
+					<tr>
+						<td>!event view</td>
+						<td>!event view [event ID]</td>
+						<td>!event view eihctjdgmf</td>
+						<td>Displays the specified event's details.</td>
+					</tr>
+					<tr>
+						<td>!event delete</td>
+						<td>!event delete [event ID]</td>
+						<td>!event delete eihctjdgmf</td>
+						<td>Deletes the specified event</td>
+					</tr>
+					<tr>
+						<td>!event remove</td>
+						<td>!event remove [event ID]</td>
+						<td>!event remove eihctjdgmf</td>
+						<td>Deletes the specified event</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<hr>
+
+			<div id="rsvp">
+				<h2>!rsvp commands</h2>
+
+				<table style="border-color: #ef0813;" border="#ef0813" cellspacing="0" cellpadding="4">
+					<tbody>
 					<tr>
 						<th>Command</th>
 						<th>Acceptable Arguments</th>
@@ -168,202 +309,41 @@
 						<th>Description</th>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!event create</td>
-						<td style="text-align: center;">!event create<br>!event create &lt;name/summary&gt;&nbsp;</td>
-						<td style="text-align: center;">&nbsp;!event create<br>!event create My event name/summary</td>
-						<td style="text-align: center;">Begins creation of a new event. DisCal will walk you through
-							this process as well! The event summary is technically it's name according to google!&nbsp;
+						<td>!rsvp ontime</td>
+						<td>!rsvp ontime [Event ID]</td>
+						<td>!rsvp ontime eihctjdgmf</td>
+						<td>RSVPs as going to the event on time.</td>
+					</tr>
+					<tr>
+						<td>!rsvp late</td>
+						<td>!rsvp late [Event ID]</td>
+						<td>!rsvp late eihctjdgmf</td>
+						<td>RSVPs as going to the event, but arriving late.</td>
+					</tr>
+					<tr>
+						<td>!rsvp not</td>
+						<td>!rsvp not [Event ID]</td>
+						<td>!rsvp not eihctjdgmf</td>
+						<td>RSVPs as not going to the event.</td>
+					</tr>
+					<tr>
+						<td>!rsvp unsure</td>
+						<td>!rsvp unsure [Event ID]</td>
+						<td>!rsvp unsure eihctjdgmf</td>
+						<td>RSVPs as unsure about whether or not you will attend.
 						</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!event edit</td>
-						<td style="text-align: center;">!event edit &lt;event ID&gt;&nbsp;</td>
-						<td style="text-align: center;">&nbsp;!event edit &nbsp;9aiifsgpbaqfjh00iufeu2qsu8&nbsp;</td>
-						<td style="text-align: center;">Begins editing an already created event that has been confirmed.
-							Use this to go back and change anything in the event with the same commands you used during
-							creation.
-						</td>
+						<td>!rsvp remove</td>
+						<td>!rsvp remove [Event ID]</td>
+						<td>!rsvp remove eihctjdgmf</td>
+						<td>Removes your RSVP status from the event.</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!event copy</td>
-						<td style="text-align: center;">!event copy &lt;event ID&gt;</td>
-						<td style="text-align: center;">!event copy&nbsp;9aiifsgpbaqfjh00iufeu2qsu8&nbsp;</td>
-						<td style="text-align: center;">Copies an event from the Guild's calendar. Once the event has
-							been copied, DisCal will walk you through editing the event's settings to add it to the
-							calendar.<br/><br/>NOTE: As of the latest version, this WILL NOT copy recurring event's
-							recurring properties. This is a work in progress!
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">&nbsp;!event summary</td>
-						<td style="text-align: center;">!event summary &lt;summary, spaces allowed&gt;</td>
-						<td style="text-align: center;">!event summary My event summary&nbsp;</td>
-						<td style="text-align: center;">Sets the event's summary. This is technically its name according
-							to Google!&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event description&nbsp;</td>
-						<td style="text-align: center;">!event description &lt;description, spaces allowed&gt;</td>
-						<td style="text-align: center;">!event description My example Event&nbsp;</td>
-						<td style="text-align: center;">Sets the event's description.&nbsp;</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event startDate&nbsp;<br/>!event start</td>
-						<td style="text-align: center;">
-							<p>&nbsp;!event startDate&nbsp;&lt;date/time&gt;</p>
-							<p>!event start &lt;date/time&gt;</p>
-						</td>
-						<td style="text-align: center;">!event startDate 2017/01/31-10:00:00<br/>!event start
-							2017/04/20-09:15:00
-						</td>
-						<td style="text-align: center;">Sets the event's start time. Format is shown. This is in
-							military/24 hour time.&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event endDate&nbsp;<br/>!event end</td>
-						<td style="text-align: center;">!event endDate &lt;date/Time&gt;<br/>!event end &lt;date/Time&gt;&nbsp;
-						</td>
-						<td style="text-align: center;">
-							<p>&nbsp; !event endDate 2017/01/31-14:45:00<br/>!event end 2017/04/31-03:30:00</p>
-						</td>
-						<td style="text-align: center;">Sets the event's ending time and date. Format is shown. This is
-							in military/24 hour time. <br>**NOTE** This is just how long the event lasts, like an hour
-							or a day. In the event you want an event repeating over months etc, use the RECUR commands!&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event review</td>
-						<td style="text-align: center;">!event review&nbsp;</td>
-						<td style="text-align: center;">!event review&nbsp;</td>
-						<td style="text-align: center;">&nbsp;Displays the event's info before entered onto the
-							calendar.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event cancel&nbsp;</td>
-						<td style="text-align: center;">&nbsp;!event cancel</td>
-						<td style="text-align: center;">!event cancel&nbsp;</td>
-						<td style="text-align: center;">Cancels creation of a new event.&nbsp;</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event confirm&nbsp;</td>
-						<td style="text-align: center;">!event confirm</td>
-						<td style="text-align: center;">!event confirm</td>
-						<td style="text-align: center;">Confirms the event you have been creating and adds it to the
-							calendar.&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event delete&nbsp;</td>
-						<td style="text-align: center;">!event delete &lt;event id&gt;&nbsp;</td>
-						<td style="text-align: center;">!event delete 9aiifsgpbaqfjh00iufeu2qsu8&nbsp;</td>
-						<td style="text-align: center;">&nbsp;Deletes the event with the given ID. This is the event Id
-							from the calendar. found when the event is listed from the !events command.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">&nbsp;!event view</td>
-						<td style="text-align: center;">!event view &lt;event id&gt;</td>
-						<td style="text-align: center;">!event view 9aiifsgpbaqfjh00iufeu2qsu8&nbsp;&nbsp;</td>
-						<td style="text-align: center;">Prints out detailed info on the specified event.&nbsp;</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event color</td>
-						<td style="text-align: center;">
-							<p>!event color &lt;color name&gt;<br/>!event color &lt;color ID&gt;<br/>!event color &lt;hex&gt;<br/>!event
-								color list</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!event color Mac_And_Cheese</p>
-							<p>!event color 1<br/>!event color E1E1E1<br/>!event color list</p>
-						</td>
-						<td style="text-align: center;">Sets the event's color.<br/>At the moment this color is only
-							reflected in the event and announcement embeds and does not appear on the google calendar
-							itself.<br/>Please visit <a
-									href="/docs/event/colors" target="_blank">here</a>&nbsp;to
-							see all supported colors (Google supported colors only)
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event image</td>
-						<td style="text-align: center;">
-							<p>!event image &lt;image url&gt
-						</td>
-						<td style="text-align: center;">
-							<p>!event image http://i.imgur.com/b7r1f.jpg</p>
-						</td>
-						<td style="text-align: center;">This will add an image to the event which will be displayed
-							during announcements as well as when the event is listed with the !events command. At the
-							moment .jpg, .jpeg and .png image links are supported.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event recur</td>
-						<td style="text-align: center;">
-							<p>!event recur &lt;true/false&gt;</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!event recur true</p>
-						</td>
-						<td style="text-align: center;">
-							<p>Sets whether or not the event should recur (repeat).</p>
-							<p>If set to 'true' DisCal will walk you through the steps to configure its recurrence to
-								how you would like.</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event&nbsp;frequency</td>
-						<td style="text-align: center;">
-							<p>!event&nbsp;frequency &lt;TYPE&gt;</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!event frequency DAILY</p>
-						</td>
-						<td style="text-align: center;">
-							<p>Sets the frequency of the recurring event.</p>
-							<p>Valid types are: DAILY, WEEKLY, MONTHLY, YEARLY</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event count</td>
-						<td style="text-align: center;">
-							<p>!event count &lt;amount&gt;</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!event count 10</p>
-						</td>
-						<td style="text-align: center;">
-							<p>Sets how many times the event should recur.</p>
-							<p>NOTE: Use '-1' or '0' to make it infinitely recur.</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!event interval</td>
-						<td style="text-align: center;">
-							<p>!event interval &lt;number&gt;</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!event interval 2</p>
-						</td>
-						<td style="text-align: center;">Sets how the event will recur based on it's respective
-							frequency.<br/><br/>EXAMPLE: If frequency is MONTHLY, setting interval to '2' will make the
-							event recur every OTHER month, whereas 1 will recur EVERY month.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!rsvp</td>
-						<td style="text-align: center;">
-							<p>!rsvp &lt;option&gt; &lt;eventId&gt;</p>
-						</td>
-						<td style="text-align: center;">
-							<p>!rsvp ontime rtk8sua2bolcs8votf02lgep9s</p>
-						</td>
-						<td style="text-align: center;">This allows you to set your rsvp status for an event. Status
-							commands include: Ontime, Late, Unsure and Not. List may also be used to list all rsvps and
-							remove may be used to remove your rsvp from the list.
-						</td>
+						<td>!rsvp list</td>
+						<td>!rsvp list [Event ID]</td>
+						<td>!rsvp list eihctjdgmf</td>
+						<td>Lists the users who have RSVPed to the event.</td>
 					</tr>
 					</tbody>
 				</table>
@@ -378,6 +358,119 @@
 				<table style="border-color: #ef0813;" border="#ef0813" cellspacing="0" cellpadding="4">
 					<tbody>
 					<tr>
+						<th>Command</th>
+						<th>Acceptable Arguments</th>
+						<th>Example</th>
+						<th>Description</th>
+					</tr>
+					<tr>
+						<td>!a create</td>
+						<td>!a create</td>
+						<td>!a create</td>
+						<td>Starts the announcement creator</td>
+					</tr>
+					<tr>
+						<td>!a type</td>
+						<td>!a type [type]</td>
+						<td>!a type UNIVERSAL</td>
+						<td>Sets the announcement type. Valid types: UNIVERSAL, SPECIFIC, COLOR, RECUR</td>
+					</tr>
+					<tr>
+						<td>!a event</td>
+						<td>!a event [event-id]</td>
+						<td>!a event eihctjdgmf</td>
+						<td>Sets the announcement's event. <strong>ONLY needed when using SPECIFIC or RECUR</strong>
+						</td>
+					</tr>
+					<tr>
+						<td>!a color</td>
+						<td>!a color [color]</td>
+						<td>!a color BLUE</td>
+						<td>Sets the announcement's color <strong>ONLY needed when using COLOR</strong></td>
+					</tr>
+					<tr>
+						<td>!a channel</td>
+						<td>!a channel [channel-name]</td>
+						<td>!a channel announcements</td>
+						<td>Sets the announcement's channel to post in.</td>
+					</tr>
+					<tr>
+						<td>!a minutes</td>
+						<td>!a minutes [minutes]</td>
+						<td>!a minutes 30</td>
+						<td>Sets the minutes before the event to announce. Added to hours</td>
+					</tr>
+					<tr>
+						<td>!a hours</td>
+						<td>!a hours [hours]</td>
+						<td>!a hours 2</td>
+						<td>Sets the hours before the event to announce. Added to minutes</td>
+					</tr>
+					<tr>
+						<td>!a review</td>
+						<td>!a review</td>
+						<td>!a review</td>
+						<td>Displays info about the announcement being edited/created.</td>
+					</tr>
+					<tr>
+						<td>!a confirm</td>
+						<td>!a confirm</td>
+						<td>!a confirm</td>
+						<td>Confirms the creation/edits and updates the database.</td>
+					</tr>
+					<tr>
+						<td>!a edit</td>
+						<td>!a edit [announcement-ID]</td>
+						<td>!a edit d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Starts the editor for the specified announcement</td>
+					</tr>
+					<tr>
+						<td>!a copy</td>
+						<td>!a copy [announcement-ID]</td>
+						<td>!a copy d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Copies the specified announcement's details to a new announcement</td>
+					</tr>
+					<tr>
+						<td>!a delete</td>
+						<td>!a delete [announcement-ID]</td>
+						<td>!a delete d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Deletes the specified announcement</td>
+					</tr>
+					<tr>
+						<td>!a view</td>
+						<td>!a view [announcement-ID]</td>
+						<td>!a view d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Displays the specified announcement's details</td>
+					</tr>
+					<tr>
+						<td>!a list</td>
+						<td>!a list [Amount or "all"]</td>
+						<td>!a list 10</td>
+						<td>Lists the specified amount of announcements view quick viewing</td>
+					</tr>
+					<tr>
+						<td>!a sub</td>
+						<td>!a sub [announcement-ID] (user(s) and/or role(s))</td>
+						<td>!a sub d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Subscribes yourself OR the specified users/roles to the announcement</td>
+					</tr>
+					<tr>
+						<td>!a unsub</td>
+						<td>!a unsub [announcement-ID] (user(s) and/or role(s))</td>
+						<td>!a unsub d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
+						<td>Unsubscribes yourself OR the specified users/roles to the announcement</td>
+					</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<hr>
+
+			<div id="discal">
+				<h2>!discal commands</h2>
+
+				<table style="border-color: #ef0813;" border="#ef0813" cellspacing="0" cellpadding="4">
+					<tbody>
 					<tr>
 						<th>Command</th>
 						<th>Acceptable Arguments</th>
@@ -385,171 +478,67 @@
 						<th>Description</th>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!announcement create</td>
-						<td style="text-align: center;">!announcement create</td>
-						<td style="text-align: center;">!announcement create</td>
-						<td style="text-align: center;">Starts the Announcement Creator. DisCal will now walk you
-							through the process of creating new announcements!
+						<td>!discal</td>
+						<td>!discal</td>
+						<td>!discal</td>
+						<td>Displays DisCal's bot information</td>
+					</tr>
+					<tr>
+						<td>!discal settings</td>
+						<td>!discal settings</td>
+						<td>!discal settings</td>
+						<td>Displays the guild's settings for DisCal (like prefix)</td>
+					</tr>
+					<tr>
+						<td>!discal prefix</td>
+						<td>!discal prefix [prefix]</td>
+						<td>!discal prefix $$</td>
+						<td>Changes DisCal's prefix. <strong>Mentioning DisCal will always work no matter the
+							prefix</strong></td>
+					</tr>
+					<tr>
+						<td>!discal role</td>
+						<td>!discal role [role-name]</td>
+						<td>!discal role controllers</td>
+						<td>Sets the role (or higher) users must have in order to use certain DisCal commands. <strong>Reset
+							with "!discal role everyone"</strong></td>
+					</tr>
+					<tr>
+						<td>!discal channel</td>
+						<td>!discal channel [channel-name]</td>
+						<td>!discal channel discal-control</td>
+						<td>Sets the channel DisCal can respond in. <strong>Reset with "!discal channel all"</strong>
 						</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!announcement edit</td>
-						<td style="text-align: center;">!announcement edit &lt;ID&gt;</td>
-						<td style="text-align: center;">!announcement edit&nbsp;55210ce8-8fed-43ca-9642-3225525baed9
-						</td>
-						<td style="text-align: center;">Edits an existing announcement that has already been confirmed.
-							Use this to go back and change any announcement values with the normal creation commands.
-						</td>
+						<td>!discal simpleAnnouncement</td>
+						<td>!discal simpleAnnouncement</td>
+						<td>!discal simpleAnnouncement</td>
+						<td>Makes announcements appear more user friendly</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!announcement copy</td>
-						<td style="text-align: center;">!announcement copy &lt;ID&gt;</td>
-						<td style="text-align: center;">!announcement copy&nbsp;55210ce8-8fed-43ca-9642-3225525baed9
-						</td>
-						<td style="text-align: center;">Copies an existing announcement as a "template" so you may
-							quickly create another announcement.
-						</td>
+						<td>!discal brand</td>
+						<td>!discal brand</td>
+						<td>!discal brand</td>
+						<td>Uses the guild's name in DisCal embeds. <strong>Patron only!</strong></td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!announcement type&nbsp;</td>
-						<td style="text-align: center;">!announcement type &lt;type&gt;</td>
-						<td style="text-align: center;">!announcement type UNIVERSAL</td>
-						<td style="text-align: center;">
-							<p>The type of announcement this is.<br/>UNIVERSAL means it is for ALL future events.<br/>SPECIFIC
-								means it is for one specific event (will auto delete once fired).<br/>COLOR (or COLOUR)
-								means it will only fire for an event with the same color.<br/>RECUR functions like a
-								SPECIFIC type but for recurring events (and does not auto delete).</p>
-						</td>
+						<td>!discal lang</td>
+						<td>!discal lang [language]</td>
+						<td>!discal lang english</td>
+						<td>Set's DisCal's language</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!announcement event</td>
-						<td style="text-align: center;">!announcement event &lt;id&gt;&nbsp;</td>
-						<td style="text-align: center;">&nbsp;!announcement event&nbsp;9aiifsgpbaqfjh00iufeu2qsu8</td>
-						<td style="text-align: center;">Specifies the event this announcement is for.<br/>ONLY NEEDED IF
-							TYPE = SPECIFIC or RECUR<br/><br/>If type is RECUR: Please specify the "base" ID which is a
-							recurring event's ID without the "_" and everything that follows that. (If the underscore
-							and following is specified, DisCal will parse it out and ignore it).
-						</td>
+						<td>!discal invite</td>
+						<td>!discal invite</td>
+						<td>!discal invite</td>
+						<td>Displays the invite link to DisCal's Support Guild.</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!announcement channel</td>
-						<td style="text-align: center;">!announcement channel &lt;channel name&gt;</td>
-						<td style="text-align: center;">!announcement channel calendar</td>
-						<td style="text-align: center;">
-							<p>Sets the channel the announcement will be sent in. This is the channel NAME not ID,
-								DisCal handles that for you.&nbsp;</p>
-							<p>**Please note: If the channel is deleted the announcement will silently fail to send.</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement&nbsp;hours</td>
-						<td style="text-align: center;">!announcement hours &lt;amount&gt;</td>
-						<td style="text-align: center;">!announcement hours 1</td>
-						<td style="text-align: center;">The amount of hours PRIOR to the event this announcement will be
-							fired.<br/>This number is added to the minutes in DisCal.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement minutes&nbsp;</td>
-						<td style="text-align: center;">!announcement minutes &lt;amount&gt;</td>
-						<td style="text-align: center;">!announcement minutes 25</td>
-						<td style="text-align: center;">The amount of minutes PRIOR to the event this announcement will
-							be fired.<br/>This number is added to the hours in DisCal. The minimum amount of time an
-							announcement can be set for is 1 minute.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement review&nbsp;</td>
-						<td style="text-align: center;">!announcement review</td>
-						<td style="text-align: center;">!announcement review</td>
-						<td style="text-align: center;">&nbsp;Allows you to review the Announcement info before
-							completion, so you may correct any errors or alter the settings.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">&nbsp;!announcement confirm</td>
-						<td style="text-align: center;">!announcement confirm</td>
-						<td style="text-align: center;">!announcement confirm</td>
-						<td style="text-align: center;">Confirms and finishes Announcement creation.</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">&nbsp;!announcement delete</td>
-						<td style="text-align: center;">!announcement delete &lt;id&gt;</td>
-						<td style="text-align: center;">!announcement delete&nbsp;55210ce8-8fed-43ca-9642-3225525baed9
-						</td>
-						<td style="text-align: center;">&nbsp;Deletes an existing announcement and stops it from being
-							fired or used again.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement subscribe&nbsp;</td>
-						<td style="text-align: center;">!announcement subscribe &lt;id&gt; (option)</td>
-						<td style="text-align: center;">
-							<p>!announcement subscribe&nbsp;55210ce8-8fed-43ca-9642-3225525baed9</p>
-							<p>!announcement subscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 user1 user2 user3 etc</p>
-							<p>!announcement subscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 role1 role2 user1 etc</p>
-							<p>!announcement subscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 everyone</p>
-							<p>!announcement subscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 here</p>
-						</td>
-						<td style="text-align: center;">
-							<p>Subscribes you to the announcement. Whenever this announcement sends, you will be
-								mentioned at the top of it.</p>
-							<p>&nbsp;</p>
-							<p>Optionally, you may FORCE subscribe people or roles to announcements. Include their name,
-								role or there is built in support for everyone and here mentions. No @ required. (At the
-								time of writing this @ will actually not work at all)</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement unsubscribe</td>
-						<td style="text-align: center;">!announcement unsubscribe &lt;id&gt; (option)</td>
-						<td style="text-align: center;">
-							<p>!announcement subscribe&nbsp;55210ce8-8fed-43ca-9642-3225525baed9</p>
-							<p>!announcement unsubscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 user1 user2</p>
-							<p>!announcement unsubscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 role1 role2</p>
-							<p>!announcement unsubscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 everyone</p>
-							<p>!announcement unsubscribe&nbsp;</p>
-							<p>55210ce8-8fed-43ca-9642-3225525baed9 here</p>
-						</td>
-						<td style="text-align: center;">
-							<p>Unsubscribes you from the announcement. Now whenever it sends, you will NO LONGER be
-								mentioned.&nbsp;</p>
-							<p>&nbsp;</p>
-							<p>Optionally, you may FORCE unsubscribe people to announcements. Include their name, role
-								or there is built in support for everyone and here mentions. No @ required. (At the time
-								of writing this @ will actually not work at all)</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement&nbsp;view</td>
-						<td style="text-align: center;">!announcement view &lt;id&gt;</td>
-						<td style="text-align: center;">!announcement view 55210ce8-8fed-43ca-9642-3225525baed9</td>
-						<td style="text-align: center;">Displays info about the specif announcement, if the announcement
-							with that ID exists.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement&nbsp;list</td>
-						<td style="text-align: center;">!announcement list &lt;amount OR all&gt;</td>
-						<td style="text-align: center;">!announcement list 10<br/>or<br/>!announcement list ALL</td>
-						<td style="text-align: center;">Will list either the amount of IDs specified or if "ALL" will
-							list every announcement for your Guild.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!announcement color</td>
-						<td style="text-align: center;">!announcement color &lt;COLOR&gt;</td>
-						<td style="text-align: center;">!announcement color BLUE</td>
-						<td style="text-align: center;">Functions just like '!event color &lt;COLOR&gt;' and sets the
-							announcement's color.<br/><br/>NOTE: Only applicable if type is COLOR
-						</td>
+						<td>!discal dashboard</td>
+						<td>!discal dashboard</td>
+						<td>!discal dashboard</td>
+						<td>Displays the link to the Control dashboard on DisCal's website.</td>
 					</tr>
 					</tbody>
 				</table>
@@ -563,119 +552,34 @@
 				<table style="border-color: #ef0813;" border="#ef0813" cellspacing="0" cellpadding="4">
 					<tbody>
 					<tr>
-					<tr>
 						<th>Command</th>
 						<th>Acceptable Arguments</th>
 						<th>Example</th>
 						<th>Description</th>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!linkCalendar&nbsp;</td>
-						<td style="text-align: center;">!linkCalendar&nbsp;</td>
-						<td style="text-align: center;">!linkCalendar<br>!linkcal&nbsp;</td>
-						<td style="text-align: center;">Links the calendar associated with your Discord server so that
-							you may open it in a web browser.&nbsp;
-						</td>
+						<td>!linkCal</td>
+						<td>!linkCal</td>
+						<td>!linkCal</td>
+						<td>Displays the server's calendar info AND provides a link to view in browser</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!time&nbsp;</td>
-						<td style="text-align: center;">!time&nbsp;</td>
-						<td style="text-align: center;">!!time&nbsp;</td>
-						<td style="text-align: center;">Displays the current time based on the calendar timezone. Useful
-							for ensuring you have selected the proper timezone, and useful for people to know what time
-							events are compared to their local time.&nbsp;
-						</td>
+						<td>!time</td>
+						<td>!time</td>
+						<td>!time</td>
+						<td>Displays the current time of the calendar in the calendar's timezone</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">&nbsp;!events</td>
-						<td style="text-align: center;">!events &lt;amount&gt;</td>
-						<td style="text-align: center;">!events 5</td>
-						<td style="text-align: center;">Displays the next upcoming events. The amount is the amount you
-							wish to display.!events 5&nbsp;&nbsp;
-						</td>
+						<td>!events</td>
+						<td>!events (amount)</td>
+						<td>!events 2</td>
+						<td>Displays up to the specified amount of upcoming events</td>
 					</tr>
 					<tr>
-						<td style="text-align: center;">!help&nbsp;</td>
-						<td style="text-align: center;">!help&nbsp;</td>
-						<td style="text-align: center;">!help</td>
-						<td style="text-align: center;">Displays a list of valid commands and links you to our pages for
-							extra help with DisCal.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal&nbsp;</td>
-						<td style="text-align: center;">!discal&nbsp;</td>
-						<td style="text-align: center;">&nbsp;!discal</td>
-						<td style="text-align: center;">Displays info about DisCal and links to the main page. This can
-							be used to easily connect to pages like this without memorizing the URL or bookmarking.&nbsp;
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal prefix&nbsp;</td>
-						<td style="text-align: center;">!discal prefix &lt;prefix&gt;&nbsp;</td>
-						<td style="text-align: center;">!discal prefix #</td>
-						<td style="text-align: center;">This changes the prefix DisCal will respond too from the default
-							! to the prefix of your choice. This allows you to prevent any mix ups with other Discord
-							bots commands. @ Mentioning also functions as a prefix. Use `@Discal discal prefix !` to
-							reset if something goes wrong.
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal role&nbsp;</td>
-						<td style="text-align: center;">!discal role &lt;roleName or roleId&gt;&nbsp;</td>
-						<td style="text-align: center;">!discal role myAdminRole</td>
-						<td style="text-align: center;">
-							<p>Sets the role a user most possess in order to control DisCal's event/calendar creation
-								modules. By default, this will be the "@everyone" role (meaning all users can control
-								all modules). Should you want to disable needing a specific role, simply use the command
-								again by specify "everyone" as the role, this will reset it to allow all users proper
-								access.&nbsp;</p>
-							<p>**NOTE: If the role is deleted or does not exist, DisCal will reset to all everyone to
-								use it.</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal channel</td>
-						<td style="text-align: center;">!discal channel &lt;channelName&gt;</td>
-						<td style="text-align: center;">!discal channel calendar</td>
-						<td style="text-align: center;">
-							<p>Sets the channel discal will use and respond in. Should a discal message be used outside
-								this channel, it will not recognise it.<br/>**Please note: By default, this is not set.
-								DisCal will work in ALL channels until this is set.</p>
-							<p>**ANOTHER NOTE: To reset, simply use "all" instead of a valid channel.</p>
-							<p>**IF the channel does not exist or is deleted, DisCal will reset to use ALL channels.</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal simpleAnnouncement</td>
-						<td style="text-align: center;">!discal simpleAnnouncement</td>
-						<td style="text-align: center;">!discal simpleAnnouncement</td>
-						<td style="text-align: center;">
-							<p>Enables/Disables "simple announcements"<br/>Simple announcements will not list the event
-								ID or announcement ID. This can be useful for making them more user friendly but the
-								downside is &nbsp;you cannot debug the announcement should something fail (which rarely
-								if ever happens).</p>
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal invite</td>
-						<td style="text-align: center;">!discal invite</td>
-						<td style="text-align: center;">!discal invite</td>
-						<td style="text-align: center;">
-							<p>This command will have the bot output an invite link for the DisCal server. Need help?
-								Come join us and we will get you fixed up. Just want to hang out? That's cool too! We
-								appreciate all feedback and ideas :)
-						</td>
-					</tr>
-					<tr>
-						<td style="text-align: center;">!discal settings</td>
-						<td style="text-align: center;">!discal settings</td>
-						<td style="text-align: center;">!discal settings</td>
-						<td style="text-align: center;">
-							<p>Display's the guild's DisCal settings in a pretty embed.<br/>Settings displayed include
-								but are not limited to: max calendars, whether your guild is a patron guild, control
-								role, channel, etc etc.</p>
-						</td>
+						<td>!help</td>
+						<td>!help (command) (sub-command)</td>
+						<td>!help event create</td>
+						<td>Displays help information for the specified commands/sub commands</td>
 					</tr>
 					</tbody>
 				</table>
