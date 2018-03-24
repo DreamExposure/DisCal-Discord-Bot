@@ -562,7 +562,7 @@ function updateEvent(editSubmitId) {
 
 	var colorElement = document.getElementById("editColor-" + eventId);
 	var timeOffset = 0;
-	if (is.firefox()) {
+	if (is.firefox() || is.edge()) {
 		timeOffset = 86400000;
 	}
 	if (document.getElementById("editEnableRecur-" + eventId) !== null) {
@@ -578,7 +578,7 @@ function updateEvent(editSubmitId) {
 				"recur": document.getElementById("editEnableRecur-" + eventId).checked,
 				"frequency": freqElement.options[freqElement.selectedIndex].value,
 				"count": document.getElementById("editCount-" + eventId).valueAsNumber,
-				"interval": document.getElementById("editInterval-" + eventId).valueAsNumber,
+				"interval": document.getElementById("editInterval-" + eventId).valueAsNumber
 			},
 			"epochStart": startDate.getTime() + timeOffset,
 			"epochEnd": endDate.getTime() + timeOffset
@@ -634,7 +634,7 @@ function createNewEvent() {
 	var freqElement = document.getElementById("create-frequency");
 
 	var timeOffset = 0;
-	if (is.firefox()) {
+	if (is.firefox() || is.edge()) {
 		timeOffset = 86400000;
 	}
 
@@ -648,7 +648,7 @@ function createNewEvent() {
 			"recur": document.getElementById("create-enableRecur").checked,
 			"frequency": freqElement.options[freqElement.selectedIndex].value,
 			"count": document.getElementById("create-count").valueAsNumber,
-			"interval": document.getElementById("create-interval").valueAsNumber,
+			"interval": document.getElementById("create-interval").valueAsNumber
 		},
 		"epochStart": startDate.getTime() + timeOffset,
 		"epochEnd": endDate.getTime() + timeOffset
