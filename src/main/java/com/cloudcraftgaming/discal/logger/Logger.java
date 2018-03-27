@@ -3,12 +3,14 @@ package com.cloudcraftgaming.discal.logger;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import javax.annotation.Nullable;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -34,15 +36,12 @@ public class Logger {
 
 	public void init() {
 		//Create files...
-		String now = String.valueOf(System.currentTimeMillis());
+		String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss").format(System.currentTimeMillis());
 
-		SimpleDateFormat format = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
-		String timestamp = format.format(System.currentTimeMillis());
-
-		exceptionsFile = BotSettings.LOG_FOLDER.get() + "/" + now + "/exceptions.log";
-		apiFile = BotSettings.LOG_FOLDER.get() + "/" + now + "/api.log";
-		announcementsFile = BotSettings.LOG_FOLDER.get() + "/" + now + "/announcements.log";
-		debugFile = BotSettings.LOG_FOLDER.get() + "/" + now + "/debug.log";
+		exceptionsFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-exceptions.log";
+		apiFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-api.log";
+		announcementsFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-announcements.log";
+		debugFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-debug.log";
 
 		try {
 			PrintWriter exceptions = new PrintWriter(exceptionsFile, "UTF-8");
@@ -121,15 +120,15 @@ public class Logger {
 
 		//ALWAYS LOG TO FILE!
 		try {
-			PrintWriter exceptions = new PrintWriter(exceptionsFile, "UTF-8");
-			exceptions.println("ERROR --- " + timeStamp + " ---");
+			FileWriter exceptions = new FileWriter(exceptionsFile, true);
+			exceptions.write("ERROR --- " + timeStamp + " ---" + MessageUtils.lineBreak);
 			if (author != null) {
-				exceptions.println("user: " + author.getName() + "#" + author.getDiscriminator());
+				exceptions.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
 			}
 			if (message != null) {
-				exceptions.println("message: " + message);
+				exceptions.write("message: " + message + MessageUtils.lineBreak);
 			}
-			exceptions.println(error);
+			exceptions.write(error + MessageUtils.lineBreak);
 			exceptions.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -168,16 +167,16 @@ public class Logger {
 
 		//ALWAYS LOG TO FILE!
 		try {
-			PrintWriter file = new PrintWriter(debugFile, "UTF-8");
-			file.println("DEBUG --- " + timeStamp + " ---");
+			FileWriter file = new FileWriter(debugFile, true);
+			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
 			if (author != null) {
-				file.println("user: " + author.getName() + "#" + author.getDiscriminator());
+				file.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
 			}
 			if (message != null) {
-				file.println("message: " + message);
+				file.write("message: " + message + MessageUtils.lineBreak);
 			}
 			if (info != null) {
-				file.println("info: " + info);
+				file.write("info: " + info + MessageUtils.lineBreak);
 			}
 			file.close();
 		} catch (IOException io) {
@@ -189,10 +188,10 @@ public class Logger {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 
 		try {
-			PrintWriter file = new PrintWriter(debugFile, "UTF-8");
-			file.println("DEBUG --- " + timeStamp + " ---");
+			FileWriter file = new FileWriter(debugFile, true);
+			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
 			if (message != null) {
-				file.println("info: " + message);
+				file.write("info: " + message + MessageUtils.lineBreak);
 			}
 			file.close();
 		} catch (IOException io) {
@@ -204,9 +203,9 @@ public class Logger {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 
 		try {
-			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
-			file.println("API --- " + timeStamp + " ---");
-			file.println("info: " + message);
+			FileWriter file = new FileWriter(apiFile, true);
+			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("info: " + message + MessageUtils.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -217,10 +216,10 @@ public class Logger {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 
 		try {
-			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
-			file.println("API --- " + timeStamp + " ---");
-			file.println("info: " + message);
-			file.println("IP: " + ip);
+			FileWriter file = new FileWriter(apiFile, true);
+			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("info: " + message + MessageUtils.lineBreak);
+			file.write("IP: " + ip + MessageUtils.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -231,12 +230,12 @@ public class Logger {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 
 		try {
-			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
-			file.println("API --- " + timeStamp + " ---");
-			file.println("info: " + message);
-			file.println("IP: " + ip);
-			file.println("Host: " + host);
-			file.println("Endpoint: " + endpoint);
+			FileWriter file = new FileWriter(apiFile, true);
+			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("info: " + message + MessageUtils.lineBreak);
+			file.write("IP: " + ip + MessageUtils.lineBreak);
+			file.write("Host: " + host + MessageUtils.lineBreak);
+			file.write("Endpoint: " + endpoint + MessageUtils.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
