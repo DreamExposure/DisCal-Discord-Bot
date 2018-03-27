@@ -8,8 +8,8 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarCreatorResponse;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.calendar.PreCalendar;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -103,7 +103,7 @@ public class CalendarCreator {
 				calendars.add(preCalendar);
 				return preCalendar;
 			} catch (Exception e) {
-				ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to init calendar editor", e, this.getClass());
+				Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to init calendar editor", e, this.getClass(), true);
 				return null;
 			}
 		} else {
@@ -173,7 +173,7 @@ public class CalendarCreator {
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
 						return response;
 					} catch (Exception ex) {
-						ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to confirm calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMessage().getAuthor(), "Failed to confirm calendar.", ex, this.getClass(), true);
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(false);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
@@ -206,7 +206,7 @@ public class CalendarCreator {
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
 						return response;
 					} catch (Exception ex) {
-						ExceptionHandler.sendException(e.getMessage().getAuthor(), "Failed to update calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMessage().getAuthor(), "Failed to update calendar.", ex, this.getClass(), true);
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(true);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());

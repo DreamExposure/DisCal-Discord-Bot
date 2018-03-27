@@ -10,8 +10,8 @@ import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.ImageUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
@@ -291,7 +291,7 @@ public class EventMessageFormatter {
 				}
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			Logger.getLogger().exception(null, "Failed to format date", e, EventMessageFormatter.class, true);
 			return "ERROR! Code: E001";
 		}
 	}
@@ -336,7 +336,7 @@ public class EventMessageFormatter {
 				}
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			Logger.getLogger().exception(null, "Failed to format date", e, EventMessageFormatter.class, true);
 			return "ERROR! Code: E002";
 		}
 	}
@@ -375,7 +375,7 @@ public class EventMessageFormatter {
 				}
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to format date", e, EventMessageFormatter.class);
+			Logger.getLogger().exception(null, "Failed to format date", e, EventMessageFormatter.class, true);
 			return "ERROR! Code: E003";
 		}
 	}

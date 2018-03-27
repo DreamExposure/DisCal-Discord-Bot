@@ -3,8 +3,8 @@ package com.cloudcraftgaming.discal.api.object.web;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.model.Calendar;
 
 /**
@@ -107,7 +107,7 @@ public class WebCalendar {
 					timezone = cal.getTimeZone().replaceAll("/", "___");
 				}
 			} catch (Exception e) {
-				ExceptionHandler.sendException(null, "[WEB] Failed to get calendar!", e, this.getClass());
+				Logger.getLogger().exception(null, "[WEB] Failed to get calendar!", e, this.getClass(), true);
 				name = "ERROR!";
 				description = "ERROR";
 				timezone = "ERROR";

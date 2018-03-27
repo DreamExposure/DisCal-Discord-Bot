@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -42,7 +43,7 @@ public class EventUtils {
 			return true;
 		} catch (Exception e) {
 			System.out.println("Something weird happened when deleting an event!");
-			ExceptionHandler.sendException(null, "Failed to delete event.", e, EventUtils.class);
+			Logger.getLogger().exception(null, "Failed to delete event.", e, EventUtils.class, true);
 			e.printStackTrace();
 		}
 		return false;
@@ -92,7 +93,7 @@ public class EventUtils {
 			return timeArray[0] + newHours + ":" + timeArray[1] + ":" + timeArray[2];
 
 		} catch (NumberFormatException e) {
-			ExceptionHandler.sendException(null, "Failed to convert to number from: " + hoursS, e, EventUtils.class);
+			Logger.getLogger().exception(null, "Failed to convert to number from: " + hoursS, e, EventUtils.class, true);
 		}
 		return dateRaw;
 	}

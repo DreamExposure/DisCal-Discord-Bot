@@ -3,10 +3,10 @@ package com.cloudcraftgaming.discal.bot.internal.service;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.PreCalendar;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.calendar.calendar.CalendarCreator;
 import com.cloudcraftgaming.discal.bot.internal.calendar.event.EventCreator;
 import com.cloudcraftgaming.discal.bot.module.announcement.AnnouncementCreator;
+import com.cloudcraftgaming.discal.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -68,7 +68,7 @@ public class CreatorCleaner extends TimerTask {
 				AnnouncementCreator.getCreator().terminate(a.getGuildId());
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Error in CreatorCleaner", e, this.getClass());
+			Logger.getLogger().exception(null, "Error in CreatorCleaner", e, this.getClass(), true);
 		}
 	}
 }

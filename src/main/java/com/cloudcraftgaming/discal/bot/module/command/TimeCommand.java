@@ -8,8 +8,8 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.calendar.calendar.CalendarMessageFormatter;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.util.EmbedBuilder;
@@ -110,7 +110,7 @@ public class TimeCommand implements ICommand {
 				Message.sendMessage(em.build(), event);
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
+			Logger.getLogger().exception(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass(), true);
 			Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 	}

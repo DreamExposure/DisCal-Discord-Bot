@@ -2,9 +2,9 @@ package com.cloudcraftgaming.discal.bot.internal.service;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import sx.blah.discord.util.DiscordException;
 
@@ -94,7 +94,7 @@ public class ApplicationHandler {
 			System.exit(0);
 		} catch (Exception e) {
 			// something went wrong
-			ExceptionHandler.sendException(null, "Failed to restart bot!", e, ApplicationHandler.class);
+			Logger.getLogger().exception(null, "Failed to restart bot!", e, ApplicationHandler.class, true);
 		}
 	}
 

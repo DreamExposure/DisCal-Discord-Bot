@@ -10,9 +10,9 @@ import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import com.cloudcraftgaming.discal.bot.internal.service.ApplicationHandler;
+import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -271,7 +271,7 @@ public class DevCommand implements ICommand {
 					try {
 						Main.client.getGuildByID(Long.valueOf(args[1])).leave();
 					} catch (DiscordException e) {
-						ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to leave guild", e, this.getClass());
+						Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to leave guild", e, this.getClass(), true);
 					}
 				});
 				Message.sendMessage("Left Guild!", event);

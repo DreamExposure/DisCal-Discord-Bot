@@ -5,8 +5,8 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.TimeUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -109,7 +109,7 @@ public class PreEvent {
 				cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
 			}
 		} catch (Exception ex) {
-			ExceptionHandler.sendException(null, "Failed to get proper date time for event!", ex, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get proper date time for event!", ex, this.getClass(), true);
 		}
 
 		if (cal != null) {

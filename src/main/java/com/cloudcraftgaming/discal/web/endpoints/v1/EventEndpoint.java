@@ -11,8 +11,8 @@ import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.Recurrence;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.ImageUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import com.google.api.client.util.DateTime;
@@ -84,7 +84,7 @@ public class EventEndpoint {
 			response.body(body.toString());
 		} catch (Exception e) {
 			response.body("Internal server error!");
-			ExceptionHandler.sendException(null, "[WEB] Failed to retrieve events for a month.", e, EventEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for a month.", e, EventEndpoint.class, true);
 			return response.body();
 		}
 		return response.body();
@@ -182,7 +182,7 @@ public class EventEndpoint {
 			response.body(body.toString());
 		} catch (Exception e) {
 			response.body("Internal server error!");
-			ExceptionHandler.sendException(null, "[WEB] Failed to retrieve events for specific date!", e, EventEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for specific date!", e, EventEndpoint.class, true);
 			return response.body();
 		}
 		return response.body();
@@ -265,7 +265,7 @@ public class EventEndpoint {
 			response.body(ResponseUtils.getJsonResponseMessage("Successfully updated event!"));
 
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Failed to update event!", e, EventEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, EventEndpoint.class, true);
 			e.printStackTrace();
 
 			response.status(500);
@@ -354,7 +354,7 @@ public class EventEndpoint {
 			response.body(respondBody.toString());
 
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Failed to update event!", e, EventEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, EventEndpoint.class, true);
 			e.printStackTrace();
 
 			response.status(500);

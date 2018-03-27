@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.api.calendar;
 import com.cloudcraftgaming.discal.api.crypto.AESEncryption;
 import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -87,7 +88,7 @@ public class CalendarAuth {
 		// Build flow and trigger user authorization request.
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
 		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		System.out.println("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+		Logger.getLogger().debug("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
 		return credential;
 	}
 

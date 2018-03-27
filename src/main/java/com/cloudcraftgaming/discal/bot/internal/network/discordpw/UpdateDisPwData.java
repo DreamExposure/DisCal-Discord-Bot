@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.bot.internal.network.discordpw;
 
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -48,7 +48,7 @@ public class UpdateDisPwData {
 		} catch (Exception e) {
 			//Handle issue.
 			System.out.println("Failed to update Discord PW list metadata!");
-			ExceptionHandler.sendException(null, "Failed to update Discord PW list.", e, UpdateDisPwData.class);
+			Logger.getLogger().exception(null, "Failed to update Discord PW list.", e, UpdateDisPwData.class, true);
 			e.printStackTrace();
 		}
 	}

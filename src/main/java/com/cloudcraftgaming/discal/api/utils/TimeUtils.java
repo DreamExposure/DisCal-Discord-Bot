@@ -5,6 +5,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
@@ -58,7 +59,7 @@ public class TimeUtils {
 					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
 					return inPast(e);
 				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "Failed to get external calendar auth", e, TimeUtils.class);
+					Logger.getLogger().exception(null, "Failed to get external calendar auth", e, TimeUtils.class, true);
 					//Return false and allow RSVP so user is not adversely affected.
 					return false;
 				}
@@ -69,7 +70,7 @@ public class TimeUtils {
 					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
 					return inPast(e);
 				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "Failed to get calendar auth", e, TimeUtils.class);
+					Logger.getLogger().exception(null, "Failed to get calendar auth", e, TimeUtils.class, true);
 					//Return false and allow RSVP so user is not adversely affected.
 					return false;
 				}

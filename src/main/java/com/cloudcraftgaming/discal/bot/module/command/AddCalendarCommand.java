@@ -8,8 +8,8 @@ import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -117,7 +117,7 @@ public class AddCalendarCommand implements ICommand {
 							}
 						} catch (Exception e) {
 							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-							ExceptionHandler.sendException(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass());
+							Logger.getLogger().exception(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass(), true);
 						}
 					}
 				} else {

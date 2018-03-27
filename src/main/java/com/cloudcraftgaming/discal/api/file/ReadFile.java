@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.api.file;
 
 import com.cloudcraftgaming.discal.api.object.BotSettings;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -37,7 +37,7 @@ public class ReadFile {
 				fr.close();
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to load lang files!", e, ReadFile.class);
+			Logger.getLogger().exception(null, "Failed to load lang files!", e, ReadFile.class, true);
 		}
 		return langs;
 	}

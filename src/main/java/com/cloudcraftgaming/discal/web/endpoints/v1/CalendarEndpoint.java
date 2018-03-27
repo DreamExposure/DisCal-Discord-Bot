@@ -2,7 +2,7 @@ package com.cloudcraftgaming.discal.web.endpoints.v1;
 
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,7 +47,7 @@ public class CalendarEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB-API] Internal get calendar error", e, CalendarEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get calendar error", e, CalendarEndpoint.class, true);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();
@@ -82,7 +82,7 @@ public class CalendarEndpoint {
 			e.printStackTrace();
 			halt(400, "Bad Request");
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB-API] Internal list calendars error", e, CalendarEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal list calendars error", e, CalendarEndpoint.class, true);
 			halt(500, "Internal Server Error");
 		}
 		return response.body();

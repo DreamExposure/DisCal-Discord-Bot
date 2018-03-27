@@ -11,10 +11,10 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.ImageUtils;
 import com.cloudcraftgaming.discal.bot.internal.calendar.event.EventMessageFormatter;
 import com.cloudcraftgaming.discal.bot.utils.ChannelUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
@@ -118,7 +118,7 @@ public class AnnouncementMessageFormatter {
                 }
             } catch (Exception e) {
                 //Failed to get from google cal.
-                ExceptionHandler.sendException(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class);
+				Logger.getLogger().exception(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class, true);
             }
         } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
@@ -247,7 +247,7 @@ public class AnnouncementMessageFormatter {
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class);
+			Logger.getLogger().exception(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class, true);
 		}
 
 		if (channel == null) {

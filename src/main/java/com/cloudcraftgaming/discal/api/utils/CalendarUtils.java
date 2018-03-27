@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
 
@@ -30,7 +31,7 @@ public class CalendarUtils {
 			}
 		} catch (IOException e) {
 			//Fail silently.
-			ExceptionHandler.sendException(null, "Failed to delete calendar", e, CalendarUtils.class);
+			Logger.getLogger().exception(null, "Failed to delete calendar", e, CalendarUtils.class, true);
 			return false;
 		}
 		if (settings.useExternalCalendar()) {
@@ -72,11 +73,11 @@ public class CalendarUtils {
 
 				return false;
 			} else {
-				ExceptionHandler.sendException(null, "Unknown google error when checking for calendar exist", ge, CalendarUtils.class);
+				Logger.getLogger().exception(null, "Unknown google error when checking for calendar exist", ge, CalendarUtils.class, true);
 				return true;
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Unknown error when checking for calendar exist", e, CalendarUtils.class);
+			Logger.getLogger().exception(null, "Unknown error when checking for calendar exist", e, CalendarUtils.class, true);
 			return true;
 		}
 	}

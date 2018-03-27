@@ -8,8 +8,8 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.utils.GuildUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -43,7 +43,7 @@ public class AnnouncementTask extends TimerTask {
 			try {
 				discalService = CalendarAuth.getCalendarService();
 			} catch (IOException e) {
-				ExceptionHandler.sendException(null, "Failed to get service! 00a0101", e, this.getClass());
+				Logger.getLogger().exception(null, "Failed to get service! 00a0101", e, this.getClass(), true);
 			}
 
 			//NOTE: This list EXCLUDES disabled announcements!!!!!!!
@@ -62,7 +62,7 @@ public class AnnouncementTask extends TimerTask {
 				try {
 					service = getService(settings);
 				} catch (Exception e) {
-					ExceptionHandler.sendException(null, "Failed to handle custom service! 00a102", e, this.getClass());
+					Logger.getLogger().exception(null, "Failed to handle custom service! 00a102", e, this.getClass(), true);
 					continue;
 				}
 
@@ -80,7 +80,7 @@ public class AnnouncementTask extends TimerTask {
 								}
 							} catch (IOException e) {
 								//Event getting error, we know it exists tho
-								ExceptionHandler.sendException(null, "Failed to get event! 00a103", e, this.getClass());
+								Logger.getLogger().exception(null, "Failed to get event! 00a103", e, this.getClass(), true);
 							}
 						} else {
 							//Event is gone, we can just delete this shit.
@@ -124,7 +124,7 @@ public class AnnouncementTask extends TimerTask {
 			customServices.clear();
 			allEvents.clear();
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "SOMETHING BAD IN THE ANNOUNCER!!!!! PANIC!!!", e, this.getClass());
+			Logger.getLogger().exception(null, "SOMETHING BAD IN THE ANNOUNCER!!!!! PANIC!!!", e, this.getClass(), true);
 		}
 	}
 
@@ -192,7 +192,7 @@ public class AnnouncementTask extends TimerTask {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				ExceptionHandler.sendException(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass());
+				Logger.getLogger().exception(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass(), true);
 				allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
 			}
 		}

@@ -13,8 +13,8 @@ import com.cloudcraftgaming.discal.api.object.web.WebChannel;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.object.web.WebRole;
 import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import org.json.JSONException;
@@ -51,28 +51,22 @@ public class DashboardHandler {
 
 			wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, u));
 			wg.setManageServer(PermissionChecker.hasManageServerRole(g, u));
-			if (m.containsKey("selected")) {
-				m.remove("selected");
-			}
+			m.remove("selected");
 
 			m.put("selected", wg);
 
-			if (m.containsKey("settings")) {
-				m.remove("settings");
-			}
+			m.remove("settings");
 
-			if (m.containsKey("admin")) {
-				m.remove("admin");
-			}
+			m.remove("admin");
 
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 
 			response.redirect("/dashboard/guild", 301);
 		} catch (JSONException e) {
-			ExceptionHandler.sendException(null, "[WEB] JSON || Guild Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] JSON || Guild Select failed!", e, DashboardHandler.class, true);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Guild Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Guild Select failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -99,10 +93,10 @@ public class DashboardHandler {
 				response.redirect("/dashboard/guild", 301);
 			}
 		} catch (JSONException e) {
-			ExceptionHandler.sendException(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class, true);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Settings Selected failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Settings Selected failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -243,7 +237,7 @@ public class DashboardHandler {
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Settings update failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -270,7 +264,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setName(request.queryParams("cal-name"));
 					} catch (Exception e) {
-						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class, true);
 					}
 				}
 			} else if (request.queryParams().contains("cal-desc")) {
@@ -292,7 +286,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setDescription(request.queryParams("cal-desc"));
 					} catch (Exception e) {
-						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class, true);
 					}
 				}
 			} else if (request.queryParams().contains("cal-tz")) {
@@ -314,7 +308,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setTimezone(request.queryParams("cal-tz"));
 					} catch (Exception e) {
-						ExceptionHandler.sendException(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class, true);
 					}
 				}
 			}
@@ -322,7 +316,7 @@ public class DashboardHandler {
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild/calendar", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Calendar update failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Calendar update failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -364,13 +358,13 @@ public class DashboardHandler {
 					//Refresh to display correct info...
 					g.setCalendar(new WebCalendar().fromCalendar(calendarData, g.getSettings()));
 				} catch (Exception ex) {
-					ExceptionHandler.sendException(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class);
+					Logger.getLogger().exception(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class, true);
 				}
 			}
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild/calendar", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Calendar create failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -419,7 +413,7 @@ public class DashboardHandler {
 			//Finally redirect back to the dashboard
 			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Announcement create failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Announcement create failed!", e, DashboardHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -444,7 +438,7 @@ public class DashboardHandler {
 				response.redirect("/dashboard/guild/calendar", 301);
 			}
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class, true);
 		}
 		return response.body();
 	}
@@ -465,7 +459,7 @@ public class DashboardHandler {
 			}
 			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class, true);
 		}
 		return response.body();
 	}
@@ -506,7 +500,7 @@ public class DashboardHandler {
 			}
 			response.redirect("/dashboard/guild/announcements", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Failed to update/edit announcement!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to update/edit announcement!", e, DashboardHandler.class, true);
 		}
 		return response.body();
 	}

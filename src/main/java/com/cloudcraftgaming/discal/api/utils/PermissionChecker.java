@@ -3,6 +3,7 @@ package com.cloudcraftgaming.discal.api.utils;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.*;
 
@@ -50,7 +51,7 @@ public class PermissionChecker {
 			}
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and email the dev.
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to check for sufficient control role.", e, PermissionChecker.class, true);
 			return true;
 		}
 		return true;
@@ -86,8 +87,8 @@ public class PermissionChecker {
 				}
 			}
 		} catch (Exception e) {
-			//Something broke so we will harmlessly allow access and email the dev.
-			ExceptionHandler.sendException(user, "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			//Something broke so we will harmlessly allow access and notify the dev team
+			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, PermissionChecker.class, true);
 			return true;
 		}
 		return true;
@@ -133,7 +134,7 @@ public class PermissionChecker {
 			return true;
 		} catch (Exception e) {
 			//Catch any errors so that the bot always responds...
-			ExceptionHandler.sendException(event.getMessage().getAuthor(), "Failed to check for discal channel.", e, PermissionChecker.class);
+			Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to check for discal channel.", e, PermissionChecker.class, true);
 			return true;
 		}
 	}

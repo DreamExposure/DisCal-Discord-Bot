@@ -2,8 +2,8 @@ package com.cloudcraftgaming.discal.api.message;
 
 import com.cloudcraftgaming.discal.api.file.ReadFile;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.MessageUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ public class MessageManager {
 			langs = ReadFile.readAllLangFiles();
 			return true;
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "Failed to reload lang files!", e, MessageManager.class);
+			Logger.getLogger().exception(null, "Failed to reload lang files!", e, MessageManager.class, true);
 			return false;
 		}
 	}

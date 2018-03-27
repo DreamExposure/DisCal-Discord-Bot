@@ -4,11 +4,11 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExecutor;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.cloudcraftgaming.discal.web.utils.SparkUtils;
 import sx.blah.discord.api.ClientBuilder;
@@ -38,6 +38,10 @@ public class Main {
 		p.load(new FileReader(new File("settings.properties")));
 		BotSettings.init(p);
 
+		//Init logger
+		Logger.getLogger().init();
+
+		//Log in to discord
 		client = createClient(BotSettings.TOKEN.get());
         if (client == null)
             throw new NullPointerException("Failed to log in! Client cannot be null!");
@@ -55,7 +59,7 @@ public class Main {
 			DiscordAccountHandler.getHandler().init();
 			SparkUtils.initSpark();
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class);
+			Logger.getLogger().exception(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
 		}
 
         //Register events

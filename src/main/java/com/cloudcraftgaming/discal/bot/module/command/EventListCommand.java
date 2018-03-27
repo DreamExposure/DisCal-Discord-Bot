@@ -7,8 +7,8 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.bot.internal.calendar.event.EventMessageFormatter;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
@@ -124,7 +124,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
 				e.printStackTrace();
 			}
 		} else if (args.length == 1) {
@@ -167,7 +167,7 @@ public class EventListCommand implements ICommand {
                     }
                 } catch (Exception e) {
                     Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-                    ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
+					Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {
@@ -218,7 +218,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				ExceptionHandler.sendException(event.getAuthor(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
 				e.printStackTrace();
 			}
 		}

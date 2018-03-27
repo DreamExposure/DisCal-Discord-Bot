@@ -4,8 +4,8 @@ import com.cloudcraftgaming.discal.api.enums.GoodTimezone;
 import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
@@ -66,10 +66,10 @@ public class DiscordLoginHandler {
 			//Finally redirect to the dashboard seamlessly.
 			response.redirect("/dashboard", 301);
 		} catch (JSONException e) {
-			ExceptionHandler.sendException(null, "[WEB] JSON || Discord login failed!", e, DiscordLoginHandler.class);
+			Logger.getLogger().exception(null, "[WEB] JSON || Discord login failed!", e, DiscordLoginHandler.class, true);
 			response.redirect("/dashboard", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Discord login failed!", e, DiscordLoginHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Discord login failed!", e, DiscordLoginHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();
@@ -81,7 +81,7 @@ public class DiscordLoginHandler {
 
 			response.redirect("/", 301);
 		} catch (Exception e) {
-			ExceptionHandler.sendException(null, "[WEB] Discord logout failed!", e, DiscordLoginHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Discord logout failed!", e, DiscordLoginHandler.class, true);
 			halt(500, "Internal Server Exception");
 		}
 		return response.body();

@@ -10,8 +10,8 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.event.EventCreatorResponse;
 import com.cloudcraftgaming.discal.api.object.event.PreEvent;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
-import com.cloudcraftgaming.discal.api.utils.ExceptionHandler;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
@@ -274,7 +274,7 @@ public class EventCreator {
 						response.setEdited(false);
 						return response;
 					} catch (Exception ex) {
-						ExceptionHandler.sendException(e.getAuthor(), "Failed to create event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getAuthor(), "Failed to create event.", ex, this.getClass(), true);
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setEdited(false);
 						return response;
@@ -298,7 +298,7 @@ public class EventCreator {
 						response.setEdited(true);
 						return response;
 					} catch (Exception ex) {
-						ExceptionHandler.sendException(e.getAuthor(), "Failed to update event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getAuthor(), "Failed to update event.", ex, this.getClass(), true);
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setEdited(true);
 						return response;
