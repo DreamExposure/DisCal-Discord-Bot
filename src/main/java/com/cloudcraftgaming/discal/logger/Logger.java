@@ -199,4 +199,47 @@ public class Logger {
 			io.printStackTrace();
 		}
 	}
+
+	public void api(String message) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+		try {
+			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
+			file.println("API --- " + timeStamp + " ---");
+			file.println("info: " + message);
+			file.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+
+	public void api(String message, String ip) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+		try {
+			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
+			file.println("API --- " + timeStamp + " ---");
+			file.println("info: " + message);
+			file.println("IP: " + ip);
+			file.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+
+	public void api(String message, String ip, String host, String endpoint) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+		try {
+			PrintWriter file = new PrintWriter(apiFile, "UTF-8");
+			file.println("API --- " + timeStamp + " ---");
+			file.println("info: " + message);
+			file.println("IP: " + ip);
+			file.println("Host: " + host);
+			file.println("Endpoint: " + endpoint);
+			file.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
 }

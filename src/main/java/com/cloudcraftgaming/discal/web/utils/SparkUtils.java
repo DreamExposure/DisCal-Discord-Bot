@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.network.discord.DiscordLoginHandler;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
+import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.endpoints.v1.*;
 import com.cloudcraftgaming.discal.web.handler.DashboardHandler;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
@@ -32,13 +33,13 @@ public class SparkUtils {
 			//Register the API Endpoints
 			before("/api/*", (request, response) -> {
 				if (!request.requestMethod().equalsIgnoreCase("POST")) {
-					System.out.println("Denied '" + request.requestMethod() + "' access from: " + request.ip());
+					Logger.getLogger().api("Denied '" + request.requestMethod() + "' access", request.ip());
 					halt(405, "Method not allowed");
 				}
 				//Check authorization
 				if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
 					//User is logged in from website, no API key needed
-					System.out.println("API Call from website. Origin IP: " + request.ip());
+					Logger.getLogger().api("API Call from website", request.ip());
 				} else {
 					//Requires "Authorization Header
 					if (request.headers().contains("Authorization")) {
@@ -46,7 +47,7 @@ public class SparkUtils {
 						UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
 						if (acc != null) {
 							if (acc.isBlocked()) {
-								System.out.println("Attempted to use blocked API Key: " + acc.getAPIKey() + "; IP: " + request.ip());
+								Logger.getLogger().api("Attempted to use blocked API Key: " + acc.getAPIKey(), request.ip());
 								halt(401, "Unauthorized");
 							} else {
 								//Everything checks out!
@@ -54,10 +55,11 @@ public class SparkUtils {
 								DatabaseManager.getManager().updateAPIAccount(acc);
 							}
 						} else {
-							System.out.println("Attempted to use invalid API Key: " + key + "; IP: " + request.ip());
+							Logger.getLogger().api("Attempted to use invalid API Key: " + key, request.ip());
 							halt(401, "Unauthorized");
 						}
 					} else {
+						Logger.getLogger().api("Attempted to use API without authorization header", request.ip());
 						halt(400, "Bad Request");
 					}
 				}
@@ -71,7 +73,7 @@ public class SparkUtils {
 
 			//API endpoints
 			path("/api/v1", () -> {
-				before("/*", (q, a) -> System.out.println("Received API call from: " + q.ip() + "; Host:" + q.host()));
+				before("/*", (q, a) -> Logger.getLogger().api("Received API Call", q.ip(), q.host(), q.pathInfo()));
 				path("/guild", () -> {
 					path("/settings", () -> {
 						post("/get", GuildEndpoint::getSettings);
