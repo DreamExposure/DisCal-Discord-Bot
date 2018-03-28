@@ -52,7 +52,7 @@ public class Logger {
 			api.println("INIT --- " + timestamp + " ---");
 			api.close();
 
-			PrintWriter announcement = new PrintWriter(apiFile, "UTF-8");
+			PrintWriter announcement = new PrintWriter(announcementsFile, "UTF-8");
 			announcement.println("INIT --- " + timestamp + " ---");
 			announcement.close();
 
