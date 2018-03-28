@@ -38,6 +38,7 @@ public class AnnouncementTask extends TimerTask {
 
 	@Override
 	public void run() {
+		Logger.getLogger().announcement("Starting announcement loop!");
 		try {
 			//Get the default stuff.
 			try {
@@ -50,6 +51,7 @@ public class AnnouncementTask extends TimerTask {
 			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements();
 
 			for (Announcement a : allAnnouncements) {
+				Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 				//Check if guild is part of DisCal's guilds. This way we can clear out the database...
 				if (!GuildUtils.active(a.getGuildId())) {
 					DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
@@ -116,6 +118,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 				}
+				Logger.getLogger().announcement("finished an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 			}
 
 			//Just clear everything immediately.
@@ -123,6 +126,8 @@ public class AnnouncementTask extends TimerTask {
 			calendars.clear();
 			customServices.clear();
 			allEvents.clear();
+
+			Logger.getLogger().announcement("Finished announcement loop!");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "SOMETHING BAD IN THE ANNOUNCER!!!!! PANIC!!!", e, this.getClass(), true);
 		}
@@ -181,6 +186,7 @@ public class AnnouncementTask extends TimerTask {
 
 	private List<Event> getEvents(GuildSettings gs, CalendarData cd, Calendar service, Announcement a) {
 		if (!allEvents.containsKey(gs.getGuildID())) {
+			Logger.getLogger().announcement("getting events for guild...", gs.getGuildID() + "", a.getAnnouncementId() + "", "N/a");
 			try {
 				Events events = service.events().list(cd.getCalendarAddress())
 						.setMaxResults(15)

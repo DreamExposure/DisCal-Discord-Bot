@@ -241,4 +241,33 @@ public class Logger {
 			io.printStackTrace();
 		}
 	}
+
+	public void announcement(String message) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+		try {
+			FileWriter file = new FileWriter(announcementsFile, true);
+			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("info: " + message + MessageUtils.lineBreak);
+			file.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+
+	public void announcement(String message, String guildId, String announcementId, String eventId) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
+
+		try {
+			FileWriter file = new FileWriter(announcementsFile, true);
+			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("info: " + message + MessageUtils.lineBreak);
+			file.write("guild Id: " + guildId + MessageUtils.lineBreak);
+			file.write("announcement Id: " + announcementId + MessageUtils.lineBreak);
+			file.write("event id: " + eventId + MessageUtils.lineBreak);
+			file.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
 }
