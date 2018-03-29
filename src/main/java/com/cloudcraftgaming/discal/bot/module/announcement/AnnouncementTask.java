@@ -14,7 +14,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -199,7 +198,9 @@ public class AnnouncementTask extends TimerTask {
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
 				Logger.getLogger().exception(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass(), true);
-				allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
+				//What the ever living fuck was this???
+				//allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
+				return new ArrayList<>();
 			}
 		}
 		return allEvents.get(gs.getGuildID());
