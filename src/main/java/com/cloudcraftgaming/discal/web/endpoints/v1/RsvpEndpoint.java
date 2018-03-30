@@ -21,10 +21,10 @@ public class RsvpEndpoint {
 	public static String getRsvp(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("guild_id");
+			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Long.valueOf(guildId), eventId);
+			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(guildId, eventId);
 
 			JSONObject body = new JSONObject();
 			body.put("on_time", rsvp.getGoingOnTime());
@@ -48,10 +48,10 @@ public class RsvpEndpoint {
 	public static String updateRsvp(Request request, Response response) {
 		try {
 			JSONObject jsonMain = new JSONObject(request.body());
-			String guildId = jsonMain.getString("guild_id");
+			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Long.valueOf(guildId), eventId);
+			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(guildId, eventId);
 
 			if (jsonMain.has("on_time")) {
 				rsvp.getGoingOnTime().clear();
