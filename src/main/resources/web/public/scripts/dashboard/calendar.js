@@ -577,8 +577,8 @@ function updateEvent(editSubmitId) {
 			recurrence: {
 				"recur": document.getElementById("editEnableRecur-" + eventId).checked,
 				"frequency": freqElement.options[freqElement.selectedIndex].value,
-				"count": document.getElementById("editCount-" + eventId).valueAsNumber,
-				"interval": document.getElementById("editInterval-" + eventId).valueAsNumber
+				"count": parseInt(document.getElementById("editCount-" + eventId).value),
+				"interval": parseInt(document.getElementById("editInterval-" + eventId).value)
 			},
 			"epochStart": startDate.getTime() + timeOffset,
 			"epochEnd": endDate.getTime() + timeOffset
@@ -647,8 +647,8 @@ function createNewEvent() {
 		"recurrence": {
 			"recur": document.getElementById("create-enableRecur").checked,
 			"frequency": freqElement.options[freqElement.selectedIndex].value,
-			"count": document.getElementById("create-count").valueAsNumber,
-			"interval": document.getElementById("create-interval").valueAsNumber
+			"count": parseInt(document.getElementById("create-count").value),
+			"interval": parseInt(document.getElementById("create-interval").value)
 		},
 		"epochStart": startDate.getTime() + timeOffset,
 		"epochEnd": endDate.getTime() + timeOffset
