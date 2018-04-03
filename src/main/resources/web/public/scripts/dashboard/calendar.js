@@ -562,7 +562,7 @@ function updateEvent(editSubmitId) {
 
 	var colorElement = document.getElementById("editColor-" + eventId);
 	var timeOffset = 0;
-	if (is.firefox() || is.edge()) {
+	if (is.firefox() || is.edge() || is.chrome) {
 		timeOffset = 86400000;
 	}
 	if (document.getElementById("editEnableRecur-" + eventId) !== null) {
@@ -634,7 +634,7 @@ function createNewEvent() {
 	var freqElement = document.getElementById("create-frequency");
 
 	var timeOffset = 0;
-	if (is.firefox() || is.edge()) {
+	if (is.firefox() || is.edge() || is.chrome()) {
 		timeOffset = 86400000;
 	}
 
