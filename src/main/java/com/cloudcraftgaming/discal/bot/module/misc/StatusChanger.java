@@ -4,6 +4,8 @@ import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
+import sx.blah.discord.handle.obj.ActivityType;
+import sx.blah.discord.handle.obj.StatusType;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -47,7 +49,7 @@ public class StatusChanger extends TimerTask {
         status = status.replace("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
         status = status.replace("%shards%", Main.client.getShardCount() + "");
 		status = status.replace("%users%", DiscordAccountHandler.getHandler().accountCount() + "");
-        Main.client.changePlayingText(status);
+		Main.client.changePresence(StatusType.ONLINE, ActivityType.PLAYING, status);
 
         //Set new index.
         if (index + 1 >= statuses.size()) {

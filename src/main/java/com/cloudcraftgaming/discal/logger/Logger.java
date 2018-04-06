@@ -77,7 +77,7 @@ public class Logger {
 			//Can ignore silently...
 		}
 
-		if (Main.getSelfUser() != null) {
+		if (Main.getSelfUser() != null && Main.client.isLoggedIn()) {
 			IUser bot = Main.getSelfUser();
 
 			if (post) {

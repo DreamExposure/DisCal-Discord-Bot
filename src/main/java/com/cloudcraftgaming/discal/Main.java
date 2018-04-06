@@ -44,7 +44,13 @@ public class Main {
 		//Log in to discord
 		client = createClient(BotSettings.TOKEN.get());
         if (client == null)
-            throw new NullPointerException("Failed to log in! Client cannot be null!");
+			throw new NullPointerException("Failed to build! Client cannot be null!");
+
+		//Register events
+		EventDispatcher dispatcher = client.getDispatcher();
+		dispatcher.registerListener(new ReadyEventListener());
+
+		client.login();
 
 		UpdateDisPwData.init();
 
@@ -61,10 +67,6 @@ public class Main {
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
 		}
-
-        //Register events
-        EventDispatcher dispatcher = client.getDispatcher();
-        dispatcher.registerListener(new ReadyEventListener());
 
         //Register modules
         CommandExecutor executor = CommandExecutor.getExecutor().enable();
@@ -97,7 +99,7 @@ public class Main {
         ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
         clientBuilder.withToken(token).withRecommendedShardCount(); // Adds the login info to the builder
         try {
-			return clientBuilder.login();
+			return clientBuilder.build();
         } catch (DiscordException e) {
             e.printStackTrace();
         }

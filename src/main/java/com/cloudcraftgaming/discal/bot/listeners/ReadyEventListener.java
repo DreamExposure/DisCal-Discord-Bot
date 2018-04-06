@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.internal.service.TimeManager;
+import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 
@@ -16,11 +17,16 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 public class ReadyEventListener {
 	@EventSubscriber
 	public void onReadyEvent(ReadyEvent event) {
-		TimeManager.getManager().init();
+		Logger.getLogger().debug("Ready!");
+		try {
+			TimeManager.getManager().init();
 
-		UpdateDisBotData.init();
-		UpdateDisPwData.init();
+			UpdateDisBotData.init();
+			UpdateDisPwData.init();
 
-		MessageManager.reloadLangs();
+			MessageManager.reloadLangs();
+		} catch (Exception e) {
+			Logger.getLogger().exception(null, "BAD!!!", e, this.getClass(), false);
+		}
 	}
 }

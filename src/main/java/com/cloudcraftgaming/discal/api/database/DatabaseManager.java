@@ -54,8 +54,8 @@ public class DatabaseManager {
 			System.out.println("Connected to MySQL database!");
 		} catch (Exception e) {
 			System.out.println("Failed to connect to MySQL database! Is it properly configured?");
-			Logger.getLogger().exception(null, "Connecting to MySQL server failed.", e, this.getClass(), true);
 			e.printStackTrace();
+			Logger.getLogger().exception(null, "Connecting to MySQL server failed.", e, this.getClass(), true);
 		}
 	}
 
