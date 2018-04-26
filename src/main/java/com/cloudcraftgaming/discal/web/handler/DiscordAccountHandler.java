@@ -4,10 +4,7 @@ import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -127,14 +124,18 @@ public class DiscordAccountHandler {
 
 	private void removeTimedOutAccounts() {
 		long limit = Long.valueOf(BotSettings.TIME_OUT.get());
-		final HashMap<String, Map> accounts = discordAccounts;
-		for (String id : accounts.keySet()) {
-			Map m = accounts.get(id);
+		final List<String> toRemove = new ArrayList<>();
+		for (String id : discordAccounts.keySet()) {
+			Map m = discordAccounts.get(id);
 			long lastUse = (long) m.get("lastUse");
 			if (System.currentTimeMillis() - lastUse > limit) {
 				//Timed out, remove account info and require sign in.
-				discordAccounts.remove(id);
+				toRemove.remove(id);
 			}
+		}
+
+		for (String id : toRemove) {
+			discordAccounts.remove(id);
 		}
 	}
 }
