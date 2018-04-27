@@ -15,6 +15,20 @@
 
 		<!--Locally hosted-->
 		<link href="/styles/global.css" rel="stylesheet">
+		<link href="/styles/fix.css" rel="stylesheet">
+		<link href="/styles/calendar.css" rel="stylesheet">
+		<link href="/styles/bootstrap/modal-only.css" rel="stylesheet">
+
+		<script src="/scripts/embed/calendar.js"></script>
+		<script src="/scripts/snackbar.js"></script>
+
+		<!--Externally hosted-->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"
+		        integrity="sha256-obZACiHd7gkOk9iIL/pimWMTJ4W/pBsKu+oZnSeBIek=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/is_js/0.9.0/is.min.js"
+		        integrity="sha256-lnJeulOa3e5IO2EzHr8jKJ3CbT80MBwkS5a+n2ooIr4=" crossorigin="anonymous"></script>
 	</head>
 
 	<body>
@@ -37,8 +51,104 @@
 
 		<div id="content">
 
+			<!--No calendar-->
+			<div th:if="${embed.calendar.id} == primary" style="text-align: left">
+				<br>
+				<p>The guild does not have a calendar!</p>
+			</div>
+			<!--Has calendar-->
 
-		</div>
+			<div th:unless="${embed.calendar.id} == primary" style="text-align: left">
+				<div id="calendar-container">
+					<table id="calendar" style="border-color: #ef0813; margin: auto;" border="#ef0813"
+					       cellpadding="4"
+					       cellspacing="0">
+						<tbody>
+						<tr style="height: 50px;">
+							<th class="nav" onclick="previousMonth()"><</th>
+							<th></th>
+							<th></th>
+							<th id="month-display"></th>
+							<th></th>
+							<th></th>
+							<th class="nav" onclick="nextMonth()">></th>
+						</tr>
+						<tr style="height: 40px;">
+							<th>Sunday</th>
+							<th>Monday</th>
+							<th>Tuesday</th>
+							<th>Wednesday</th>
+							<th>Thursday</th>
+							<th>Friday</th>
+							<th>Saturday</th>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r1c1"></td>
+							<td onclick="selectDate(this.id)" id="r1c2"></td>
+							<td onclick="selectDate(this.id)" id="r1c3"></td>
+							<td onclick="selectDate(this.id)" id="r1c4"></td>
+							<td onclick="selectDate(this.id)" id="r1c5"></td>
+							<td onclick="selectDate(this.id)" id="r1c6"></td>
+							<td onclick="selectDate(this.id)" id="r1c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r2c1"></td>
+							<td onclick="selectDate(this.id)" id="r2c2"></td>
+							<td onclick="selectDate(this.id)" id="r2c3"></td>
+							<td onclick="selectDate(this.id)" id="r2c4"></td>
+							<td onclick="selectDate(this.id)" id="r2c5"></td>
+							<td onclick="selectDate(this.id)" id="r2c6"></td>
+							<td onclick="selectDate(this.id)" id="r2c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r3c1"></td>
+							<td onclick="selectDate(this.id)" id="r3c2"></td>
+							<td onclick="selectDate(this.id)" id="r3c3"></td>
+							<td onclick="selectDate(this.id)" id="r3c4"></td>
+							<td onclick="selectDate(this.id)" id="r3c5"></td>
+							<td onclick="selectDate(this.id)" id="r3c6"></td>
+							<td onclick="selectDate(this.id)" id="r3c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r4c1"></td>
+							<td onclick="selectDate(this.id)" id="r4c2"></td>
+							<td onclick="selectDate(this.id)" id="r4c3"></td>
+							<td onclick="selectDate(this.id)" id="r4c4"></td>
+							<td onclick="selectDate(this.id)" id="r4c5"></td>
+							<td onclick="selectDate(this.id)" id="r4c6"></td>
+							<td onclick="selectDate(this.id)" id="r4c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r5c1"></td>
+							<td onclick="selectDate(this.id)" id="r5c2"></td>
+							<td onclick="selectDate(this.id)" id="r5c3"></td>
+							<td onclick="selectDate(this.id)" id="r5c4"></td>
+							<td onclick="selectDate(this.id)" id="r5c5"></td>
+							<td onclick="selectDate(this.id)" id="r5c6"></td>
+							<td onclick="selectDate(this.id)" id="r5c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r6c1"></td>
+							<td onclick="selectDate(this.id)" id="r6c2"></td>
+							<td onclick="selectDate(this.id)" id="r6c3"></td>
+							<td onclick="selectDate(this.id)" id="r6c4"></td>
+							<td onclick="selectDate(this.id)" id="r6c5"></td>
+							<td onclick="selectDate(this.id)" id="r6c6"></td>
+							<td onclick="selectDate(this.id)" id="r6c7"></td>
+						</tr>
+						</tbody>
+					</table>
+					<p style="text-align: center; font-size: 20px" id="local-time-display">All Dates and
+						Times are displayed in your local timezone!</p>
+				</div>
+				<hr>
+				<br>
+				<h6>Events for Selected Date</h6>
+				<!--Add events for selected date via JS and JQuery-->
+				<div id="event-container">
+
+				</div>
+			</div>
 	</body>
 
 	<footer id="footer">

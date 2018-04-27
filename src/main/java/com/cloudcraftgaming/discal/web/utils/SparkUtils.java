@@ -151,6 +151,9 @@ public class SparkUtils {
 			get("/dashboard/guild/announcements", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/announcements"), new ThymeleafTemplateEngine());
 			get("/dashboard/guild/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/rsvp"), new ThymeleafTemplateEngine());
 
+			//Embed pages
+			get("/embed/calendar/:guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccountForGuildEmbed(rq.session().id(), rq.params(":guild")), "pages/embed/calendar"), new ThymeleafTemplateEngine());
+
 			//Various other doc pages
 			get("/docs/event/colors", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/events/event-colors"), new ThymeleafTemplateEngine());
 

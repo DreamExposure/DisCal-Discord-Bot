@@ -1,7 +1,10 @@
 package com.cloudcraftgaming.discal.web.handler;
 
+import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
+import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
+import sx.blah.discord.handle.obj.IGuild;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -66,6 +69,36 @@ public class DiscordAccountHandler {
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirUri", BotSettings.REDIR_URI.get());
+			return m;
+		}
+	}
+
+	public Map getAccountForGuildEmbed(String sessionId, String guildId) {
+		if (discordAccounts.containsKey(sessionId)) {
+			Map m = discordAccounts.get(sessionId);
+			m.remove("lastUse");
+			m.put("lastUse", System.currentTimeMillis());
+
+			//Add guild for guild embed
+			m.remove("embed");
+			IGuild g = Main.client.getGuildByID(Long.valueOf(guildId));
+			WebGuild wg = new WebGuild().fromGuild(g);
+
+			m.put("embed", wg);
+
+			return m;
+		} else {
+			//Not logged in...
+			Map m = new HashMap();
+			m.put("loggedIn", false);
+			m.put("client", BotSettings.ID.get());
+			m.put("year", LocalDate.now().getYear());
+
+			//Add guild for guild embed
+			IGuild g = Main.client.getGuildByID(Long.valueOf(guildId));
+			WebGuild wg = new WebGuild().fromGuild(g);
+
+			m.put("embed", wg);
 			return m;
 		}
 	}
