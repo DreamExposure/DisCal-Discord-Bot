@@ -130,23 +130,20 @@
 		</dependency>
 	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <!-- Build an executable JAR -->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.cloudcraftgaming.discal.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>com.cloudcraftgaming.discal.Main</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
 			<!-- Maven Assembly Plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -175,6 +172,6 @@
 					</execution>
 				</executions>
 			</plugin>
-        </plugins>
-    </build>
+		</plugins>
+	</build>
 </project>
