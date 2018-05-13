@@ -25,6 +25,8 @@ public class ReadyEventListener {
 			UpdateDisPwData.init();
 
 			MessageManager.reloadLangs();
+
+			Logger.getLogger().debug("[ReadyEvent] Connection success!");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "BAD!!!", e, this.getClass(), false);
 		}
