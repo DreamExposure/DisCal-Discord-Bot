@@ -158,8 +158,13 @@ public class EventMessageFormatter {
 		em.withAuthorIcon(Main.client.getGuildByID(266063520112574464L).getIconURL());
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
-		if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
-			em.withImage(event.getEventData().getImageLink());
+		try {
+			if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
+				em.withImage(event.getEventData().getImageLink());
+			}
+		} catch (NullPointerException e) {
+			//TODO: find out why this is happening
+			Logger.getLogger().exception(null, "[Event] Failed to handle event image. Is event null?", e, EventMessageFormatter.class, true);
 		}
 		if (event.isEditing()) {
 			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
