@@ -36,7 +36,7 @@
 		<resources>
 			<resource>
 				<targetPath>.</targetPath>
-				<directory>/</directory>
+				<directory>${project.basedir}</directory>
 				<includes>
 					<include>**/src/main/resources/*</include>
 				</includes>
