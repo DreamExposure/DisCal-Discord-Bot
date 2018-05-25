@@ -167,7 +167,6 @@ public class SparkUtils {
 			get("/docs/api/v1/events", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/events"), new ThymeleafTemplateEngine());
 			get("/docs/api/v1/guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/guild"), new ThymeleafTemplateEngine());
 			get("/docs/api/v1/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/rsvp"), new ThymeleafTemplateEngine());
-			get("/docs/api/v1/time", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/api/v1/time"), new ThymeleafTemplateEngine());
 		}
 	}
 }
