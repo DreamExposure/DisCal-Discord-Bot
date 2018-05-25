@@ -3,6 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+	<packaging>pom</packaging>
 
     <groupId>com.cloudcraftgaming</groupId>
     <artifactId>DisCal</artifactId>
@@ -15,7 +16,13 @@
         <maven.compiler.testSource>1.8</maven.compiler.testSource>
     </properties>
 
-    <repositories>
+	<modules>
+		<module>API</module>
+		<module>Website</module>
+		<module>Bot</module>
+	</modules>
+
+	<repositories>
         <repository>
             <id>jcenter</id>
             <url>http://jcenter.bintray.com</url>
@@ -32,89 +39,105 @@
 			<groupId>com.github.discord4j</groupId>
             <artifactId>Discord4J</artifactId>
 			<version>LATEST</version>
+			<scope>compile</scope>
         </dependency>
         <!-- Allows you to log events from Discord4J -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.7</version>
+			<scope>compile</scope>
         </dependency>
 		<!--discordbots.net API library-->
 		<dependency>
 			<groupId>com.github.DiscordBotList</groupId>
 			<artifactId>Java-Wrapper</artifactId>
 			<version>v1.0</version>
+			<scope>compile</scope>
 		</dependency>
         <!--Google Calendar API-->
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
             <version>1.22.0</version>
+			<scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-calendar</artifactId>
             <version>v3-rev225-1.22.0</version>
+			<scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
             <version>1.22.0</version>
+			<scope>compile</scope>
         </dependency>
         <!--MySQL Driver-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>LATEST</version>
+			<scope>compile</scope>
         </dependency>
         <!--GSON API-->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.0</version>
+			<scope>compile</scope>
         </dependency>
         <!-- Unirest API & it's depends-->
 		<dependency>
 			<groupId>com.mashape.unirest</groupId>
 			<artifactId>unirest-java</artifactId>
 			<version>1.4.9</version>
+			<scope>compile</scope>
 		</dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.6</version>
+			<scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <version>4.0.2</version>
+			<scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>4.3.6</version>
+			<scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20140107</version>
+			<scope>compile</scope>
         </dependency>
         <!--Joda Time-->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.9.9</version>
+			<scope>compile</scope>
         </dependency>
 		<!--Spark API-->
 		<dependency>
 			<groupId>com.sparkjava</groupId>
 			<artifactId>spark-core</artifactId>
 			<version>2.7.1</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.21</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<!--Thymeleaf-->
@@ -122,11 +145,13 @@
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf</artifactId>
 			<version>3.0.9.RELEASE</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-java8time</artifactId>
 			<version>3.0.1.RELEASE</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 
@@ -134,43 +159,12 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
 				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-							<mainClass>com.cloudcraftgaming.discal.Main</mainClass>
-						</manifest>
-					</archive>
+					<source>8</source>
+					<target>8</target>
 				</configuration>
-			</plugin>
-			<!-- Maven Assembly Plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4.1</version>
-				<configuration>
-					<!-- get all project dependencies -->
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>com.cloudcraftgaming.discal.Main</mainClass>
-						</manifest>
-					</archive>
-
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<!-- bind to the packaging phase -->
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

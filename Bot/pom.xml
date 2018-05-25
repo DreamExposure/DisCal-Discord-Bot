@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.cloudcraftgaming</groupId>
+		<artifactId>DisCal</artifactId>
+		<version>2.0.0</version>
+	</parent>
+
+	<groupId>com.cloudcraftgaming.DisCal</groupId>
+	<artifactId>Bot</artifactId>
+
+	<dependencies>
+		<!--Add our modules to the deps-->
+		<dependency>
+			<groupId>com.cloudcraftgaming.DisCal</groupId>
+			<artifactId>API</artifactId>
+			<version>2.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.cloudcraftgaming.DisCal</groupId>
+			<artifactId>Website</artifactId>
+			<version>2.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<directory>../target</directory> <!-- Build it one level up, because it is the one we care about -->
+		<finalName>DisCal-Bot</finalName>
+		<!-- Define filtering for the inclusion of plugin.yml, so we can utilize the pom.xml version in it -->
+		<resources>
+			<resource>
+				<targetPath>.</targetPath>
+				<directory>/</directory>
+				<includes>
+					<include>**/src/main/resources/*</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.1.1</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
