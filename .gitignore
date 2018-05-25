@@ -57,7 +57,9 @@ fabric.properties
 hs_err_pid*
 /.idea/
 /src/test/
+/target/
 /src/main/resources/client_secret.json
-/src/main/resources/META-INF/
 
+**/META-INF/*
  **/*.iml
+**/dependency-reduced-pom.xml

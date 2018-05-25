@@ -30,7 +30,6 @@ import java.util.Properties;
 @SuppressWarnings("ThrowableNotThrown")
 public class Main {
 	public static String version = "2.0.0";
-	private static DisCalAPI api;
 
 	public static void main(String[] args) throws IOException {
         //Get bot settings
@@ -42,7 +41,7 @@ public class Main {
 		Logger.getLogger().init();
 
 		//Log in to discord
-		api = DisCalAPI.getAPI();
+		DisCalAPI api = DisCalAPI.getAPI();
 
 		api.init(createClient(BotSettings.TOKEN.get()));
 		if (api.getClient() == null)
