@@ -64,6 +64,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
+							<mainClass>com.cloudcraftgaming.discal.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
