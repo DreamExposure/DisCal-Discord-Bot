@@ -105,7 +105,7 @@ public class ApplicationHandler {
 		System.out.println("Shutting down Discord bot!");
 		try {
 			DisCalAPI.getAPI().getClient().logout();
-		} catch (DiscordException e) {
+		} catch (DiscordException | NoSuchMethodError e) {
 			//No need to print, exiting anyway.
 			e.printStackTrace();
 		}
