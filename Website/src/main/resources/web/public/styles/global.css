@@ -219,6 +219,16 @@ label {
 	border-radius: 10px;
 }
 
+.announcement-edit-container-all {
+	display: inline-block;
+}
+
+.announcement-edit-container-single {
+	display: block;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
 /* Navigation bar */
 .top-nav {
 	overflow: hidden;

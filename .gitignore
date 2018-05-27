@@ -39,8 +39,6 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
-### Java template
-*.class
 
 # BlueJ files
 *.ctxt
@@ -49,7 +47,6 @@ fabric.properties
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.ear
 
@@ -57,7 +54,7 @@ fabric.properties
 hs_err_pid*
 /.idea/
 /src/test/
-/target/
+**/target/
 /src/main/resources/client_secret.json
 
 **/META-INF/*
