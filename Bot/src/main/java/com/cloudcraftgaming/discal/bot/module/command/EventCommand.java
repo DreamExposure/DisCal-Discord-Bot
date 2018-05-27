@@ -1,5 +1,6 @@
 package com.cloudcraftgaming.discal.bot.module.command;
 
+import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
@@ -20,6 +21,7 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -749,19 +751,25 @@ public class EventCommand implements ICommand {
 		if (args.length == 2) {
 			String value = args[1];
 			if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
-				//TODO: Make this list pretty!!!
-				StringBuilder list = new StringBuilder("All Colors: ");
+				EmbedBuilder em = new EmbedBuilder();
+				em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+				em.withAuthorName("DisCal!");
+
+				em.withTitle("Available Colors");
+				em.withUrl("https://discalbot.com/docs/event/colors");
+				em.withColor(56, 138, 237);
+				em.withFooterText("Click Title for previews of the colors!");
+
 				for (EventColor ec : EventColor.values()) {
-					list.append(MessageUtils.lineBreak).append("Name: ").append(ec.name()).append(", ID: ").append(ec.getId());
+					em.appendField(ec.name(), ec.getId() + "", true);
 				}
-				list.append(MessageUtils.lineBreak).append(MessageUtils.lineBreak).append(MessageManager.getMessage("Creator.Event.Color.List", settings));
 
 				if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 					Message.deleteMessage(event);
 					Message.deleteMessage(EventCreator.getCreator().getCreatorMessage(guildId));
-					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(guildId), settings), list.toString().trim(), event));
+					EventCreator.getCreator().setCreatorMessage(Message.sendMessage(em.build(), "All Supported Colors. Use either the name or ID in the command: `!event color <name/id>`", event));
 				} else {
-					Message.sendMessage(list.toString().trim(), event);
+					Message.sendMessage(em.build(), "All Supported Colors. Use either the name or ID in the command: `!event color <name/id>`", event);
 				}
 			} else {
 				if (EventCreator.getCreator().hasPreEvent(guildId)) {
