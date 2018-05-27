@@ -240,7 +240,20 @@ label {
 	color: white;
 	text-align: center;
 	margin: auto 15px;
-	font-size: 25pt;
+}
+
+.top-nav h1:hover {
+	color: #090809;
+}
+
+.top-nav a.title {
+	padding: 0;
+	margin: auto 15px;
+}
+
+.top-nav a.title:hover {
+	color: #090809;
+	background: transparent;
 }
 
 .top-nav a {
