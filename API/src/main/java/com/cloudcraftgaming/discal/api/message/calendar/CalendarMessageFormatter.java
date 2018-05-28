@@ -8,20 +8,12 @@ import com.google.api.services.calendar.model.Calendar;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.util.EmbedBuilder;
 
-import java.net.URI;
-
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarMessageFormatter {
-	@Deprecated
-	public static String getCalendarLink(String calId) {
-		URI callURI = URI.create(calId);
-		return "https://calendar.google.com/calendar/embed?src=" + callURI;
-	}
-
 	//TODO: Add support for multiple calendars.
 	public static String getCalendarLink(long guildId) {
 		return "https://www.discalbot.com/embed/calendar/" + guildId;
