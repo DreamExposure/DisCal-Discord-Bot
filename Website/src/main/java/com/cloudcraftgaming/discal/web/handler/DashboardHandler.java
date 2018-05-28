@@ -51,6 +51,12 @@ public class DashboardHandler {
 
 			wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, u));
 			wg.setManageServer(PermissionChecker.hasManageServerRole(g, u));
+
+			if (!(wg.isManageServer() || wg.isDiscalRole())) {
+				//Insufficient perms to edit that guild.
+				response.redirect("/dashboard", 301);
+				return response.body();
+			}
 			m.remove("selected");
 
 			m.put("selected", wg);

@@ -41,20 +41,35 @@
 				<h3>Select a guild below!</h3>
 
 				<!--TODO: IF YOU CAN MAKE THIS LOOP WORK WITH THE METHOD CALL I WILL PAY YOU-->
+
+				<!--TODO: Do this in JS so that it is dynamic!!!-->
 				<th:block th:each="guild : ${guilds}">
 					<!--TODO: Remove patron/dev only  on full release-->
 					<th:block th:if="${guild.settings.patronGuild} == true or ${guild.settings.devGuild} == true">
-						<form method="post" action="/api/v1/dashboard/select/guild">
-							<input type="hidden" name="guild" th:value="${guild.id}">
-							<button type="submit" class="guild" th:text="${guild.name}"></button>
-						</form>
-						<br>
+						<th:block th:if="${guild.manageServer} == true or ${guild.discalRole} == true">
+							<form method="post" action="/api/v1/dashboard/select/guild">
+								<input type="hidden" name="guild" th:value="${guild.id}">
+								<button type="submit" class="guild" th:text="${guild.name}"></button>
+							</form>
+							<br>
+						</th:block>
+						<th:block th:unless="${guild.manageServer} == true or ${guild.discalRole} == true">
+							<form method="post" action="" disabled="true">
+								<input type="hidden" name="guild" th:value="${guild.id}">
+								<button disabled type="submit" class="guild" th:text="${guild.name}"></button>
+							</form>
+							<br>
+						</th:block>
 					</th:block>
 				</th:block>
 				<br>
 				<br>
 				<br>
-				<p>*Guild not listed? Until the full release, only patron guilds are supported!</p>
+				<p>
+					*Guild not listed? Until the full release, only patron guilds are supported!
+					<br>
+					**Button grayed out/not working? You don't have high enough permissions to manage that server!
+				</p>
 			</div>
 			<div th:unless="${loggedIn}">
 				<h1>YOU ARE NOT LOGGED IN!</h1>
