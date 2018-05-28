@@ -105,7 +105,7 @@ public class TimeCommand implements ICommand {
 				em.appendField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
 				em.withFooterText(MessageManager.getMessage("Embed.Time.Footer", settings));
-				em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
+				em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
 				em.withColor(56, 138, 237);
 				Message.sendMessage(em.build(), event);
 			}

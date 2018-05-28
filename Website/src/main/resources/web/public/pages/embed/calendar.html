@@ -31,7 +31,7 @@
 		        integrity="sha256-lnJeulOa3e5IO2EzHr8jKJ3CbT80MBwkS5a+n2ooIr4=" crossorigin="anonymous"></script>
 	</head>
 
-	<body>
+	<body th:onload="'init(' + ${embed.id} + ')'">
 		<div class="top-nav">
 			<a href="/" class="title"><h1>DISCAL</h1></a>
 			<a href="/about">About</a>
@@ -137,8 +137,14 @@
 						</tr>
 						</tbody>
 					</table>
-					<p style="text-align: center; font-size: 20px" id="local-time-display">All Dates and
-						Times are displayed in your local timezone!</p>
+					<p style="text-align: center; font-size: 20px" id="local-time-display">All Dates and Times are
+						displayed in your local timezone!</p>
+					<br>
+					<br>
+					<a target="_blank"
+					   th:href="'https://calendar.google.com/calendar/embed?src=' + ${embed.calendar.id}">
+						<button>View on Google Calendar</button>
+					</a>
 				</div>
 				<hr>
 				<br>
@@ -147,6 +153,8 @@
 				<div id="event-container">
 
 				</div>
+
+				<div id="snackbar"></div>
 			</div>
 	</body>
 

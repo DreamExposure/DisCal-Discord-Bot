@@ -44,19 +44,25 @@ public class SparkUtils {
 					//Requires "Authorization Header
 					if (request.headers().contains("Authorization")) {
 						String key = request.headers("Authorization");
-						UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
-						if (acc != null) {
-							if (acc.isBlocked()) {
-								Logger.getLogger().api("Attempted to use blocked API Key: " + acc.getAPIKey(), request.ip());
-								halt(401, "Unauthorized");
-							} else {
-								//Everything checks out!
-								acc.setUses(acc.getUses() + 1);
-								DatabaseManager.getManager().updateAPIAccount(acc);
-							}
+
+						//TODO: Handle this shit better but whatever
+						if (key.equals("EMBEDDED")) {
+							Logger.getLogger().api("User using embed", request.ip(), request.host(), request.pathInfo());
 						} else {
-							Logger.getLogger().api("Attempted to use invalid API Key: " + key, request.ip());
-							halt(401, "Unauthorized");
+							UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
+							if (acc != null) {
+								if (acc.isBlocked()) {
+									Logger.getLogger().api("Attempted to use blocked API Key: " + acc.getAPIKey(), request.ip());
+									halt(401, "Unauthorized");
+								} else {
+									//Everything checks out!
+									acc.setUses(acc.getUses() + 1);
+									DatabaseManager.getManager().updateAPIAccount(acc);
+								}
+							} else {
+								Logger.getLogger().api("Attempted to use invalid API Key: " + key, request.ip());
+								halt(401, "Unauthorized");
+							}
 						}
 					} else {
 						Logger.getLogger().api("Attempted to use API without authorization header", request.ip());
@@ -64,11 +70,9 @@ public class SparkUtils {
 					}
 				}
 				//Only accept json because its easier to parse and handle.
-				/*
 				if (!request.contentType().equalsIgnoreCase("application/json")) {
 					halt(400, "Bad Request");
 				}
-				*/
 			});
 
 			//API endpoints
@@ -152,7 +156,7 @@ public class SparkUtils {
 			get("/dashboard/guild/rsvp", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/dashboard/components/rsvp"), new ThymeleafTemplateEngine());
 
 			//Embed pages
-			//get("/embed/calendar/:guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccountForGuildEmbed(rq.session().id(), rq.params(":guild")), "pages/embed/calendar"), new ThymeleafTemplateEngine());
+			get("/embed/calendar/:guild", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccountForGuildEmbed(rq.session().id(), rq.params(":guild")), "pages/embed/calendar"), new ThymeleafTemplateEngine());
 
 			//Various other doc pages
 			get("/docs/event/colors", (rq, rs) -> new ModelAndView(DiscordAccountHandler.getHandler().getAccount(rq.session().id()), "pages/docs/events/event-colors"), new ThymeleafTemplateEngine());

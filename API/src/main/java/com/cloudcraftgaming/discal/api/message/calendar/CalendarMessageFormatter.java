@@ -16,9 +16,15 @@ import java.net.URI;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarMessageFormatter {
+	@Deprecated
 	public static String getCalendarLink(String calId) {
 		URI callURI = URI.create(calId);
 		return "https://calendar.google.com/calendar/embed?src=" + callURI;
+	}
+
+	//TODO: Add support for multiple calendars.
+	public static String getCalendarLink(long guildId) {
+		return "https://www.discalbot.com/embed/calendar/" + guildId;
 	}
 
 	public static EmbedObject getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
@@ -33,7 +39,7 @@ public class CalendarMessageFormatter {
 			//Some error, desc probably never set, just ignore no need to log.
 		}
 		em.appendField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
-		em.withUrl(CalendarMessageFormatter.getCalendarLink(cal.getId()));
+		em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
 		em.withFooterText(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings));
 		em.withColor(56, 138, 237);
 

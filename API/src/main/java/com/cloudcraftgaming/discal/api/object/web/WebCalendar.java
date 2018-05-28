@@ -6,8 +6,6 @@ import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.services.calendar.model.Calendar;
 
-import java.net.URI;
-
 /**
  * Created by Nova Fox on 1/7/18.
  * Website: www.cloudcraftgaming.com
@@ -93,7 +91,7 @@ public class WebCalendar {
 		} else {
 			id = cd.getCalendarId();
 			address = cd.getCalendarAddress();
-			link = "https://calendar.google.com/calendar/embed?src=" + URI.create(cd.getCalendarAddress());
+			link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID();
 			external = cd.isExternal();
 			try {
 				if (cd.isExternal()) {

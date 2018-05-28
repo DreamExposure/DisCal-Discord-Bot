@@ -197,7 +197,7 @@ public class Authorization {
 							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.TimeZone", settings), i.getTimeZone(), false);
 							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.ID", settings), i.getId(), false);
 
-							em.withUrl(CalendarMessageFormatter.getCalendarLink(i.getId()));
+							em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
 							em.withColor(56, 138, 237);
 							Message.sendDirectMessage(em.build(), poll.getUser());
 						}
