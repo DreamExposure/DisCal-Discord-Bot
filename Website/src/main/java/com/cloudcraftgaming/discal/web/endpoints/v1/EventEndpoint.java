@@ -216,7 +216,7 @@ public class EventEndpoint {
 
 			Event event = new Event();
 			event.setId(eventId);
-			event.setVisibility("web/public");
+			event.setVisibility("public");
 			event.setSummary(body.getString("summary"));
 			event.setDescription(body.getString("description"));
 
@@ -249,10 +249,21 @@ public class EventEndpoint {
 			}
 
 			EventData ed = new EventData(settings.getGuildID());
-			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
+			if (!body.getString("image").equalsIgnoreCase("")) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventId(eventId);
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+
+				if (!ImageUtils.validate(ed.getImageLink())) {
+					response.status(400);
+					JSONObject respondBody = new JSONObject();
+					respondBody.put("Message", "Failed to create event!");
+					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
+
+					response.body(respondBody.toString());
+
+					return response.body();
+				}
 			}
 
 			if (ed.shouldBeSaved()) {
@@ -268,8 +279,11 @@ public class EventEndpoint {
 			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, EventEndpoint.class, true);
 			e.printStackTrace();
 
-			response.status(500);
-			response.body(ResponseUtils.getJsonResponseMessage("Failed to update event!"));
+			JSONObject respondBody = new JSONObject();
+			respondBody.put("Message", "Failed to create event!");
+			respondBody.put("reason", "Google API may be at fault. Please try again.");
+
+			response.body(respondBody.toString());
 		}
 
 		return response.body();
@@ -289,7 +303,7 @@ public class EventEndpoint {
 			settings = DatabaseManager.getManager().getSettings(guildId);
 		}
 
-		//Okay, time to update the event
+		//Okay, time to create the event
 		try {
 			Calendar service;
 			if (settings.useExternalCalendar()) {
@@ -302,7 +316,7 @@ public class EventEndpoint {
 
 			Event event = new Event();
 			event.setId(KeyGenerator.generateEventId());
-			event.setVisibility("web/public");
+			event.setVisibility("public");
 			event.setSummary(body.getString("summary"));
 			event.setDescription(body.getString("description"));
 
@@ -335,10 +349,22 @@ public class EventEndpoint {
 			}
 
 			EventData ed = new EventData(settings.getGuildID());
-			if (!body.getString("image").equalsIgnoreCase("") && ImageUtils.validate(body.getString("image"))) {
+			if (!body.getString("image").equalsIgnoreCase("")) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+
+				if (!ImageUtils.validate(ed.getImageLink())) {
+					response.status(400);
+					JSONObject respondBody = new JSONObject();
+					respondBody.put("Message", "Failed to create event!");
+					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
+
+					response.body(respondBody.toString());
+
+					return response.body();
+				}
 			}
+
 
 			if (ed.shouldBeSaved()) {
 				DatabaseManager.getManager().updateEventData(ed);
@@ -354,11 +380,14 @@ public class EventEndpoint {
 			response.body(respondBody.toString());
 
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, EventEndpoint.class, true);
+			Logger.getLogger().exception(null, "[WEB] Failed to create event!", e, EventEndpoint.class, true);
 			e.printStackTrace();
 
-			response.status(500);
-			response.body(ResponseUtils.getJsonResponseMessage("Failed to update event!"));
+			JSONObject respondBody = new JSONObject();
+			respondBody.put("Message", "Failed to create event!");
+			respondBody.put("reason", "Google API may be at fault. Please try again.");
+
+			response.body(respondBody.toString());
 		}
 
 		return response.body();

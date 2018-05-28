@@ -606,21 +606,30 @@ function updateEvent(editSubmitId) {
 		};
 	}
 
-	var q = $.post("/api/v1/events/update", JSON.stringify(bodyRaw), function (response) {
+	$.ajax({
+		url: "/api/v1/events/update",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		method: "POST",
+		dataType: "json",
+		data: JSON.stringify(bodyRaw),
+		success: function (data) {
+			$('#modal-' + bodyRaw.id).modal('hide');
 
-		$('#modal-' + bodyRaw.id).modal('hide');
+			showSnackbar("Event successfully updated!");
 
-		showSnackbar("Event successfully updated!");
+			setMonth({date: calendar.selectedDate});
+			getEventsForMonth();
 
-		setMonth({date: calendar.selectedDate});
-		getEventsForMonth();
+			getEventsForSelectedDate();
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			var obj = JSON.parse(jqXHR.responseText);
 
-		getEventsForSelectedDate();
-	})
-		.fail(function () {
-			showSnackbar("Our hippos failed to update your event!");
-		}, "json");
-
+			showSnackbar("[ERROR] " + obj.reason);
+		}
+	});
 }
 
 function createNewEvent() {
@@ -658,23 +667,34 @@ function createNewEvent() {
 		"epochEnd": endDate.getTime() + timeOffset
 	};
 
-	var q = $.post("/api/v1/events/create", JSON.stringify(bodyRaw), function (response) {
-		showSnackbar("Event successfully created!");
+	$.ajax({
+		url: "/api/v1/events/create",
+		headers: {
+			"Content-Type": "application/json"
+		},
+		method: "POST",
+		dataType: "json",
+		data: JSON.stringify(bodyRaw),
+		success: function (data) {
+			showSnackbar("Event successfully created!");
 
-		$('html:not(:animated), body:not(:animated)').animate({
-			scrollTop: $("#calendar").offset().top
-		}, 2000);
+			$('html:not(:animated), body:not(:animated)').animate({
+				scrollTop: $("#calendar").offset().top
+			}, 2000);
 
-		document.getElementById("create-form").reset();
+			document.getElementById("create-form").reset();
 
-		setMonth({date: calendar.selectedDate});
-		getEventsForMonth();
+			setMonth({date: calendar.selectedDate});
+			getEventsForMonth();
 
-		getEventsForSelectedDate();
-	})
-		.fail(function () {
-			showSnackbar("Our hippos failed to create your event!");
-		}, "json");
+			getEventsForSelectedDate();
+		},
+		error: function (jqXHR, textStatus, errorThrown) {
+			var obj = JSON.parse(jqXHR.responseText);
+
+			showSnackbar("[ERROR] " + obj.reason);
+		}
+	});
 }
 
 function deleteEvent(clickedId) {
