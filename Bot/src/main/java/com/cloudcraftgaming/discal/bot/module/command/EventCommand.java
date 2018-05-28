@@ -539,27 +539,25 @@ public class EventCommand implements ICommand {
 							eventDateTimeV.setDateTime(dateTimeV);
 							EventCreator.getCreator().getPreEvent(guildId).setViewableStartDate(eventDateTimeV);
 
-                            /*
+
                             //To streamline, check if event end is null, if so, apply 2 hour duration!
 							if (EventCreator.getCreator().getPreEvent(guildId).getEndDateTime() == null) {
-								//Actual date -- Fuck me, need to do conversions again because its stupid.
-								String endRaw = EventUtils.applyHoursToRawUserInput(dateRaw, 2);
-								Date endDateObj = sdf.parse(endRaw);
-								DateTime endDateTime = new DateTime(endDateObj);
-								EventDateTime eventEndDateTime = new EventDateTime();
-								eventDateTime.setDateTime(endDateTime);
-								EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(eventEndDateTime);
+								EventDateTime end = EventCreator.getCreator().getPreEvent(guildId).getStartDateTime().clone();
+								long endLong = end.getDateTime().getValue() + 3600000; //Add an hour
+
+								end.setDateTime(new DateTime(endLong));
+
+								EventCreator.getCreator().getPreEvent(guildId).setEndDateTime(end);
+
 
 								//Viewable date
-								Date endDateObjV = DateUtils.addHours(dateObjV, 2);
-								DateTime endDateTimeV = new DateTime(endDateObjV);
-								EventDateTime eventEndDateTimeV = new EventDateTime();
-								eventEndDateTimeV.setDateTime(endDateTimeV);
-								EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(eventEndDateTimeV);
+								EventDateTime endV = EventCreator.getCreator().getPreEvent(guildId).getViewableStartDate().clone();
+								long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
 
-								//I know, the above is stupid but I think it works :/
+								endV.setDateTime(new DateTime(endVLong));
+
+								EventCreator.getCreator().getPreEvent(guildId).setViewableEndDate(endV);
 							}
-							*/
 
 							if (EventCreator.getCreator().hasCreatorMessage(guildId)) {
 								Message.deleteMessage(event);
