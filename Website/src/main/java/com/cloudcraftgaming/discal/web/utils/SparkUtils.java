@@ -70,9 +70,11 @@ public class SparkUtils {
 					}
 				}
 				//Only accept json because its easier to parse and handle.
+				/*
 				if (!request.contentType().equalsIgnoreCase("application/json")) {
 					halt(400, "Bad Request");
 				}
+				*/
 			});
 
 			//API endpoints
