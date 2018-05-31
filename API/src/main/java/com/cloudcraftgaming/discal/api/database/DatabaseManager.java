@@ -765,15 +765,17 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + calendarTableName + ";";
+				String query = "SELECT COUNT(*) FROM " + calendarTableName + ";";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
-				if (res.last()) {
-					amount = res.getRow();
+
+				if (res.next()) {
+					amount = res.getInt(1);
 				} else {
 					amount = 0;
 				}
 
+				res.close();
 				statement.close();
 			}
 		} catch (SQLException e) {
@@ -1064,20 +1066,22 @@ public class DatabaseManager {
 	}
 
 	public Integer getAnnouncementCount() {
-		Integer amount = -1;
+		int amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + announcementTableName + ";";
+				String query = "SELECT COUNT(*) FROM " + announcementTableName + ";";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
-				if (res.last()) {
-					amount = res.getRow();
+
+				if (res.next()) {
+					amount = res.getInt(1);
 				} else {
 					amount = 0;
 				}
 
+				res.close();
 				statement.close();
 			}
 		} catch (SQLException e) {
