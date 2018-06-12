@@ -74,7 +74,7 @@ public class HelpCommand implements ICommand {
                 }
             }
             em.withFooterText("Check out the official site for more command info!");
-            em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
+			em.withUrl("https://www.discalbot.com/commands");
             em.withColor(56, 138, 237);
             Message.sendMessage(em.build(), event);
         } else if (args.length == 1) {
@@ -118,7 +118,7 @@ public class HelpCommand implements ICommand {
 
         em.withFooterText("<> = required | () = optional");
 
-        em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
+		em.withUrl("https://www.discalbot.com/commands");
 
         em.withColor(56, 138, 237);
 
@@ -136,7 +136,7 @@ public class HelpCommand implements ICommand {
 
 		em.withFooterText("<> = required | () = optional");
 
-		em.withUrl("https://www.cloudcraftgaming.com/discal/commands");
+		em.withUrl("https://www.discalbot.com/commands");
 
 		em.withColor(56, 138, 237);
 
