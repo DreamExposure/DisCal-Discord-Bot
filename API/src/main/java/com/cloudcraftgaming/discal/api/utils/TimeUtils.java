@@ -52,28 +52,15 @@ public class TimeUtils {
 	public static boolean inPast(String eventId, GuildSettings settings) {
 		//TODO: Support multiple calendars
 		if (EventUtils.eventExists(settings, eventId)) {
-			if (settings.useExternalCalendar()) {
-				try {
-					Calendar service = CalendarAuth.getCalendarService(settings);
-					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
-					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
-					return inPast(e);
-				} catch (Exception e) {
-					Logger.getLogger().exception(null, "Failed to get external calendar auth", e, TimeUtils.class, true);
-					//Return false and allow RSVP so user is not adversely affected.
-					return false;
-				}
-			} else {
-				try {
-					Calendar service = CalendarAuth.getCalendarService();
-					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
-					Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
-					return inPast(e);
-				} catch (Exception e) {
-					Logger.getLogger().exception(null, "Failed to get calendar auth", e, TimeUtils.class, true);
-					//Return false and allow RSVP so user is not adversely affected.
-					return false;
-				}
+			try {
+				Calendar service = CalendarAuth.getCalendarService(settings);
+				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
+				return inPast(e);
+			} catch (Exception e) {
+				Logger.getLogger().exception(null, "Failed to get calendar auth", e, TimeUtils.class, true);
+				//Return false and allow RSVP so user is not adversely affected.
+				return false;
 			}
 		}
 		return false;

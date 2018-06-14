@@ -59,11 +59,10 @@ public class EventCreator {
 		if (!hasPreEvent(e.getGuild().getLongID())) {
 			PreEvent event = new PreEvent(e.getGuild().getLongID());
 			try {
-
 				//TODO: Handle multiple calendars...
 				String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
-				event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
-			} catch (IOException exc) {
+				event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
+			} catch (Exception exc) {
 				//Failed to get timezone, ignore safely.
 			}
 			if (handleMessage) {
@@ -90,11 +89,8 @@ public class EventCreator {
 
 				//TODO: Handle multiple calendars...
 				String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
-				if (!settings.useExternalCalendar()) {
-					event.setTimeZone(CalendarAuth.getCalendarService().calendars().get(calId).execute().getTimeZone());
-				} else {
-					event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
-				}
+
+				event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
 			} catch (Exception exc) {
 				//Failed to get timezone, ignore safely.
 			}
@@ -120,12 +116,8 @@ public class EventCreator {
 			//TODO: Handle multiple calendars...
 			try {
 				String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
-				Calendar service;
-				if (settings.useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				Calendar service = CalendarAuth.getCalendarService(settings);
+
 				Event calEvent = service.events().get(calId, eventId).execute();
 
 				PreEvent event = EventUtils.copyEvent(e.getGuild().getLongID(), calEvent);
@@ -162,12 +154,8 @@ public class EventCreator {
 			//TODO: Handle multiple calendars...
 			try {
 				String calId = DatabaseManager.getManager().getMainCalendar(guildId).getCalendarAddress();
-				Calendar service;
-				if (settings.useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				Calendar service = CalendarAuth.getCalendarService(settings);
+
 				Event calEvent = service.events().get(calId, eventId).execute();
 
 				PreEvent event = new PreEvent(guildId, calEvent);
@@ -258,12 +246,8 @@ public class EventCreator {
 				if (!preEvent.isEditing()) {
 					event.setId(KeyGenerator.generateEventId());
 					try {
-						Event confirmed;
-						if (settings.useExternalCalendar()) {
-							confirmed = CalendarAuth.getCalendarService(settings).events().insert(calendarId, event).execute();
-						} else {
-							confirmed = CalendarAuth.getCalendarService().events().insert(calendarId, event).execute();
-						}
+						Event confirmed = CalendarAuth.getCalendarService(settings).events().insert(calendarId, event).execute();
+
 						if (preEvent.getEventData().shouldBeSaved()) {
 							preEvent.getEventData().setEventId(confirmed.getId());
 							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());
@@ -281,12 +265,8 @@ public class EventCreator {
 					}
 				} else {
 					try {
-						Event confirmed;
-						if (settings.useExternalCalendar()) {
-							confirmed = CalendarAuth.getCalendarService(settings).events().update(calendarId, preEvent.getEventId(), event).execute();
-						} else {
-							confirmed = CalendarAuth.getCalendarService().events().update(calendarId, preEvent.getEventId(), event).execute();
-						}
+						Event confirmed = CalendarAuth.getCalendarService(settings).events().update(calendarId, preEvent.getEventId(), event).execute();
+
 						if (preEvent.getEventData().shouldBeSaved()) {
 							preEvent.getEventData().setEventId(confirmed.getId());
 							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());

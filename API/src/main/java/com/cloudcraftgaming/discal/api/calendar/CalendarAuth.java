@@ -108,21 +108,13 @@ public class CalendarAuth {
 		return credential;
 	}
 
-	/**
-	 * Build and return an authorized Calendar client service.
-	 *
-	 * @return an authorized Calendar client service
-	 * @throws IOException In the event authorization fails.
-	 */
-	public static com.google.api.services.calendar.Calendar
-	getCalendarService() throws IOException {
-		Credential credential = authorize();
-		return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
-	}
-
 	public static com.google.api.services.calendar.Calendar getCalendarService(GuildSettings g) throws Exception {
-		Credential credential = authorize(g);
-
-		return new com.google.api.services.calendar.Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
+		if (g != null && g.useExternalCalendar()) {
+			Credential credential = authorize(g);
+			return new com.google.api.services.calendar.Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
+		} else {
+			Credential credential = authorize();
+			return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+		}
 	}
 }

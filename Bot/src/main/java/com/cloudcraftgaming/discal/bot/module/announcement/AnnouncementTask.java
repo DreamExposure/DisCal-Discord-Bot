@@ -41,7 +41,7 @@ public class AnnouncementTask extends TimerTask {
 		try {
 			//Get the default stuff.
 			try {
-				discalService = CalendarAuth.getCalendarService();
+				discalService = CalendarAuth.getCalendarService(null);
 			} catch (IOException e) {
 				Logger.getLogger().exception(null, "Failed to get service! 00a0101", e, this.getClass(), true);
 			}

@@ -100,12 +100,7 @@ public class EventListCommand implements ICommand {
 	private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
     	if (args.length == 0) {
 			try {
-				Calendar service;
-				if (settings.useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				Calendar service = CalendarAuth.getCalendarService(settings);
 
 				DateTime now = new DateTime(System.currentTimeMillis());
 				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
@@ -139,12 +134,8 @@ public class EventListCommand implements ICommand {
                     return;
                 }
                 try {
-                	Calendar service;
-                	if (settings.useExternalCalendar()) {
-                		service = CalendarAuth.getCalendarService(settings);
-					} else {
-						service = CalendarAuth.getCalendarService();
-					}
+					Calendar service = CalendarAuth.getCalendarService(settings);
+
                     DateTime now = new DateTime(System.currentTimeMillis());
                     CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
                     Events events = service.events().list(calendarData.getCalendarAddress())
@@ -187,12 +178,8 @@ public class EventListCommand implements ICommand {
 		if (args.length == 1) {
 			//Get the upcoming events in the next 24 hours.
 			try {
-				Calendar service;
-				if (settings.useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				Calendar service = CalendarAuth.getCalendarService(settings);
+
 				DateTime now = new DateTime(System.currentTimeMillis());
 				DateTime twentyFourHoursFromNow = new DateTime(now.getValue() + 86400000L);
 				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());

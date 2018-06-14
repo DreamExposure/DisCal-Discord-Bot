@@ -94,17 +94,10 @@ public class WebCalendar {
 			link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID();
 			external = cd.isExternal();
 			try {
-				if (cd.isExternal()) {
-					Calendar cal = CalendarAuth.getCalendarService(gs).calendars().get(id).execute();
-					name = cal.getSummary();
-					description = cal.getDescription();
-					timezone = cal.getTimeZone().replaceAll("/", "___");
-				} else {
-					Calendar cal = CalendarAuth.getCalendarService().calendars().get(id).execute();
-					name = cal.getSummary();
-					description = cal.getDescription();
-					timezone = cal.getTimeZone().replaceAll("/", "___");
-				}
+				Calendar cal = CalendarAuth.getCalendarService(gs).calendars().get(id).execute();
+				name = cal.getSummary();
+				description = cal.getDescription();
+				timezone = cal.getTimeZone().replaceAll("/", "___");
 			} catch (Exception e) {
 				Logger.getLogger().exception(null, "[WEB] Failed to get calendar!", e, this.getClass(), true);
 				name = "ERROR!";

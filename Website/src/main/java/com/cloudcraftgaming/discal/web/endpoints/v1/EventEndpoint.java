@@ -51,12 +51,8 @@ public class EventEndpoint {
 
 		//okay, lets actually get the month's events.
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
 			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
@@ -108,12 +104,8 @@ public class EventEndpoint {
 
 		//okay, lets actually get the month's events.
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
 			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
@@ -205,12 +197,8 @@ public class EventEndpoint {
 
 		//Okay, time to update the event
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
 			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
@@ -305,12 +293,8 @@ public class EventEndpoint {
 
 		//Okay, time to create the event
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
 			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 

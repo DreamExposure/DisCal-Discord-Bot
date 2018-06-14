@@ -84,12 +84,8 @@ public class TimeCommand implements ICommand {
 				//Does not have a calendar.
 				Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
 			} else {
-				Calendar cal;
-				if (settings.useExternalCalendar()) {
-					cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
-				} else {
-					cal = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute();
-				}
+				Calendar cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
+
 				LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
 
 				//Okay... format and then we can go from there...

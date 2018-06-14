@@ -95,13 +95,10 @@ public class AnnouncementMessageFormatter {
         if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
             try {
-            	Calendar service;
-            	if (settings.useExternalCalendar()) {
-            		service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				Calendar service = CalendarAuth.getCalendarService(settings);
+
                 //TODO: Handle multiple calendars...
+
                 CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
                 Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
@@ -205,7 +202,7 @@ public class AnnouncementMessageFormatter {
 				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
 				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
 				try {
-					Calendar service = CalendarAuth.getCalendarService();
+					Calendar service = CalendarAuth.getCalendarService(settings);
 					String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
 				} catch (Exception e1) {
@@ -214,7 +211,7 @@ public class AnnouncementMessageFormatter {
 			} else {
 				String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
 				try {
-					Calendar service = CalendarAuth.getCalendarService();
+					Calendar service = CalendarAuth.getCalendarService(settings);
 					String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 					start = start + " " + tz;
 				} catch (Exception e1) {
@@ -288,7 +285,7 @@ public class AnnouncementMessageFormatter {
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
             em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
             try {
-                Calendar service = CalendarAuth.getCalendarService();
+				Calendar service = CalendarAuth.getCalendarService(settings);
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
                 em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
             } catch (Exception e1) {
@@ -297,7 +294,7 @@ public class AnnouncementMessageFormatter {
         } else {
             String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
             try {
-                Calendar service = CalendarAuth.getCalendarService();
+				Calendar service = CalendarAuth.getCalendarService(settings);
                 String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
                 start = start + " " + tz;
             } catch (Exception e1) {

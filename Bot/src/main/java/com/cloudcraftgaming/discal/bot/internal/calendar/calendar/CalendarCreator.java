@@ -79,12 +79,7 @@ public class CalendarCreator {
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
 
 			try {
-				com.google.api.services.calendar.Calendar service;
-				if (settings.useExternalCalendar()) {
-					service = CalendarAuth.getCalendarService(settings);
-				} else {
-					service = CalendarAuth.getCalendarService();
-				}
+				com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
 
 				Calendar calendar = service.calendars().get(data.getCalendarAddress()).execute();
 
@@ -151,12 +146,7 @@ public class CalendarCreator {
 					calendar.setDescription(preCalendar.getDescription());
 					calendar.setTimeZone(preCalendar.getTimezone());
 					try {
-						com.google.api.services.calendar.Calendar service;
-						if (settings.useExternalCalendar()) {
-							service = CalendarAuth.getCalendarService(settings);
-						} else {
-							service = CalendarAuth.getCalendarService();
-						}
+						com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
 
 						Calendar confirmed = service.calendars().insert(calendar).execute();
 						AclRule rule = new AclRule();
@@ -188,12 +178,7 @@ public class CalendarCreator {
 					calendar.setTimeZone(preCalendar.getTimezone());
 
 					try {
-						com.google.api.services.calendar.Calendar service;
-						if (settings.useExternalCalendar()) {
-							service = CalendarAuth.getCalendarService(settings);
-						} else {
-							service = CalendarAuth.getCalendarService();
-						}
+						com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
 
 						Calendar confirmed = service.calendars().update(preCalendar.getCalendarId(), calendar).execute();
 						AclRule rule = new AclRule();

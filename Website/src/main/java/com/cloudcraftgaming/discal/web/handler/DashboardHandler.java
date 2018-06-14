@@ -258,15 +258,9 @@ public class DashboardHandler {
 
 				if (g.isDiscalRole()) {
 					try {
-						if (g.getCalendar().isExternal()) {
-							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-							cal.setSummary(request.queryParams("cal-name"));
-							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-						} else {
-							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-							cal.setSummary(request.queryParams("cal-name"));
-							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-						}
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setSummary(request.queryParams("cal-name"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
 
 						g.getCalendar().setName(request.queryParams("cal-name"));
 					} catch (Exception e) {
@@ -280,15 +274,9 @@ public class DashboardHandler {
 
 				if (g.isDiscalRole()) {
 					try {
-						if (g.getCalendar().isExternal()) {
-							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-							cal.setDescription(request.queryParams("cal-desc"));
-							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-						} else {
-							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-							cal.setDescription(request.queryParams("cal-desc"));
-							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-						}
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setDescription(request.queryParams("cal-desc"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
 
 						g.getCalendar().setDescription(request.queryParams("cal-desc"));
 					} catch (Exception e) {
@@ -302,15 +290,9 @@ public class DashboardHandler {
 
 				if (g.isDiscalRole()) {
 					try {
-						if (g.getCalendar().isExternal()) {
-							Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
-							cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
-							CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
-						} else {
-							Calendar cal = CalendarAuth.getCalendarService().calendars().get(g.getCalendar().getId()).execute();
-							cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
-							CalendarAuth.getCalendarService().calendars().update(g.getCalendar().getId(), cal).execute();
-						}
+						Calendar cal = CalendarAuth.getCalendarService(g.getSettings()).calendars().get(g.getCalendar().getId()).execute();
+						cal.setTimeZone(request.queryParams("cal-tz").replace("___", "/"));
+						CalendarAuth.getCalendarService(g.getSettings()).calendars().update(g.getCalendar().getId(), cal).execute();
 
 						g.getCalendar().setTimezone(request.queryParams("cal-tz"));
 					} catch (Exception e) {
@@ -343,12 +325,7 @@ public class DashboardHandler {
 				calendar.setDescription(desc);
 				calendar.setTimeZone(tz.replace("___", "/"));
 				try {
-					com.google.api.services.calendar.Calendar service;
-					if (g.getSettings().useExternalCalendar()) {
-						service = CalendarAuth.getCalendarService(g.getSettings());
-					} else {
-						service = CalendarAuth.getCalendarService();
-					}
+					com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(g.getSettings());
 
 					Calendar confirmed = service.calendars().insert(calendar).execute();
 					AclRule rule = new AclRule();

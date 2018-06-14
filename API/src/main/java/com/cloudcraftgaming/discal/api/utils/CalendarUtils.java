@@ -8,8 +8,6 @@ import com.cloudcraftgaming.discal.logger.Logger;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
 
-import java.io.IOException;
-
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
@@ -26,10 +24,10 @@ public class CalendarUtils {
 		try {
 			//Only delete if the calendar is stored on DisCal's account.
 			if (!data.getCalendarAddress().equalsIgnoreCase("primary") && !settings.useExternalCalendar()) {
-				Calendar service = CalendarAuth.getCalendarService();
+				Calendar service = CalendarAuth.getCalendarService(settings);
 				service.calendars().delete(data.getCalendarAddress()).execute();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			//Fail silently.
 			Logger.getLogger().exception(null, "Failed to delete calendar", e, CalendarUtils.class, true);
 			return false;
@@ -53,11 +51,7 @@ public class CalendarUtils {
 
 	public static boolean calendarExists(CalendarData data, GuildSettings settings) {
 		try {
-			if (settings.useExternalCalendar()) {
-				return CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute() != null;
-			} else {
-				return CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute() != null;
-			}
+			return CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute() != null;
 		} catch (GoogleJsonResponseException ge) {
 			if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
 				//Calendar does not exist... remove from db...

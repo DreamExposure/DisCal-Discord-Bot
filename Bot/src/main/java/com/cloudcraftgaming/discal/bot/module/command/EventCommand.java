@@ -425,12 +425,8 @@ public class EventCommand implements ICommand {
 			if (!EventCreator.getCreator().hasPreEvent(guildId)) {
 				if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
 					try {
-						Calendar service;
-						if (settings.useExternalCalendar()) {
-							service = CalendarAuth.getCalendarService(settings);
-						} else {
-							service = CalendarAuth.getCalendarService();
-						}
+						Calendar service = CalendarAuth.getCalendarService(settings);
+
 						Event calEvent = service.events().get(calendarData.getCalendarAddress(), args[1]).execute();
 						Message.sendMessage(EventMessageFormatter.getEventEmbed(calEvent, settings), event);
 					} catch (Exception e) {

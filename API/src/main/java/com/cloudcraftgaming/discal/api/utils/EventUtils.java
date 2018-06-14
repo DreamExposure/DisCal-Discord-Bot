@@ -26,12 +26,7 @@ public class EventUtils {
 		//TODO: Support multiple calendars...
 		String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
 			try {
 				service.events().delete(calendarId, eventId).execute();
 			} catch (Exception e) {
@@ -53,12 +48,8 @@ public class EventUtils {
 		//TODO: Support multiple calendars...
 		String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
 		try {
-			Calendar service;
-			if (settings.useExternalCalendar()) {
-				service = CalendarAuth.getCalendarService(settings);
-			} else {
-				service = CalendarAuth.getCalendarService();
-			}
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
 			return service.events().get(calendarId, eventId).execute() != null;
 		} catch (Exception e) {
 			//Failed to check event, probably doesn't exist, safely ignore.
@@ -79,22 +70,5 @@ public class EventUtils {
 		pe.setEventData(DatabaseManager.getManager().getEventData(guildId, event.getId()));
 
 		return pe;
-	}
-
-	public static String applyHoursToRawUserInput(String dateRaw, Integer plus) {
-		//format: yyyy/MM/dd-HH:mm:ss
-		String hoursS = dateRaw.substring(11, 13);
-		try {
-			Integer newHours = Integer.valueOf(hoursS);
-			newHours = newHours + plus;
-
-			String[] timeArray = dateRaw.split(":");
-
-			return timeArray[0] + newHours + ":" + timeArray[1] + ":" + timeArray[2];
-
-		} catch (NumberFormatException e) {
-			Logger.getLogger().exception(null, "Failed to convert to number from: " + hoursS, e, EventUtils.class, true);
-		}
-		return dateRaw;
 	}
 }

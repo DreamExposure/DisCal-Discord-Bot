@@ -73,8 +73,7 @@ public class EventMessageFormatter {
 		try {
 			//TODO: add support for multiple calendars...
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
-			Calendar service;
-			service = settings.useExternalCalendar() ? CalendarAuth.getCalendarService(settings) : CalendarAuth.getCalendarService();
+			Calendar service = CalendarAuth.getCalendarService(settings);
 			String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 			em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
 		} catch (Exception e1) {
@@ -272,11 +271,7 @@ public class EventMessageFormatter {
 
 				String timezone;
 				if (!preEvent) {
-					if (settings.useExternalCalendar()) {
-						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					} else {
-						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					}
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				} else {
 					timezone = "America/Chicago";
 				}
@@ -317,11 +312,7 @@ public class EventMessageFormatter {
 
 				String timezone;
 				if (!preEvent) {
-					if (settings.useExternalCalendar()) {
-						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					} else {
-						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					}
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				} else {
 					timezone = "America/Chicago";
 				}
@@ -356,11 +347,7 @@ public class EventMessageFormatter {
 
 				String timezone;
 				if (!preEvent) {
-					if (settings.useExternalCalendar()) {
-						timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					} else {
-						timezone = CalendarAuth.getCalendarService().calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-					}
+					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				} else {
 					timezone = "America/Chicago";
 				}
