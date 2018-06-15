@@ -189,7 +189,7 @@ public class EventMessageFormatter {
 			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
 		}
 		if (event.shouldRecur()) {
-			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
 		} else {
 			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
 		}
