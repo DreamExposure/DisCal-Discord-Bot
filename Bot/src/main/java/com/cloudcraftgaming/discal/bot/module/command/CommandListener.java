@@ -35,8 +35,8 @@ class CommandListener {
     @EventSubscriber
     public void onMessageEvent(MessageReceivedEvent event) {
         try {
-            if (event.getMessage() != null && event.getGuild() != null && event.getChannel() != null && !event.getChannel().isPrivate() && event.getMessage().getContent() != null && event.getMessage().getContent().length() > 0) {
-                //Message is a valid guild message (not DM). Check if in correct channel.
+			if (event.getMessage() != null && event.getGuild() != null && event.getChannel() != null && !event.getChannel().isPrivate() && event.getMessage().getContent() != null && event.getMessage().getContent().length() > 0 && !event.getAuthor().isBot()) {
+				//Message is a valid guild message (not DM and not from a bot). Check if in correct channel.
 				GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
                 if (event.getMessage().getContent().startsWith(settings.getPrefix())) {
                 	if (PermissionChecker.isCorrectChannel(event)) {
