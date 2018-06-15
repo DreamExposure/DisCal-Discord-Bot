@@ -218,7 +218,10 @@ public class Announcement {
 	 * @return The type of announcement this is.
 	 */
 	public AnnouncementType getAnnouncementType() {
-		return type;
+		if (type != null)
+			return type;
+		else
+			return AnnouncementType.UNIVERSAL;
 	}
 
 	/**
