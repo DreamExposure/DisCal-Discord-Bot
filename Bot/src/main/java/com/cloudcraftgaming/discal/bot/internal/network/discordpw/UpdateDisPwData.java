@@ -32,9 +32,8 @@ public class UpdateDisPwData {
 	}
 
 	public static void shutdown() {
-		if (timer != null) {
+		if (timer != null)
 			timer.cancel();
-		}
 	}
 
 	private static void updateSiteBotMeta() {

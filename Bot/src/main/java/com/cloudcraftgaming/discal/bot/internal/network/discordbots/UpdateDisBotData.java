@@ -32,14 +32,12 @@ public class UpdateDisBotData {
 	}
 
 	public static void shutdown() {
-		if (timer != null) {
+		if (timer != null)
 			timer.cancel();
-		}
 	}
 
 	private static void updateStats() {
-		if (api != null) {
+		if (api != null)
 			api.setStats(BotSettings.ID.get(), DisCalAPI.getAPI().getClient().getGuilds().size());
-		}
 	}
 }

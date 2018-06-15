@@ -25,9 +25,9 @@ public class TimeManager {
 	 * @return The instance of the TimeManager.
 	 */
 	public static TimeManager getManager() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new TimeManager();
-		}
+
 		return instance;
 	}
 

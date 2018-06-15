@@ -6,7 +6,6 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.bot.internal.consolecommand.ConsoleCommandExecutor;
-import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
 import com.cloudcraftgaming.discal.logger.Logger;
@@ -53,8 +52,6 @@ public class Main {
 
 		api.getClient().login();
 
-		UpdateDisPwData.init();
-
 		Authorization.getAuth().init();
 
         //Connect to MySQL
@@ -97,8 +94,8 @@ public class Main {
      * @return The client if successful, otherwise <code>null</code>.
      */
     private static IDiscordClient createClient(String token) {
-        ClientBuilder clientBuilder = new ClientBuilder(); // Creates the ClientBuilder instance
-        clientBuilder.withToken(token).withRecommendedShardCount(); // Adds the login info to the builder
+		ClientBuilder clientBuilder = new ClientBuilder();
+		clientBuilder.withToken(token).withRecommendedShardCount();
         try {
 			return clientBuilder.build();
         } catch (DiscordException e) {
