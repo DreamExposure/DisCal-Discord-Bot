@@ -35,18 +35,8 @@
 	</dependencies>
 
 	<build>
-		<directory>../target</directory> <!-- Build it one level up, because it is the one we care about -->
+		<directory>../target</directory>
 		<finalName>DisCal-Bot</finalName>
-		<!-- Define filtering for the inclusion of plugin.yml, so we can utilize the pom.xml version in it -->
-		<resources>
-			<resource>
-				<targetPath>.</targetPath>
-				<directory>${project.basedir}</directory>
-				<includes>
-					<include>**/src/main/resources/*</include>
-				</includes>
-			</resource>
-		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
