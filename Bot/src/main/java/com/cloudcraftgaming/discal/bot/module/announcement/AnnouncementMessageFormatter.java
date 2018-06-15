@@ -152,11 +152,11 @@ public class AnnouncementMessageFormatter {
 		assert guild != null;
 
 		//Set all of the stuff for embeds regardless of announcement settings
-		if (settings.isBranded()) {
+		if (settings.isBranded())
 			em.withAuthorName(guild.getName());
-		} else {
+		else
 			em.withAuthorName("DisCal");
-		}
+
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
@@ -177,7 +177,7 @@ public class AnnouncementMessageFormatter {
 			em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
 		}
 
-		if (announcement.isInfoOnly()) {
+		if (announcement.isInfoOnly() && announcement.getInfo() != null && !announcement.getInfo().equalsIgnoreCase("none")) {
 			//Only send info...
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
 		} else {
@@ -233,7 +233,7 @@ public class AnnouncementMessageFormatter {
 			if (!settings.usingSimpleAnnouncements()) {
 				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
 			}
-			if (!announcement.getInfo().equalsIgnoreCase("None")) {
+			if (!announcement.getInfo().equalsIgnoreCase("None") && !announcement.getInfo().equalsIgnoreCase("")) {
 				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
 			}
 		}
@@ -244,7 +244,7 @@ public class AnnouncementMessageFormatter {
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to find announcement channel! Will auto delete announcement to prevent issue! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class, true);
+			Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class, true);
 		}
 
 		if (channel == null) {
