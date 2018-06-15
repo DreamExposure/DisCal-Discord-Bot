@@ -26,7 +26,6 @@ public class DisCalAPI {
 
 	public void init(IDiscordClient _client) {
 		client = _client;
-		iconUrl = client.getGuildByID(266063520112574464L).getIconURL();
 	}
 
 	public IDiscordClient getClient() {

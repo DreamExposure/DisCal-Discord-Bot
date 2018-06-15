@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.bot.listeners;
 
+import com.cloudcraftgaming.discal.Main;
+import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
@@ -25,6 +27,12 @@ public class ReadyEventListener {
 			UpdateDisPwData.init();
 
 			MessageManager.reloadLangs();
+
+			try {
+				DisCalAPI.getAPI().iconUrl = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL();
+			} catch (Exception e) {
+				Logger.getLogger().exception(null, "Fuck a duck.", e, Main.class, true);
+			}
 
 			Logger.getLogger().debug("[ReadyEvent] Connection success!");
 		} catch (Exception e) {
