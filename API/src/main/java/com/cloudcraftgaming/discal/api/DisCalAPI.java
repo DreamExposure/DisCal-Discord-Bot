@@ -7,6 +7,9 @@ public class DisCalAPI {
 
 	private static IDiscordClient client;
 
+	//final global variables.
+	public final String iconUrl = "https://discalbot.com/assets/images/logos/Dark/Opaque/Type%20Square%20Dark%20+bg.png";
+
 	private DisCalAPI() {
 	}
 

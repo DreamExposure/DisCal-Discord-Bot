@@ -62,7 +62,7 @@ public class HelpCommand implements ICommand {
     public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length < 1) {
             EmbedBuilder em = new EmbedBuilder();
-			em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+			em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
             em.withAuthorName("DisCal");
             em.withTitle("DisCal Command Help");
             for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
@@ -103,7 +103,7 @@ public class HelpCommand implements ICommand {
     //Embed formatters
     private EmbedObject getCommandInfoEmbed(ICommand cmd) {
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal");
         em.appendField("Command", cmd.getCommand(), true);
         em.appendField("Description", cmd.getCommandInfo().getDescription(), true);
@@ -127,7 +127,7 @@ public class HelpCommand implements ICommand {
 
     private EmbedObject getSubCommandEmbed(ICommand cmd, String subCommand) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 		em.withAuthorName("DisCal");
 		em.appendField("Command", cmd.getCommand(), true);
 		em.appendField("Sub Command", subCommand, true);

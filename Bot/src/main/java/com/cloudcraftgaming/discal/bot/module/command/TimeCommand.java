@@ -94,7 +94,7 @@ public class TimeCommand implements ICommand {
 
 				//Build embed and send.
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+				em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 				em.withAuthorName("DisCal");
 				em.withTitle(MessageManager.getMessage("Embed.Time.Title", settings));
 				em.appendField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);

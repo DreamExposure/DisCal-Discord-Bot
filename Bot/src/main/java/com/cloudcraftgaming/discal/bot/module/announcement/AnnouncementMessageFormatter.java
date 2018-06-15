@@ -39,7 +39,7 @@ public class AnnouncementMessageFormatter {
      */
     public static EmbedObject getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", settings));
         try {
@@ -86,7 +86,7 @@ public class AnnouncementMessageFormatter {
      */
     public static EmbedObject getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings)  {
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", settings));
         em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
@@ -145,7 +145,7 @@ public class AnnouncementMessageFormatter {
      */
     static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 
 		IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(announcement.getGuildId());
 
@@ -258,7 +258,7 @@ public class AnnouncementMessageFormatter {
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());

@@ -140,7 +140,7 @@ public class DisCalCommand implements ICommand {
         IGuild guild = event.getGuild();
 
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal!");
         em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
         em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "NovaFox161", true);
@@ -242,7 +242,7 @@ public class DisCalCommand implements ICommand {
         long guildId = event.getGuild().getLongID();
 
         EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
         em.withAuthorName("DisCal");
         em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));
         em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", settings), String.valueOf(settings.useExternalCalendar()), true);

@@ -746,7 +746,7 @@ public class EventCommand implements ICommand {
 			String value = args[1];
 			if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+				em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 				em.withAuthorName("DisCal!");
 
 				em.withTitle("Available Colors");

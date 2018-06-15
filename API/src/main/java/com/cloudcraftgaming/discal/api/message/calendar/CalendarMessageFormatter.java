@@ -21,7 +21,7 @@ public class CalendarMessageFormatter {
 
 	public static EmbedObject getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
 		em.appendField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
@@ -46,7 +46,7 @@ public class CalendarMessageFormatter {
 	 */
 	public static EmbedObject getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
 		if (calendar.getSummary() != null) {

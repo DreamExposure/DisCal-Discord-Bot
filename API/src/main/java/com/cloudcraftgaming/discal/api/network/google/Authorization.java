@@ -68,7 +68,7 @@ public class Authorization {
 
 				//Send DM to user with code.
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+				em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 				em.withAuthorName("DisCal");
 				em.withTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
 				em.appendField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), cr.user_code, true);
@@ -190,7 +190,7 @@ public class Authorization {
 					for (CalendarListEntry i : items) {
 						if (!i.isDeleted()) {
 							EmbedBuilder em = new EmbedBuilder();
-							em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+							em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 							em.withAuthorName("DisCal");
 							em.withTitle(MessageManager.getMessage("Embed.AddCalendar.List.Title", settings));
 							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.Name", settings), i.getSummary(), false);

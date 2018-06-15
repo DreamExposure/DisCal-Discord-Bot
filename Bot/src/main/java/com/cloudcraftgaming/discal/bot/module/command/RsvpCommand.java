@@ -233,7 +233,7 @@ public class RsvpCommand implements ICommand {
 
 	private EmbedObject getRsvpEmbed(RsvpData data, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L).getIconURL());
+		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
 		em.appendField("Event ID", data.getEventId(), false);
