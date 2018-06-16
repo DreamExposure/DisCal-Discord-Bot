@@ -4,6 +4,7 @@ import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
+import com.cloudcraftgaming.discal.bot.module.announcement.AnnouncementThreader;
 import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
 import sx.blah.discord.util.DiscordException;
@@ -82,16 +83,8 @@ public class ApplicationHandler {
 
 			//MY CODE: Gracefully exit processes:
 			System.out.println("Restarting Discord bot!");
-			try {
-				DisCalAPI.getAPI().getClient().logout();
-			} catch (DiscordException e) {
-				//No need to print, exiting anyway.
-			}
-			TimeManager.getManager().shutdown();
-			DatabaseManager.getManager().disconnectFromMySQL();
 
-			// exit
-			System.exit(0);
+			exitApplication();
 		} catch (Exception e) {
 			// something went wrong
 			Logger.getLogger().exception(null, "Failed to restart bot!", e, ApplicationHandler.class, true);
@@ -111,6 +104,7 @@ public class ApplicationHandler {
 		}
 		UpdateDisBotData.shutdown();
 		UpdateDisPwData.shutdown();
+		AnnouncementThreader.getThreader().shutdown();
 		TimeManager.getManager().shutdown();
 		DiscordAccountHandler.getHandler().shutdown();
 		DatabaseManager.getManager().disconnectFromMySQL();

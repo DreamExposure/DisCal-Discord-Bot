@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.bot.internal.network.discordbots.UpdateDisBotData;
 import com.cloudcraftgaming.discal.bot.internal.network.discordpw.UpdateDisPwData;
 import com.cloudcraftgaming.discal.bot.internal.service.TimeManager;
+import com.cloudcraftgaming.discal.bot.module.announcement.AnnouncementThreader;
 import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
@@ -22,6 +23,9 @@ public class ReadyEventListener {
 		Logger.getLogger().debug("Ready!");
 		try {
 			TimeManager.getManager().init();
+
+			//Lets test the new announcement multi-threader...
+			AnnouncementThreader.getThreader().init();
 
 			UpdateDisBotData.init();
 			UpdateDisPwData.init();

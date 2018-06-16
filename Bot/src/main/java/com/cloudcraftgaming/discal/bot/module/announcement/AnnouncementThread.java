@@ -19,14 +19,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TimerTask;
 
-/**
- * Created by Nova Fox on 10/9/17.
- * Website: www.cloudcraftgaming.com
- * For Project: DisCal-Discord-Bot
- */
-public class AnnouncementTask extends TimerTask {
+@SuppressWarnings({"WeakerAccess", "Duplicates"})
+public class AnnouncementThread extends Thread {
+	private final AnnouncementType type;
+
 	private Calendar discalService;
 
 	private HashMap<Long, GuildSettings> allSettings = new HashMap<>();
@@ -34,22 +31,26 @@ public class AnnouncementTask extends TimerTask {
 	private HashMap<Long, Calendar> customServices = new HashMap<>();
 	private HashMap<Long, List<Event>> allEvents = new HashMap<>();
 
+	public AnnouncementThread(AnnouncementType _type) {
+		type = _type;
+	}
+
 
 	@Override
 	public void run() {
-		Logger.getLogger().announcement("Starting announcement loop!");
+		Logger.getLogger().announcement("Starting announcement loop for type: " + type.name() + "!");
 		try {
 			//Get the default stuff.
 			try {
 				discalService = CalendarAuth.getCalendarService(null);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "Failed to get service! 00a0101", e, this.getClass(), true);
+				Logger.getLogger().exception(null, "Failed to get service! 01a0101", e, this.getClass(), true);
 			}
 
 			//NOTE: This list EXCLUDES disabled announcements!!!!!!!
-			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements();
+			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements(type);
 
-			for (Announcement a : allAnnouncements) {
+			for (Announcement a: allAnnouncements) {
 				Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 				//Check if guild is part of DisCal's guilds. This way we can clear out the database...
 				if (!GuildUtils.active(a.getGuildId())) {
@@ -60,15 +61,16 @@ public class AnnouncementTask extends TimerTask {
 				GuildSettings settings = getSettings(a);
 				CalendarData calendar = getCalendarData(a);
 				Calendar service;
+
 				try {
 					service = getService(settings);
 				} catch (Exception e) {
-					Logger.getLogger().exception(null, "Failed to handle custom service! 00a102", e, this.getClass(), true);
+					Logger.getLogger().exception(null, "Failed to handle service! 01a102", e, this.getClass(), true);
 					continue;
 				}
 
 				//Now we can check the announcement type and do all the actual logic here.
-				switch (a.getAnnouncementType()) {
+				switch (type) {
 					case SPECIFIC:
 						if (EventUtils.eventExists(settings, a.getEventId())) {
 							try {
@@ -81,7 +83,7 @@ public class AnnouncementTask extends TimerTask {
 								}
 							} catch (IOException e) {
 								//Event getting error, we know it exists tho
-								Logger.getLogger().exception(null, "Failed to get event! 00a103", e, this.getClass(), true);
+								Logger.getLogger().exception(null, "Failed to get event! 01a103", e, this.getClass(), true);
 							}
 						} else {
 							//Event is gone, we can just delete this shit.
@@ -89,7 +91,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case UNIVERSAL:
-						for (Event e : getEvents(settings, calendar, service, a)) {
+						for (Event e: getEvents(settings, calendar, service, a)) {
 							if (inRange(a, e)) {
 								//It fits! Let's do it!
 								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
@@ -97,7 +99,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case COLOR:
-						for (Event e : getEvents(settings, calendar, service, a)) {
+						for (Event e: getEvents(settings, calendar, service, a)) {
 							if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
 								if (inRange(a, e)) {
 									//It fits! Let's do it!
@@ -107,7 +109,7 @@ public class AnnouncementTask extends TimerTask {
 						}
 						break;
 					case RECUR:
-						for (Event e : getEvents(settings, calendar, service, a)) {
+						for (Event e: getEvents(settings, calendar, service, a)) {
 							if (inRange(a, e)) {
 								if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
 									//It fits! Lets announce!
@@ -126,9 +128,15 @@ public class AnnouncementTask extends TimerTask {
 			customServices.clear();
 			allEvents.clear();
 
-			Logger.getLogger().announcement("Finished announcement loop!");
+			Logger.getLogger().announcement("Finished announcement loop for type: " + type.name() + "!");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "SOMETHING BAD IN THE ANNOUNCER!!!!! PANIC!!!", e, this.getClass(), true);
+			Logger.getLogger().exception(null, "SOMETHING BAD IN THE ANNOUNCER!!!!! ANNOUNCEMENT TYPE: " + type.name(), e, this.getClass(), true);
+
+			//Clear everything because why take up RAM after is broke???
+			allSettings.clear();
+			calendars.clear();
+			customServices.clear();
+			allEvents.clear();
 		}
 	}
 
@@ -197,9 +205,7 @@ public class AnnouncementTask extends TimerTask {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "Failed to get events list! 00x2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass(), true);
-				//What the ever living fuck was this???
-				//allEvents.put(gs.getGuildID(), new VirtualFlow.ArrayLinkedList<>());
+				Logger.getLogger().exception(null, "Failed to get events list! 01ae2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, this.getClass(), true);
 				return new ArrayList<>();
 			}
 		}

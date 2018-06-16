@@ -21,7 +21,7 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"SqlResolve", "UnusedReturnValue", "SqlNoDataSourceInspection"})
+@SuppressWarnings({"SqlResolve", "UnusedReturnValue", "SqlNoDataSourceInspection", "Duplicates"})
 public class DatabaseManager {
 	private static DatabaseManager instance;
 	private DatabaseInfo databaseInfo;
@@ -173,7 +173,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("API_KEY") == null) {
 					//Data not present, add to DB.
@@ -228,7 +228,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("GUILD_ID") == null) {
 					//Data not present, add to DB.
@@ -309,7 +309,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("GUILD_ID") == null) {
 					//Data not present, add to DB.
@@ -358,7 +358,7 @@ public class DatabaseManager {
 	 * @param announcement The announcement object to add to the database.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public Boolean updateAnnouncement(Announcement announcement) {
+	public boolean updateAnnouncement(Announcement announcement) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
@@ -367,7 +367,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
 					//Data not present, add to db.
@@ -432,7 +432,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public Boolean updateEventData(EventData data) {
+	public boolean updateEventData(EventData data) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
@@ -445,7 +445,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("EVENT_ID") == null) {
 					//Data not present, add to DB.
@@ -485,7 +485,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public Boolean updateRsvpData(RsvpData data) {
+	public boolean updateRsvpData(RsvpData data) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
@@ -494,7 +494,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (!hasStuff || res.getString("EVENT_ID") == null) {
 					//Data not present, add to DB.
@@ -553,7 +553,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (hasStuff && res.getString("API_KEY") != null) {
 					UserAPIAccount account = new UserAPIAccount();
@@ -588,7 +588,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (hasStuff && res.getString("GUILD_ID") != null) {
 					settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
@@ -760,7 +760,7 @@ public class DatabaseManager {
 	}
 
 	public Integer getCalendarCount() {
-		Integer amount = -1;
+		int amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
@@ -918,7 +918,7 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				Boolean hasStuff = res.next();
+				boolean hasStuff = res.next();
 
 				if (hasStuff && res.getString("ANNOUNCEMENT_ID") != null) {
 					Announcement announcement = new Announcement(announcementId, guildId);
@@ -1026,6 +1026,44 @@ public class DatabaseManager {
 		return announcements;
 	}
 
+	public ArrayList<Announcement> getAnnouncements(AnnouncementType type) {
+		ArrayList<Announcement> announcements = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_TYPE = ?");
+				stmt.setString(1, type.name());
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("ANNOUNCEMENT_ID") != null) {
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
+						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
+						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
+						announcement.setAnnouncementType(type);
+						announcement.setEventId(res.getString("EVENT_ID"));
+						announcement.setEventColor(EventColor.fromNameOrHexOrID(res.getString("EVENT_COLOR")));
+						announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
+						announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+						announcement.setInfo(res.getString("INFO"));
+						announcement.setEnabled(res.getBoolean("ENABLED"));
+						announcement.setInfoOnly(res.getBoolean("INFO_ONLY"));
+
+						announcements.add(announcement);
+					}
+				}
+
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			Logger.getLogger().exception(null, "Failed to get all announcements by type.", e, this.getClass(), true);
+		}
+
+		return announcements;
+	}
+
 	public ArrayList<Announcement> getEnabledAnnouncements() {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
@@ -1059,13 +1097,53 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all announcements.", e, this.getClass(), true);
+			Logger.getLogger().exception(null, "Failed to get all enabled announcements.", e, this.getClass(), true);
 		}
 
 		return announcements;
 	}
 
-	public Integer getAnnouncementCount() {
+	public ArrayList<Announcement> getEnabledAnnouncements(AnnouncementType type) {
+		ArrayList<Announcement> announcements = new ArrayList<>();
+		try {
+			if (databaseInfo.getMySQL().checkConnection()) {
+				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
+
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1 AND ANNOUNCEMENT_ID = ?");
+				stmt.setString(1, type.name());
+				ResultSet res = stmt.executeQuery();
+
+				while (res.next()) {
+					if (res.getString("ANNOUNCEMENT_ID") != null) {
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
+						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
+						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
+						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
+						announcement.setAnnouncementType(type);
+						announcement.setEventId(res.getString("EVENT_ID"));
+						announcement.setEventColor(EventColor.fromNameOrHexOrID(res.getString("EVENT_COLOR")));
+						announcement.setHoursBefore(res.getInt("HOURS_BEFORE"));
+						announcement.setMinutesBefore(res.getInt("MINUTES_BEFORE"));
+						announcement.setInfo(res.getString("INFO"));
+						announcement.setInfoOnly(res.getBoolean("INFO_ONLY"));
+
+						//The announcement is obviously enabled if we have gotten here lol
+						announcement.setEnabled(true);
+
+						announcements.add(announcement);
+					}
+				}
+
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			Logger.getLogger().exception(null, "Failed to get all enabled announcements by type.", e, this.getClass(), true);
+		}
+
+		return announcements;
+	}
+
+	public int getAnnouncementCount() {
 		int amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
@@ -1096,7 +1174,7 @@ public class DatabaseManager {
 	 * @param announcementId The ID of the announcement to delete.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public Boolean deleteAnnouncement(String announcementId) {
+	public boolean deleteAnnouncement(String announcementId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
@@ -1115,7 +1193,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public Boolean deleteAnnouncementsForEvent(long guildId, String eventId) {
+	public boolean deleteAnnouncementsForEvent(long guildId, String eventId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
@@ -1136,7 +1214,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public Boolean deleteEventData(String eventId) {
+	public boolean deleteEventData(String eventId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String eventTable = String.format("%sevents", databaseInfo.getPrefix());

@@ -1,6 +1,5 @@
 package com.cloudcraftgaming.discal.bot.internal.service;
 
-import com.cloudcraftgaming.discal.bot.module.announcement.AnnouncementTask;
 import com.cloudcraftgaming.discal.bot.module.misc.StatusChanger;
 
 import java.util.ArrayList;
@@ -37,15 +36,15 @@ public class TimeManager {
 	public void init() {
 		Timer timer = new Timer(true);
 		timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-
 		timers.add(timer);
 
-		Timer at = new Timer(true);
-		at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
+		//Timer at = new Timer(true);
+		//at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
+		//timers.add(at);
 
 		Timer cc = new Timer(true);
 		cc.schedule(new CreatorCleaner(), 60 * 1000 * 60, 60 * 1000 * 60);
-		timers.add(at);
+		timers.add(cc);
 	}
 
 	/**
