@@ -181,6 +181,7 @@ public class Authorization {
 				AESEncryption encryption = new AESEncryption(gs);
 				gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
 				gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
+				gs.setUseExternalCalendar(true);
 				DatabaseManager.getManager().updateSettings(gs);
 
 				try {
