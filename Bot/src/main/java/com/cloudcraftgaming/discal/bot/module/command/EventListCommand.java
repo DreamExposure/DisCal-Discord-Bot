@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
@@ -77,13 +76,13 @@ public class EventListCommand implements ICommand {
 					if (settings.isDevGuild())
 						moduleSearch(args, event, settings);
 					else
-                        Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
                     break;
 				case "today":
 					if (settings.isDevGuild())
 						moduleDay(args, event, settings);
 					else
-						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
 					break;
                 default:
                     moduleSimpleList(args, event, settings);
@@ -110,12 +109,12 @@ public class EventListCommand implements ICommand {
 						.execute();
 				List<Event> items = events.getItems();
 				if (items.size() == 0) {
-					Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
 				} else if (items.size() == 1) {
-					Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
+					MessageManager.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
 				}
 			} catch (Exception e) {
-				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
 				e.printStackTrace();
 			}
@@ -123,11 +122,11 @@ public class EventListCommand implements ICommand {
             try {
                 Integer eventNum = Integer.valueOf(args[0]);
                 if (eventNum > 15) {
-                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Over", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Event.List.Amount.Over", settings), event);
                     return;
                 }
                 if (eventNum < 1) {
-                    Message.sendMessage(MessageManager.getMessage("Event.List.Amount.Under", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Event.List.Amount.Under", settings), event);
                     return;
                 }
                 try {
@@ -143,26 +142,26 @@ public class EventListCommand implements ICommand {
                             .execute();
                     List<Event> items = events.getItems();
                     if (items.size() == 0) {
-                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
                     } else if (items.size() == 1) {
-                        Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
+						MessageManager.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
                     } else {
                         //List events by Id only.
-                        Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
                         for (Event e : items) {
-                            Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
+							MessageManager.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
                         }
                     }
                 } catch (Exception e) {
-                    Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 					Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
                     e.printStackTrace();
                 }
             } catch (NumberFormatException e) {
-                Message.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Event.List.Args.Many", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Event.List.Args.Many", settings), event);
         }
     }
 
@@ -190,18 +189,18 @@ public class EventListCommand implements ICommand {
 						.execute();
 				List<Event> items = events.getItems();
 				if (items.size() == 0) {
-					Message.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Event.List.Found.None", settings), event);
 				} else if (items.size() == 1) {
-					Message.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
+					MessageManager.sendMessage(EventMessageFormatter.getEventEmbed(items.get(0), settings), MessageManager.getMessage("Event.List.Found.One", settings), event);
 				} else {
 					//List events by Id only.
-					Message.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
 					for (Event e : items) {
-						Message.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
+						MessageManager.sendMessage(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
 					}
 				}
 			} catch (Exception e) {
-				Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass(), true);
 				e.printStackTrace();
 			}

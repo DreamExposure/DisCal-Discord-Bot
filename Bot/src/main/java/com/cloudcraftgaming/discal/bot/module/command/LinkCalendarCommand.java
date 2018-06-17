@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.message.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
@@ -73,15 +72,15 @@ public class LinkCalendarCommand implements ICommand {
 
             if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
                 //Does not have a calendar.
-                Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
 				Calendar cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
 
-                Message.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, settings), event);
+				MessageManager.sendMessage(CalendarMessageFormatter.getCalendarLinkEmbed(cal, settings), event);
             }
         } catch (Exception e) {
 			Logger.getLogger().exception(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass(), true);
-            Message.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
         }
         return false;
     }

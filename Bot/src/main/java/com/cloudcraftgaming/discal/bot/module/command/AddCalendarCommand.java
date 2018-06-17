@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.network.google.Authorization;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
@@ -75,17 +74,17 @@ public class AddCalendarCommand implements ICommand {
 			if (PermissionChecker.hasManageServerRole(event)) {
 				if (args.length == 0) {
 					if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
-						Message.sendMessage(MessageManager.getMessage("AddCalendar.Start", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Start", settings), event);
 						Authorization.getAuth().requestCode(event, settings);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
 					}
 				} else if (args.length == 1) {
 					//Check if arg is calendar ID that is supported, if so, complete the setup.
 					if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
-						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
 					} else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
-						Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
 					} else {
 						try {
 							Calendar service = CalendarAuth.getCalendarService(settings);
@@ -110,24 +109,24 @@ public class AddCalendarCommand implements ICommand {
 								settings.setUseExternalCalendar(true);
 								DatabaseManager.getManager().updateSettings(settings);
 
-								Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
+								MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
 							} else {
 								//Invalid
-								Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
+								MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
 							}
 						} catch (Exception e) {
-							Message.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
+							MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
 							Logger.getLogger().exception(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass(), true);
 						}
 					}
 				} else {
-					Message.sendMessage(MessageManager.getMessage("AddCalendar.Specify", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("AddCalendar.Specify", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
 		}
 		return false;
 	}

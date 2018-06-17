@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.bot.internal.calendar.calendar;
 
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.message.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
@@ -58,10 +57,10 @@ public class CalendarCreator {
 
 			if (handleCreatorMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), MessageManager.getMessage("Creator.Calendar.Create.Init", settings), e);
+					IMessage msg = MessageManager.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), MessageManager.getMessage("Creator.Calendar.Create.Init", settings), e);
 					calendar.setCreatorMessage(msg);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+					MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 				}
 			}
 			calendars.add(calendar);
@@ -88,10 +87,10 @@ public class CalendarCreator {
 
 				if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), event);
+						IMessage msg = MessageManager.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), event);
 					}
 				}
 

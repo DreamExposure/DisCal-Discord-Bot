@@ -3,7 +3,6 @@ package com.cloudcraftgaming.discal.bot.module.command;
 import com.cloudcraftgaming.discal.Main;
 import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
@@ -129,7 +128,7 @@ public class DisCalCommand implements ICommand {
 					moduleBrand(event, settings);
 					break;
                 default:
-                    Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
                     break;
             }
         }
@@ -157,7 +156,7 @@ public class DisCalCommand implements ICommand {
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
-        Message.sendMessage(em.build(), event);
+		MessageManager.sendMessage(em.build(), event);
     }
 
     /**
@@ -178,24 +177,24 @@ public class DisCalCommand implements ICommand {
                         settings.setControlRole(controlRole.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
                         //Send message.
-                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), settings), event);
 
                     } else {
                         //Invalid role.
-                        Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Invalid", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Invalid", settings), event);
                     }
                 } else {
                     //Role is @everyone, set this so that anyone can control the bot.
                     settings.setControlRole("everyone");
                     DatabaseManager.getManager().updateSettings(settings);
                     //Send message
-                    Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Reset", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Reset", settings), event);
                 }
             } else {
-                Message.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Specify", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.ControlRole.Specify", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
         }
     }
 
@@ -211,23 +210,23 @@ public class DisCalCommand implements ICommand {
                 //Reset channel info.
                 settings.setDiscalChannel("all");
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.Channel.All", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.Channel.All", settings), event);
             } else {
                 if (ChannelUtils.channelExists(channelName, event)) {
                     IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
                     if (channel != null) {
                         settings.setDiscalChannel(channel.getStringID());
                         DatabaseManager.getManager().updateSettings(settings);
-                        Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
                     } else {
-                        Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
+						MessageManager.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
                     }
                 } else {
-                    Message.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
                 }
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("DisCal.Channel.Specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("DisCal.Channel.Specify", settings), event);
         }
     }
 
@@ -235,7 +234,7 @@ public class DisCalCommand implements ICommand {
         settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
         DatabaseManager.getManager().updateSettings(settings);
 
-        Message.sendMessage(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings), event);
+		MessageManager.sendMessage(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings), event);
     }
 
     private void moduleSettings(MessageReceivedEvent event, GuildSettings settings) {
@@ -267,7 +266,7 @@ public class DisCalCommand implements ICommand {
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
         em.withUrl("https://www.cloudcraftgaming.com/discal/");
         em.withColor(56, 138, 237);
-        Message.sendMessage(em.build(), event);
+		MessageManager.sendMessage(em.build(), event);
     }
 
     private void moduleDmAnnouncements(MessageReceivedEvent event, GuildSettings settings) {
@@ -277,14 +276,14 @@ public class DisCalCommand implements ICommand {
             if (settings.getDmAnnouncements().contains(user.getStringID())) {
                 settings.getDmAnnouncements().remove(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.Off", settings), event);
             } else {
                 settings.getDmAnnouncements().add(user.getStringID());
                 DatabaseManager.getManager().updateSettings(settings);
-                Message.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.DmAnnouncements.On", settings), event);
             }
         } else {
-            Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
         }
     }
 
@@ -296,12 +295,12 @@ public class DisCalCommand implements ICommand {
 				settings.setPrefix(prefix);
 				DatabaseManager.getManager().updateSettings(settings);
 
-				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.Prefix.Specify", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 		}
 	}
 
@@ -315,23 +314,23 @@ public class DisCalCommand implements ICommand {
 					settings.setLang(valid);
 					DatabaseManager.getManager().updateSettings(settings);
 
-					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Success", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("DisCal.Lang.Success", settings), event);
 				} else {
 					String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
-					Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
 				}
 			} else {
 				String langs = MessageManager.getLangs().toString().replace("[", "").replace("]", "");
-				Message.sendMessage(MessageManager.getMessage("DisCal.Lang.Specify", "%values%", langs, settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.Lang.Specify", "%values%", langs, settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 		}
 	}
 
 	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
 		String INVITE_LINK = "https://discord.gg/AmAMGeN";
-		Message.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
+		MessageManager.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
 	}
 
 	private void moduleBrand(MessageReceivedEvent event, GuildSettings settings) {
@@ -340,17 +339,17 @@ public class DisCalCommand implements ICommand {
 				settings.setBranded(!settings.isBranded());
 				DatabaseManager.getManager().updateSettings(settings);
 
-				Message.sendMessage(MessageManager.getMessage("DisCal.Brand", "%value%", settings.isBranded() + "", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("DisCal.Brand", "%value%", settings.isBranded() + "", settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notification.Patron", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 		}
 	}
 
 	private void moduleDashboard(MessageReceivedEvent event, GuildSettings settings) {
 		String DASHBOARD_LINK = "https://www.discalbot.com/dashboard";
-		Message.sendMessage(MessageManager.getMessage("DisCal.DashboardLink", "%link%", DASHBOARD_LINK, settings), event);
+		MessageManager.sendMessage(MessageManager.getMessage("DisCal.DashboardLink", "%link%", DASHBOARD_LINK, settings), event);
 	}
 }

@@ -4,7 +4,6 @@ import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.event.EventCreatorResponse;
@@ -66,11 +65,11 @@ public class EventCreator {
 			}
 			if (handleMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
+					IMessage message = MessageManager.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
 					event.setCreatorMessage(message);
-					Message.deleteMessage(e);
+					MessageManager.deleteMessage(e);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+					MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 				}
 			}
 
@@ -85,7 +84,6 @@ public class EventCreator {
 			PreEvent event = new PreEvent(e.getGuild().getLongID());
 			event.setSummary(summary);
 			try {
-
 				//TODO: Handle multiple calendars...
 				String calId = DatabaseManager.getManager().getMainCalendar(e.getGuild().getLongID()).getCalendarAddress();
 
@@ -95,11 +93,11 @@ public class EventCreator {
 			}
 			if (handleMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
+					IMessage message = MessageManager.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Create.Init", settings), e);
 					event.setCreatorMessage(message);
-					Message.deleteMessage(e);
+					MessageManager.deleteMessage(e);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+					MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 				}
 			}
 
@@ -129,11 +127,11 @@ public class EventCreator {
 
 				if (handleMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Copy.Init", settings), e);
+						IMessage message = MessageManager.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Copy.Init", settings), e);
 						event.setCreatorMessage(message);
-						Message.deleteMessage(e);
+						MessageManager.deleteMessage(e);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+						MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 					}
 				}
 
@@ -168,11 +166,11 @@ public class EventCreator {
 
 				if (handleMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = Message.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Edit.Init", settings), e);
+						IMessage message = MessageManager.sendMessage(EventMessageFormatter.getPreEventEmbed(event, settings), MessageManager.getMessage("Creator.Event.Edit.Init", settings), e);
 						event.setCreatorMessage(message);
-						Message.deleteMessage(e);
+						MessageManager.deleteMessage(e);
 					} else {
-						Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+						MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 					}
 				}
 

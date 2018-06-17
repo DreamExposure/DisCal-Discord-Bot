@@ -2,7 +2,6 @@ package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
@@ -97,11 +96,11 @@ public class RsvpCommand implements ICommand {
 					moduleList(args, event, settings);
 					break;
 				default:
-					Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
 					break;
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
 		}
 		return false;
 	}
@@ -116,15 +115,15 @@ public class RsvpCommand implements ICommand {
 					data.getGoingOnTime().add(event.getAuthor().getStringID());
 
 					DatabaseManager.getManager().updateRsvpData(data);
-					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.going.success", settings), event);
+					MessageManager.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.going.success", settings), event);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.going.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.going.specify", settings), event);
 		}
 	}
 
@@ -138,15 +137,15 @@ public class RsvpCommand implements ICommand {
 					data.getGoingLate().add(event.getAuthor().getStringID());
 
 					DatabaseManager.getManager().updateRsvpData(data);
-					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.late.success", settings), event);
+					MessageManager.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.late.success", settings), event);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.late.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.late.specify", settings), event);
 		}
 	}
 
@@ -160,15 +159,15 @@ public class RsvpCommand implements ICommand {
 					data.getNotGoing().add(event.getAuthor().getStringID());
 
 					DatabaseManager.getManager().updateRsvpData(data);
-					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.not.success", settings), event);
+					MessageManager.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.not.success", settings), event);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.not.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.not.specify", settings), event);
 		}
 	}
 
@@ -181,15 +180,15 @@ public class RsvpCommand implements ICommand {
 					data.removeCompletely(event.getAuthor().getStringID());
 
 					DatabaseManager.getManager().updateRsvpData(data);
-					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.remove.success", settings), event);
+					MessageManager.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.remove.success", settings), event);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.remove.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.remove.specify", settings), event);
 		}
 	}
 
@@ -203,15 +202,15 @@ public class RsvpCommand implements ICommand {
 					data.getUndecided().add(event.getAuthor().getStringID());
 
 					DatabaseManager.getManager().updateRsvpData(data);
-					Message.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.unsure.success", settings), event);
+					MessageManager.sendMessage(getRsvpEmbed(data, settings), MessageManager.getMessage("RSVP.unsure.success", settings), event);
 				} else {
-					Message.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
 				}
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.unsure.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.unsure.specify", settings), event);
 		}
 	}
 
@@ -221,12 +220,12 @@ public class RsvpCommand implements ICommand {
 			if (EventUtils.eventExists(settings, eventId)) {
 				RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
 
-				Message.sendMessage(getRsvpEmbed(data, settings), event);
+				MessageManager.sendMessage(getRsvpEmbed(data, settings), event);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Notifications.Event.NoExist", settings), event);
+				MessageManager.sendMessage(MessageManager.getMessage("Notifications.Event.NoExist", settings), event);
 			}
 		} else {
-			Message.sendMessage(MessageManager.getMessage("RSVP.list.specify", settings), event);
+			MessageManager.sendMessage(MessageManager.getMessage("RSVP.list.specify", settings), event);
 		}
 	}
 

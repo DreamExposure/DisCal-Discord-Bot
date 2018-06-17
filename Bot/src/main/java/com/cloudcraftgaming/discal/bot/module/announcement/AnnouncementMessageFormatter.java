@@ -5,7 +5,6 @@ import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
@@ -253,7 +252,7 @@ public class AnnouncementMessageFormatter {
 			return;
 		}
 
-		Message.sendMessageAsync(em.build(), getSubscriberMentions(announcement, guild), channel);
+		MessageManager.sendMessageAsync(em.build(), getSubscriberMentions(announcement, guild), channel);
     }
 
     static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
@@ -333,7 +332,7 @@ public class AnnouncementMessageFormatter {
 
         String msg = MessageManager.getMessage("Embed.Announcement.Announce.Dm.Message", "%guild%", guild.getName(), settings);
 
-        Message.sendDirectMessage(msg, em.build(), user);
+		MessageManager.sendDirectMessage(msg, em.build(), user);
     }
 
     /**

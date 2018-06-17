@@ -1,7 +1,7 @@
 package com.cloudcraftgaming.discal.api.object.event;
 
 import com.cloudcraftgaming.discal.api.enums.event.EventFrequency;
-import com.cloudcraftgaming.discal.api.utils.MessageUtils;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -68,11 +68,11 @@ public class Recurrence {
 	 * @return Human readable string of the settings.
 	 */
 	public String toHumanReadable() {
-		String humanRead = "Frequency: " + frequency.name() + MessageUtils.lineBreak + "Interval: " + interval;
+		String humanRead = "Frequency: " + frequency.name() + MessageManager.lineBreak + "Interval: " + interval;
 		if (count < 1)
-			return humanRead + MessageUtils.lineBreak + "Amount: Infinite";
+			return humanRead + MessageManager.lineBreak + "Amount: Infinite";
 		else
-			return humanRead + MessageUtils.lineBreak + "Amount: " + count;
+			return humanRead + MessageManager.lineBreak + "Amount: " + count;
 	}
 
 	/**

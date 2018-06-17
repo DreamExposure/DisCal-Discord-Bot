@@ -4,7 +4,6 @@ import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.calendar.CalendarAuth;
 import com.cloudcraftgaming.discal.api.crypto.AESEncryption;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.message.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
@@ -78,7 +77,7 @@ public class Authorization {
 				em.withColor(36, 153, 153);
 
 				IUser user = event.getAuthor();
-				Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Success", settings), em.build(), user);
+				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Success", settings), em.build(), user);
 
 				//Start timer to poll Google Cal for auth
 				Poll poll = new Poll(user, event.getGuild());
@@ -89,7 +88,7 @@ public class Authorization {
 				poll.setInterval(cr.interval);
 				pollForAuth(poll);
 			} else {
-				Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
+				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
 
 				Logger.getLogger().debug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
 			}
@@ -97,7 +96,7 @@ public class Authorization {
 			//Failed, report issue to dev.
 			Logger.getLogger().exception(event.getAuthor(), "Failed to request Google Access Code", e, this.getClass(), true);
 			IUser u = event.getAuthor();
-			Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), u);
+			MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), u);
 		}
 	}
 
@@ -143,7 +142,7 @@ public class Authorization {
 			//Handle response.
 			if (response.getStatus() == 403) {
 				//Handle access denied
-				Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Deny", settings), poll.getUser());
+				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Deny", settings), poll.getUser());
 			} else if (response.getStatus() == 400) {
 				try {
 					//See if auth is pending, if so, just reschedule.
@@ -155,16 +154,16 @@ public class Authorization {
 						//Response pending
 						PollManager.getManager().scheduleNextPoll(poll);
 					} else if (apre.error.equalsIgnoreCase("expired_token")) {
-						Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings), poll.getUser());
+						MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings), poll.getUser());
 					} else {
-						Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
+						MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
 						Logger.getLogger().debug(poll.getUser(), "Poll Failure!", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
 					}
 				} catch (Exception e) {
 					//Auth is not pending, error occurred.
 					Logger.getLogger().exception(poll.getUser(), "Failed to poll for authorization to google account.", e, this.getClass(), true);
 					Logger.getLogger().debug(poll.getUser(), "More info on failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
-					Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
+					MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
 				}
 			} else if (response.getStatus() == 429) {
 				//We got rate limited... oops. Let's just poll half as often.
@@ -187,7 +186,7 @@ public class Authorization {
 				try {
 					Calendar service = CalendarAuth.getCalendarService(gs);
 					List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
-					Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Success", settings), poll.getUser());
+					MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Success", settings), poll.getUser());
 					for (CalendarListEntry i : items) {
 						if (!i.isDeleted()) {
 							EmbedBuilder em = new EmbedBuilder();
@@ -200,7 +199,7 @@ public class Authorization {
 
 							em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
 							em.withColor(56, 138, 237);
-							Message.sendDirectMessage(em.build(), poll.getUser());
+							MessageManager.sendDirectMessage(em.build(), poll.getUser());
 						}
 					}
 					//Response will be handled in guild, and will check. We already saved the tokens anyway.
@@ -208,17 +207,17 @@ public class Authorization {
 					//Failed to get calendars list and check for calendars.
 					Logger.getLogger().exception(poll.getUser(), "Failed to list calendars from external account!", e1, this.getClass(), true);
 
-					Message.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", settings), poll.getUser());
+					MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", settings), poll.getUser());
 				}
 			} else {
 				//Unknown network error...
-				Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
+				MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
 				Logger.getLogger().debug(poll.getUser(), "Network error; poll failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
 			}
 		} catch (Exception e) {
 			//Handle exception.
 			Logger.getLogger().exception(poll.getUser(), "Failed to poll for authorization to google account", e, this.getClass(), true);
-			Message.sendDirectMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), poll.getUser());
+			MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Unknown", settings), poll.getUser());
 		}
 	}
 }

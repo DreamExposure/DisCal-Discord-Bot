@@ -1,7 +1,6 @@
 package com.cloudcraftgaming.discal.bot.module.command;
 
 import com.cloudcraftgaming.discal.api.DisCalAPI;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
@@ -76,12 +75,12 @@ public class HelpCommand implements ICommand {
             em.withFooterText("Check out the official site for more command info!");
 			em.withUrl("https://www.discalbot.com/commands");
             em.withColor(56, 138, 237);
-            Message.sendMessage(em.build(), event);
+			MessageManager.sendMessage(em.build(), event);
         } else if (args.length == 1) {
             String cmdFor = args[0];
             ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
 			if (cmd != null)
-                Message.sendMessage(getCommandInfoEmbed(cmd), event);
+				MessageManager.sendMessage(getCommandInfoEmbed(cmd), event);
 
         } else if (args.length == 2) {
         	//Display sub command info
@@ -89,9 +88,9 @@ public class HelpCommand implements ICommand {
 			ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
 			if (cmd != null) {
 				if (cmd.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
-					Message.sendMessage(getSubCommandEmbed(cmd, args[1].toLowerCase()), event);
+					MessageManager.sendMessage(getSubCommandEmbed(cmd, args[1].toLowerCase()), event);
 				else
-					Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
+					MessageManager.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
 			}
 		}
 

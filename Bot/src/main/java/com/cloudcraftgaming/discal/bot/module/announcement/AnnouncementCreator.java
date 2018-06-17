@@ -1,7 +1,6 @@
 package com.cloudcraftgaming.discal.bot.module.announcement;
 
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
@@ -49,10 +48,10 @@ public class AnnouncementCreator {
             a.setAnnouncementChannelId(e.getChannel().getStringID());
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-				IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Create.Init", settings), e);
+				IMessage msg = MessageManager.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Create.Init", settings), e);
 				a.setCreatorMessage(msg);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+				MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 			}
 
             announcements.add(a);
@@ -69,10 +68,10 @@ public class AnnouncementCreator {
             Announcement a = new Announcement(toCopy);
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-		        IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), e);
+				IMessage msg = MessageManager.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), e);
 		        a.setCreatorMessage(msg);
 	        } else {
-		        Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+				MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 	        }
 
             announcements.add(a);
@@ -90,10 +89,10 @@ public class AnnouncementCreator {
             a.setEditing(true);
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-				IMessage msg = Message.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), e);
+				IMessage msg = MessageManager.sendMessage(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), e);
 				a.setCreatorMessage(msg);
 			} else {
-				Message.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
+				MessageManager.sendMessage(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
 			}
 
             announcements.add(a);

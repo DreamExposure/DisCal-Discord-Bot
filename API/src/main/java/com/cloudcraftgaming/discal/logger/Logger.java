@@ -1,9 +1,8 @@
 package com.cloudcraftgaming.discal.logger;
 
 import com.cloudcraftgaming.discal.api.DisCalAPI;
-import com.cloudcraftgaming.discal.api.message.Message;
+import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
-import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -112,21 +111,21 @@ public class Logger {
 				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
 				IChannel channel = guild.getChannelByID(302249332244217856L);
 
-				Message.sendMessage(em.build(), "```" + shortError + "```", channel);
+				MessageManager.sendMessage(em.build(), "```" + shortError + "```", channel);
 			}
 		}
 
 		//ALWAYS LOG TO FILE!
 		try {
 			FileWriter exceptions = new FileWriter(exceptionsFile, true);
-			exceptions.write("ERROR --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			exceptions.write("ERROR --- " + timeStamp + " ---" + MessageManager.lineBreak);
 			if (author != null)
-				exceptions.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
+				exceptions.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageManager.lineBreak);
 
 			if (message != null)
-				exceptions.write("message: " + message + MessageUtils.lineBreak);
+				exceptions.write("message: " + message + MessageManager.lineBreak);
 
-			exceptions.write(error + MessageUtils.lineBreak);
+			exceptions.write(error + MessageManager.lineBreak);
 			exceptions.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -159,22 +158,22 @@ public class Logger {
 				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
 				IChannel channel = guild.getChannelByID(302249332244217856L);
 
-				Message.sendMessage(em.build(), "```" + message + "```", channel);
+				MessageManager.sendMessage(em.build(), "```" + message + "```", channel);
 			}
 		}
 
 		//ALWAYS LOG TO FILE!
 		try {
 			FileWriter file = new FileWriter(debugFile, true);
-			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("DEBUG --- " + timeStamp + " ---" + MessageManager.lineBreak);
 			if (author != null)
-				file.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
+				file.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageManager.lineBreak);
 
 			if (message != null)
-				file.write("message: " + message + MessageUtils.lineBreak);
+				file.write("message: " + message + MessageManager.lineBreak);
 
 			if (info != null)
-				file.write("info: " + info + MessageUtils.lineBreak);
+				file.write("info: " + info + MessageManager.lineBreak);
 
 			file.close();
 		} catch (IOException io) {
@@ -187,9 +186,9 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(debugFile, true);
-			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
+			file.write("DEBUG --- " + timeStamp + " ---" + MessageManager.lineBreak);
 			if (message != null)
-				file.write("info: " + message + MessageUtils.lineBreak);
+				file.write("info: " + message + MessageManager.lineBreak);
 
 			file.close();
 		} catch (IOException io) {
@@ -202,8 +201,8 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(apiFile, true);
-			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			file.write("info: " + message + MessageUtils.lineBreak);
+			file.write("API --- " + timeStamp + " ---" + MessageManager.lineBreak);
+			file.write("info: " + message + MessageManager.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -215,9 +214,9 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(apiFile, true);
-			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			file.write("info: " + message + MessageUtils.lineBreak);
-			file.write("IP: " + ip + MessageUtils.lineBreak);
+			file.write("API --- " + timeStamp + " ---" + MessageManager.lineBreak);
+			file.write("info: " + message + MessageManager.lineBreak);
+			file.write("IP: " + ip + MessageManager.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -229,11 +228,11 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(apiFile, true);
-			file.write("API --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			file.write("info: " + message + MessageUtils.lineBreak);
-			file.write("IP: " + ip + MessageUtils.lineBreak);
-			file.write("Host: " + host + MessageUtils.lineBreak);
-			file.write("Endpoint: " + endpoint + MessageUtils.lineBreak);
+			file.write("API --- " + timeStamp + " ---" + MessageManager.lineBreak);
+			file.write("info: " + message + MessageManager.lineBreak);
+			file.write("IP: " + ip + MessageManager.lineBreak);
+			file.write("Host: " + host + MessageManager.lineBreak);
+			file.write("Endpoint: " + endpoint + MessageManager.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -245,8 +244,8 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(announcementsFile, true);
-			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			file.write("info: " + message + MessageUtils.lineBreak);
+			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageManager.lineBreak);
+			file.write("info: " + message + MessageManager.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -258,11 +257,11 @@ public class Logger {
 
 		try {
 			FileWriter file = new FileWriter(announcementsFile, true);
-			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			file.write("info: " + message + MessageUtils.lineBreak);
-			file.write("guild Id: " + guildId + MessageUtils.lineBreak);
-			file.write("announcement Id: " + announcementId + MessageUtils.lineBreak);
-			file.write("event id: " + eventId + MessageUtils.lineBreak);
+			file.write("ANNOUNCEMENT --- " + timeStamp + " ---" + MessageManager.lineBreak);
+			file.write("info: " + message + MessageManager.lineBreak);
+			file.write("guild Id: " + guildId + MessageManager.lineBreak);
+			file.write("announcement Id: " + announcementId + MessageManager.lineBreak);
+			file.write("event id: " + eventId + MessageManager.lineBreak);
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();

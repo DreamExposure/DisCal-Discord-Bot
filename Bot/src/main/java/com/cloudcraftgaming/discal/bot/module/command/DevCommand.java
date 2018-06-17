@@ -3,14 +3,12 @@ package com.cloudcraftgaming.discal.bot.module.command;
 import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.crypto.KeyGenerator;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
-import com.cloudcraftgaming.discal.api.message.Message;
 import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
-import com.cloudcraftgaming.discal.api.utils.MessageUtils;
 import com.cloudcraftgaming.discal.bot.internal.service.ApplicationHandler;
 import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.api.IDiscordClient;
@@ -98,7 +96,7 @@ public class DevCommand implements ICommand {
 	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (event.getAuthor().getLongID() == DisCalAPI.getAPI().novaId || event.getAuthor().getLongID() == DisCalAPI.getAPI().xaanitId || event.getAuthor().getLongID() == DisCalAPI.getAPI().calId || event.getAuthor().getLongID() == DisCalAPI.getAPI().dreamId) {
 			if (args.length < 1) {
-				Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
+				MessageManager.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
 			} else {
 				switch (args[0].toLowerCase()) {
 					case "patron":
@@ -144,12 +142,12 @@ public class DevCommand implements ICommand {
 						blockAPIKey(args, event);
 						break;
 					default:
-						Message.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
+						MessageManager.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
 						break;
 				}
 			}
 		} else {
-			Message.sendMessage("You are not a registered DisCal developer! If this is a mistake please contact Nova!", event);
+			MessageManager.sendMessage("You are not a registered DisCal developer! If this is a mistake please contact Nova!", event);
 		}
 		return false;
 	}
@@ -165,12 +163,12 @@ public class DevCommand implements ICommand {
 
 				DatabaseManager.getManager().updateSettings(settings);
 
-				Message.sendMessage("Guild with ID: `" + guildId + "` is patron set to: `" + isPatron + "`", event);
+				MessageManager.sendMessage("Guild with ID: `" + guildId + "` is patron set to: `" + isPatron + "`", event);
 			} else {
-				Message.sendMessage("Guild not found or is not connected to DisCal!", event);
+				MessageManager.sendMessage("Guild not found or is not connected to DisCal!", event);
 			}
 		} else {
-			Message.sendMessage("Please specify the ID of the guild to set as a patron guild with `!dev patron <ID>`", event);
+			MessageManager.sendMessage("Please specify the ID of the guild to set as a patron guild with `!dev patron <ID>`", event);
 		}
 	}
 
@@ -201,7 +199,7 @@ public class DevCommand implements ICommand {
 			em.withDesc(ex.getMessage());
 			em.withFooterText("Eval failed");
 			em.withColor(56, 138, 237);
-			Message.sendMessage(em.build(), channel);
+			MessageManager.sendMessage(em.build(), channel);
 			return;
 		}
 
@@ -213,7 +211,7 @@ public class DevCommand implements ICommand {
 		em.withDesc(o == null ? "No output, object is null" : o.toString());
 		em.appendField("Input", "```java\n" + input + "\n```", false);
 		em.withFooterText("Eval successful!");
-		Message.sendMessage(em.build(), channel);
+		MessageManager.sendMessage(em.build(), channel);
 	}
 
 	private void moduleDevGuild(String[] args, MessageReceivedEvent event) {
@@ -227,12 +225,12 @@ public class DevCommand implements ICommand {
 
 				DatabaseManager.getManager().updateSettings(settings);
 
-				Message.sendMessage("Guild with ID: `" + guildId + "` is dev guild set to: `" + isPatron + "`", event);
+				MessageManager.sendMessage("Guild with ID: `" + guildId + "` is dev guild set to: `" + isPatron + "`", event);
 			} else {
-				Message.sendMessage("Guild not found or is not connected to DisCal!", event);
+				MessageManager.sendMessage("Guild not found or is not connected to DisCal!", event);
 			}
 		} else {
-			Message.sendMessage("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event);
+			MessageManager.sendMessage("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event);
 		}
 	}
 
@@ -248,15 +246,15 @@ public class DevCommand implements ICommand {
 
 					DatabaseManager.getManager().updateSettings(settings);
 
-					Message.sendMessage("Guild with ID: `" + guildId + "` max calendar count set to: `" + mc + "`", event);
+					MessageManager.sendMessage("Guild with ID: `" + guildId + "` max calendar count set to: `" + mc + "`", event);
 				} else {
-					Message.sendMessage("Guild not found or is not connected to DisCal!", event);
+					MessageManager.sendMessage("Guild not found or is not connected to DisCal!", event);
 				}
 			} catch (NumberFormatException e) {
-				Message.sendMessage("Max Calendar amount must be a valid Integer!", event);
+				MessageManager.sendMessage("Max Calendar amount must be a valid Integer!", event);
 			}
 		} else {
-			Message.sendMessage("Please specify the ID of the guild and calendar amount with `!dev maxcal <ID> <amount>`", event);
+			MessageManager.sendMessage("Please specify the ID of the guild and calendar amount with `!dev maxcal <ID> <amount>`", event);
 		}
 	}
 
@@ -270,93 +268,93 @@ public class DevCommand implements ICommand {
 						Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to leave guild", e, this.getClass(), true);
 					}
 				});
-				Message.sendMessage("Left Guild!", event);
+				MessageManager.sendMessage("Left Guild!", event);
 			} else {
-				Message.sendMessage("Guild not found!", event);
+				MessageManager.sendMessage("Guild not found!", event);
 			}
 		} else {
-			Message.sendMessage("Please specify the ID of the guild to leave with `!dev leave <ID>`", event);
+			MessageManager.sendMessage("Please specify the ID of the guild to leave with `!dev leave <ID>`", event);
 		}
 	}
 
 	private void moduleListGuilds(MessageReceivedEvent event) {
 
-		Message.sendMessage("Sending a list of all Guilds! This may take awhile...", event);
+		MessageManager.sendMessage("Sending a list of all Guilds! This may take awhile...", event);
 		StringBuilder msg = new StringBuilder();
 
 		for (IGuild g : DisCalAPI.getAPI().getClient().getGuilds()) {
-			msg.append(MessageUtils.lineBreak).append(g.getName()).append(" | ").append(g.getLongID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
+			msg.append(MessageManager.lineBreak).append(g.getName()).append(" | ").append(g.getLongID()).append(" | Members: ").append(g.getTotalMemberCount()).append(" | Bots: ").append(botPercent(g)).append("%");
 
 			if (msg.length() >= 1500) {
-				Message.sendMessage(msg.toString(), event);
+				MessageManager.sendMessage(msg.toString(), event);
 				msg = new StringBuilder();
 			}
 		}
-		Message.sendMessage(msg.toString(), event);
-		Message.sendMessage("All Guilds listed!", event);
+		MessageManager.sendMessage(msg.toString(), event);
+		MessageManager.sendMessage("All Guilds listed!", event);
 	}
 
 	private void moduleReloadLangs(MessageReceivedEvent event) {
 
-		Message.sendMessage("Reloading lang files!", event);
+		MessageManager.sendMessage("Reloading lang files!", event);
 
 		MessageManager.reloadLangs();
 
-		Message.sendMessage("All lang files reloaded!", event);
+		MessageManager.sendMessage("All lang files reloaded!", event);
 	}
 
 	private void moduleCleanupDatabase(MessageReceivedEvent event) {
-		Message.sendMessage("Cleaning up database! This may take some time....", event);
+		MessageManager.sendMessage("Cleaning up database! This may take some time....", event);
 
-		Message.sendMessage("Cleaning out calendars....", event);
+		MessageManager.sendMessage("Cleaning out calendars....", event);
 		for (CalendarData cd : DatabaseManager.getManager().getAllCalendars()) {
 			if (DisCalAPI.getAPI().getClient().getGuildByID(cd.getGuildId()) == null) {
 				//Guild not connected... delete calendar...
 				CalendarUtils.deleteCalendar(cd, DatabaseManager.getManager().getSettings(cd.getGuildId()));
 			}
 		}
-		Message.sendMessage("Calendars cleaned up!", event);
+		MessageManager.sendMessage("Calendars cleaned up!", event);
 
-		Message.sendMessage("Cleaned up database!", event);
-		//Message.sendMessage("Disabled because I am a dumb", event);
+		MessageManager.sendMessage("Cleaned up database!", event);
+		//MessageManager.sendMessage("Disabled because I am a dumb", event);
 	}
 
 	private void moduleRestart(MessageReceivedEvent event) {
-		Message.sendMessage("Restarting DisCal! This may take a moment!", event);
+		MessageManager.sendMessage("Restarting DisCal! This may take a moment!", event);
 
 		ApplicationHandler.restartApplication(null);
 	}
 
 	private void moduleReload(MessageReceivedEvent event) {
-		IMessage msg = Message.sendMessage("Reloading DisCal! This may take a moment!", event);
+		IMessage msg = MessageManager.sendMessage("Reloading DisCal! This may take a moment!", event);
 
 		for (IShard s : msg.getClient().getShards()) {
 			s.logout();
 			s.login();
 		}
-		Message.sendMessage("DisCal successfully reloaded!", event);
+		MessageManager.sendMessage("DisCal successfully reloaded!", event);
 	}
 
 	private void moduleShutdown(MessageReceivedEvent event) {
-		Message.sendMessage("Shutting down DisCal! This may take a moment!", event);
+		MessageManager.sendMessage("Shutting down DisCal! This may take a moment!", event);
 
 		ApplicationHandler.exitApplication();
 	}
 
 	private void moduleTestShards(MessageReceivedEvent event) {
-		Message.sendMessage("Testing shard responses...", event);
+		MessageManager.sendMessage("Testing shard responses...", event);
 
 		StringBuilder r = new StringBuilder();
 		for (IShard s : DisCalAPI.getAPI().getClient().getShards()) {
 			r.append(s.getInfo()[0]).append(": ").append(s.isReady()).append("\n");
 		}
 
-		Message.sendMessage(r.toString(), event);
+		MessageManager.sendMessage(r.toString(), event);
 	}
 
 	private void registerApiKey(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
-			Message.sendMessage("Registering new API key...", event);
+			MessageManager.sendMessage("Registering new API key...", event);
 
 			String userId = args[1];
 
@@ -368,19 +366,19 @@ public class DevCommand implements ICommand {
 			account.setUses(0);
 
 			if (DatabaseManager.getManager().updateAPIAccount(account)) {
-				Message.sendMessage("Check your DMs for the new API Key!", event);
-				Message.sendDirectMessage(account.getAPIKey(), event.getAuthor());
+				MessageManager.sendMessage("Check your DMs for the new API Key!", event);
+				MessageManager.sendDirectMessage(account.getAPIKey(), event.getAuthor());
 			} else {
-				Message.sendMessage("Error occurred! Could not register new API key!", event);
+				MessageManager.sendMessage("Error occurred! Could not register new API key!", event);
 			}
 		} else {
-			Message.sendMessage("Please specify the USER ID linked to the key!", event);
+			MessageManager.sendMessage("Please specify the USER ID linked to the key!", event);
 		}
 	}
 
 	private void blockAPIKey(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
-			Message.sendMessage("Blocking API key...", event);
+			MessageManager.sendMessage("Blocking API key...", event);
 
 			String key = args[1];
 
@@ -388,11 +386,11 @@ public class DevCommand implements ICommand {
 			account.setBlocked(true);
 
 			if (DatabaseManager.getManager().updateAPIAccount(account))
-				Message.sendMessage("Successfully blocked API key!", event);
+				MessageManager.sendMessage("Successfully blocked API key!", event);
 			else
-				Message.sendMessage("Error occurred! Could not block API key!", event);
+				MessageManager.sendMessage("Error occurred! Could not block API key!", event);
 		} else {
-			Message.sendMessage("Please specify the API KEY!", event);
+			MessageManager.sendMessage("Please specify the API KEY!", event);
 		}
 	}
 
