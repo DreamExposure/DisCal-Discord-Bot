@@ -1109,7 +1109,7 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
-				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1 AND ANNOUNCEMENT_ID = ?");
+				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1 AND ANNOUNCEMENT_TYPE = ?");
 				stmt.setString(1, type.name());
 				ResultSet res = stmt.executeQuery();
 
