@@ -18,47 +18,42 @@ import java.util.stream.Collectors;
 public class RoleUtils {
 	public static IRole getRoleFromMention(String mention, MessageReceivedEvent event) {
 		for (IRole r : event.getMessage().getGuild().getRoles()) {
-			if (mention.equalsIgnoreCase("<@&" + r.getStringID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getStringID() + ">")) {
+			if (mention.equalsIgnoreCase("<@&" + r.getStringID() + ">") || mention.equalsIgnoreCase("<@&!" + r.getStringID() + ">"))
 				return r;
-			}
 		}
 		return null;
 	}
 
 	public static IRole getRoleFromID(String id, MessageReceivedEvent event) {
 		for (IRole r : event.getMessage().getGuild().getRoles()) {
-			if (id.equals(r.getStringID()) || id.equals(r.getName())) {
+			if (id.equals(r.getStringID()) || id.equals(r.getName()))
 				return r;
-			}
 		}
 		return null;
 	}
 
 	public static IRole getRoleFromID(String id, IGuild guild) {
 		for (IRole r : guild.getRoles()) {
-			if (id.equalsIgnoreCase(r.getStringID()) || id.equals(r.getName())) {
+			if (id.equalsIgnoreCase(r.getStringID()) || id.equals(r.getName()))
 				return r;
-			}
 		}
 		return null;
 	}
 
 	public static boolean roleExists(String id, MessageReceivedEvent event) {
 		for (IRole r : event.getMessage().getGuild().getRoles()) {
-			if (id.equals(r.getStringID())) {
+			if (id.equals(r.getStringID()))
 				return true;
-			}
 		}
 		return false;
 	}
 
 	public static String getRoleNameFromID(String id, MessageReceivedEvent event) {
 		IRole role = getRoleFromID(id, event);
-		if (role != null) {
+		if (role != null)
 			return role.getName();
-		} else {
+		else
 			return "ERROR";
-		}
 	}
 
 
@@ -72,9 +67,8 @@ public class RoleUtils {
 		if (lower.matches("@&[0-9]+") || lower.matches("[0-9]+")) {
 			final String parse = toLookFor.replaceAll("[<@&>]", "");
 			IRole exists = guild.getRoleByID(Long.parseLong(toLookFor.replaceAll("[<@&>]", "")));
-			if (exists != null) {
+			if (exists != null)
 				return exists.getLongID();
-			}
 		}
 
 
@@ -82,9 +76,8 @@ public class RoleUtils {
 		List<IRole> rs = guild.getRoles();
 		roles.addAll(rs.stream().filter(r -> r.getName().equalsIgnoreCase(lower)).collect(Collectors.toList()));
 		roles.addAll(rs.stream().filter(r -> r.getName().toLowerCase().contains(lower)).collect(Collectors.toList()));
-		if (!roles.isEmpty()) {
+		if (!roles.isEmpty())
 			return roles.get(0).getLongID();
-		}
 
 		return 0;
 	}

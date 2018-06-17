@@ -57,11 +57,11 @@ public class WebRole {
 
 		managed = r.isManaged();
 
-		if (r.isEveryoneRole() && settings.getControlRole().equalsIgnoreCase("everyone")) {
+		if (r.isEveryoneRole() && settings.getControlRole().equalsIgnoreCase("everyone"))
 			controlRole = true;
-		} else {
+		else
 			controlRole = settings.getControlRole().equalsIgnoreCase(String.valueOf(id));
-		}
+
 
 		return this;
 	}

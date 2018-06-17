@@ -95,7 +95,7 @@ public class DevCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (event.getAuthor().getLongID() == DisCalAPI.getAPI().novaId || event.getAuthor().getLongID() == DisCalAPI.getAPI().xaanitId || event.getAuthor().getLongID() == DisCalAPI.getAPI().calId || event.getAuthor().getLongID() == DisCalAPI.getAPI().dreamId) {
 			if (args.length < 1) {
 				Message.sendMessage("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
@@ -387,11 +387,10 @@ public class DevCommand implements ICommand {
 			UserAPIAccount account = DatabaseManager.getManager().getAPIAccount(key);
 			account.setBlocked(true);
 
-			if (DatabaseManager.getManager().updateAPIAccount(account)) {
+			if (DatabaseManager.getManager().updateAPIAccount(account))
 				Message.sendMessage("Successfully blocked API key!", event);
-			} else {
+			else
 				Message.sendMessage("Error occurred! Could not block API key!", event);
-			}
 		} else {
 			Message.sendMessage("Please specify the API KEY!", event);
 		}

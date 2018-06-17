@@ -62,11 +62,11 @@ public class EventUtils {
 		pe.setSummary(event.getSummary());
 		pe.setDescription(event.getDescription());
 		pe.setLocation(event.getLocation());
-		if (event.getColorId() != null) {
+		if (event.getColorId() != null)
 			pe.setColor(EventColor.fromNameOrHexOrID(event.getColorId()));
-		} else {
+		else
 			pe.setColor(EventColor.RED);
-		}
+
 		pe.setEventData(DatabaseManager.getManager().getEventData(guildId, event.getId()));
 
 		return pe;

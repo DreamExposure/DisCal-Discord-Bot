@@ -353,9 +353,8 @@ public class AnnouncementMessageFormatter {
         for (String userId : a.getSubscriberUserIds()) {
             try {
                 IUser user = guild.getUserByID(Long.valueOf(userId));
-                if (user != null) {
+				if (user != null)
                     userMentions.append(user.getName()).append(" ");
-                }
             } catch (Exception e) {
                 //User does not exist, safely ignore.
             }
@@ -372,22 +371,20 @@ public class AnnouncementMessageFormatter {
             } else {
                 try {
                     IRole role = guild.getRoleByID(Long.valueOf(roleId));
-                    if (role != null) {
+					if (role != null)
                         roleMentions.append(role.getName()).append(" ");
-                    }
-                } catch (Exception e) {
+				} catch (Exception ignore) {
                     //Role does not exist, safely ignore.
                 }
             }
         }
 
         String message = "Subscribers: " + userMentions + " " + roleMentions;
-        if (mentionEveryone) {
+		if (mentionEveryone)
             message = message + " " + guild.getEveryoneRole().getName();
-        }
-        if (mentionHere) {
+
+		if (mentionHere)
             message = message + " here";
-        }
 
         return message;
     }
@@ -416,25 +413,23 @@ public class AnnouncementMessageFormatter {
             } else {
                 try {
                     IRole role = guild.getRoleByID(Long.valueOf(roleId));
-                    if (role != null) {
+					if (role != null)
                         roleMentions.append(role.mention()).append(" ");
-                    }
                 } catch (Exception e) {
                     //Role does not exist, safely ignore.
                 }
             }
         }
-        if (!mentionEveryone && !mentionHere && userMentions.toString().equals("") && roleMentions.toString().equals("")) {
+		if (!mentionEveryone && !mentionHere && userMentions.toString().equals("") && roleMentions.toString().equals(""))
         	return "";
-        }
+
 
         String message = "Subscribers: " + userMentions + " " + roleMentions;
-        if (mentionEveryone) {
+		if (mentionEveryone)
             message = message + " " + guild.getEveryoneRole().mention();
-        }
-        if (mentionHere) {
+
+		if (mentionHere)
             message = message + " @here";
-        }
 
         return message;
     }

@@ -67,26 +67,23 @@ public class EventListCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings)  {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         //Get events from calendar
         if (args.length < 1) {
             moduleSimpleList(args, event, settings);
         } else {
             switch (args[0].toLowerCase()) {
                 case "search":
-                    if (settings.isDevGuild()) {
-                        //To search module.
+					if (settings.isDevGuild())
 						moduleSearch(args, event, settings);
-                    } else {
+					else
                         Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-                    }
                     break;
 				case "today":
-					if (settings.isDevGuild()) {
+					if (settings.isDevGuild())
 						moduleDay(args, event, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Disabled", settings), event);
-					}
 					break;
                 default:
                     moduleSimpleList(args, event, settings);

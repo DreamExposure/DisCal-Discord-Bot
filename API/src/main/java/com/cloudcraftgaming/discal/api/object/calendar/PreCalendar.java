@@ -41,12 +41,12 @@ public class PreCalendar {
 		guildId = _guildId;
 		summary = calendar.getSummary();
 
-		if (calendar.getDescription() != null) {
+		if (calendar.getDescription() != null)
 			description = calendar.getDescription();
-		}
-		if (calendar.getTimeZone() != null) {
+
+		if (calendar.getTimeZone() != null)
 			timezone = calendar.getTimeZone();
-		}
+
 
 		editing = false;
 
@@ -159,7 +159,7 @@ public class PreCalendar {
 	 *
 	 * @return <code>true</code> if required data set, otherwise <code>false</code>.
 	 */
-	public Boolean hasRequiredValues() {
+	public boolean hasRequiredValues() {
 		return summary != null && timezone != null;
 	}
 }

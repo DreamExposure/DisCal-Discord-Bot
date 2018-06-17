@@ -42,11 +42,10 @@ public class TimeUtils {
 	}
 
 	private static boolean inPast(Event event) {
-		if (event.getStart().getDateTime() != null) {
+		if (event.getStart().getDateTime() != null)
 			return event.getStart().getDateTime().getValue() <= System.currentTimeMillis();
-		} else {
+		else
 			return event.getStart().getDate().getValue() <= System.currentTimeMillis();
-		}
 	}
 
 	public static boolean inPast(String eventId, GuildSettings settings) {

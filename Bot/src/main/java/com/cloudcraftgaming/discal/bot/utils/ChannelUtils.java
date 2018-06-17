@@ -18,14 +18,13 @@ public class ChannelUtils {
 	 * @param event    The event received.
 	 * @return <code>true</code> if exists, else <code>false</code>.
 	 */
-	public static Boolean channelExists(String nameOrId, MessageReceivedEvent event) {
-		if (nameOrId.contains("#")) {
+	public static boolean channelExists(String nameOrId, MessageReceivedEvent event) {
+		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
-		}
+
 		for (IChannel c : event.getGuild().getChannels()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId)) {
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId))
 				return true;
-			}
 		}
 		return false;
 	}
@@ -38,13 +37,12 @@ public class ChannelUtils {
 	 * @return the IChannel if successful, else <code>null</code>.
 	 */
 	public static IChannel getChannelFromNameOrId(String nameOrId, MessageReceivedEvent event) {
-		if (nameOrId.contains("#")) {
+		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
-		}
+
 		for (IChannel c : event.getGuild().getChannels()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId)) {
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId))
 				return c;
-			}
 		}
 		return null;
 	}
@@ -58,13 +56,12 @@ public class ChannelUtils {
 	 */
 	public static IChannel getChannelFromNameOrId(String nameOrId, long guildId) {
 		IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(guildId);
-		if (nameOrId.contains("#")) {
+		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
-		}
+
 		for (IChannel c : guild.getChannels()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId)) {
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId))
 				return c;
-			}
 		}
 		return null;
 	}
@@ -78,13 +75,12 @@ public class ChannelUtils {
 	 */
 	public static String getChannelNameFromNameOrId(String nameOrId, long guildId) {
 		IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(guildId);
-		if (nameOrId.contains("#")) {
+		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
-		}
+
 		for (IChannel c : guild.getChannels()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId)) {
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId))
 				return c.getName();
-			}
 		}
 		return "ERROR";
 	}

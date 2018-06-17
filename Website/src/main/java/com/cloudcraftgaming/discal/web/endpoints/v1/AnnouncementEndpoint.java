@@ -76,12 +76,12 @@ public class AnnouncementEndpoint {
 			a.setAnnouncementChannelId(body.getString("channel"));
 			a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
 
-			if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+			if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
 				a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
-			}
-			if (a.getAnnouncementType().equals(AnnouncementType.RECUR) || a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+
+			if (a.getAnnouncementType().equals(AnnouncementType.RECUR) || a.getAnnouncementType().equals(AnnouncementType.SPECIFIC))
 				a.setEventId(body.getString("event_id"));
-			}
+
 
 			a.setHoursBefore(body.getInt("hours"));
 			a.setMinutesBefore(body.getInt("minutes"));
@@ -256,7 +256,6 @@ public class AnnouncementEndpoint {
 			response.type("application/json");
 			response.status(200);
 			response.body(body.toString());
-
 		} catch (JSONException e) {
 			e.printStackTrace();
 			halt(400, "Bad Request");

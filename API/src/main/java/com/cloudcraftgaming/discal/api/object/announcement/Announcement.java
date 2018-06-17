@@ -331,7 +331,7 @@ public class Announcement {
 	 *
 	 * @param _minutesBefore The minutes before the event to announce for.
 	 */
-	public void setMinutesBefore(Integer _minutesBefore) {
+	public void setMinutesBefore(int _minutesBefore) {
 		minutesBefore = _minutesBefore;
 	}
 

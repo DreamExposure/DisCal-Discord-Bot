@@ -75,7 +75,7 @@ public class RsvpCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length > 0) {
 			switch (args[0].toLowerCase()) {
 				case "ontime":
@@ -257,26 +257,25 @@ public class RsvpCommand implements ICommand {
 			notGoing.append(u.getName()).append(", ");
 		}
 
-		if (onTime.toString().isEmpty()) {
+		if (onTime.toString().isEmpty())
 			em.appendField("On time", "N/a", true);
-		} else {
+		else
 			em.appendField("On Time", onTime.toString(), true);
-		}
-		if (late.toString().isEmpty()) {
+
+		if (late.toString().isEmpty())
 			em.appendField("Late", "N/a", true);
-		} else {
+		else
 			em.appendField("Late", late.toString(), true);
-		}
-		if (unsure.toString().isEmpty()) {
+
+		if (unsure.toString().isEmpty())
 			em.appendField("Unsure", "N/a", true);
-		} else {
+		else
 			em.appendField("Unsure", unsure.toString(), true);
-		}
-		if (notGoing.toString().isEmpty()) {
+
+		if (notGoing.toString().isEmpty())
 			em.appendField("Not Going", "N/a", true);
-		} else {
+		else
 			em.appendField("Not Going", notGoing.toString(), true);
-		}
 
 		em.withFooterText(MessageManager.getMessage("Embed.RSVP.List.Footer", settings));
 		em.withColor(56, 138, 237);

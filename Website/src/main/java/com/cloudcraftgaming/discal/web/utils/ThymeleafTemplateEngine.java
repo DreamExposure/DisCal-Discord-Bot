@@ -56,13 +56,9 @@ public class ThymeleafTemplateEngine extends TemplateEngine {
 		final ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 
-		templateResolver.setPrefix(
-				prefix != null ? prefix : DEFAULT_PREFIX
-		);
+		templateResolver.setPrefix(prefix != null ? prefix : DEFAULT_PREFIX);
 
-		templateResolver.setSuffix(
-				suffix != null ? suffix : DEFAULT_SUFFIX
-		);
+		templateResolver.setSuffix(suffix != null ? suffix : DEFAULT_SUFFIX);
 
 		templateResolver.setCacheTTLMs(DEFAULT_CACHE_TTL_MS);
 		return templateResolver;

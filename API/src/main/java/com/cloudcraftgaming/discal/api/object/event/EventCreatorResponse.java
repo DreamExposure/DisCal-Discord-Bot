@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal-Discord-Bot
  */
 public class EventCreatorResponse {
-	private final Boolean successful;
+	private final boolean successful;
 
 	private IMessage creatorMessage;
 
@@ -21,7 +21,7 @@ public class EventCreatorResponse {
 	 *
 	 * @param _successful Whether or not the Creator was successful.
 	 */
-	public EventCreatorResponse(Boolean _successful) {
+	public EventCreatorResponse(boolean _successful) {
 		successful = _successful;
 	}
 
@@ -31,7 +31,7 @@ public class EventCreatorResponse {
 	 * @param _successful Whether or not the Creator was successful.
 	 * @param _event      The Event that was created.
 	 */
-	public EventCreatorResponse(Boolean _successful, Event _event) {
+	public EventCreatorResponse(boolean _successful, Event _event) {
 		successful = _successful;
 		event = _event;
 		edited = false;
@@ -44,7 +44,7 @@ public class EventCreatorResponse {
 	 *
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public Boolean isSuccessful() {
+	public boolean isSuccessful() {
 		return successful;
 	}
 

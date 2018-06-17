@@ -22,9 +22,9 @@ public class PollManager {
 	}
 
 	public static PollManager getManager() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new PollManager();
-		}
+
 		return instance;
 	}
 

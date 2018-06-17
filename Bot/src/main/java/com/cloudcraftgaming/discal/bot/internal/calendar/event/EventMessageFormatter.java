@@ -113,9 +113,9 @@ public class EventMessageFormatter {
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
 			em.withThumbnail(ed.getImageLink());
-		}
+
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
 			if (summary.length() > 250) {
@@ -165,9 +165,9 @@ public class EventMessageFormatter {
 			//TODO: find out why this is happening
 			Logger.getLogger().exception(null, "[Event] Failed to handle event image. Is event null?", e, EventMessageFormatter.class, true);
 		}
-		if (event.isEditing()) {
+		if (event.isEditing())
 			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
-		}
+
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
 			if (summary.length() > 250) {

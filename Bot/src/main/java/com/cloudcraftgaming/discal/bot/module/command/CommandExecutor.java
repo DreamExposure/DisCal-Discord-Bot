@@ -24,9 +24,9 @@ public class CommandExecutor {
      * @return The instance of the CommandExecutor.
      */
     public static CommandExecutor getExecutor() {
-        if (instance == null) {
+		if (instance == null)
             instance = new CommandExecutor();
-        }
+
         return instance;
     }
 
@@ -67,9 +67,8 @@ public class CommandExecutor {
 		}
 
         for (ICommand c : commands) {
-            if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase())) {
+			if (c.getCommand().equalsIgnoreCase(cmd) || c.getAliases().contains(cmd.toLowerCase()))
                 c.issueCommand(args, event, settings);
-            }
         }
 
     }
@@ -81,9 +80,8 @@ public class CommandExecutor {
     ArrayList<String> getAllCommands() {
         ArrayList<String> cmds = new ArrayList<>();
         for (ICommand c : commands) {
-            if (!cmds.contains(c.getCommand())) {
+			if (!cmds.contains(c.getCommand()))
                 cmds.add(c.getCommand());
-            }
         }
         return cmds;
     }
@@ -94,9 +92,8 @@ public class CommandExecutor {
 
     ICommand getCommand(String cmdNameOrAlias) {
         for (ICommand c : commands) {
-            if (c.getCommand().equalsIgnoreCase(cmdNameOrAlias) || c.getAliases().contains(cmdNameOrAlias.toLowerCase())) {
+			if (c.getCommand().equalsIgnoreCase(cmdNameOrAlias) || c.getAliases().contains(cmdNameOrAlias.toLowerCase()))
                 return c;
-            }
         }
         return null;
     }

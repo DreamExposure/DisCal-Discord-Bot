@@ -31,7 +31,7 @@ public enum EventColor {
 	}
 
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 
@@ -39,15 +39,15 @@ public enum EventColor {
 		return hex;
 	}
 
-	public Integer getR() {
+	public int getR() {
 		return r;
 	}
 
-	public Integer getG() {
+	public int getG() {
 		return g;
 	}
 
-	public Integer getB() {
+	public int getB() {
 		return b;
 	}
 
@@ -58,10 +58,9 @@ public enum EventColor {
 				return true;
 			} else {
 				try {
-					Integer i = Integer.valueOf(nameOrHexOrId);
-					if (c.getId().equals(i)) {
+					int i = Integer.valueOf(nameOrHexOrId);
+					if (c.getId() == i)
 						return true;
-					}
 				} catch (NumberFormatException e) {
 					//Not number, just ignore.
 				}
@@ -72,9 +71,8 @@ public enum EventColor {
 
 	public static boolean exists(Integer id) {
 		for (EventColor c : values()) {
-			if (c.getId().equals(id)) {
+			if (c.getId() == id)
 				return true;
-			}
 		}
 		return false;
 	}
@@ -85,10 +83,9 @@ public enum EventColor {
 				return c;
 			} else {
 				try {
-					Integer i = Integer.valueOf(nameOrHexOrID);
-					if (c.getId().equals(i)) {
+					int i = Integer.valueOf(nameOrHexOrID);
+					if (c.getId() == i)
 						return c;
-					}
 				} catch (NumberFormatException e) {
 					//Not number, just ignore.
 				}
@@ -99,9 +96,8 @@ public enum EventColor {
 
 	public static EventColor fromId(Integer id) {
 		for (EventColor c : values()) {
-			if (c.getId().equals(id)) {
+			if (c.getId() == id)
 				return c;
-			}
 		}
 		return NONE;
 	}

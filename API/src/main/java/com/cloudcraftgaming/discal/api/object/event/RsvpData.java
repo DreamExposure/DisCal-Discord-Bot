@@ -54,7 +54,7 @@ public class RsvpData {
 
 	public String getGoingOnTimeString() {
 		StringBuilder goingString = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String u : goingOnTime) {
 			if (i == 0) {
 				goingString = new StringBuilder(u);
@@ -68,7 +68,7 @@ public class RsvpData {
 
 	public String getGoingLateString() {
 		StringBuilder goingString = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String u : goingLate) {
 			if (i == 0) {
 				goingString = new StringBuilder(u);
@@ -82,7 +82,7 @@ public class RsvpData {
 
 	public String getNotGoingString() {
 		StringBuilder going = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String u : notGoing) {
 			if (i == 0) {
 				going = new StringBuilder(u);
@@ -96,7 +96,7 @@ public class RsvpData {
 
 	public String getUndecidedString() {
 		StringBuilder going = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String u : undecided) {
 			if (i == 0) {
 				going = new StringBuilder(u);

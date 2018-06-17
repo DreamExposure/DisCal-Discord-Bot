@@ -6,7 +6,7 @@ package com.cloudcraftgaming.discal.api.object.announcement;
  * For Project: DisCal-Discord-Bot
  */
 public class AnnouncementCreatorResponse {
-	private final Boolean successful;
+	private final boolean successful;
 
 	private Announcement announcement;
 
@@ -15,7 +15,7 @@ public class AnnouncementCreatorResponse {
 	 *
 	 * @param _successful Whether or not the creator was successful.
 	 */
-	public AnnouncementCreatorResponse(Boolean _successful) {
+	public AnnouncementCreatorResponse(boolean _successful) {
 		successful = _successful;
 	}
 
@@ -25,7 +25,7 @@ public class AnnouncementCreatorResponse {
 	 * @param _successful   Whether or not the creator was successful.
 	 * @param _announcement The announcement involved.
 	 */
-	public AnnouncementCreatorResponse(Boolean _successful, Announcement _announcement) {
+	public AnnouncementCreatorResponse(boolean _successful, Announcement _announcement) {
 		successful = _successful;
 		announcement = _announcement;
 	}
@@ -37,7 +37,7 @@ public class AnnouncementCreatorResponse {
 	 *
 	 * @return Whether or not the creator was successful.
 	 */
-	public Boolean isSuccessful() {
+	public boolean isSuccessful() {
 		return successful;
 	}
 

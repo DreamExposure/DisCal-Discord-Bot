@@ -38,5 +38,5 @@ interface ICommand {
      * @param event The event received.
      * @return <code>true</code> if successful, else <code>false</code>.
      */
-    Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings);
+	boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings);
 }

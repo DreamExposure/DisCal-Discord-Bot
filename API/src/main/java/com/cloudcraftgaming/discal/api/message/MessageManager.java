@@ -39,18 +39,18 @@ public class MessageManager {
 
 	public static boolean isSupported(String _value) {
 		for (String l : langs.keySet()) {
-			if (l.equalsIgnoreCase(_value)) {
+			if (l.equalsIgnoreCase(_value))
 				return true;
-			}
+
 		}
 		return false;
 	}
 
 	public static String getValidLang(String _value) {
 		for (String l : langs.keySet()) {
-			if (l.equalsIgnoreCase(_value)) {
+			if (l.equalsIgnoreCase(_value))
 				return l;
-			}
+
 		}
 		return "ENGLISH";
 	}
@@ -59,11 +59,11 @@ public class MessageManager {
 	public static String getMessage(String key, GuildSettings settings) {
 		Map<String, String> messages;
 
-		if (settings.getLang() != null && langs.containsKey(settings.getLang())) {
+		if (settings.getLang() != null && langs.containsKey(settings.getLang()))
 			messages = langs.get(settings.getLang());
-		} else {
+		else
 			messages = langs.get("ENGLISH");
-		}
+
 
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace("%lb%", MessageUtils.lineBreak);
 	}
@@ -71,11 +71,11 @@ public class MessageManager {
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
 		Map<String, String> messages;
 
-		if (settings.getLang() != null && langs.containsKey(settings.getLang())) {
+		if (settings.getLang() != null && langs.containsKey(settings.getLang()))
 			messages = langs.get(settings.getLang());
-		} else {
+		else
 			messages = langs.get("ENGLISH");
-		}
+
 		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace(var, replace).replace("%lb%", MessageUtils.lineBreak);
 	}
 }

@@ -28,9 +28,8 @@ public class Logger {
 	} //Prevent initialization
 
 	public static Logger getLogger() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new Logger();
-		}
 		return instance;
 	}
 
@@ -82,14 +81,14 @@ public class Logger {
 
 			if (post) {
 				String shortError = error;
-				if (error.length() > 1250) {
+				if (error.length() > 1250)
 					shortError = error.substring(0, 1250);
-				}
+
 
 				EmbedBuilder em = new EmbedBuilder();
-				if (bot != null) {
+				if (bot != null)
 					em.withAuthorIcon(bot.getAvatarURL());
-				}
+
 				if (author != null) {
 					em.withAuthorName(author.getName());
 					em.withThumbnail(author.getAvatarURL());
@@ -100,15 +99,14 @@ public class Logger {
 				//Send to discord!
 				em.appendField("Time", timeStamp, true);
 				if (e.getMessage() != null) {
-					if (e.getMessage().length() > 1024) {
+					if (e.getMessage().length() > 1024)
 						em.appendField("Exception", e.getMessage().substring(0, 1024), true);
-					} else {
+					else
 						em.appendField("Exception", e.getMessage(), true);
-					}
 				}
-				if (message != null) {
+				if (message != null)
 					em.appendField("Message", message, true);
-				}
+
 
 				//Get DisCal guild and channel..
 				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
@@ -122,12 +120,12 @@ public class Logger {
 		try {
 			FileWriter exceptions = new FileWriter(exceptionsFile, true);
 			exceptions.write("ERROR --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			if (author != null) {
+			if (author != null)
 				exceptions.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
-			}
-			if (message != null) {
+
+			if (message != null)
 				exceptions.write("message: " + message + MessageUtils.lineBreak);
-			}
+
 			exceptions.write(error + MessageUtils.lineBreak);
 			exceptions.close();
 		} catch (IOException io) {
@@ -153,9 +151,9 @@ public class Logger {
 
 
 				em.appendField("Time", timeStamp, true);
-				if (info != null) {
+				if (info != null)
 					em.appendField("Additional Info", info, true);
-				}
+
 
 				//Get DisCal guild and channel..
 				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
@@ -169,15 +167,15 @@ public class Logger {
 		try {
 			FileWriter file = new FileWriter(debugFile, true);
 			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			if (author != null) {
+			if (author != null)
 				file.write("user: " + author.getName() + "#" + author.getDiscriminator() + MessageUtils.lineBreak);
-			}
-			if (message != null) {
+
+			if (message != null)
 				file.write("message: " + message + MessageUtils.lineBreak);
-			}
-			if (info != null) {
+
+			if (info != null)
 				file.write("info: " + info + MessageUtils.lineBreak);
-			}
+
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
@@ -190,9 +188,9 @@ public class Logger {
 		try {
 			FileWriter file = new FileWriter(debugFile, true);
 			file.write("DEBUG --- " + timeStamp + " ---" + MessageUtils.lineBreak);
-			if (message != null) {
+			if (message != null)
 				file.write("info: " + message + MessageUtils.lineBreak);
-			}
+
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();

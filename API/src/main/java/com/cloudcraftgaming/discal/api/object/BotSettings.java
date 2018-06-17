@@ -28,7 +28,7 @@ public enum BotSettings {
 		return val;
 	}
 
-	public void set(String val) {
-		this.val = val;
+	public void set(String _val) {
+		val = _val;
 	}
 }

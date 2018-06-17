@@ -38,7 +38,7 @@ public class UpdateDisPwData {
 
 	private static void updateSiteBotMeta() {
 		try {
-			Integer serverCount = DisCalAPI.getAPI().getClient().getGuilds().size();
+			int serverCount = DisCalAPI.getAPI().getClient().getGuilds().size();
 
 			JSONObject json = new JSONObject().put("server_count", serverCount);
 

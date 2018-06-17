@@ -56,12 +56,10 @@ public class Recurrence {
 	 */
 	public String toRRule() {
 		String rrule = "RRULE:FREQ=" + frequency.name() + ";INTERVAL=" + interval;
-		if (count < 1) {
-			//Infinite
-			return rrule;
-		} else {
+		if (count < 1)
+			return rrule; //Infinite
+		else
 			return rrule + ";COUNT=" + count;
-		}
 	}
 
 	/**
@@ -70,13 +68,11 @@ public class Recurrence {
 	 * @return Human readable string of the settings.
 	 */
 	public String toHumanReadable() {
-		String humanRead = "Frequency: " + frequency.name() + MessageUtils.lineBreak +
-				"Interval: " + interval;
-		if (count < 1) {
+		String humanRead = "Frequency: " + frequency.name() + MessageUtils.lineBreak + "Interval: " + interval;
+		if (count < 1)
 			return humanRead + MessageUtils.lineBreak + "Amount: Infinite";
-		} else {
+		else
 			return humanRead + MessageUtils.lineBreak + "Amount: " + count;
-		}
 	}
 
 	/**
@@ -117,9 +113,9 @@ public class Recurrence {
 		for (String c : contents) {
 			if (c.contains("FREQ=")) {
 				String freq = c.replaceAll("FREQ=", "");
-				if (EventFrequency.isValid(freq)) {
+				if (EventFrequency.isValid(freq))
 					frequency = EventFrequency.fromValue(freq);
-				}
+
 			} else if (c.contains("INTERVAL=")) {
 				String inter = c.replaceAll("INTERVAL=", "");
 				try {

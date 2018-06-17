@@ -37,9 +37,9 @@ public class PermissionChecker {
 
 				if (role != null) {
 					for (IRole r : sender.getRolesForGuild(event.getMessage().getGuild())) {
-						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition()) {
+						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition())
 							return true;
-						}
+
 					}
 					return false;
 				} else {
@@ -74,9 +74,9 @@ public class PermissionChecker {
 
 				if (role != null) {
 					for (IRole r : user.getRolesForGuild(guild)) {
-						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition()) {
+						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition())
 							return true;
-						}
+
 					}
 					return false;
 				} else {
@@ -95,8 +95,7 @@ public class PermissionChecker {
 	}
 
 	public static boolean hasManageServerRole(MessageReceivedEvent event) {
-		return event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
-				Permissions.MANAGE_SERVER);
+		return event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(Permissions.MANAGE_SERVER);
 	}
 
 	public static boolean hasManageServerRole(IGuild g, IUser u) {
@@ -112,9 +111,9 @@ public class PermissionChecker {
 	public static boolean isCorrectChannel(MessageReceivedEvent event) {
 		try {
 			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
-			if (settings.getDiscalChannel().equalsIgnoreCase("all")) {
+			if (settings.getDiscalChannel().equalsIgnoreCase("all"))
 				return true;
-			}
+
 
 			IChannel channel = null;
 			for (IChannel c : event.getMessage().getGuild().getChannels()) {
@@ -124,9 +123,9 @@ public class PermissionChecker {
 				}
 			}
 
-			if (channel != null) {
+			if (channel != null)
 				return event.getMessage().getChannel().getStringID().equals(channel.getStringID());
-			}
+
 
 			//If we got here, the channel no longer exists, reset data and return true.
 			settings.setDiscalChannel("all");

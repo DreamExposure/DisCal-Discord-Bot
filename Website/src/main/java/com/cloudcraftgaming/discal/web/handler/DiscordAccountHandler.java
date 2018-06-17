@@ -26,9 +26,9 @@ public class DiscordAccountHandler {
 	} //Prevent initialization
 
 	public static DiscordAccountHandler getHandler() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new DiscordAccountHandler();
-		}
+
 		return instance;
 	}
 
@@ -45,9 +45,8 @@ public class DiscordAccountHandler {
 	}
 
 	public void shutdown() {
-		if (timer != null) {
+		if (timer != null)
 			timer.cancel();
-		}
 	}
 
 	//Boolean/checkers
@@ -161,10 +160,8 @@ public class DiscordAccountHandler {
 		for (String id : discordAccounts.keySet()) {
 			Map m = discordAccounts.get(id);
 			long lastUse = (long) m.get("lastUse");
-			if (System.currentTimeMillis() - lastUse > limit) {
-				//Timed out, remove account info and require sign in.
-				toRemove.remove(id);
-			}
+			if (System.currentTimeMillis() - lastUse > limit)
+				toRemove.remove(id); //Timed out, remove account info and require sign in.
 		}
 
 		for (String id : toRemove) {

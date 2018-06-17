@@ -104,9 +104,8 @@ public class GuildEndpoint {
 			//Find all guilds user is in...
 			ArrayList<IGuild> guilds = new ArrayList<>();
 			for (IGuild g : DisCalAPI.getAPI().getClient().getGuilds()) {
-				if (g.getUserByID(userId) != null) {
+				if (g.getUserByID(userId) != null)
 					guilds.add(g);
-				}
 			}
 
 			//Get needed data

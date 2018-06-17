@@ -37,9 +37,8 @@ public class CalendarCreator {
 	 * @return The instance of the CalendarCreator.
 	 */
 	public static CalendarCreator getCreator() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new CalendarCreator();
-		}
 		return instance;
 	}
 
@@ -223,9 +222,8 @@ public class CalendarCreator {
 	}
 
 	public IMessage getCreatorMessage(long guildId) {
-		if (hasPreCalendar(guildId)) {
+		if (hasPreCalendar(guildId))
 			return getPreCalendar(guildId).getCreatorMessage();
-		}
 		return null;
 	}
 
@@ -243,9 +241,8 @@ public class CalendarCreator {
 	 */
 	public Boolean hasPreCalendar(long guildId) {
 		for (PreCalendar c : calendars) {
-			if (c.getGuildId() == guildId) {
+			if (c.getGuildId() == guildId)
 				return true;
-			}
 		}
 		return false;
 	}
@@ -256,10 +253,7 @@ public class CalendarCreator {
 
 	//Setters
 	public void setCreatorMessage(IMessage msg) {
-		if (msg != null) {
-			if (hasPreCalendar(msg.getGuild().getLongID())) {
-				getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
-			}
-		}
+		if (msg != null && hasPreCalendar(msg.getGuild().getLongID()))
+			getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
 	}
 }

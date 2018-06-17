@@ -83,15 +83,15 @@ public class PreEvent {
 			recurrence.fromRRule(e.getRecurrence().get(0));
 		}
 
-		if (e.getSummary() != null) {
+		if (e.getSummary() != null)
 			summary = e.getSummary();
-		}
-		if (e.getDescription() != null) {
+
+		if (e.getDescription() != null)
 			description = e.getDescription();
-		}
-		if (e.getLocation() != null) {
+
+		if (e.getLocation() != null)
 			location = e.getLocation();
-		}
+
 
 		startDateTime = e.getStart();
 		endDateTime = e.getEnd();
@@ -367,7 +367,7 @@ public class PreEvent {
 	 *
 	 * @return <code>true</code> if required values set, otherwise <code>false</code>.
 	 */
-	public Boolean hasRequiredValues() {
+	public boolean hasRequiredValues() {
 		return startDateTime != null && endDateTime != null;
 	}
 }

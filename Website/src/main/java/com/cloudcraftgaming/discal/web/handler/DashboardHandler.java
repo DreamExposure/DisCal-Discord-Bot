@@ -87,17 +87,17 @@ public class DashboardHandler {
 
 			DiscordAccountHandler.getHandler().appendAccount(m, request.session().id());
 
-			if (settings.equalsIgnoreCase("calendar")) {
+			if (settings.equalsIgnoreCase("calendar"))
 				response.redirect("/dashboard/guild/calendar", 301);
-			} else if (settings.equalsIgnoreCase("events")) {
+			else if (settings.equalsIgnoreCase("events"))
 				response.redirect("/dashboard/guild/events", 301);
-			} else if (settings.equalsIgnoreCase("announcements")) {
+			else if (settings.equalsIgnoreCase("announcements"))
 				response.redirect("/dashboard/guild/announcements", 301);
-			} else if (settings.equalsIgnoreCase("rsvp")) {
+			else if (settings.equalsIgnoreCase("rsvp"))
 				response.redirect("/dashboard/guild/rsvp", 301);
-			} else {
+			else
 				response.redirect("/dashboard/guild", 301);
-			}
+
 		} catch (JSONException e) {
 			Logger.getLogger().exception(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class, true);
 			response.redirect("/dashboard", 301);
@@ -155,11 +155,10 @@ public class DashboardHandler {
 					IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(Long.valueOf(g.getId()));
 					IRole role = guild.getRoleByID(Long.valueOf(request.queryParams("con-role")));
 
-					if (role.isEveryoneRole()) {
+					if (role.isEveryoneRole())
 						g.getSettings().setControlRole("everyone");
-					} else {
+					else
 						g.getSettings().setControlRole(role.getStringID());
-					}
 
 					DatabaseManager.getManager().updateSettings(g.getSettings());
 
@@ -180,12 +179,10 @@ public class DashboardHandler {
 
 					IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(Long.valueOf(g.getId()));
 
-					if (request.queryParams("discal-channel").equalsIgnoreCase("0")) {
-						//All channels
-						g.getSettings().setDiscalChannel("all");
-					} else {
+					if (request.queryParams("discal-channel").equalsIgnoreCase("0"))
+						g.getSettings().setDiscalChannel("all"); //All channels
+					else
 						g.getSettings().setDiscalChannel(request.queryParams("discal-channel"));
-					}
 
 					DatabaseManager.getManager().updateSettings(g.getSettings());
 
@@ -210,11 +207,10 @@ public class DashboardHandler {
 					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
 					if (g.getSettings().isPatronGuild()) {
-						if (request.queryParams().contains("value")) {
+						if (request.queryParams().contains("value"))
 							g.getSettings().setBranded(true);
-						} else {
+						else
 							g.getSettings().setBranded(false);
-						}
 
 						DatabaseManager.getManager().updateSettings(g.getSettings());
 					}
@@ -228,11 +224,10 @@ public class DashboardHandler {
 
 				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
-				if (request.queryParams().contains("value")) {
+				if (request.queryParams().contains("value"))
 					g.getSettings().setSimpleAnnouncements(true);
-				} else {
+				else
 					g.getSettings().setSimpleAnnouncements(false);
-				}
 
 				DatabaseManager.getManager().updateSettings(g.getSettings());
 

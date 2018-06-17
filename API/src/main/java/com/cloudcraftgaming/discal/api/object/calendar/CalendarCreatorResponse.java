@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarCreatorResponse {
-	private final Boolean successful;
+	private final boolean successful;
 
 	private boolean edited;
 	private IMessage creatorMessage;
@@ -20,7 +20,7 @@ public class CalendarCreatorResponse {
 	 *
 	 * @param _successful Whether or not the creation was successful.
 	 */
-	public CalendarCreatorResponse(Boolean _successful) {
+	public CalendarCreatorResponse(boolean _successful) {
 		successful = _successful;
 	}
 
@@ -30,7 +30,7 @@ public class CalendarCreatorResponse {
 	 * @param _successful Whether or not the creation was successful.
 	 * @param _calendar   The calendar created.
 	 */
-	public CalendarCreatorResponse(Boolean _successful, Calendar _calendar) {
+	public CalendarCreatorResponse(boolean _successful, Calendar _calendar) {
 		successful = _successful;
 		calendar = _calendar;
 	}
@@ -42,7 +42,7 @@ public class CalendarCreatorResponse {
 	 *
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public Boolean isSuccessful() {
+	public boolean isSuccessful() {
 		return successful;
 	}
 

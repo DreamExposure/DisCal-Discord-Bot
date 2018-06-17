@@ -33,9 +33,9 @@ public class StatusChanger extends TimerTask {
         statuses.add("%calCount% calendars!");
         statuses.add("%annCount% announcements!");
         statuses.add("%shards% shards!");
-		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("true"))
 			statuses.add("%users% using Dashboard!");
-		}
+
         statuses.add("Version " + Main.version);
         statuses.add("DisCal is on Patreon!");
         statuses.add("Share DisCal!!");
@@ -53,10 +53,9 @@ public class StatusChanger extends TimerTask {
 		DisCalAPI.getAPI().getClient().changePresence(StatusType.ONLINE, ActivityType.PLAYING, status);
 
         //Set new index.
-        if (index + 1 >= statuses.size()) {
+		if (index + 1 >= statuses.size())
             index = 0;
-        } else {
+		else
             index++;
-        }
     }
 }

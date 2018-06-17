@@ -18,9 +18,8 @@ import java.util.stream.Collectors;
 public class UserUtils {
 	public static IUser getUserFromMention(String mention, MessageReceivedEvent event) {
 		for (IUser u : event.getGuild().getUsers()) {
-			if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">")) {
+			if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">"))
 				return u;
-			}
 		}
 
 		return null;
@@ -44,9 +43,8 @@ public class UserUtils {
 		if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
 			final String parse = toLookFor.replaceAll("[<@!>]", "");
 			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
-			if (exists != null) {
+			if (exists != null)
 				return exists.getLongID();
-			}
 		}
 
 
@@ -60,9 +58,8 @@ public class UserUtils {
 		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).toLowerCase().contains(lower)).collect(Collectors.toList()));
 
 
-		if (!users.isEmpty()) {
+		if (!users.isEmpty())
 			return users.get(0).getLongID();
-		}
 
 		return 0;
 	}
@@ -78,9 +75,8 @@ public class UserUtils {
 
 		if (toLookFor.matches("<@!?[0-9]+>")) {
 			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor.replaceAll("[^0-9]", "")));
-			if (u != null) {
+			if (u != null)
 				return u;
-			}
 		}
 
 		List<IUser> users = guild.getUsers().stream()
@@ -108,9 +104,8 @@ public class UserUtils {
 		ArrayList<IUser> users = new ArrayList<>();
 		for (String u : userIds) {
 			IUser user = getUserFromID(u, guild);
-			if (user != null) {
+			if (user != null)
 				users.add(user);
-			}
 		}
 		return users;
 	}

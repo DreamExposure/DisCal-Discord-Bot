@@ -35,9 +35,9 @@ public class DatabaseManager {
 	 * @return The instance of the {@link DatabaseManager}
 	 */
 	public static DatabaseManager getManager() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new DatabaseManager();
-		}
+
 		return instance;
 	}
 
@@ -217,9 +217,9 @@ public class DatabaseManager {
 	}
 
 	public boolean updateSettings(GuildSettings settings) {
-		if (settings.getPrivateKey().equalsIgnoreCase("N/a")) {
+		if (settings.getPrivateKey().equalsIgnoreCase("N/a"))
 			settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
-		}
+
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String dataTableName = String.format("%sguild_settings", databaseInfo.getPrefix());
@@ -684,7 +684,7 @@ public class DatabaseManager {
 		return calData;
 	}
 
-	public CalendarData getCalendar(long guildId, Integer calendarNumber) {
+	public CalendarData getCalendar(long guildId, int calendarNumber) {
 		CalendarData calData = new CalendarData(guildId, calendarNumber);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
@@ -759,7 +759,7 @@ public class DatabaseManager {
 		return calendars;
 	}
 
-	public Integer getCalendarCount() {
+	public int getCalendarCount() {
 		int amount = -1;
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
@@ -769,11 +769,11 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				if (res.next()) {
+				if (res.next())
 					amount = res.getInt(1);
-				} else {
+				else
 					amount = 0;
-				}
+
 
 				res.close();
 				statement.close();
@@ -787,9 +787,9 @@ public class DatabaseManager {
 	public EventData getEventData(long guildId, String eventId) {
 		EventData data = new EventData(guildId);
 
-		if (eventId.contains("_")) {
+		if (eventId.contains("_"))
 			eventId = eventId.split("_")[0];
-		}
+
 
 		data.setEventId(eventId);
 
@@ -1153,11 +1153,10 @@ public class DatabaseManager {
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
-				if (res.next()) {
+				if (res.next())
 					amount = res.getInt(1);
-				} else {
+				else
 					amount = 0;
-				}
 
 				res.close();
 				statement.close();
@@ -1220,10 +1219,9 @@ public class DatabaseManager {
 				String eventTable = String.format("%sevents", databaseInfo.getPrefix());
 
 				//Check if recurring...
-				if (eventId.contains("_")) {
-					//Don't delete if child event of recurring event.
-					return false;
-				}
+				if (eventId.contains("_"))
+					return false; //Don't delete if child event of recurring event.
+
 
 				String query = "DELETE FROM " + eventTable + " WHERE EVENT_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);

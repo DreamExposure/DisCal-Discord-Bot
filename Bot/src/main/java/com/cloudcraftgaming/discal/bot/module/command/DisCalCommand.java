@@ -84,7 +84,7 @@ public class DisCalCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length < 1) {
             moduleDisCalInfo(event, settings);
         } else {

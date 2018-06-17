@@ -45,9 +45,9 @@ public class Authorization {
 	} //Prevent initialization.
 
 	public static Authorization getAuth() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new Authorization();
-		}
+
 		return instance;
 	}
 

@@ -59,7 +59,7 @@ public class HelpCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         if (args.length < 1) {
             EmbedBuilder em = new EmbedBuilder();
 			em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
@@ -80,20 +80,18 @@ public class HelpCommand implements ICommand {
         } else if (args.length == 1) {
             String cmdFor = args[0];
             ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
-            if (cmd != null) {
+			if (cmd != null)
                 Message.sendMessage(getCommandInfoEmbed(cmd), event);
-            }
+
         } else if (args.length == 2) {
         	//Display sub command info
 			String cmdFor = args[0];
 			ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
 			if (cmd != null) {
-				if (cmd.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase())) {
+				if (cmd.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
 					Message.sendMessage(getSubCommandEmbed(cmd, args[1].toLowerCase()), event);
-				} else {
-					//Sub command does not exist.
+				else
 					Message.sendMessage(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
-				}
 			}
 		}
 

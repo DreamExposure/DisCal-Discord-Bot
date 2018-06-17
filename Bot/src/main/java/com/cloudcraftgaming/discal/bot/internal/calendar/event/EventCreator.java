@@ -41,9 +41,8 @@ public class EventCreator {
 	 * @return The instance of the EventCreator
 	 */
 	public static EventCreator getCreator() {
-		if (instance == null) {
+		if (instance == null)
 			instance = new EventCreator();
-		}
 		return instance;
 	}
 
@@ -163,7 +162,7 @@ public class EventCreator {
 
 				try {
 					event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
-				} catch (IOException e1) {
+				} catch (IOException ignore) {
 					//Failed to get tz, ignore safely.
 				}
 
@@ -193,7 +192,7 @@ public class EventCreator {
 	 * @param e The event received upon termination.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public Boolean terminate(MessageReceivedEvent e) {
+	public boolean terminate(MessageReceivedEvent e) {
 		if (hasPreEvent(e.getGuild().getLongID())) {
 			events.remove(getPreEvent(e.getGuild().getLongID()));
 			return true;
@@ -226,12 +225,11 @@ public class EventCreator {
 				event.setStart(preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone()));
 				event.setEnd(preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone()));
 				event.setVisibility("public");
-				if (!preEvent.getColor().equals(EventColor.NONE)) {
+				if (!preEvent.getColor().equals(EventColor.NONE))
 					event.setColorId(String.valueOf(preEvent.getColor().getId()));
-				}
-				if (preEvent.getLocation() != null && !preEvent.getLocation().equalsIgnoreCase("")) {
+
+				if (preEvent.getLocation() != null && !preEvent.getLocation().equalsIgnoreCase(""))
 					event.setLocation(preEvent.getLocation());
-				}
 
 
 				//Set recurrence
@@ -308,9 +306,8 @@ public class EventCreator {
 	}
 
 	public IMessage getCreatorMessage(long guildId) {
-		if (hasPreEvent(guildId)) {
+		if (hasPreEvent(guildId))
 			return getPreEvent(guildId).getCreatorMessage();
-		}
 		return null;
 	}
 
@@ -326,11 +323,10 @@ public class EventCreator {
 	 * @param guildId The ID of the guild.
 	 * @return <code>true</code> if a PreEvent exists, otherwise <code>false</code>.
 	 */
-	public Boolean hasPreEvent(long guildId) {
+	public boolean hasPreEvent(long guildId) {
 		for (PreEvent e : events) {
-			if (e.getGuildId() == guildId) {
+			if (e.getGuildId() == guildId)
 				return true;
-			}
 		}
 		return false;
 	}
@@ -341,10 +337,7 @@ public class EventCreator {
 
 	//Setters
 	public void setCreatorMessage(IMessage msg) {
-		if (msg != null) {
-			if (hasPreEvent(msg.getGuild().getLongID())) {
-				getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
-			}
-		}
+		if (msg != null && hasPreEvent(msg.getGuild().getLongID()))
+			getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
 	}
 }

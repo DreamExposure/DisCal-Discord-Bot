@@ -7,14 +7,14 @@ package com.cloudcraftgaming.discal.api.object.calendar;
  */
 public class CalendarData {
 	private final long guildId;
-	private final Integer calendarNumber;
+	private final int calendarNumber;
 
 	private String calendarId;
 	private String calendarAddress;
 
 	private boolean external;
 
-	public CalendarData(long _guildID, Integer _calendarNumber) {
+	public CalendarData(long _guildID, int _calendarNumber) {
 		guildId = _guildID;
 		calendarNumber = _calendarNumber;
 
@@ -29,7 +29,7 @@ public class CalendarData {
 		return guildId;
 	}
 
-	public Integer getCalendarNumber() {
+	public int getCalendarNumber() {
 		return calendarNumber;
 	}
 

@@ -17,6 +17,7 @@ import sx.blah.discord.util.RequestBuffer;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings("UnusedReturnValue")
 public class Message {
 	/**
 	 * Sends a message via Discord as DisCal.
@@ -173,9 +174,9 @@ public class Message {
 		try {
 			return RequestBuffer.request(() -> {
 				try {
-					if (!event.getMessage().isDeleted()) {
+					if (!event.getMessage().isDeleted())
 						event.getMessage().delete();
-					}
+
 					return true;
 				} catch (DiscordException | MissingPermissionsException e) {
 					//Failed to delete
@@ -191,9 +192,9 @@ public class Message {
 		try {
 			return RequestBuffer.request(() -> {
 				try {
-					if (!message.isDeleted()) {
+					if (!message.isDeleted())
 						message.delete();
-					}
+
 					return true;
 				} catch (DiscordException | MissingPermissionsException e) {
 					//Failed to delete.
@@ -209,9 +210,9 @@ public class Message {
 		try {
 			return RequestBuffer.request(() -> {
 				try {
-					if (message != null && !message.isDeleted()) {
+					if (message != null && !message.isDeleted())
 						message.edit(content);
-					}
+
 					return true;
 				} catch (DiscordException | MissingPermissionsException e) {
 					//Failed to edit.
@@ -227,9 +228,9 @@ public class Message {
 		try {
 			return RequestBuffer.request(() -> {
 				try {
-					if (!message.isDeleted()) {
+					if (!message.isDeleted())
 						message.edit(content, embed);
-					}
+
 					return true;
 				} catch (DiscordException | MissingPermissionsException e) {
 					//Failed to edit.

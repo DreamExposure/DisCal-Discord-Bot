@@ -96,9 +96,9 @@ public class CalendarAuth {
 	}
 
 	private static Credential authorize(GuildSettings g) throws Exception {
-		if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a")) {
+		if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a"))
 			throw new IllegalAccessException("Guild does not have proper access token!");
-		}
+
 
 		AESEncryption encryption = new AESEncryption(g);
 		String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);

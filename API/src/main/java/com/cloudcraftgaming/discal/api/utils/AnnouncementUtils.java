@@ -19,9 +19,9 @@ public class AnnouncementUtils {
 	 */
 	public static Boolean announcementExists(String value, MessageReceivedEvent event) {
 		for (Announcement a : DatabaseManager.getManager().getAnnouncements(event.getGuild().getLongID())) {
-			if (a.getAnnouncementId().toString().equals(value)) {
+			if (a.getAnnouncementId().toString().equals(value))
 				return true;
-			}
+
 		}
 		return false;
 	}

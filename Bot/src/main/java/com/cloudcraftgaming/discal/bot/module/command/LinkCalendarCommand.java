@@ -66,7 +66,7 @@ public class LinkCalendarCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
         try {
             //TODO: Handle multiple calendars...
             CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());

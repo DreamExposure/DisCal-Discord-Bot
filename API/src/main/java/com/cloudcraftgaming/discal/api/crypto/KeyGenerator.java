@@ -22,9 +22,9 @@ public class KeyGenerator {
 
 		for (int i = 0; i < numChars; ++i) {
 			// reseed rand once you've used up all available entropy bits
-			if ((i % 10) == 0) {
+			if ((i % 10) == 0)
 				rand.setSeed(secRand.nextLong()); // 64 bits of random!
-			}
+
 			buff[i] = VALID_CHARACTERS[rand.nextInt(VALID_CHARACTERS.length)];
 		}
 		return new String(buff);
@@ -37,9 +37,9 @@ public class KeyGenerator {
 
 		for (int i = 0; i < 9; ++i) {
 			// reseed rand once you've used up all available entropy bits
-			if ((i % 10) == 0) {
+			if ((i % 10) == 0)
 				rand.setSeed(secRand.nextLong()); // 64 bits of random!
-			}
+
 			buff[i] = VALID_CHARS_2[rand.nextInt(VALID_CHARS_2.length)];
 		}
 		return "e" + new String(buff);
@@ -52,9 +52,9 @@ public class KeyGenerator {
 
 		for (int i = 0; i < 9; ++i) {
 			// reseed rand once you've used up all available entropy bits
-			if ((i % 10) == 0) {
+			if ((i % 10) == 0)
 				rand.setSeed(secRand.nextLong()); // 64 bits of random!
-			}
+
 			buff[i] = VALID_CHARS_2[rand.nextInt(VALID_CHARS_2.length)];
 		}
 		return "a" + new String(buff);

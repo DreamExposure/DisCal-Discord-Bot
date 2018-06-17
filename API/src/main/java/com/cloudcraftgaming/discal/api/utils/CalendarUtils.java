@@ -20,7 +20,7 @@ public class CalendarUtils {
 	 * @param data The BotData of the Guild whose deleting their calendar.
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
-	public static Boolean deleteCalendar(CalendarData data, GuildSettings settings) {
+	public static boolean deleteCalendar(CalendarData data, GuildSettings settings) {
 		try {
 			//Only delete if the calendar is stored on DisCal's account.
 			if (!data.getCalendarAddress().equalsIgnoreCase("primary") && !settings.useExternalCalendar()) {

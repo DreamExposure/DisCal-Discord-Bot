@@ -26,7 +26,7 @@ public class GuildSettings {
 
 	private boolean patronGuild;
 	private boolean devGuild;
-	private Integer maxCalendars;
+	private int maxCalendars;
 
 	private boolean twelveHour;
 	private boolean branded;
@@ -105,7 +105,7 @@ public class GuildSettings {
 		return devGuild;
 	}
 
-	public Integer getMaxCalendars() {
+	public int getMaxCalendars() {
 		return maxCalendars;
 	}
 
@@ -123,7 +123,7 @@ public class GuildSettings {
 
 	public String getDmAnnouncementsString() {
 		StringBuilder users = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String sub : dmAnnouncements) {
 			if (i == 0) {
 				users = new StringBuilder(sub);

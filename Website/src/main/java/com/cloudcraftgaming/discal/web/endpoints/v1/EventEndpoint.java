@@ -131,11 +131,11 @@ public class EventEndpoint {
 				jo.put("timezone", tz);
 				jo.put("summary", e.getSummary());
 				jo.put("description", e.getDescription());
-				if (e.getLocked() != null) {
+				if (e.getLocked() != null)
 					jo.put("location", e.getLocation());
-				} else {
+				else
 					jo.put("location", "N/a");
-				}
+
 				jo.put("color", EventColor.fromNameOrHexOrID(e.getColorId()).name());
 				jo.put("isParent", !(e.getId().contains("_")));
 
@@ -216,13 +216,11 @@ public class EventEndpoint {
 			end.setDateTime(new DateTime(body.getLong("epochEnd")));
 			event.setEnd(end.setTimeZone(cal.getTimeZone()));
 
-			if (!body.getString("color").equalsIgnoreCase("NONE")) {
-				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId().toString());
-			}
+			if (!body.getString("color").equalsIgnoreCase("NONE"))
+				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId() + "");
 
-			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a")) {
+			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a"))
 				event.setLocation(body.getString("location"));
-			}
 
 			JSONObject recur = body.getJSONObject("recurrence");
 			if (recur.getBoolean("recur")) {
@@ -254,9 +252,8 @@ public class EventEndpoint {
 				}
 			}
 
-			if (ed.shouldBeSaved()) {
+			if (ed.shouldBeSaved())
 				DatabaseManager.getManager().updateEventData(ed);
-			}
 
 			service.events().update(calendarData.getCalendarId(), eventId, event).execute();
 
@@ -312,13 +309,11 @@ public class EventEndpoint {
 			end.setDateTime(new DateTime(body.getLong("epochEnd")));
 			event.setEnd(end.setTimeZone(cal.getTimeZone()));
 
-			if (!body.getString("color").equalsIgnoreCase("NONE")) {
-				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId().toString());
-			}
+			if (!body.getString("color").equalsIgnoreCase("NONE"))
+				event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId() + "");
 
-			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a")) {
+			if (!body.getString("location").equalsIgnoreCase("") || !body.getString("location").equalsIgnoreCase("N/a"))
 				event.setLocation(body.getString("location"));
-			}
 
 			JSONObject recur = body.getJSONObject("recurrence");
 			if (recur.getBoolean("recur")) {
@@ -350,9 +345,8 @@ public class EventEndpoint {
 			}
 
 
-			if (ed.shouldBeSaved()) {
+			if (ed.shouldBeSaved())
 				DatabaseManager.getManager().updateEventData(ed);
-			}
 
 			Event confirmed = service.events().insert(calendarData.getCalendarId(), event).execute();
 

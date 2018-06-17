@@ -49,24 +49,24 @@ public class CalendarMessageFormatter {
 		em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 		em.withAuthorName("DisCal");
 		em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
-		if (calendar.getSummary() != null) {
+		if (calendar.getSummary() != null)
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
-		} else {
+		else
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), "***UNSET***", true);
-		}
-		if (calendar.getDescription() != null) {
+
+		if (calendar.getDescription() != null)
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
-		} else {
+		else
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), "***UNSET***", false);
-		}
-		if (calendar.getTimezone() != null) {
+
+		if (calendar.getTimezone() != null)
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), calendar.getTimezone(), true);
-		} else {
+		else
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
-		}
-		if (calendar.isEditing()) {
+
+		if (calendar.isEditing())
 			em.appendField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), false);
-		} //No else needed, just don't post it.
+
 
 		em.withFooterText(MessageManager.getMessage("Embed.Calendar.Pre.Key", settings));
 		em.withColor(56, 138, 237);

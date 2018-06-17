@@ -87,7 +87,7 @@ public class CalendarCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length < 1) {
 			Message.sendMessage(MessageManager.getMessage("Notification.Args.Few", settings), event);
 		} else {
@@ -97,18 +97,16 @@ public class CalendarCommand implements ICommand {
 
 			switch (args[0].toLowerCase()) {
 				case "create":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleCreate(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "cancel":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleCancel(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "view":
 					moduleView(event, calendarData, settings);
@@ -117,25 +115,22 @@ public class CalendarCommand implements ICommand {
 					moduleView(event, calendarData, settings);
 					break;
 				case "confirm":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleConfirm(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "delete":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleDelete(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "remove":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleDelete(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "name":
 					moduleSummary(args, event, calendarData, settings);
@@ -150,11 +145,10 @@ public class CalendarCommand implements ICommand {
 					moduleTimezone(args, event, calendarData, settings);
 					break;
 				case "edit":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleEdit(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				default:
 					Message.sendMessage(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
@@ -179,11 +173,10 @@ public class CalendarCommand implements ICommand {
                 if (args.length > 1) {
                     String name = GeneralUtils.getContent(args, 1);
                     PreCalendar calendar = CalendarCreator.getCreator().init(event, name, settings, true);
-                    if (calendar.getCreatorMessage() != null) {
+					if (calendar.getCreatorMessage() != null)
 						Message.deleteMessage(event);
-					} else {
+					else
                     	Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Create.Init", settings), event);
-					}
                 } else {
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Create.Name", settings), event);
                 }
@@ -209,22 +202,20 @@ public class CalendarCommand implements ICommand {
 						CalendarCreator.getCreator().setCreatorMessage(Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", settings), event));
 					}
 				} else {
-            		if (!editing) {
+					if (!editing)
 						Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Success", settings), event);
-					} else {
+					else
             			Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", settings), event);
-					}
 				}
             } else {
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Cancel.Failure", settings), event);
                 Message.deleteMessage(event);
             }
         } else {
-            if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+			if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NotInit", settings), event);
-            } else {
+			else
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-            }
         }
     }
 
@@ -240,11 +231,10 @@ public class CalendarCommand implements ICommand {
             	Message.sendMessage(CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), MessageManager.getMessage("Creator.Calendar.Review", settings), event);
 			}
         } else {
-            if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+			if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-            } else {
+			else
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-            }
         }
     }
 
@@ -290,11 +280,10 @@ public class CalendarCommand implements ICommand {
                 }
             }
         } else {
-            if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+			if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-            } else {
+			else
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-            }
         }
     }
 
@@ -310,18 +299,16 @@ public class CalendarCommand implements ICommand {
 			}
             return;
         }
-        if(!event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(
-                Permissions.MANAGE_SERVER)) {
+		if (!event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(Permissions.MANAGE_SERVER)) {
             Message.sendMessage(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
             return;
         }
         if (!calendarData.getCalendarId().equalsIgnoreCase("primary")) {
             //Delete calendar
-            if (CalendarUtils.deleteCalendar(calendarData, settings)) {
+			if (CalendarUtils.deleteCalendar(calendarData, settings))
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Success", settings), event);
-            } else {
+			else
                 Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.Unknown", settings), event);
-            }
         } else {
             //No calendar to delete
             Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Delete.Failure.NoCalendar", settings), event);
@@ -342,11 +329,10 @@ public class CalendarCommand implements ICommand {
             		Message.sendMessage(msg, event);
 				}
             } else {
-                if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+				if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-                } else {
+				else
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
@@ -376,11 +362,10 @@ public class CalendarCommand implements ICommand {
 					Message.sendMessage(MessageManager.getMessage("Creator.Calendar.Description.O.Success", "%desc%", GeneralUtils.getContent(args, 1), settings) + TIME_ZONE_DB, event);
 				}
             } else {
-                if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+				if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-                } else {
+				else
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {
@@ -422,11 +407,10 @@ public class CalendarCommand implements ICommand {
 					}
                 }
             } else {
-                if (calendarData.getCalendarId().equalsIgnoreCase("primary")) {
+				if (calendarData.getCalendarId().equalsIgnoreCase("primary"))
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-                } else {
+				else
                     Message.sendMessage(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                }
             }
         } else {
             if (CalendarCreator.getCreator().hasPreCalendar(guildId)) {

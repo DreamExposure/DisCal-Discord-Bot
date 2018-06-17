@@ -107,7 +107,7 @@ public class AnnouncementCreator {
      * @param e The event received upon termination.
      * @return Whether or not the Creator was successfully terminated.
      */
-    public Boolean terminate(MessageReceivedEvent e) {
+	public boolean terminate(MessageReceivedEvent e) {
         if (hasAnnouncement(e.getGuild().getLongID())) {
             announcements.remove(getAnnouncement(e.getGuild().getLongID()));
             return true;
@@ -158,9 +158,8 @@ public class AnnouncementCreator {
     }
 
     public IMessage getCreatorMessage(long guildId) {
-    	if (hasAnnouncement(guildId)) {
+		if (hasAnnouncement(guildId))
     		return getAnnouncement(guildId).getCreatorMessage();
-		}
 		return null;
 	}
 
@@ -170,11 +169,8 @@ public class AnnouncementCreator {
 
 	//Setters
 	public void setCreatorMessage(IMessage message) {
-    	if (message != null) {
-			if (hasCreatorMessage(message.getGuild().getLongID())) {
-				getAnnouncement(message.getGuild().getLongID()).setCreatorMessage(message);
-			}
-		}
+		if (message != null && hasCreatorMessage(message.getGuild().getLongID()))
+			getAnnouncement(message.getGuild().getLongID()).setCreatorMessage(message);
 	}
 
     //Booleans/Checkers
@@ -183,16 +179,15 @@ public class AnnouncementCreator {
      * @param guildId The ID of the guild.
      * @return <code>true</code> if active, else <code>false</code>.
      */
-    public Boolean hasAnnouncement(long guildId) {
+	public boolean hasAnnouncement(long guildId) {
         for (Announcement a : announcements) {
-            if (a.getGuildId() == guildId) {
+			if (a.getGuildId() == guildId)
                 return true;
-            }
         }
         return false;
     }
 
-    public Boolean hasCreatorMessage(long guildId) {
+	public boolean hasCreatorMessage(long guildId) {
     	return hasAnnouncement(guildId) && getAnnouncement(guildId).getCreatorMessage() != null;
 	}
 }

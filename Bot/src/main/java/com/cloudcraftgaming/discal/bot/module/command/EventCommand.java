@@ -111,7 +111,7 @@ public class EventCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public Boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		long guildId = event.getGuild().getLongID();
 		//TODO: Add multiple calendar handling.
 		CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(guildId);
@@ -120,46 +120,40 @@ public class EventCommand implements ICommand {
 		} else {
 			switch (args[0].toLowerCase()) {
 				case "create":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleCreate(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "copy":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleCopy(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "edit":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleEdit(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "restart":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleRestart(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "cancel":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleCancel(event, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "delete":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleDelete(args, event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "view":
 					moduleView(args, event, calendarData, settings);
@@ -168,11 +162,10 @@ public class EventCommand implements ICommand {
 					moduleView(args, event, calendarData, settings);
 					break;
 				case "confirm":
-					if (PermissionChecker.hasSufficientRole(event)) {
+					if (PermissionChecker.hasSufficientRole(event))
 						moduleConfirm(event, calendarData, settings);
-					} else {
+					else
 						Message.sendMessage(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-					}
 					break;
 				case "startdate":
 					moduleStartDate(args, event, settings);
@@ -253,14 +246,13 @@ public class EventCommand implements ICommand {
 		} else {
 			if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
 				PreEvent e;
-				if (args.length == 1) {
+				if (args.length == 1)
 					e = EventCreator.getCreator().init(event, settings, true);
-				} else {
+				else
 					e = EventCreator.getCreator().init(event, settings, GeneralUtils.getContent(args, 1), true);
-				}
-				if (e.getCreatorMessage() == null) {
+
+				if (e.getCreatorMessage() == null)
 					Message.sendMessage(MessageManager.getMessage("Creator.Event.Create.Init", settings), event);
-				}
 			} else {
 				Message.sendMessage(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
 			}
@@ -356,9 +348,9 @@ public class EventCommand implements ICommand {
 		long guildId = event.getGuild().getLongID();
 		IMessage msg = null;
 		boolean editing = false;
-		if (EventCreator.getCreator().hasPreEvent(guildId)) {
+		if (EventCreator.getCreator().hasPreEvent(guildId))
 			editing = EventCreator.getCreator().getPreEvent(guildId).isEditing();
-		}
+
 
 
 		if (EventCreator.getCreator().hasCreatorMessage(guildId))
@@ -369,11 +361,10 @@ public class EventCommand implements ICommand {
 				Message.deleteMessage(msg);
 				Message.deleteMessage(event);
 			}
-			if (!editing) {
+			if (!editing)
 				moduleCreate(args, event, calendarData, settings);
-			} else {
+			else
 				moduleEdit(args, event, calendarData, settings);
-			}
 		} else {
 			Message.sendMessage(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
 		}
