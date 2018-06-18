@@ -328,6 +328,8 @@ public class EventEndpoint {
 			}
 
 			EventData ed = new EventData(settings.getGuildID());
+			ed.setEventId(event.getId());
+
 			if (!body.getString("image").equalsIgnoreCase("")) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
