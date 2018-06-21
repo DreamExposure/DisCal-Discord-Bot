@@ -14,6 +14,9 @@ public class DisCalAPI {
 	public final long calId = 142107863307780097L;
 	public final long dreamId = 282662248365817867L;
 
+	public final long errorLog = 459411923935690752L;
+	public final long serverId = 375357265198317579L;
+
 	private DisCalAPI() {
 	}
 

@@ -108,8 +108,8 @@ public class Logger {
 
 
 				//Get DisCal guild and channel..
-				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
-				IChannel channel = guild.getChannelByID(302249332244217856L);
+				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(DisCalAPI.getAPI().serverId);
+				IChannel channel = guild.getChannelByID(DisCalAPI.getAPI().errorLog);
 
 				MessageManager.sendMessage(em.build(), "```" + shortError + "```", channel);
 			}
@@ -155,8 +155,8 @@ public class Logger {
 
 
 				//Get DisCal guild and channel..
-				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(266063520112574464L);
-				IChannel channel = guild.getChannelByID(302249332244217856L);
+				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(DisCalAPI.getAPI().serverId);
+				IChannel channel = guild.getChannelByID(DisCalAPI.getAPI().errorLog);
 
 				MessageManager.sendMessage(em.build(), "```" + message + "```", channel);
 			}
