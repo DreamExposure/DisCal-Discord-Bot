@@ -154,7 +154,7 @@ public class DisCalCommand implements ICommand {
 		}
 		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", (guild.getShard().getInfo()[0] + 1) + "/" + DisCalAPI.getAPI().getClient().getShardCount(), settings), guild.getShard().getResponseTime() + "ms", false);
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
-        em.withUrl("https://www.cloudcraftgaming.com/discal/");
+		em.withUrl("https://www.discalbot.com");
         em.withColor(56, 138, 237);
 		MessageManager.sendMessage(em.build(), event);
     }
@@ -264,7 +264,7 @@ public class DisCalCommand implements ICommand {
 		//TODO: Add translations...
 		em.appendField("Using Branding", settings.isBranded() + "", true);
         em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
-        em.withUrl("https://www.cloudcraftgaming.com/discal/");
+		em.withUrl("https://www.discalbot.com/");
         em.withColor(56, 138, 237);
 		MessageManager.sendMessage(em.build(), event);
     }
@@ -329,7 +329,7 @@ public class DisCalCommand implements ICommand {
 	}
 
 	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
-		String INVITE_LINK = "https://discord.gg/AmAMGeN";
+		String INVITE_LINK = "https://discord.gg/2TFqyuy";
 		MessageManager.sendMessage(MessageManager.getMessage("DisCal.InviteLink", "%link%", INVITE_LINK, settings), event);
 	}
 
