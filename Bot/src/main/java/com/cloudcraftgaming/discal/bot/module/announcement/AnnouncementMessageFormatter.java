@@ -243,7 +243,7 @@ public class AnnouncementMessageFormatter {
 		try {
 			channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class, true);
+			Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class, true);
 		}
 
 		if (channel == null) {
@@ -393,10 +393,10 @@ public class AnnouncementMessageFormatter {
         for (String userId : a.getSubscriberUserIds()) {
             try {
                 IUser user = guild.getUserByID(Long.valueOf(userId));
-                if (user != null) {
+				if (user != null)
                     userMentions.append(user.mention(true)).append(" ");
-                }
-            } catch (Exception e) {
+
+			} catch (Exception e) {
                 //User does not exist, safely ignore.
             }
         }
