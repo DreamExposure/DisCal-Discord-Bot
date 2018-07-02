@@ -51,76 +51,81 @@ public class AnnouncementThread extends Thread {
 			ArrayList<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements(type);
 
 			for (Announcement a: allAnnouncements) {
-				Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
-				//Check if guild is part of DisCal's guilds. This way we can clear out the database...
-				if (!GuildUtils.active(a.getGuildId())) {
-					DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
-					continue;
-				}
-				//Get everything we need ready.
-				GuildSettings settings = getSettings(a);
-				CalendarData calendar = getCalendarData(a);
-				Calendar service;
-
 				try {
-					service = getService(settings);
-				} catch (Exception e) {
-					Logger.getLogger().exception(null, "Failed to handle service! 01a102", e, this.getClass(), true);
-					continue;
-				}
+					Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
+					//Check if guild is part of DisCal's guilds. This way we can clear out the database...
+					if (!GuildUtils.active(a.getGuildId())) {
+						DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+						continue;
+					}
+					//Get everything we need ready.
+					GuildSettings settings = getSettings(a);
+					CalendarData calendar = getCalendarData(a);
+					Calendar service;
 
-				//Now we can check the announcement type and do all the actual logic here.
-				switch (type) {
-					case SPECIFIC:
-						if (EventUtils.eventExists(settings, a.getEventId())) {
-							try {
-								Event e = service.events().get(calendar.getCalendarId(), a.getEventId()).execute();
-								if (inRange(a, e)) {
-									//We can announce it.
-									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-									//And now lets delete it
-									DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+					try {
+						service = getService(settings);
+					} catch (Exception e) {
+						Logger.getLogger().exception(null, "Failed to handle service! 01a102", e, this.getClass(), true);
+						continue;
+					}
+
+					//Now we can check the announcement type and do all the actual logic here.
+					switch (type) {
+						case SPECIFIC:
+							if (EventUtils.eventExists(settings, a.getEventId())) {
+								try {
+									Event e = service.events().get(calendar.getCalendarId(), a.getEventId()).execute();
+									if (inRange(a, e)) {
+										//We can announce it.
+										AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+										//And now lets delete it
+										DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+									}
+								} catch (IOException e) {
+									//Event getting error, we know it exists tho
+									Logger.getLogger().exception(null, "Failed to get event! 01a103", e, this.getClass(), true);
 								}
-							} catch (IOException e) {
-								//Event getting error, we know it exists tho
-								Logger.getLogger().exception(null, "Failed to get event! 01a103", e, this.getClass(), true);
+							} else {
+								//Event is gone, we can just delete this shit.
+								DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
 							}
-						} else {
-							//Event is gone, we can just delete this shit.
-							DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
-						}
-						break;
-					case UNIVERSAL:
-						for (Event e: getEvents(settings, calendar, service, a)) {
-							if (inRange(a, e)) {
-								//It fits! Let's do it!
-								AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
-							}
-						}
-						break;
-					case COLOR:
-						for (Event e: getEvents(settings, calendar, service, a)) {
-							if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
+							break;
+						case UNIVERSAL:
+							for (Event e: getEvents(settings, calendar, service, a)) {
 								if (inRange(a, e)) {
 									//It fits! Let's do it!
 									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
 								}
 							}
-						}
-						break;
-					case RECUR:
-						for (Event e: getEvents(settings, calendar, service, a)) {
-							if (inRange(a, e)) {
-								if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
-									//It fits! Lets announce!
-									AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+							break;
+						case COLOR:
+							for (Event e: getEvents(settings, calendar, service, a)) {
+								if (a.getEventColor() == EventColor.fromNameOrHexOrID(e.getColorId())) {
+									if (inRange(a, e)) {
+										//It fits! Let's do it!
+										AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+									}
 								}
 							}
-						}
-						break;
+							break;
+						case RECUR:
+							for (Event e: getEvents(settings, calendar, service, a)) {
+								if (inRange(a, e)) {
+									if (e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId())) {
+										//It fits! Lets announce!
+										AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
+									}
+								}
+							}
+							break;
+					}
+					Logger.getLogger().announcement("finished an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
+				} catch (Exception e) {
+					Logger.getLogger().exception(null, "Announcement failed! ID: " + a.getAnnouncementId() + ", GUILD: " + a.getGuildId(), e, this.getClass(), true);
 				}
-				Logger.getLogger().announcement("finished an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 			}
+
 
 			//Just clear everything immediately.
 			allSettings.clear();
