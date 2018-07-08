@@ -38,33 +38,38 @@ public class DiscordLoginHandler {
 
 			JSONObject info = new JSONObject(httpResponse.getBody()).getJSONObject("object");
 
-			//GET request for user info...
-			HttpResponse<JsonNode> userDataResponse = Unirest.get("https://discordapp.com/api/v6/users/@me").header("Authorization", "Bearer " + info.getString("access_token")).asJson();
+			if (info.has("access_token")) {
+				//GET request for user info...
+				HttpResponse<JsonNode> userDataResponse = Unirest.get("https://discordapp.com/api/v6/users/@me").header("Authorization", "Bearer " + info.getString("access_token")).asJson();
 
-			JSONObject userInfo = new JSONObject(userDataResponse.getBody()).getJSONObject("object");
+				JSONObject userInfo = new JSONObject(userDataResponse.getBody()).getJSONObject("object");
 
-			//Saving session info and access info to memory until moved into the database...
-			Map m = new HashMap();
-			m.put("loggedIn", true);
-			m.put("client", BotSettings.ID.get());
-			m.put("year", LocalDate.now().getYear());
-			m.put("redirUri", BotSettings.REDIR_URI.get());
+				//Saving session info and access info to memory until moved into the database...
+				Map m = new HashMap();
+				m.put("loggedIn", true);
+				m.put("client", BotSettings.ID.get());
+				m.put("year", LocalDate.now().getYear());
+				m.put("redirUri", BotSettings.REDIR_URI.get());
 
-			m.put("id", userInfo.getString("id"));
-			m.put("username", userInfo.getString("username"));
-			m.put("discrim", userInfo.getString("discriminator"));
+				m.put("id", userInfo.getString("id"));
+				m.put("username", userInfo.getString("username"));
+				m.put("discrim", userInfo.getString("discriminator"));
 
-			//Get guilds...
-			m.put("guilds", GuildUtils.getGuilds(userInfo.getString("id")));
+				//Get guilds...
+				m.put("guilds", GuildUtils.getGuilds(userInfo.getString("id")));
 
-			m.put("goodTz", GoodTimezone.values());
-			m.put("anTypes", AnnouncementType.values());
-			m.put("eventColors", EventColor.values());
+				m.put("goodTz", GoodTimezone.values());
+				m.put("anTypes", AnnouncementType.values());
+				m.put("eventColors", EventColor.values());
 
-			DiscordAccountHandler.getHandler().addAccount(m, request.session().id());
+				DiscordAccountHandler.getHandler().addAccount(m, request.session().id());
 
-			//Finally redirect to the dashboard seamlessly.
-			response.redirect("/dashboard", 301);
+				//Finally redirect to the dashboard seamlessly.
+				response.redirect("/dashboard", 301);
+			} else {
+				//Token not provided. Authentication denied or errored... Redirect to dashboard so user knows auth failed.
+				response.redirect("/dashboard", 301);
+			}
 		} catch (JSONException e) {
 			Logger.getLogger().exception(null, "[WEB] JSON || Discord login failed!", e, DiscordLoginHandler.class, true);
 			response.redirect("/dashboard", 301);
