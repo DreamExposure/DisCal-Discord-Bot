@@ -47,21 +47,23 @@ public class AnnouncementMessageFormatter {
 		} catch (NullPointerException e) {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), "ID IS NULL???", true);
 		}
+
 		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Type", settings), a.getAnnouncementType().name(), true);
+
+
 		if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
-			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
 				em.withImage(ed.getImageLink());
-			}
+
 		} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
 		} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
 			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
-			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
 				em.withImage(ed.getImageLink());
-			}
 		}
 		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
 		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
@@ -103,9 +105,9 @@ public class AnnouncementMessageFormatter {
 				CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
 				Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
 					em.withThumbnail(ed.getImageLink());
-				}
+
 				if (event.getSummary() != null) {
 					String summary = event.getSummary();
 					if (summary.length() > 250) {
@@ -159,9 +161,8 @@ public class AnnouncementMessageFormatter {
 
 			em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 			EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
-			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
 				em.withImage(ed.getImageLink());
-			}
 
 			em.withUrl(event.getHtmlLink());
 
@@ -230,12 +231,10 @@ public class AnnouncementMessageFormatter {
 					}
 				}
 
-				if (!settings.usingSimpleAnnouncements()) {
+				if (!settings.usingSimpleAnnouncements())
 					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
-				}
-				if (!announcement.getInfo().equalsIgnoreCase("None") && !announcement.getInfo().equalsIgnoreCase("")) {
+				if (!announcement.getInfo().equalsIgnoreCase("None") && !announcement.getInfo().equalsIgnoreCase(""))
 					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
-				}
 			}
 
 
@@ -387,6 +386,10 @@ public class AnnouncementMessageFormatter {
 
 		if (mentionHere)
 			message = message + " here";
+
+
+		//Sanitize even tho this shouldn't be needed....
+		message = message.replaceAll("@", "");
 
 		return message;
 	}
