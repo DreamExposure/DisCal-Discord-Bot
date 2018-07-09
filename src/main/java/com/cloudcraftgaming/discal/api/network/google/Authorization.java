@@ -21,8 +21,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.mashape.unirest.http.JsonNode;
-import com.mashape.unirest.http.Unirest;
+import okhttp3.*;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
@@ -36,9 +35,11 @@ import java.util.List;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings("ConstantConditions")
 public class Authorization {
 	private static Authorization instance;
 	private ClientData clientData;
+	private OkHttpClient client;
 
 	private Authorization() {
 	} //Prevent initialization.
@@ -52,18 +53,28 @@ public class Authorization {
 
 	public void init() {
 		clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
+		client = new OkHttpClient();
 	}
 
 	public void requestCode(MessageReceivedEvent event, GuildSettings settings) {
 		try {
-			String body = "client_id=" + clientData.getClientId() + "&scope=" + CalendarScopes.CALENDAR;
+			RequestBody body = new FormBody.Builder()
+					.addEncoded("client_id", clientData.getClientId())
+					.addEncoded("scope", CalendarScopes.CALENDAR)
+					.build();
 
-			com.mashape.unirest.http.HttpResponse<JsonNode> response = Unirest.post("https://accounts.google.com/o/oauth2/device/code").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
+			Request httpRequest = new okhttp3.Request.Builder()
+					.url("https://accounts.google.com/o/oauth2/device/code")
+					.post(body)
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.build();
 
-			if (response.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
+			Response response = client.newCall(httpRequest).execute();
+
+			if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
 				Type type = new TypeToken<CodeResponse>() {
 				}.getType();
-				CodeResponse cr = new Gson().fromJson(response.getBody().toString(), type);
+				CodeResponse cr = new Gson().fromJson(response.body().string(), type);
 
 				//Send DM to user with code.
 				EmbedBuilder em = new EmbedBuilder();
@@ -90,7 +101,7 @@ public class Authorization {
 			} else {
 				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
 
-				Logger.getLogger().debug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
+				Logger.getLogger().debug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass(), true);
 			}
 		} catch (Exception e) {
 			//Failed, report issue to dev.
@@ -102,15 +113,26 @@ public class Authorization {
 
 	public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
 		try {
-			String body = "client_id=" + clientData.getClientId() + "&client_secret=" + clientData.getClientSecret() + "&refresh_token=" + encryption.decrypt(settings.getEncryptedRefreshToken()) + "&grant_type=refresh_token";
+			RequestBody body = new FormBody.Builder()
+					.addEncoded("client_id", clientData.getClientId())
+					.addEncoded("client_secret", clientData.getClientSecret())
+					.addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
+					.addEncoded("grant_type", "refresh_token")
+					.build();
 
-			com.mashape.unirest.http.HttpResponse<JsonNode> httpResponse = Unirest.post("https://www.googleapis.com/oauth2/v4/token").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
+			Request httpRequest = new okhttp3.Request.Builder()
+					.url("https://www.googleapis.com/oauth2/v4/token")
+					.post(body)
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.build();
 
-			if (httpResponse.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
+			Response httpResponse = client.newCall(httpRequest).execute();
+
+			if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
 
 				Type type = new TypeToken<AuthRefreshResponse>() {
 				}.getType();
-				AuthRefreshResponse response = new Gson().fromJson(httpResponse.getBody().toString(), type);
+				AuthRefreshResponse response = new Gson().fromJson(httpResponse.body().string(), type);
 
 				//Update Db data.
 				settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
@@ -120,7 +142,7 @@ public class Authorization {
 				return response.access_token;
 			} else {
 				//Failed to get OK. Send debug info.
-				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.getStatus() + " | " + httpResponse.getStatusText() + " | " + httpResponse.getBody().toString(), this.getClass(), true);
+				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.code() + " | " + httpResponse.message() + " | " + httpResponse.body().string(), this.getClass(), true);
 				return null;
 			}
 
@@ -134,21 +156,33 @@ public class Authorization {
 	void pollForAuth(Poll poll) {
 		GuildSettings settings = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
 		try {
-			String body = "client_id=" + clientData.getClientId() + "&client_secret=" + clientData.getClientSecret() + "&code=" + poll.getDevice_code() + "&grant_type=http://oauth.net/grant_type/device/1.0";
+			RequestBody body = new FormBody.Builder()
+					.addEncoded("client_id", clientData.getClientId())
+					.addEncoded("client_secret", clientData.getClientSecret())
+					.addEncoded("code", poll.getDevice_code())
+					.addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
+					.build();
+
+			Request httpRequest = new okhttp3.Request.Builder()
+					.url("https://www.googleapis.com/oauth2/v4/token")
+					.post(body)
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.build();
 
 			//Execute
-			com.mashape.unirest.http.HttpResponse<JsonNode> response = Unirest.post("https://www.googleapis.com/oauth2/v4/token").header("Content-Type", "application/x-www-form-urlencoded").body(body).asJson();
+			Response response = client.newCall(httpRequest).execute();
+
 
 			//Handle response.
-			if (response.getStatus() == 403) {
+			if (response.code() == 403) {
 				//Handle access denied
 				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Deny", settings), poll.getUser());
-			} else if (response.getStatus() == 400) {
+			} else if (response.code() == 400) {
 				try {
 					//See if auth is pending, if so, just reschedule.
 					Type type = new TypeToken<AuthPollResponseError>() {
 					}.getType();
-					AuthPollResponseError apre = new Gson().fromJson(response.getBody().toString(), type);
+					AuthPollResponseError apre = new Gson().fromJson(response.body().string(), type);
 
 					if (apre.error.equalsIgnoreCase("authorization_pending")) {
 						//Response pending
@@ -157,23 +191,23 @@ public class Authorization {
 						MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings), poll.getUser());
 					} else {
 						MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
-						Logger.getLogger().debug(poll.getUser(), "Poll Failure!", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
+						Logger.getLogger().debug(poll.getUser(), "Poll Failure!", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass(), true);
 					}
 				} catch (Exception e) {
 					//Auth is not pending, error occurred.
 					Logger.getLogger().exception(poll.getUser(), "Failed to poll for authorization to google account.", e, this.getClass(), true);
-					Logger.getLogger().debug(poll.getUser(), "More info on failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
+					Logger.getLogger().debug(poll.getUser(), "More info on failure", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass(), true);
 					MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
 				}
-			} else if (response.getStatus() == 429) {
+			} else if (response.code() == 429) {
 				//We got rate limited... oops. Let's just poll half as often.
 				poll.setInterval(poll.getInterval() * 2);
 				PollManager.getManager().scheduleNextPoll(poll);
-			} else if (response.getStatus() == HttpStatusCodes.STATUS_CODE_OK) {
+			} else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
 				//Access granted
 				Type type = new TypeToken<AuthPollResponseGrant>() {
 				}.getType();
-				AuthPollResponseGrant aprg = new Gson().fromJson(response.getBody().toString(), type);
+				AuthPollResponseGrant aprg = new Gson().fromJson(response.body().string(), type);
 
 				//Save credentials securely.
 				GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
@@ -212,7 +246,7 @@ public class Authorization {
 			} else {
 				//Unknown network error...
 				MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
-				Logger.getLogger().debug(poll.getUser(), "Network error; poll failure", "Status code: " + response.getStatus() + " | " + response.getStatusText() + " | " + response.getBody().toString(), this.getClass(), true);
+				Logger.getLogger().debug(poll.getUser(), "Network error; poll failure", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass(), true);
 			}
 		} catch (Exception e) {
 			//Handle exception.
