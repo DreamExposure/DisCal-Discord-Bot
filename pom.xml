@@ -174,7 +174,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>com.cloudcraftgaming.discal.Main</mainClass>
+							<mainClass>com.cloudcraftgaming.discal.bot.Main</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
