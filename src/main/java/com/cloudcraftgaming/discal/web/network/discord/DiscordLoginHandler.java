@@ -36,11 +36,11 @@ public class DiscordLoginHandler {
 			String code = request.queryParams("code");
 
 			RequestBody body = new FormBody.Builder()
-					.add("client_id", BotSettings.ID.get())
-					.add("client_secret", BotSettings.SECRET.get())
-					.add("grant_type", "authorization_code")
-					.add("code", code)
-					.add("redirect_uri", BotSettings.REDIR_URL.get())
+					.addEncoded("client_id", BotSettings.ID.get())
+					.addEncoded("client_secret", BotSettings.SECRET.get())
+					.addEncoded("grant_type", "authorization_code")
+					.addEncoded("code", code)
+					.addEncoded("redirect_uri", BotSettings.REDIR_URL.get())
 					.build();
 
 			okhttp3.Request httpRequest = new okhttp3.Request.Builder()
@@ -50,16 +50,10 @@ public class DiscordLoginHandler {
 					.build();
 
 			//POST request to discord for access...
-			/*
-			HttpResponse<JsonNode> httpResponse = Unirest.post("https://discordapp.com/api/v6/oauth2/token").header("Content-Type", "application/x-www-form-urlencoded").field("client_id", BotSettings.ID.get()).field("client_secret", BotSettings.SECRET.get()).field("grant_type", "authorization_code").field("code", code).field("redirect_uri", BotSettings.REDIR_URL.get()).asJson();
-
-			JSONObject info = new JSONObject(httpResponse.getBody()).getJSONObject("object");
-			*/
-
 			okhttp3.Response httpResponse = client.newCall(httpRequest).execute();
 
 			@SuppressWarnings("ConstantConditions")
-			JSONObject info = new JSONObject(httpResponse.body()).getJSONObject("object");
+			JSONObject info = new JSONObject(httpResponse.body().string());
 
 			if (info.has("access_token")) {
 				//GET request for user info...
@@ -70,15 +64,8 @@ public class DiscordLoginHandler {
 
 				okhttp3.Response userDataResponse = client.newCall(userDataRequest).execute();
 
-				/*
-				HttpResponse<JsonNode> userDataResponse = Unirest.get("https://discordapp.com/api/v6/users/@me").header("Authorization", "Bearer " + info.getString("access_token")).asJson();
-
-				JSONObject userInfo = new JSONObject(userDataResponse.getBody()).getJSONObject("object");
-
-				 */
-
 				@SuppressWarnings("ConstantConditions")
-				JSONObject userInfo = new JSONObject(userDataResponse.body()).getJSONObject("object");
+				JSONObject userInfo = new JSONObject(userDataResponse.body().string());
 
 				//Saving session info and access info to memory until moved into the database...
 				Map m = new HashMap();
