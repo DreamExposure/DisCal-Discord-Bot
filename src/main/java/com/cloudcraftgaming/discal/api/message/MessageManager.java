@@ -4,6 +4,8 @@ import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.file.ReadFile;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.logger.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
@@ -17,7 +19,6 @@ import sx.blah.discord.util.RequestBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -28,7 +29,7 @@ import java.util.Map;
 public class MessageManager {
 	public static String lineBreak = System.getProperty("line.separator");
 
-	private static Map<String, Map<String, String>> langs;
+	private static JSONObject langs;
 
 	//Language handling
 	public static void loadLangs() {
@@ -51,45 +52,50 @@ public class MessageManager {
 	}
 
 	public static boolean isSupported(String _value) {
-		for (String l : langs.keySet()) {
-			if (l.equalsIgnoreCase(_value))
+		JSONArray names = langs.names();
+		for (int i = 0; i < names.length(); i++) {
+			if (_value.equalsIgnoreCase(names.getString(i)))
 				return true;
-
 		}
 		return false;
 	}
 
 	public static String getValidLang(String _value) {
-		for (String l : langs.keySet()) {
-			if (l.equalsIgnoreCase(_value))
-				return l;
-
+		JSONArray names = langs.names();
+		for (int i = 0; i < names.length(); i++) {
+			if (_value.equalsIgnoreCase(names.getString(i)))
+				return names.getString(i);
 		}
 		return "ENGLISH";
 	}
 
 
 	public static String getMessage(String key, GuildSettings settings) {
-		Map<String, String> messages;
+		JSONObject messages;
 
-		if (settings.getLang() != null && langs.containsKey(settings.getLang()))
-			messages = langs.get(settings.getLang());
+		if (settings.getLang() != null && langs.has(settings.getLang()))
+			messages = langs.getJSONObject(settings.getLang());
 		else
-			messages = langs.get("ENGLISH");
+			messages = langs.getJSONObject("ENGLISH");
 
-
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace("%lb%", lineBreak);
+		if (messages.has(key))
+			return messages.getString(key).replace("%lb%", lineBreak);
+		else
+			return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
 	}
 
 	public static String getMessage(String key, String var, String replace, GuildSettings settings) {
-		Map<String, String> messages;
+		JSONObject messages;
 
-		if (settings.getLang() != null && langs.containsKey(settings.getLang()))
-			messages = langs.get(settings.getLang());
+		if (settings.getLang() != null && langs.has(settings.getLang()))
+			messages = langs.getJSONObject(settings.getLang());
 		else
-			messages = langs.get("ENGLISH");
+			messages = langs.getJSONObject("ENGLISH");
 
-		return messages.getOrDefault(key, "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key).replace(var, replace).replace("%lb%", lineBreak);
+		if (messages.has(key))
+			return messages.getString(key).replace(var, replace).replace("%lb%", lineBreak);
+		else
+			return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
 	}
 
 	//Sending messages and shit handling...
