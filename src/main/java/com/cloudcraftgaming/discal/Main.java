@@ -28,7 +28,7 @@ import java.util.Properties;
  */
 @SuppressWarnings("ThrowableNotThrown")
 public class Main {
-	public static String version = "2.0.0";
+	public static String version = "2.1.0";
 
 	public static void main(String[] args) throws IOException {
 		//Get bot settings
