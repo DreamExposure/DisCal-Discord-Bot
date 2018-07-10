@@ -222,7 +222,7 @@ public class EventCreator {
 				event.setDescription(preEvent.getDescription());
 				event.setStart(preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone()));
 				event.setEnd(preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone()));
-				event.setVisibility("web/public");
+				event.setVisibility("public");
 				if (!preEvent.getColor().equals(EventColor.NONE))
 					event.setColorId(String.valueOf(preEvent.getColor().getId()));
 

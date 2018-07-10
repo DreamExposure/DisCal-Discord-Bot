@@ -204,7 +204,7 @@ public class EventEndpoint {
 
 			Event event = new Event();
 			event.setId(eventId);
-			event.setVisibility("web/public");
+			event.setVisibility("public");
 			event.setSummary(body.getString("summary"));
 			event.setDescription(body.getString("description"));
 
@@ -297,7 +297,7 @@ public class EventEndpoint {
 
 			Event event = new Event();
 			event.setId(KeyGenerator.generateEventId());
-			event.setVisibility("web/public");
+			event.setVisibility("public");
 			event.setSummary(body.getString("summary"));
 			event.setDescription(body.getString("description"));
 
