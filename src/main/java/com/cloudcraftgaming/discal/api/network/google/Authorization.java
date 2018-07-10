@@ -8,10 +8,6 @@ import com.cloudcraftgaming.discal.api.message.MessageManager;
 import com.cloudcraftgaming.discal.api.message.calendar.CalendarMessageFormatter;
 import com.cloudcraftgaming.discal.api.object.BotSettings;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
-import com.cloudcraftgaming.discal.api.object.json.google.AuthPollResponseError;
-import com.cloudcraftgaming.discal.api.object.json.google.AuthPollResponseGrant;
-import com.cloudcraftgaming.discal.api.object.json.google.AuthRefreshResponse;
-import com.cloudcraftgaming.discal.api.object.json.google.CodeResponse;
 import com.cloudcraftgaming.discal.api.object.network.google.ClientData;
 import com.cloudcraftgaming.discal.api.object.network.google.Poll;
 import com.cloudcraftgaming.discal.logger.Logger;
@@ -19,15 +15,13 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import okhttp3.*;
+import org.json.JSONObject;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.List;
 
 /**
@@ -72,19 +66,17 @@ public class Authorization {
 			Response response = client.newCall(httpRequest).execute();
 
 			if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-				Type type = new TypeToken<CodeResponse>() {
-				}.getType();
-				CodeResponse cr = new Gson().fromJson(response.body().string(), type);
+				JSONObject codeResponse = new JSONObject(response.body().string());
 
 				//Send DM to user with code.
 				EmbedBuilder em = new EmbedBuilder();
 				em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
 				em.withAuthorName("DisCal");
 				em.withTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
-				em.appendField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), cr.user_code, true);
+				em.appendField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), codeResponse.getString("user_code"), true);
 				em.withFooterText(MessageManager.getMessage("Embed.AddCalendar.Code.Footer", settings));
 
-				em.withUrl(cr.verification_url);
+				em.withUrl(codeResponse.getString("verification_url"));
 				em.withColor(36, 153, 153);
 
 				IUser user = event.getAuthor();
@@ -93,10 +85,10 @@ public class Authorization {
 				//Start timer to poll Google Cal for auth
 				Poll poll = new Poll(user, event.getGuild());
 
-				poll.setDevice_code(cr.device_code);
-				poll.setRemainingSeconds(cr.expires_in);
-				poll.setExpires_in(cr.expires_in);
-				poll.setInterval(cr.interval);
+				poll.setDevice_code(codeResponse.getString("device_code"));
+				poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
+				poll.setExpires_in(codeResponse.getInt("expires_in"));
+				poll.setInterval(codeResponse.getInt("interval"));
 				pollForAuth(poll);
 			} else {
 				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
@@ -129,17 +121,14 @@ public class Authorization {
 			Response httpResponse = client.newCall(httpRequest).execute();
 
 			if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
-
-				Type type = new TypeToken<AuthRefreshResponse>() {
-				}.getType();
-				AuthRefreshResponse response = new Gson().fromJson(httpResponse.body().string(), type);
+				JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
 				//Update Db data.
-				settings.setEncryptedAccessToken(encryption.encrypt(response.access_token));
+				settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
 				DatabaseManager.getManager().updateSettings(settings);
 
 				//Okay, we can return the access token to be used when this method is called.
-				return response.access_token;
+				return autoRefreshResponse.getString("access_token");
 			} else {
 				//Failed to get OK. Send debug info.
 				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.code() + " | " + httpResponse.message() + " | " + httpResponse.body().string(), this.getClass(), true);
@@ -177,17 +166,15 @@ public class Authorization {
 			if (response.code() == 403) {
 				//Handle access denied
 				MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Deny", settings), poll.getUser());
-			} else if (response.code() == 400) {
+			} else if (response.code() == 400 || response.code() == 428) {
 				try {
 					//See if auth is pending, if so, just reschedule.
-					Type type = new TypeToken<AuthPollResponseError>() {
-					}.getType();
-					AuthPollResponseError apre = new Gson().fromJson(response.body().string(), type);
+					JSONObject aprError = new JSONObject(response.body().string());
 
-					if (apre.error.equalsIgnoreCase("authorization_pending")) {
+					if (aprError.getString("error").equalsIgnoreCase("authorization_pending")) {
 						//Response pending
 						PollManager.getManager().scheduleNextPoll(poll);
-					} else if (apre.error.equalsIgnoreCase("expired_token")) {
+					} else if (aprError.getString("error").equalsIgnoreCase("expired_token")) {
 						MessageManager.sendDirectMessage(MessageManager.getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings), poll.getUser());
 					} else {
 						MessageManager.sendDirectMessage(MessageManager.getMessage("Notification.Error.Network", settings), poll.getUser());
@@ -205,15 +192,13 @@ public class Authorization {
 				PollManager.getManager().scheduleNextPoll(poll);
 			} else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
 				//Access granted
-				Type type = new TypeToken<AuthPollResponseGrant>() {
-				}.getType();
-				AuthPollResponseGrant aprg = new Gson().fromJson(response.body().string(), type);
+				JSONObject aprGrant = new JSONObject(response.body().string());
 
 				//Save credentials securely.
 				GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
 				AESEncryption encryption = new AESEncryption(gs);
-				gs.setEncryptedAccessToken(encryption.encrypt(aprg.access_token));
-				gs.setEncryptedRefreshToken(encryption.encrypt(aprg.refresh_token));
+				gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
+				gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
 				gs.setUseExternalCalendar(true);
 				DatabaseManager.getManager().updateSettings(gs);
 
