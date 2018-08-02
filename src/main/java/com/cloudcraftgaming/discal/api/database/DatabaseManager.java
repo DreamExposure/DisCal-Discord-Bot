@@ -14,6 +14,8 @@ import com.cloudcraftgaming.discal.logger.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -25,6 +27,8 @@ import java.util.UUID;
 public class DatabaseManager {
 	private static DatabaseManager instance;
 	private DatabaseInfo databaseInfo;
+
+	private Map<Long, GuildSettings> guildSettingsCache = new HashMap<>();
 
 	private DatabaseManager() {
 	} //Prevent initialization.
@@ -216,6 +220,9 @@ public class DatabaseManager {
 	}
 
 	public boolean updateSettings(GuildSettings settings) {
+		guildSettingsCache.remove(settings.getGuildID());
+		guildSettingsCache.put(settings.getGuildID(), settings);
+
 		if (settings.getPrivateKey().equalsIgnoreCase("N/a"))
 			settings.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
 
@@ -578,6 +585,9 @@ public class DatabaseManager {
 	}
 
 	public GuildSettings getSettings(long guildId) {
+		if (guildSettingsCache.containsKey(guildId))
+			return guildSettingsCache.get(guildId);
+
 		GuildSettings settings = new GuildSettings(guildId);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
@@ -610,12 +620,15 @@ public class DatabaseManager {
 				} else {
 					//Data not present.
 					statement.close();
-					return settings;
 				}
 			}
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get Guild Settings.", e, this.getClass(), true);
 		}
+
+		guildSettingsCache.remove(guildId);
+		guildSettingsCache.put(guildId, settings);
+
 		return settings;
 	}
 
