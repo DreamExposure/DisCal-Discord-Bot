@@ -241,19 +241,22 @@ public class RsvpCommand implements ICommand {
 
 		StringBuilder onTime = new StringBuilder();
 		for (IUser u: UserUtils.getUsers(data.getGoingOnTime(), g)) {
-			onTime.append(u.getName()).append(", ");
+			onTime.append(u.getDisplayName(g)).append(", ");
 		}
+
 		StringBuilder late = new StringBuilder();
 		for (IUser u: UserUtils.getUsers(data.getGoingLate(), g)) {
-			late.append(u.getName()).append(", ");
+			late.append(u.getDisplayName(g)).append(", ");
 		}
+
 		StringBuilder unsure = new StringBuilder();
 		for (IUser u: UserUtils.getUsers(data.getUndecided(), g)) {
-			unsure.append(u.getName()).append(", ");
+			unsure.append(u.getDisplayName(g)).append(", ");
 		}
+
 		StringBuilder notGoing = new StringBuilder();
 		for (IUser u: UserUtils.getUsers(data.getNotGoing(), g)) {
-			notGoing.append(u.getName()).append(", ");
+			notGoing.append(u.getDisplayName(g)).append(", ");
 		}
 
 		if (onTime.toString().isEmpty())
