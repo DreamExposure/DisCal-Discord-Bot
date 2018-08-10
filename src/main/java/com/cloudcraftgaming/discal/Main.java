@@ -63,6 +63,7 @@ public class Main {
 			DiscordAccountHandler.getHandler().init();
 			SparkUtils.initSpark();
 		} catch (Exception e) {
+			e.printStackTrace();
 			Logger.getLogger().exception(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
 		}
 

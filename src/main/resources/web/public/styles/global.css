@@ -3,6 +3,12 @@ html {
 	position: relative;
 	min-height: 100%;
 	overflow: auto;
+
+	box-sizing: border-box;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
 }
 
 body {
@@ -17,7 +23,10 @@ body {
 footer {
 	position: absolute;
 	bottom: 0;
-	height: 25px;
+	background: #1b1f20;
+	color: white;
+
+	width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -154,12 +163,13 @@ label {
 #content {
 	margin-left: 10%;
 	margin-right: 10%;
-	margin-bottom: auto;
+	margin-bottom: 5%;
 	background-color: #3c3d41;
 
 	padding: 10px;
 
 	text-align: center;
+
 	display: flow-root;
 }
 
