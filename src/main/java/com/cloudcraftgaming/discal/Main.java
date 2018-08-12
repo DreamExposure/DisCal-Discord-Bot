@@ -10,7 +10,8 @@ import com.cloudcraftgaming.discal.bot.listeners.ReadyEventListener;
 import com.cloudcraftgaming.discal.bot.module.command.*;
 import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
-import com.cloudcraftgaming.discal.web.utils.SparkUtils;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventDispatcher;
@@ -27,6 +28,7 @@ import java.util.Properties;
  * For Project: DisCal
  */
 @SuppressWarnings("ThrowableNotThrown")
+@SpringBootApplication
 public class Main {
 	public static String version = "2.1.0";
 
@@ -58,13 +60,13 @@ public class Main {
 		DatabaseManager.getManager().connectToMySQL();
 		DatabaseManager.getManager().createTables();
 
-		//Start spark (catch any issues from it so only the site goes down without affecting bot....
+		//Start Spring (catch any issues from it so only the site goes down without affecting bot....)
 		try {
 			DiscordAccountHandler.getHandler().init();
-			SparkUtils.initSpark();
+			SpringApplication.run(Main.class, args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "'Spark ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
+			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
 		}
 
 		//Register modules

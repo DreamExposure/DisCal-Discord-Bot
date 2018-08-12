@@ -9,11 +9,13 @@ import com.cloudcraftgaming.discal.api.object.GuildSettings;
 import com.cloudcraftgaming.discal.api.object.calendar.CalendarData;
 import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.Recurrence;
+import com.cloudcraftgaming.discal.api.object.web.AuthenticationState;
 import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.EventUtils;
 import com.cloudcraftgaming.discal.api.utils.ImageUtils;
 import com.cloudcraftgaming.discal.logger.Logger;
 import com.cloudcraftgaming.discal.web.handler.DiscordAccountHandler;
+import com.cloudcraftgaming.discal.web.utils.Authentication;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
@@ -21,26 +23,43 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
 import org.json.JSONObject;
-import spark.Request;
-import spark.Response;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("Duplicates")
+@RestController
+@RequestMapping("/api/v1/events")
 public class EventEndpoint {
-	public static String getEventsForMonth(Request request, Response response) {
-		JSONObject requestBody = new JSONObject(request.body());
+
+	@PostMapping(value = "/list/month", produces = "application/json")
+	public static String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
+		JSONObject requestBody = new JSONObject(rBody);
 
 		Integer daysInMonth = Integer.valueOf(requestBody.getString("DaysInMonth"));
 		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
 		Long endEpoch = startEpoch + (86400000L * daysInMonth);
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
 			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 			settings = g.getSettings();
@@ -77,23 +96,36 @@ public class EventEndpoint {
 			body.put("events", eventsJson);
 			body.put("count", eventsJson.size() + "");
 
-			response.body(body.toString());
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return body.toString();
 		} catch (Exception e) {
-			response.body("Internal server error!");
 			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for a month.", e, EventEndpoint.class, true);
-			return response.body();
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String getEventsForSelectedDate(Request request, Response response) {
-		JSONObject requestBody = new JSONObject(request.body());
+	@PostMapping(value = "/list/date", produces = "application/json")
+	public static String getEventsForSelectedDate(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
+		JSONObject requestBody = new JSONObject(rBody);
 		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
 		Long endEpoch = startEpoch + 86400000L;
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
 			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 			settings = g.getSettings();
@@ -123,7 +155,7 @@ public class EventEndpoint {
 			}
 
 			List<JSONObject> eventsJson = new ArrayList<>();
-			for (Event e: items) {
+			for (Event e : items) {
 				JSONObject jo = new JSONObject();
 				jo.put("id", e.getId());
 				jo.put("epochStart", e.getStart().getDateTime().getValue());
@@ -171,22 +203,35 @@ public class EventEndpoint {
 			body.put("events", eventsJson);
 			body.put("count", eventsJson.size());
 
-			response.body(body.toString());
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return body.toString();
 		} catch (Exception e) {
-			response.body("Internal server error!");
 			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for specific date!", e, EventEndpoint.class, true);
-			return response.body();
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String updateEvent(Request request, Response response) {
-		JSONObject body = new JSONObject(request.body());
+	@PostMapping(value = "/update", produces = "application/json")
+	public static String updateEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
+		JSONObject body = new JSONObject(rBody);
 		String eventId = body.getString("id");
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
 			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 			settings = g.getSettings();
@@ -241,14 +286,14 @@ public class EventEndpoint {
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
 
 				if (!ImageUtils.validate(ed.getImageLink())) {
-					response.status(400);
 					JSONObject respondBody = new JSONObject();
 					respondBody.put("Message", "Failed to create event!");
 					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
 
-					response.body(respondBody.toString());
 
-					return response.body();
+					response.setContentType("application/json");
+					response.setStatus(400);
+					return respondBody.toString();
 				}
 			}
 
@@ -257,8 +302,9 @@ public class EventEndpoint {
 
 			service.events().update(calendarData.getCalendarId(), eventId, event).execute();
 
-			response.status(200);
-			response.body(ResponseUtils.getJsonResponseMessage("Successfully updated event!"));
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return ResponseUtils.getJsonResponseMessage("Successfully updated event!");
 
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, EventEndpoint.class, true);
@@ -268,18 +314,28 @@ public class EventEndpoint {
 			respondBody.put("Message", "Failed to create event!");
 			respondBody.put("reason", "Google API may be at fault. Please try again.");
 
-			response.body(respondBody.toString());
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return respondBody.toString();
 		}
-
-		return response.body();
 	}
 
-	public static String createEvent(Request request, Response response) {
-		JSONObject body = new JSONObject(request.body());
+	@PostMapping(value = "/create", produces = "application/json")
+	public static String createEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
+		JSONObject body = new JSONObject(rBody);
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
 			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 			settings = g.getSettings();
@@ -335,14 +391,14 @@ public class EventEndpoint {
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
 
 				if (!ImageUtils.validate(ed.getImageLink())) {
-					response.status(400);
+					response.setContentType("application/json");
+					response.setStatus(400);
+
 					JSONObject respondBody = new JSONObject();
 					respondBody.put("Message", "Failed to create event!");
 					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
 
-					response.body(respondBody.toString());
-
-					return response.body();
+					return respondBody.toString();
 				}
 			}
 
@@ -352,12 +408,13 @@ public class EventEndpoint {
 
 			Event confirmed = service.events().insert(calendarData.getCalendarId(), event).execute();
 
-			response.status(200);
 			JSONObject respondBody = new JSONObject();
 			respondBody.put("Message", "Successfully create event!");
 			respondBody.put("id", confirmed.getId());
 
-			response.body(respondBody.toString());
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return respondBody.toString();
 
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB] Failed to create event!", e, EventEndpoint.class, true);
@@ -367,20 +424,31 @@ public class EventEndpoint {
 			respondBody.put("Message", "Failed to create event!");
 			respondBody.put("reason", "Google API may be at fault. Please try again.");
 
-			response.body(respondBody.toString());
-		}
+			response.setContentType("application/json");
+			response.setStatus(500);
 
-		return response.body();
+			return respondBody.toString();
+		}
 	}
 
-	public static String deleteEvent(Request request, Response response) {
-		JSONObject requestBody = new JSONObject(request.body());
+	@PostMapping(value = "/delete", produces = "application/json")
+	public static String deleteEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
+		JSONObject requestBody = new JSONObject(rBody);
 		String eventId = requestBody.getString("id");
 		GuildSettings settings;
 
 		//Check if logged in, else get guild ID from body.
-		if (DiscordAccountHandler.getHandler().hasAccount(request.session().id())) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request.session().id());
+		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
 			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 			settings = g.getSettings();
@@ -392,13 +460,15 @@ public class EventEndpoint {
 		//okay, time to properly delete the event
 		if (EventUtils.deleteEvent(settings, eventId)) {
 			//Deleted!
-			response.body(ResponseUtils.getJsonResponseMessage("Successfully deleted event!"));
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return ResponseUtils.getJsonResponseMessage("Successfully deleted event!");
 		} else {
 			//Oh nos! we failed >.<
-			response.status(500);
-			response.body(ResponseUtils.getJsonResponseMessage("Failed to delete event!"));
-		}
+			response.setContentType("application/json");
+			response.setStatus(500);
 
-		return response.body();
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+		}
 	}
 }

@@ -4,17 +4,21 @@ import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.enums.announcement.AnnouncementType;
 import com.cloudcraftgaming.discal.api.enums.event.EventColor;
 import com.cloudcraftgaming.discal.api.object.announcement.Announcement;
+import com.cloudcraftgaming.discal.api.object.web.AuthenticationState;
 import com.cloudcraftgaming.discal.logger.Logger;
+import com.cloudcraftgaming.discal.web.utils.Authentication;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import spark.Request;
-import spark.Response;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.UUID;
-
-import static spark.Spark.halt;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -22,19 +26,29 @@ import static spark.Spark.halt;
  * For Project: DisCal-Discord-Bot
  */
 @SuppressWarnings("ThrowableNotThrown")
+@RestController
+@RequestMapping("/api/v1/announcement")
 public class AnnouncementEndpoint {
-	public static String getAnnouncement(Request request, Response response) {
+
+	@PostMapping(value = "/get", produces = "application/json")
+	public static String getAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
 			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
 			if (a != null) {
-
-				response.type("application/json");
-				response.status(200);
 
 				JSONObject body = new JSONObject();
 				body.put("channel", a.getAnnouncementChannelId());
@@ -49,30 +63,48 @@ public class AnnouncementEndpoint {
 				body.put("subscribers_role", a.getSubscriberRoleIds());
 				body.put("subscribers_user", a.getSubscriberUserIds());
 
-				response.body(body.toString());
+				response.setContentType("application/json");
+				response.setStatus(200);
+
+				return body.toString();
 			} else {
-				response.type("application/json");
-				response.status(404);
-				response.body(ResponseUtils.getJsonResponseMessage("Announcement not found."));
+				response.setContentType("application/json");
+				response.setStatus(200);
+				return ResponseUtils.getJsonResponseMessage("Announcement not found.");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get announcement error", e, AnnouncementEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String createAnnouncement(Request request, Response response) {
+	@PostMapping(value = "/create", produces = "application/json")
+	public static String createAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 
 			Announcement a = new Announcement(guildId);
 
-			JSONObject body = new JSONObject(request.body());
+			JSONObject body = new JSONObject(requestBody);
 			a.setAnnouncementChannelId(body.getString("channel"));
 			a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
 
@@ -88,31 +120,47 @@ public class AnnouncementEndpoint {
 			a.setInfo(body.getString("info"));
 
 			if (DatabaseManager.getManager().updateAnnouncement(a)) {
-				response.type("application/json");
-				response.status(200);
+				response.setContentType("application/json");
+				response.setStatus(200);
 
 				JSONObject responseBody = new JSONObject();
 				responseBody.put("Message", "Successfully created announcement");
 				responseBody.put("id", a.getAnnouncementId().toString());
-				response.body(responseBody.toString());
+
+				return responseBody.toString();
 			} else {
-				response.type("application/json");
-				response.status(500);
-				response.body(ResponseUtils.getJsonResponseMessage("Internal Server Error"));
+				response.setContentType("application/json");
+				response.setStatus(500);
+				return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal create announcement error", e, AnnouncementEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String updateAnnouncement(Request request, Response response) {
+	@PostMapping(value = "/update", produces = "application/json")
+	public static String updateAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
@@ -120,7 +168,7 @@ public class AnnouncementEndpoint {
 
 			if (a != null) {
 
-				JSONObject body = new JSONObject(request.body());
+				JSONObject body = new JSONObject(requestBody);
 
 				if (body.has("channel"))
 					a.setAnnouncementChannelId(body.getString("channel"));
@@ -138,68 +186,97 @@ public class AnnouncementEndpoint {
 					a.setInfo(body.getString("info"));
 				if (body.has("enabled"))
 					a.setEnabled(body.getBoolean("enabled"));
-				if (body.has("info_only")) {
+				if (body.has("info_only"))
 					a.setInfoOnly(body.getBoolean("info_only"));
-				}
 
 				if (DatabaseManager.getManager().updateAnnouncement(a)) {
-					response.type("application/json");
-					response.status(200);
-					response.body(ResponseUtils.getJsonResponseMessage("Successfully updated announcement"));
+					response.setContentType("application/json");
+					response.setStatus(200);
+					return ResponseUtils.getJsonResponseMessage("Successfully updated announcement");
 				} else {
-					response.type("application/json");
-					response.status(500);
-					response.body(ResponseUtils.getJsonResponseMessage("Internal Server Error"));
+					response.setContentType("application/json");
+					response.setStatus(500);
+					return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 				}
 			} else {
-				response.type("application/json");
-				response.status(404);
-				response.body(ResponseUtils.getJsonResponseMessage("Announcement not found"));
+				response.setContentType("application/json");
+				response.setStatus(404);
+				return ResponseUtils.getJsonResponseMessage("Announcement not found");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal update announcement error", e, AnnouncementEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String deleteAnnouncement(Request request, Response response) {
+	@PostMapping(value = "/delete", produces = "application/json")
+	public static String deleteAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
 			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId) != null) {
 				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
-					response.type("application/json");
-					response.status(200);
-					response.body(ResponseUtils.getJsonResponseMessage("Successfully deleted announcement"));
+					response.setContentType("application/json");
+					response.setStatus(200);
+					return ResponseUtils.getJsonResponseMessage("Successfully deleted announcement");
 				} else {
-					response.type("application/json");
-					response.status(500);
-					response.body(ResponseUtils.getJsonResponseMessage("Internal Server Error"));
+					response.setContentType("application/json");
+					response.setStatus(500);
+					return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 				}
 			} else {
-				response.type("application/json");
-				response.status(404);
-				response.body(ResponseUtils.getJsonResponseMessage("Announcement not found"));
+				response.setContentType("application/json");
+				response.setStatus(404);
+				return ResponseUtils.getJsonResponseMessage("Announcement not found");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal delete announcement error", e, AnnouncementEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String listAnnouncements(Request request, Response response) {
+	@PostMapping(value = "/list", produces = "application/json")
+	public static String listAnnouncements(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			long guildId = jsonMain.getLong("guild_id");
 
 			int amount = jsonMain.getInt("amount");
@@ -253,16 +330,21 @@ public class AnnouncementEndpoint {
 			body.put("amount", announcements.size());
 			body.put("announcements", announcements);
 
-			response.type("application/json");
-			response.status(200);
-			response.body(body.toString());
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return body.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal list announcements error", e, AnnouncementEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 }

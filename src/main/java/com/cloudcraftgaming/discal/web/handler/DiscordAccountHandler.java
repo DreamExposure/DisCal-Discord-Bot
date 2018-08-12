@@ -6,6 +6,7 @@ import com.cloudcraftgaming.discal.api.object.web.WebGuild;
 import com.cloudcraftgaming.discal.api.utils.GuildUtils;
 import sx.blah.discord.handle.obj.IGuild;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -14,7 +15,7 @@ import java.util.*;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "RedundantCast"})
 public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
 	private static Timer timer;
@@ -50,14 +51,14 @@ public class DiscordAccountHandler {
 	}
 
 	//Boolean/checkers
-	public boolean hasAccount(String sessionId) {
-		return discordAccounts.containsKey(sessionId);
+	public boolean hasAccount(HttpServletRequest request) {
+		return discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"));
 	}
 
 	//Getters
-	public Map getAccount(String sessionId) {
-		if (discordAccounts.containsKey(sessionId)) {
-			Map m = discordAccounts.get(sessionId);
+	public Map getAccount(HttpServletRequest request) {
+		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
+			Map m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
 			m.remove("lastUse");
 			m.put("lastUse", System.currentTimeMillis());
 			return m;
@@ -72,9 +73,9 @@ public class DiscordAccountHandler {
 		}
 	}
 
-	public Map getAccountForGuildEmbed(String sessionId, String guildId) {
-		if (discordAccounts.containsKey(sessionId)) {
-			Map m = discordAccounts.get(sessionId);
+	public Map getAccountForGuildEmbed(HttpServletRequest request, String guildId) {
+		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
+			Map m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
 			m.remove("lastUse");
 			m.put("lastUse", System.currentTimeMillis());
 
@@ -120,21 +121,21 @@ public class DiscordAccountHandler {
 	}
 
 	//Functions
-	public void addAccount(Map m, String sessionId) {
-		discordAccounts.remove(sessionId);
+	public void addAccount(Map m, HttpServletRequest request) {
+		discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
 		m.remove("lastUse");
 		m.put("lastUse", System.currentTimeMillis());
-		discordAccounts.put(sessionId, m);
+		discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
 	}
 
-	public void appendAccount(Map m, String sessionId) {
-		if (discordAccounts.containsKey(sessionId)) {
-			Map exist = discordAccounts.get(sessionId);
+	public void appendAccount(Map m, HttpServletRequest request) {
+		if (discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
+			Map exist = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
 			exist.remove("lastUse");
 			exist.put("lastUse", System.currentTimeMillis());
 			exist.putAll(m);
 		} else {
-			discordAccounts.put(sessionId, m);
+			discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
 		}
 	}
 
@@ -148,9 +149,9 @@ public class DiscordAccountHandler {
 		}
 	}
 
-	public void removeAccount(String sessionId) {
-		if (hasAccount(sessionId)) {
-			discordAccounts.remove(sessionId);
+	public void removeAccount(HttpServletRequest request) {
+		if ((String) request.getSession(true).getAttribute("account") != null && hasAccount(request)) {
+			discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
 		}
 	}
 
@@ -164,7 +165,7 @@ public class DiscordAccountHandler {
 				toRemove.remove(id); //Timed out, remove account info and require sign in.
 		}
 
-		for (String id: toRemove) {
+		for (String id : toRemove) {
 			discordAccounts.remove(id);
 		}
 	}

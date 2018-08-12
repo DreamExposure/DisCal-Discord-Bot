@@ -12,29 +12,32 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import org.json.JSONException;
 import org.json.JSONObject;
-import spark.Request;
-import spark.Response;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-
-import static spark.Spark.halt;
+import java.util.UUID;
 
 /**
  * Created by Nova Fox on 12/19/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"ThrowableNotThrown", "unchecked"})
+@SuppressWarnings({"ThrowableNotThrown", "unchecked", "unused"})
+@RestController
 public class DiscordLoginHandler {
 
-	public static String handleDiscordCode(Request request, Response response) {
+	@GetMapping("/account/login")
+	public static String handleDiscordCode(HttpServletRequest req, HttpServletResponse res, @RequestParam(value = "code") String code) throws IOException {
 		OkHttpClient client = new OkHttpClient();
 
 		try {
-			String code = request.queryParams("code");
-
 			RequestBody body = new FormBody.Builder()
 					.addEncoded("client_id", BotSettings.ID.get())
 					.addEncoded("client_secret", BotSettings.SECRET.get())
@@ -85,33 +88,42 @@ public class DiscordLoginHandler {
 				m.put("anTypes", AnnouncementType.values());
 				m.put("eventColors", EventColor.values());
 
-				DiscordAccountHandler.getHandler().addAccount(m, request.session().id());
+				String newSessionId = UUID.randomUUID().toString();
+
+				req.getSession(true).setAttribute("account", newSessionId);
+
+				DiscordAccountHandler.getHandler().addAccount(m, newSessionId);
 
 				//Finally redirect to the dashboard seamlessly.
-				response.redirect("/dashboard", 301);
+				res.sendRedirect("/dashboard");
+				return "redirect:/dashboard";
 			} else {
 				//Token not provided. Authentication denied or errored... Redirect to dashboard so user knows auth failed.
-				response.redirect("/dashboard", 301);
+				res.sendRedirect("/dashboard");
+				return "redirect:/dashboard";
 			}
 		} catch (JSONException e) {
 			Logger.getLogger().exception(null, "[WEB] JSON || Discord login failed!", e, DiscordLoginHandler.class, true);
-			response.redirect("/dashboard", 301);
+			res.sendRedirect("/dashboard");
+			return "redirect:/dashboard";
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB] Discord login failed!", e, DiscordLoginHandler.class, true);
-			halt(500, "Internal Server Exception");
+			res.sendRedirect("/dashboard");
+			return "redirect:/dashboard";
 		}
-		return response.body();
 	}
 
-	public static String handleLogout(Request request, Response response) {
+	@GetMapping("/account/logout")
+	public static String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
 		try {
-			DiscordAccountHandler.getHandler().removeAccount(request.session().id());
+			DiscordAccountHandler.getHandler().removeAccount((String) request.getSession(true).getAttribute("account"));
 
-			response.redirect("/", 301);
+			res.sendRedirect("/");
+			return "redirect:/";
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB] Discord logout failed!", e, DiscordLoginHandler.class, true);
-			halt(500, "Internal Server Exception");
+			res.sendRedirect("/");
+			return "redirect:/";
 		}
-		return response.body();
 	}
 }

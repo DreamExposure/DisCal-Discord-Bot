@@ -3,19 +3,23 @@ package com.cloudcraftgaming.discal.web.endpoints.v1;
 import com.cloudcraftgaming.discal.api.DisCalAPI;
 import com.cloudcraftgaming.discal.api.database.DatabaseManager;
 import com.cloudcraftgaming.discal.api.object.GuildSettings;
+import com.cloudcraftgaming.discal.api.object.web.AuthenticationState;
 import com.cloudcraftgaming.discal.api.utils.PermissionChecker;
 import com.cloudcraftgaming.discal.logger.Logger;
+import com.cloudcraftgaming.discal.web.utils.Authentication;
 import com.cloudcraftgaming.discal.web.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
-import spark.Request;
-import spark.Response;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-
-import static spark.Spark.halt;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -23,16 +27,29 @@ import static spark.Spark.halt;
  * For Project: DisCal-Discord-Bot
  */
 @SuppressWarnings("ThrowableNotThrown")
+@RestController
+@RequestMapping("/api/v1/guild")
 public class GuildEndpoint {
-	public static String getSettings(Request request, Response response) {
+
+	@PostMapping(value = "/settings/get", produces = "application/json")
+	public static String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
-			response.type("application/json");
-			response.status(200);
+			response.setContentType("application/json");
+			response.setStatus(200);
 
 			JSONObject body = new JSONObject();
 			body.put("external_calendar", settings.useExternalCalendar());
@@ -45,20 +62,35 @@ public class GuildEndpoint {
 			body.put("dev_guild", settings.isDevGuild());
 			body.put("max_calendars", settings.getMaxCalendars());
 
-			response.body(body.toString());
+			return body.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get guild settings error", e, GuildEndpoint.class, true);
-			halt(500, "Internal Server Error");
+
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String updateSettings(Request request, Response response) {
+	@PostMapping(value = "/settings/update", produces = "application/json")
+	public static String updateSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject body = new JSONObject((request.body()));
+			JSONObject body = new JSONObject(requestBody);
 
 			Long guildId = body.getLong("guild_id");
 
@@ -76,27 +108,40 @@ public class GuildEndpoint {
 				settings.setPrefix(body.getString("prefix"));
 
 			if (DatabaseManager.getManager().updateSettings(settings)) {
-				response.type("application/json");
-				response.status(200);
-				response.body(ResponseUtils.getJsonResponseMessage("Successfully updated guild settings!"));
+				response.setContentType("application/json");
+				response.setStatus(200);
+				return ResponseUtils.getJsonResponseMessage("Successfully updated guild settings!");
 			} else {
-				response.type("application/json");
-				response.status(500);
-				response.body(ResponseUtils.getJsonResponseMessage("Failed to update settings!"));
+				response.setContentType("application/json");
+				response.setStatus(500);
+				return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal update guild settings error", e, GuildEndpoint.class, true);
-			halt(500, "Internal Server Error");
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 
-	public static String getUserGuilds(Request request, Response response) {
+	@PostMapping(value = "/info/from-user/list", produces = "application/json")
+	public static String getUserGuilds(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+		//Authenticate...
+		AuthenticationState authState = Authentication.authenticate(request);
+		if (!authState.isSuccess()) {
+			response.setStatus(authState.getStatus());
+			response.setContentType("application/json");
+			return authState.toJson();
+		}
+
+		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(request.body());
+			JSONObject jsonMain = new JSONObject(requestBody);
 
 			long userId = jsonMain.getLong("USER_ID");
 			IUser user = DisCalAPI.getAPI().getClient().getUserByID(userId);
@@ -125,15 +170,19 @@ public class GuildEndpoint {
 			body.put("GUILD_COUNT", guildData.size());
 			body.put("GUILDS", guildData);
 
-			response.type("application/json");
-			response.status(200);
-			response.body(body.toString());
+			response.setContentType("application/json");
+			response.setStatus(200);
+			return body.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
-			halt(400, "Bad Request");
+			response.setContentType("application/json");
+			response.setStatus(400);
+			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get guilds from users error", e, GuildEndpoint.class, true);
+			response.setContentType("application/json");
+			response.setStatus(500);
+			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
 		}
-		return response.body();
 	}
 }
