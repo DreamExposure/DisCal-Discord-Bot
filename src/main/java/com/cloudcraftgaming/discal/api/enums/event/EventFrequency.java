@@ -38,4 +38,8 @@ public enum EventFrequency {
 				return DAILY;
 		}
 	}
+
+	public String getName() {
+		return this.name();
+	}
 }

@@ -40,4 +40,8 @@ public enum AnnouncementType {
 				return UNIVERSAL;
 		}
 	}
+
+	public String getName() {
+		return this.name();
+	}
 }

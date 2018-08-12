@@ -92,7 +92,7 @@ public class DiscordLoginHandler {
 
 				req.getSession(true).setAttribute("account", newSessionId);
 
-				DiscordAccountHandler.getHandler().addAccount(m, newSessionId);
+				DiscordAccountHandler.getHandler().addAccount(m, req);
 
 				//Finally redirect to the dashboard seamlessly.
 				res.sendRedirect("/dashboard");
@@ -116,7 +116,7 @@ public class DiscordLoginHandler {
 	@GetMapping("/account/logout")
 	public static String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
 		try {
-			DiscordAccountHandler.getHandler().removeAccount((String) request.getSession(true).getAttribute("account"));
+			DiscordAccountHandler.getHandler().removeAccount(request);
 
 			res.sendRedirect("/");
 			return "redirect:/";

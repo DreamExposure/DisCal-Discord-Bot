@@ -51,6 +51,10 @@ public enum EventColor {
 		return b;
 	}
 
+	public String getName() {
+		return this.name();
+	}
+
 	//Static methods
 	public static boolean exists(String nameOrHexOrId) {
 		for (EventColor c: values()) {

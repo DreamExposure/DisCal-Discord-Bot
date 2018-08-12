@@ -61,12 +61,14 @@ public class Main {
 		DatabaseManager.getManager().createTables();
 
 		//Start Spring (catch any issues from it so only the site goes down without affecting bot....)
-		try {
-			DiscordAccountHandler.getHandler().init();
-			SpringApplication.run(Main.class, args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+			try {
+				DiscordAccountHandler.getHandler().init();
+				SpringApplication.run(Main.class, args);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, Main.class, true);
+			}
 		}
 
 		//Register modules
