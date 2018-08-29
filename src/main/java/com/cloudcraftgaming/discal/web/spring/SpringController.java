@@ -55,6 +55,13 @@ public class SpringController {
 		return "policy/privacy";
 	}
 
+	@RequestMapping("/policy/tos")
+	public String termsOfService(Map<String, Object> model, HttpServletRequest req) {
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "policy/tos";
+	}
+
 	//Dashboard pages
 	@RequestMapping("/dashboard")
 	public String dashboard(Map<String, Object> model, HttpServletRequest req) {
