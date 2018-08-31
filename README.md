@@ -1,8 +1,8 @@
 # About DisCal
 
 [Official Website](https://www.discalbot.com)
-
-[Trello Board](https://trello.com/b/OuFo5aXu/discal)
+	
+[Trello Board](https://trello.com/b/2Xx3Galz)
 
 DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
 <br> <br>

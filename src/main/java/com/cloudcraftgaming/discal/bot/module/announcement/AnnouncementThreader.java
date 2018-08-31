@@ -27,9 +27,11 @@ public class AnnouncementThreader {
 			@Override
 			public void run() {
 				for (AnnouncementType t: AnnouncementType.values()) {
-					AnnouncementThread at = new AnnouncementThread(t);
-					at.setDaemon(true);
-					at.run();
+					new Thread(() -> {
+						AnnouncementThread at = new AnnouncementThread(t);
+						at.setDaemon(true);
+						at.run();
+					}).start();
 				}
 			}
 		}, 5 * 1000 * 60, 5 * 1000 * 60);
