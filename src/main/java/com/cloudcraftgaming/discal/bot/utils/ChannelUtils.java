@@ -29,6 +29,17 @@ public class ChannelUtils {
 		return false;
 	}
 
+	public static boolean channelExists(String nameOrId, IGuild guild) {
+		if (nameOrId.contains("#"))
+			nameOrId = nameOrId.replace("#", "");
+
+		for (IChannel c : guild.getChannels()) {
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getStringID().equals(nameOrId))
+				return true;
+		}
+		return false;
+	}
+
 	/**
 	 * Gets the IChannel from its name.
 	 *

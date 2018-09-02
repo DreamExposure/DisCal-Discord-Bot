@@ -48,6 +48,14 @@ public class RoleUtils {
 		return false;
 	}
 
+	public static boolean roleExists(String id, IGuild guild) {
+		for (IRole r : guild.getRoles()) {
+			if (id.equals(r.getStringID()))
+				return true;
+		}
+		return false;
+	}
+
 	public static String getRoleNameFromID(String id, MessageReceivedEvent event) {
 		IRole role = getRoleFromID(id, event);
 		if (role != null)
@@ -56,6 +64,13 @@ public class RoleUtils {
 			return "ERROR";
 	}
 
+	public static String getRoleNameFromID(String id, IGuild guild) {
+		IRole role = getRoleFromID(id, guild);
+		if (role != null)
+			return role.getName();
+		else
+			return "ERROR";
+	}
 
 	public static long getRole(String toLookFor, IMessage m) {
 		return getRole(toLookFor, m.getGuild());

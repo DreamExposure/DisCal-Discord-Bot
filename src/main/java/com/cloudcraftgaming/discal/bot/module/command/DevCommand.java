@@ -10,6 +10,8 @@ import com.cloudcraftgaming.discal.api.object.command.CommandInfo;
 import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.api.utils.CalendarUtils;
 import com.cloudcraftgaming.discal.bot.internal.service.ApplicationHandler;
+import com.cloudcraftgaming.discal.bot.utils.ChannelUtils;
+import com.cloudcraftgaming.discal.bot.utils.RoleUtils;
 import com.cloudcraftgaming.discal.logger.Logger;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.IShard;
@@ -81,6 +83,7 @@ public class DevCommand implements ICommand {
 		ci.getSubCommands().put("testShards", "Tests to make sure all shards respond.");
 		ci.getSubCommands().put("api-register", "Register new API key");
 		ci.getSubCommands().put("api-block", "Block API usage by key");
+		ci.getSubCommands().put("settings", "Checks the settings of the specified Guild.");
 
 		return ci;
 	}
@@ -140,6 +143,9 @@ public class DevCommand implements ICommand {
 						break;
 					case "api-block":
 						blockAPIKey(args, event);
+						break;
+					case "settings":
+						moduleCheckSettings(args, event);
 						break;
 					default:
 						MessageManager.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
@@ -391,6 +397,55 @@ public class DevCommand implements ICommand {
 				MessageManager.sendMessage("Error occurred! Could not block API key!", event);
 		} else {
 			MessageManager.sendMessage("Please specify the API KEY!", event);
+		}
+	}
+
+	private void moduleCheckSettings(String[] args, MessageReceivedEvent event) {
+		if (args.length == 2) {
+			String id = args[1];
+
+			try {
+
+				IGuild guild = DisCalAPI.getAPI().getClient().getGuildByID(Long.valueOf(id));
+
+				if (guild != null) {
+					GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
+
+					EmbedBuilder em = new EmbedBuilder();
+					em.withAuthorIcon(DisCalAPI.getAPI().iconUrl);
+					em.withAuthorName("DisCal");
+					em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", settings), String.valueOf(settings.useExternalCalendar()), true);
+					if (RoleUtils.roleExists(settings.getControlRole(), guild)) {
+						em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), RoleUtils.getRoleNameFromID(settings.getControlRole(), guild), true);
+					} else {
+						em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), "everyone", true);
+					}
+					if (ChannelUtils.channelExists(settings.getDiscalChannel(), guild)) {
+						em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), guild.getLongID()), false);
+					} else {
+						em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), "All Channels", true);
+					}
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), String.valueOf(settings.usingSimpleAnnouncements()), true);
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Patron", settings), String.valueOf(settings.isPatronGuild()), true);
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Dev", settings), String.valueOf(settings.isDevGuild()), true);
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", settings), String.valueOf(settings.getMaxCalendars()), true);
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
+					em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
+					//TODO: Add translations...
+					em.appendField("Using Branding", settings.isBranded() + "", true);
+					em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
+					em.withUrl("https://www.discalbot.com/");
+					em.withColor(56, 138, 237);
+					MessageManager.sendMessage(em.build(), event);
+				} else {
+					MessageManager.sendMessage("The specified guild is not connected to DisCal or does not Exist", event);
+				}
+			} catch (Exception e) {
+				MessageManager.sendMessage("Guild ID must be of type long!", event);
+			}
+		} else {
+			MessageManager.sendMessage("Please specify the ID of the guild to check settings for!", event);
 		}
 	}
 
