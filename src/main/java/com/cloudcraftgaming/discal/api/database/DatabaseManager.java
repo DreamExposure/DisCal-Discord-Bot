@@ -11,6 +11,7 @@ import com.cloudcraftgaming.discal.api.object.event.EventData;
 import com.cloudcraftgaming.discal.api.object.event.RsvpData;
 import com.cloudcraftgaming.discal.api.object.web.UserAPIAccount;
 import com.cloudcraftgaming.discal.logger.Logger;
+import org.dreamexposure.novautils.database.MySQL;
 
 import java.sql.*;
 import java.util.ArrayList;

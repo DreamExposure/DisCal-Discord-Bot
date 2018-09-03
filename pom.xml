@@ -30,6 +30,10 @@
 
 	<repositories>
 		<repository>
+			<id>nova-public</id>
+			<url>http://repo.novafox161.com/repository/nova-public/</url>
+		</repository>
+		<repository>
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com</url>
 		</repository>
@@ -56,6 +60,14 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>RELEASE</version>
+		</dependency>
+		<!--NovaUtils API-->
+		<dependency>
+			<groupId>org.dreamexposure</groupId>
+			<artifactId>NovaUtils</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<type>jar</type>
+			<scope>compile</scope>
 		</dependency>
 		<!--Discord4J API-->
 		<dependency>

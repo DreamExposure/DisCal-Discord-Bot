@@ -1,5 +1,7 @@
 package com.cloudcraftgaming.discal.api.database;
 
+import org.dreamexposure.novautils.database.MySQL;
+
 import java.sql.Connection;
 
 /**
