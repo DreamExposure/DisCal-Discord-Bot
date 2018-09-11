@@ -4,15 +4,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cloudcraftgaming</groupId>
-	<artifactId>DisCal</artifactId>
-	<version>2.1.0</version>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.6.RELEASE</version>
-	</parent>
+	<packaging>pom</packaging>
 
 	<properties>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -28,6 +20,22 @@
 		<thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 	</properties>
 
+	<groupId>org.dreamexposure</groupId>
+	<artifactId>DisCal</artifactId>
+	<version>3.0.0</version>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.6.RELEASE</version>
+	</parent>
+
+	<modules>
+		<module>core</module>
+		<module>client</module>
+		<module>server</module>
+	</modules>
+
 	<repositories>
 		<repository>
 			<id>nova-public</id>
@@ -40,6 +48,10 @@
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+		</repository>
+		<repository>
+			<id>repository.spring.milestone</id>
+			<url>http://repo.spring.io/milestone</url>
 		</repository>
 		<repository>
 			<id>spring-releases</id>
@@ -71,9 +83,15 @@
 		</dependency>
 		<!--Discord4J API-->
 		<dependency>
-			<groupId>com.github.discord4j</groupId>
-			<artifactId>Discord4J</artifactId>
-			<version>LATEST</version>
+			<groupId>com.discord4j.discord4j</groupId>
+			<artifactId>discord4j-core</artifactId>
+			<version>82e1df452e</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.projectreactor</groupId>
+					<artifactId>reactor-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- Allows you to log events from Discord4J -->
 		<dependency>
@@ -127,21 +145,6 @@
 			<artifactId>joda-time</artifactId>
 			<version>2.9.9</version>
 		</dependency>
-		<!--Thymeleaf-->
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-			<version>${thymeleaf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
-			<version>${thymeleaf.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>nz.net.ultraq.thymeleaf</groupId>
-			<artifactId>thymeleaf-layout-dialect</artifactId>
-		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
 		<dependency>
 			<groupId>commons-logging</groupId>
@@ -154,22 +157,11 @@
 			<artifactId>okhttp</artifactId>
 			<version>3.10.0</version>
 		</dependency>
-		<!--Spring Boot starter Thymeleaf API-->
+		<!--Reactor Core-->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-		<!--Spring Session API-->
-		<dependency>
-			<groupId>org.springframework.session</groupId>
-			<artifactId>spring-session</artifactId>
-			<version>1.3.1.RELEASE</version>
-		</dependency>
-		<!--Spring Security-->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-			<version>5.0.7.RELEASE</version>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.2.0.M3</version>
 		</dependency>
 	</dependencies>
 
