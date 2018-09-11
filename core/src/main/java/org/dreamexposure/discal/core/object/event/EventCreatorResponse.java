@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.object.event;
 
 import com.google.api.services.calendar.model.Event;
-import sun.plugin2.message.Message;
+import discord4j.core.object.entity.Message;
 
 /**
  * Created by Nova Fox on 11/10/17.

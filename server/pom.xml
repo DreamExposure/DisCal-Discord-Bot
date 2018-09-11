@@ -19,10 +19,18 @@
 		<thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
 	</properties>
 
+	<!--
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.6.RELEASE</version>
+	</parent>
+	-->
+
+	<parent>
+		<groupId>org.dreamexposure</groupId>
+		<artifactId>DisCal</artifactId>
+		<version>3.0.0</version>
 	</parent>
 
 	<groupId>org.dreamexposure.discal</groupId>
@@ -30,13 +38,6 @@
 	<version>3.0.0</version>
 
 	<dependencies>
-		<!--DisCal parent because Spring is a dumb-->
-		<dependency>
-			<groupId>org.dreamexposure</groupId>
-			<artifactId>DisCal</artifactId>
-			<version>3.0.0</version>
-			<scope>compile</scope>
-		</dependency>
 		<!--DisCal Core-->
 		<dependency>
 			<groupId>org.dreamexposure.discal</groupId>
@@ -85,7 +86,7 @@
 	</dependencies>
 
 	<build>
-		<directory>target</directory>
+		<directory>../target</directory> <!-- Build it one level up, because it is the one we care about -->
 		<finalName>DisCal-Server</finalName>
 
 		<plugins>
