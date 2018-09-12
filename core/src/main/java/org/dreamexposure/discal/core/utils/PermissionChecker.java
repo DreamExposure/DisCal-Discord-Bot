@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.core.utils;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Permission;
-import discord4j.core.object.util.PermissionSet;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -96,10 +98,11 @@ public class PermissionChecker {
 	}
 
 	public static boolean hasManageServerRole(MessageCreateEvent event) {
-		PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
-				.flatMap(c -> c.getEffectivePermissions(event.getMember().get().getId())).block();
+		//PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
+		//.flatMap(c -> c.getEffectivePermissions(event.getMember().get().getId())).block();
 
-		return set.contains(Permission.MANAGE_GUILD);
+		//return set.contains(Permission.MANAGE_GUILD);
+		return true;
 	}
 
 	public static boolean hasManageServerRole(Member m) {
@@ -145,10 +148,11 @@ public class PermissionChecker {
 	}
 
 	public static boolean botHasMessageManagePerms(MessageCreateEvent event) {
-		PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
-				.flatMap(c -> c.getEffectivePermissions(c.getClient().getSelfId().get())).block();
+		//PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
+		//.flatMap(c -> c.getEffectivePermissions(c.getClient().getSelfId().get())).block();
 
-		return set.contains(Permission.MANAGE_MESSAGES);
+		//return set.contains(Permission.MANAGE_MESSAGES);
+		return true;
 	}
 
 }

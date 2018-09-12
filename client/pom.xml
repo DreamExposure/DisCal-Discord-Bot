@@ -37,7 +37,7 @@
 	</dependencies>
 
 	<build>
-		<directory>target</directory>
+		<directory>../target</directory> <!-- Build it one level up, because it is the one we care about -->
 		<finalName>DisCal-Client</finalName>
 
 		<plugins>

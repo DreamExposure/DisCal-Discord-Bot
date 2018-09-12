@@ -2,18 +2,8 @@ package org.dreamexposure.discal.client;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
-import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.client.module.command.*;
-import org.dreamexposure.discal.client.service.KeepAliveHandler;
-import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
-import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
 
 import java.io.File;
 import java.io.FileReader;
@@ -35,6 +25,7 @@ public class DisCalClient {
 		//Handle client setup
 		client = createClient();
 
+		/*
 		//Register discord events
 		client.getEventDispatcher().on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
 
@@ -55,9 +46,6 @@ public class DisCalClient {
 		executor.registerCommand(new AnnouncementCommand());
 		executor.registerCommand(new DevCommand());
 
-		//Login
-		client.login().subscribe();
-
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();
 		DatabaseManager.getManager().createTables();
@@ -74,6 +62,10 @@ public class DisCalClient {
 		ClientSocketHandler.initListener();
 
 		KeepAliveHandler.startKeepAlive(60);
+		*/
+
+		//Login
+		client.login().block();
 	}
 
 	/**
