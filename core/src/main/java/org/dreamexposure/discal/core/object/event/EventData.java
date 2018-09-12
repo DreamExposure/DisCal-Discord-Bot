@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.object.event;
 
-import discord4j.core.object.util.Snowflake;
-
 import javax.annotation.Nullable;
 
 /**
@@ -10,18 +8,18 @@ import javax.annotation.Nullable;
  * For Project: DisCal-Discord-Bot
  */
 public class EventData {
-	private final Snowflake guildId;
+	private final long guildId;
 
 	private String eventId;
 	private long eventEnd;
 	private String imageLink;
 
-	public EventData(Snowflake _guildId) {
+	public EventData(long _guildId) {
 		guildId = _guildId;
 	}
 
 	//Getters
-	public Snowflake getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 

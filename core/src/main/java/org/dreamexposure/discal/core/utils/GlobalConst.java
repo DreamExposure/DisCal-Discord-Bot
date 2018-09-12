@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.object.util.Snowflake;
-
 import java.awt.*;
 
 public class GlobalConst {
@@ -9,13 +7,13 @@ public class GlobalConst {
 
 	public static final String iconUrl = "https://www.discalbot.com/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png";
 	public static final String lineBreak = System.getProperty("line.separator");
-	public static final Snowflake novaId = Snowflake.of(130510525770629121L);
-	public static final Snowflake xaanitId = Snowflake.of(233611560545812480L);
-	public static final Snowflake calId = Snowflake.of(142107863307780097L);
-	public static final Snowflake dreamId = Snowflake.of(142107863307780097L);
+	public static final long novaId = 130510525770629121L;
+	public static final long xaanitId = 233611560545812480L;
+	public static final long calId = 142107863307780097L;
+	public static final long dreamId = 142107863307780097L;
 
-	public static final Snowflake errorLog = Snowflake.of(142107863307780097L);
-	public static final Snowflake serverId = Snowflake.of(142107863307780097L);
+	public static final long errorLog = 142107863307780097L;
+	public static final long serverId = 142107863307780097L;
 
 	public static final Color discalColor = new Color(56, 138, 237);
 	public static final String discalSite = "https://www.discalbot.com";

@@ -50,10 +50,6 @@
 			<url>https://jitpack.io</url>
 		</repository>
 		<repository>
-			<id>repository.spring.milestone</id>
-			<url>http://repo.spring.io/milestone</url>
-		</repository>
-		<repository>
 			<id>spring-releases</id>
 			<url>https://repo.spring.io/libs-release</url>
 		</repository>
@@ -72,7 +68,6 @@
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>RELEASE</version>
-			<optional>false</optional>
 		</dependency>
 		<!--NovaUtils API-->
 		<dependency>
@@ -81,80 +76,40 @@
 			<version>1.0.0-SNAPSHOT</version>
 			<type>jar</type>
 			<scope>compile</scope>
-			<optional>false</optional>
 		</dependency>
 		<!--Discord4J API-->
 		<dependency>
-			<groupId>com.discord4j.discord4j</groupId>
-			<artifactId>discord4j-core</artifactId>
-			<version>074aff1</version>
-			<exclusions>
-				<!--
-				<exclusion>
-					<groupId>io.projectreactor</groupId>
-					<artifactId>reactor-core</artifactId>
-				</exclusion>
-				-->
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-databind</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-annotations</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.discord4j</groupId>
+			<artifactId>Discord4J</artifactId>
+			<version>2.10.1</version>
 		</dependency>
 		<!-- Allows you to log events from Discord4J -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.7</version>
-			<optional>false</optional>
 		</dependency>
 		<!--discordbots.net API library-->
 		<dependency>
 			<groupId>com.github.DiscordBotList</groupId>
 			<artifactId>Java-Wrapper</artifactId>
 			<version>v1.0</version>
-			<optional>false</optional>
 		</dependency>
 		<!--Google Calendar API-->
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
 			<version>1.22.0</version>
-			<optional>false</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-databind</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.core</groupId>
-					<artifactId>jackson-annotations</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.apis</groupId>
 			<artifactId>google-api-services-calendar</artifactId>
 			<version>v3-rev225-1.22.0</version>
-			<optional>false</optional>
 		</dependency>
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client-jetty</artifactId>
 			<version>1.22.0</version>
-			<optional>false</optional>
 			<exclusions>
 				<exclusion>
 					<groupId>org.mortbay.jetty</groupId>
@@ -167,61 +122,30 @@
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<version>LATEST</version>
-			<optional>false</optional>
 		</dependency>
 		<!--JSON API-->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20140107</version>
-			<optional>false</optional>
 		</dependency>
 		<!--Joda Time-->
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
 			<version>2.9.9</version>
-			<optional>false</optional>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
 		<dependency>
 			<groupId>commons-logging</groupId>
 			<artifactId>commons-logging</artifactId>
 			<version>1.1.1</version>
-			<optional>false</optional>
 		</dependency>
 		<!--OkHTTP API-->
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp</artifactId>
 			<version>3.10.0</version>
-			<optional>false</optional>
-		</dependency>
-		<!--Reactor Core-->
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-core</artifactId>
-			<version>3.2.0.M3</version>
-			<optional>false</optional>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>2.9.6</version>
-			<optional>false</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.9.6</version>
-			<optional>false</optional>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>2.9.6</version>
-			<optional>false</optional>
 		</dependency>
 	</dependencies>
 

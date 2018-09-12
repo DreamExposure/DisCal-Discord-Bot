@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -47,7 +46,7 @@ public class AnnouncementEndpoint {
 			Long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId));
+			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
 			if (a != null) {
 
@@ -103,7 +102,7 @@ public class AnnouncementEndpoint {
 			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 
-			Announcement a = new Announcement(Snowflake.of(guildId));
+			Announcement a = new Announcement(guildId);
 
 			JSONObject body = new JSONObject(requestBody);
 			a.setAnnouncementChannelId(body.getString("channel"));
@@ -165,7 +164,7 @@ public class AnnouncementEndpoint {
 			Long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId));
+			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId);
 
 			if (a != null) {
 
@@ -235,7 +234,7 @@ public class AnnouncementEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId)) != null) {
+			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), guildId) != null) {
 				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
 					response.setContentType("application/json");
 					response.setStatus(200);
@@ -284,7 +283,7 @@ public class AnnouncementEndpoint {
 
 			ArrayList<JSONObject> announcements = new ArrayList<>();
 			if (amount == -1) {
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Snowflake.of(guildId))) {
+				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					JSONObject obj = new JSONObject();
 					obj.put("id", a.getAnnouncementId().toString());
 					obj.put("channel", a.getAnnouncementChannelId());
@@ -303,7 +302,7 @@ public class AnnouncementEndpoint {
 				}
 			} else {
 				int i = 0;
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Snowflake.of(guildId))) {
+				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
 					if (i < amount) {
 						JSONObject obj = new JSONObject();
 						obj.put("id", a.getAnnouncementId().toString());

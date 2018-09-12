@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -44,7 +43,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			int calNumber = jsonMain.getInt("number");
 
-			CalendarData calendar = DatabaseManager.getManager().getCalendar(Snowflake.of(guildId), calNumber);
+			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 
@@ -92,7 +91,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 
 			ArrayList<JSONObject> cals = new ArrayList<>();
-			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(Snowflake.of(guildId))) {
+			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(guildId)) {
 				if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
 					JSONObject body = new JSONObject();
 					body.put("number", cal.getCalendarNumber());

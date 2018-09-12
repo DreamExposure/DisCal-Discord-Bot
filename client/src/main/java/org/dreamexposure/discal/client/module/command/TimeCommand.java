@@ -1,8 +1,6 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -12,6 +10,8 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -69,16 +69,15 @@ public class TimeCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		calendarTime(event, settings);
 		return false;
 	}
 
-	@SuppressWarnings("OptionalGetWithoutIsPresent")
-	private void calendarTime(MessageCreateEvent event, GuildSettings settings) {
+	private void calendarTime(MessageReceivedEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 
 			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
 				//Does not have a calendar.
@@ -93,19 +92,21 @@ public class TimeCommand implements ICommand {
 				String thisIsTheCorrectTime = format.format(ldt);
 
 				//Build embed and send.
-				EmbedCreateSpec em = new EmbedCreateSpec();
-				em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-				em.setTitle(MessageManager.getMessage("Embed.Time.Title", settings));
-				em.addField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
-				em.addField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
+				EmbedBuilder em = new EmbedBuilder();
+				em.withAuthorIcon(GlobalConst.discalSite);
+				em.withAuthorName("DisCal");
+				em.withAuthorUrl(GlobalConst.discalSite);
+				em.withTitle(MessageManager.getMessage("Embed.Time.Title", settings));
+				em.appendField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
+				em.appendField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
-				em.setFooter(MessageManager.getMessage("Embed.Time.Footer", settings), null);
-				em.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
-				em.setColor(GlobalConst.discalColor);
-				MessageManager.sendMessageAsync(em, event);
+				em.withFooterText(MessageManager.getMessage("Embed.Time.Footer", settings));
+				em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
+				em.withColor(GlobalConst.discalColor);
+				MessageManager.sendMessageAsync(em.build(), event);
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, this.getClass());
+			Logger.getLogger().exception(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 	}

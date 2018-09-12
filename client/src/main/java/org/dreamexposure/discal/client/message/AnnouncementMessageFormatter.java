@@ -2,13 +2,6 @@ package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -22,13 +15,19 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.EmbedBuilder;
 
 /**
  * Created by Nova Fox on 3/4/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"Duplicates", "OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings({"Duplicates"})
 public class AnnouncementMessageFormatter {
 
 	/**
@@ -37,47 +36,49 @@ public class AnnouncementMessageFormatter {
 	 * @param a The Announcement to embed.
 	 * @return The EmbedObject for the Announcement.
 	 */
-	public static EmbedCreateSpec getFormatAnnouncementEmbed(Announcement a, GuildSettings settings, Guild guild) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", settings));
+	public static EmbedObject getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", settings));
 		try {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
 		} catch (NullPointerException e) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), "ID IS NULL???", true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), "ID IS NULL???", true);
 		}
 
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Type", settings), a.getAnnouncementType().name(), true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Type", settings), a.getAnnouncementType().name(), true);
 
 
 		if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
-				em.setImage(ed.getImageLink());
+				em.withImage(ed.getImageLink());
 
 		} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
 		} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
 			EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
-				em.setImage(ed.getImageLink());
+				em.withImage(ed.getImageLink());
 		}
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), guild), true);
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), DisCalClient.getClient().getGuildByID(a.getGuildId())), true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
 		if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 			EventColor c = a.getEventColor();
-			em.setColor(c.asColor());
+			em.withColor(c.getR(), c.getG(), c.getB());
 		} else {
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(GlobalConst.discalColor);
 		}
 
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
 
-		return em;
+		return em.build();
 	}
 
 	/**
@@ -86,15 +87,17 @@ public class AnnouncementMessageFormatter {
 	 * @param a The Announcement to embed.
 	 * @return The EmbedObject for a Condensed Announcement.
 	 */
-	public static EmbedCreateSpec getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", settings));
-		em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
-		em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Time", settings), condensedTime(a), false);
+	public static EmbedObject getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", settings));
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Time", settings), condensedTime(a), false);
 
 		if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
 			try {
 				Calendar service = CalendarAuth.getCalendarService(settings);
 
@@ -104,7 +107,7 @@ public class AnnouncementMessageFormatter {
 				Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
 				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
 				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
-					em.setThumbnail(ed.getImageLink());
+					em.withThumbnail(ed.getImageLink());
 
 				if (event.getSummary() != null) {
 					String summary = event.getSummary();
@@ -112,29 +115,29 @@ public class AnnouncementMessageFormatter {
 						summary = summary.substring(0, 250);
 						summary = summary + " (continues on Google Calendar View)";
 					}
-					em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Summary", settings), summary, true);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Summary", settings), summary, true);
 				}
 			} catch (Exception e) {
 				//Failed to get from google cal.
 				Logger.getLogger().exception(null, "Failed to get event for announcement.", e, AnnouncementMessageFormatter.class);
 			}
 		} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
 		} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Condensed.RecurID", settings), a.getEventId(), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Condensed.RecurID", settings), a.getEventId(), true);
 		}
-		em.setFooter(MessageManager.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getAnnouncementType().name(), settings), null);
+		em.withFooterText(MessageManager.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getAnnouncementType().name(), settings));
 
 		if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 			EventColor c = a.getEventColor();
-			em.setColor(c.asColor());
+			em.withColor(c.getR(), c.getG(), c.getB());
 		} else {
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(56, 138, 237);
 		}
 
-		em.addField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
 
-		return em;
+		return em.build();
 	}
 
 	/**
@@ -145,38 +148,41 @@ public class AnnouncementMessageFormatter {
 	 * @param data         The BotData belonging to the guild.
 	 */
 	public static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		Guild guild = DisCalClient.getClient().getGuildById(announcement.getGuildId()).block();
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorUrl(GlobalConst.discalSite);
+
+		IGuild guild = DisCalClient.getClient().getGuildByID(announcement.getGuildId());
 
 		if (guild != null) {
 			//Set all of the stuff for embeds regardless of announcement settings
 			if (settings.isBranded())
-				em.setAuthor(guild.getName(), null, guild.getIconUrl(Image.Format.PNG).get());
+				em.withAuthorName(guild.getName());
 			else
-				em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+				em.withAuthorName("DisCal");
 
-			em.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
+			em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 			EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
-				em.setImage(ed.getImageLink());
+				em.withImage(ed.getImageLink());
 
-			em.setUrl(event.getHtmlLink());
+			em.withUrl(event.getHtmlLink());
 
 			try {
 				EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
-				em.setColor(ec.asColor());
+				em.withColor(ec.getR(), ec.getG(), ec.getB());
 			} catch (Exception e) {
 				//I dunno, color probably null.
-				em.setColor(GlobalConst.discalColor);
+				em.withColor(56, 138, 237);
 			}
 
 			if (!settings.usingSimpleAnnouncements()) {
-				em.setFooter(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings), null);
+				em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
 			}
 
 			if (announcement.isInfoOnly() && announcement.getInfo() != null && !announcement.getInfo().equalsIgnoreCase("none")) {
 				//Only send info...
-				em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
 			} else {
 				//Requires all announcement data
 				if (event.getSummary() != null) {
@@ -185,7 +191,7 @@ public class AnnouncementMessageFormatter {
 						summary = summary.substring(0, 250);
 						summary = summary + " (continues on Google Calendar View)";
 					}
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
 				}
 				if (event.getDescription() != null) {
 					String description = event.getDescription();
@@ -193,17 +199,17 @@ public class AnnouncementMessageFormatter {
 						description = description.substring(0, 250);
 						description = description + " (continues on Google Calendar View)";
 					}
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
 				}
 				if (!settings.usingSimpleAnnouncements()) {
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
 					try {
 						Calendar service = CalendarAuth.getCalendarService(settings);
 						String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-						em.addField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
+						em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
 					} catch (Exception e1) {
-						em.addField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
+						em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
 					}
 				} else {
 					String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
@@ -215,29 +221,29 @@ public class AnnouncementMessageFormatter {
 						start = start + " (TZ UNKNOWN/ERROR)";
 					}
 
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
 				}
 
 				if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
 					if (event.getLocation().length() > 300) {
 						String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-						em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+						em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 					} else {
-						em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+						em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
 					}
 				}
 
 				if (!settings.usingSimpleAnnouncements())
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
 				if (!announcement.getInfo().equalsIgnoreCase("None") && !announcement.getInfo().equalsIgnoreCase(""))
-					em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+					em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
 			}
 
 
-			TextChannel channel = null;
+			IChannel channel = null;
 
 			try {
-				channel = guild.getChannels().ofType(TextChannel.class).filter(c -> c.getId().asLong() == Long.valueOf(announcement.getAnnouncementChannelId())).blockLast();
+				channel = guild.getChannelByID(Long.valueOf(announcement.getAnnouncementChannelId()));
 			} catch (Exception e) {
 				Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId(), e, AnnouncementMessageFormatter.class);
 			}
@@ -248,18 +254,19 @@ public class AnnouncementMessageFormatter {
 				return;
 			}
 
-			MessageManager.sendMessageAsync(getSubscriberMentions(announcement, guild), em, channel);
+			MessageManager.sendMessageAsync(getSubscriberMentions(announcement, guild), em.build(), channel);
 		}
 	}
 
-	public static void sendAnnouncementDM(Announcement announcement, Event event, User user, CalendarData data, GuildSettings settings) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-
-		em.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
+	public static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
-			em.setImage(ed.getImageLink());
+			em.withImage(ed.getImageLink());
 		}
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
@@ -267,7 +274,7 @@ public class AnnouncementMessageFormatter {
 				summary = summary.substring(0, 250);
 				summary = summary + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Summary", settings), summary, true);
 		}
 		if (event.getDescription() != null) {
 			String description = event.getDescription();
@@ -275,17 +282,17 @@ public class AnnouncementMessageFormatter {
 				description = description.substring(0, 250);
 				description = description + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
 		}
 		if (!settings.usingSimpleAnnouncements()) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Date", settings), EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false), true);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Time", settings), EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false), true);
 			try {
 				Calendar service = CalendarAuth.getCalendarService(settings);
 				String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-				em.addField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
 			} catch (Exception e1) {
-				em.addField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
+				em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.TimeZone", settings), "Unknown *Error Occurred", true);
 			}
 		} else {
 			String start = EventMessageFormatter.getHumanReadableDate(event.getStart(), settings, false) + " at " + EventMessageFormatter.getHumanReadableTime(event.getStart(), settings, false);
@@ -297,39 +304,39 @@ public class AnnouncementMessageFormatter {
 				start = start + " (TZ UNKNOWN/ERROR)";
 			}
 
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
 		}
 
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
 			if (event.getLocation().length() > 300) {
 				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 			} else {
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
 			}
 		}
 
 		if (!settings.usingSimpleAnnouncements()) {
-			em.addField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
+			em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
 		}
-		em.addField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
-		em.setUrl(event.getHtmlLink());
+		em.appendField(MessageManager.getMessage("Embed.Announcement.Announce.Info", settings), announcement.getInfo(), false);
+		em.withUrl(event.getHtmlLink());
 		if (!settings.usingSimpleAnnouncements()) {
-			em.setFooter(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings), null);
+			em.withFooterText(MessageManager.getMessage("Embed.Announcement.Announce.ID", "%id%", announcement.getAnnouncementId().toString(), settings));
 		}
 		try {
 			EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
-			em.setColor(ec.asColor());
+			em.withColor(ec.getR(), ec.getG(), ec.getB());
 		} catch (Exception e) {
 			//I dunno, color probably null.
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(GlobalConst.discalColor);
 		}
 
-		Guild guild = DisCalClient.getClient().getGuildById(announcement.getGuildId()).block();
+		IGuild guild = DisCalClient.getClient().getGuildByID(announcement.getGuildId());
 
 		String msg = MessageManager.getMessage("Embed.Announcement.Announce.Dm.Message", "%guild%", guild.getName(), settings);
 
-		MessageManager.sendDirectMessageAsync(msg, em, user);
+		MessageManager.sendDirectMessageAsync(msg, em.build(), user);
 	}
 
 	/**
@@ -344,14 +351,14 @@ public class AnnouncementMessageFormatter {
 
 	public static String getSubscriberNames(Announcement a) {
 		//Loop and get subs without mentions...
-		Guild guild = DisCalClient.getClient().getGuildById(a.getGuildId()).block();
+		IGuild guild = DisCalClient.getClient().getGuildByID(a.getGuildId());
 
 		StringBuilder userMentions = new StringBuilder();
 		for (String userId: a.getSubscriberUserIds()) {
 			try {
-				User user = DisCalClient.getClient().getUserById(Snowflake.of(userId)).block();
+				IUser user = guild.getUserByID(Long.valueOf(userId));
 				if (user != null)
-					userMentions.append(user.asMember(a.getGuildId()).block().getDisplayName()).append(" ");
+					userMentions.append(user.getName()).append(" ");
 			} catch (Exception e) {
 				//User does not exist, safely ignore.
 			}
@@ -367,7 +374,7 @@ public class AnnouncementMessageFormatter {
 				mentionHere = true;
 			} else {
 				try {
-					Role role = guild.getRoles().filter(r -> r.getId().asLong() == Long.valueOf(roleId)).blockLast();
+					IRole role = guild.getRoleByID(Long.valueOf(roleId));
 					if (role != null)
 						roleMentions.append(role.getName()).append(" ");
 				} catch (Exception ignore) {
@@ -378,7 +385,7 @@ public class AnnouncementMessageFormatter {
 
 		String message = "Subscribers: " + userMentions + " " + roleMentions;
 		if (mentionEveryone)
-			message = message + " " + guild.getEveryoneRole().block().getName();
+			message = message + " " + guild.getEveryoneRole().getName();
 
 		if (mentionHere)
 			message = message + " here";
@@ -390,13 +397,13 @@ public class AnnouncementMessageFormatter {
 		return message;
 	}
 
-	private static String getSubscriberMentions(Announcement a, Guild guild) {
+	private static String getSubscriberMentions(Announcement a, IGuild guild) {
 		StringBuilder userMentions = new StringBuilder();
 		for (String userId: a.getSubscriberUserIds()) {
 			try {
-				User user = DisCalClient.getClient().getUserById(Snowflake.of(userId)).block();
+				IUser user = guild.getUserByID(Long.valueOf(userId));
 				if (user != null)
-					userMentions.append(user.getMention()).append(" ");
+					userMentions.append(user.mention(true)).append(" ");
 
 			} catch (Exception e) {
 				//User does not exist, safely ignore.
@@ -413,9 +420,9 @@ public class AnnouncementMessageFormatter {
 				mentionHere = true;
 			} else {
 				try {
-					Role role = guild.getRoles().filter(r -> r.getId().asString().equalsIgnoreCase(roleId)).blockLast();
+					IRole role = guild.getRoleByID(Long.valueOf(roleId));
 					if (role != null)
-						roleMentions.append(role.getMention()).append(" ");
+						roleMentions.append(role.mention()).append(" ");
 				} catch (Exception e) {
 					//Role does not exist, safely ignore.
 				}
@@ -427,7 +434,7 @@ public class AnnouncementMessageFormatter {
 
 		String message = "Subscribers: " + userMentions + " " + roleMentions;
 		if (mentionEveryone)
-			message = message + " " + guild.getEveryoneRole().block().getMention();
+			message = message + " " + guild.getEveryoneRole().mention();
 
 		if (mentionHere)
 			message = message + " @here";

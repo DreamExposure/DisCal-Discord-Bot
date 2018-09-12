@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -42,7 +41,7 @@ public class GuildEndpoint {
 			JSONObject jsonMain = new JSONObject(requestBody);
 			Long guildId = jsonMain.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 			response.setContentType("application/json");
 			response.setStatus(200);
@@ -90,7 +89,7 @@ public class GuildEndpoint {
 
 			Long guildId = body.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 			if (body.has("control_role"))
 				settings.setControlRole(body.getString("control_role"));

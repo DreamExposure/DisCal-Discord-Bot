@@ -4,7 +4,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -13,6 +12,7 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,6 @@ import java.util.List;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class EventListCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -69,7 +68,7 @@ public class EventListCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		//Get events from calendar
 		if (args.length < 1) {
 			moduleSimpleList(args, event, settings);
@@ -96,13 +95,13 @@ public class EventListCommand implements ICommand {
 	}
 
 	@SuppressWarnings("Duplicates")
-	private void moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	private void moduleSimpleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 0) {
 			try {
 				Calendar service = CalendarAuth.getCalendarService(settings);
 
 				DateTime now = new DateTime(System.currentTimeMillis());
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 				Events events = service.events().list(calendarData.getCalendarAddress())
 						.setMaxResults(1)
 						.setTimeMin(now)
@@ -118,7 +117,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass());
 				e.printStackTrace();
 			}
 		} else if (args.length == 1) {
@@ -136,7 +135,7 @@ public class EventListCommand implements ICommand {
 					Calendar service = CalendarAuth.getCalendarService(settings);
 
 					DateTime now = new DateTime(System.currentTimeMillis());
-					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 					Events events = service.events().list(calendarData.getCalendarAddress())
 							.setMaxResults(eventNum)
 							.setTimeMin(now)
@@ -157,7 +156,7 @@ public class EventListCommand implements ICommand {
 					}
 				} catch (Exception e) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-					Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+					Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass());
 					e.printStackTrace();
 				}
 			} catch (NumberFormatException e) {
@@ -168,12 +167,12 @@ public class EventListCommand implements ICommand {
 		}
 	}
 
-	private void moduleSearch(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	private void moduleSearch(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 
 	}
 
 	@SuppressWarnings("Duplicates")
-	private void moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	private void moduleDay(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length == 1) {
 			//Get the upcoming events in the next 24 hours.
 			try {
@@ -181,7 +180,7 @@ public class EventListCommand implements ICommand {
 
 				DateTime now = new DateTime(System.currentTimeMillis());
 				DateTime twentyFourHoursFromNow = new DateTime(now.getValue() + 86400000L);
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 				Events events = service.events().list(calendarData.getCalendarAddress())
 						.setMaxResults(20)
 						.setTimeMin(now)
@@ -204,7 +203,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getAuthor(), "Failed to list events.", e, this.getClass());
 				e.printStackTrace();
 			}
 		}

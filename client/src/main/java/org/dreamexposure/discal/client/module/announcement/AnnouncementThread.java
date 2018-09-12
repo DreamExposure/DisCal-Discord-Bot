@@ -4,8 +4,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -18,6 +16,7 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GuildUtils;
+import sx.blah.discord.handle.obj.IGuild;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,10 +28,10 @@ public class AnnouncementThread extends Thread {
 
 	private Calendar discalService;
 
-	private HashMap<Snowflake, GuildSettings> allSettings = new HashMap<>();
-	private HashMap<Snowflake, CalendarData> calendars = new HashMap<>();
-	private HashMap<Snowflake, Calendar> customServices = new HashMap<>();
-	private HashMap<Snowflake, List<Event>> allEvents = new HashMap<>();
+	private HashMap<Long, GuildSettings> allSettings = new HashMap<>();
+	private HashMap<Long, CalendarData> calendars = new HashMap<>();
+	private HashMap<Long, Calendar> customServices = new HashMap<>();
+	private HashMap<Long, List<Event>> allEvents = new HashMap<>();
 
 	public AnnouncementThread() {
 	}
@@ -49,8 +48,8 @@ public class AnnouncementThread extends Thread {
 				Logger.getLogger().exception(null, "Failed to get service! 01a0101", e, this.getClass());
 			}
 
-			for (Guild g : DisCalClient.getClient().getGuilds().toIterable()) {
-				List<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements(g.getId());
+			for (IGuild g : DisCalClient.getClient().getGuilds()) {
+				List<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements(g.getLongID());
 				for (Announcement a : allAnnouncements) {
 					try {
 						Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");

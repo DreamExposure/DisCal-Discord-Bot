@@ -1,9 +1,8 @@
 package org.dreamexposure.discal.core.object.announcement;
 
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,7 @@ import java.util.UUID;
 @SuppressWarnings("WeakerAccess")
 public class Announcement {
 	private final UUID announcementId;
-	private final Snowflake guildId;
+	private final long guildId;
 
 	private final ArrayList<String> subscriberRoleIds = new ArrayList<>();
 	private final ArrayList<String> subscriberUserIds = new ArrayList<>();
@@ -33,7 +32,7 @@ public class Announcement {
 	private boolean enabled;
 	private boolean infoOnly;
 
-	private Message creatorMessage;
+	private IMessage creatorMessage;
 
 	private boolean editing;
 
@@ -44,7 +43,7 @@ public class Announcement {
 	 *
 	 * @param _guildId The ID of the Guild this announcement belongs to.
 	 */
-	public Announcement(Snowflake _guildId) {
+	public Announcement(long _guildId) {
 		guildId = _guildId;
 		announcementId = UUID.randomUUID();
 		announcementChannelId = "N/a";
@@ -66,7 +65,7 @@ public class Announcement {
 	 * @param _announcementId The ID of the announcement object.
 	 * @param _guildId        The ID of the guild the announcement belongs to.
 	 */
-	public Announcement(UUID _announcementId, Snowflake _guildId) {
+	public Announcement(UUID _announcementId, long _guildId) {
 		announcementId = _announcementId;
 		guildId = _guildId;
 		announcementChannelId = "N/a";
@@ -144,7 +143,7 @@ public class Announcement {
 	 *
 	 * @return The Guild ID the announcement belongs to.
 	 */
-	public Snowflake getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 
@@ -182,7 +181,7 @@ public class Announcement {
 	 */
 	public String getSubscriberRoleIdString() {
 		StringBuilder subs = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String sub: subscriberRoleIds) {
 			if (i == 0) {
 				subs = new StringBuilder(sub);
@@ -201,7 +200,7 @@ public class Announcement {
 	 */
 	public String getSubscriberUserIdString() {
 		StringBuilder subs = new StringBuilder();
-		Integer i = 0;
+		int i = 0;
 		for (String sub: subscriberUserIds) {
 			if (i == 0) {
 				subs = new StringBuilder(sub);
@@ -273,7 +272,7 @@ public class Announcement {
 		return infoOnly;
 	}
 
-	public Message getCreatorMessage() {
+	public IMessage getCreatorMessage() {
 		return creatorMessage;
 	}
 
@@ -368,7 +367,7 @@ public class Announcement {
 		Collections.addAll(subscriberUserIds, subs);
 	}
 
-	public void setCreatorMessage(Message _message) {
+	public void setCreatorMessage(IMessage _message) {
 		creatorMessage = _message;
 	}
 

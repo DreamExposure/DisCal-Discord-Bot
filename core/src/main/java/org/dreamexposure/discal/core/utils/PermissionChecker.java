@@ -1,14 +1,10 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildChannel;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.Permission;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.*;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -23,24 +19,25 @@ public class PermissionChecker {
 	 * @param event The Event received to check for the user and guild.
 	 * @return <code>true</code> if the user has the proper role, otherwise <code>false</code>.
 	 */
-	public static boolean hasSufficientRole(MessageCreateEvent event) {
+	public static boolean hasSufficientRole(MessageReceivedEvent event) {
 		//TODO: Figure out exactly what is causing a NPE here...
 		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().block().getId());
+			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
 			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
+				IUser sender = event.getMessage().getAuthor();
 				String roleId = settings.getControlRole();
-				Role role = null;
+				IRole role = null;
 
-				for (Role r : event.getGuild().map(Guild::getRoles).block().toIterable()) {
-					if (r.getId().asString().equalsIgnoreCase(roleId)) {
+				for (IRole r : event.getMessage().getGuild().getRoles()) {
+					if (r.getStringID().equals(roleId)) {
 						role = r;
 						break;
 					}
 				}
 
 				if (role != null) {
-					for (Role r : event.getMember().get().getRoles().toIterable()) {
-						if (r.getId() == role.getId() || r.getPosition().block() > role.getPosition().block())
+					for (IRole r : sender.getRolesForGuild(event.getMessage().getGuild())) {
+						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition())
 							return true;
 
 					}
@@ -54,30 +51,30 @@ public class PermissionChecker {
 			}
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and email the dev.
-			Logger.getLogger().exception(event.getMessage().getAuthor().block(), "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to check for sufficient control role.", e, PermissionChecker.class);
 			return true;
 		}
 		return true;
 	}
 
-	public static boolean hasSufficientRole(Guild guild, Member member) {
+	public static boolean hasSufficientRole(IGuild guild, IUser user) {
 		//TODO: Figure out exactly what is causing a NPE here...
 		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getId());
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getLongID());
 			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
 				String roleId = settings.getControlRole();
-				Role role = null;
+				IRole role = null;
 
-				for (Role r : guild.getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
+				for (IRole r : guild.getRoles()) {
+					if (r.getStringID().equals(roleId)) {
 						role = r;
 						break;
 					}
 				}
 
 				if (role != null) {
-					for (Role r : member.getRoles().toIterable()) {
-						if (r.getId().equals(role.getId()) || r.getPosition().block() > role.getPosition().block())
+					for (IRole r : user.getRolesForGuild(guild)) {
+						if (r.getStringID().equals(role.getStringID()) || r.getPosition() > role.getPosition())
 							return true;
 
 					}
@@ -91,26 +88,18 @@ public class PermissionChecker {
 			}
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and notify the dev team
-			Logger.getLogger().exception(member, "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, PermissionChecker.class);
 			return true;
 		}
 		return true;
 	}
 
-	public static boolean hasManageServerRole(MessageCreateEvent event) {
-		//PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
-		//.flatMap(c -> c.getEffectivePermissions(event.getMember().get().getId())).block();
-
-		//return set.contains(Permission.MANAGE_GUILD);
-		return true;
+	public static boolean hasManageServerRole(MessageReceivedEvent event) {
+		return event.getMessage().getAuthor().getPermissionsForGuild(event.getMessage().getGuild()).contains(Permissions.MANAGE_SERVER);
 	}
 
-	public static boolean hasManageServerRole(Member m) {
-		for (Role r : m.getRoles().toIterable()) {
-			if (r.getPermissions().contains(Permission.MANAGE_GUILD))
-				return true;
-		}
-		return false;
+	public static boolean hasManageServerRole(IGuild g, IUser u) {
+		return u.getPermissionsForGuild(g).contains(Permissions.MANAGE_SERVER);
 	}
 
 	/**
@@ -119,22 +108,24 @@ public class PermissionChecker {
 	 * @param event The event received to check for the correct channel.
 	 * @return <code>true</code> if in correct channel, otherwise <code>false</code>.
 	 */
-	public static boolean isCorrectChannel(MessageCreateEvent event, GuildSettings settings) {
+	public static boolean isCorrectChannel(MessageReceivedEvent event) {
 		try {
+			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().getLongID());
 			if (settings.getDiscalChannel().equalsIgnoreCase("all"))
 				return true;
 
 
-			GuildChannel channel = null;
-			for (GuildChannel c : event.getGuild().block().getChannels().toIterable()) {
-				if (c.getId().toString().equals(settings.getDiscalChannel())) {
+			IChannel channel = null;
+			for (IChannel c : event.getMessage().getGuild().getChannels()) {
+				if (c.getStringID().equals(settings.getDiscalChannel())) {
 					channel = c;
 					break;
 				}
 			}
 
 			if (channel != null)
-				return event.getMessage().getChannel().block().getId().equals(channel.getId());
+				return event.getMessage().getChannel().getStringID().equals(channel.getStringID());
+
 
 			//If we got here, the channel no longer exists, reset data and return true.
 			settings.setDiscalChannel("all");
@@ -142,17 +133,12 @@ public class PermissionChecker {
 			return true;
 		} catch (Exception e) {
 			//Catch any errors so that the bot always responds...
-			Logger.getLogger().exception(event.getMessage().getAuthor().block(), "Failed to check for discal channel.", e, PermissionChecker.class);
+			Logger.getLogger().exception(event.getMessage().getAuthor(), "Failed to check for discal channel.", e, PermissionChecker.class);
 			return true;
 		}
 	}
 
-	public static boolean botHasMessageManagePerms(MessageCreateEvent event) {
-		//PermissionSet set = event.getMessage().getChannel().ofType(TextChannel.class)
-		//.flatMap(c -> c.getEffectivePermissions(c.getClient().getSelfId().get())).block();
-
-		//return set.contains(Permission.MANAGE_MESSAGES);
-		return true;
+	public static boolean botHasMessageManagePerms(MessageReceivedEvent event) {
+		return event.getGuild().getClient().getOurUser().getPermissionsForGuild(event.getMessage().getGuild()).contains(Permissions.MANAGE_MESSAGES);
 	}
-
 }

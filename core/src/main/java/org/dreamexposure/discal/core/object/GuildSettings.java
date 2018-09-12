@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.object;
 
-import discord4j.core.object.util.Snowflake;
-
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -11,7 +9,7 @@ import java.util.Collections;
  * For Project: DisCal-Discord-Bot
  */
 public class GuildSettings {
-	private final Snowflake guildID;
+	private final long guildID;
 
 	private boolean externalCalendar;
 	private String privateKey;
@@ -35,7 +33,7 @@ public class GuildSettings {
 
 	private final ArrayList<String> dmAnnouncements = new ArrayList<>();
 
-	public GuildSettings(Snowflake _guildId) {
+	public GuildSettings(long _guildId) {
 		guildID = _guildId;
 
 		externalCalendar = false;
@@ -59,7 +57,7 @@ public class GuildSettings {
 	}
 
 	//Getters
-	public Snowflake getGuildID() {
+	public long getGuildID() {
 		return guildID;
 	}
 

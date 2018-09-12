@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.database;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -30,7 +29,7 @@ public class DatabaseManager {
 	private static DatabaseManager instance;
 	private DatabaseInfo databaseInfo;
 
-	private Map<Snowflake, GuildSettings> guildSettingsCache = new HashMap<>();
+	private Map<Long, GuildSettings> guildSettingsCache = new HashMap<>();
 
 	private DatabaseManager() {
 	} //Prevent initialization.
@@ -244,7 +243,7 @@ public class DatabaseManager {
 							"(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR, BRANDED)" +
 							" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-					ps.setString(1, settings.getGuildID().asString());
+					ps.setString(1, String.valueOf(settings.getGuildID()));
 					ps.setBoolean(2, settings.useExternalCalendar());
 					ps.setString(3, settings.getPrivateKey());
 					ps.setString(4, settings.getEncryptedAccessToken());
@@ -291,7 +290,7 @@ public class DatabaseManager {
 					ps.setString(13, settings.getDmAnnouncementsString());
 					ps.setBoolean(14, settings.useTwelveHour());
 					ps.setBoolean(15, settings.isBranded());
-					ps.setString(16, settings.getGuildID().asString());
+					ps.setString(16, String.valueOf(settings.getGuildID()));
 
 					ps.executeUpdate();
 
@@ -325,7 +324,7 @@ public class DatabaseManager {
 							"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS, EXTERNAL)" +
 							" VALUES (?, ?, ?, ?, ?);";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-					ps.setString(1, calData.getGuildId().asString());
+					ps.setString(1, String.valueOf(calData.getGuildId()));
 					ps.setInt(2, calData.getCalendarNumber());
 					ps.setString(3, calData.getCalendarId());
 					ps.setString(4, calData.getCalendarAddress());
@@ -345,7 +344,7 @@ public class DatabaseManager {
 					ps.setString(2, calData.getCalendarId());
 					ps.setString(3, calData.getCalendarAddress());
 					ps.setBoolean(4, calData.isExternal());
-					ps.setString(5, calData.getGuildId().asString());
+					ps.setString(5, String.valueOf(calData.getGuildId()));
 
 					ps.executeUpdate();
 
@@ -384,7 +383,7 @@ public class DatabaseManager {
 							" VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
 					ps.setString(1, announcement.getAnnouncementId().toString());
-					ps.setString(2, announcement.getGuildId().asString());
+					ps.setString(2, String.valueOf(announcement.getGuildId()));
 					ps.setString(3, announcement.getSubscriberRoleIdString());
 					ps.setString(4, announcement.getSubscriberUserIdString());
 					ps.setString(5, announcement.getAnnouncementChannelId());
@@ -461,7 +460,7 @@ public class DatabaseManager {
 							"(GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)" +
 							" VALUES (?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-					ps.setString(1, data.getGuildId().asString());
+					ps.setString(1, String.valueOf(data.getGuildId()));
 					ps.setString(2, data.getEventId());
 					ps.setLong(3, data.getEventEnd());
 					ps.setString(4, data.getImageLink());
@@ -510,7 +509,7 @@ public class DatabaseManager {
 							"(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, NOT_GOING, UNDECIDED)" +
 							" VALUES (?, ?, ?, ?, ?, ?, ?)";
 					PreparedStatement ps = databaseInfo.getConnection().prepareStatement(insertCommand);
-					ps.setString(1, data.getGuildId().asString());
+					ps.setString(1, String.valueOf(data.getGuildId()));
 					ps.setString(2, data.getEventId());
 					ps.setLong(3, data.getEventEnd());
 					ps.setString(4, data.getGoingOnTimeString());
@@ -586,7 +585,7 @@ public class DatabaseManager {
 		return null;
 	}
 
-	public GuildSettings getSettings(Snowflake guildId) {
+	public GuildSettings getSettings(long guildId) {
 		if (guildSettingsCache.containsKey(guildId))
 			return guildSettingsCache.get(guildId);
 
@@ -645,7 +644,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("GUILD_ID") != null) {
-						GuildSettings settings = new GuildSettings(Snowflake.of(res.getString("GUILD_ID")));
+						GuildSettings settings = new GuildSettings(Long.valueOf(res.getString("GUILD_ID")));
 						settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
 						settings.setPrivateKey(res.getString("PRIVATE_KEY"));
 						settings.setEncryptedAccessToken(res.getString("ACCESS_TOKEN"));
@@ -672,13 +671,13 @@ public class DatabaseManager {
 		return allSettings;
 	}
 
-	public CalendarData getMainCalendar(Snowflake guildId) {
+	public CalendarData getMainCalendar(long guildId) {
 		CalendarData calData = new CalendarData(guildId, 1);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -698,13 +697,13 @@ public class DatabaseManager {
 		return calData;
 	}
 
-	public CalendarData getCalendar(Snowflake guildId, int calendarNumber) {
+	public CalendarData getCalendar(long guildId, int calendarNumber) {
 		CalendarData calData = new CalendarData(guildId, calendarNumber);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -724,13 +723,13 @@ public class DatabaseManager {
 		return calData;
 	}
 
-	public ArrayList<CalendarData> getAllCalendars(Snowflake guildId) {
+	public ArrayList<CalendarData> getAllCalendars(long guildId) {
 		ArrayList<CalendarData> calendars = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String calendarTableName = String.format("%scalendars", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -759,7 +758,7 @@ public class DatabaseManager {
 				ResultSet res = stmt.executeQuery();
 
 				while (res.next()) {
-					CalendarData calData = new CalendarData(Snowflake.of(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
+					CalendarData calData = new CalendarData(Long.valueOf(res.getString("GUILD_ID")), res.getInt("CALENDAR_NUMBER"));
 					calData.setCalendarId(res.getString("CALENDAR_ID"));
 					calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
 					calData.setExternal(res.getBoolean("EXTERNAL"));
@@ -798,7 +797,7 @@ public class DatabaseManager {
 		return amount;
 	}
 
-	public EventData getEventData(Snowflake guildId, String eventId) {
+	public EventData getEventData(long guildId, String eventId) {
 		EventData data = new EventData(guildId);
 
 		if (eventId.contains("_"))
@@ -811,7 +810,7 @@ public class DatabaseManager {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String eventTableName = String.format("%sevents", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -841,7 +840,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("EVENT_ID") != null) {
-						EventData data = new EventData(Snowflake.of(res.getString("GUILD_ID")));
+						EventData data = new EventData(Long.valueOf(res.getString("GUILD_ID")));
 
 						data.setEventId(res.getString("EVENT_ID"));
 						data.setEventEnd(res.getLong("EVENT_END"));
@@ -858,14 +857,14 @@ public class DatabaseManager {
 		return allData;
 	}
 
-	public RsvpData getRsvpData(Snowflake guildId, String eventId) {
+	public RsvpData getRsvpData(long guildId, String eventId) {
 		RsvpData data = new RsvpData(guildId);
 		data.setEventId(eventId);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String rsvpTableName = String.format("%srsvp", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -897,7 +896,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("GUILD_ID") != null) {
-						RsvpData data = new RsvpData(Snowflake.of(res.getString("GUILD_ID")));
+						RsvpData data = new RsvpData(Long.valueOf(res.getString("GUILD_ID")));
 						data.setEventId(res.getString("EVENT_ID"));
 						data.setEventEnd(res.getLong("EVENT_END"));
 						data.setGoingOnTimeFromString(res.getString("GOING_ON_TIME"));
@@ -923,7 +922,7 @@ public class DatabaseManager {
 	 * @param guildId        The ID of the guild the Announcement belongs to.
 	 * @return The {@link Announcement} with the specified ID if it exists, otherwise <c>null</c>.
 	 */
-	public Announcement getAnnouncement(UUID announcementId, Snowflake guildId) {
+	public Announcement getAnnouncement(UUID announcementId, long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
@@ -965,13 +964,13 @@ public class DatabaseManager {
 	 * @param guildId The ID of the guild whose data is to be retrieved.
 	 * @return An ArrayList of Announcements that belong to the specified Guild.
 	 */
-	public ArrayList<Announcement> getAnnouncements(Snowflake guildId) {
+	public ArrayList<Announcement> getAnnouncements(long guildId) {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
-				String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + guildId.asString() + "';";
+				String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = '" + guildId + "';";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 				ResultSet res = statement.executeQuery();
 
@@ -1014,7 +1013,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("ANNOUNCEMENT_ID") != null) {
-						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Snowflake.of(res.getString("GUILD_ID")));
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
 						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
 						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
 						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
@@ -1052,7 +1051,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("ANNOUNCEMENT_ID") != null) {
-						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Snowflake.of(res.getString("GUILD_ID")));
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
 						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
 						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
 						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
@@ -1089,7 +1088,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("ANNOUNCEMENT_ID") != null) {
-						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Snowflake.of(res.getString("GUILD_ID")));
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
 						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
 						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
 						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
@@ -1129,7 +1128,7 @@ public class DatabaseManager {
 
 				while (res.next()) {
 					if (res.getString("ANNOUNCEMENT_ID") != null) {
-						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Snowflake.of(res.getString("GUILD_ID")));
+						Announcement announcement = new Announcement(UUID.fromString(res.getString("ANNOUNCEMENT_ID")), Long.valueOf(res.getString("GUILD_ID")));
 						announcement.setSubscriberRoleIdsFromString(res.getString("SUBSCRIBERS_ROLE"));
 						announcement.setSubscriberUserIdsFromString(res.getString("SUBSCRIBERS_USER"));
 						announcement.setAnnouncementChannelId(res.getString("CHANNEL_ID"));
@@ -1157,14 +1156,14 @@ public class DatabaseManager {
 		return announcements;
 	}
 
-	public ArrayList<Announcement> getEnabledAnnouncements(Snowflake guildId) {
+	public ArrayList<Announcement> getEnabledAnnouncements(long guildId) {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1 AND GUILD_ID = ?");
-				stmt.setString(1, guildId.asString());
+				stmt.setString(1, String.valueOf(guildId));
 				ResultSet res = stmt.executeQuery();
 
 				while (res.next()) {
@@ -1246,7 +1245,7 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean deleteAnnouncementsForEvent(Snowflake guildId, String eventId) {
+	public boolean deleteAnnouncementsForEvent(long guildId, String eventId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
@@ -1254,7 +1253,7 @@ public class DatabaseManager {
 				String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
 				preparedStmt.setString(1, eventId);
-				preparedStmt.setString(2, guildId.asString());
+				preparedStmt.setString(2, String.valueOf(guildId));
 				preparedStmt.setString(3, AnnouncementType.SPECIFIC.name());
 
 				preparedStmt.execute();
@@ -1291,14 +1290,14 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean deleteAllEventData(Snowflake guildId) {
+	public boolean deleteAllEventData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String eventTable = String.format("%sevents", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.asString());
+				preparedStmt.setString(1, String.valueOf(guildId));
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1310,14 +1309,14 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean deleteAllAnnouncementData(Snowflake guildId) {
+	public boolean deleteAllAnnouncementData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String announcementTable = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.asString());
+				preparedStmt.setString(1, String.valueOf(guildId));
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1329,14 +1328,14 @@ public class DatabaseManager {
 		return false;
 	}
 
-	public boolean deleteAllRSVPData(Snowflake guildId) {
+	public boolean deleteAllRSVPData(long guildId) {
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
 				String rsvpTable = String.format("%srsvp", databaseInfo.getPrefix());
 
 				String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.asString());
+				preparedStmt.setString(1, String.valueOf(guildId));
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1355,7 +1354,7 @@ public class DatabaseManager {
 
 				String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, data.getGuildId().asString());
+				preparedStmt.setString(1, String.valueOf(data.getGuildId()));
 				preparedStmt.setString(2, data.getCalendarAddress());
 
 				preparedStmt.execute();

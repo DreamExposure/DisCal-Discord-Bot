@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.utils;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -58,7 +57,7 @@ public class EventUtils {
 		return false;
 	}
 
-	public static PreEvent copyEvent(Snowflake guildId, Event event) {
+	public static PreEvent copyEvent(long guildId, Event event) {
 		PreEvent pe = new PreEvent(guildId);
 		pe.setSummary(event.getSummary());
 		pe.setDescription(event.getDescription());

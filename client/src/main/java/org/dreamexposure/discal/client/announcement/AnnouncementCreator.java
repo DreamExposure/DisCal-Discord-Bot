@@ -1,8 +1,5 @@
 package org.dreamexposure.discal.client.announcement;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -11,6 +8,8 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
 import org.dreamexposure.discal.core.utils.AnnouncementUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -49,13 +48,13 @@ public class AnnouncementCreator {
 	 * @param e The event received upon init.
 	 * @return A new Announcement.
 	 */
-	public Announcement init(MessageCreateEvent e, GuildSettings settings) {
+	public Announcement init(MessageReceivedEvent e, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID())) {
 			Announcement a = new Announcement(settings.getGuildID());
-			a.setAnnouncementChannelId(e.getMessage().getChannelId().asString());
+			a.setAnnouncementChannelId(e.getMessage().getChannel().getStringID());
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings, e.getGuild().block()), e);
+				IMessage msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
@@ -67,7 +66,7 @@ public class AnnouncementCreator {
 		return getAnnouncement(settings.getGuildID());
 	}
 
-	public Announcement init(MessageCreateEvent e, String announcementId, GuildSettings settings) {
+	public Announcement init(MessageReceivedEvent e, String announcementId, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID()) && AnnouncementUtils.announcementExists(announcementId, settings.getGuildID())) {
 			Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), settings.getGuildID());
 
@@ -75,7 +74,7 @@ public class AnnouncementCreator {
 			Announcement a = new Announcement(toCopy);
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings, e.getGuild().block()), e);
+				IMessage msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
@@ -87,7 +86,7 @@ public class AnnouncementCreator {
 		return getAnnouncement(settings.getGuildID());
 	}
 
-	public Announcement edit(MessageCreateEvent e, String announcementId, GuildSettings settings) {
+	public Announcement edit(MessageReceivedEvent e, String announcementId, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID()) && AnnouncementUtils.announcementExists(announcementId, settings.getGuildID())) {
 			Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), settings.getGuildID());
 
@@ -96,7 +95,7 @@ public class AnnouncementCreator {
 			a.setEditing(true);
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
-				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings, e.getGuild().block()), e);
+				IMessage msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
@@ -108,7 +107,7 @@ public class AnnouncementCreator {
 		return getAnnouncement(settings.getGuildID());
 	}
 
-	public boolean terminate(Snowflake guildId) {
+	public boolean terminate(long guildId) {
 		if (hasAnnouncement(guildId)) {
 			announcements.remove(getAnnouncement(guildId));
 			return true;
@@ -116,7 +115,7 @@ public class AnnouncementCreator {
 		return false;
 	}
 
-	public AnnouncementCreatorResponse confirmAnnouncement(Snowflake guildId) {
+	public AnnouncementCreatorResponse confirmAnnouncement(long guildId) {
 		if (hasAnnouncement(guildId)) {
 			Announcement a = getAnnouncement(guildId);
 			if (a.hasRequiredValues()) {
@@ -136,7 +135,7 @@ public class AnnouncementCreator {
 	 * @param guildId The ID of the guild
 	 * @return The Announcement in the creator for the guild.
 	 */
-	public Announcement getAnnouncement(Snowflake guildId) {
+	public Announcement getAnnouncement(long guildId) {
 		for (Announcement a: announcements) {
 			if (a.getGuildId() == guildId) {
 				a.setLastEdit(System.currentTimeMillis());
@@ -146,7 +145,7 @@ public class AnnouncementCreator {
 		return null;
 	}
 
-	public Message getCreatorMessage(Snowflake guildId) {
+	public IMessage getCreatorMessage(long guildId) {
 		if (hasAnnouncement(guildId))
 			return getAnnouncement(guildId).getCreatorMessage();
 		return null;
@@ -157,9 +156,9 @@ public class AnnouncementCreator {
 	}
 
 	//Setters
-	public void setCreatorMessage(Message message) {
-		if (message != null && hasCreatorMessage(message.getGuild().block().getId()))
-			getAnnouncement(message.getGuild().block().getId()).setCreatorMessage(message);
+	public void setCreatorMessage(IMessage message) {
+		if (message != null && hasCreatorMessage(message.getGuild().getLongID()))
+			getAnnouncement(message.getGuild().getLongID()).setCreatorMessage(message);
 	}
 
 	//Booleans/Checkers
@@ -170,7 +169,7 @@ public class AnnouncementCreator {
 	 * @param guildId The ID of the guild.
 	 * @return <code>true</code> if active, else <code>false</code>.
 	 */
-	public boolean hasAnnouncement(Snowflake guildId) {
+	public boolean hasAnnouncement(long guildId) {
 		for (Announcement a: announcements) {
 			if (a.getGuildId() == guildId)
 				return true;
@@ -178,7 +177,7 @@ public class AnnouncementCreator {
 		return false;
 	}
 
-	public boolean hasCreatorMessage(Snowflake guildId) {
+	public boolean hasCreatorMessage(long guildId) {
 		return hasAnnouncement(guildId) && getAnnouncement(guildId).getCreatorMessage() != null;
 	}
 }

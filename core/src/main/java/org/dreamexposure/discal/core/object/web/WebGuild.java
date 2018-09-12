@@ -1,13 +1,11 @@
 package org.dreamexposure.discal.core.object.web;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,17 +132,16 @@ public class WebGuild {
 
 
 	//Functions
-	public WebGuild fromGuild(Guild g) {
-		id = g.getId().asString();
+	public WebGuild fromGuild(IGuild g) {
+		id = g.getStringID();
 		name = g.getName();
-		iconUrl = g.getIconUrl(Image.Format.PNG).get();
-		botNick = g.getClient().getSelf().block().asMember(Snowflake.of(id)).block().getNickname().get();
+		iconUrl = g.getIconURL();
+		botNick = g.getClient().getOurUser().getNicknameForGuild(g);
 
-		settings = DatabaseManager.getManager().getSettings(g.getId());
+		settings = DatabaseManager.getManager().getSettings(g.getLongID());
 
 		//Handle lists and stuffs
-
-		for (Role r : g.getRoles().toIterable()) {
+		for (IRole r : g.getRoles()) {
 			roles.add(new WebRole().fromRole(r, settings));
 		}
 
@@ -153,12 +150,12 @@ public class WebGuild {
 		all.setName("All Channels");
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
-		for (TextChannel c : g.getChannels().ofType(TextChannel.class).toIterable()) {
+		for (IChannel c : g.getChannels()) {
 			channels.add(new WebChannel().fromChannel(c, settings));
 		}
-		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
+		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getLongID()));
 
-		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(id)), settings);
+		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(id)), settings);
 
 		return this;
 	}

@@ -1,12 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Channel;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -19,6 +12,13 @@ import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
 import org.json.JSONObject;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.EmbedBuilder;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -87,8 +87,8 @@ public class DevCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (event.getMember().get().getId() == GlobalConst.novaId || event.getMember().get().getId() == GlobalConst.xaanitId || event.getMember().get().getId() == GlobalConst.calId || event.getMember().get().getId() == GlobalConst.dreamId) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+		if (event.getAuthor().getLongID() == GlobalConst.novaId || event.getAuthor().getLongID() == GlobalConst.xaanitId || event.getAuthor().getLongID() == GlobalConst.calId || event.getAuthor().getLongID() == GlobalConst.dreamId) {
 			if (args.length < 1) {
 				MessageManager.sendMessageAsync("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
 			} else {
@@ -131,7 +131,7 @@ public class DevCommand implements ICommand {
 		return false;
 	}
 
-	private void modulePatron(String[] args, MessageCreateEvent event) {
+	private void modulePatron(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -156,13 +156,13 @@ public class DevCommand implements ICommand {
 	}
 
 	@SuppressWarnings("all")
-	private void moduleEval(MessageCreateEvent event) {
-		Guild guild = event.getGuild().block();
-		Member user = event.getMember().get();
-		Message message = event.getMessage();
-		DiscordClient client = event.getClient();
-		Channel channel = event.getMessage().getChannel().block();
-		String input = message.getContent().get().substring(message.getContent().get().indexOf("eval") + 5).replaceAll("`", "");
+	private void moduleEval(MessageReceivedEvent event) {
+		IGuild guild = event.getGuild();
+		IUser user = event.getAuthor();
+		IMessage message = event.getMessage();
+		IDiscordClient client = event.getClient();
+		IChannel channel = event.getMessage().getChannel();
+		String input = message.getContent().substring(message.getContent().indexOf("eval") + 5).replaceAll("`", "");
 		Object o = null;
 		factory.put("guild", guild);
 		factory.put("channel", channel);
@@ -170,33 +170,37 @@ public class DevCommand implements ICommand {
 		factory.put("message", message);
 		factory.put("command", this);
 		factory.put("client", client);
-		factory.put("builder", new EmbedCreateSpec());
-		factory.put("cUser", client.getSelf().block());
+		factory.put("builder", new EmbedBuilder());
+		factory.put("cUser", client.getOurUser());
 
 		try {
 			o = factory.eval(input);
 		} catch (Exception ex) {
-			EmbedCreateSpec em = new EmbedCreateSpec();
-			em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-			em.setTitle("Error");
-			em.setDescription(ex.getMessage());
-			em.setFooter("Eval failed", null);
-			em.setColor(GlobalConst.discalColor);
-			MessageManager.sendMessageAsync(em, event);
+			EmbedBuilder em = new EmbedBuilder();
+			em.withAuthorName("DisCal");
+			em.withAuthorUrl(GlobalConst.discalSite);
+			em.withAuthorIcon(GlobalConst.iconUrl);
+			em.withTitle("Error");
+			em.appendDesc(ex.getMessage());
+			em.withFooterText("Eval failed");
+			em.withColor(GlobalConst.discalColor);
+			MessageManager.sendMessageAsync(em.build(), event);
 			return;
 		}
 
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle("Success! -- Eval Output.");
-		em.setColor(GlobalConst.discalColor);
-		em.setDescription(o == null ? "No output, object is null" : o.toString());
-		em.addField("Input", "```java\n" + input + "\n```", false);
-		em.setFooter("Eval successful!", null);
-		MessageManager.sendMessageAsync(em, event);
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
+		em.withTitle("Success! -- Eval Output.");
+		em.withColor(GlobalConst.discalColor);
+		em.appendDesc(o == null ? "No output, object is null" : o.toString());
+		em.appendField("Input", "```java\n" + input + "\n```", false);
+		em.withFooterText("Eval successful!");
+		MessageManager.sendMessageAsync(em.build(), event);
 	}
 
-	private void moduleDevGuild(String[] args, MessageCreateEvent event) {
+	private void moduleDevGuild(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -220,7 +224,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleMaxCalendars(String[] args, MessageCreateEvent event) {
+	private void moduleMaxCalendars(String[] args, MessageReceivedEvent event) {
 		if (args.length == 3) {
 			try {
 				int mc = Integer.valueOf(args[2]);
@@ -252,7 +256,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleLeaveGuild(String[] args, MessageCreateEvent event) {
+	private void moduleLeaveGuild(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -276,7 +280,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleReloadLangs(MessageCreateEvent event) {
+	private void moduleReloadLangs(MessageReceivedEvent event) {
 		MessageManager.reloadLangs();
 
 		//Just send this across the network with CrossTalk... and let the changes propagate
@@ -291,7 +295,7 @@ public class DevCommand implements ICommand {
 	}
 
 
-	private void registerApiKey(String[] args, MessageCreateEvent event) {
+	private void registerApiKey(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			MessageManager.sendMessageAsync("Registering new API key...", event);
 
@@ -306,7 +310,7 @@ public class DevCommand implements ICommand {
 
 			if (DatabaseManager.getManager().updateAPIAccount(account)) {
 				MessageManager.sendMessageAsync("Check your DMs for the new API Key!", event);
-				MessageManager.sendDirectMessageAsync(account.getAPIKey(), event.getMember().get());
+				MessageManager.sendDirectMessageAsync(account.getAPIKey(), event.getAuthor());
 			} else {
 				MessageManager.sendMessageAsync("Error occurred! Could not register new API key!", event);
 			}
@@ -315,7 +319,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void blockAPIKey(String[] args, MessageCreateEvent event) {
+	private void blockAPIKey(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			MessageManager.sendMessageAsync("Blocking API key...", event);
 
@@ -333,7 +337,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleCheckSettings(String[] args, MessageCreateEvent event) {
+	private void moduleCheckSettings(String[] args, MessageReceivedEvent event) {
 		if (args.length == 2) {
 			//String id = args[1];
 

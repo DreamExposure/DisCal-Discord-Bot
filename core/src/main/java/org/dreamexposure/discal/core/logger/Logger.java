@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.core.logger;
 
-import discord4j.core.object.entity.User;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import sx.blah.discord.handle.obj.IUser;
 
 import javax.annotation.Nullable;
 import java.io.FileWriter;
@@ -59,7 +59,7 @@ public class Logger {
 		}
 	}
 
-	public void exception(@Nullable User author, @Nullable String message, Exception e, Class clazz) {
+	public void exception(@Nullable IUser author, @Nullable String message, Exception e, Class clazz) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -77,7 +77,7 @@ public class Logger {
 			FileWriter exceptions = new FileWriter(exceptionsFile, true);
 			exceptions.write("ERROR --- " + timeStamp + " ---" + GlobalConst.lineBreak);
 			if (author != null)
-				exceptions.write("user: " + author.getUsername() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
+				exceptions.write("user: " + author.getName() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
 
 			if (message != null)
 				exceptions.write("message: " + message + GlobalConst.lineBreak);
@@ -91,14 +91,14 @@ public class Logger {
 		}
 	}
 
-	public void debug(@Nullable User author, String message, @Nullable String info, Class clazz) {
+	public void debug(@Nullable IUser author, String message, @Nullable String info, Class clazz) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 		//ALWAYS LOG TO FILE!
 		try {
 			FileWriter file = new FileWriter(debugFile, true);
 			file.write("DEBUG --- " + timeStamp + " ---" + GlobalConst.lineBreak);
 			if (author != null)
-				file.write("user: " + author.getUsername() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
+				file.write("user: " + author.getName() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
 
 			if (message != null)
 				file.write("message: " + message + GlobalConst.lineBreak);

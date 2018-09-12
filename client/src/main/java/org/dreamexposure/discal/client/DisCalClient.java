@@ -1,9 +1,19 @@
 package org.dreamexposure.discal.client;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
+import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
+import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
+import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.module.command.*;
+import org.dreamexposure.discal.client.service.KeepAliveHandler;
+import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.novautils.event.EventManager;
+import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
+import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.EventDispatcher;
 
 import java.io.File;
 import java.io.FileReader;
@@ -11,7 +21,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class DisCalClient {
-	private static DiscordClient client;
+	private static IDiscordClient client;
 
 	public static void main(String[] args) throws IOException {
 		//Get settings
@@ -25,12 +35,15 @@ public class DisCalClient {
 		//Handle client setup
 		client = createClient();
 
-		/*
 		//Register discord events
-		client.getEventDispatcher().on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
+		EventDispatcher dispatcher = client.getDispatcher();
+		dispatcher.registerListener(new ReadyEventListener());
 
 		//Register discal events
 		EventManager.get().registerEventListener(new CrossTalkEventListener());
+
+		//Login
+		client.login();
 
 		//Register commands
 		CommandExecutor executor = CommandExecutor.getExecutor().enable();
@@ -62,10 +75,6 @@ public class DisCalClient {
 		ClientSocketHandler.initListener();
 
 		KeepAliveHandler.startKeepAlive(60);
-		*/
-
-		//Login
-		client.login().block();
 	}
 
 	/**
@@ -73,16 +82,18 @@ public class DisCalClient {
 	 *
 	 * @return The client if successful, otherwise <code>null</code>.
 	 */
-	private static DiscordClient createClient() {
-		DiscordClientBuilder clientBuilder = new DiscordClientBuilder(BotSettings.TOKEN.get());
+	private static IDiscordClient createClient() {
+		ClientBuilder clientBuilder = new ClientBuilder().withToken(BotSettings.TOKEN.get());
+		//In case of disconnects and shit
+		clientBuilder.setMaxReconnectAttempts(10);
+		clientBuilder.setMaxReconnectAttempts(10);
 		//Handle shard count and index.
-		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
-		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
+		clientBuilder.setShard(Integer.valueOf(BotSettings.SHARD_INDEX.get()), Integer.valueOf(BotSettings.SHARD_COUNT.get()));
 		return clientBuilder.build();
 	}
 
 	//Public stuffs
-	public static DiscordClient getClient() {
+	public static IDiscordClient getClient() {
 		return client;
 	}
 }

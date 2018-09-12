@@ -1,10 +1,11 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
 import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 
 /**
  * @author NovaFox161
@@ -15,19 +16,20 @@ import org.dreamexposure.discal.core.logger.Logger;
  * Contact: nova@dreamexposure.org
  */
 public class ReadyEventListener {
-	public static void handle(ReadyEvent event) {
+	@EventSubscriber
+	public void onReadyEvent(ReadyEvent event) {
 		Logger.getLogger().debug("Ready!");
 		try {
 			TimeManager.getManager().init();
 
-			//START ANNOUNCEMENT THREADER HERE
+			//Lets test the new announcement multi-threader...
 			AnnouncementThreader.getThreader().init();
 
 			MessageManager.reloadLangs();
 
 			Logger.getLogger().debug("[ReadyEvent] Connection success!");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "BAD!!!", e, ReadyEventListener.class);
+			Logger.getLogger().exception(null, "BAD!!!", e, this.getClass());
 		}
 	}
 }

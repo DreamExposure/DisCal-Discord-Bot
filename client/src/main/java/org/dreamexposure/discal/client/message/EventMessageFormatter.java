@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -15,6 +14,8 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.util.EmbedBuilder;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -37,13 +38,15 @@ public class EventMessageFormatter {
 	 * @param settings The guild's settings
 	 * @return The EmbedObject of the event.
 	 */
-	public static EmbedCreateSpec getEventEmbed(Event event, GuildSettings settings) {
+	public static EmbedObject getEventEmbed(Event event, GuildSettings settings) {
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
-			em.setImage(ed.getImageLink());
+			em.withImage(ed.getImageLink());
 		}
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
@@ -52,7 +55,7 @@ public class EventMessageFormatter {
 				summary = summary + " (continues on Google Calendar View)";
 			}
 
-			em.addField(MessageManager.getMessage("Embed.Event.Info.Summary", settings), summary, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Info.Summary", settings), summary, true);
 		}
 		if (event.getDescription() != null) {
 			String description = event.getDescription();
@@ -60,42 +63,42 @@ public class EventMessageFormatter {
 				description = description.substring(0, 500);
 				description = description + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Event.Info.Description", settings), description, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Info.Description", settings), description, true);
 		}
-		em.addField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart(), settings, false), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart(), settings, false), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd(), settings, false), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd(), settings, false), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Info.StartDate", settings), getHumanReadableDate(event.getStart(), settings, false), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Info.StartTime", settings), getHumanReadableTime(event.getStart(), settings, false), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Info.EndDate", settings), getHumanReadableDate(event.getEnd(), settings, false), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Info.EndTime", settings), getHumanReadableTime(event.getEnd(), settings, false), true);
 
 		try {
 			//TODO: add support for multiple calendars...
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
 			Calendar service = CalendarAuth.getCalendarService(settings);
 			String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
-			em.addField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
 		} catch (Exception e1) {
-			em.addField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), "Error/Unknown", true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), "Error/Unknown", true);
 		}
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
 			if (event.getLocation().length() > 300) {
 				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 			} else {
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
 			}
 		}
 		//TODO: Add info on recurrence here.
-		em.setUrl(event.getHtmlLink());
-		em.setFooter(MessageManager.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
+		em.withUrl(event.getHtmlLink());
+		em.withFooterText(MessageManager.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings));
 		try {
 			EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
-			em.setColor(ec.asColor());
+			em.withColor(ec.getR(), ec.getG(), ec.getB());
 		} catch (Exception e) {
 			//Color is null, ignore and add our default.
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(56, 138, 237);
 		}
 
-		return em;
+		return em.build();
 	}
 
 	/**
@@ -104,13 +107,15 @@ public class EventMessageFormatter {
 	 * @param event The event involved.
 	 * @return The EmbedObject of the event.
 	 */
-	public static EmbedCreateSpec getCondensedEventEmbed(Event event, GuildSettings settings) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
+	public static EmbedObject getCondensedEventEmbed(Event event, GuildSettings settings) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
-			em.setThumbnail(ed.getImageLink());
+			em.withThumbnail(ed.getImageLink());
 
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
@@ -118,28 +123,28 @@ public class EventMessageFormatter {
 				summary = summary.substring(0, 250);
 				summary = summary + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
 		}
-		em.addField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings, false), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Condensed.Date", settings), getHumanReadableDate(event.getStart(), settings, false), true);
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
 			if (event.getLocation().length() > 300) {
 				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 			} else {
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
 			}
 		}
-		em.addField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
-		em.setUrl(event.getHtmlLink());
+		em.appendField(MessageManager.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
+		em.withUrl(event.getHtmlLink());
 		try {
 			EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
-			em.setColor(ec.asColor());
+			em.withColor(ec.getR(), ec.getG(), ec.getB());
 		} catch (Exception e) {
 			//Color is null, ignore and add our default.
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(GlobalConst.discalColor);
 		}
 
-		return em;
+		return em.build();
 	}
 
 	/**
@@ -148,20 +153,22 @@ public class EventMessageFormatter {
 	 * @param event The PreEvent to get an embed for.
 	 * @return The EmbedObject of the PreEvent.
 	 */
-	public static EmbedCreateSpec getPreEventEmbed(PreEvent event, GuildSettings settings) {
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
+	public static EmbedObject getPreEventEmbed(PreEvent event, GuildSettings settings) {
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
 		try {
 			if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
-				em.setImage(event.getEventData().getImageLink());
+				em.withImage(event.getEventData().getImageLink());
 			}
 		} catch (NullPointerException e) {
 			//TODO: find out why this is happening
 			Logger.getLogger().exception(null, "[Event] Failed to handle event image. Is event null?", e, EventMessageFormatter.class);
 		}
 		if (event.isEditing())
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
 
 		if (event.getSummary() != null) {
 			String summary = event.getSummary();
@@ -169,9 +176,9 @@ public class EventMessageFormatter {
 				summary = summary.substring(0, 250);
 				summary = summary + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), summary, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), summary, true);
 		} else {
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
 		}
 		if (event.getDescription() != null) {
 			String description = event.getDescription();
@@ -179,36 +186,36 @@ public class EventMessageFormatter {
 				description = description.substring(0, 500);
 				description = description + " (continues on Google Calendar View)";
 			}
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), description, true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), description, true);
 		} else {
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
 		}
 		if (event.shouldRecur()) {
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
 		} else {
-			em.addField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
 		}
-		em.addField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings, true), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings, true), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings, true), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
-		em.addField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings, true), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings, true), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings, true), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
+		em.appendField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
 		if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
 			if (event.getLocation().length() > 300) {
 				String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 			} else {
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
 			}
 		} else {
-			em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
+			em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
 		}
 
-		em.setFooter(MessageManager.getMessage("Embed.Event.Pre.Key", settings), null);
-		em.setColor(event.getColor().asColor());
+		em.withFooterText(MessageManager.getMessage("Embed.Event.Pre.Key", settings));
+		em.withColor(event.getColor().asColor());
 
-		return em;
+		return em.build();
 	}
 
 	/**
@@ -217,35 +224,37 @@ public class EventMessageFormatter {
 	 * @param ecr The CreatorResponse involved.
 	 * @return The EmbedObject for the CreatorResponse.
 	 */
-	public static EmbedCreateSpec getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
+	public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), ecr.getEvent().getId());
-		EmbedCreateSpec em = new EmbedCreateSpec();
-		em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-		em.setTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
+		EmbedBuilder em = new EmbedBuilder();
+		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorName("DisCal");
+		em.withAuthorUrl(GlobalConst.discalSite);
+		em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
 		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
-			em.setImage(ed.getImageLink());
+			em.withImage(ed.getImageLink());
 		}
-		em.addField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
-		em.addField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
+		em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
+		em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
 		if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
 			if (ecr.getEvent().getLocation().length() > 300) {
 				String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), location, true);
 			} else {
-				em.addField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), true);
+				em.appendField(MessageManager.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), true);
 			}
 		}
-		em.setFooter(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings), null);
-		em.setImage(ecr.getEvent().getHtmlLink());
+		em.withFooterText(MessageManager.getMessage("Embed.Event.Confirm.Footer", settings));
+		em.withUrl(ecr.getEvent().getHtmlLink());
 		try {
 			EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
-			em.setColor(ec.asColor());
+			em.withColor(ec.getR(), ec.getG(), ec.getB());
 		} catch (Exception e) {
 			//Color is null, ignore and add our default.
-			em.setColor(GlobalConst.discalColor);
+			em.withColor(GlobalConst.discalColor);
 		}
 
-		return em;
+		return em.build();
 	}
 
 	/**

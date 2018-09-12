@@ -2,7 +2,6 @@ package org.dreamexposure.discal.server.handler;
 
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -166,7 +165,7 @@ public class DashboardHandler {
 				WebGuild g = (WebGuild) m.get("selected");
 
 				if (g.isManageServer()) {
-					g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 					g.getSettings().setPrefix(queryParams.get("prefix"));
 
 					DatabaseManager.getManager().updateSettings(g.getSettings());
@@ -177,7 +176,7 @@ public class DashboardHandler {
 				WebGuild g = (WebGuild) m.get("selected");
 
 				if (g.isManageServer()) {
-					g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 					g.getSettings().setLang(queryParams.get("lang"));
 
 					DatabaseManager.getManager().updateSettings(g.getSettings());
@@ -188,7 +187,7 @@ public class DashboardHandler {
 				WebGuild g = (WebGuild) m.get("selected");
 
 				if (g.isManageServer()) {
-					g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
 
 					WebRole role = g.getRole((Long.valueOf(queryParams.get("con-role"))));
@@ -213,7 +212,7 @@ public class DashboardHandler {
 				WebGuild g = (WebGuild) m.get("selected");
 
 				if (g.isDiscalRole()) {
-					g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
 
 					for (WebChannel wc : g.getChannels()) {
@@ -235,7 +234,7 @@ public class DashboardHandler {
 				WebGuild g = (WebGuild) m.get("selected");
 
 				if (g.isManageServer()) {
-					g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+					g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
 					if (g.getSettings().isPatronGuild()) {
 						if (queryParams.containsKey("value"))
@@ -253,7 +252,7 @@ public class DashboardHandler {
 
 				//Guess this one never checked for perms so...
 
-				g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
 
 				if (queryParams.containsKey("value"))
 					g.getSettings().setSimpleAnnouncements(true);
@@ -367,7 +366,7 @@ public class DashboardHandler {
 					scope.setType("default");
 					rule.setScope(scope).setRole("reader");
 					service.acl().insert(confirmed.getId(), rule).execute();
-					CalendarData calendarData = new CalendarData(Snowflake.of(g.getId()), 1);
+					CalendarData calendarData = new CalendarData(Long.valueOf(g.getId()), 1);
 					calendarData.setCalendarId(confirmed.getId());
 					calendarData.setCalendarAddress(confirmed.getId());
 					DatabaseManager.getManager().updateCalendar(calendarData);
@@ -404,7 +403,7 @@ public class DashboardHandler {
 			WebGuild g = (WebGuild) m.get("selected");
 
 			if (g.isDiscalRole()) {
-				Announcement a = new Announcement(Snowflake.of(g.getId()));
+				Announcement a = new Announcement(Long.valueOf(g.getId()));
 				a.setAnnouncementChannelId(channelId);
 				a.setMinutesBefore(Integer.valueOf(minutesRaw));
 				a.setHoursBefore(Integer.valueOf(hoursRaw));
@@ -429,7 +428,7 @@ public class DashboardHandler {
 
 				//Update WebGuild to display correctly...
 				g.getAnnouncements().clear();
-				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Snowflake.of(g.getId())));
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
 			//Finally redirect back to the dashboard
 			response.sendRedirect("/dashboard/guild/announcements");
@@ -453,11 +452,11 @@ public class DashboardHandler {
 			WebGuild g = (WebGuild) m.get("selected");
 
 			if (g.isManageServer()) {
-				CalendarData data = DatabaseManager.getManager().getMainCalendar(Snowflake.of(g.getId()));
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(g.getId()));
+				CalendarData data = DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId()));
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()));
 				CalendarUtils.deleteCalendar(data, settings);
 
-				g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(g.getId())), DatabaseManager.getManager().getSettings(Snowflake.of(g.getId()))));
+				g.setCalendar(new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(g.getId())), DatabaseManager.getManager().getSettings(Long.valueOf(g.getId()))));
 				response.sendRedirect("/dashboard/guild/calendar");
 				return "redirect:/dashboard/guild/calendar";
 			} else {
@@ -486,7 +485,7 @@ public class DashboardHandler {
 
 				//Update announcements list to display correctly.
 				g.getAnnouncements().clear();
-				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Snowflake.of(g.getId())));
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
 			response.sendRedirect("/dashboard/guild/announcements");
 			return "redirect:/dashboard/guild/announcements";
@@ -508,7 +507,7 @@ public class DashboardHandler {
 			WebGuild g = (WebGuild) m.get("selected");
 
 			if (g.isManageServer()) {
-				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(g.getId()));
+				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Long.valueOf(g.getId()));
 
 				a.setAnnouncementChannelId(queryParams.get("channel"));
 				a.setAnnouncementType(AnnouncementType.fromValue(queryParams.get("type")));
@@ -532,7 +531,7 @@ public class DashboardHandler {
 
 				//Update announcements list to display correctly.
 				g.getAnnouncements().clear();
-				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Snowflake.of(g.getId())));
+				g.getAnnouncements().addAll(DatabaseManager.getManager().getAnnouncements(Long.valueOf(g.getId())));
 			}
 			response.sendRedirect("/dashboard/guild/announcements");
 			return "redirect:/dashboard/guild/announcements";

@@ -4,9 +4,6 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.User;
-import discord4j.core.spec.EmbedCreateSpec;
 import okhttp3.FormBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -22,6 +19,9 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.network.google.Poll;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONObject;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +48,7 @@ public class GoogleExternalAuth {
 		return auth;
 	}
 
-	public void requestCode(MessageCreateEvent event, GuildSettings settings) {
+	public void requestCode(MessageReceivedEvent event, GuildSettings settings) {
 		try {
 			RequestBody body = new FormBody.Builder()
 					.addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
@@ -67,20 +67,22 @@ public class GoogleExternalAuth {
 				JSONObject codeResponse = new JSONObject(response.body().string());
 
 				//Send DM to user with code.
-				EmbedCreateSpec em = new EmbedCreateSpec();
-				em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-				em.setTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
-				em.addField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), codeResponse.getString("user_code"), true);
-				em.setFooter(MessageManager.getMessage("Embed.AddCalendar.Code.Footer", settings), null);
+				EmbedBuilder em = new EmbedBuilder();
+				em.withAuthorIcon(GlobalConst.discalSite);
+				em.withAuthorName("DisCal");
+				em.withAuthorUrl(GlobalConst.discalSite);
+				em.withTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
+				em.appendField(MessageManager.getMessage("Embed.AddCalendar.Code.Code", settings), codeResponse.getString("user_code"), true);
+				em.withFooterText(MessageManager.getMessage("Embed.AddCalendar.Code.Footer", settings));
 
-				em.setUrl(codeResponse.getString("verification_url"));
-				em.setColor(GlobalConst.discalColor);
+				em.withUrl(codeResponse.getString("verification_url"));
+				em.withColor(GlobalConst.discalColor);
 
-				User user = event.getMember().get();
-				MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Success", settings), em, user);
+				IUser user = event.getAuthor();
+				MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Success", settings), em.build(), user);
 
 				//Start timer to poll Google Cal for auth
-				Poll poll = new Poll(user, event.getGuild().block());
+				Poll poll = new Poll(user, event.getGuild());
 
 				poll.setDevice_code(codeResponse.getString("device_code"));
 				poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
@@ -88,20 +90,20 @@ public class GoogleExternalAuth {
 				poll.setInterval(codeResponse.getInt("interval"));
 				pollForAuth(poll);
 			} else {
-				MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getMember().get());
+				MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), event.getAuthor());
 
-				Logger.getLogger().debug(event.getMember().get(), "Error requesting access token.", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass());
+				Logger.getLogger().debug(event.getAuthor(), "Error requesting access token.", "Status code: " + response.code() + " | " + response.message() + " | " + response.body().string(), this.getClass());
 			}
 		} catch (Exception e) {
 			//Failed, report issue to dev.
-			Logger.getLogger().exception(event.getMember().get(), "Failed to request Google Access Code", e, this.getClass());
-			User u = event.getMember().get();
+			Logger.getLogger().exception(event.getAuthor(), "Failed to request Google Access Code", e, this.getClass());
+			IUser u = event.getAuthor();
 			MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), u);
 		}
 	}
 
 	void pollForAuth(Poll poll) {
-		GuildSettings settings = DatabaseManager.getManager().getSettings(poll.getGuild().getId());
+		GuildSettings settings = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
 		try {
 			RequestBody body = new FormBody.Builder()
 					.addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
@@ -153,7 +155,7 @@ public class GoogleExternalAuth {
 				JSONObject aprGrant = new JSONObject(response.body().string());
 
 				//Save credentials securely.
-				GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getId());
+				GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getLongID());
 				AESEncryption encryption = new AESEncryption(gs);
 				gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
 				gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
@@ -166,16 +168,18 @@ public class GoogleExternalAuth {
 					MessageManager.sendDirectMessageAsync(MessageManager.getMessage("AddCalendar.Auth.Poll.Success", settings), poll.getUser());
 					for (CalendarListEntry i : items) {
 						if (!i.isDeleted()) {
-							EmbedCreateSpec em = new EmbedCreateSpec();
-							em.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-							em.setTitle(MessageManager.getMessage("Embed.AddCalendar.List.Title", settings));
-							em.addField(MessageManager.getMessage("Embed.AddCalendar.List.Name", settings), i.getSummary(), false);
-							em.addField(MessageManager.getMessage("Embed.AddCalendar.List.TimeZone", settings), i.getTimeZone(), false);
-							em.addField(MessageManager.getMessage("Embed.AddCalendar.List.ID", settings), i.getId(), false);
+							EmbedBuilder em = new EmbedBuilder();
+							em.withAuthorIcon(GlobalConst.discalSite);
+							em.withAuthorName("DisCal");
+							em.withAuthorUrl(GlobalConst.discalSite);
+							em.withTitle(MessageManager.getMessage("Embed.AddCalendar.List.Title", settings));
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.Name", settings), i.getSummary(), false);
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.TimeZone", settings), i.getTimeZone(), false);
+							em.appendField(MessageManager.getMessage("Embed.AddCalendar.List.ID", settings), i.getId(), false);
 
-							em.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
-							em.setColor(GlobalConst.discalColor);
-							MessageManager.sendDirectMessageAsync(em, poll.getUser());
+							em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
+							em.withColor(GlobalConst.discalColor);
+							MessageManager.sendDirectMessageAsync(em.build(), poll.getUser());
 						}
 					}
 					//Response will be handled in guild, and will check. We already saved the tokens anyway.

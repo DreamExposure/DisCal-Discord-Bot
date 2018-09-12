@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,5 +38,5 @@ public interface ICommand {
 		return info;
 	}
 
-	boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings);
+	boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings);
 }

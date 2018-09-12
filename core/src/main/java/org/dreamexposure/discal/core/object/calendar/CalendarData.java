@@ -1,14 +1,12 @@
 package org.dreamexposure.discal.core.object.calendar;
 
-import discord4j.core.object.util.Snowflake;
-
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarData {
-	private final Snowflake guildId;
+	private final long guildId;
 	private final int calendarNumber;
 
 	private String calendarId;
@@ -16,7 +14,7 @@ public class CalendarData {
 
 	private boolean external;
 
-	public CalendarData(Snowflake _guildID, int _calendarNumber) {
+	public CalendarData(long _guildID, int _calendarNumber) {
 		guildId = _guildID;
 		calendarNumber = _calendarNumber;
 
@@ -27,7 +25,7 @@ public class CalendarData {
 	}
 
 	//Getters
-	public Snowflake getGuildId() {
+	public long getGuildId() {
 		return guildId;
 	}
 

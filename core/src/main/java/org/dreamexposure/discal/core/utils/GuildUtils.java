@@ -1,10 +1,9 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.object.web.WebGuild;
+import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.IUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,20 +14,19 @@ import java.util.List;
  * For Project: DisCal-Discord-Bot
  */
 public class GuildUtils {
-	public static boolean active(Snowflake id) {
+	public static boolean active(long id) {
 		//TODO: Determine an accurate way to detect if a guild is still connected to DisCal
 		return true;
-		//return Main.client.getGuildByID(id) != null;
 	}
 
-	public static List<WebGuild> getGuilds(String userId, DiscordClient client) {
+	public static List<WebGuild> getGuilds(String userId, IDiscordClient client) {
 		List<WebGuild> guilds = new ArrayList<>();
 
-		for (Guild g : client.getGuilds().toIterable()) {
-			for (Member m : g.getMembers().toIterable()) {
-				if (m.getId().asString().equals(userId)) {
+		for (IGuild g : client.getGuilds()) {
+			for (IUser m : g.getUsers()) {
+				if (m.getStringID().equals(userId)) {
 					WebGuild wg = new WebGuild().fromGuild(g);
-					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
+					wg.setManageServer(PermissionChecker.hasManageServerRole(g, m));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
 
 					guilds.add(new WebGuild().fromGuild(g));

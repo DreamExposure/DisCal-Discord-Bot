@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -10,6 +9,7 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 
@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class LinkCalendarCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -68,10 +67,10 @@ public class LinkCalendarCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
 
 			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
 				//Does not have a calendar.
@@ -82,7 +81,7 @@ public class LinkCalendarCommand implements ICommand {
 				MessageManager.sendMessageAsync(CalendarMessageFormatter.getCalendarLinkEmbed(cal, settings), event);
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, this.getClass());
+			Logger.getLogger().exception(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 		return false;
