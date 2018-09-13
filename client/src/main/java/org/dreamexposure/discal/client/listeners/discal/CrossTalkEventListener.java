@@ -81,7 +81,7 @@ public class CrossTalkEventListener {
 					IUser member = g.getUserByID(Long.valueOf(memId));
 
 					JSONObject newData = new JSONObject();
-					newData.put("Guild", new WebGuild().fromGuild(g));
+					newData.put("Guild", new WebGuild().fromGuild(g).toJson());
 					newData.put("Sufficient-Role", PermissionChecker.hasSufficientRole(g, member));
 					newData.put("Manager-Server", PermissionChecker.hasManageServerRole(g, member));
 
@@ -96,7 +96,7 @@ public class CrossTalkEventListener {
 					List<WebGuild> guilds = GuildUtils.getGuilds(memId, DisCalClient.getClient());
 
 					for (WebGuild wg : guilds) {
-						guildsArray.put(wg);
+						guildsArray.put(wg.toJson());
 					}
 
 					newData.put("Guilds", guildsArray);
@@ -107,7 +107,7 @@ public class CrossTalkEventListener {
 					//Get guild for calendar embed on site....
 					JSONObject newData = new JSONObject();
 
-					newData.put("Guild", new WebGuild().fromGuild(g));
+					newData.put("Guild", new WebGuild().fromGuild(g).toJson());
 
 					ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), newData, BotSettings.CROSSTALK_SERVER_HOST.get(), event.getOneTimeResponsePort());
 				}

@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
+import org.dreamexposure.discal.server.handler.DiscordAccountHandler;
 import org.dreamexposure.discal.server.listeners.CrossTalkListener;
 import org.dreamexposure.discal.server.network.discordbots.UpdateDisBotData;
 import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
@@ -17,8 +18,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
-
-//TODO: Add methods to convert WebGuild, WebRole, WebChannel, and Announcement to/from JSON <- note for self.
 
 @SpringBootApplication
 public class DisCalServer {
@@ -47,7 +46,7 @@ public class DisCalServer {
 		//Start Spring
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
 			try {
-				//DiscordAccountHandler.getHandler().init();
+				DiscordAccountHandler.getHandler().init();
 				SpringApplication.run(DisCalServer.class, args);
 			} catch (Exception e) {
 				e.printStackTrace();

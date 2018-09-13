@@ -57,7 +57,7 @@ public class DashboardHandler {
 			JSONObject data = ServerSocketHandler.sendAndReceive(body);
 
 			//Don't worry about guild not existing, impossible to get here if it doesn't exist.
-			WebGuild wg = (WebGuild) data.get("Guild");
+			WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
 
 			wg.setDiscalRole(data.getBoolean("Sufficient-Role"));
 			wg.setManageServer(data.getBoolean("Manager-Server"));

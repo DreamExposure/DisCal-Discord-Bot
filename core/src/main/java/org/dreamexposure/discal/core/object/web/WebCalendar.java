@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.json.JSONObject;
 
 /**
  * Created by Nova Fox on 1/7/18.
@@ -105,6 +106,34 @@ public class WebCalendar {
 				timezone = "ERROR";
 			}
 		}
+		return this;
+	}
+
+	public JSONObject toJson() {
+		JSONObject data = new JSONObject();
+
+		data.put("Id", id);
+		data.put("Address", address);
+		data.put("Link", link);
+		data.put("Name", name);
+		if (description != null)
+			data.put("Description", description);
+		data.put("Timezone", timezone);
+		data.put("External", external);
+
+		return data;
+	}
+
+	public WebCalendar fromJson(JSONObject data) {
+		id = data.getString("Id");
+		address = data.getString("Address");
+		link = data.getString("Link");
+		name = data.getString("Name");
+		if (data.has("Description"))
+			description = data.getString("Description");
+		timezone = data.getString("Timezone");
+		external = data.getBoolean("External");
+
 		return this;
 	}
 }

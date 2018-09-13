@@ -2,6 +2,8 @@ package org.dreamexposure.discal.core.object.announcement;
 
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
@@ -13,10 +15,10 @@ import java.util.UUID;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "Duplicates"})
 public class Announcement {
-	private final UUID announcementId;
-	private final long guildId;
+	private UUID announcementId;
+	private long guildId;
 
 	private final ArrayList<String> subscriberRoleIds = new ArrayList<>();
 	private final ArrayList<String> subscriberUserIds = new ArrayList<>();
@@ -32,10 +34,9 @@ public class Announcement {
 	private boolean enabled;
 	private boolean infoOnly;
 
+	//Stuff for creator/editor wizards.
 	private IMessage creatorMessage;
-
 	private boolean editing;
-
 	private long lastEdit;
 
 	/**
@@ -388,5 +389,63 @@ public class Announcement {
 	 */
 	public Boolean hasRequiredValues() {
 		return (minutesBefore != 0 || hoursBefore != 0) && !(type.equals(AnnouncementType.SPECIFIC) && eventId.equalsIgnoreCase("N/a")) && !announcementChannelId.equalsIgnoreCase("N/a");
+	}
+
+	public JSONObject toJson() {
+		JSONObject data = new JSONObject();
+
+		data.put("GuildId", guildId);
+		data.put("Id", announcementId.toString());
+
+		JSONArray roles = new JSONArray();
+		for (String s : subscriberRoleIds) {
+			roles.put(s);
+		}
+		data.put("Roles", roles);
+
+		JSONArray users = new JSONArray();
+		for (String s : subscriberUserIds) {
+			users.put(s);
+		}
+		data.put("Users", users);
+
+		data.put("ChannelId", announcementChannelId);
+		data.put("Type", type.getName());
+		data.put("EventId", eventId);
+		data.put("EventColor", eventColor.getName());
+		data.put("Hours", hoursBefore);
+		data.put("Minutes", minutesBefore);
+		data.put("Info", info);
+		data.put("Enabled", enabled);
+		data.put("InfoOnly", infoOnly);
+
+		return data;
+	}
+
+	public Announcement fromJson(JSONObject data) {
+		guildId = data.getLong("GuildId");
+		announcementId = UUID.fromString(data.getString("Id"));
+
+		JSONArray roles = data.getJSONArray("Roles");
+		for (int i = 0; i < roles.length(); i++) {
+			subscriberRoleIds.add(roles.getString(i));
+		}
+
+		JSONArray users = data.getJSONArray("Users");
+		for (int i = 0; i < users.length(); i++) {
+			subscriberUserIds.add(users.getString(i));
+		}
+
+		announcementChannelId = data.getString("ChannelId");
+		type = AnnouncementType.fromValue(data.getString("Type"));
+		eventId = data.getString("EventId");
+		eventColor = EventColor.valueOf(data.getString("EventColor"));
+		hoursBefore = data.getInt("Hours");
+		minutesBefore = data.getInt("Minutes");
+		info = data.getString("Info");
+		enabled = data.getBoolean("Enabled");
+		infoOnly = data.getBoolean("InfoOnly");
+
+		return this;
 	}
 }

@@ -5,7 +5,7 @@ import java.awt.*;
 public class GlobalConst {
 	public static final String version = "3.0.0";
 
-	public static final String iconUrl = "https://www.discalbot.com/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png";
+	public static String iconUrl;
 	public static final String lineBreak = System.getProperty("line.separator");
 	public static final long novaId = 130510525770629121L;
 	public static final long xaanitId = 233611560545812480L;

@@ -98,7 +98,7 @@ public class DiscordLoginHandler {
 
 					JSONArray guildsData = responseData.getJSONArray("Guilds");
 					for (int i = 0; i < responseData.getInt("Guild-Count"); i++) {
-						guilds.add((WebGuild) guildsData.get(i));
+						guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));
 					}
 				}
 

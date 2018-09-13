@@ -28,8 +28,7 @@ public class GuildUtils {
 					WebGuild wg = new WebGuild().fromGuild(g);
 					wg.setManageServer(PermissionChecker.hasManageServerRole(g, m));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
-
-					guilds.add(new WebGuild().fromGuild(g));
+					guilds.add(wg);
 				}
 			}
 		}

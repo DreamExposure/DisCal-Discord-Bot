@@ -4,6 +4,7 @@ import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
 import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 
@@ -24,6 +25,8 @@ public class ReadyEventListener {
 
 			//Lets test the new announcement multi-threader...
 			AnnouncementThreader.getThreader().init();
+
+			GlobalConst.iconUrl = event.getClient().getApplicationIconURL();
 
 			MessageManager.reloadLangs();
 

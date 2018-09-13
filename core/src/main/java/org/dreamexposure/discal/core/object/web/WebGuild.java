@@ -3,6 +3,8 @@ package org.dreamexposure.discal.core.object.web;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
@@ -156,6 +158,69 @@ public class WebGuild {
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getLongID()));
 
 		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(id)), settings);
+
+		return this;
+	}
+
+	public JSONObject toJson() {
+		JSONObject data = new JSONObject();
+
+		data.put("Id", id);
+		data.put("Name", name);
+		data.put("IconUrl", iconUrl);
+		data.put("Settings", settings.toJson());
+		data.put("BotNick", botNick);
+		data.put("ManageServer", manageServer);
+		data.put("DiscalRole", discalRole);
+
+		JSONArray jRoles = new JSONArray();
+		for (WebRole wr : roles) {
+			jRoles.put(wr.toJson());
+		}
+		data.put("Roles", jRoles);
+
+		JSONArray jChannels = new JSONArray();
+		for (WebChannel wc : channels) {
+			jChannels.put(wc.toJson());
+		}
+		data.put("Channels", jChannels);
+
+		JSONArray jAnnouncements = new JSONArray();
+		for (Announcement a : announcements) {
+			jAnnouncements.put(a.toJson());
+		}
+		data.put("Announcements", jAnnouncements);
+
+		data.put("Calendar", calendar.toJson());
+
+		return data;
+	}
+
+	public WebGuild fromJson(JSONObject data) {
+		id = data.getString("Id");
+		name = data.getString("Name");
+		iconUrl = data.getString("IconUrl");
+		settings = new GuildSettings(Long.valueOf(id)).fromJson(data.getJSONObject("Settings"));
+		botNick = data.getString("BotNick");
+		manageServer = data.getBoolean("ManageServer");
+		discalRole = data.getBoolean("DiscalRole");
+
+		JSONArray jRoles = data.getJSONArray("Roles");
+		for (int i = 0; i < jRoles.length(); i++) {
+			roles.add(new WebRole().fromJson(jRoles.getJSONObject(i)));
+		}
+
+		JSONArray jChannels = data.getJSONArray("Channels");
+		for (int i = 0; i < jChannels.length(); i++) {
+			channels.add(new WebChannel().fromJson(jChannels.getJSONObject(i)));
+		}
+
+		JSONArray jAnnouncements = data.getJSONArray("Announcements");
+		for (int i = 0; i < jAnnouncements.length(); i++) {
+			announcements.add(new Announcement(Long.valueOf(id)).fromJson(jAnnouncements.getJSONObject(i)));
+		}
+
+		calendar = new WebCalendar().fromJson(data.getJSONObject("Calendar"));
 
 		return this;
 	}

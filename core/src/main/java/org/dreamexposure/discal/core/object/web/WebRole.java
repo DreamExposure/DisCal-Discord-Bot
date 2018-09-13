@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.web;
 
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.json.JSONObject;
 import sx.blah.discord.handle.obj.IRole;
 
 /**
@@ -74,6 +75,28 @@ public class WebRole {
 		else
 			controlRole = settings.getControlRole().equalsIgnoreCase(String.valueOf(id));
 
+
+		return this;
+	}
+
+	public JSONObject toJson() {
+		JSONObject data = new JSONObject();
+
+		data.put("Id", id);
+		data.put("Name", name);
+		data.put("Managed", managed);
+		data.put("ControlRole", controlRole);
+		data.put("Everyone", everyone);
+
+		return data;
+	}
+
+	public WebRole fromJson(JSONObject data) {
+		id = data.getLong("Id");
+		name = data.getString("Name");
+		managed = data.getBoolean("Managed");
+		controlRole = data.getBoolean("ControlRole");
+		everyone = data.getBoolean("Everyone");
 
 		return this;
 	}

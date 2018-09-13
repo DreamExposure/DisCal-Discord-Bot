@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.module.command;
 
+import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -140,6 +141,16 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
+			//Check if its on this shard...
+			if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+				settings.setPatronGuild(!settings.isPatronGuild());
+				DatabaseManager.getManager().updateSettings(settings);
+
+				MessageManager.sendMessageAsync("Guild connected to this shard. isPatronGuild value updated!", event);
+				return;
+			}
+
 			//Just send this across the network with CrossTalk... and let the changes propagate
 			JSONObject request = new JSONObject();
 
@@ -208,6 +219,15 @@ public class DevCommand implements ICommand {
 				MessageManager.sendMessageAsync("Specified ID is not a valid LONG", event);
 				return;
 			}
+			//Check if its on this shard...
+			if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+				settings.setDevGuild(!settings.isDevGuild());
+				DatabaseManager.getManager().updateSettings(settings);
+
+				MessageManager.sendMessageAsync("Guild connected to this shard. isDevGuild value updated!", event);
+				return;
+			}
 
 			//Just send this across the network with CrossTalk... and let the changes propagate
 			JSONObject request = new JSONObject();
@@ -237,6 +257,16 @@ public class DevCommand implements ICommand {
 					return;
 				}
 
+				//Check if its on this shard...
+				if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
+					GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+					settings.setMaxCalendars(mc);
+					DatabaseManager.getManager().updateSettings(settings);
+
+					MessageManager.sendMessageAsync("Guild connected to this shard. Max calendar value has been updated!", event);
+					return;
+				}
+
 				//Just send this across the network with CrossTalk... and let the changes propagate
 				JSONObject request = new JSONObject();
 
@@ -262,6 +292,15 @@ public class DevCommand implements ICommand {
 				Long.valueOf(args[1]);
 			} catch (NumberFormatException ignore) {
 				MessageManager.sendMessageAsync("Specified ID is not a valid LONG", event);
+				return;
+			}
+
+			//Check if its on this shard...
+			IGuild g = DisCalClient.getClient().getGuildByID(Long.valueOf(args[1]));
+			if (g != null) {
+				g.leave();
+
+				MessageManager.sendMessageAsync("Guild connected to this shard has been left!", event);
 				return;
 			}
 

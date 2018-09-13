@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -9,7 +11,7 @@ import java.util.Collections;
  * For Project: DisCal-Discord-Bot
  */
 public class GuildSettings {
-	private final long guildID;
+	private long guildID;
 
 	private boolean externalCalendar;
 	private String privateKey;
@@ -204,5 +206,47 @@ public class GuildSettings {
 	public void setDmAnnouncementsFromString(String userList) {
 		String[] subs = userList.split(",");
 		Collections.addAll(dmAnnouncements, subs);
+	}
+
+	public JSONObject toJson() {
+		JSONObject data = new JSONObject();
+
+		data.put("GuildId", guildID);
+		data.put("ExternalCalendar", externalCalendar);
+		data.put("PrivateKey", privateKey);
+		data.put("AccessToken", encryptedAccessToken);
+		data.put("RefreshToken", encryptedRefreshToken);
+		data.put("ControlRole", controlRole);
+		data.put("DisCalChannel", discalChannel);
+		data.put("SimpleAnnouncements", simpleAnnouncements);
+		data.put("Lang", lang);
+		data.put("Prefix", prefix);
+		data.put("PatronGuild", patronGuild);
+		data.put("DevGuild", devGuild);
+		data.put("MaxCalendars", maxCalendars);
+		data.put("TwelveHour", twelveHour);
+		data.put("Branded", branded);
+
+		return data;
+	}
+
+	public GuildSettings fromJson(JSONObject data) {
+		guildID = data.getLong("GuildId");
+		externalCalendar = data.getBoolean("ExternalCalendar");
+		privateKey = data.getString("PrivateKey");
+		encryptedAccessToken = data.getString("AccessToken");
+		encryptedRefreshToken = data.getString("RefreshToken");
+		controlRole = data.getString("ControlRole");
+		discalChannel = data.getString("DisCalChannel");
+		simpleAnnouncements = data.getBoolean("SimpleAnnouncements");
+		lang = data.getString("Lang");
+		prefix = data.getString("Prefix");
+		patronGuild = data.getBoolean("PatronGuild");
+		devGuild = data.getBoolean("DevGuild");
+		maxCalendars = data.getInt("MaxCalendars");
+		twelveHour = data.getBoolean("TwelveHour");
+		branded = data.getBoolean("Branded");
+
+		return this;
 	}
 }

@@ -53,6 +53,6 @@ public class KeepAliveHandler {
 		Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
 		Period period = interval.toPeriod();
 
-		return String.format("%d year(s), %d month(s), %d day(s), %d hour(s), %d minute(s), %d second(s)%n", period.getYears(), period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+		return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
 	}
 }
