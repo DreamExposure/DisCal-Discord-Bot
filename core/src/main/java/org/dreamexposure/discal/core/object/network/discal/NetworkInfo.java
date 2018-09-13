@@ -44,5 +44,9 @@ public class NetworkInfo {
 		return count;
 	}
 
+	public int getClientCount() {
+		return clients.size();
+	}
+
 	//Setters
 }

@@ -33,8 +33,9 @@ public class DisCalServer {
 		//Init logger
 		Logger.getLogger().init();
 
-		//Register DisCal events and listeners
-		EventManager.get().registerEventListener(new CrossTalkListener());
+		//Register DisCal events
+		EventManager.get().init();
+		EventManager.get().getEventBus().register(new CrossTalkListener());
 
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();

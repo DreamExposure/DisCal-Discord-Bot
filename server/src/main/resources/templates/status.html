@@ -61,7 +61,7 @@
 			<h1>DisCal Network and Services Status</h1>
 
 			<h2>Server</h2>
-			<p th:text="'Connected Clients: ' + ${status.clients.size}"></p>
+			<p th:text="'Connected Clients: ' + ${status.clientCount}"></p>
 			<p>Uptime: Not yet tracked</p>
 			<p>Total Guilds: not yet tracked</p>
 			<p>Total Calendars: not yet tracked</p>
@@ -84,10 +84,10 @@
 			<th:block th:each="client : ${status.clients}">
 				<div th:id="'client-' + ${client.clientIndex}">
 					<h3 th:text="'Client Index: ' + ${client.clientIndex}"></h3>
-					<p th:text="'Guilds:' + ${client.connectedServers}"></p>
+					<p th:text="'Guilds: ' + ${client.connectedServers}"></p>
 					<p th:text="'RAM Used: ' + ${client.memUsed} + 'MB'"></p>
 					<p>Announcements: Not Yet Tracked</p>
-					<p>Uptime: To be Displayed</p>
+					<p th:text="'Uptime: ' + ${client.uptime}"></p>
 					<p>Announcement Service: Not yet tracked</p>
 					<p>Creator Cleaner Service: Not yet tracked</p>
 				</div>

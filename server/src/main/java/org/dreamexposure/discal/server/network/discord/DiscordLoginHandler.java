@@ -10,9 +10,10 @@ import org.dreamexposure.discal.core.enums.network.CrossTalkReason;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebGuild;
+import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.handler.DiscordAccountHandler;
-import org.dreamexposure.novautils.network.crosstalk.ClientSocketData;
 import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -86,14 +87,14 @@ public class DiscordLoginHandler {
 
 				//Get guilds...
 				List<WebGuild> guilds = new ArrayList<>();
-				for (ClientSocketData csd : ServerSocketHandler.getClients()) {
+				for (ConnectedClient csd : DisCalServer.getNetworkInfo().getClients()) {
 					JSONObject requestData = new JSONObject();
 
 					requestData.put("Reason", CrossTalkReason.GET.name());
 					requestData.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_DEFAULTS);
 					requestData.put("Member-Id", m.get("id") + "");
 
-					JSONObject responseData = ServerSocketHandler.sendAndReceive(requestData, csd.getIp(), csd.getPort());
+					JSONObject responseData = ServerSocketHandler.sendAndReceive(requestData, csd.getClientHostname(), csd.getClientPort());
 
 					JSONArray guildsData = responseData.getJSONArray("Guilds");
 					for (int i = 0; i < responseData.getInt("Guild-Count"); i++) {

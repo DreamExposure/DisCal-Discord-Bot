@@ -1,8 +1,11 @@
 package org.dreamexposure.discal.client.service;
 
 import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
+import org.joda.time.Interval;
+import org.joda.time.Period;
 import org.json.JSONObject;
 
 import java.lang.management.ManagementFactory;
@@ -28,10 +31,12 @@ public class KeepAliveHandler {
 				data.put("Reason", "Keep-Alive");
 				data.put("Server-Count", DisCalClient.getClient().getGuilds().size());
 				data.put("Mem-Used", usedMemory());
-				data.put("Uptime", getUptime());
+				data.put("Uptime", humanReadableUptime());
 				//TODO: Add announcement count!!!
 
 				ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), data);
+
+				Logger.getLogger().debug("Sent keep alive to server.");
 			}
 		}, seconds * 1000, seconds * 1000);
 	}
@@ -39,11 +44,15 @@ public class KeepAliveHandler {
 	private static double usedMemory() {
 		long totalMemory = Runtime.getRuntime().totalMemory();
 		long freeMemory = Runtime.getRuntime().freeMemory();
-		return (double) (totalMemory - freeMemory) / (double) (1024 * 1024);
+		double a = (totalMemory - freeMemory) / (double) (1024 * 1024);
+		return (double) Math.round(a * 100) / 100;
 	}
 
-	private static long getUptime() {
+	private static String humanReadableUptime() {
 		RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
-		return mxBean.getUptime();
+		Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
+		Period period = interval.toPeriod();
+
+		return String.format("%d year(s), %d month(s), %d day(s), %d hour(s), %d minute(s), %d second(s)%n", period.getYears(), period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
 	}
 }

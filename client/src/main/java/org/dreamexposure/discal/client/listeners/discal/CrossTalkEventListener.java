@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discal;
 
+import com.google.common.eventbus.Subscribe;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -10,7 +11,6 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.utils.GuildUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.novautils.event.EventListener;
 import org.dreamexposure.novautils.events.network.crosstalk.CrossTalkReceiveEvent;
 import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
 import org.json.JSONArray;
@@ -29,8 +29,8 @@ import java.util.List;
  * Contact: nova@dreamexposure.org
  */
 @SuppressWarnings({"ConstantConditions", "IfCanBeSwitch"})
-public class CrossTalkEventListener implements EventListener {
-	@SuppressWarnings("unused")
+public class CrossTalkEventListener {
+	@Subscribe
 	public void handle(CrossTalkReceiveEvent event) {
 		IGuild g = null;
 		//Check if this even applies to us!

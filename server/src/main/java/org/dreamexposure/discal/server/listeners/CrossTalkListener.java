@@ -1,8 +1,9 @@
 package org.dreamexposure.discal.server.listeners;
 
+import com.google.common.eventbus.Subscribe;
+import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.server.DisCalServer;
-import org.dreamexposure.novautils.event.EventListener;
 import org.dreamexposure.novautils.events.network.crosstalk.CrossTalkReceiveEvent;
 
 /**
@@ -13,26 +14,29 @@ import org.dreamexposure.novautils.events.network.crosstalk.CrossTalkReceiveEven
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings("Duplicates")
-public class CrossTalkListener implements EventListener {
-	public void handle(CrossTalkReceiveEvent event) {
+@SuppressWarnings({"Duplicates", "UnstableApiUsage"})
+public class CrossTalkListener {
+	@Subscribe
+	public static void handle(CrossTalkReceiveEvent event) {
 		//Handle keep alive...
 		if (event.getData().has("Reason") && event.getData().getString("Reason").equalsIgnoreCase("Keep-Alive")) {
+			Logger.getLogger().debug("Received Keep Alive for Client: " + event.getClientIndex());
 			if (DisCalServer.getNetworkInfo().clientExists(event.getClientIndex())) {
 				//In network, update info...
 				ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(event.getClientIndex());
 
 				cc.setLastKeepAlive(System.currentTimeMillis());
 				cc.setConnectedServers(event.getData().getInt("Server-Count"));
-				cc.setUptime(event.getData().getLong("Uptime"));
+				cc.setUptime(event.getData().getString("Uptime"));
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
+
 			} else {
 				//Not in network, add info...
 				ConnectedClient cc = new ConnectedClient(event.getClientIndex(), event.getClientIp(), event.getClientPort());
 
 				cc.setLastKeepAlive(System.currentTimeMillis());
 				cc.setConnectedServers(event.getData().getInt("Server-Count"));
-				cc.setUptime(event.getData().getLong("Uptime"));
+				cc.setUptime(event.getData().getString("Uptime"));
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
 
 				DisCalServer.getNetworkInfo().getClients().add(cc);

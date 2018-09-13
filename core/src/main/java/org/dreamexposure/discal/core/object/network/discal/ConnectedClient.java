@@ -15,7 +15,7 @@ public class ConnectedClient {
 
 	private int connectedServers;
 	private long lastKeepAlive;
-	private long uptime;
+	private String uptime;
 	private double memUsed;
 
 	public ConnectedClient(int _clientIndex, String _clientHostname, int _clientPort) {
@@ -26,7 +26,7 @@ public class ConnectedClient {
 		connectedServers = 0;
 		lastKeepAlive = System.currentTimeMillis();
 
-		uptime = 0;
+		uptime = "ERROR";
 		memUsed = 0;
 	}
 
@@ -51,7 +51,7 @@ public class ConnectedClient {
 		return lastKeepAlive;
 	}
 
-	public long getUptime() {
+	public String getUptime() {
 		return uptime;
 	}
 
@@ -68,7 +68,7 @@ public class ConnectedClient {
 		lastKeepAlive = _lastKeepAlive;
 	}
 
-	public void setUptime(long _uptime) {
+	public void setUptime(String _uptime) {
 		uptime = _uptime;
 	}
 

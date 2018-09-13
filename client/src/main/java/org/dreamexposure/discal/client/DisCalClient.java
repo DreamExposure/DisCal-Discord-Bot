@@ -40,7 +40,8 @@ public class DisCalClient {
 		dispatcher.registerListener(new ReadyEventListener());
 
 		//Register discal events
-		EventManager.get().registerEventListener(new CrossTalkEventListener());
+		EventManager.get().init();
+		EventManager.get().getEventBus().register(new CrossTalkEventListener());
 
 		//Login
 		client.login();
