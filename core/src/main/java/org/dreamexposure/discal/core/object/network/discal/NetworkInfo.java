@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.dreamexposure.discal.core.database.DatabaseManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,14 @@ public class NetworkInfo {
 
 	public int getClientCount() {
 		return clients.size();
+	}
+
+	public int getCalendarCount() {
+		return DatabaseManager.getManager().getCalendarCount();
+	}
+
+	public int getAnnouncementCount() {
+		return DatabaseManager.getManager().getAnnouncementCount();
 	}
 
 	//Setters

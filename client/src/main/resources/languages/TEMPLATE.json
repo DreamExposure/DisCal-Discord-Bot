@@ -252,7 +252,7 @@
   "Embed.DisCal.Info.Developer": "Developer",
   "Embed.Discal.Info.Version": "Version",
   "Embed.DisCal.Info.Library": "Library",
-  "Embed.DisCal.Info.TotalGuilds": "Total Guilds",
+  "Embed.DisCal.Info.TotalGuilds": "Guilds on This Shard",
   "Embed.DisCal.Info.TotalCalendars": "Total Calendars",
   "Embed.DisCal.Info.TotalAnnouncements": "Total Announcements",
   "Embed.DisCal.Info.Ping": "Current Ping [Shard %shard%]",

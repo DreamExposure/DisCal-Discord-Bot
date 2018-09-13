@@ -28,13 +28,12 @@ public class StatusChanger extends TimerTask {
 		statuses.add("!DisCal for info");
 		statuses.add("Powered by DreamExposure");
 		statuses.add("Ultimate calendar bot!");
-		statuses.add("Used on %guCount% guilds!");
+		statuses.add("%guCount% guilds on shard!");
 		statuses.add("%calCount% calendars!");
 		statuses.add("%annCount% announcements!");
 		statuses.add("%shards% shards!");
 		statuses.add("Version " + GlobalConst.version);
 		statuses.add("DisCal is on Patreon!");
-		statuses.add("Share DisCal!!");
 		index = 0;
 	}
 

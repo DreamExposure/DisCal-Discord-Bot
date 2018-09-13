@@ -1,5 +1,8 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * @author NovaFox161
  * Date Created: 9/8/2018
@@ -49,6 +52,12 @@ public class ConnectedClient {
 
 	public long getLastKeepAlive() {
 		return lastKeepAlive;
+	}
+
+	public String getLastKeepAliveHumanReadable() {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+		return sdf.format(new Date(lastKeepAlive));
 	}
 
 	public String getUptime() {
