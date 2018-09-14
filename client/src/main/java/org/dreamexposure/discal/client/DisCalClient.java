@@ -4,7 +4,6 @@ import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.command.*;
-import org.dreamexposure.discal.client.service.KeepAliveHandler;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
@@ -74,8 +73,6 @@ public class DisCalClient {
 		ClientSocketHandler.setValues(BotSettings.CROSSTALK_SERVER_HOST.get(), Integer.valueOf(BotSettings.CROSSTALK_SERVER_PORT.get()), BotSettings.CROSSTALK_CLIENT_HOST.get(), Integer.valueOf(BotSettings.CROSSTALK_CLIENT_PORT.get()));
 
 		ClientSocketHandler.initListener();
-
-		KeepAliveHandler.startKeepAlive(60);
 	}
 
 	/**
