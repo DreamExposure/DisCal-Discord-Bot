@@ -63,7 +63,7 @@ public class NetworkInfo {
 		return DatabaseManager.getManager().getAnnouncementCount();
 	}
 
-	private static String humanReadableUptime() {
+	public String getUptime() {
 		RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
 		Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
 		Period period = interval.toPeriod();
