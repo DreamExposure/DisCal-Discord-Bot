@@ -50,6 +50,7 @@
 			<a href="/dashboard">Dashboard</a>
 			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
 			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+			<a class="active" href="/status">Status</a>
 
 			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
 			<a class="account" th:unless="${loggedIn}"
@@ -62,7 +63,7 @@
 
 			<h2>Server</h2>
 			<p th:text="'Connected Clients: ' + ${status.clientCount}"></p>
-			<p>Uptime: Not yet tracked</p>
+			<p th:text="'Uptime: ' + ${status.humanReadableUptime}"></p>
 			<p th:text="'Total Guilds: ' + ${status.totalGuildCount}"></p>
 			<p th:text="'Total Calendars: ' + ${status.calendarCount}"></p>
 			<p th:text="'Total Announcements: ' + ${status.announcementCount}"></p>
