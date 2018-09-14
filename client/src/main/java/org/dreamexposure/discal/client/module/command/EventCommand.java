@@ -734,7 +734,7 @@ public class EventCommand implements ICommand {
 			String value = args[1];
 			if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(GlobalConst.discalSite);
+				em.withAuthorIcon(GlobalConst.iconUrl);
 				em.withAuthorName("DisCal");
 				em.withAuthorUrl(GlobalConst.discalSite);
 

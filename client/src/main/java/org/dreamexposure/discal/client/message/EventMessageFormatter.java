@@ -41,7 +41,7 @@ public class EventMessageFormatter {
 	public static EmbedObject getEventEmbed(Event event, GuildSettings settings) {
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
@@ -109,7 +109,7 @@ public class EventMessageFormatter {
 	 */
 	public static EmbedObject getCondensedEventEmbed(Event event, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
@@ -155,7 +155,7 @@ public class EventMessageFormatter {
 	 */
 	public static EmbedObject getPreEventEmbed(PreEvent event, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
@@ -227,7 +227,7 @@ public class EventMessageFormatter {
 	public static EmbedObject getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), ecr.getEvent().getId());
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));

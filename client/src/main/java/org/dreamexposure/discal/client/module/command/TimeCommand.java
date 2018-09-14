@@ -93,7 +93,7 @@ public class TimeCommand implements ICommand {
 
 				//Build embed and send.
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(GlobalConst.discalSite);
+				em.withAuthorIcon(GlobalConst.iconUrl);
 				em.withAuthorName("DisCal");
 				em.withAuthorUrl(GlobalConst.discalSite);
 				em.withTitle(MessageManager.getMessage("Embed.Time.Title", settings));

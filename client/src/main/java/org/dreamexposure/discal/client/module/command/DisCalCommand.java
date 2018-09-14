@@ -136,7 +136,7 @@ public class DisCalCommand implements ICommand {
 		IGuild guild = event.getGuild();
 
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
@@ -235,7 +235,7 @@ public class DisCalCommand implements ICommand {
 
 	private void moduleSettings(MessageReceivedEvent event, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));

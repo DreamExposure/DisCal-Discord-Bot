@@ -68,7 +68,7 @@ public class GoogleExternalAuth {
 
 				//Send DM to user with code.
 				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(GlobalConst.discalSite);
+				em.withAuthorIcon(GlobalConst.iconUrl);
 				em.withAuthorName("DisCal");
 				em.withAuthorUrl(GlobalConst.discalSite);
 				em.withTitle(MessageManager.getMessage("Embed.AddCalendar.Code.Title", settings));
@@ -169,7 +169,7 @@ public class GoogleExternalAuth {
 					for (CalendarListEntry i : items) {
 						if (!i.isDeleted()) {
 							EmbedBuilder em = new EmbedBuilder();
-							em.withAuthorIcon(GlobalConst.discalSite);
+							em.withAuthorIcon(GlobalConst.iconUrl);
 							em.withAuthorName("DisCal");
 							em.withAuthorUrl(GlobalConst.discalSite);
 							em.withTitle(MessageManager.getMessage("Embed.AddCalendar.List.Title", settings));

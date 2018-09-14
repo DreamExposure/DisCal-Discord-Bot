@@ -64,7 +64,7 @@ public class HelpCommand implements ICommand {
 	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
 		if (args.length < 1) {
 			EmbedBuilder em = new EmbedBuilder();
-			em.withAuthorIcon(GlobalConst.discalSite);
+			em.withAuthorIcon(GlobalConst.iconUrl);
 			em.withAuthorName("DisCal");
 			em.withAuthorUrl(GlobalConst.discalSite);
 			em.withTitle("DisCal Command Help");
@@ -104,7 +104,7 @@ public class HelpCommand implements ICommand {
 	//Embed formatters
 	private EmbedObject getCommandInfoEmbed(ICommand cmd) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.appendField("Command", cmd.getCommand(), true);
@@ -129,7 +129,7 @@ public class HelpCommand implements ICommand {
 
 	private EmbedObject getSubCommandEmbed(ICommand cmd, String subCommand) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.appendField("Command", cmd.getCommand(), true);

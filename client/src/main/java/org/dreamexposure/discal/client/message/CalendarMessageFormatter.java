@@ -20,7 +20,7 @@ public class CalendarMessageFormatter {
 
 	public static EmbedObject getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
@@ -46,7 +46,7 @@ public class CalendarMessageFormatter {
 	 */
 	public static EmbedObject getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));

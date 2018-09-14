@@ -31,7 +31,7 @@ public class ReadyEventListener {
 			//Lets test the new announcement multi-threader...
 			AnnouncementThreader.getThreader().init();
 
-			GlobalConst.iconUrl = DisCalClient.getClient().getApplicationIconURL();
+			GlobalConst.iconUrl = DisCalClient.getClient().getOurUser().getAvatarURL();
 
 			MessageManager.reloadLangs();
 
