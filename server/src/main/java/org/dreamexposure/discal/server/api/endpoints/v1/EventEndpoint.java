@@ -59,10 +59,15 @@ public class EventEndpoint {
 		GuildSettings settings;
 
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request);
-			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-			settings = g.getSettings();
+			if (requestBody.has("guild_id")) {
+				long guildId = Long.valueOf(requestBody.getString("guild_id"));
+				settings = DatabaseManager.getManager().getSettings(guildId);
+			} else {
+				Map m = DiscordAccountHandler.getHandler().getAccount(request);
+				WebGuild g = (WebGuild) m.get("selected");
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				settings = g.getSettings();
+			}
 		} else {
 			long guildId = requestBody.getLong("guild_id");
 			settings = DatabaseManager.getManager().getSettings(guildId);
@@ -125,10 +130,15 @@ public class EventEndpoint {
 		GuildSettings settings;
 
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
-			Map m = DiscordAccountHandler.getHandler().getAccount(request);
-			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-			settings = g.getSettings();
+			if (requestBody.has("guild_id")) {
+				long guildId = requestBody.getLong("guild_id");
+				settings = DatabaseManager.getManager().getSettings(guildId);
+			} else {
+				Map m = DiscordAccountHandler.getHandler().getAccount(request);
+				WebGuild g = (WebGuild) m.get("selected");
+				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+				settings = g.getSettings();
+			}
 		} else {
 			long guildId = requestBody.getLong("guild_id");
 			settings = DatabaseManager.getManager().getSettings(guildId);

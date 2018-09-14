@@ -28,6 +28,8 @@ public class Authentication {
 				//TODO: Handle this shit better but whatever
 				if (key.equals("EMBEDDED")) {
 					Logger.getLogger().api("User using embed", request.getRemoteAddr(), request.getServerName(), request.getPathInfo());
+					//TODO: Verify its using the correct /embed/ path!!!!
+					return new AuthenticationState(true).setStatus(200).setReason("Success");
 				} else {
 					UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
 					if (acc != null) {
@@ -52,6 +54,5 @@ public class Authentication {
 				return new AuthenticationState(false).setStatus(400).setReason("Bad Request");
 			}
 		}
-		return new AuthenticationState(false).setStatus(500).setReason("Internal Server Error");
 	}
 }

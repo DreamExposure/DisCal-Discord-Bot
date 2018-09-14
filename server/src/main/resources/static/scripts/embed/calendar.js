@@ -147,7 +147,7 @@ function getEventsForMonth() {
 
 
 	var bodyRaw = {
-		"guild_id": calendar.guildId,
+		"guild_id": calendar.guildId.toString(),
 		"DaysInMonth": daysInMonth().toString(),
 		"StartEpoch": ds.getTime().toString()
 	};

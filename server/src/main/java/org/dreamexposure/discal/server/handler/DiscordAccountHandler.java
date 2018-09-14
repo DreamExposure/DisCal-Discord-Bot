@@ -51,7 +51,11 @@ public class DiscordAccountHandler {
 
 	//Boolean/checkers
 	public boolean hasAccount(HttpServletRequest request) {
-		return discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"));
+		try {
+			return discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"));
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	//Getters
@@ -87,7 +91,7 @@ public class DiscordAccountHandler {
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
 			requestBody.put("Reason", CrossTalkReason.GET.name());
-			requestBody.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_GUILD);
+			requestBody.put("Realm", DisCalRealm.WEBSITE_EMBED_CALENDAR);
 			requestBody.put("Guild-Id", guildId);
 
 			m.remove("embed");
@@ -114,7 +118,7 @@ public class DiscordAccountHandler {
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
 			requestBody.put("Reason", CrossTalkReason.GET.name());
-			requestBody.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_GUILD);
+			requestBody.put("Realm", DisCalRealm.WEBSITE_EMBED_CALENDAR);
 			requestBody.put("Guild-Id", guildId);
 
 			m.remove("embed");
