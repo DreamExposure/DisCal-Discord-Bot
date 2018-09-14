@@ -58,16 +58,16 @@ public class EventEndpoint {
 		Long endEpoch = startEpoch + (86400000L * daysInMonth);
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
-			if (requestBody.has("guild_id")) {
-				long guildId = Long.valueOf(requestBody.getString("guild_id"));
-				settings = DatabaseManager.getManager().getSettings(guildId);
-			} else {
-				Map m = DiscordAccountHandler.getHandler().getAccount(request);
-				WebGuild g = (WebGuild) m.get("selected");
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-				settings = g.getSettings();
-			}
+		if (DiscordAccountHandler.getHandler().hasEmbedMap(request)) {
+			Map m = DiscordAccountHandler.getHandler().getEmbedMap(request);
+			WebGuild g = (WebGuild) m.get("embed");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
 		} else {
 			long guildId = requestBody.getLong("guild_id");
 			settings = DatabaseManager.getManager().getSettings(guildId);
@@ -129,16 +129,16 @@ public class EventEndpoint {
 		Long endEpoch = startEpoch + 86400000L;
 		GuildSettings settings;
 
-		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
-			if (requestBody.has("guild_id")) {
-				long guildId = requestBody.getLong("guild_id");
-				settings = DatabaseManager.getManager().getSettings(guildId);
-			} else {
-				Map m = DiscordAccountHandler.getHandler().getAccount(request);
-				WebGuild g = (WebGuild) m.get("selected");
-				g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
-				settings = g.getSettings();
-			}
+		if (DiscordAccountHandler.getHandler().hasEmbedMap(request)) {
+			Map m = DiscordAccountHandler.getHandler().getEmbedMap(request);
+			WebGuild g = (WebGuild) m.get("embed");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
+		} else if (DiscordAccountHandler.getHandler().hasAccount(request)) {
+			Map m = DiscordAccountHandler.getHandler().getAccount(request);
+			WebGuild g = (WebGuild) m.get("selected");
+			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			settings = g.getSettings();
 		} else {
 			long guildId = requestBody.getLong("guild_id");
 			settings = DatabaseManager.getManager().getSettings(guildId);

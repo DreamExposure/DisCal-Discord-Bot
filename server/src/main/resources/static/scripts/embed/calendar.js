@@ -1,5 +1,4 @@
 var calendar = {
-	guildId: 0,
 	todaysDate: new Date(),
 	selectedDate: new Date(),
 	displays: []
@@ -147,7 +146,6 @@ function getEventsForMonth() {
 
 
 	var bodyRaw = {
-		"guild_id": calendar.guildId.toString(),
 		"DaysInMonth": daysInMonth().toString(),
 		"StartEpoch": ds.getTime().toString()
 	};
@@ -190,7 +188,6 @@ function getEventsForSelectedDate() {
 
 
 	var bodyRaw = {
-		"guild_id": calendar.guildId,
 		"DaysInMonth": daysInMonth().toString(),
 		"StartEpoch": ds.getTime().toString()
 	};
@@ -531,9 +528,7 @@ function selectDate(clickedId) {
 	}
 }
 
-function init(guildId) {
-	calendar.guildId = parseInt(guildId);
-
+function init() {
 	setMonth({date: calendar.todaysDate});
 
 	getEventsForMonth();
