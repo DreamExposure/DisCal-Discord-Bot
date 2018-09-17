@@ -169,7 +169,8 @@ public class WebGuild {
 		data.put("Name", name);
 		data.put("IconUrl", iconUrl);
 		data.put("Settings", settings.toJson());
-		data.put("BotNick", botNick);
+		if (botNick != null && !botNick.equals(""))
+			data.put("BotNick", botNick);
 		data.put("ManageServer", manageServer);
 		data.put("DiscalRole", discalRole);
 
@@ -201,7 +202,10 @@ public class WebGuild {
 		name = data.getString("Name");
 		iconUrl = data.getString("IconUrl");
 		settings = new GuildSettings(Long.valueOf(id)).fromJson(data.getJSONObject("Settings"));
-		botNick = data.getString("BotNick");
+		if (data.has("BotNick"))
+			botNick = data.getString("BotNick");
+		else
+			botNick = "";
 		manageServer = data.getBoolean("ManageServer");
 		discalRole = data.getBoolean("DiscalRole");
 
