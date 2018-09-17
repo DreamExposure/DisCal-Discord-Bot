@@ -20,6 +20,7 @@ public class DiscordAccountHandler {
 	private static Timer timer;
 
 	private HashMap<String, Map> discordAccounts = new HashMap<>();
+	private HashMap<String, Map> embedMaps = new HashMap<>();
 
 	//Instance handling
 	private DiscordAccountHandler() {
@@ -58,6 +59,14 @@ public class DiscordAccountHandler {
 		}
 	}
 
+	public boolean hasEmbedMap(HttpServletRequest request) {
+		try {
+			return embedMaps.containsKey((String) request.getSession(true).getAttribute("embed"));
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
 	//Getters
 	public Map getAccount(HttpServletRequest request) {
 		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
@@ -67,7 +76,12 @@ public class DiscordAccountHandler {
 
 			m.remove("status");
 			m.put("status", DisCalServer.getNetworkInfo());
+
+			//Remove from embed map just in case...
+			removeEmbedMap(request);
+
 			return m;
+
 		} else {
 			//Not logged in...
 			Map m = new HashMap();
@@ -76,8 +90,16 @@ public class DiscordAccountHandler {
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirUri", BotSettings.REDIR_URI.get());
 			m.put("status", DisCalServer.getNetworkInfo());
+
+			//Remove from embed map just in case...
+			removeEmbedMap(request);
+
 			return m;
 		}
+	}
+
+	public Map getEmbedMap(HttpServletRequest request) {
+		return embedMaps.get((String) request.getSession(true).getAttribute("embed"));
 	}
 
 	public Map getAccountForGuildEmbed(HttpServletRequest request, String guildId) {
@@ -106,6 +128,11 @@ public class DiscordAccountHandler {
 				m.put("embed", new WebGuild());
 			}
 
+			//Add to embed map...
+			UUID embedKey = UUID.randomUUID();
+			request.getSession(true).setAttribute("embed", embedKey.toString());
+			embedMaps.put(embedKey.toString(), m);
+
 			return m;
 		} else {
 			//Not logged in...
@@ -132,6 +159,11 @@ public class DiscordAccountHandler {
 
 				m.put("embed", new WebGuild());
 			}
+
+			//Add to embed map...
+			UUID embedKey = UUID.randomUUID();
+			request.getSession(true).setAttribute("embed", embedKey.toString());
+			embedMaps.put(embedKey.toString(), m);
 
 			return m;
 		}
@@ -174,9 +206,13 @@ public class DiscordAccountHandler {
 	}
 
 	public void removeAccount(HttpServletRequest request) {
-		if ((String) request.getSession(true).getAttribute("account") != null && hasAccount(request)) {
+		if ((String) request.getSession(true).getAttribute("account") != null && hasAccount(request))
 			discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
-		}
+	}
+
+	public void removeEmbedMap(HttpServletRequest request) {
+		if ((String) request.getSession(true).getAttribute("embed") != null && hasEmbedMap(request))
+			embedMaps.remove((String) request.getSession(true).getAttribute("embed"));
 	}
 
 	private void removeTimedOutAccounts() {

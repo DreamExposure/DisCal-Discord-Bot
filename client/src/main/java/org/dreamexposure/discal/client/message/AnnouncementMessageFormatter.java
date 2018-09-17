@@ -38,7 +38,7 @@ public class AnnouncementMessageFormatter {
 	 */
 	public static EmbedObject getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", settings));
@@ -89,7 +89,7 @@ public class AnnouncementMessageFormatter {
 	 */
 	public static EmbedObject getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", settings));
@@ -149,7 +149,7 @@ public class AnnouncementMessageFormatter {
 	 */
 	public static void sendAnnouncementMessage(Announcement announcement, Event event, CalendarData data, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorUrl(GlobalConst.discalSite);
 
 		IGuild guild = DisCalClient.getClient().getGuildByID(announcement.getGuildId());
@@ -260,7 +260,7 @@ public class AnnouncementMessageFormatter {
 
 	public static void sendAnnouncementDM(Announcement announcement, Event event, IUser user, CalendarData data, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));

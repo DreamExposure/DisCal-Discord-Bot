@@ -21,7 +21,7 @@ import java.util.TimerTask;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings("ConstantConditions")
+@SuppressWarnings({"ConstantConditions", "Duplicates"})
 public class KeepAliveHandler {
 	public static void startKeepAlive(final int seconds) {
 		new Timer(true).scheduleAtFixedRate(new TimerTask() {

@@ -234,7 +234,7 @@ public class RsvpCommand implements ICommand {
 
 	private EmbedObject getRsvpEmbed(RsvpData data, GuildSettings settings) {
 		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.discalSite);
+		em.withAuthorIcon(GlobalConst.iconUrl);
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
