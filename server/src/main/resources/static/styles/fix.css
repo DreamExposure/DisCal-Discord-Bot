@@ -3,8 +3,6 @@
 /* Remove controls from Firefox */
 input[type=number] {
 	-moz-appearance: textfield;
-	/* Fix sizing */
-	height: 10px;
 }
 
 /* Re-applies the controls on :hover and :focus */
