@@ -50,22 +50,22 @@ public class CrossTalkEventListener {
 			if (event.getData().getString("Realm").equals(DisCalRealm.BOT_LANGS.name())) {
 				//Reload lang files...
 				MessageManager.reloadLangs();
-			} else if (!event.getData().getString("Realm").equals(DisCalRealm.GUILD_LEAVE.name())) {
+			} else if (event.getData().getString("Realm").equals(DisCalRealm.GUILD_LEAVE.name())) {
 				//Leave guild...
 				g.leave();
-			} else if (!event.getData().getString("Realm").equals(DisCalRealm.GUILD_MAX_CALENDARS.name())) {
+			} else if (event.getData().getString("Realm").equals(DisCalRealm.GUILD_MAX_CALENDARS.name())) {
 				//Change max calendar limit..
 				GuildSettings settings = DatabaseManager.getManager().getSettings(g.getLongID());
 
 				settings.setMaxCalendars(event.getData().getInt("Max-Calendars"));
 				DatabaseManager.getManager().updateSettings(settings);
-			} else if (!event.getData().getString("Realm").equals(DisCalRealm.GUILD_IS_DEV.name())) {
+			} else if (event.getData().getString("Realm").equals(DisCalRealm.GUILD_IS_DEV.name())) {
 				//Change if the guild is a dev guild or not
 				GuildSettings settings = DatabaseManager.getManager().getSettings(g.getLongID());
 
 				settings.setDevGuild(!settings.isDevGuild());
 				DatabaseManager.getManager().updateSettings(settings);
-			} else if (!event.getData().getString("Realm").equals(DisCalRealm.GUILD_IS_PATRON.name())) {
+			} else if (event.getData().getString("Realm").equals(DisCalRealm.GUILD_IS_PATRON.name())) {
 				//Change if the guild is a patron guild or not
 				GuildSettings settings = DatabaseManager.getManager().getSettings(g.getLongID());
 
