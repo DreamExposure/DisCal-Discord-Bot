@@ -45,7 +45,7 @@ public class EventMessageFormatter {
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
-		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 			em.withImage(ed.getImageLink());
 		}
 		if (event.getSummary() != null) {
@@ -114,7 +114,7 @@ public class EventMessageFormatter {
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
 		EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink()))
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 			em.withThumbnail(ed.getImageLink());
 
 		if (event.getSummary() != null) {
@@ -160,7 +160,7 @@ public class EventMessageFormatter {
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Pre.Title", settings));
 		try {
-			if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink())) {
+			if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink(), settings.isPatronGuild())) {
 				em.withImage(event.getEventData().getImageLink());
 			}
 		} catch (NullPointerException e) {
@@ -231,7 +231,7 @@ public class EventMessageFormatter {
 		em.withAuthorName("DisCal");
 		em.withAuthorUrl(GlobalConst.discalSite);
 		em.withTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
-		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink())) {
+		if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 			em.withImage(ed.getImageLink());
 		}
 		em.appendField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);

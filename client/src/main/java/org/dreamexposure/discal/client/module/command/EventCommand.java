@@ -845,7 +845,7 @@ public class EventCommand implements ICommand {
 					} else {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), event);
 					}
-				} else if (ImageUtils.validate(value)) {
+				} else if (ImageUtils.validate(value, settings.isPatronGuild())) {
 					EventCreator.getCreator().getPreEvent(guildId).getEventData().setImageLink(value);
 
 					if (EventCreator.getCreator().hasCreatorMessage(guildId)) {

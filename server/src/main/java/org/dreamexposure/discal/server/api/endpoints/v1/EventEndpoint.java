@@ -294,8 +294,8 @@ public class EventEndpoint {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventId(eventId);
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
-
-				if (!ImageUtils.validate(ed.getImageLink())) {
+				
+				if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 					JSONObject respondBody = new JSONObject();
 					respondBody.put("Message", "Failed to create event!");
 					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
@@ -399,8 +399,8 @@ public class EventEndpoint {
 			if (!body.getString("image").equalsIgnoreCase("")) {
 				ed.setImageLink(body.getString("image"));
 				ed.setEventEnd(event.getEnd().getDateTime().getValue());
-
-				if (!ImageUtils.validate(ed.getImageLink())) {
+				
+				if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 					response.setContentType("application/json");
 					response.setStatus(400);
 
