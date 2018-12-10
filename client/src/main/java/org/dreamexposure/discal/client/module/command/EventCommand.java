@@ -166,14 +166,10 @@ public class EventCommand implements ICommand {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "startdate":
-					moduleStartDate(args, event, settings);
-					break;
 				case "start":
 					moduleStartDate(args, event, settings);
 					break;
 				case "enddate":
-					moduleEndDate(args, event, settings);
-					break;
 				case "end":
 					moduleEndDate(args, event, settings);
 					break;
@@ -184,20 +180,14 @@ public class EventCommand implements ICommand {
 					moduleDescription(args, event, settings);
 					break;
 				case "color":
-					moduleColor(args, event, settings);
-					break;
 				case "colour":
 					moduleColor(args, event, settings);
 					break;
 				case "location":
-					moduleLocation(args, event, settings);
-					break;
 				case "loc":
 					moduleLocation(args, event, settings);
 					break;
 				case "image":
-					moduleAttachment(args, event, settings);
-					break;
 				case "attachment":
 					moduleAttachment(args, event, settings);
 					break;
