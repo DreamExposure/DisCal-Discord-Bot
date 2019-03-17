@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.object;
 
+import discord4j.core.object.util.Snowflake;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Collections;
  * For Project: DisCal-Discord-Bot
  */
 public class GuildSettings {
-	private long guildID;
+	private Snowflake guildID;
 
 	private boolean externalCalendar;
 	private String privateKey;
@@ -35,7 +36,7 @@ public class GuildSettings {
 
 	private final ArrayList<String> dmAnnouncements = new ArrayList<>();
 
-	public GuildSettings(long _guildId) {
+	public GuildSettings(Snowflake _guildId) {
 		guildID = _guildId;
 
 		externalCalendar = false;
@@ -59,7 +60,7 @@ public class GuildSettings {
 	}
 
 	//Getters
-	public long getGuildID() {
+	public Snowflake getGuildID() {
 		return guildID;
 	}
 
@@ -123,6 +124,7 @@ public class GuildSettings {
 		return dmAnnouncements;
 	}
 
+	@SuppressWarnings("Duplicates")
 	public String getDmAnnouncementsString() {
 		StringBuilder users = new StringBuilder();
 		int i = 0;
@@ -137,7 +139,7 @@ public class GuildSettings {
 		return users.toString();
 	}
 
-	//Dumb getters so that Tymeleaf plays nice...
+	//Dumb getters so that Thymeleaf plays nice...
 	public boolean isExternalCalendar() {
 		return externalCalendar;
 	}
@@ -231,7 +233,7 @@ public class GuildSettings {
 	}
 
 	public GuildSettings fromJson(JSONObject data) {
-		guildID = data.getLong("GuildId");
+		guildID = Snowflake.of(data.getLong("GuildId"));
 		externalCalendar = data.getBoolean("ExternalCalendar");
 		privateKey = data.getString("PrivateKey");
 		encryptedAccessToken = data.getString("AccessToken");

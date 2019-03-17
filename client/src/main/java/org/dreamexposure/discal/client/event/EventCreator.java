@@ -2,6 +2,9 @@ package org.dreamexposure.discal.client.event;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -14,8 +17,6 @@ import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class EventCreator {
 		return instance;
 	}
 
-	//Functionals
+	//Functional
 
 	/**
 	 * Initiates the EventCreator for a specific guild.
@@ -54,7 +55,7 @@ public class EventCreator {
 	 * @param e The event received upon initialization.
 	 * @return The PreEvent for the guild.
 	 */
-	public PreEvent init(MessageReceivedEvent e, GuildSettings settings, boolean handleMessage) {
+	public PreEvent init(MessageCreateEvent e, GuildSettings settings, boolean handleMessage) {
 		if (!hasPreEvent(settings.getGuildID())) {
 			PreEvent event = new PreEvent(settings.getGuildID());
 			try {
@@ -66,7 +67,7 @@ public class EventCreator {
 			}
 			if (handleMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
+					Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
 					event.setCreatorMessage(message);
 					MessageManager.deleteMessage(e);
 				} else {
@@ -80,7 +81,7 @@ public class EventCreator {
 		return getPreEvent(settings.getGuildID());
 	}
 
-	public PreEvent init(MessageReceivedEvent e, GuildSettings settings, String summary, boolean handleMessage) {
+	public PreEvent init(MessageCreateEvent e, GuildSettings settings, String summary, boolean handleMessage) {
 		if (!hasPreEvent(settings.getGuildID())) {
 			PreEvent event = new PreEvent(settings.getGuildID());
 			event.setSummary(summary);
@@ -94,7 +95,7 @@ public class EventCreator {
 			}
 			if (handleMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
+					Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
 					event.setCreatorMessage(message);
 					MessageManager.deleteMessage(e);
 				} else {
@@ -109,7 +110,7 @@ public class EventCreator {
 	}
 
 	//Copy event
-	public PreEvent init(MessageReceivedEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
+	public PreEvent init(MessageCreateEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
 		if (!hasPreEvent(settings.getGuildID())) {
 			//TODO: Handle multiple calendars...
 			try {
@@ -128,7 +129,7 @@ public class EventCreator {
 
 				if (handleMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Copy.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
+						Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Copy.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
 						event.setCreatorMessage(message);
 						MessageManager.deleteMessage(e);
 					} else {
@@ -146,7 +147,7 @@ public class EventCreator {
 		return getPreEvent(settings.getGuildID());
 	}
 
-	public PreEvent edit(MessageReceivedEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
+	public PreEvent edit(MessageCreateEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
 		if (!hasPreEvent(settings.getGuildID())) {
 			//TODO: Handle multiple calendars...
 			try {
@@ -166,7 +167,7 @@ public class EventCreator {
 
 				if (handleMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(e)) {
-						IMessage message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Edit.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
+						Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Edit.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
 						event.setCreatorMessage(message);
 						MessageManager.deleteMessage(e);
 					} else {
@@ -184,7 +185,7 @@ public class EventCreator {
 		return getPreEvent(settings.getGuildID());
 	}
 
-	public boolean terminate(long guildId) {
+	public boolean terminate(Snowflake guildId) {
 		if (hasPreEvent(guildId)) {
 			events.remove(getPreEvent(guildId));
 			return true;
@@ -198,7 +199,7 @@ public class EventCreator {
 	 * @param e The event received upon confirmation.
 	 * @return The response containing detailed info about the confirmation.
 	 */
-	public EventCreatorResponse confirmEvent(MessageReceivedEvent e, GuildSettings settings) {
+	public EventCreatorResponse confirmEvent(MessageCreateEvent e, GuildSettings settings) {
 		if (hasPreEvent(settings.getGuildID())) {
 			PreEvent preEvent = getPreEvent(settings.getGuildID());
 			if (preEvent.hasRequiredValues()) {
@@ -239,7 +240,7 @@ public class EventCreator {
 						response.setEdited(false);
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getAuthor(), "Failed to create event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setEdited(false);
 						return response;
@@ -259,7 +260,7 @@ public class EventCreator {
 						response.setEdited(true);
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getAuthor(), "Failed to update event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setEdited(true);
 						return response;
@@ -278,7 +279,7 @@ public class EventCreator {
 	 * @param guildId The ID of the guild.
 	 * @return The PreEvent belonging to the guild.
 	 */
-	public PreEvent getPreEvent(long guildId) {
+	public PreEvent getPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
 			if (e.getGuildId() == guildId) {
 				e.setLastEdit(System.currentTimeMillis());
@@ -288,7 +289,7 @@ public class EventCreator {
 		return null;
 	}
 
-	public IMessage getCreatorMessage(long guildId) {
+	public Message getCreatorMessage(Snowflake guildId) {
 		if (hasPreEvent(guildId))
 			return getPreEvent(guildId).getCreatorMessage();
 		return null;
@@ -306,7 +307,7 @@ public class EventCreator {
 	 * @param guildId The ID of the guild.
 	 * @return <code>true</code> if a PreEvent exists, otherwise <code>false</code>.
 	 */
-	public boolean hasPreEvent(long guildId) {
+	public boolean hasPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
 			if (e.getGuildId() == guildId)
 				return true;
@@ -314,13 +315,13 @@ public class EventCreator {
 		return false;
 	}
 
-	public boolean hasCreatorMessage(long guildId) {
+	public boolean hasCreatorMessage(Snowflake guildId) {
 		return hasPreEvent(guildId) && getPreEvent(guildId).getCreatorMessage() != null;
 	}
 
 	//Setters
-	public void setCreatorMessage(IMessage msg) {
-		if (msg != null && hasPreEvent(msg.getGuild().getLongID()))
-			getPreEvent(msg.getGuild().getLongID()).setCreatorMessage(msg);
+	public void setCreatorMessage(Message msg) {
+		if (msg != null && hasPreEvent(msg.getGuild().block().getId()))
+			getPreEvent(msg.getGuild().block().getId()).setCreatorMessage(msg);
 	}
 }

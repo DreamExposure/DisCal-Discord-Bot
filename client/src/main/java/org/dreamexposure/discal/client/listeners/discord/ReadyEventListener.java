@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
@@ -7,8 +9,6 @@ import org.dreamexposure.discal.client.service.KeepAliveHandler;
 import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.ReadyEvent;
 
 /**
  * @author NovaFox161
@@ -18,9 +18,10 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class ReadyEventListener {
-	@EventSubscriber
-	public void onReadyEvent(ReadyEvent event) {
+
+	public static void handle(ReadyEvent event) {
 		Logger.getLogger().debug("Ready!");
 		try {
 			//Start keep-alive
@@ -31,13 +32,13 @@ public class ReadyEventListener {
 			//Lets test the new announcement multi-threader...
 			AnnouncementThreader.getThreader().init();
 
-			GlobalConst.iconUrl = DisCalClient.getClient().getOurUser().getAvatarURL();
+			GlobalConst.iconUrl = DisCalClient.getClient().getApplicationInfo().block().getIcon(Image.Format.PNG).get();
 
 			MessageManager.reloadLangs();
 
-			Logger.getLogger().debug("[ReadyEvent] Connection success!");
+			Logger.getLogger().debug("[ReadyEvent] Connection success! Session ID: " + event.getSessionId());
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "BAD!!!", e, this.getClass());
+			Logger.getLogger().exception(null, "BAD!!!", e, ReadyEventListener.class);
 		}
 	}
 }

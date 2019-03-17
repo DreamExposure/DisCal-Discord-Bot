@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"ThrowableNotThrown", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 @RestController
 @RequestMapping("/api/v1/calendar")
 public class CalendarEndpoint {
@@ -43,7 +44,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			int calNumber = jsonMain.getInt("number");
 
-			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
+			CalendarData calendar = DatabaseManager.getManager().getCalendar(Snowflake.of(guildId), calNumber);
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 
@@ -91,7 +92,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 
 			ArrayList<JSONObject> cals = new ArrayList<>();
-			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(guildId)) {
+			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(Snowflake.of(guildId))) {
 				if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
 					JSONObject body = new JSONObject();
 					body.put("number", cal.getCalendarNumber());

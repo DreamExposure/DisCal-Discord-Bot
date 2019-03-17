@@ -33,7 +33,7 @@ import java.util.*;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"ThrowableNotThrown", "unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused"})
 @RestController
 public class DiscordLoginHandler {
 

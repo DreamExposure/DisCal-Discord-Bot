@@ -1,14 +1,14 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -61,25 +61,24 @@ public class HelpCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length < 1) {
-			EmbedBuilder em = new EmbedBuilder();
-			em.withAuthorIcon(GlobalConst.iconUrl);
-			em.withAuthorName("DisCal");
-			em.withAuthorUrl(GlobalConst.discalSite);
-			em.withTitle("DisCal Command Help");
-			for (ICommand c: CommandExecutor.getExecutor().getCommands()) {
-				if (c.getAliases().size() > 0) {
-					String al = c.getAliases().toString();
-					em.appendField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
-				} else {
-					em.appendField(c.getCommand(), c.getCommandInfo().getDescription(), true);
+			Consumer<EmbedCreateSpec> embed = spec -> {
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+				spec.setTitle("DisCal Command Help");
+				for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
+					if (c.getAliases().size() > 0) {
+						String al = c.getAliases().toString();
+						spec.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
+					} else {
+						spec.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
+					}
 				}
-			}
-			em.withFooterText("Check out the official site for more command info!");
-			em.withUrl("https://www.discalbot.com/commands");
-			em.withColor(GlobalConst.discalColor);
-			MessageManager.sendMessageAsync(em.build(), event);
+				spec.setFooter("Check out the official site for more command info!", null);
+				spec.setUrl("https://www.discalbot.com/commands");
+				spec.setColor(GlobalConst.discalColor);
+			};
+			MessageManager.sendMessageAsync(embed, event);
 		} else if (args.length == 1) {
 			String cmdFor = args[0];
 			ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
@@ -102,47 +101,43 @@ public class HelpCommand implements ICommand {
 	}
 
 	//Embed formatters
-	private EmbedObject getCommandInfoEmbed(ICommand cmd) {
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.appendField("Command", cmd.getCommand(), true);
-		em.appendField("Description", cmd.getCommandInfo().getDescription(), true);
-		em.appendField("Example", cmd.getCommandInfo().getExample(), true);
+	private Consumer<EmbedCreateSpec> getCommandInfoEmbed(ICommand cmd) {
+		return spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.addField("Command", cmd.getCommand(), true);
+			spec.addField("Description", cmd.getCommandInfo().getDescription(), true);
+			spec.addField("Example", cmd.getCommandInfo().getExample(), true);
 
-		//Loop through sub commands
-		if (cmd.getCommandInfo().getSubCommands().size() > 0) {
-			String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
-			subs = subs.replace("[", "").replace("]", "");
-			em.appendField("Sub-Commands", subs, false);
-		}
+			//Loop through sub commands
+			if (cmd.getCommandInfo().getSubCommands().size() > 0) {
+				String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
+				subs = subs.replace("[", "").replace("]", "");
+				spec.addField("Sub-Commands", subs, false);
+			}
 
-		em.withFooterText("<> = required | () = optional");
+			spec.setFooter("<> = required | () = optional", null);
 
-		em.withUrl("https://www.discalbot.com/commands");
+			spec.setUrl("https://www.discalbot.com/commands");
 
-		em.withColor(GlobalConst.discalColor);
+			spec.setColor(GlobalConst.discalColor);
 
-		return em.build();
+		};
 	}
 
-	private EmbedObject getSubCommandEmbed(ICommand cmd, String subCommand) {
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.appendField("Command", cmd.getCommand(), true);
-		em.appendField("Sub Command", subCommand, true);
+	private Consumer<EmbedCreateSpec> getSubCommandEmbed(ICommand cmd, String subCommand) {
+		return spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.addField("Command", cmd.getCommand(), true);
+			spec.addField("Sub Command", subCommand, true);
 
-		em.appendField("Usage", cmd.getCommandInfo().getSubCommands().get(subCommand), false);
+			spec.addField("Usage", cmd.getCommandInfo().getSubCommands().get(subCommand), false);
 
-		em.withFooterText("<> = required | () = optional");
+			spec.setFooter("<> = required | () = optional", null);
 
-		em.withUrl("https://www.discalbot.com/commands");
+			spec.setUrl("https://www.discalbot.com/commands");
 
-		em.withColor(GlobalConst.discalColor);
+			spec.setColor(GlobalConst.discalColor);
 
-		return em.build();
+		};
 	}
 }

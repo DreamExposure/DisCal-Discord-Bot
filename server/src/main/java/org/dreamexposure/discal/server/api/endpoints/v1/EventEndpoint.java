@@ -5,6 +5,7 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import com.google.api.services.calendar.model.Events;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -54,23 +55,23 @@ public class EventEndpoint {
 		JSONObject requestBody = new JSONObject(rBody);
 
 		Integer daysInMonth = Integer.valueOf(requestBody.getString("DaysInMonth"));
-		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
-		Long endEpoch = startEpoch + (86400000L * daysInMonth);
+		long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
+		long endEpoch = startEpoch + (86400000L * daysInMonth);
 		GuildSettings settings;
 
 		if (DiscordAccountHandler.getHandler().hasEmbedMap(request)) {
 			Map m = DiscordAccountHandler.getHandler().getEmbedMap(request);
 			WebGuild g = (WebGuild) m.get("embed");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else {
 			long guildId = requestBody.getLong("guild_id");
-			settings = DatabaseManager.getManager().getSettings(guildId);
+			settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 		}
 
 		//okay, lets actually get the month's events.
@@ -125,23 +126,23 @@ public class EventEndpoint {
 
 		//Okay, now handle actual request.
 		JSONObject requestBody = new JSONObject(rBody);
-		Long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
-		Long endEpoch = startEpoch + 86400000L;
+		long startEpoch = Long.valueOf(requestBody.getString("StartEpoch"));
+		long endEpoch = startEpoch + 86400000L;
 		GuildSettings settings;
 
 		if (DiscordAccountHandler.getHandler().hasEmbedMap(request)) {
 			Map m = DiscordAccountHandler.getHandler().getEmbedMap(request);
 			WebGuild g = (WebGuild) m.get("embed");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else {
 			long guildId = requestBody.getLong("guild_id");
-			settings = DatabaseManager.getManager().getSettings(guildId);
+			settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 		}
 
 		//okay, lets actually get the month's events.
@@ -243,11 +244,11 @@ public class EventEndpoint {
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else {
 			long guildId = body.getLong("guild_id");
-			settings = DatabaseManager.getManager().getSettings(guildId);
+			settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 		}
 
 		//Okay, time to update the event
@@ -347,11 +348,11 @@ public class EventEndpoint {
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else {
 			long guildId = body.getLong("guild_id");
-			settings = DatabaseManager.getManager().getSettings(guildId);
+			settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 		}
 
 		//Okay, time to create the event
@@ -460,11 +461,11 @@ public class EventEndpoint {
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 			WebGuild g = (WebGuild) m.get("selected");
-			g.setSettings(DatabaseManager.getManager().getSettings(Long.valueOf(g.getId())));
+			g.setSettings(DatabaseManager.getManager().getSettings(Snowflake.of(g.getId())));
 			settings = g.getSettings();
 		} else {
 			long guildId = requestBody.getLong("guild_id");
-			settings = DatabaseManager.getManager().getSettings(guildId);
+			settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 		}
 
 		//okay, time to properly delete the event

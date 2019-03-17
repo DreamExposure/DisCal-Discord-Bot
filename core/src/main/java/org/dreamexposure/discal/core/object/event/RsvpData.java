@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.event;
 
+import discord4j.core.object.util.Snowflake;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -9,7 +11,7 @@ import java.util.Collections;
  * For Project: DisCal-Discord-Bot
  */
 public class RsvpData {
-	private final long guildId;
+	private final Snowflake guildId;
 
 	private String eventId;
 	private long eventEnd;
@@ -19,12 +21,12 @@ public class RsvpData {
 	private final ArrayList<String> notGoing = new ArrayList<>();
 	private final ArrayList<String> undecided = new ArrayList<>();
 
-	public RsvpData(long _guildId) {
+	public RsvpData(Snowflake _guildId) {
 		guildId = _guildId;
 	}
 
 	//Getters
-	public long getGuildId() {
+	public Snowflake getGuildId() {
 		return guildId;
 	}
 

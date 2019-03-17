@@ -4,6 +4,8 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -11,7 +13,6 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.TimeUtils;
-import sx.blah.discord.handle.obj.IMessage;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -19,7 +20,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal-Discord-Bot
  */
 public class PreEvent {
-	private final long guildId;
+	private final Snowflake guildId;
 	private final String eventId;
 
 	private String summary;
@@ -43,7 +44,7 @@ public class PreEvent {
 
 	private boolean editing;
 
-	private IMessage creatorMessage;
+	private Message creatorMessage;
 
 	private long lastEdit;
 
@@ -53,7 +54,7 @@ public class PreEvent {
 	 *
 	 * @param _guildId The ID of the guild.
 	 */
-	public PreEvent(long _guildId) {
+	public PreEvent(Snowflake _guildId) {
 		guildId = _guildId;
 		eventId = "N/a";
 
@@ -70,7 +71,7 @@ public class PreEvent {
 		lastEdit = System.currentTimeMillis();
 	}
 
-	public PreEvent(long _guildId, Event e) {
+	public PreEvent(Snowflake _guildId, Event e) {
 		guildId = _guildId;
 		eventId = e.getId();
 
@@ -139,7 +140,7 @@ public class PreEvent {
 	 *
 	 * @return The ID of the guild who owns this PreEvent.
 	 */
-	public long getGuildId() {
+	public Snowflake getGuildId() {
 		return guildId;
 	}
 
@@ -249,7 +250,7 @@ public class PreEvent {
 		return editing;
 	}
 
-	public IMessage getCreatorMessage() {
+	public Message getCreatorMessage() {
 		return creatorMessage;
 	}
 
@@ -352,7 +353,7 @@ public class PreEvent {
 		editing = _editing;
 	}
 
-	public void setCreatorMessage(IMessage _creatorMessage) {
+	public void setCreatorMessage(Message _creatorMessage) {
 		creatorMessage = _creatorMessage;
 	}
 

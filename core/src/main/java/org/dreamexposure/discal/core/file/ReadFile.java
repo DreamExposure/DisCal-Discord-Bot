@@ -16,7 +16,7 @@ import java.nio.file.Paths;
  * For Project: DisCal-Discord-Bot
  */
 public class ReadFile {
-	@SuppressWarnings({"unchecked", "ConstantConditions"})
+	@SuppressWarnings("ConstantConditions")
 	public static JSONObject readAllLangFiles() {
 		JSONObject langs = new JSONObject();
 

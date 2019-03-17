@@ -1,26 +1,26 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.*;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/5/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class DisCalCommand implements ICommand {
 
 	/**
@@ -80,7 +80,7 @@ public class DisCalCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length < 1) {
 			moduleDisCalInfo(event, settings);
 		} else {
@@ -101,14 +101,10 @@ public class DisCalCommand implements ICommand {
 					moduleSimpleAnnouncement(event, settings);
 					break;
 				case "dmannouncement":
-					moduleDmAnnouncements(event, settings);
-					break;
 				case "dmannouncements":
 					moduleDmAnnouncements(event, settings);
 					break;
 				case "language":
-					moduleLanguage(args, event, settings);
-					break;
 				case "lang":
 					moduleLanguage(args, event, settings);
 					break;
@@ -132,25 +128,21 @@ public class DisCalCommand implements ICommand {
 		return false;
 	}
 
-	private void moduleDisCalInfo(MessageReceivedEvent event, GuildSettings settings) {
-		IGuild guild = event.getGuild();
-
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.withTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
-		em.appendField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 2.10.1", false);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), DisCalClient.getClient().getGuilds().size() + "", true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Info.Ping", "%shard%", (guild.getShard().getInfo()[0] + 1) + "/" + BotSettings.SHARD_COUNT.get(), settings), guild.getShard().getResponseTime() + "ms", false);
-		em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
-		em.withUrl("https://www.discalbot.com");
-		em.withColor(GlobalConst.discalColor);
-		MessageManager.sendMessageAsync(em.build(), event);
+	private void moduleDisCalInfo(MessageCreateEvent event, GuildSettings settings) {
+		Consumer<EmbedCreateSpec> embed = spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.setTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
+			spec.addField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 2.10.1", false);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), DisCalClient.getClient().getGuilds().count().block() + "", true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
+			spec.setFooter(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
+			spec.setUrl("https://www.discalbot.com");
+			spec.setColor(GlobalConst.discalColor);
+		};
+		MessageManager.sendMessageAsync(embed, event);
 	}
 
 	/**
@@ -159,17 +151,17 @@ public class DisCalCommand implements ICommand {
 	 * @param args  The args of the command.
 	 * @param event The event received.
 	 */
-	private void moduleControlRole(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleControlRole(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (args.length > 1) {
 				String roleName = GeneralUtils.getContent(args, 1);
-				IRole controlRole;
+				Role controlRole;
 
 				if (!"everyone".equalsIgnoreCase(roleName)) {
 					controlRole = RoleUtils.getRoleFromID(roleName, event);
 
 					if (controlRole != null) {
-						settings.setControlRole(controlRole.getStringID());
+						settings.setControlRole(controlRole.getId().asString());
 						DatabaseManager.getManager().updateSettings(settings);
 						//Send message.
 						MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), settings), event);
@@ -199,7 +191,7 @@ public class DisCalCommand implements ICommand {
 	 * @param args  The command args
 	 * @param event The event received.
 	 */
-	private void moduleDisCalChannel(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleDisCalChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String channelName = args[1];
 			if (channelName.equalsIgnoreCase("all")) {
@@ -209,9 +201,9 @@ public class DisCalCommand implements ICommand {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Channel.All", settings), event);
 			} else {
 				if (ChannelUtils.channelExists(channelName, event)) {
-					IChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
+					GuildChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
 					if (channel != null) {
-						settings.setDiscalChannel(channel.getStringID());
+						settings.setDiscalChannel(channel.getId().asString());
 						DatabaseManager.getManager().updateSettings(settings);
 						MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
 					} else {
@@ -226,54 +218,53 @@ public class DisCalCommand implements ICommand {
 		}
 	}
 
-	private void moduleSimpleAnnouncement(MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleSimpleAnnouncement(MessageCreateEvent event, GuildSettings settings) {
 		settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
 		DatabaseManager.getManager().updateSettings(settings);
 
 		MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings), event);
 	}
 
-	private void moduleSettings(MessageReceivedEvent event, GuildSettings settings) {
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.withTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", settings), String.valueOf(settings.useExternalCalendar()), true);
-		if (RoleUtils.roleExists(settings.getControlRole(), event)) {
-			em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), RoleUtils.getRoleNameFromID(settings.getControlRole(), event), true);
-		} else {
-			em.appendField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), "everyone", true);
-		}
-		if (ChannelUtils.channelExists(settings.getDiscalChannel(), event)) {
-			em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), event.getGuild()), false);
-		} else {
-			em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), "All Channels", true);
-		}
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), String.valueOf(settings.usingSimpleAnnouncements()), true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Patron", settings), String.valueOf(settings.isPatronGuild()), true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Dev", settings), String.valueOf(settings.isDevGuild()), true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", settings), String.valueOf(settings.getMaxCalendars()), true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
-		em.appendField(MessageManager.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
-		//TODO: Add translations...
-		em.appendField("Using Branding", settings.isBranded() + "", true);
-		em.withFooterText(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox");
-		em.withUrl("https://www.discalbot.com/");
-		em.withColor(GlobalConst.discalColor);
-		MessageManager.sendMessageAsync(em.build(), event);
+	private void moduleSettings(MessageCreateEvent event, GuildSettings settings) {
+		Consumer<EmbedCreateSpec> embed = spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.setTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", settings), String.valueOf(settings.useExternalCalendar()), true);
+			if (RoleUtils.roleExists(settings.getControlRole(), event)) {
+				spec.addField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), RoleUtils.getRoleNameFromID(settings.getControlRole(), event), true);
+			} else {
+				spec.addField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), "everyone", true);
+			}
+			if (ChannelUtils.channelExists(settings.getDiscalChannel(), event)) {
+				spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), event.getGuild().block()), false);
+			} else {
+				spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), "All Channels", true);
+			}
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), String.valueOf(settings.usingSimpleAnnouncements()), true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Patron", settings), String.valueOf(settings.isPatronGuild()), true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Dev", settings), String.valueOf(settings.isDevGuild()), true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.MaxCal", settings), String.valueOf(settings.getMaxCalendars()), true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
+			//TODO: Add translations...
+			spec.addField("Using Branding", settings.isBranded() + "", true);
+			spec.setFooter(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
+			spec.setUrl("https://www.discalbot.com/");
+			spec.setColor(GlobalConst.discalColor);
+		};
+		MessageManager.sendMessageAsync(embed, event);
 	}
 
-	private void moduleDmAnnouncements(MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleDmAnnouncements(MessageCreateEvent event, GuildSettings settings) {
 		if (settings.isDevGuild()) {
-			IUser user = event.getAuthor();
+			Member user = event.getMember().get();
 
-			if (settings.getDmAnnouncements().contains(user.getStringID())) {
-				settings.getDmAnnouncements().remove(user.getStringID());
+			if (settings.getDmAnnouncements().contains(user.getId().asString())) {
+				settings.getDmAnnouncements().remove(user.getId().asString());
 				DatabaseManager.getManager().updateSettings(settings);
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.DmAnnouncements.Off", settings), event);
 			} else {
-				settings.getDmAnnouncements().add(user.getStringID());
+				settings.getDmAnnouncements().add(user.getId().asString());
 				DatabaseManager.getManager().updateSettings(settings);
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.DmAnnouncements.On", settings), event);
 			}
@@ -282,7 +273,7 @@ public class DisCalCommand implements ICommand {
 		}
 	}
 
-	private void modulePrefix(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void modulePrefix(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasManageServerRole(event)) {
 			if (args.length == 2) {
 				String prefix = args[1];
@@ -299,7 +290,7 @@ public class DisCalCommand implements ICommand {
 		}
 	}
 
-	private void moduleLanguage(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleLanguage(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasManageServerRole(event)) {
 			if (args.length == 2) {
 				String value = args[1];
@@ -323,11 +314,11 @@ public class DisCalCommand implements ICommand {
 		}
 	}
 
-	private void moduleInvite(MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleInvite(MessageCreateEvent event, GuildSettings settings) {
 		MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.InviteLink", "%link%", GlobalConst.supportInviteLink, settings), event);
 	}
 
-	private void moduleBrand(MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleBrand(MessageCreateEvent event, GuildSettings settings) {
 		if (PermissionChecker.hasSufficientRole(event)) {
 			if (settings.isPatronGuild()) {
 				settings.setBranded(!settings.isBranded());
@@ -342,7 +333,7 @@ public class DisCalCommand implements ICommand {
 		}
 	}
 
-	private void moduleDashboard(MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleDashboard(MessageCreateEvent event, GuildSettings settings) {
 		MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.DashboardLink", "%link%", GlobalConst.discalDashboardLink, settings), event);
 	}
 }

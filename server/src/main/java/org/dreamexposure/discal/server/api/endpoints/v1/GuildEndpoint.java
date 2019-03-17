@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -21,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"ThrowableNotThrown", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 @RestController
 @RequestMapping("/api/v1/guild")
 public class GuildEndpoint {
@@ -39,9 +40,9 @@ public class GuildEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
-			Long guildId = jsonMain.getLong("guild_id");
+			long guildId = jsonMain.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
 			response.setContentType("application/json");
 			response.setStatus(200);
@@ -87,9 +88,9 @@ public class GuildEndpoint {
 		try {
 			JSONObject body = new JSONObject(requestBody);
 
-			Long guildId = body.getLong("guild_id");
+			long guildId = body.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
 			if (body.has("control_role"))
 				settings.setControlRole(body.getString("control_role"));

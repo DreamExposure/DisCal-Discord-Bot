@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.core.object.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
-import sx.blah.discord.handle.obj.IMessage;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -9,7 +10,7 @@ import sx.blah.discord.handle.obj.IMessage;
  * For Project: DisCal-Discord-Bot
  */
 public class PreCalendar {
-	private final long guildId;
+	private final Snowflake guildId;
 
 	private String summary;
 	private String description;
@@ -18,7 +19,7 @@ public class PreCalendar {
 	private boolean editing;
 	private String calendarId;
 
-	private IMessage creatorMessage;
+	private Message creatorMessage;
 
 	private long lastEdit;
 
@@ -28,7 +29,7 @@ public class PreCalendar {
 	 * @param _guildId The ID of the guild.
 	 * @param _summary The summary/name of the calendar.
 	 */
-	public PreCalendar(long _guildId, String _summary) {
+	public PreCalendar(Snowflake _guildId, String _summary) {
 		guildId = _guildId;
 		summary = _summary;
 
@@ -37,7 +38,7 @@ public class PreCalendar {
 		lastEdit = System.currentTimeMillis();
 	}
 
-	public PreCalendar(long _guildId, Calendar calendar) {
+	public PreCalendar(Snowflake _guildId, Calendar calendar) {
 		guildId = _guildId;
 		summary = calendar.getSummary();
 
@@ -60,7 +61,7 @@ public class PreCalendar {
 	 *
 	 * @return The ID of the guild this PreCalendar belongs to.
 	 */
-	public long getGuildId() {
+	public Snowflake getGuildId() {
 		return guildId;
 	}
 
@@ -99,7 +100,7 @@ public class PreCalendar {
 		return calendarId;
 	}
 
-	public IMessage getCreatorMessage() {
+	public Message getCreatorMessage() {
 		return creatorMessage;
 	}
 
@@ -144,7 +145,7 @@ public class PreCalendar {
 		calendarId = _id;
 	}
 
-	public void setCreatorMessage(IMessage _message) {
+	public void setCreatorMessage(Message _message) {
 		creatorMessage = _message;
 	}
 

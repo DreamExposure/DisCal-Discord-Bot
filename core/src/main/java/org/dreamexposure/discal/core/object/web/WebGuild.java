@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.core.object.web;
 
+import discord4j.core.object.entity.*;
+import discord4j.core.object.util.Image;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IRole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -134,16 +134,16 @@ public class WebGuild {
 
 
 	//Functions
-	public WebGuild fromGuild(IGuild g) {
-		id = g.getStringID();
+	public WebGuild fromGuild(Guild g) {
+		id = g.getId().asString();
 		name = g.getName();
-		iconUrl = g.getIconURL();
-		botNick = g.getClient().getOurUser().getNicknameForGuild(g);
+		iconUrl = g.getIconUrl(Image.Format.PNG).get();
+		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("Need this otherwise Java will throw an error. It's an optional");
 
-		settings = DatabaseManager.getManager().getSettings(g.getLongID());
+		settings = DatabaseManager.getManager().getSettings(g.getId());
 
 		//Handle lists and stuffs
-		for (IRole r : g.getRoles()) {
+		for (Role r : g.getRoles().toIterable()) {
 			roles.add(new WebRole().fromRole(r, settings));
 		}
 
@@ -152,12 +152,13 @@ public class WebGuild {
 		all.setName("All Channels");
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
-		for (IChannel c : g.getChannels()) {
-			channels.add(new WebChannel().fromChannel(c, settings));
+		for (GuildChannel c : g.getChannels().toIterable()) {
+			if (c instanceof TextChannel)
+				channels.add(new WebChannel().fromChannel((TextChannel) c, settings));
 		}
-		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getLongID()));
+		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
 
-		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Long.valueOf(id)), settings);
+		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(id)), settings);
 
 		return this;
 	}
@@ -201,7 +202,7 @@ public class WebGuild {
 		id = data.getString("Id");
 		name = data.getString("Name");
 		iconUrl = data.getString("IconUrl");
-		settings = new GuildSettings(Long.valueOf(id)).fromJson(data.getJSONObject("Settings"));
+		settings = new GuildSettings(Snowflake.of(id)).fromJson(data.getJSONObject("Settings"));
 		if (data.has("BotNick"))
 			botNick = data.getString("BotNick");
 		else
@@ -221,7 +222,7 @@ public class WebGuild {
 
 		JSONArray jAnnouncements = data.getJSONArray("Announcements");
 		for (int i = 0; i < jAnnouncements.length(); i++) {
-			announcements.add(new Announcement(Long.valueOf(id)).fromJson(jAnnouncements.getJSONObject(i)));
+			announcements.add(new Announcement(Snowflake.of(id)).fromJson(jAnnouncements.getJSONObject(i)));
 		}
 
 		calendar = new WebCalendar().fromJson(data.getJSONObject("Calendar"));

@@ -1,5 +1,13 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
@@ -13,17 +21,11 @@ import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
 import org.json.JSONObject;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 4/4/2017.
@@ -88,8 +90,8 @@ public class DevCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
-		if (event.getAuthor().getLongID() == GlobalConst.novaId || event.getAuthor().getLongID() == GlobalConst.xaanitId || event.getAuthor().getLongID() == GlobalConst.calId || event.getAuthor().getLongID() == GlobalConst.dreamId) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+		if (event.getMember().get().getId().equals(GlobalConst.novaId) || event.getMember().get().getId().equals(GlobalConst.xaanitId) || event.getMember().get().getId().equals(GlobalConst.calId) || event.getMember().get().getId().equals(GlobalConst.dreamId)) {
 			if (args.length < 1) {
 				MessageManager.sendMessageAsync("Please specify the function you would like to execute. To view valid functions use `!help dev`", event);
 			} else {
@@ -132,7 +134,7 @@ public class DevCommand implements ICommand {
 		return false;
 	}
 
-	private void modulePatron(String[] args, MessageReceivedEvent event) {
+	private void modulePatron(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -142,8 +144,8 @@ public class DevCommand implements ICommand {
 			}
 
 			//Check if its on this shard...
-			if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+			if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
 				settings.setPatronGuild(!settings.isPatronGuild());
 				DatabaseManager.getManager().updateSettings(settings);
 
@@ -167,13 +169,13 @@ public class DevCommand implements ICommand {
 	}
 
 	@SuppressWarnings("all")
-	private void moduleEval(MessageReceivedEvent event) {
-		IGuild guild = event.getGuild();
-		IUser user = event.getAuthor();
-		IMessage message = event.getMessage();
-		IDiscordClient client = event.getClient();
-		IChannel channel = event.getMessage().getChannel();
-		String input = message.getContent().substring(message.getContent().indexOf("eval") + 5).replaceAll("`", "");
+	private void moduleEval(MessageCreateEvent event) {
+		Guild guild = event.getGuild().block();
+		Member user = event.getMember().get();
+		Message message = event.getMessage();
+		DiscordClient client = event.getClient();
+		MessageChannel channel = event.getMessage().getChannel().block();
+		String input = message.getContent().get().substring(message.getContent().get().indexOf("eval") + 5).replaceAll("`", "");
 		Object o = null;
 		factory.put("guild", guild);
 		factory.put("channel", channel);
@@ -181,37 +183,36 @@ public class DevCommand implements ICommand {
 		factory.put("message", message);
 		factory.put("command", this);
 		factory.put("client", client);
-		factory.put("builder", new EmbedBuilder());
-		factory.put("cUser", client.getOurUser());
+		factory.put("builder", new EmbedCreateSpec());
+		factory.put("cUser", client.getSelf());
 
 		try {
 			o = factory.eval(input);
 		} catch (Exception ex) {
-			EmbedBuilder em = new EmbedBuilder();
-			em.withAuthorName("DisCal");
-			em.withAuthorUrl(GlobalConst.discalSite);
-			em.withAuthorIcon(GlobalConst.iconUrl);
-			em.withTitle("Error");
-			em.appendDesc(ex.getMessage());
-			em.withFooterText("Eval failed");
-			em.withColor(GlobalConst.discalColor);
-			MessageManager.sendMessageAsync(em.build(), event);
+			Consumer<EmbedCreateSpec> embed = spec -> {
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+				spec.setTitle("Error");
+				spec.setDescription(ex.getMessage());
+				spec.setFooter("Eval failed", null);
+				spec.setColor(GlobalConst.discalColor);
+			};
+			MessageManager.sendMessageAsync(embed, event);
 			return;
 		}
 
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withTitle("Success! -- Eval Output.");
-		em.withColor(GlobalConst.discalColor);
-		em.appendDesc(o == null ? "No output, object is null" : o.toString());
-		em.appendField("Input", "```java\n" + input + "\n```", false);
-		em.withFooterText("Eval successful!");
-		MessageManager.sendMessageAsync(em.build(), event);
+		Object finalO = o;
+		Consumer<EmbedCreateSpec> embed = spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.setTitle("Success! -- Eval Output.");
+			spec.setColor(GlobalConst.discalColor);
+			spec.setDescription(finalO == null ? "No output, object is null" : finalO.toString());
+			spec.addField("Input", "```java\n" + input + "\n```", false);
+			spec.setFooter("Eval successful!", null);
+		};
+		MessageManager.sendMessageAsync(embed, event);
 	}
 
-	private void moduleDevGuild(String[] args, MessageReceivedEvent event) {
+	private void moduleDevGuild(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -220,8 +221,8 @@ public class DevCommand implements ICommand {
 				return;
 			}
 			//Check if its on this shard...
-			if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+			if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
+				GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
 				settings.setDevGuild(!settings.isDevGuild());
 				DatabaseManager.getManager().updateSettings(settings);
 
@@ -244,7 +245,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleMaxCalendars(String[] args, MessageReceivedEvent event) {
+	private void moduleMaxCalendars(String[] args, MessageCreateEvent event) {
 		if (args.length == 3) {
 			try {
 				int mc = Integer.valueOf(args[2]);
@@ -258,8 +259,8 @@ public class DevCommand implements ICommand {
 				}
 
 				//Check if its on this shard...
-				if (DisCalClient.getClient().getGuildByID(Long.valueOf(args[1])) != null) {
-					GuildSettings settings = DatabaseManager.getManager().getSettings(Long.valueOf(args[1]));
+				if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
+					GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
 					settings.setMaxCalendars(mc);
 					DatabaseManager.getManager().updateSettings(settings);
 
@@ -286,7 +287,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleLeaveGuild(String[] args, MessageReceivedEvent event) {
+	private void moduleLeaveGuild(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			try {
 				Long.valueOf(args[1]);
@@ -296,9 +297,9 @@ public class DevCommand implements ICommand {
 			}
 
 			//Check if its on this shard...
-			IGuild g = DisCalClient.getClient().getGuildByID(Long.valueOf(args[1]));
+			Guild g = DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block();
 			if (g != null) {
-				g.leave();
+				g.leave().subscribe();
 
 				MessageManager.sendMessageAsync("Guild connected to this shard has been left!", event);
 				return;
@@ -319,7 +320,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleReloadLangs(MessageReceivedEvent event) {
+	private void moduleReloadLangs(MessageCreateEvent event) {
 		MessageManager.reloadLangs();
 
 		//Just send this across the network with CrossTalk... and let the changes propagate
@@ -334,7 +335,7 @@ public class DevCommand implements ICommand {
 	}
 
 
-	private void registerApiKey(String[] args, MessageReceivedEvent event) {
+	private void registerApiKey(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			MessageManager.sendMessageAsync("Registering new API key...", event);
 
@@ -349,7 +350,7 @@ public class DevCommand implements ICommand {
 
 			if (DatabaseManager.getManager().updateAPIAccount(account)) {
 				MessageManager.sendMessageAsync("Check your DMs for the new API Key!", event);
-				MessageManager.sendDirectMessageAsync(account.getAPIKey(), event.getAuthor());
+				MessageManager.sendDirectMessageAsync(account.getAPIKey(), event.getMember().get());
 			} else {
 				MessageManager.sendMessageAsync("Error occurred! Could not register new API key!", event);
 			}
@@ -358,7 +359,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void blockAPIKey(String[] args, MessageReceivedEvent event) {
+	private void blockAPIKey(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			MessageManager.sendMessageAsync("Blocking API key...", event);
 
@@ -376,7 +377,7 @@ public class DevCommand implements ICommand {
 		}
 	}
 
-	private void moduleCheckSettings(String[] args, MessageReceivedEvent event) {
+	private void moduleCheckSettings(String[] args, MessageCreateEvent event) {
 		if (args.length == 2) {
 			//String id = args[1];
 

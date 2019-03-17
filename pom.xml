@@ -80,8 +80,8 @@
 		<!--Discord4J API-->
 		<dependency>
 			<groupId>com.discord4j</groupId>
-			<artifactId>Discord4J</artifactId>
-			<version>2.10.1</version>
+			<artifactId>discord4j-core</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		<!-- Allows you to log events from Discord4J -->
 		<dependency>

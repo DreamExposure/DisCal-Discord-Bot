@@ -26,8 +26,6 @@ public enum EventFrequency {
 	 */
 	public static EventFrequency fromValue(String value) {
 		switch (value.toUpperCase()) {
-			case "DAILY":
-				return DAILY;
 			case "WEEKLY":
 				return WEEKLY;
 			case "MONTHLY":

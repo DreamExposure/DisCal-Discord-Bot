@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.core.object.web;
 
+import discord4j.core.object.entity.Role;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.IRole;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -62,15 +62,15 @@ public class WebRole {
 	}
 
 	//functions
-	public WebRole fromRole(IRole r, GuildSettings settings) {
-		id = r.getLongID();
+	public WebRole fromRole(Role r, GuildSettings settings) {
+		id = r.getId().asLong();
 		name = r.getName();
 
 		managed = r.isManaged();
 
-		everyone = r.isEveryoneRole();
+		everyone = r.isEveryone();
 
-		if (r.isEveryoneRole() && settings.getControlRole().equalsIgnoreCase("everyone"))
+		if (r.isEveryone() && settings.getControlRole().equalsIgnoreCase("everyone"))
 			controlRole = true;
 		else
 			controlRole = settings.getControlRole().equalsIgnoreCase(String.valueOf(id));
