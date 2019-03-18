@@ -281,7 +281,7 @@ public class EventCreator {
 	 */
 	public PreEvent getPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
-			if (e.getGuildId() == guildId) {
+			if (e.getGuildId().asLong() == guildId.asLong()) {
 				e.setLastEdit(System.currentTimeMillis());
 				return e;
 			}
@@ -309,7 +309,7 @@ public class EventCreator {
 	 */
 	public boolean hasPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
-			if (e.getGuildId() == guildId)
+			if (e.getGuildId().asLong() == guildId.asLong())
 				return true;
 		}
 		return false;

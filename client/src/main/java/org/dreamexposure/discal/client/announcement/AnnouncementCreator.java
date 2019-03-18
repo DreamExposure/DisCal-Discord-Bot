@@ -138,7 +138,7 @@ public class AnnouncementCreator {
 	 */
 	public Announcement getAnnouncement(Snowflake guildId) {
 		for (Announcement a: announcements) {
-			if (a.getGuildId() == guildId) {
+			if (a.getGuildId().asLong() == guildId.asLong()) {
 				a.setLastEdit(System.currentTimeMillis());
 				return a;
 			}
@@ -172,7 +172,7 @@ public class AnnouncementCreator {
 	 */
 	public boolean hasAnnouncement(Snowflake guildId) {
 		for (Announcement a: announcements) {
-			if (a.getGuildId() == guildId)
+			if (a.getGuildId().asLong() == guildId.asLong())
 				return true;
 		}
 		return false;

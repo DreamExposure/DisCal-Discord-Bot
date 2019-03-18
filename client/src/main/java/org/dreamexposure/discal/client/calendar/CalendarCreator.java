@@ -197,7 +197,7 @@ public class CalendarCreator {
 	 */
 	public PreCalendar getPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId() == guildId) {
+			if (c.getGuildId().asLong() == guildId.asLong()) {
 				c.setLastEdit(System.currentTimeMillis());
 				return c;
 			}
@@ -225,7 +225,7 @@ public class CalendarCreator {
 	 */
 	public Boolean hasPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId() == guildId)
+			if (c.getGuildId().asLong() == guildId.asLong())
 				return true;
 		}
 		return false;
