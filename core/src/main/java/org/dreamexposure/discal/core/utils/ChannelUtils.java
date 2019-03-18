@@ -23,7 +23,7 @@ public class ChannelUtils {
 			nameOrId = nameOrId.replace("#", "");
 
 		for (GuildChannel c : event.getGuild().block().getChannels().toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().toString().equals(nameOrId))
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return true;
 		}
 		return false;
@@ -34,7 +34,7 @@ public class ChannelUtils {
 			nameOrId = nameOrId.replace("#", "");
 
 		for (GuildChannel c : guild.getChannels().toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().toString().equals(nameOrId))
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return true;
 		}
 		return false;
@@ -52,7 +52,7 @@ public class ChannelUtils {
 			nameOrId = nameOrId.replace("#", "");
 
 		for (GuildChannel c : event.getGuild().block().getChannels().toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().toString().equals(nameOrId))
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c;
 		}
 		return null;
@@ -69,7 +69,7 @@ public class ChannelUtils {
 			nameOrId = nameOrId.replace("#", "");
 
 		for (GuildChannel c : guild.getChannels().toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().toString().equals(nameOrId))
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c;
 		}
 		return null;
@@ -86,7 +86,7 @@ public class ChannelUtils {
 			nameOrId = nameOrId.replace("#", "");
 
 		for (GuildChannel c : guild.getChannels().toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().toString().equals(nameOrId))
+			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c.getName();
 		}
 		return "ERROR";

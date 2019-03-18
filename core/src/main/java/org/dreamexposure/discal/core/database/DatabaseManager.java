@@ -14,11 +14,7 @@ import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.MySQL;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -240,7 +236,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, settings.getGuildID().toString());
+				statement.setString(1, settings.getGuildID().asString());
 				ResultSet res = statement.executeQuery();
 
 				boolean hasStuff = res.next();
@@ -322,7 +318,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, calData.getGuildId().toString());
+				statement.setString(1, calData.getGuildId().asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -614,7 +610,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -661,7 +657,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -689,7 +685,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -717,7 +713,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -777,7 +773,7 @@ public class DatabaseManager {
 				String query = "SELECT * FROM " + eventTableName + " WHERE GUILD_ID= ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
 
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 				ResultSet res = statement.executeQuery();
 
 				while (res.next()) {
@@ -804,7 +800,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -885,7 +881,7 @@ public class DatabaseManager {
 
 				String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = ?";
 				PreparedStatement statement = databaseInfo.getConnection().prepareStatement(query);
-				statement.setString(1, guildId.toString());
+				statement.setString(1, guildId.asString());
 
 				ResultSet res = statement.executeQuery();
 
@@ -1078,7 +1074,7 @@ public class DatabaseManager {
 				String announcementTableName = String.format("%sannouncements", databaseInfo.getPrefix());
 
 				PreparedStatement stmt = databaseInfo.getConnection().prepareStatement("SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1 AND GUILD_ID = ?");
-				stmt.setString(1, guildId.toString());
+				stmt.setString(1, guildId.asString());
 				ResultSet res = stmt.executeQuery();
 
 				while (res.next()) {
@@ -1168,7 +1164,7 @@ public class DatabaseManager {
 				String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
 				preparedStmt.setString(1, eventId);
-				preparedStmt.setString(2, guildId.toString());
+				preparedStmt.setString(2, guildId.asString());
 				preparedStmt.setString(3, AnnouncementType.SPECIFIC.name());
 
 				preparedStmt.execute();
@@ -1212,7 +1208,7 @@ public class DatabaseManager {
 
 				String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.toString());
+				preparedStmt.setString(1, guildId.asString());
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1231,7 +1227,7 @@ public class DatabaseManager {
 
 				String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.toString());
+				preparedStmt.setString(1, guildId.asString());
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1250,7 +1246,7 @@ public class DatabaseManager {
 
 				String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, guildId.toString());
+				preparedStmt.setString(1, guildId.asString());
 
 				preparedStmt.execute();
 				preparedStmt.close();
@@ -1269,7 +1265,7 @@ public class DatabaseManager {
 
 				String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?";
 				PreparedStatement preparedStmt = databaseInfo.getConnection().prepareStatement(query);
-				preparedStmt.setString(1, data.getGuildId().toString());
+				preparedStmt.setString(1, data.getGuildId().asString());
 				preparedStmt.setString(2, data.getCalendarAddress());
 
 				preparedStmt.execute();

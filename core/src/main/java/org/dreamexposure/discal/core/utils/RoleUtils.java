@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class RoleUtils {
 	public static Role getRoleFromMention(String mention, MessageCreateEvent event) {
 		for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-			if (mention.equalsIgnoreCase("<@&" + r.getId().toString() + ">") || mention.equalsIgnoreCase("<@&!" + r.getId().toString() + ">"))
+			if (mention.equalsIgnoreCase("<@&" + r.getId().asString() + ">") || mention.equalsIgnoreCase("<@&!" + r.getId().asString() + ">"))
 				return r;
 		}
 		return null;
@@ -27,7 +27,7 @@ public class RoleUtils {
 
 	public static Role getRoleFromID(String id, MessageCreateEvent event) {
 		for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-			if (id.equals(r.getId().toString()) || id.equals(r.getName()))
+			if (id.equals(r.getId().asString()) || id.equals(r.getName()))
 				return r;
 		}
 		return null;
@@ -35,7 +35,7 @@ public class RoleUtils {
 
 	public static Role getRoleFromID(String id, Guild guild) {
 		for (Role r : guild.getRoles().toIterable()) {
-			if (id.equalsIgnoreCase(r.getId().toString()) || id.equals(r.getName()))
+			if (id.equalsIgnoreCase(r.getId().asString()) || id.equals(r.getName()))
 				return r;
 		}
 		return null;
@@ -43,7 +43,7 @@ public class RoleUtils {
 
 	public static boolean roleExists(String id, MessageCreateEvent event) {
 		for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-			if (id.equals(r.getId().toString()))
+			if (id.equals(r.getId().asString()))
 				return true;
 		}
 		return false;
@@ -51,7 +51,7 @@ public class RoleUtils {
 
 	public static boolean roleExists(String id, Guild guild) {
 		for (Role r : guild.getRoles().toIterable()) {
-			if (id.equals(r.getId().toString()))
+			if (id.equals(r.getId().asString()))
 				return true;
 		}
 		return false;

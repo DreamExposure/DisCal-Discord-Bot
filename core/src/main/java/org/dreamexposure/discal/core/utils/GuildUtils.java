@@ -25,7 +25,7 @@ public class GuildUtils {
 
 		for (Guild g : client.getGuilds().toIterable()) {
 			for (Member m : g.getMembers().toIterable()) {
-				if (m.getId().toString().equals(userId)) {
+				if (m.getId().asString().equals(userId)) {
 					WebGuild wg = new WebGuild().fromGuild(g);
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));

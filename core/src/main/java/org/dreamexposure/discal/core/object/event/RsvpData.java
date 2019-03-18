@@ -10,6 +10,7 @@ import java.util.Collections;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings("Duplicates")
 public class RsvpData {
 	private final Snowflake guildId;
 

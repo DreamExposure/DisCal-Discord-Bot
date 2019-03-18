@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class UserUtils {
 	public static Member getUserFromMention(String mention, MessageCreateEvent event) {
 		for (Member u : event.getGuild().block().getMembers().toIterable()) {
-			if (mention.equalsIgnoreCase("<@" + u.getId().toString() + ">") || mention.equalsIgnoreCase("<@!" + u.getId().toString() + ">"))
+			if (mention.equalsIgnoreCase("<@" + u.getId().asString() + ">") || mention.equalsIgnoreCase("<@!" + u.getId().asString() + ">"))
 				return u;
 		}
 
@@ -80,7 +80,7 @@ public class UserUtils {
 
 		List<Member> users = guild.getMembers().toStream()
 				.filter(u -> u.getUsername().toLowerCase().contains(lower)
-						|| u.getUsername().equalsIgnoreCase(lower) || u.getId().toString().equals(lower)
+					|| u.getUsername().equalsIgnoreCase(lower) || u.getId().asString().equals(lower)
 						|| u.getDisplayName().toLowerCase().contains(lower)
 						|| u.getDisplayName().equalsIgnoreCase(lower))
 				.collect(Collectors.toList());

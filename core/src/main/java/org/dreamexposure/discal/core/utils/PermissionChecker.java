@@ -30,7 +30,7 @@ public class PermissionChecker {
 				Role role = null;
 
 				for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-					if (r.getId().toString().equals(roleId)) {
+					if (r.getId().asString().equals(roleId)) {
 						role = r;
 						break;
 					}
@@ -38,7 +38,7 @@ public class PermissionChecker {
 
 				if (role != null) {
 					for (Role r : event.getGuild().block().getMemberById(sender.getId()).block().getRoles().toIterable()) {
-						if (r.getId().toString().equals(role.getId().toString()) || r.getPosition().block() > role.getPosition().block())
+						if (r.getId().asString().equals(role.getId().asString()) || r.getPosition().block() > role.getPosition().block())
 							return true;
 
 					}
@@ -67,7 +67,7 @@ public class PermissionChecker {
 				Role role = null;
 
 				for (Role r : guild.getRoles().toIterable()) {
-					if (r.getId().toString().equals(roleId)) {
+					if (r.getId().asString().equals(roleId)) {
 						role = r;
 						break;
 					}
@@ -118,7 +118,7 @@ public class PermissionChecker {
 
 			GuildChannel channel = null;
 			for (GuildChannel c : event.getMessage().getGuild().block().getChannels().toIterable()) {
-				if (c.getId().toString().equals(settings.getDiscalChannel())) {
+				if (c.getId().asString().equals(settings.getDiscalChannel())) {
 					channel = c;
 					break;
 				}

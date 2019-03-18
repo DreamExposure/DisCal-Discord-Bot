@@ -52,7 +52,7 @@ public class AnnouncementCreator {
 	public Announcement init(MessageCreateEvent e, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID())) {
 			Announcement a = new Announcement(settings.getGuildID());
-			a.setAnnouncementChannelId(e.getMessage().getChannel().block().getId().toString());
+			a.setAnnouncementChannelId(e.getMessage().getChannel().block().getId().asString());
 
 			if (PermissionChecker.botHasMessageManagePerms(e)) {
 				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
