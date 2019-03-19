@@ -349,7 +349,7 @@ public class AnnouncementMessageFormatter {
 			try {
 				Member user = guild.getMemberById(Snowflake.of(userId)).block();
 				if (user != null)
-					userMentions.append(user.getMention()).append(" ");
+					userMentions.append(user.getUsername()).append("#").append(user.getDiscriminator()).append(" ");
 			} catch (Exception e) {
 				//User does not exist, safely ignore.
 			}

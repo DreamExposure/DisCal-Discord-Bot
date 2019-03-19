@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.module.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
@@ -506,8 +507,17 @@ public class AnnouncementCommand implements ICommand {
 			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()) : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
 			for (int i = 1; i < args.length; i++) {
-				Member u = guild.getMemberById(UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild)).block();
-				Role r = guild.getRoleById(RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild)).block();
+				Member u = null;
+				Role r = null;
+
+				Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
+				if (usf != null)
+					u = guild.getMemberById(usf).block();
+
+				Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
+				if (rsf != null)
+					r = guild.getRoleById(rsf).block();
+
 				if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
 					//Here or everyone is to be subscribed...
 					String men = args[i].toLowerCase();
@@ -592,8 +602,18 @@ public class AnnouncementCommand implements ICommand {
 		if (args[1].length() <= 32) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-				Member u = guild.getMemberById(UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild)).block();
-				Role r = guild.getRoleById(RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild)).block();
+
+				Member u = null;
+				Role r = null;
+
+				Snowflake usf = UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
+				if (usf != null)
+					u = guild.getMemberById(usf).block();
+
+				Snowflake rsf = RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
+				if (rsf != null)
+					r = guild.getRoleById(rsf).block();
+
 				if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
 					String men = value.toLowerCase();
 					if (a.getSubscriberRoleIds().contains(men)) {
@@ -697,8 +717,17 @@ public class AnnouncementCommand implements ICommand {
 			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()) : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
 			for (int i = 1; i < args.length; i++) {
-				Member u = guild.getMemberById(UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild)).block();
-				Role r = guild.getRoleById(RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild)).block();
+				Member u = null;
+				Role r = null;
+
+				Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
+				if (usf != null)
+					u = guild.getMemberById(usf).block();
+
+				Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
+				if (rsf != null)
+					r = guild.getRoleById(rsf).block();
+
 				if (args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
 					//Here or everyone is to be subscribed...
 					String men = args[i].toLowerCase();
