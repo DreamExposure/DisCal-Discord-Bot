@@ -92,7 +92,7 @@ public class WebCalendar {
 		} else {
 			id = cd.getCalendarId();
 			address = cd.getCalendarAddress();
-			link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID();
+			link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
 			external = cd.isExternal();
 			try {
 				Calendar cal = CalendarAuth.getCalendarService(gs).calendars().get(id).execute();

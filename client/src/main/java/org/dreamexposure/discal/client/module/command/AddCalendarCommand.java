@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -11,7 +12,6 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +21,7 @@ import java.util.List;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class AddCalendarCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -69,7 +70,7 @@ public class AddCalendarCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (settings.isDevGuild() || settings.isPatronGuild()) {
 			if (PermissionChecker.hasManageServerRole(event)) {
 				if (args.length == 0) {
@@ -99,7 +100,7 @@ public class AddCalendarCommand implements ICommand {
 							}
 							if (valid) {
 								//Update and save.
-								CalendarData data = new CalendarData(event.getGuild().getLongID(), 1);
+								CalendarData data = new CalendarData(event.getGuild().block().getId(), 1);
 								data.setCalendarId(args[0]);
 								data.setCalendarAddress(args[0]);
 								data.setExternal(true);
@@ -116,7 +117,7 @@ public class AddCalendarCommand implements ICommand {
 							}
 						} catch (Exception e) {
 							MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-							Logger.getLogger().exception(event.getAuthor(), "Failed to connect external calendar!", e, this.getClass());
+							Logger.getLogger().exception(event.getMember().get(), "Failed to connect external calendar!", e, this.getClass());
 						}
 					}
 				} else {

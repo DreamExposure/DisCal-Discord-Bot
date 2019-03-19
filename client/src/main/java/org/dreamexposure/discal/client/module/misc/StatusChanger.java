@@ -1,11 +1,11 @@
 package org.dreamexposure.discal.client.module.misc;
 
+import discord4j.core.object.presence.Activity;
+import discord4j.core.object.presence.Presence;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import sx.blah.discord.handle.obj.ActivityType;
-import sx.blah.discord.handle.obj.StatusType;
 
 import java.util.ArrayList;
 import java.util.TimerTask;
@@ -40,12 +40,12 @@ public class StatusChanger extends TimerTask {
 	@Override
 	public void run() {
 		String status = statuses.get(index);
-		status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().size() + "");
+		status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().count().block() + "");
 		status = status.replace("%calCount%", DatabaseManager.getManager().getCalendarCount() + "");
 		status = status.replace("%annCount%", DatabaseManager.getManager().getAnnouncementCount() + "");
 		status = status.replace("%shards%", BotSettings.SHARD_COUNT.get());
-		DisCalClient.getClient().changePresence(StatusType.ONLINE, ActivityType.PLAYING, status);
 
+		DisCalClient.getClient().updatePresence(Presence.online(Activity.playing(status))).subscribe();
 		//Set new index.
 		if (index + 1 >= statuses.size())
 			index = 0;

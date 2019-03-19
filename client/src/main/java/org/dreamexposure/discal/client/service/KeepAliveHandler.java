@@ -29,7 +29,7 @@ public class KeepAliveHandler {
 			public void run() {
 				JSONObject data = new JSONObject();
 				data.put("Reason", "Keep-Alive");
-				data.put("Server-Count", DisCalClient.getClient().getGuilds().size());
+				data.put("Server-Count", DisCalClient.getClient().getGuilds().count().block());
 				data.put("Mem-Used", usedMemory());
 				data.put("Uptime", humanReadableUptime());
 				//TODO: Add announcement count!!!

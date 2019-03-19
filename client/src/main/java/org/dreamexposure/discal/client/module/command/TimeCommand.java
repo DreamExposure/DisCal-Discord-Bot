@@ -1,6 +1,8 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -10,19 +12,19 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 6/16/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class TimeCommand implements ICommand {
 
 	/**
@@ -69,15 +71,15 @@ public class TimeCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		calendarTime(event, settings);
 		return false;
 	}
 
-	private void calendarTime(MessageReceivedEvent event, GuildSettings settings) {
+	private void calendarTime(MessageCreateEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().getLongID());
+			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
 
 			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
 				//Does not have a calendar.
@@ -92,21 +94,20 @@ public class TimeCommand implements ICommand {
 				String thisIsTheCorrectTime = format.format(ldt);
 
 				//Build embed and send.
-				EmbedBuilder em = new EmbedBuilder();
-				em.withAuthorIcon(GlobalConst.iconUrl);
-				em.withAuthorName("DisCal");
-				em.withAuthorUrl(GlobalConst.discalSite);
-				em.withTitle(MessageManager.getMessage("Embed.Time.Title", settings));
-				em.appendField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
-				em.appendField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
+				Consumer<EmbedCreateSpec> embed = spec -> {
+					spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+					spec.setTitle(MessageManager.getMessage("Embed.Time.Title", settings));
+					spec.addField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
+					spec.addField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
-				em.withFooterText(MessageManager.getMessage("Embed.Time.Footer", settings));
-				em.withUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
-				em.withColor(GlobalConst.discalColor);
-				MessageManager.sendMessageAsync(em.build(), event);
+					spec.setFooter(MessageManager.getMessage("Embed.Time.Footer", settings), null);
+					spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
+					spec.setColor(GlobalConst.discalColor);
+				};
+				MessageManager.sendMessageAsync(embed, event);
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getAuthor(), "Failed to connect to Google Cal.", e, this.getClass());
+			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, this.getClass());
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 	}

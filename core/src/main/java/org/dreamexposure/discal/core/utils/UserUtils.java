@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.core.utils;
 
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -16,17 +16,9 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("ConstantConditions")
 public class UserUtils {
-	public static IUser getUserFromMention(String mention, MessageReceivedEvent event) {
-		for (IUser u : event.getGuild().getUsers()) {
-			if (mention.equalsIgnoreCase("<@" + u.getStringID() + ">") || mention.equalsIgnoreCase("<@!" + u.getStringID() + ">"))
-				return u;
-		}
 
-		return null;
-	}
-
-	public static long getUser(String toLookFor, IMessage m) {
-		return getUser(toLookFor, m.getGuild());
+	public static Snowflake getUser(String toLookFor, Message m) {
+		return getUser(toLookFor, m.getGuild().block());
 	}
 
 	/**
@@ -36,73 +28,45 @@ public class UserUtils {
 	 * @param guild     The guild
 	 * @return The user if found, null otherwise
 	 */
-	public static long getUser(String toLookFor, IGuild guild) {
+	public static Snowflake getUser(String toLookFor, Guild guild) {
 		toLookFor = GeneralUtils.trim(toLookFor);
 		final String lower = toLookFor.toLowerCase();
 		if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
-			final String parse = toLookFor.replaceAll("[<@!>]", "");
-			IUser exists = guild.getUserByID(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")));
+			Member exists = guild.getMemberById(Snowflake.of(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")))).onErrorResume(e -> Mono.empty()).block();
 			if (exists != null)
-				return exists.getLongID();
+				return exists.getId();
 		}
 
 
-		List<IUser> users = new ArrayList<>();
-		List<IUser> us = guild.getUsers();
-		users.addAll(us.stream().filter(u -> u.getName().equalsIgnoreCase(lower)).collect(Collectors.toList()));
-		users.addAll(us.stream().filter(u -> u.getName().toLowerCase().contains(lower)).collect(Collectors.toList()));
-		users.addAll(us.stream().filter(u -> (u.getName() + "#" + u.getDiscriminator()).equalsIgnoreCase(lower)).collect(Collectors.toList()));
-		users.addAll(us.stream().filter(u -> u.getDiscriminator().equalsIgnoreCase(lower)).collect(Collectors.toList()));
-		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).equalsIgnoreCase(lower)).collect(Collectors.toList()));
-		users.addAll(us.stream().filter(u -> u.getDisplayName(guild).toLowerCase().contains(lower)).collect(Collectors.toList()));
+		List<Member> users = new ArrayList<>();
+
+		users.addAll(guild.getMembers().filter(m -> m.getUsername().equalsIgnoreCase(lower)).collectList().block());
+		users.addAll(guild.getMembers().filter(m -> m.getUsername().toLowerCase().contains(lower)).collectList().block());
+		users.addAll(guild.getMembers().filter(m -> (m.getUsername() + "#" + m.getDiscriminator()).equalsIgnoreCase(lower)).collectList().block());
+		users.addAll(guild.getMembers().filter(m -> m.getDiscriminator().equalsIgnoreCase(lower)).collectList().block());
+		users.addAll(guild.getMembers().filter(m -> m.getDisplayName().equalsIgnoreCase(lower)).collectList().block());
+		users.addAll(guild.getMembers().filter(m -> m.getDisplayName().toLowerCase().contains(lower)).collectList().block());
 
 
 		if (!users.isEmpty())
-			return users.get(0).getLongID();
+			return users.get(0).getId();
 
-		return 0;
+		return null;
 	}
 
-	public static IUser getIUser(String toLookFor, IMessage m, IGuild guild) {
-		toLookFor = toLookFor.trim();
-		final String lower = toLookFor.toLowerCase();
-
-		IUser res = null;
-
-		if (m != null && !m.getMentions().isEmpty())
-			res = m.getMentions().get(0);
-
-		if (toLookFor.matches("<@!?[0-9]+>")) {
-			IUser u = guild.getUserByID(Long.parseUnsignedLong(toLookFor.replaceAll("[^0-9]", "")));
-			if (u != null)
-				return u;
-		}
-
-		List<IUser> users = guild.getUsers().stream()
-				.filter(u -> u.getName().toLowerCase().contains(lower)
-						|| u.getName().equalsIgnoreCase(lower) || u.getStringID().equals(lower)
-						|| u.getDisplayName(guild).toLowerCase().contains(lower)
-						|| u.getDisplayName(guild).equalsIgnoreCase(lower))
-				.collect(Collectors.toList());
-		if (!users.isEmpty())
-			res = users.get(0);
-
-		return res;
-	}
-
-	private static IUser getUserFromID(String id, IGuild guild) {
+	private static Member getUserFromID(String id, Guild guild) {
 		try {
-			return guild.getUserByID(Long.parseUnsignedLong(id));
+			return guild.getMemberById(Snowflake.of(Long.parseUnsignedLong(id))).block();
 		} catch (Exception e) {
 			//Ignore. Probably invalid ID.
 			return null;
 		}
 	}
 
-	public static ArrayList<IUser> getUsers(ArrayList<String> userIds, IGuild guild) {
-		ArrayList<IUser> users = new ArrayList<>();
+	public static ArrayList<Member> getUsers(ArrayList<String> userIds, Guild guild) {
+		ArrayList<Member> users = new ArrayList<>();
 		for (String u : userIds) {
-			IUser user = getUserFromID(u, guild);
+			Member user = getUserFromID(u, guild);
 			if (user != null)
 				users.add(user);
 		}

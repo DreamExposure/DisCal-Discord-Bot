@@ -1,10 +1,11 @@
 package org.dreamexposure.discal.core.object.announcement;
 
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,13 +13,13 @@ import java.util.UUID;
 
 /**
  * Created by Nova Fox on 11/10/17.
- * Website: www.cloudcraftgaming.com
+ * Website: www.dreamexposure.org
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"WeakerAccess", "Duplicates"})
+@SuppressWarnings("Duplicates")
 public class Announcement {
 	private UUID announcementId;
-	private long guildId;
+	private Snowflake guildId;
 
 	private final ArrayList<String> subscriberRoleIds = new ArrayList<>();
 	private final ArrayList<String> subscriberUserIds = new ArrayList<>();
@@ -35,7 +36,7 @@ public class Announcement {
 	private boolean infoOnly;
 
 	//Stuff for creator/editor wizards.
-	private IMessage creatorMessage;
+	private Message creatorMessage;
 	private boolean editing;
 	private long lastEdit;
 
@@ -44,7 +45,7 @@ public class Announcement {
 	 *
 	 * @param _guildId The ID of the Guild this announcement belongs to.
 	 */
-	public Announcement(long _guildId) {
+	public Announcement(Snowflake _guildId) {
 		guildId = _guildId;
 		announcementId = UUID.randomUUID();
 		announcementChannelId = "N/a";
@@ -66,7 +67,7 @@ public class Announcement {
 	 * @param _announcementId The ID of the announcement object.
 	 * @param _guildId        The ID of the guild the announcement belongs to.
 	 */
-	public Announcement(UUID _announcementId, long _guildId) {
+	public Announcement(UUID _announcementId, Snowflake _guildId) {
 		announcementId = _announcementId;
 		guildId = _guildId;
 		announcementChannelId = "N/a";
@@ -144,7 +145,7 @@ public class Announcement {
 	 *
 	 * @return The Guild ID the announcement belongs to.
 	 */
-	public long getGuildId() {
+	public Snowflake getGuildId() {
 		return guildId;
 	}
 
@@ -273,7 +274,7 @@ public class Announcement {
 		return infoOnly;
 	}
 
-	public IMessage getCreatorMessage() {
+	public Message getCreatorMessage() {
 		return creatorMessage;
 	}
 
@@ -368,7 +369,7 @@ public class Announcement {
 		Collections.addAll(subscriberUserIds, subs);
 	}
 
-	public void setCreatorMessage(IMessage _message) {
+	public void setCreatorMessage(Message _message) {
 		creatorMessage = _message;
 	}
 
@@ -394,7 +395,7 @@ public class Announcement {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("GuildId", guildId);
+		data.put("GuildId", guildId.asLong());
 		data.put("Id", announcementId.toString());
 
 		JSONArray roles = new JSONArray();
@@ -423,7 +424,7 @@ public class Announcement {
 	}
 
 	public Announcement fromJson(JSONObject data) {
-		guildId = data.getLong("GuildId");
+		guildId = Snowflake.of(data.getLong("GuildId"));
 		announcementId = UUID.fromString(data.getString("Id"));
 
 		JSONArray roles = data.getJSONArray("Roles");

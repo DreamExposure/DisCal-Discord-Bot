@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.event.RsvpData;
@@ -21,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"ThrowableNotThrown", "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 @RestController
 @RequestMapping("/api/v1/rsvp")
 public class RsvpEndpoint {
@@ -42,7 +43,7 @@ public class RsvpEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(guildId, eventId);
+			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Snowflake.of(guildId), eventId);
 
 			JSONObject body = new JSONObject();
 			body.put("on_time", rsvp.getGoingOnTime());
@@ -84,7 +85,7 @@ public class RsvpEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(guildId, eventId);
+			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Snowflake.of(guildId), eventId);
 
 			if (jsonMain.has("on_time")) {
 				rsvp.getGoingOnTime().clear();

@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -10,20 +14,16 @@ import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.dreamexposure.discal.core.utils.UserUtils;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 8/31/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class RsvpCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -76,7 +76,7 @@ public class RsvpCommand implements ICommand {
 	 * @return <code>true</code> if successful, else <code>false</code>.
 	 */
 	@Override
-	public boolean issueCommand(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length > 0) {
 			switch (args[0].toLowerCase()) {
 				case "ontime":
@@ -107,14 +107,14 @@ public class RsvpCommand implements ICommand {
 		return false;
 	}
 
-	private void moduleGoing(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				if (!TimeUtils.inPast(eventId, settings)) {
 					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-					data.removeCompletely(event.getAuthor().getStringID());
-					data.getGoingOnTime().add(event.getAuthor().getStringID());
+					data.removeCompletely(event.getMember().get().getId().asString());
+					data.getGoingOnTime().add(event.getMember().get().getId().asString());
 
 					DatabaseManager.getManager().updateRsvpData(data);
 					MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.going.success", settings), getRsvpEmbed(data, settings), event);
@@ -129,14 +129,14 @@ public class RsvpCommand implements ICommand {
 		}
 	}
 
-	private void moduleGoingLate(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleGoingLate(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				if (!TimeUtils.inPast(eventId, settings)) {
 					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-					data.removeCompletely(event.getAuthor().getStringID());
-					data.getGoingLate().add(event.getAuthor().getStringID());
+					data.removeCompletely(event.getMember().get().getId().asString());
+					data.getGoingLate().add(event.getMember().get().getId().asString());
 
 					DatabaseManager.getManager().updateRsvpData(data);
 					MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.late.success", settings), getRsvpEmbed(data, settings), event);
@@ -151,14 +151,14 @@ public class RsvpCommand implements ICommand {
 		}
 	}
 
-	private void moduleNotGoing(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleNotGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				if (!TimeUtils.inPast(eventId, settings)) {
 					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-					data.removeCompletely(event.getAuthor().getStringID());
-					data.getNotGoing().add(event.getAuthor().getStringID());
+					data.removeCompletely(event.getMember().get().getId().asString());
+					data.getNotGoing().add(event.getMember().get().getId().asString());
 
 					DatabaseManager.getManager().updateRsvpData(data);
 					MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.not.success", settings), getRsvpEmbed(data, settings), event);
@@ -173,13 +173,13 @@ public class RsvpCommand implements ICommand {
 		}
 	}
 
-	private void moduleRemove(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleRemove(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				if (!TimeUtils.inPast(eventId, settings)) {
 					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-					data.removeCompletely(event.getAuthor().getStringID());
+					data.removeCompletely(event.getMember().get().getId().asString());
 
 					DatabaseManager.getManager().updateRsvpData(data);
 					MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.remove.success", settings), getRsvpEmbed(data, settings), event);
@@ -194,14 +194,14 @@ public class RsvpCommand implements ICommand {
 		}
 	}
 
-	private void moduleUnsure(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleUnsure(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
 				if (!TimeUtils.inPast(eventId, settings)) {
 					RsvpData data = DatabaseManager.getManager().getRsvpData(settings.getGuildID(), eventId);
-					data.removeCompletely(event.getAuthor().getStringID());
-					data.getUndecided().add(event.getAuthor().getStringID());
+					data.removeCompletely(event.getMember().get().getId().asString());
+					data.getUndecided().add(event.getMember().get().getId().asString());
 
 					DatabaseManager.getManager().updateRsvpData(data);
 					MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.unsure.success", settings), getRsvpEmbed(data, settings), event);
@@ -216,7 +216,7 @@ public class RsvpCommand implements ICommand {
 		}
 	}
 
-	private void moduleList(String[] args, MessageReceivedEvent event, GuildSettings settings) {
+	private void moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (args.length == 2) {
 			String eventId = args[1];
 			if (EventUtils.eventExists(settings, eventId)) {
@@ -232,59 +232,57 @@ public class RsvpCommand implements ICommand {
 	}
 
 
-	private EmbedObject getRsvpEmbed(RsvpData data, GuildSettings settings) {
-		EmbedBuilder em = new EmbedBuilder();
-		em.withAuthorIcon(GlobalConst.iconUrl);
-		em.withAuthorName("DisCal");
-		em.withAuthorUrl(GlobalConst.discalSite);
-		em.withTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
-		em.appendField("Event ID", data.getEventId(), false);
+	private Consumer<EmbedCreateSpec> getRsvpEmbed(RsvpData data, GuildSettings settings) {
+		return spec -> {
+			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			spec.setTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
+			spec.addField("Event ID", data.getEventId(), false);
 
-		IGuild g = DisCalClient.getClient().getGuildByID(settings.getGuildID());
+			Guild g = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
 
-		StringBuilder onTime = new StringBuilder();
-		for (IUser u : UserUtils.getUsers(data.getGoingOnTime(), g)) {
-			onTime.append(u.getDisplayName(g)).append(", ");
-		}
+			StringBuilder onTime = new StringBuilder();
+			for (Member u : UserUtils.getUsers(data.getGoingOnTime(), g)) {
+				onTime.append(u.getDisplayName()).append(", ");
+			}
 
-		StringBuilder late = new StringBuilder();
-		for (IUser u : UserUtils.getUsers(data.getGoingLate(), g)) {
-			late.append(u.getDisplayName(g)).append(", ");
-		}
+			StringBuilder late = new StringBuilder();
+			for (Member u : UserUtils.getUsers(data.getGoingLate(), g)) {
+				late.append(u.getDisplayName()).append(", ");
+			}
 
-		StringBuilder unsure = new StringBuilder();
-		for (IUser u : UserUtils.getUsers(data.getUndecided(), g)) {
-			unsure.append(u.getDisplayName(g)).append(", ");
-		}
+			StringBuilder unsure = new StringBuilder();
+			for (Member u : UserUtils.getUsers(data.getUndecided(), g)) {
+				unsure.append(u.getDisplayName()).append(", ");
+			}
 
-		StringBuilder notGoing = new StringBuilder();
-		for (IUser u : UserUtils.getUsers(data.getNotGoing(), g)) {
-			notGoing.append(u.getDisplayName(g)).append(", ");
-		}
+			StringBuilder notGoing = new StringBuilder();
+			for (Member u : UserUtils.getUsers(data.getNotGoing(), g)) {
+				notGoing.append(u.getDisplayName()).append(", ");
+			}
 
-		if (onTime.toString().isEmpty())
-			em.appendField("On time", "N/a", true);
-		else
-			em.appendField("On Time", onTime.toString(), true);
+			if (onTime.toString().isEmpty())
+				spec.addField("On time", "N/a", true);
+			else
+				spec.addField("On Time", onTime.toString(), true);
 
-		if (late.toString().isEmpty())
-			em.appendField("Late", "N/a", true);
-		else
-			em.appendField("Late", late.toString(), true);
+			if (late.toString().isEmpty())
+				spec.addField("Late", "N/a", true);
+			else
+				spec.addField("Late", late.toString(), true);
 
-		if (unsure.toString().isEmpty())
-			em.appendField("Unsure", "N/a", true);
-		else
-			em.appendField("Unsure", unsure.toString(), true);
+			if (unsure.toString().isEmpty())
+				spec.addField("Unsure", "N/a", true);
+			else
+				spec.addField("Unsure", unsure.toString(), true);
 
-		if (notGoing.toString().isEmpty())
-			em.appendField("Not Going", "N/a", true);
-		else
-			em.appendField("Not Going", notGoing.toString(), true);
+			if (notGoing.toString().isEmpty())
+				spec.addField("Not Going", "N/a", true);
+			else
+				spec.addField("Not Going", notGoing.toString(), true);
 
-		em.withFooterText(MessageManager.getMessage("Embed.RSVP.List.Footer", settings));
-		em.withColor(GlobalConst.discalColor);
+			spec.setFooter(MessageManager.getMessage("Embed.RSVP.List.Footer", settings), null);
+			spec.setColor(GlobalConst.discalColor);
 
-		return em.build();
+		};
 	}
 }

@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.object.network.google;
 
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -9,25 +9,25 @@ import sx.blah.discord.handle.obj.IUser;
  * For Project: DisCal-Discord-Bot
  */
 public class Poll {
-	private final IUser user;
-	private final IGuild guild;
+	private final User user;
+	private final Guild guild;
 
 	private int interval;
 	private int expires_in;
 	private int remainingSeconds;
 	private String device_code;
 
-	public Poll(IUser _user, IGuild _guild) {
+	public Poll(User _user, Guild _guild) {
 		user = _user;
 		guild = _guild;
 	}
 
 	//Getters
-	public IUser getUser() {
+	public User getUser() {
 		return user;
 	}
 
-	public IGuild getGuild() {
+	public Guild getGuild() {
 		return guild;
 	}
 

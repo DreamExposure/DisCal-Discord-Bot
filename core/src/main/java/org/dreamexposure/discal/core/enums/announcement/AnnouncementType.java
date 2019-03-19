@@ -26,12 +26,9 @@ public enum AnnouncementType {
 	 */
 	public static AnnouncementType fromValue(String _value) {
 		switch (_value.toUpperCase()) {
-			case "UNIVERSAL":
-				return UNIVERSAL;
 			case "SPECIFIC":
 				return SPECIFIC;
 			case "COLOR":
-				return COLOR;
 			case "COLOUR":
 				return COLOR;
 			case "RECUR":

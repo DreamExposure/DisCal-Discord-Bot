@@ -9,6 +9,6 @@ hs_err_pid*
 **/target/
 /src/main/resources/client_secret.json
 
- **/*.iml
+**/*.iml
 **/dependency-reduced-pom.xml
 **/META-INF/

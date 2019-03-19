@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.object.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
-import sx.blah.discord.handle.obj.IMessage;
+import discord4j.core.object.entity.Message;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -12,7 +12,7 @@ public class CalendarCreatorResponse {
 	private final boolean successful;
 
 	private boolean edited;
-	private IMessage creatorMessage;
+	private Message creatorMessage;
 	private Calendar calendar;
 
 	/**
@@ -59,7 +59,7 @@ public class CalendarCreatorResponse {
 		return edited;
 	}
 
-	public IMessage getCreatorMessage() {
+	public Message getCreatorMessage() {
 		return creatorMessage;
 	}
 
@@ -78,7 +78,7 @@ public class CalendarCreatorResponse {
 		edited = _edit;
 	}
 
-	public void setCreatorMessage(IMessage msg) {
+	public void setCreatorMessage(Message msg) {
 		creatorMessage = msg;
 	}
 }

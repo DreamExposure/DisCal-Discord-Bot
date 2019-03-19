@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.core.object.web;
 
+import discord4j.core.object.entity.TextChannel;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.IChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -42,8 +42,8 @@ public class WebChannel {
 	}
 
 	//Functions
-	public WebChannel fromChannel(IChannel c, GuildSettings settings) {
-		id = c.getLongID();
+	public WebChannel fromChannel(TextChannel c, GuildSettings settings) {
+		id = c.getId().asLong();
 		name = c.getName();
 
 		discalChannel = settings.getDiscalChannel().equalsIgnoreCase(String.valueOf(id));

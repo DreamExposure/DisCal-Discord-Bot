@@ -1,10 +1,9 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GeneralUtils;
-import sx.blah.discord.api.events.EventDispatcher;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 
@@ -38,13 +37,12 @@ public class CommandExecutor {
 	 * @return The CommandExecutor's instance.
 	 */
 	public CommandExecutor enable() {
-		EventDispatcher dispatcher = DisCalClient.getClient().getDispatcher();
-		dispatcher.registerListener(new CommandListener(this));
+		DisCalClient.getClient().getEventDispatcher().on(MessageCreateEvent.class).subscribe(CommandListener::onMessageEvent);
 		return instance;
 	}
 
 
-	//Functionals
+	//Functional
 
 	/**
 	 * Registers a command that can be executed.
@@ -62,7 +60,7 @@ public class CommandExecutor {
 	 * @param argsOr The command arguments used.
 	 * @param event  The Event received.
 	 */
-	void issueCommand(String cmd, String[] argsOr, MessageReceivedEvent event, GuildSettings settings) {
+	void issueCommand(String cmd, String[] argsOr, MessageCreateEvent event, GuildSettings settings) {
 
 		String[] args;
 		if (argsOr.length > 0) {

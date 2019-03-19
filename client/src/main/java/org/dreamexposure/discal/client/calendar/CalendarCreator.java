@@ -2,6 +2,9 @@ package org.dreamexposure.discal.client.calendar;
 
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -12,8 +15,6 @@ import org.dreamexposure.discal.core.object.calendar.CalendarCreatorResponse;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IMessage;
 
 import java.util.ArrayList;
 
@@ -22,7 +23,7 @@ import java.util.ArrayList;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"ConstantConditions", "Duplicates"})
+@SuppressWarnings({"ConstantConditions", "Duplicates", "OptionalGetWithoutIsPresent"})
 public class CalendarCreator {
 	private static CalendarCreator instance;
 
@@ -42,7 +43,7 @@ public class CalendarCreator {
 		return instance;
 	}
 
-	//Functionals
+	//Functional
 
 	/**
 	 * Initiates the CalendarCreator for the guild involved in the event.
@@ -51,13 +52,13 @@ public class CalendarCreator {
 	 * @param calendarName The name of the calendar to create.
 	 * @return The PreCalendar object created.
 	 */
-	public PreCalendar init(MessageReceivedEvent e, String calendarName, GuildSettings settings, boolean handleCreatorMessage) {
+	public PreCalendar init(MessageCreateEvent e, String calendarName, GuildSettings settings, boolean handleCreatorMessage) {
 		if (!hasPreCalendar(settings.getGuildID())) {
 			PreCalendar calendar = new PreCalendar(settings.getGuildID(), calendarName);
 
 			if (handleCreatorMessage) {
 				if (PermissionChecker.botHasMessageManagePerms(e)) {
-					IMessage msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Create.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), e);
+					Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Create.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), e);
 					calendar.setCreatorMessage(msg);
 				} else {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
@@ -70,7 +71,7 @@ public class CalendarCreator {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	public PreCalendar edit(MessageReceivedEvent event, GuildSettings settings, boolean handleCreatorMessage) {
+	public PreCalendar edit(MessageCreateEvent event, GuildSettings settings, boolean handleCreatorMessage) {
 		if (!hasPreCalendar(settings.getGuildID())) {
 			//TODO: Support multiple calendars
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
@@ -86,7 +87,7 @@ public class CalendarCreator {
 
 				if (handleCreatorMessage) {
 					if (PermissionChecker.botHasMessageManagePerms(event)) {
-						IMessage msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), event);
+						Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), event);
@@ -96,7 +97,7 @@ public class CalendarCreator {
 				calendars.add(preCalendar);
 				return preCalendar;
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getAuthor(), "Failed to init calendar editor", e, this.getClass());
+				Logger.getLogger().exception(event.getMember().get(), "Failed to init calendar editor", e, this.getClass());
 				return null;
 			}
 		} else {
@@ -104,7 +105,7 @@ public class CalendarCreator {
 		}
 	}
 
-	public boolean terminate(long guildId) {
+	public boolean terminate(Snowflake guildId) {
 		if (hasPreCalendar(guildId)) {
 			calendars.remove(getPreCalendar(guildId));
 			return true;
@@ -118,7 +119,7 @@ public class CalendarCreator {
 	 * @param e The event received upon confirmation.
 	 * @return A CalendarCreatorResponse Object with detailed info about the confirmation.
 	 */
-	public CalendarCreatorResponse confirmCalendar(MessageReceivedEvent e, GuildSettings settings) {
+	public CalendarCreatorResponse confirmCalendar(MessageCreateEvent e, GuildSettings settings) {
 		if (hasPreCalendar(settings.getGuildID())) {
 			PreCalendar preCalendar = getPreCalendar(settings.getGuildID());
 			if (preCalendar.hasRequiredValues()) {
@@ -140,13 +141,16 @@ public class CalendarCreator {
 						calendarData.setCalendarId(confirmed.getId());
 						calendarData.setCalendarAddress(confirmed.getId());
 						DatabaseManager.getManager().updateCalendar(calendarData);
-						terminate(settings.getGuildID());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
 						response.setEdited(false);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getAuthor(), "Failed to confirm calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, this.getClass());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(false);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
@@ -168,13 +172,16 @@ public class CalendarCreator {
 						scope.setType("default");
 						rule.setScope(scope).setRole("reader");
 						service.acl().insert(confirmed.getId(), rule).execute();
-						terminate(settings.getGuildID());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
 						response.setEdited(true);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getAuthor(), "Failed to update calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, this.getClass());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(true);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
@@ -194,9 +201,9 @@ public class CalendarCreator {
 	 * @param guildId The ID of the guild whose PreCalendar is to be returned.
 	 * @return The PreCalendar belonging to the guild.
 	 */
-	public PreCalendar getPreCalendar(long guildId) {
+	public PreCalendar getPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId() == guildId) {
+			if (c.getGuildId().equals(guildId)) {
 				c.setLastEdit(System.currentTimeMillis());
 				return c;
 			}
@@ -204,7 +211,7 @@ public class CalendarCreator {
 		return null;
 	}
 
-	public IMessage getCreatorMessage(long guildId) {
+	public Message getCreatorMessage(Snowflake guildId) {
 		if (hasPreCalendar(guildId))
 			return getPreCalendar(guildId).getCreatorMessage();
 		return null;
@@ -222,21 +229,21 @@ public class CalendarCreator {
 	 * @param guildId The ID of the guild to check for.
 	 * @return <code>true</code> if a PreCalendar exists, else <code>false</code>.
 	 */
-	public Boolean hasPreCalendar(long guildId) {
+	public Boolean hasPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId() == guildId)
+			if (c.getGuildId().equals(guildId))
 				return true;
 		}
 		return false;
 	}
 
-	public boolean hasCreatorMessage(long guildId) {
+	public boolean hasCreatorMessage(Snowflake guildId) {
 		return hasPreCalendar(guildId) && getPreCalendar(guildId).getCreatorMessage() != null;
 	}
 
 	//Setters
-	public void setCreatorMessage(IMessage msg) {
-		if (msg != null && hasPreCalendar(msg.getGuild().getLongID()))
-			getPreCalendar(msg.getGuild().getLongID()).setCreatorMessage(msg);
+	public void setCreatorMessage(Message msg) {
+		if (msg != null && hasPreCalendar(msg.getGuild().block().getId()))
+			getPreCalendar(msg.getGuild().block().getId()).setCreatorMessage(msg);
 	}
 }
