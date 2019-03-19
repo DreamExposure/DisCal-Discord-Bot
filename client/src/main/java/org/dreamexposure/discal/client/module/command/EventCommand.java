@@ -424,18 +424,18 @@ public class EventCommand implements ICommand {
 					EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event, settings);
 					if (response.isSuccessful()) {
 						if (!response.isEdited()) {
-							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
+							if (response.getCreatorMessage() != null) {
 								MessageManager.deleteMessage(event);
-								MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Create", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event));
+								MessageManager.deleteMessage(response.getCreatorMessage());
+								MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Create", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
 							} else {
 								MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Confirm.Create", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
 							}
 						} else {
-							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
+							if (response.getCreatorMessage() != null) {
 								MessageManager.deleteMessage(event);
-								MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Edit", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event));
+								MessageManager.deleteMessage(response.getCreatorMessage());
+								MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Edit", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
 							} else {
 								MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Confirm.Edit", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
 							}

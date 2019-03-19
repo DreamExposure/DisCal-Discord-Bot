@@ -19,7 +19,7 @@ import java.util.Arrays;
 class CommandListener {
 
 	/**
-	 * Checks for command validity and calls the command executor if valid.
+	 * Checks for command validity and ca	lls the command executor if valid.
 	 *
 	 * @param event The event received to check for a command.
 	 */

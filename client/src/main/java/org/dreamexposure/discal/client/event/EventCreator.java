@@ -235,14 +235,18 @@ public class EventCreator {
 							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());
 							DatabaseManager.getManager().updateEventData(preEvent.getEventData());
 						}
-						terminate(settings.getGuildID());
 						EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
+						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(false);
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
+						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(false);
+
 						return response;
 					}
 				} else {
@@ -254,14 +258,17 @@ public class EventCreator {
 							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());
 							DatabaseManager.getManager().updateEventData(preEvent.getEventData());
 						}
-						terminate(settings.getGuildID());
 
 						EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
+						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(true);
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
+						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(true);
 						return response;
 					}
@@ -281,7 +288,7 @@ public class EventCreator {
 	 */
 	public PreEvent getPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
-			if (e.getGuildId().asLong() == guildId.asLong()) {
+			if (e.getGuildId().equals(guildId)) {
 				e.setLastEdit(System.currentTimeMillis());
 				return e;
 			}
@@ -309,7 +316,7 @@ public class EventCreator {
 	 */
 	public boolean hasPreEvent(Snowflake guildId) {
 		for (PreEvent e: events) {
-			if (e.getGuildId().asLong() == guildId.asLong())
+			if (e.getGuildId().equals(guildId))
 				return true;
 		}
 		return false;

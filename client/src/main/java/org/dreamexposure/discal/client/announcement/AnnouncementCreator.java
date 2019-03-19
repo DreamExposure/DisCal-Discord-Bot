@@ -108,21 +108,19 @@ public class AnnouncementCreator {
 		return getAnnouncement(settings.getGuildID());
 	}
 
-	public boolean terminate(Snowflake guildId) {
-		if (hasAnnouncement(guildId)) {
+	public void terminate(Snowflake guildId) {
+		if (hasAnnouncement(guildId))
 			announcements.remove(getAnnouncement(guildId));
-			return true;
-		}
-		return false;
 	}
 
 	public AnnouncementCreatorResponse confirmAnnouncement(Snowflake guildId) {
 		if (hasAnnouncement(guildId)) {
 			Announcement a = getAnnouncement(guildId);
 			if (a.hasRequiredValues()) {
-				DatabaseManager.getManager().updateAnnouncement(a);
-				terminate(guildId);
-				return new AnnouncementCreatorResponse(true, a);
+				if (DatabaseManager.getManager().updateAnnouncement(a)) {
+					terminate(guildId);
+					return new AnnouncementCreatorResponse(true, a);
+				}
 			}
 		}
 		return new AnnouncementCreatorResponse(false);
@@ -138,7 +136,7 @@ public class AnnouncementCreator {
 	 */
 	public Announcement getAnnouncement(Snowflake guildId) {
 		for (Announcement a: announcements) {
-			if (a.getGuildId().asLong() == guildId.asLong()) {
+			if (a.getGuildId().equals(guildId)) {
 				a.setLastEdit(System.currentTimeMillis());
 				return a;
 			}
@@ -172,7 +170,7 @@ public class AnnouncementCreator {
 	 */
 	public boolean hasAnnouncement(Snowflake guildId) {
 		for (Announcement a: announcements) {
-			if (a.getGuildId().asLong() == guildId.asLong())
+			if (a.getGuildId().equals(guildId))
 				return true;
 		}
 		return false;

@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.announcement;
 
+import discord4j.core.object.entity.Message;
+
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
@@ -9,6 +11,7 @@ public class AnnouncementCreatorResponse {
 	private final boolean successful;
 
 	private Announcement announcement;
+	private Message creatorMessage;
 
 	/**
 	 * Creates an AnnouncementCreatorResponse.
@@ -50,6 +53,10 @@ public class AnnouncementCreatorResponse {
 		return announcement;
 	}
 
+	public Message getCreatorMessage() {
+		return creatorMessage;
+	}
+
 	//Setters
 
 	/**
@@ -59,5 +66,9 @@ public class AnnouncementCreatorResponse {
 	 */
 	public void setAnnouncement(Announcement _announcement) {
 		announcement = _announcement;
+	}
+
+	public void setCreatorMessage(Message creatorMessage) {
+		this.creatorMessage = creatorMessage;
 	}
 }

@@ -141,13 +141,16 @@ public class CalendarCreator {
 						calendarData.setCalendarId(confirmed.getId());
 						calendarData.setCalendarAddress(confirmed.getId());
 						DatabaseManager.getManager().updateCalendar(calendarData);
-						terminate(settings.getGuildID());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
 						response.setEdited(false);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, this.getClass());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(false);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
@@ -169,13 +172,16 @@ public class CalendarCreator {
 						scope.setType("default");
 						rule.setScope(scope).setRole("reader");
 						service.acl().insert(confirmed.getId(), rule).execute();
-						terminate(settings.getGuildID());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
 						response.setEdited(true);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
+
+						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, this.getClass());
+
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(true);
 						response.setCreatorMessage(preCalendar.getCreatorMessage());
@@ -197,7 +203,7 @@ public class CalendarCreator {
 	 */
 	public PreCalendar getPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId().asLong() == guildId.asLong()) {
+			if (c.getGuildId().equals(guildId)) {
 				c.setLastEdit(System.currentTimeMillis());
 				return c;
 			}
@@ -225,7 +231,7 @@ public class CalendarCreator {
 	 */
 	public Boolean hasPreCalendar(Snowflake guildId) {
 		for (PreCalendar c: calendars) {
-			if (c.getGuildId().asLong() == guildId.asLong())
+			if (c.getGuildId().equals(guildId))
 				return true;
 		}
 		return false;

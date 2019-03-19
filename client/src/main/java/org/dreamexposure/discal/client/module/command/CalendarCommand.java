@@ -232,16 +232,16 @@ public class CalendarCommand implements ICommand {
 				if (response.isEdited()) {
 					if (response.getCreatorMessage() != null) {
 						MessageManager.deleteMessage(event);
-						MessageManager.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-						CalendarCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event));
+						MessageManager.deleteMessage(response.getCreatorMessage());
+						MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event);
 					} else {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.Confirm.Edit.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event);
 					}
 				} else {
-					if (response.getCalendar() != null) {
+					if (response.getCreatorMessage() != null) {
 						MessageManager.deleteMessage(event);
-						MessageManager.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-						CalendarCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event));
+						MessageManager.deleteMessage(response.getCreatorMessage());
+						MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event);
 					} else {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.Confirm.Create.Success", settings), CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings), event);
 					}
