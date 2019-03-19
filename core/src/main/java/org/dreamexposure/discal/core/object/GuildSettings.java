@@ -213,7 +213,7 @@ public class GuildSettings {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("GuildId", guildID);
+		data.put("GuildId", guildID.asString());
 		data.put("ExternalCalendar", externalCalendar);
 		data.put("PrivateKey", privateKey);
 		data.put("AccessToken", encryptedAccessToken);

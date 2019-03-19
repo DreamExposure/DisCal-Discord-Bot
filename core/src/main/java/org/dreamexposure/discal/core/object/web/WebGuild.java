@@ -17,7 +17,7 @@ import java.util.List;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings("ConstantConditions")
 public class WebGuild {
 	private String id;
 	private String name;
@@ -137,8 +137,9 @@ public class WebGuild {
 	public WebGuild fromGuild(Guild g) {
 		id = g.getId().asString();
 		name = g.getName();
-		iconUrl = g.getIconUrl(Image.Format.PNG).get();
-		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("Need this otherwise Java will throw an error. It's an optional");
+		if (g.getIconUrl(Image.Format.PNG).isPresent())
+			iconUrl = g.getIconUrl(Image.Format.PNG).get();
+		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("DisCal");
 
 		settings = DatabaseManager.getManager().getSettings(g.getId());
 
@@ -168,7 +169,8 @@ public class WebGuild {
 
 		data.put("Id", id);
 		data.put("Name", name);
-		data.put("IconUrl", iconUrl);
+		if (iconUrl != null)
+			data.put("IconUrl", iconUrl);
 		data.put("Settings", settings.toJson());
 		if (botNick != null && !botNick.equals(""))
 			data.put("BotNick", botNick);
@@ -201,7 +203,8 @@ public class WebGuild {
 	public WebGuild fromJson(JSONObject data) {
 		id = data.getString("Id");
 		name = data.getString("Name");
-		iconUrl = data.getString("IconUrl");
+		if (data.has("IconUrl"))
+			iconUrl = data.getString("IconUrl");
 		settings = new GuildSettings(Snowflake.of(id)).fromJson(data.getJSONObject("Settings"));
 		if (data.has("BotNick"))
 			botNick = data.getString("BotNick");

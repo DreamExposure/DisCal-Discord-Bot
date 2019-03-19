@@ -395,7 +395,7 @@ public class Announcement {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("GuildId", guildId);
+		data.put("GuildId", guildId.asLong());
 		data.put("Id", announcementId.toString());
 
 		JSONArray roles = new JSONArray();
