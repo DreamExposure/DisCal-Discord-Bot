@@ -29,7 +29,7 @@ import java.util.List;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings({"ConstantConditions", "IfCanBeSwitch"})
+@SuppressWarnings("ConstantConditions")
 public class CrossTalkEventListener {
 	@Subscribe
 	public void handle(CrossTalkReceiveEvent event) {
@@ -90,11 +90,12 @@ public class CrossTalkEventListener {
 				} else if (event.getData().getString("Realm").equals(DisCalRealm.WEBSITE_DASHBOARD_DEFAULTS.name())) {
 					//Get guilds the user is in...
 					String memId = event.getData().getString("Member-Id");
+					JSONArray servers = event.getData().getJSONArray("Guilds");
 
 					JSONObject newData = new JSONObject();
 
 					JSONArray guildsArray = new JSONArray();
-					List<WebGuild> guilds = GuildUtils.getGuilds(memId, DisCalClient.getClient());
+					List<WebGuild> guilds = GuildUtils.getGuilds(servers, memId, DisCalClient.getClient());
 
 					for (WebGuild wg : guilds) {
 						guildsArray.put(wg.toJson());

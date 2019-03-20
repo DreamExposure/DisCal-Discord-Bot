@@ -5,6 +5,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.object.web.WebGuild;
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,20 +21,20 @@ public class GuildUtils {
 		return true;
 	}
 
-	public static List<WebGuild> getGuilds(String userId, DiscordClient client) {
+	public static List<WebGuild> getGuilds(JSONArray ids, String userId, DiscordClient client) {
 		List<WebGuild> guilds = new ArrayList<>();
 
-		for (Guild g : client.getGuilds().toIterable()) {
-			for (Member m : g.getMembers().toIterable()) {
-				if (m.getId().asString().equals(userId)) {
-					WebGuild wg = new WebGuild().fromGuild(g);
-					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
-					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
-					guilds.add(wg);
-				}
+		for (int i = 0; i < ids.length(); i++) {
+			Guild g = client.getGuildById(Snowflake.of(ids.getLong(i))).block();
+			if (g != null) {
+				Member m = g.getMemberById(Snowflake.of(userId)).block();
+
+				WebGuild wg = new WebGuild().fromGuild(g);
+				wg.setManageServer(PermissionChecker.hasManageServerRole(m));
+				wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
+				guilds.add(wg);
 			}
 		}
-
 		return guilds;
 	}
 }

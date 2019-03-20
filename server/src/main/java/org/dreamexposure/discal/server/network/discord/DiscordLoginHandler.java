@@ -1,8 +1,6 @@
 package org.dreamexposure.discal.server.network.discord;
 
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import org.dreamexposure.discal.core.enums.GoodTimezone;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -33,7 +31,7 @@ import java.util.*;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "ConstantConditions"})
 @RestController
 public class DiscordLoginHandler {
 
@@ -64,15 +62,28 @@ public class DiscordLoginHandler {
 
 			if (info.has("access_token")) {
 				//GET request for user info...
-				okhttp3.Request userDataRequest = new okhttp3.Request.Builder()
+				Request userDataRequest = new Request.Builder()
 						.url("https://discordapp.com/api/v6/users/@me")
 						.header("Authorization", "Bearer " + info.getString("access_token"))
 						.build();
 
-				okhttp3.Response userDataResponse = client.newCall(userDataRequest).execute();
+				Response userDataResponse = client.newCall(userDataRequest).execute();
 
-				@SuppressWarnings("ConstantConditions")
+				Request userGuildsRequest = new Request.Builder()
+					.url("https://discordapp.com/api/v6/users/@me/guilds")
+					.header("Authorization", "Bearer " + info.getString("access_token"))
+					.build();
+
+				Response userGuildsResponse = client.newCall(userGuildsRequest).execute();
+
 				JSONObject userInfo = new JSONObject(userDataResponse.body().string());
+				JSONArray jGuilds = new JSONArray(userGuildsResponse.body().string());
+
+				//Get list of guild IDs.
+				JSONArray servers = new JSONArray();
+				for (int i = 0; i < jGuilds.length(); i++) {
+					servers.put(jGuilds.getJSONObject(i).getLong("id"));
+				}
 
 				//Saving session info and access info to memory until moved into the database...
 				Map m = new HashMap();
@@ -93,6 +104,7 @@ public class DiscordLoginHandler {
 					requestData.put("Reason", CrossTalkReason.GET.name());
 					requestData.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_DEFAULTS);
 					requestData.put("Member-Id", m.get("id") + "");
+					requestData.put("Guilds", servers);
 
 					JSONObject responseData = ServerSocketHandler.sendAndReceive(requestData, csd.getClientHostname(), csd.getClientPort());
 
