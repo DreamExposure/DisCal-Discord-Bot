@@ -3,6 +3,8 @@ package org.dreamexposure.discal.client;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.store.redis.RedisStoreService;
+import io.lettuce.core.RedisClient;
 import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -84,6 +86,13 @@ public class DisCalClient {
 		//Handle shard count and index.
 		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
 		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
+
+		//Redis info + store service
+		String redisInfo = String.format("redis://%s@%s:%s/0", BotSettings.REDIS_PASSWORD.get(), BotSettings.REDIS_HOSTNAME.get(), BotSettings.REDIS_PORT.get());
+
+		clientBuilder.setStoreService(new RedisStoreService(RedisClient.create(redisInfo)));
+
+
 		return clientBuilder.build();
 	}
 

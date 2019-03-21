@@ -34,6 +34,12 @@
 			<version>3.0.0</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.discord4j</groupId>
+			<artifactId>stores-redis</artifactId>
+			<version>3.0.0</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

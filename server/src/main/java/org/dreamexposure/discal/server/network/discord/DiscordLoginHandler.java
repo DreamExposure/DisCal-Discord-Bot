@@ -109,7 +109,7 @@ public class DiscordLoginHandler {
 					JSONObject responseData = ServerSocketHandler.sendAndReceive(requestData, csd.getClientHostname(), csd.getClientPort());
 
 					JSONArray guildsData = responseData.getJSONArray("Guilds");
-					for (int i = 0; i < responseData.getInt("Guild-Count"); i++) {
+					for (int i = 0; i < guildsData.length(); i++) {
 						guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));
 					}
 				}
