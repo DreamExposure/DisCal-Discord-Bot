@@ -603,6 +603,8 @@ public class DatabaseManager {
 		if (guildSettingsCache.containsKey(guildId))
 			return guildSettingsCache.get(guildId);
 
+		boolean shouldStore = false;
+
 		GuildSettings settings = new GuildSettings(guildId);
 		try {
 			if (databaseInfo.getMySQL().checkConnection()) {
@@ -617,6 +619,7 @@ public class DatabaseManager {
 				boolean hasStuff = res.next();
 
 				if (hasStuff && res.getString("GUILD_ID") != null) {
+					shouldStore = true;
 					settings.setUseExternalCalendar(res.getBoolean("EXTERNAL_CALENDAR"));
 					settings.setPrivateKey(res.getString("PRIVATE_KEY"));
 					settings.setEncryptedAccessToken(res.getString("ACCESS_TOKEN"));
@@ -643,8 +646,10 @@ public class DatabaseManager {
 			Logger.getLogger().exception(null, "Failed to get Guild Settings.", e, this.getClass());
 		}
 
-		guildSettingsCache.remove(guildId);
-		guildSettingsCache.put(guildId, settings);
+		if (shouldStore) {
+			guildSettingsCache.remove(guildId); //just incase its still there...
+			guildSettingsCache.put(guildId, settings);
+		}
 
 		return settings;
 	}
