@@ -85,12 +85,17 @@ public class DisCalClient {
 		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
 		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
 
+		/*
 		//Redis info + store service
-		//String redisInfo = String.format("redis://%s@%s:%s", BotSettings.REDIS_PASSWORD.get(), BotSettings.REDIS_HOSTNAME.get(), BotSettings.REDIS_PORT.get());
-		//RedisClient rc = RedisClient.create(redisInfo);
-		//RedisStoreService rss = new RedisStoreService(rc);
-		//clientBuilder.setStoreService(rss);
+		RedisURI uri = RedisURI.Builder
+			.redis(BotSettings.REDIS_HOSTNAME.get(), 6379)
+			.withPassword(BotSettings.REDIS_PASSWORD.get())
+			.build();
 
+		RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
+		clientBuilder.setStoreService(rss);
+
+		*/
 		return clientBuilder.build();
 	}
 

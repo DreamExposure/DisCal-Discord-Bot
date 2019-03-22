@@ -82,6 +82,7 @@
 			<groupId>com.discord4j</groupId>
 			<artifactId>discord4j-core</artifactId>
 			<version>3.0.0</version>
+			<!--Because there's some weird ass maven nonsense going on-->
 			<exclusions>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
@@ -127,6 +128,7 @@
 			<version>1.22.0</version>
 			<optional>false</optional>
 			<exclusions>
+				<!--Because there's some weird ass maven nonsense going on-->
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
 					<artifactId>jackson-core</artifactId>
@@ -215,6 +217,15 @@
 			<artifactId>jackson-datatype-jdk8</artifactId>
 			<version>2.9.8</version>
 		</dependency>
+
+		<!--Project Reactor-->
+		<!--
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>3.2.6.RELEASE</version>
+		</dependency>
+		-->
 	</dependencies>
 
 	<build>
