@@ -13,6 +13,7 @@ import org.dreamexposure.novautils.event.EventManager;
 import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import java.io.File;
 import java.io.FileReader;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 @SpringBootApplication
+@EnableRedisHttpSession
 public class DisCalServer {
 	private static NetworkInfo networkInfo = new NetworkInfo();
 

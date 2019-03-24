@@ -6,6 +6,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.json.JSONArray;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ public class GuildUtils {
 		List<WebGuild> guilds = new ArrayList<>();
 
 		for (int i = 0; i < ids.length(); i++) {
-			Guild g = client.getGuildById(Snowflake.of(ids.getLong(i))).block();
+			Guild g = client.getGuildById(Snowflake.of(ids.getLong(i))).onErrorResume(e -> Mono.empty()).block();
 			if (g != null) {
 				Member m = g.getMemberById(Snowflake.of(userId)).block();
 

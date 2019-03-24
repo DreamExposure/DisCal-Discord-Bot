@@ -16,7 +16,27 @@
 	<version>3.0.0</version>
 
 	<dependencies>
-
+		<!--Discord4J API-->
+		<dependency>
+			<groupId>com.discord4j</groupId>
+			<artifactId>discord4j-core</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<!--Discord4J Redis Stores-->
+		<!--
+		<dependency>
+			<groupId>com.discord4j</groupId>
+			<artifactId>stores-redis</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		-->
+		<!-- Allows you to log events from Discord4J -->
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.3.0-alpha4</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

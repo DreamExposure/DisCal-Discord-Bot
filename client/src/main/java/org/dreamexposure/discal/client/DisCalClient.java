@@ -88,14 +88,14 @@ public class DisCalClient {
 		/*
 		//Redis info + store service
 		RedisURI uri = RedisURI.Builder
-			.redis(BotSettings.REDIS_HOSTNAME.get(), 6379)
+			.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()))
 			.withPassword(BotSettings.REDIS_PASSWORD.get())
 			.build();
 
 		RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
 		clientBuilder.setStoreService(rss);
+		 */
 
-		*/
 		return clientBuilder.build();
 	}
 

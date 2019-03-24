@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.crypto;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.dreamexposure.discal.core.object.GuildSettings;
 
 import javax.crypto.Cipher;

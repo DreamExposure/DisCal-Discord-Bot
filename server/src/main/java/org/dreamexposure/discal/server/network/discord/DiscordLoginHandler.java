@@ -149,6 +149,7 @@ public class DiscordLoginHandler {
 	public static String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
 		try {
 			DiscordAccountHandler.getHandler().removeAccount(request);
+			request.getSession().invalidate();
 
 			res.sendRedirect("/");
 			return "redirect:/";
