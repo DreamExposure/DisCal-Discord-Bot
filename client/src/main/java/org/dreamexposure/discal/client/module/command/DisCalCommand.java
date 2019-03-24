@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.client.module.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
+import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -130,7 +132,13 @@ public class DisCalCommand implements ICommand {
 
 	private void moduleDisCalInfo(MessageCreateEvent event, GuildSettings settings) {
 		Consumer<EmbedCreateSpec> embed = spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = event.getGuild().block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
 			spec.addField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
@@ -227,7 +235,13 @@ public class DisCalCommand implements ICommand {
 
 	private void moduleSettings(MessageCreateEvent event, GuildSettings settings) {
 		Consumer<EmbedCreateSpec> embed = spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = event.getGuild().block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.DisCal.Settings.Title", settings));
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.ExternalCal", settings), String.valueOf(settings.useExternalCalendar()), true);
 			if (RoleUtils.roleExists(settings.getControlRole(), event)) {
@@ -236,7 +250,7 @@ public class DisCalCommand implements ICommand {
 				spec.addField(MessageManager.getMessage("Embed.Discal.Settings.Role", settings), "everyone", true);
 			}
 			if (ChannelUtils.channelExists(settings.getDiscalChannel(), event)) {
-				spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), event.getGuild().block()), false);
+				spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), guild), false);
 			} else {
 				spec.addField(MessageManager.getMessage("Embed.DisCal.Settings.Channel", settings), "All Channels", true);
 			}

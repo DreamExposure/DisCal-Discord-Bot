@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
@@ -37,7 +38,13 @@ public class AnnouncementMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded())
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Announcement.Info.Title", settings));
 			try {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
@@ -64,7 +71,7 @@ public class AnnouncementMessageFormatter {
 			}
 			spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
 			spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
-			spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), DisCalClient.getClient().getGuildById(a.getGuildId()).block()), true);
+			spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Channel", settings), ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), guild), true);
 			spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
 			if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 				spec.setColor(a.getEventColor().asColor());
@@ -84,7 +91,13 @@ public class AnnouncementMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded())
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Announcement.Condensed.Title", settings));
 			spec.addField(MessageManager.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
 			spec.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Time", settings), condensedTime(a), false);
@@ -143,9 +156,12 @@ public class AnnouncementMessageFormatter {
 		Guild guild = DisCalClient.getClient().getGuildById(announcement.getGuildId()).block();
 
 		Consumer<EmbedCreateSpec> embed = spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-
 			if (guild != null) {
+				if (settings.isBranded())
+					spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+				else
+					spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 				spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 				EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
@@ -246,8 +262,14 @@ public class AnnouncementMessageFormatter {
 	}
 
 	public static void sendAnnouncementDM(Announcement announcement, Event event, User user, CalendarData data, GuildSettings settings) {
+		Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
 		Consumer<EmbedCreateSpec> embed = spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
 			EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
@@ -318,8 +340,6 @@ public class AnnouncementMessageFormatter {
 			}
 
 		};
-
-		Guild guild = DisCalClient.getClient().getGuildById(announcement.getGuildId()).block();
 
 		if (guild != null) {
 			String msg = MessageManager.getMessage("Embed.Announcement.Announce.Dm.Message", "%guild%", guild.getName(), settings);

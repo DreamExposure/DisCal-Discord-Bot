@@ -2,6 +2,8 @@ package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -95,7 +97,13 @@ public class TimeCommand implements ICommand {
 
 				//Build embed and send.
 				Consumer<EmbedCreateSpec> embed = spec -> {
-					spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+					Guild guild = event.getGuild().block();
+
+					if (settings.isBranded() && guild != null)
+						spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+					else
+						spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 					spec.setTitle(MessageManager.getMessage("Embed.Time.Title", settings));
 					spec.addField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
 					spec.addField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);

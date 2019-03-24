@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.module.command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -234,11 +235,15 @@ public class RsvpCommand implements ICommand {
 
 	private Consumer<EmbedCreateSpec> getRsvpEmbed(RsvpData data, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild g = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && g != null)
+				spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
 			spec.addField("Event ID", data.getEventId(), false);
-
-			Guild g = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
 
 			StringBuilder onTime = new StringBuilder();
 			for (Member u : UserUtils.getUsers(data.getGoingOnTime(), g)) {

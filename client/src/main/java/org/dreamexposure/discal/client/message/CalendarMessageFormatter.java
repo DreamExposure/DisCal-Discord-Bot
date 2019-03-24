@@ -1,8 +1,11 @@
 package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.model.Calendar;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
+import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -22,7 +25,13 @@ public class CalendarMessageFormatter {
 
 	public static Consumer<EmbedCreateSpec> getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
 			spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
 			try {
@@ -45,7 +54,13 @@ public class CalendarMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
 			if (calendar.getSummary() != null)
 				spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);

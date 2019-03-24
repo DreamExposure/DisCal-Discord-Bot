@@ -3,7 +3,10 @@ package org.dreamexposure.discal.client.message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
+import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -41,7 +44,13 @@ public class EventMessageFormatter {
 	public static Consumer<EmbedCreateSpec> getEventEmbed(Event event, GuildSettings settings) {
 		return spec -> {
 			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Event.Info.Title", settings));
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 				spec.setImage(ed.getImageLink());
@@ -107,7 +116,13 @@ public class EventMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getCondensedEventEmbed(Event event, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
 			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
@@ -150,7 +165,13 @@ public class EventMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getPreEventEmbed(PreEvent event, GuildSettings settings) {
 		return spec -> {
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			try {
 				if (event.getEventData() != null && event.getEventData().getImageLink() != null && ImageUtils.validate(event.getEventData().getImageLink(), settings.isPatronGuild())) {
 					spec.setImage(event.getEventData().getImageLink());
@@ -219,8 +240,13 @@ public class EventMessageFormatter {
 	public static Consumer<EmbedCreateSpec> getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
 		return spec -> {
 			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), ecr.getEvent().getId());
+			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
 
-			spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+			if (settings.isBranded() && guild != null)
+				spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+			else
+				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
 			spec.setTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 				spec.setImage(ed.getImageLink());
