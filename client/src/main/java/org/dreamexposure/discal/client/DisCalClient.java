@@ -3,6 +3,9 @@ package org.dreamexposure.discal.client;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.store.redis.RedisStoreService;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
 import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -81,20 +84,21 @@ public class DisCalClient {
 	 */
 	private static DiscordClient createClient() {
 		DiscordClientBuilder clientBuilder = new DiscordClientBuilder(BotSettings.TOKEN.get());
-		//Handle shard count and index.
+		//Handle shard count and index for multiple java instances
 		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
 		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
 
-		/*
-		//Redis info + store service
-		RedisURI uri = RedisURI.Builder
-			.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()))
-			.withPassword(BotSettings.REDIS_PASSWORD.get())
-			.build();
 
-		RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
-		clientBuilder.setStoreService(rss);
-		 */
+		//Redis info + store service for caching
+		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
+			RedisURI uri = RedisURI.Builder
+				.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()))
+				.withPassword(BotSettings.REDIS_PASSWORD.get())
+				.build();
+
+			RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
+			clientBuilder.setStoreService(rss);
+		}
 
 		return clientBuilder.build();
 	}

@@ -2,10 +2,12 @@
 <configuration scan="true">
 	<logger name="io.netty" level="INFO"/>
 	<logger name="reactor" level="INFO"/>
+	<logger name="proxy" level="info"/>
 	<logger name="reactor.retry" level="DEBUG"/>
 	<logger name="discord4j.core" level="DEBUG"/>
 	<logger name="discord4j.gateway" level="INFO"/>
 	<logger name="discord4j.gateway.client" level="DEBUG"/>
+	<logger name="io.lettuce" level="INFO"/>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -13,7 +15,7 @@
 		</encoder>
 	</appender>
 
-	<root level="INFO">
+	<root level="DEBUG">
 		<appender-ref ref="CONSOLE"/>
 	</root>
 </configuration>

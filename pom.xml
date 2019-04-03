@@ -18,6 +18,9 @@
 
 		<thymeleaf.version>3.0.9.RELEASE</thymeleaf.version>
 		<thymeleaf-layout-dialect.version>2.2.1</thymeleaf-layout-dialect.version>
+
+		<discord4j.version>3.0.1</discord4j.version>
+		<discord4j.stores.version>3.0.1</discord4j.stores.version>
 	</properties>
 
 	<groupId>org.dreamexposure</groupId>
