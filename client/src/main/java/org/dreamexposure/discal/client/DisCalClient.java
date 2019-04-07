@@ -3,6 +3,10 @@ package org.dreamexposure.discal.client;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.data.stored.GuildBean;
+import discord4j.core.object.data.stored.MessageBean;
+import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -97,7 +101,13 @@ public class DisCalClient {
 				.build();
 
 			RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
-			clientBuilder.setStoreService(rss);
+
+			MappingStoreService mss = MappingStoreService.create()
+				.setMapping(GuildBean.class, rss)
+				.setMapping(MessageBean.class, rss)
+				.setFallback(new JdkStoreService());
+
+			clientBuilder.setStoreService(mss);
 		}
 
 		return clientBuilder.build();
