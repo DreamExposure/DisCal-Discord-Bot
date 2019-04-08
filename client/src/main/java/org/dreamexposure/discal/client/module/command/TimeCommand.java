@@ -115,7 +115,7 @@ public class TimeCommand implements ICommand {
 				MessageManager.sendMessageAsync(embed, event);
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, this.getClass());
+			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, true, this.getClass());
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 	}

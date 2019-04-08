@@ -80,7 +80,7 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal get announcement error", e, AnnouncementEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -141,7 +141,7 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal create announcement error", e, AnnouncementEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal create announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -211,7 +211,7 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal update announcement error", e, AnnouncementEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal update announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -257,7 +257,7 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal delete announcement error", e, AnnouncementEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal delete announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -341,7 +341,7 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal list announcements error", e, AnnouncementEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal list announcements error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);

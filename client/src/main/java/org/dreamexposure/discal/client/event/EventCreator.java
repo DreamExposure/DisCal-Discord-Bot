@@ -242,7 +242,7 @@ public class EventCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, true, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(false);
@@ -266,7 +266,7 @@ public class EventCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, true, this.getClass());
 						EventCreatorResponse response = new EventCreatorResponse(false);
 						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
 						response.setEdited(true);

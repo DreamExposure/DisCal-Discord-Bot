@@ -74,13 +74,13 @@ public class Authorization {
 				return autoRefreshResponse.getString("access_token");
 			} else {
 				//Failed to get OK. Send debug info.
-				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.code() + " | " + httpResponse.message() + " | " + httpResponse.body().string(), this.getClass());
+				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.code() + " | " + httpResponse.message() + " | " + httpResponse.body().string(), true, this.getClass());
 				return null;
 			}
 
 		} catch (Exception e) {
 			//Error occurred, lets just log it and return null.
-			Logger.getLogger().exception(null, "Failed to request new access token.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to request new access token.", e, true, this.getClass());
 			return null;
 		}
 	}

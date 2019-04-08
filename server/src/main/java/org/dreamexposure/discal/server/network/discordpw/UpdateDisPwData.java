@@ -54,11 +54,11 @@ public class UpdateDisPwData {
 			Response response = client.newCall(request).execute();
 
 			if (response.code() == 200)
-				Logger.getLogger().debug("Successfully updated Discord PW List!");
+				Logger.getLogger().debug("Successfully updated Discord PW List!", true);
 		} catch (Exception e) {
 			//Handle issue.
 			System.out.println("Failed to update Discord PW list metadata!");
-			Logger.getLogger().exception(null, "Failed to update Discord PW list.", e, UpdateDisPwData.class);
+			Logger.getLogger().exception(null, "Failed to update Discord PW list.", e, true, UpdateDisPwData.class);
 			e.printStackTrace();
 		}
 	}

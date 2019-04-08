@@ -57,7 +57,7 @@ public class TimeUtils {
 				Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
 				return inPast(e);
 			} catch (Exception e) {
-				Logger.getLogger().exception(null, "Failed to get calendar auth", e, TimeUtils.class);
+				Logger.getLogger().exception(null, "Failed to get calendar auth", e, true, TimeUtils.class);
 				//Return false and allow RSVP so user is not adversely affected.
 				return false;
 			}

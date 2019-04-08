@@ -118,7 +118,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
 				e.printStackTrace();
 			}
 		} else if (args.length == 1) {
@@ -157,7 +157,7 @@ public class EventListCommand implements ICommand {
 					}
 				} catch (Exception e) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-					Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+					Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
 					e.printStackTrace();
 				}
 			} catch (NumberFormatException e) {
@@ -204,7 +204,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, this.getClass());
+				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
 				e.printStackTrace();
 			}
 		}

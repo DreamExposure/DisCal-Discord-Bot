@@ -106,7 +106,7 @@ public class PreEvent {
 		try {
 			cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
 		} catch (Exception ex) {
-			Logger.getLogger().exception(null, "Failed to get proper date time for event!", ex, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get proper date time for event!", ex, true, this.getClass());
 		}
 
 		if (cal != null) {

@@ -21,7 +21,7 @@ import java.util.TimerTask;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings({"ConstantConditions", "Duplicates"})
+@SuppressWarnings("Duplicates")
 public class KeepAliveHandler {
 	public static void startKeepAlive(final int seconds) {
 		new Timer(true).scheduleAtFixedRate(new TimerTask() {
@@ -36,7 +36,7 @@ public class KeepAliveHandler {
 
 				ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), data);
 
-				Logger.getLogger().debug("Sent keep alive to server.");
+				Logger.getLogger().debug("Sent keep alive to server.", false);
 			}
 		}, seconds * 1000, seconds * 1000);
 	}

@@ -1,5 +1,8 @@
 package org.dreamexposure.discal.core.logger;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import discord4j.core.object.entity.User;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -10,11 +13,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 
 @SuppressWarnings("Duplicates")
 public class Logger {
 	private static Logger instance;
+	private WebhookClient debugClient;
+	private WebhookClient exceptionClient;
+	private WebhookClient statusClient;
+
 	private String exceptionsFile;
 	private String apiFile;
 	private String announcementsFile;
@@ -30,6 +38,13 @@ public class Logger {
 	}
 
 	public void init() {
+		//Create webhook clients.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true")) {
+			debugClient = WebhookClient.withUrl(BotSettings.DEBUG_WEBHOOK.get());
+			exceptionClient = WebhookClient.withUrl(BotSettings.ERROR_WEBHOOK.get());
+			statusClient = WebhookClient.withUrl(BotSettings.STATUS_WEBHOOK.get());
+		}
+
 		//Create files...
 		String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss").format(System.currentTimeMillis());
 
@@ -59,7 +74,7 @@ public class Logger {
 		}
 	}
 
-	public void exception(@Nullable User author, @Nullable String message, Exception e, Class clazz) {
+	public void exception(@Nullable User author, @Nullable String message, Exception e, boolean postWebhook, Class clazz) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -89,9 +104,32 @@ public class Logger {
 		} catch (IOException io) {
 			io.printStackTrace();
 		}
+
+		//Post to webhook if wanted.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
+			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.addField(new WebhookEmbed
+					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+				.addField(new WebhookEmbed
+					.EmbedField(false, "Class", clazz.getName()))
+				.setDescription(error)
+				.setColor(GlobalConst.discalColor.getRGB())
+				.setTimestamp(Instant.now());
+
+			if (author != null) {
+				builder.setAuthor(new WebhookEmbed
+					.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
+			}
+			if (message != null) {
+				builder.addField(new WebhookEmbed.EmbedField(false, "Message", message));
+			}
+
+			exceptionClient.send(builder.build());
+		}
 	}
 
-	public void debug(@Nullable User author, String message, @Nullable String info, Class clazz) {
+	public void debug(@Nullable User author, String message, @Nullable String info, boolean postWebhook, Class clazz) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 		//ALWAYS LOG TO FILE!
 		try {
@@ -112,9 +150,30 @@ public class Logger {
 		} catch (IOException io) {
 			io.printStackTrace();
 		}
+
+		//Post to webhook if wanted.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
+			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.addField(new WebhookEmbed
+					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+				.setDescription(message)
+				.setColor(GlobalConst.discalColor.getRGB())
+				.setTimestamp(Instant.now());
+
+			if (author != null) {
+				builder.setAuthor(new WebhookEmbed
+					.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
+			}
+			if (info != null) {
+				builder.addField(new WebhookEmbed.EmbedField(false, "Info", info));
+			}
+
+			debugClient.send(builder.build());
+		}
 	}
 
-	public void debug(String message) {
+	public void debug(String message, boolean postWebhook) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss").format(Calendar.getInstance().getTime());
 
 		try {
@@ -126,6 +185,19 @@ public class Logger {
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
+		}
+
+		//Post to webhook if wanted.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
+			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.addField(new WebhookEmbed
+					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+				.setDescription(message)
+				.setColor(GlobalConst.discalColor.getRGB())
+				.setTimestamp(Instant.now());
+
+			debugClient.send(builder.build());
 		}
 	}
 
@@ -198,6 +270,26 @@ public class Logger {
 			file.close();
 		} catch (IOException io) {
 			io.printStackTrace();
+		}
+	}
+
+	public void status(String message, @Nullable String info) {
+		//Post to webhook if wanted.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true")) {
+			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.addField(new WebhookEmbed
+					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+				.setDescription(message)
+				.setColor(GlobalConst.discalColor.getRGB())
+				.setTimestamp(Instant.now());
+
+			if (info != null) {
+				builder.addField(new WebhookEmbed
+					.EmbedField(false, "Info", info));
+			}
+
+			statusClient.send(builder.build());
 		}
 	}
 }

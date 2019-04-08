@@ -87,7 +87,7 @@ public class CalendarAuth {
 		// Build flow and trigger user authorization request.
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
 		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		Logger.getLogger().debug("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath());
+		Logger.getLogger().debug("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath(), false);
 
 		//Try to close input stream since I don't think it was ever closed?
 		in.close();

@@ -117,7 +117,7 @@ public class AddCalendarCommand implements ICommand {
 							}
 						} catch (Exception e) {
 							MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-							Logger.getLogger().exception(event.getMember().get(), "Failed to connect external calendar!", e, this.getClass());
+							Logger.getLogger().exception(event.getMember().get(), "Failed to connect external calendar!", e, true, this.getClass());
 						}
 					}
 				} else {

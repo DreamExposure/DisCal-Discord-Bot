@@ -60,7 +60,7 @@ public class DatabaseManager {
 		} catch (Exception e) {
 			System.out.println("Failed to connect to MySQL database! Is it properly configured?");
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "Connecting to MySQL server failed.", e, this.getClass());
+			Logger.getLogger().exception(null, "Connecting to MySQL server failed.", e, true, this.getClass());
 		}
 	}
 
@@ -73,7 +73,7 @@ public class DatabaseManager {
 				databaseInfo.getMySQL().closeConnection();
 				System.out.println("Successfully disconnected from MySQL Database!");
 			} catch (SQLException e) {
-				Logger.getLogger().exception(null, "Disconnecting from MySQL failed.", e, this.getClass());
+				Logger.getLogger().exception(null, "Disconnecting from MySQL failed.", e, true, this.getClass());
 				System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
 			}
 		}
@@ -164,7 +164,7 @@ public class DatabaseManager {
 			System.out.println("Successfully created needed tables in MySQL database!");
 		} catch (SQLException e) {
 			System.out.println("Failed to created database tables! Something must be wrong.");
-			Logger.getLogger().exception(null, "Creating MySQL tables failed", e, this.getClass());
+			Logger.getLogger().exception(null, "Creating MySQL tables failed", e, true, this.getClass());
 			e.printStackTrace();
 		}
 	}
@@ -218,7 +218,7 @@ public class DatabaseManager {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "Failed to update API account", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update API account", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -305,7 +305,7 @@ public class DatabaseManager {
 			}
 		} catch (SQLException e) {
 			System.out.println("Failed to input data into database! Error Code: 00101");
-			Logger.getLogger().exception(null, "Failed to update/insert guild settings.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update/insert guild settings.", e, true, this.getClass());
 			e.printStackTrace();
 		}
 		return false;
@@ -360,7 +360,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to update/insert calendar data.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update/insert calendar data.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -441,7 +441,7 @@ public class DatabaseManager {
 			}
 		} catch (SQLException e) {
 			System.out.print("Failed to input announcement data! Error Code: 00201");
-			Logger.getLogger().exception(null, "Failed to update/insert announcement.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update/insert announcement.", e, true, this.getClass());
 			e.printStackTrace();
 		}
 		return false;
@@ -497,7 +497,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to update/insert event data.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update/insert event data.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -558,7 +558,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to update/insert event data.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to update/insert event data.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -594,7 +594,7 @@ public class DatabaseManager {
 				}
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get API Account.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get API Account.", e, true, this.getClass());
 		}
 		return null;
 	}
@@ -643,7 +643,7 @@ public class DatabaseManager {
 				}
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get Guild Settings.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get Guild Settings.", e, true, this.getClass());
 		}
 
 		if (shouldStore) {
@@ -677,7 +677,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get calendar settings.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get calendar settings.", e, true, this.getClass());
 		}
 		return calData;
 	}
@@ -705,7 +705,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get calendar data", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get calendar data", e, true, this.getClass());
 		}
 		return calData;
 	}
@@ -732,7 +732,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all guild calendars.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all guild calendars.", e, true, this.getClass());
 		}
 		return calendars;
 	}
@@ -757,7 +757,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get calendar count", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get calendar count", e, true, this.getClass());
 		}
 		return amount;
 	}
@@ -791,7 +791,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get event data", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get event data", e, true, this.getClass());
 		}
 		return data;
 	}
@@ -822,7 +822,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get RSVP data for event", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get RSVP data for event", e, true, this.getClass());
 		}
 		return data;
 	}
@@ -866,7 +866,7 @@ public class DatabaseManager {
 				}
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get announcement data.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get announcement data.", e, true, this.getClass());
 			e.printStackTrace();
 		}
 		return null;
@@ -912,7 +912,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all guild announcements.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all guild announcements.", e, true, this.getClass());
 			e.printStackTrace();
 		}
 		return announcements;
@@ -949,7 +949,7 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all announcements.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all announcements.", e, true, this.getClass());
 		}
 
 		return announcements;
@@ -987,7 +987,7 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all announcements by type.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all announcements by type.", e, true, this.getClass());
 		}
 
 		return announcements;
@@ -1026,7 +1026,7 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all enabled announcements.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all enabled announcements.", e, true, this.getClass());
 		}
 
 		return announcements;
@@ -1066,7 +1066,7 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all enabled announcements by type.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all enabled announcements by type.", e, true, this.getClass());
 		}
 
 		return announcements;
@@ -1106,7 +1106,7 @@ public class DatabaseManager {
 				stmt.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get all enabled announcements by type.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get all enabled announcements by type.", e, true, this.getClass());
 		}
 
 		return announcements;
@@ -1131,7 +1131,7 @@ public class DatabaseManager {
 				statement.close();
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to get announcement count", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to get announcement count", e, true, this.getClass());
 		}
 		return amount;
 	}
@@ -1156,7 +1156,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete announcement.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete announcement.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1177,7 +1177,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete announcements for specific event.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete announcements for specific event.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1201,7 +1201,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete event data.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete event data.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1220,7 +1220,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete all event data for guild.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete all event data for guild.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1239,7 +1239,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete all announcements for guild.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete all announcements for guild.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1258,7 +1258,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete all RSVP data for guild.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete all RSVP data for guild.", e, true, this.getClass());
 		}
 		return false;
 	}
@@ -1278,7 +1278,7 @@ public class DatabaseManager {
 				return true;
 			}
 		} catch (SQLException e) {
-			Logger.getLogger().exception(null, "Failed to delete calendar from database for guild.", e, this.getClass());
+			Logger.getLogger().exception(null, "Failed to delete calendar from database for guild.", e, true, this.getClass());
 		}
 		return false;
 	}

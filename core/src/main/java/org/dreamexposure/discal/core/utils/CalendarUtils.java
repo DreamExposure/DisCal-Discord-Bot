@@ -30,7 +30,7 @@ public class CalendarUtils {
 			}
 		} catch (Exception e) {
 			//Fail silently.
-			Logger.getLogger().exception(null, "Failed to delete calendar", e, CalendarUtils.class);
+			Logger.getLogger().exception(null, "Failed to delete calendar", e, true, CalendarUtils.class);
 			return false;
 		}
 		if (settings.useExternalCalendar()) {
@@ -68,11 +68,11 @@ public class CalendarUtils {
 
 				return false;
 			} else {
-				Logger.getLogger().exception(null, "Unknown google error when checking for calendar exist", ge, CalendarUtils.class);
+				Logger.getLogger().exception(null, "Unknown google error when checking for calendar exist", ge, true, CalendarUtils.class);
 				return true;
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Unknown error when checking for calendar exist", e, CalendarUtils.class);
+			Logger.getLogger().exception(null, "Unknown error when checking for calendar exist", e, true, CalendarUtils.class);
 			return true;
 		}
 	}

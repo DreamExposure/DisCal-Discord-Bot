@@ -61,7 +61,7 @@ public class RsvpEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal get RSVP data error", e, RsvpEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get RSVP data error", e, true, RsvpEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -135,7 +135,7 @@ public class RsvpEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal update RSVP data error", e, RsvpEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal update RSVP data error", e, true, RsvpEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);

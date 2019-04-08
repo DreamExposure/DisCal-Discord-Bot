@@ -39,7 +39,7 @@ public class EventUtils {
 			return true;
 		} catch (Exception e) {
 			System.out.println("Something weird happened when deleting an event!");
-			Logger.getLogger().exception(null, "Failed to delete event.", e, EventUtils.class);
+			Logger.getLogger().exception(null, "Failed to delete event.", e, true, EventUtils.class);
 			e.printStackTrace();
 		}
 		return false;

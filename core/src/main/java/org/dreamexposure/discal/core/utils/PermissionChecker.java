@@ -51,8 +51,8 @@ public class PermissionChecker {
 				}
 			}
 		} catch (Exception e) {
-			//Something broke so we will harmlessly allow access and email the dev.
-			Logger.getLogger().exception(event.getMessage().getAuthor().get(), "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			//Something broke so we will harmlessly allow access and alert the dev.
+			Logger.getLogger().exception(event.getMessage().getAuthor().get(), "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
 			return true;
 		}
 		return true;
@@ -89,7 +89,7 @@ public class PermissionChecker {
 			}
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and notify the dev team
-			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, PermissionChecker.class);
+			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
 			return true;
 		}
 		return true;
@@ -134,7 +134,7 @@ public class PermissionChecker {
 			return true;
 		} catch (Exception e) {
 			//Catch any errors so that the bot always responds...
-			Logger.getLogger().exception(event.getMember().get(), "Failed to check for discal channel.", e, PermissionChecker.class);
+			Logger.getLogger().exception(event.getMember().get(), "Failed to check for discal channel.", e, true, PermissionChecker.class);
 			return true;
 		}
 	}

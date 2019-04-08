@@ -123,7 +123,7 @@ public class DiscordAccountHandler {
 				WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
 				m.put("embed", wg);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, this.getClass());
+				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
 
 				m.put("embed", new WebGuild());
 			}
@@ -155,7 +155,7 @@ public class DiscordAccountHandler {
 				WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
 				m.put("embed", wg);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, this.getClass());
+				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
 
 				m.put("embed", new WebGuild());
 			}

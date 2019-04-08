@@ -81,7 +81,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild");
 			return "redirect:/dashboard/guild";
 		} catch (JSONException e) {
-			Logger.getLogger().exception(null, "[WEB] JSON || Guild Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] JSON || Guild Select failed!", e, true, DashboardHandler.class);
 			try {
 				response.sendRedirect("/dashboard");
 			} catch (Exception ignore) {
@@ -89,7 +89,7 @@ public class DashboardHandler {
 			}
 			return "redirect:/dashboard";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Guild Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Guild Select failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -124,7 +124,7 @@ public class DashboardHandler {
 				return "redirect:/dashboard/guild";
 			}
 		} catch (JSONException e) {
-			Logger.getLogger().exception(null, "[WEB] JSON || Settings Select failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] JSON || Settings Select failed!", e, true, DashboardHandler.class);
 
 			try {
 				response.sendRedirect("/dashboard");
@@ -132,7 +132,7 @@ public class DashboardHandler {
 			}
 			return "redirect:/dashboard";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Settings Selected failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Settings Selected failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -270,7 +270,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild");
 			return "redirect:/dashboard/guild";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Settings update failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Settings update failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -294,7 +294,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setName(queryParams.get("cal-name"));
 					} catch (Exception e) {
-						Logger.getLogger().exception(null, "[WEB] Failed to update calendar name", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar name", e, true, DashboardHandler.class);
 					}
 				}
 			} else if (queryParams.containsKey("cal-desc")) {
@@ -310,7 +310,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setDescription(queryParams.get("cal-desc"));
 					} catch (Exception e) {
-						Logger.getLogger().exception(null, "[WEB] Failed to update calendar description", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar description", e, true, DashboardHandler.class);
 					}
 				}
 			} else if (queryParams.containsKey("cal-tz")) {
@@ -326,7 +326,7 @@ public class DashboardHandler {
 
 						g.getCalendar().setTimezone(queryParams.get("cal-tz"));
 					} catch (Exception e) {
-						Logger.getLogger().exception(null, "[WEB] Failed to update calendar timezone", e, DashboardHandler.class);
+						Logger.getLogger().exception(null, "[WEB] Failed to update calendar timezone", e, true, DashboardHandler.class);
 					}
 				}
 			}
@@ -335,7 +335,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild/calendar");
 			return "redirect:/dashboard/guild/calendar";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Calendar update failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Calendar update failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -375,14 +375,14 @@ public class DashboardHandler {
 					//Refresh to display correct info...
 					g.setCalendar(new WebCalendar().fromCalendar(calendarData, g.getSettings()));
 				} catch (Exception ex) {
-					Logger.getLogger().exception(null, "[WEB] Failed to confirm calendar.", ex, DashboardHandler.class);
+					Logger.getLogger().exception(null, "[WEB] Failed to confirm calendar.", ex, true, DashboardHandler.class);
 				}
 			}
 			//Finally redirect back to the dashboard
 			response.sendRedirect("/dashboard/guild/calendar");
 			return "redirect:/dashboard/guild/calendar";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Calendar create failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Calendar create failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -435,7 +435,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild/announcements");
 			return "redirect:/dashboard/guild/announcements";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Announcement create failed!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Announcement create failed!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -465,7 +465,7 @@ public class DashboardHandler {
 				return "redirect:/dashboard/guild/calendar";
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to delete/remove calendar!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to delete/remove calendar!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -491,7 +491,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild/announcements");
 			return "redirect:/dashboard/guild/announcements";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to delete announcement!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to delete announcement!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -537,7 +537,7 @@ public class DashboardHandler {
 			response.sendRedirect("/dashboard/guild/announcements");
 			return "redirect:/dashboard/guild/announcements";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to update/edit announcement!", e, DashboardHandler.class);
+			Logger.getLogger().exception(null, "[WEB] Failed to update/edit announcement!", e, true, DashboardHandler.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);

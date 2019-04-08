@@ -66,7 +66,7 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal get guild settings error", e, GuildEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get guild settings error", e, true, GuildEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -118,7 +118,7 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal update guild settings error", e, GuildEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal update guild settings error", e, true, GuildEndpoint.class);
 			response.setContentType("application/json");
 			response.setStatus(500);
 			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
@@ -181,7 +181,7 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal get guilds from users error", e, GuildEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get guilds from users error", e, true, GuildEndpoint.class);
 			response.setContentType("application/json");
 			response.setStatus(500);
 			return ResponseUtils.getJsonResponseMessage("Internal Server Error");

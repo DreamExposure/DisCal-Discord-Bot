@@ -68,7 +68,7 @@ public class CalendarEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal get calendar error", e, CalendarEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal get calendar error", e, true, CalendarEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -118,7 +118,7 @@ public class CalendarEndpoint {
 			response.setStatus(400);
 			return ResponseUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB-API] Internal list calendars error", e, CalendarEndpoint.class);
+			Logger.getLogger().exception(null, "[WEB-API] Internal list calendars error", e, true, CalendarEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);

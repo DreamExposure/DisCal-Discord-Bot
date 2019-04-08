@@ -33,7 +33,7 @@ public class MessageManager {
 			langs = ReadFile.readAllLangFiles();
 			return true;
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to reload lang files!", e, MessageManager.class);
+			Logger.getLogger().exception(null, "Failed to reload lang files!", e, true, MessageManager.class);
 			return false;
 		}
 	}

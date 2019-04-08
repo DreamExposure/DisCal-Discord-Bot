@@ -37,7 +37,7 @@ public class ReadFile {
 				fr.close();
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to load lang files!", e, ReadFile.class);
+			Logger.getLogger().exception(null, "Failed to load lang files!", e, true, ReadFile.class);
 		}
 		return langs;
 	}

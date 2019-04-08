@@ -52,7 +52,7 @@ public class DisCalServer {
 				SpringApplication.run(DisCalServer.class, args);
 			} catch (Exception e) {
 				e.printStackTrace();
-				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, DisCalServer.class);
+				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalServer.class);
 			}
 		}
 

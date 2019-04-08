@@ -8,6 +8,7 @@ import java.util.Random;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings("Duplicates")
 public class KeyGenerator {
 	private static char[] VALID_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray();
 

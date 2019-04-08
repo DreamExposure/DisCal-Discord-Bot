@@ -20,7 +20,7 @@ public class CrossTalkListener {
 	public static void handle(CrossTalkReceiveEvent event) {
 		//Handle keep alive...
 		if (event.getData().has("Reason") && event.getData().getString("Reason").equalsIgnoreCase("Keep-Alive")) {
-			Logger.getLogger().debug("Received Keep Alive for Client: " + event.getClientIndex());
+			Logger.getLogger().debug("Received Keep Alive for Client: " + event.getClientIndex(), false);
 			if (DisCalServer.getNetworkInfo().clientExists(event.getClientIndex())) {
 				//In network, update info...
 				ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(event.getClientIndex());
@@ -40,6 +40,8 @@ public class CrossTalkListener {
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
 
 				DisCalServer.getNetworkInfo().getClients().add(cc);
+
+				Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + cc.getClientIndex());
 			}
 		}
 

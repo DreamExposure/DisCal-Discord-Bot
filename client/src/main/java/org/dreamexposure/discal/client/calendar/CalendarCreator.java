@@ -97,7 +97,7 @@ public class CalendarCreator {
 				calendars.add(preCalendar);
 				return preCalendar;
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getMember().get(), "Failed to init calendar editor", e, this.getClass());
+				Logger.getLogger().exception(event.getMember().get(), "Failed to init calendar editor", e, true, this.getClass());
 				return null;
 			}
 		} else {
@@ -149,7 +149,7 @@ public class CalendarCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, true, this.getClass());
 
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(false);
@@ -180,7 +180,7 @@ public class CalendarCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, this.getClass());
+						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, true, this.getClass());
 
 						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
 						response.setEdited(true);

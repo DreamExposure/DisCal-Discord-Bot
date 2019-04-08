@@ -64,7 +64,7 @@ class CommandListener {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Command error; event message: " + event.getMessage().getContent().get(), e, CommandListener.class);
+			Logger.getLogger().exception(event.getMember().get(), "Command error; event message: " + event.getMessage().getContent().get(), e, true, CommandListener.class);
 		}
 	}
 }

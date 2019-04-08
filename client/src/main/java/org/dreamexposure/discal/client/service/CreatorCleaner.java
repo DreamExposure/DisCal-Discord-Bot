@@ -68,7 +68,7 @@ public class CreatorCleaner extends TimerTask {
 				AnnouncementCreator.getCreator().terminate(a.getGuildId());
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Error in CreatorCleaner", e, this.getClass());
+			Logger.getLogger().exception(null, "Error in CreatorCleaner", e, true, this.getClass());
 		}
 	}
 }
