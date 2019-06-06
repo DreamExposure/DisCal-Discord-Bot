@@ -18,8 +18,8 @@
 		<thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
 		<thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
 
-		<spring.version>2.1.3.RELEASE</spring.version>
-		<spring.security.version>5.1.4.RELEASE</spring.security.version>
+		<spring.version>2.1.5.RELEASE</spring.version>
+		<spring.security.version>5.1.5.RELEASE</spring.security.version>
 
 		<discal.core.version>3.0.0</discal.core.version>
 	</properties>

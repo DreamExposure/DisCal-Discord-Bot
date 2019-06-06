@@ -103,8 +103,7 @@ public class DisCalClient {
 			RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
 
 			MappingStoreService mss = MappingStoreService.create()
-				.setMapping(GuildBean.class, rss)
-				.setMapping(MessageBean.class, rss)
+				.setMappings(rss, GuildBean.class, MessageBean.class)
 				.setFallback(new JdkStoreService());
 
 			clientBuilder.setStoreService(mss);
