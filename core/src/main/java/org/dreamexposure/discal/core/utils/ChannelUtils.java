@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.utils;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.TextChannel;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -22,7 +22,7 @@ public class ChannelUtils {
 		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
 
-		for (GuildChannel c : event.getGuild().block().getChannels().toIterable()) {
+		for (TextChannel c : event.getGuild().block().getChannels().ofType(TextChannel.class).toIterable()) {
 			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return true;
 		}
@@ -33,7 +33,7 @@ public class ChannelUtils {
 		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
 
-		for (GuildChannel c : guild.getChannels().toIterable()) {
+		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
 			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return true;
 		}
@@ -47,11 +47,11 @@ public class ChannelUtils {
 	 * @param event    The event received.
 	 * @return the IChannel if successful, else <code>null</code>.
 	 */
-	public static GuildChannel getChannelFromNameOrId(String nameOrId, MessageCreateEvent event) {
+	public static TextChannel getChannelFromNameOrId(String nameOrId, MessageCreateEvent event) {
 		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
 
-		for (GuildChannel c : event.getGuild().block().getChannels().toIterable()) {
+		for (TextChannel c : event.getGuild().block().getChannels().ofType(TextChannel.class).toIterable()) {
 			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c;
 		}
@@ -64,11 +64,11 @@ public class ChannelUtils {
 	 * @param nameOrId The channel name or ID.
 	 * @return the IChannel if successful, else <code>null</code>.
 	 */
-	public static GuildChannel getChannelFromNameOrId(String nameOrId, Guild guild) {
+	public static TextChannel getChannelFromNameOrId(String nameOrId, Guild guild) {
 		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
 
-		for (GuildChannel c : guild.getChannels().toIterable()) {
+		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
 			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c;
 		}
@@ -85,7 +85,7 @@ public class ChannelUtils {
 		if (nameOrId.contains("#"))
 			nameOrId = nameOrId.replace("#", "");
 
-		for (GuildChannel c : guild.getChannels().toIterable()) {
+		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
 			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
 				return c.getName();
 		}

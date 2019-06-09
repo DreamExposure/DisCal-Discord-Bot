@@ -247,7 +247,7 @@ public class AnnouncementMessageFormatter {
 
 			try {
 				if (guild != null)
-					channel = (TextChannel)guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).block();
+					channel = guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).ofType(TextChannel.class).block();
 			} catch (Exception e) {
 				Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId().asString(), e, true, AnnouncementMessageFormatter.class);
 			}
