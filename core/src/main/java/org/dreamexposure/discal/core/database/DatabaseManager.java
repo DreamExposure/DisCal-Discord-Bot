@@ -1248,4 +1248,8 @@ public class DatabaseManager {
 		}
 		return false;
 	}
+
+	public void clearCache() {
+		guildSettingsCache.clear();
+	}
 }

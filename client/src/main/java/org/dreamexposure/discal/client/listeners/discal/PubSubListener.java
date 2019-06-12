@@ -22,7 +22,7 @@ import java.util.Optional;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings({"UnstableApiUsage", "StatementWithEmptyBody", "OptionalGetWithoutIsPresent"})
+@SuppressWarnings({"UnstableApiUsage", "OptionalGetWithoutIsPresent"})
 public class PubSubListener {
 	@Subscribe
 	public void handle(PubSubReceiveEvent event) {
@@ -49,7 +49,8 @@ public class PubSubListener {
 						//Reload the lang files as they could have changed.
 						MessageManager.reloadLangs();
 					} else if (realm.equals(DisCalRealm.BOT_INVALIDATE_CACHES)) {
-						//TODO: Invalidate the caches, such as the database cache.
+						//Invalidate the caches, such as the database cache.
+						DatabaseManager.getManager().clearCache();
 					} else if (realm.equals(DisCalRealm.GUILD_LEAVE)) {
 						//Leave guild as requested.
 						g.get().leave().subscribe();
