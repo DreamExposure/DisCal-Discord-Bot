@@ -12,14 +12,13 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.enums.network.CrossTalkReason;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
-import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.enums.network.PubSubReason;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
+import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.json.JSONObject;
 
 import javax.script.ScriptEngine;
@@ -153,14 +152,14 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with CrossTalk... and let the changes propagate
+			//Just send this across the network with Pub/Sub... and let the changes propagate
 			JSONObject request = new JSONObject();
 
-			request.put("Reason", CrossTalkReason.HANDLE.name());
+			request.put("Reason", PubSubReason.HANDLE.name());
 			request.put("Realm", DisCalRealm.GUILD_IS_PATRON);
 			request.put("Guild-Id", args[1]);
 
-			ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), request);
+			PubSubManager.get().publish("DisCal/ToClient/All", DisCalClient.clientId(), request);
 
 			MessageManager.sendMessageAsync("DisCal will update the isPatron status of the guild (if connected). Please allow some time for this to propagate across the network!", event);
 		} else {
@@ -230,14 +229,14 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with CrossTalk... and let the changes propagate
+			//Just send this across the network with Pub/Sub... and let the changes propagate
 			JSONObject request = new JSONObject();
 
-			request.put("Reason", CrossTalkReason.HANDLE.name());
+			request.put("Reason", PubSubReason.HANDLE.name());
 			request.put("Realm", DisCalRealm.GUILD_IS_DEV);
 			request.put("Guild-Id", args[1]);
 
-			ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), request);
+			PubSubManager.get().publish("DisCal/ToClient/All", DisCalClient.clientId(), request);
 
 			MessageManager.sendMessageAsync("DisCal will update the isDevGuild status of the guild (if connected). Please allow some time for this to propagate across the network!", event);
 		} else {
@@ -268,15 +267,15 @@ public class DevCommand implements ICommand {
 					return;
 				}
 
-				//Just send this across the network with CrossTalk... and let the changes propagate
+				//Just send this across the network with Pub/Sub... and let the changes propagate
 				JSONObject request = new JSONObject();
 
-				request.put("Reason", CrossTalkReason.HANDLE.name());
+				request.put("Reason", PubSubReason.HANDLE.name());
 				request.put("Realm", DisCalRealm.GUILD_MAX_CALENDARS);
 				request.put("Guild-Id", args[1]);
 				request.put("Max-Calendars", mc);
 
-				ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), request);
+				PubSubManager.get().publish("DisCal/ToClient/All", DisCalClient.clientId(), request);
 
 				MessageManager.sendMessageAsync("DisCal will update the max calendar limit of the specified guild (if connected). Please allow some time for this to propagate across the network!", event);
 			} catch (NumberFormatException e) {
@@ -305,14 +304,14 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with CrossTalk... and let the changes propagate
+			//Just send this across the network with Pub/Sub... and let the changes propagate
 			JSONObject request = new JSONObject();
 
-			request.put("Reason", CrossTalkReason.HANDLE.name());
+			request.put("Reason", PubSubReason.HANDLE.name());
 			request.put("Realm", DisCalRealm.GUILD_LEAVE);
 			request.put("Guild-Id", args[1]);
 
-			ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), request);
+			PubSubManager.get().publish("DisCal/ToClient/All", DisCalClient.clientId(), request);
 
 			MessageManager.sendMessageAsync("DisCal will leave the specified guild (if connected). Please allow some time for this to propagate across the network!", event);
 		} else {
@@ -323,13 +322,13 @@ public class DevCommand implements ICommand {
 	private void moduleReloadLangs(MessageCreateEvent event) {
 		MessageManager.reloadLangs();
 
-		//Just send this across the network with CrossTalk... and let the changes propagate
+		//Just send this across the network with Pub/Sub... and let the changes propagate
 		JSONObject request = new JSONObject();
 
-		request.put("Reason", CrossTalkReason.HANDLE.name());
+		request.put("Reason", PubSubReason.HANDLE.name());
 		request.put("Realm", DisCalRealm.BOT_LANGS);
 
-		ClientSocketHandler.sendToServer(Integer.valueOf(BotSettings.SHARD_INDEX.get()), request);
+		PubSubManager.get().publish("DisCal/ToClient/All", DisCalClient.clientId(), request);
 
 		MessageManager.sendMessageAsync("Reloading lang files! Please give this time to propagate across the network.", event);
 	}
@@ -383,7 +382,7 @@ public class DevCommand implements ICommand {
 
 			MessageManager.sendMessageAsync("HEY! This command is being redone cuz of networking!", event);
 
-			//TODO: Send/Receive from crosstalk.
+			//TODO: Send/Receive from Pub/Sub.
 			/*
 			try {
 

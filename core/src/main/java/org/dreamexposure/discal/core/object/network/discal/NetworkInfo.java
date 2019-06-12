@@ -23,7 +23,7 @@ public class NetworkInfo {
 
 	//Getters
 	public List<ConnectedClient> getClients() {
-		return clients;
+		return new ArrayList<>(clients);
 	}
 
 	public boolean clientExists(int clientIndex) {
@@ -40,6 +40,11 @@ public class NetworkInfo {
 				return cc;
 		}
 		return null;
+	}
+
+	public void removeClient(int clientIndex) {
+		if (clientExists(clientIndex))
+			clients.remove(getClient(clientIndex));
 	}
 
 	public int getTotalGuildCount() {

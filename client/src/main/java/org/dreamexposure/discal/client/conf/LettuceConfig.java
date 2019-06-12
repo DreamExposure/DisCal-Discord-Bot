@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.server.conf;
+package org.dreamexposure.discal.client.conf;
 
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.springframework.context.annotation.Bean;

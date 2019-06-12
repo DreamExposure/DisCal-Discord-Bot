@@ -4,7 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.server.DisCalServer;
-import org.dreamexposure.novautils.events.network.crosstalk.CrossTalkReceiveEvent;
+import org.dreamexposure.novautils.events.network.pubsub.PubSubReceiveEvent;
 
 /**
  * @author NovaFox161
@@ -15,24 +15,22 @@ import org.dreamexposure.novautils.events.network.crosstalk.CrossTalkReceiveEven
  * Contact: nova@dreamexposure.org
  */
 @SuppressWarnings({"Duplicates", "UnstableApiUsage"})
-public class CrossTalkListener {
+public class PubSubListener {
 	@Subscribe
-	public static void handle(CrossTalkReceiveEvent event) {
+	public static void handle(PubSubReceiveEvent event) {
 		//Handle keep alive...
-		if (event.getData().has("Reason") && event.getData().getString("Reason").equalsIgnoreCase("Keep-Alive")) {
-			Logger.getLogger().debug("Received Keep Alive for Client: " + event.getClientIndex(), false);
-			if (DisCalServer.getNetworkInfo().clientExists(event.getClientIndex())) {
+		if (event.getChannelName().equalsIgnoreCase("DisCal/ToServer/KeepAlive")) {
+			if (DisCalServer.getNetworkInfo().clientExists(event.getClient())) {
 				//In network, update info...
-				ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(event.getClientIndex());
+				ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(event.getClient());
 
 				cc.setLastKeepAlive(System.currentTimeMillis());
 				cc.setConnectedServers(event.getData().getInt("Server-Count"));
 				cc.setUptime(event.getData().getString("Uptime"));
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
-
 			} else {
 				//Not in network, add info...
-				ConnectedClient cc = new ConnectedClient(event.getClientIndex(), event.getClientIp(), event.getClientPort());
+				ConnectedClient cc = new ConnectedClient(event.getClient());
 
 				cc.setLastKeepAlive(System.currentTimeMillis());
 				cc.setConnectedServers(event.getData().getInt("Server-Count"));
@@ -44,7 +42,5 @@ public class CrossTalkListener {
 				Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + cc.getClientIndex());
 			}
 		}
-
-		//TODO: Handle the rest of the stuff we may have to handle....
 	}
 }

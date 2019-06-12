@@ -1,20 +1,20 @@
 package org.dreamexposure.discal.server.handler;
 
-import org.dreamexposure.discal.core.enums.network.CrossTalkReason;
-import org.dreamexposure.discal.core.enums.network.DisCalRealm;
+import okhttp3.*;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebGuild;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.server.DisCalServer;
-import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings({"unchecked", "RedundantCast", "Duplicates"})
+@SuppressWarnings({"unchecked", "RedundantCast", "Duplicates", "WeakerAccess", "unused", "ConstantConditions"})
 public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
 	private static Timer timer;
@@ -112,17 +112,45 @@ public class DiscordAccountHandler {
 
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
-			requestBody.put("Reason", CrossTalkReason.GET.name());
-			requestBody.put("Realm", DisCalRealm.WEBSITE_EMBED_CALENDAR);
-			requestBody.put("Guild-Id", guildId);
+			requestBody.put("guild_id", guildId);
 
 			m.remove("embed");
 			try {
-				JSONObject data = ServerSocketHandler.sendAndReceive(requestBody);
+				OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(1, TimeUnit.SECONDS)
+					.build();
+				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, requestBody.toString());
 
-				WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
-				m.put("embed", wg);
-			} catch (IOException e) {
+				for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
+
+					try {
+						Request httpRequest = new Request.Builder()
+							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
+							.post(httpRequestBody)
+							.header("Content-Type", "application/json")
+							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+							.build();
+
+						Response response = client.newCall(httpRequest).execute();
+
+						JSONObject responseBody = new JSONObject(response.body().string());
+
+						if (response.code() == 200) {
+							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
+							m.put("embed", wg);
+							break; //We got the info, no need to request from the rest
+						} else if (response.code() >= 500) {
+							//Client must be down... lets remove it...
+							DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+						}
+					} catch (Exception e) {
+						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
+						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
+						DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+
+					}
+				}
+			} catch (Exception e) {
 				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
 
 				m.put("embed", new WebGuild());
@@ -144,17 +172,45 @@ public class DiscordAccountHandler {
 
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
-			requestBody.put("Reason", CrossTalkReason.GET.name());
-			requestBody.put("Realm", DisCalRealm.WEBSITE_EMBED_CALENDAR);
-			requestBody.put("Guild-Id", guildId);
+			requestBody.put("guild_id", guildId);
 
 			m.remove("embed");
 			try {
-				JSONObject data = ServerSocketHandler.sendAndReceive(requestBody);
+				OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(1, TimeUnit.SECONDS)
+					.build();
+				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, requestBody.toString());
 
-				WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
-				m.put("embed", wg);
-			} catch (IOException e) {
+				for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
+
+					try {
+						Request httpRequest = new Request.Builder()
+							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
+							.post(httpRequestBody)
+							.header("Content-Type", "application/json")
+							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+							.build();
+
+						Response response = client.newCall(httpRequest).execute();
+
+						JSONObject responseBody = new JSONObject(response.body().string());
+
+						if (response.code() == 200) {
+							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
+							m.put("embed", wg);
+							break; //We got the info, no need to request from the rest
+						} else if (response.code() >= 500) {
+							//Client must be down... lets remove it...
+							DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+						}
+					} catch (Exception e) {
+						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
+						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
+						DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+
+					}
+				}
+			} catch (Exception e) {
 				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
 
 				m.put("embed", new WebGuild());

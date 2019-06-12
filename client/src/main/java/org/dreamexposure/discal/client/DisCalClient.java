@@ -10,7 +10,7 @@ import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import org.dreamexposure.discal.client.listeners.discal.CrossTalkEventListener;
+import org.dreamexposure.discal.client.listeners.discal.PubSubListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.command.*;
@@ -19,13 +19,18 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.crosstalk.ClientSocketHandler;
+import org.dreamexposure.novautils.network.pubsub.PubSubManager;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+@SpringBootApplication
+@EnableRedisHttpSession
 public class DisCalClient {
 	private static DiscordClient client;
 
@@ -46,7 +51,7 @@ public class DisCalClient {
 
 		//Register discal events
 		EventManager.get().init();
-		EventManager.get().getEventBus().register(new CrossTalkEventListener());
+		EventManager.get().getEventBus().register(new PubSubListener());
 
 		//Register commands
 		CommandExecutor executor = CommandExecutor.getExecutor().enable();
@@ -72,10 +77,20 @@ public class DisCalClient {
 		//Load lang files
 		MessageManager.reloadLangs();
 
-		//Start CrossTalk client
-		ClientSocketHandler.setValues(BotSettings.CROSSTALK_SERVER_HOST.get(), Integer.valueOf(BotSettings.CROSSTALK_SERVER_PORT.get()), BotSettings.CROSSTALK_CLIENT_HOST.get(), Integer.valueOf(BotSettings.CROSSTALK_CLIENT_PORT.get()));
+		//Start Spring
+		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+			try {
+				SpringApplication.run(DisCalClient.class, args);
+			} catch (Exception e) {
+				e.printStackTrace();
+				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE Communication'", e, true, DisCalClient.class);
+			}
+		}
 
-		ClientSocketHandler.initListener();
+		//Start Redis pub/sub listeners
+		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
+		//We must register each channel we want to use. This is super important.
+		PubSubManager.get().register(clientId(), "DisCal/ToClient/All");
 
 		//Login
 		client.login().block();
@@ -107,6 +122,8 @@ public class DisCalClient {
 				.setFallback(new JdkStoreService());
 
 			clientBuilder.setStoreService(mss);
+		} else {
+			clientBuilder.setStoreService(new JdkStoreService());
 		}
 
 		return clientBuilder.build();
@@ -115,5 +132,9 @@ public class DisCalClient {
 	//Public stuffs
 	public static DiscordClient getClient() {
 		return client;
+	}
+
+	public static int clientId() {
+		return Integer.valueOf(BotSettings.SHARD_INDEX.get());
 	}
 }

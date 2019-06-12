@@ -6,11 +6,11 @@ import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
 import org.dreamexposure.discal.server.handler.DiscordAccountHandler;
-import org.dreamexposure.discal.server.listeners.CrossTalkListener;
+import org.dreamexposure.discal.server.listeners.PubSubListener;
 import org.dreamexposure.discal.server.network.discordbots.UpdateDisBotData;
 import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
 import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
+import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
@@ -36,7 +36,7 @@ public class DisCalServer {
 
 		//Register DisCal events
 		EventManager.get().init();
-		EventManager.get().getEventBus().register(new CrossTalkListener());
+		EventManager.get().getEventBus().register(new PubSubListener());
 
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();
@@ -56,9 +56,10 @@ public class DisCalServer {
 			}
 		}
 
-		//Start CrossTalk Server
-		ServerSocketHandler.setValues(Integer.valueOf(BotSettings.CROSSTALK_SERVER_PORT.get()));
-		ServerSocketHandler.initListener();
+		//Start Redis PubSub Listeners
+		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
+		//We must register each channel we want to use. This is super important.
+		PubSubManager.get().register(-1, "DisCal/ToServer/KeepAlive");
 
 		//Handle the rest of the bullshit
 		UpdateDisBotData.init();

@@ -4,15 +4,14 @@ import okhttp3.*;
 import org.dreamexposure.discal.core.enums.GoodTimezone;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.enums.network.CrossTalkReason;
-import org.dreamexposure.discal.core.enums.network.DisCalRealm;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebGuild;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.server.DisCalServer;
+import org.dreamexposure.discal.server.handler.DashboardHandler;
 import org.dreamexposure.discal.server.handler.DiscordAccountHandler;
-import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -96,23 +96,48 @@ public class DiscordLoginHandler {
 				m.put("username", userInfo.getString("username"));
 				m.put("discrim", userInfo.getString("discriminator"));
 
-				//Get guilds...
+
 				List<WebGuild> guilds = new ArrayList<>();
-				for (ConnectedClient csd : DisCalServer.getNetworkInfo().getClients()) {
-					JSONObject requestData = new JSONObject();
+				try {
+					OkHttpClient clientWithTimeout = new OkHttpClient.Builder()
+						.connectTimeout(1, TimeUnit.SECONDS)
+						.build();
+					RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, body.toString());
 
-					requestData.put("Reason", CrossTalkReason.GET.name());
-					requestData.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_DEFAULTS);
-					requestData.put("Member-Id", m.get("id") + "");
-					requestData.put("Guilds", servers);
+					for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
 
-					JSONObject responseData = ServerSocketHandler.sendAndReceive(requestData, csd.getClientHostname(), csd.getClientPort());
+						try {
+							Request requestNew = new Request.Builder()
+								.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/defaults")
+								.post(httpRequestBody)
+								.header("Content-Type", "application/json")
+								.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+								.build();
 
-					JSONArray guildsData = responseData.getJSONArray("Guilds");
-					for (int i = 0; i < guildsData.length(); i++) {
-						guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));
+							Response responseNew = clientWithTimeout.newCall(requestNew).execute();
+
+							JSONObject responseBody = new JSONObject(responseNew.body().string());
+
+							if (responseNew.code() == 200) {
+								JSONArray guildsData = responseBody.getJSONArray("guilds");
+								for (int i = 0; i < guildsData.length(); i++) {
+									guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));
+								}
+							} else if (responseNew.code() >= 500) {
+								//Client must be down... lets remove it...
+								DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+							}
+						} catch (Exception e) {
+							Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
+							//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
+							DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+
+						}
 					}
+				} catch (Exception e) {
+					Logger.getLogger().exception(null, "Failed to handle dashboard guild get", e, true, DashboardHandler.class);
 				}
+
 
 				m.put("guilds", guilds);
 

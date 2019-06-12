@@ -3,23 +3,28 @@ package org.dreamexposure.discal.server.handler;
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
 import discord4j.core.object.util.Snowflake;
+import okhttp3.*;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.enums.network.CrossTalkReason;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
+import org.dreamexposure.discal.core.enums.network.PubSubReason;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebCalendar;
 import org.dreamexposure.discal.core.object.web.WebChannel;
 import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.object.web.WebRole;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.utils.ResponseUtils;
-import org.dreamexposure.novautils.network.crosstalk.ServerSocketHandler;
+import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,13 +37,14 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Nova Fox on 12/19/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"unchecked", "unused", "Duplicates"})
+@SuppressWarnings({"unchecked", "unused", "Duplicates", "ConstantConditions"})
 @RestController
 @RequestMapping("/api/v1/dashboard")
 public class DashboardHandler {
@@ -50,18 +56,47 @@ public class DashboardHandler {
 
 			//HANDLE OF GETTING THIS SHIT
 			JSONObject body = new JSONObject();
-			body.put("Reason", CrossTalkReason.GET.name());
-			body.put("Realm", DisCalRealm.WEBSITE_DASHBOARD_GUILD);
-			body.put("Guild-Id", guildId);
-			body.put("Member-Id", m.get("id") + "");
+			body.put("guild_id", guildId);
+			body.put("member_id", Long.valueOf(m.get("id") + ""));
 
-			JSONObject data = ServerSocketHandler.sendAndReceive(body);
+			WebGuild wg = new WebGuild();
+			try {
+				OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(1, TimeUnit.SECONDS)
+					.build();
+				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, body.toString());
 
-			//Don't worry about guild not existing, impossible to get here if it doesn't exist.
-			WebGuild wg = new WebGuild().fromJson(data.getJSONObject("Guild"));
+				for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
 
-			wg.setDiscalRole(data.getBoolean("Sufficient-Role"));
-			wg.setManageServer(data.getBoolean("Manager-Server"));
+					try {
+						Request httpRequest = new Request.Builder()
+							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/guild")
+							.post(httpRequestBody)
+							.header("Content-Type", "application/json")
+							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+							.build();
+
+						Response responseNew = client.newCall(httpRequest).execute();
+
+						JSONObject responseBody = new JSONObject(responseNew.body().string());
+
+						if (responseNew.code() == 200) {
+							wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
+							break; //We got the info, no need to request from the rest
+						} else if (responseNew.code() >= 500) {
+							//Client must be down... lets remove it...
+							DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+						}
+					} catch (Exception e) {
+						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
+						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
+						DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
+
+					}
+				}
+			} catch (Exception e) {
+				Logger.getLogger().exception(null, "Failed to handle dashboard guild get", e, true, DashboardHandler.class);
+			}
 
 			if (!(wg.isManageServer() || wg.isDiscalRole())) {
 				//Insufficient perms to edit that guild.
@@ -153,12 +188,12 @@ public class DashboardHandler {
 
 					//Send to all clients. Correct client will handle the actual change.
 					JSONObject data = new JSONObject();
-					data.put("Reason", CrossTalkReason.UPDATE.name());
+					data.put("Reason", PubSubReason.UPDATE.name());
 					data.put("Realm", DisCalRealm.BOT_SETTINGS);
 					data.put("Guild-Id", g.getId());
 					data.put("Bot-Nick", g.getBotNick());
 
-					ServerSocketHandler.sendToAllClients(data, "SERVER", -1, -1);
+					PubSubManager.get().publish("DisCal/ToClient/All", -1, data);
 				}
 			} else if (queryParams.containsKey("prefix")) {
 				//Update prefix...

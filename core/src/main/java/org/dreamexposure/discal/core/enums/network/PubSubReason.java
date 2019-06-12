@@ -8,6 +8,6 @@ package org.dreamexposure.discal.core.enums.network;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-public enum CrossTalkReason {
+public enum PubSubReason {
 	UPDATE, GET, CREATE, DELETE, RELOAD, HANDLE
 }

@@ -13,18 +13,14 @@ import java.util.Date;
  */
 public class ConnectedClient {
 	private final int clientIndex;
-	private final String clientHostname;
-	private final int clientPort;
 
 	private int connectedServers;
 	private long lastKeepAlive;
 	private String uptime;
 	private double memUsed;
 
-	public ConnectedClient(int _clientIndex, String _clientHostname, int _clientPort) {
+	public ConnectedClient(int _clientIndex) {
 		clientIndex = _clientIndex;
-		clientHostname = _clientHostname;
-		clientPort = _clientPort;
 
 		connectedServers = 0;
 		lastKeepAlive = System.currentTimeMillis();
@@ -36,14 +32,6 @@ public class ConnectedClient {
 	//Getters
 	public int getClientIndex() {
 		return clientIndex;
-	}
-
-	public String getClientHostname() {
-		return clientHostname;
-	}
-
-	public int getClientPort() {
-		return clientPort;
 	}
 
 	public int getConnectedServers() {
