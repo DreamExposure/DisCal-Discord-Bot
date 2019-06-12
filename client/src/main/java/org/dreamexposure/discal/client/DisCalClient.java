@@ -90,7 +90,7 @@ public class DisCalClient {
 		//Start Redis pub/sub listeners
 		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
 		//We must register each channel we want to use. This is super important.
-		PubSubManager.get().register(clientId(), "DisCal/ToClient/All");
+		PubSubManager.get().register(clientId(), BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All");
 
 		//Login
 		client.login().block();

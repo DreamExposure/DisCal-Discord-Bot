@@ -125,7 +125,7 @@ public class DiscordAccountHandler {
 
 					try {
 						Request httpRequest = new Request.Builder()
-							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
+							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
 							.post(httpRequestBody)
 							.header("Content-Type", "application/json")
 							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
@@ -185,7 +185,7 @@ public class DiscordAccountHandler {
 
 					try {
 						Request httpRequest = new Request.Builder()
-							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
+							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
 							.post(httpRequestBody)
 							.header("Content-Type", "application/json")
 							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))

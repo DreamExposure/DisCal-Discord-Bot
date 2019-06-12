@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.listeners;
 
 import com.google.common.eventbus.Subscribe;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.novautils.events.network.pubsub.PubSubReceiveEvent;
@@ -19,7 +20,7 @@ public class PubSubListener {
 	@Subscribe
 	public static void handle(PubSubReceiveEvent event) {
 		//Handle keep alive...
-		if (event.getChannelName().equalsIgnoreCase("DisCal/ToServer/KeepAlive")) {
+		if (event.getChannelName().equalsIgnoreCase(BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive")) {
 			if (DisCalServer.getNetworkInfo().clientExists(event.getClient())) {
 				//In network, update info...
 				ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(event.getClient());

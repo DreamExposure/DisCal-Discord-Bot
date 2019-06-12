@@ -70,7 +70,7 @@ public class DashboardHandler {
 
 					try {
 						Request httpRequest = new Request.Builder()
-							.url("https://client-" + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/guild")
+							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/guild")
 							.post(httpRequestBody)
 							.header("Content-Type", "application/json")
 							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
@@ -193,7 +193,7 @@ public class DashboardHandler {
 					data.put("Guild-Id", g.getId());
 					data.put("Bot-Nick", g.getBotNick());
 
-					PubSubManager.get().publish("DisCal/ToClient/All", -1, data);
+					PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", -1, data);
 				}
 			} else if (queryParams.containsKey("prefix")) {
 				//Update prefix...

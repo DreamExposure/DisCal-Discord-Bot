@@ -9,6 +9,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
 import org.dreamexposure.discal.core.enums.network.PubSubReason;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.novautils.events.network.pubsub.PubSubReceiveEvent;
 
@@ -26,17 +27,17 @@ import java.util.Optional;
 public class PubSubListener {
 	@Subscribe
 	public void handle(PubSubReceiveEvent event) {
-		Optional<Guild> g = Optional.empty();
-		//Check if this even applies to us!
-		if (event.getData().has("Guild-Id")) {
-			g = GuildFinder.findGuild(Snowflake.of(event.getData().getString("Guild-Id")));
-			if (!g.isPresent()) return; //Guild not connected to this client, correct client will handle this.
-		}
+		if (event.getChannelName().equalsIgnoreCase(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All")) {
+			Optional<Guild> g = Optional.empty();
+			//Check if this even applies to us!
+			if (event.getData().has("Guild-Id")) {
+				g = GuildFinder.findGuild(Snowflake.of(event.getData().getString("Guild-Id")));
+				if (!g.isPresent()) return; //Guild not connected to this client, correct client will handle this.
+			}
 
-		PubSubReason reason = PubSubReason.valueOf(event.getData().getString("Reason"));
-		DisCalRealm realm = DisCalRealm.valueOf(event.getData().getString("Realm"));
+			PubSubReason reason = PubSubReason.valueOf(event.getData().getString("Reason"));
+			DisCalRealm realm = DisCalRealm.valueOf(event.getData().getString("Realm"));
 
-		if (event.getChannelName().equalsIgnoreCase("DisCal/ToClient/All")) {
 			switch (reason) {
 				case UPDATE:
 					if (realm.equals(DisCalRealm.BOT_SETTINGS)) {

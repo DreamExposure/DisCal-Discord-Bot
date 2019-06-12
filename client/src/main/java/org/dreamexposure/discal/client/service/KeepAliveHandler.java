@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.service;
 
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -33,7 +34,7 @@ public class KeepAliveHandler {
 				data.put("Uptime", humanReadableUptime());
 				//TODO: Add announcement count!!!
 
-				PubSubManager.get().publish("DisCal/ToServer/KeepAlive", DisCalClient.clientId(), data);
+				PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive", DisCalClient.clientId(), data);
 
 				Logger.getLogger().debug("Sent keep alive to server.", false);
 			}
