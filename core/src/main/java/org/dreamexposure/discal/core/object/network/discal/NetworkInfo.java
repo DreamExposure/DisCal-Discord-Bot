@@ -42,6 +42,10 @@ public class NetworkInfo {
 		return null;
 	}
 
+	public void addClient(ConnectedClient client) {
+		clients.add(client);
+	}
+
 	public void removeClient(int clientIndex) {
 		if (clientExists(clientIndex))
 			clients.remove(getClient(clientIndex));
@@ -75,6 +79,4 @@ public class NetworkInfo {
 
 		return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
 	}
-
-	//Setters
 }

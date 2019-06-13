@@ -38,7 +38,7 @@ public class PubSubListener {
 				cc.setUptime(event.getData().getString("Uptime"));
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
 
-				DisCalServer.getNetworkInfo().getClients().add(cc);
+				DisCalServer.getNetworkInfo().addClient(cc);
 
 				Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + cc.getClientIndex());
 			}
