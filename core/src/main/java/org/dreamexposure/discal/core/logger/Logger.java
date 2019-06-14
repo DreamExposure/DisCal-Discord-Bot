@@ -107,8 +107,12 @@ public class Logger {
 
 		//Post to webhook if wanted.
 		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
+			//Shorten error message...
+			if (error.length() > 1500)
+				error = error.substring(0, 1500);
+
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
 				.addField(new WebhookEmbed
 					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
 				.addField(new WebhookEmbed
@@ -277,7 +281,7 @@ public class Logger {
 		//Post to webhook if wanted.
 		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true")) {
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+				.setTitle(new WebhookEmbed.EmbedTitle("Status", null))
 				.addField(new WebhookEmbed
 					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
 				.setDescription(message)
