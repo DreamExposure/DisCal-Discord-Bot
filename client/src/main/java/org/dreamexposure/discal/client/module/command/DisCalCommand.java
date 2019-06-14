@@ -10,6 +10,7 @@ import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.*;
@@ -142,7 +143,8 @@ public class DisCalCommand implements ICommand {
 			spec.setTitle(MessageManager.getMessage("Embed.DisCal.Info.Title", settings));
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
 			spec.addField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
-			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 3.0.0", false);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 3.0.6", false);
+			spec.addField("Shard Index", BotSettings.SHARD_INDEX.get() + "/" + BotSettings.SHARD_COUNT.get(), true);
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), DisCalClient.getClient().getGuilds().count().block() + "", true);
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
