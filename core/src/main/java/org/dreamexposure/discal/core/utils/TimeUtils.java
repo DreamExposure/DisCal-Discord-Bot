@@ -11,7 +11,6 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -111,14 +110,5 @@ public class TimeUtils {
 			}
 		}
 		return false;
-	}
-
-	public static long applyTimeZoneOffset(long epochTime, String timezone) {
-		long timeZoneOffset = TimeZone.getTimeZone(ZoneId.of(timezone)).getRawOffset();
-		long chicagoOffset = TimeZone.getTimeZone(ZoneId.of("America/Chicago")).getRawOffset();
-
-		long toAdd = timeZoneOffset - chicagoOffset;
-
-		return epochTime + toAdd;
 	}
 }

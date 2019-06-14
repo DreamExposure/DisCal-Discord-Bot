@@ -1,18 +1,11 @@
 package org.dreamexposure.discal.core.object.event;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.dreamexposure.discal.core.utils.TimeUtils;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -27,9 +20,6 @@ public class PreEvent {
 	private String description;
 	private EventDateTime startDateTime;
 	private EventDateTime endDateTime;
-
-	private EventDateTime viewableStartDate;
-	private EventDateTime viewableEndDate;
 
 	private String timeZone;
 
@@ -97,36 +87,6 @@ public class PreEvent {
 		startDateTime = e.getStart();
 		endDateTime = e.getEnd();
 
-		//Here is where I need to fix the display times
-		GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-		//TODO: Support multiple calendars
-		CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
-
-		Calendar cal = null;
-		try {
-			cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
-		} catch (Exception ex) {
-			Logger.getLogger().exception(null, "Failed to get proper date time for event!", ex, true, this.getClass());
-		}
-
-		if (cal != null) {
-
-			//Check if either DateTime or just Date...
-			if (e.getStart().getDateTime() != null) {
-				//DateTime
-				viewableStartDate = new EventDateTime().setDateTime(new DateTime(TimeUtils.applyTimeZoneOffset(e.getStart().getDateTime().getValue(), cal.getTimeZone())));
-				viewableEndDate = new EventDateTime().setDateTime(new DateTime(TimeUtils.applyTimeZoneOffset(e.getEnd().getDateTime().getValue(), cal.getTimeZone())));
-			} else {
-				//Just Date
-				viewableStartDate = new EventDateTime().setDate(new DateTime(TimeUtils.applyTimeZoneOffset(e.getStart().getDate().getValue(), cal.getTimeZone())));
-				viewableEndDate = new EventDateTime().setDate(new DateTime(TimeUtils.applyTimeZoneOffset(e.getEnd().getDate().getValue(), cal.getTimeZone())));
-			}
-		} else {
-			//Almost definitely not correct, but we need something displayed here.
-			viewableStartDate = e.getStart();
-			viewableEndDate = e.getEnd();
-		}
-
 		eventData = DatabaseManager.getManager().getEventData(guildId, e.getId());
 
 		editing = false;
@@ -182,24 +142,6 @@ public class PreEvent {
 	 */
 	public EventDateTime getEndDateTime() {
 		return endDateTime;
-	}
-
-	/**
-	 * Gets the viewable start date and time.
-	 *
-	 * @return The viewable start date and time.
-	 */
-	public EventDateTime getViewableStartDate() {
-		return viewableStartDate;
-	}
-
-	/**
-	 * Gets the viewable end date and time.
-	 *
-	 * @return The viewable end date and time.
-	 */
-	public EventDateTime getViewableEndDate() {
-		return viewableEndDate;
 	}
 
 	/**
@@ -294,24 +236,6 @@ public class PreEvent {
 	 */
 	public void setEndDateTime(EventDateTime _endDateTime) {
 		endDateTime = _endDateTime;
-	}
-
-	/**
-	 * Sets the viewable start date and time of the event.
-	 *
-	 * @param _viewableStart The viewable start date and time of the event.
-	 */
-	public void setViewableStartDate(EventDateTime _viewableStart) {
-		viewableStartDate = _viewableStart;
-	}
-
-	/**
-	 * Sets the viewable end date and time of the event.
-	 *
-	 * @param _viewableEnd The viewable end date and time of the event.
-	 */
-	public void setViewableEndDate(EventDateTime _viewableEnd) {
-		viewableEndDate = _viewableEnd;
 	}
 
 	/**

@@ -492,14 +492,6 @@ public class EventCommand implements ICommand {
 							//Date shuffling done, now actually apply all that damn stuff here.
 							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setStartDateTime(eventDateTime);
 
-							//Apply viewable date/times...
-							SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-							Date dateObjV = sdfV.parse(dateRaw);
-							DateTime dateTimeV = new DateTime(dateObjV);
-							EventDateTime eventDateTimeV = new EventDateTime();
-							eventDateTimeV.setDateTime(dateTimeV);
-							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableStartDate(eventDateTimeV);
-
 
 							//To streamline, check if event end is null, if so, apply 2 hour duration!
 							if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).getEndDateTime() == null) {
@@ -509,15 +501,6 @@ public class EventCommand implements ICommand {
 								end.setDateTime(new DateTime(endLong));
 
 								EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(end);
-
-
-								//Viewable date
-								EventDateTime endV = EventCreator.getCreator().getPreEvent(settings.getGuildID()).getViewableStartDate().clone();
-								long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
-
-								endV.setDateTime(new DateTime(endVLong));
-
-								EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(endV);
 							}
 
 							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
@@ -526,7 +509,7 @@ public class EventCommand implements ICommand {
 								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Start.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.Start.Success", settings);
-								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
+								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTime, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTime, settings, true));
 								MessageManager.sendMessageAsync(msg, event);
 							}
 						} else {
@@ -591,21 +574,13 @@ public class EventCommand implements ICommand {
 							//Date shuffling done, now actually apply all that damn stuff here.
 							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(eventDateTime);
 
-							//Apply viewable date/times...
-							SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-							Date dateObjV = sdfV.parse(dateRaw);
-							DateTime dateTimeV = new DateTime(dateObjV);
-							EventDateTime eventDateTimeV = new EventDateTime();
-							eventDateTimeV.setDateTime(dateTimeV);
-							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(eventDateTimeV);
-
 							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
 								MessageManager.deleteMessage(event);
 								MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
 								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.End.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.End.Success", settings);
-								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
+								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTime, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTime, settings, true));
 								MessageManager.sendMessageAsync(msg, event);
 							}
 						} else {

@@ -208,10 +208,10 @@ public class EventMessageFormatter {
 			} else {
 				spec.addField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
 			}
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getStartDateTime(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getStartDateTime(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getEndDateTime(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getEndDateTime(), settings, true), true);
 			spec.addField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
 			if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
@@ -291,7 +291,7 @@ public class EventMessageFormatter {
 				if (!preEvent) {
 					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				} else {
-					timezone = "America/Chicago";
+					timezone = "UTC";
 				}
 				if (eventDateTime.getDateTime() != null) {
 					long dateTime = eventDateTime.getDateTime().getValue();
@@ -332,7 +332,7 @@ public class EventMessageFormatter {
 				if (!preEvent) {
 					timezone = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				} else {
-					timezone = "America/Chicago";
+					timezone = "UTC";
 				}
 				if (eventDateTime.getDateTime() != null) {
 					long dateTime = eventDateTime.getDateTime().getValue();
