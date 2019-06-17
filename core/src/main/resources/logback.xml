@@ -9,7 +9,7 @@
 	<logger name="discord4j.gateway.client" level="DEBUG"/>
 	<logger name="io.lettuce" level="INFO"/>
 
-	<turboFilter class="discord4j.core.logback.GatewayEventFilter">
+	<turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">
 		<Exclude>PRESENCE_UPDATE</Exclude>
 		<Exclude>GUILD_CREATE</Exclude>
 	</turboFilter>

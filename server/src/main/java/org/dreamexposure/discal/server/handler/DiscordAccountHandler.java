@@ -133,9 +133,9 @@ public class DiscordAccountHandler {
 
 						Response response = client.newCall(httpRequest).execute();
 
-						JSONObject responseBody = new JSONObject(response.body().string());
-
 						if (response.code() == 200) {
+							JSONObject responseBody = new JSONObject(response.body().string());
+
 							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
 							m.put("embed", wg);
 							break; //We got the info, no need to request from the rest
@@ -193,9 +193,9 @@ public class DiscordAccountHandler {
 
 						Response response = client.newCall(httpRequest).execute();
 
-						JSONObject responseBody = new JSONObject(response.body().string());
-
 						if (response.code() == 200) {
+							JSONObject responseBody = new JSONObject(response.body().string());
+
 							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
 							m.put("embed", wg);
 							break; //We got the info, no need to request from the rest

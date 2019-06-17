@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.Logger;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 
@@ -44,11 +45,14 @@ public class NetworkInfo {
 
 	public void addClient(ConnectedClient client) {
 		clients.add(client);
+		Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + client.getClientIndex());
 	}
 
 	public void removeClient(int clientIndex) {
-		if (clientExists(clientIndex))
+		if (clientExists(clientIndex)) {
 			clients.remove(getClient(clientIndex));
+			Logger.getLogger().status("Client Disconnected to Network", "Shard Index of Disconnected Client: " + clientIndex);
+		}
 	}
 
 	public int getTotalGuildCount() {

@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.server.listeners;
 
 import com.google.common.eventbus.Subscribe;
-import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.server.DisCalServer;
@@ -39,8 +38,6 @@ public class PubSubListener {
 				cc.setMemUsed(event.getData().getDouble("Mem-Used"));
 
 				DisCalServer.getNetworkInfo().addClient(cc);
-
-				Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + cc.getClientIndex());
 			}
 		}
 	}

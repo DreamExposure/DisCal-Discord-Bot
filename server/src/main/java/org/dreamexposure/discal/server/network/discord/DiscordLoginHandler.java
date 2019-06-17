@@ -102,7 +102,12 @@ public class DiscordLoginHandler {
 					OkHttpClient clientWithTimeout = new OkHttpClient.Builder()
 						.connectTimeout(1, TimeUnit.SECONDS)
 						.build();
-					RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, body.toString());
+
+					JSONObject comBody = new JSONObject();
+					comBody.put("member_id", Long.valueOf(m.get("id") + ""));
+					comBody.put("guilds", servers);
+
+					RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, comBody.toString());
 
 					for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
 
@@ -116,9 +121,10 @@ public class DiscordLoginHandler {
 
 							Response responseNew = clientWithTimeout.newCall(requestNew).execute();
 
-							JSONObject responseBody = new JSONObject(responseNew.body().string());
 
 							if (responseNew.code() == 200) {
+								JSONObject responseBody = new JSONObject(responseNew.body().string());
+
 								JSONArray guildsData = responseBody.getJSONArray("guilds");
 								for (int i = 0; i < guildsData.length(); i++) {
 									guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));

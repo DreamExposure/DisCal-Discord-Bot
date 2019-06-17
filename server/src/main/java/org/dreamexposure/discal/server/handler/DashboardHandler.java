@@ -15,7 +15,6 @@ import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebCalendar;
 import org.dreamexposure.discal.core.object.web.WebChannel;
 import org.dreamexposure.discal.core.object.web.WebGuild;
@@ -51,7 +50,7 @@ public class DashboardHandler {
 	@PostMapping(value = "/select/guild")
 	public static String handleGuildSelect(HttpServletRequest request, HttpServletResponse response, @RequestParam Map<String, String> queryParams) {
 		try {
-			String guildId = queryParams.get("guild");
+			long guildId = Long.valueOf(queryParams.get("guild"));
 			Map m = DiscordAccountHandler.getHandler().getAccount(request);
 
 			//HANDLE OF GETTING THIS SHIT
@@ -60,39 +59,38 @@ public class DashboardHandler {
 			body.put("member_id", Long.valueOf(m.get("id") + ""));
 
 			WebGuild wg = new WebGuild();
+
+			//Do math rather than sending this to all clients!!!!
+			int clientId = (int) ((guildId >> 22) % Integer.valueOf(BotSettings.SHARD_COUNT.get()));
 			try {
 				OkHttpClient client = new OkHttpClient.Builder()
 					.connectTimeout(1, TimeUnit.SECONDS)
 					.build();
 				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, body.toString());
 
-				for (ConnectedClient cc : DisCalServer.getNetworkInfo().getClients()) {
+				try {
+					Request httpRequest = new Request.Builder()
+						.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + clientId + ".discalbot.com/api/v1/com/website/dashboard/guild")
+						.post(httpRequestBody)
+						.header("Content-Type", "application/json")
+						.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+						.build();
 
-					try {
-						Request httpRequest = new Request.Builder()
-							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/guild")
-							.post(httpRequestBody)
-							.header("Content-Type", "application/json")
-							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
-							.build();
+					Response responseNew = client.newCall(httpRequest).execute();
 
-						Response responseNew = client.newCall(httpRequest).execute();
+					JSONObject responseBody = new JSONObject(responseNew.body().string());
 
-						JSONObject responseBody = new JSONObject(responseNew.body().string());
-
-						if (responseNew.code() == 200) {
-							wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
-							break; //We got the info, no need to request from the rest
-						} else if (responseNew.code() >= 500) {
-							//Client must be down... lets remove it...
-							DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
-						}
-					} catch (Exception e) {
-						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
-						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
-						DisCalServer.getNetworkInfo().removeClient(cc.getClientIndex());
-
+					if (responseNew.code() == 200) {
+						wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
+					} else if (responseNew.code() >= 500) {
+						//Client must be down... lets remove it...
+						DisCalServer.getNetworkInfo().removeClient(clientId);
 					}
+				} catch (Exception e) {
+					Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
+					//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
+					DisCalServer.getNetworkInfo().removeClient(clientId);
+
 				}
 			} catch (Exception e) {
 				Logger.getLogger().exception(null, "Failed to handle dashboard guild get", e, true, DashboardHandler.class);

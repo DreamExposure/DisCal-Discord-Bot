@@ -5,6 +5,8 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.data.stored.GuildBean;
 import discord4j.core.object.data.stored.MessageBean;
+import discord4j.core.object.presence.Activity;
+import discord4j.core.object.presence.Presence;
 import discord4j.store.api.mapping.MappingStoreService;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
@@ -106,6 +108,7 @@ public class DisCalClient {
 		//Handle shard count and index for multiple java instances
 		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
 		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
+		clientBuilder.setInitialPresence(Presence.online(Activity.playing("Booting Up!")));
 
 
 		//Redis info + store service for caching
