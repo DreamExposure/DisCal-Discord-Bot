@@ -10,8 +10,7 @@
 	<logger name="io.lettuce" level="INFO"/>
 
 	<turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">
-		<Exclude>PRESENCE_UPDATE</Exclude>
-		<Exclude>GUILD_CREATE</Exclude>
+		<Exclude>PRESENCE_UPDATE,GUILD_CREATE,GUILD_MEMBERS_CHUNK</Exclude>
 	</turboFilter>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
