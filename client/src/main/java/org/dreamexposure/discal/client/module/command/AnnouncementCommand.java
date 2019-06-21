@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.*;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -401,8 +402,8 @@ public class AnnouncementCommand implements ICommand {
 		if (args[1].length() <= 32) {
 			if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-				Member u = guild.getMemberById(UserUtils.getUser(value, message)).block();
-				Role r = guild.getRoleById(RoleUtils.getRole(value, message)).block();
+				Member u = guild.getMemberById(UserUtils.getUser(value, message)).onErrorResume(e -> Mono.empty()).block();
+				Role r = guild.getRoleById(RoleUtils.getRole(value, message)).onErrorResume(e -> Mono.empty()).block();
 				if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
 					String men = value.toLowerCase();
 					if (!a.getSubscriberRoleIds().contains(men)) {
@@ -512,11 +513,11 @@ public class AnnouncementCommand implements ICommand {
 
 				Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
 				if (usf != null)
-					u = guild.getMemberById(usf).block();
+					u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
 
 				Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
 				if (rsf != null)
-					r = guild.getRoleById(rsf).block();
+					r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
 
 				if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
 					//Here or everyone is to be subscribed...
@@ -608,11 +609,11 @@ public class AnnouncementCommand implements ICommand {
 
 				Snowflake usf = UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
 				if (usf != null)
-					u = guild.getMemberById(usf).block();
+					u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
 
 				Snowflake rsf = RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
 				if (rsf != null)
-					r = guild.getRoleById(rsf).block();
+					r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
 
 				if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
 					String men = value.toLowerCase();
@@ -722,11 +723,11 @@ public class AnnouncementCommand implements ICommand {
 
 				Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
 				if (usf != null)
-					u = guild.getMemberById(usf).block();
+					u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
 
 				Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
 				if (rsf != null)
-					r = guild.getRoleById(rsf).block();
+					r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
 
 				if (args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
 					//Here or everyone is to be subscribed...
