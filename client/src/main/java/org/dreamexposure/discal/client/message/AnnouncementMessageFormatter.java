@@ -19,6 +19,7 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
@@ -247,7 +248,7 @@ public class AnnouncementMessageFormatter {
 
 			try {
 				if (guild != null)
-					channel = guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).ofType(TextChannel.class).block();
+					channel = guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).ofType(TextChannel.class).onErrorResume(e -> Mono.empty()).block();
 			} catch (Exception e) {
 				Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId().asString(), e, true, AnnouncementMessageFormatter.class);
 			}
