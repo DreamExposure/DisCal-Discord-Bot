@@ -11,6 +11,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -182,10 +183,11 @@ public class MessageManager {
 
 	//Message deleting
 	public static void deleteMessage(Message message) {
-		message.delete().subscribe();
+		if (message == null) return;
+		message.delete().onErrorResume(e -> Mono.empty()).subscribe();
 	}
 
 	public static void deleteMessage(MessageCreateEvent event) {
-		event.getMessage().delete().subscribe();
+		event.getMessage().delete().onErrorResume(e -> Mono.empty()).subscribe();
 	}
 }
