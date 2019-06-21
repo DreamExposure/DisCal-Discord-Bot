@@ -33,12 +33,13 @@ public class CalendarMessageFormatter {
 				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
 			spec.setTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
-			spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
-			try {
+
+			if (cal.getSummary() != null)
+				spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
+
+			if (cal.getDescription() != null)
 				spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
-			} catch (NullPointerException | IllegalArgumentException e) {
-				//Some error, desc probably never set, just ignore no need to log.
-			}
+
 			spec.addField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
 			spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
 			spec.setFooter(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
