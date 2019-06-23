@@ -40,7 +40,7 @@ public class DisCalServer {
 
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();
-		DatabaseManager.getManager().createTables();
+		DatabaseManager.getManager().handleMigrations();
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();

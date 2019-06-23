@@ -14,8 +14,12 @@ import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseInfo;
 import org.dreamexposure.novautils.database.DatabaseSettings;
+import org.flywaydb.core.Flyway;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,6 +73,26 @@ public class DatabaseManager {
 		}
 	}
 
+	public void handleMigrations() {
+		Map<String, String> placeholders = new HashMap<>();
+		placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
+
+		try {
+			Flyway flyway = Flyway.configure()
+				.dataSource(masterInfo.getSource())
+				.cleanDisabled(true)
+				.baselineOnMigrate(true)
+				.table(BotSettings.SQL_PREFIX.get() + "schema_history")
+				.placeholders(placeholders)
+				.load();
+			int sm = flyway.migrate();
+			Logger.getLogger().debug("Migrations Successful, " + sm + " migrations applied!", true);
+		} catch (Exception e) {
+			Logger.getLogger().exception(null, "Migrations Failure", e, true, getClass());
+			System.exit(2);
+		}
+	}
+
 	/**
 	 * Disconnects from the MySQL server if still connected.
 	 */
@@ -82,96 +106,6 @@ public class DatabaseManager {
 				Logger.getLogger().exception(null, "Disconnecting from MySQL failed.", e, true, this.getClass());
 				System.out.println("MySQL Connection may not have closed properly! Data may be invalidated!");
 			}
-		}
-	}
-
-	/**
-	 * Creates all required tables in the database if they do not exist.
-	 */
-	public void createTables() {
-		try (final Connection connection = masterInfo.getSource().getConnection()) {
-			Statement statement = connection.createStatement();
-
-			String announcementTableName = String.format("%sannouncements", masterInfo.getSettings().getPrefix());
-			String calendarTableName = String.format("%scalendars", masterInfo.getSettings().getPrefix());
-			String settingsTableName = String.format("%sguild_settings", masterInfo.getSettings().getPrefix());
-			String eventTableName = String.format("%sevents", masterInfo.getSettings().getPrefix());
-			String rsvpTableName = String.format("%srsvp", masterInfo.getSettings().getPrefix());
-			String apiTableName = String.format("%sapi", masterInfo.getSettings().getPrefix());
-			String createSettingsTable = "CREATE TABLE IF NOT EXISTS " + settingsTableName +
-				"(GUILD_ID VARCHAR(255) not NULL, " +
-				" EXTERNAL_CALENDAR BOOLEAN not NULL, " +
-				" PRIVATE_KEY VARCHAR(16) not NULL, " +
-				" ACCESS_TOKEN LONGTEXT not NULL, " +
-				" REFRESH_TOKEN LONGTEXT not NULL, " +
-				" CONTROL_ROLE LONGTEXT not NULL, " +
-				" DISCAL_CHANNEL LONGTEXT not NULL, " +
-				" SIMPLE_ANNOUNCEMENT BOOLEAN not NULL, " +
-				" LANG VARCHAR(255) not NULL, " +
-				" PREFIX VARCHAR(255) not NULL, " +
-				" PATRON_GUILD BOOLEAN not NULL, " +
-				" DEV_GUILD BOOLEAN not NULL, " +
-				" MAX_CALENDARS INTEGER not NULL, " +
-				" DM_ANNOUNCEMENTS LONGTEXT not NULL, " +
-				" 12_HOUR BOOLEAN not NULL, " +
-				" BRANDED BOOLEAN not NULL, " +
-				" PRIMARY KEY (GUILD_ID))";
-			String createAnnouncementTable = "CREATE TABLE IF NOT EXISTS " + announcementTableName +
-				" (ANNOUNCEMENT_ID VARCHAR(255) not NULL, " +
-				" GUILD_ID VARCHAR(255) not NULL, " +
-				" SUBSCRIBERS_ROLE LONGTEXT not NULL, " +
-				" SUBSCRIBERS_USER LONGTEXT not NULL, " +
-				" CHANNEL_ID VARCHAR(255) not NULL, " +
-				" ANNOUNCEMENT_TYPE VARCHAR(255) not NULL, " +
-				" EVENT_ID LONGTEXT not NULL, " +
-				" EVENT_COLOR VARCHAR(255) not NULL, " +
-				" HOURS_BEFORE INTEGER not NULL, " +
-				" MINUTES_BEFORE INTEGER not NULL, " +
-				" INFO LONGTEXT not NULL, " +
-				" ENABLED BOOLEAN not NULL, " +
-				" INFO_ONLY BOOLEAN not NULL, " +
-				" PRIMARY KEY (ANNOUNCEMENT_ID))";
-			String createCalendarTable = "CREATE TABLE IF NOT EXISTS " + calendarTableName +
-				" (GUILD_ID VARCHAR(255) not NULL, " +
-				" CALENDAR_NUMBER INTEGER not NULL, " +
-				" CALENDAR_ID VARCHAR(255) not NULL, " +
-				" CALENDAR_ADDRESS LONGTEXT not NULL, " +
-				" EXTERNAL BOOLEAN not NULL , " +
-				" PRIMARY KEY (GUILD_ID, CALENDAR_NUMBER))";
-			String createEventTable = "CREATE TABLE IF NOT EXISTS " + eventTableName +
-				" (GUILD_ID VARCHAR(255) not NULL, " +
-				" EVENT_ID VARCHAR(255) not NULL, " +
-				" EVENT_END LONG not NULL, " +
-				" IMAGE_LINK LONGTEXT, " +
-				" PRIMARY KEY (GUILD_ID, EVENT_ID))";
-			String createRsvpTable = "CREATE TABLE IF NOT EXISTS " + rsvpTableName +
-				" (GUILD_ID VARCHAR(255) not NULL, " +
-				" EVENT_ID VARCHAR(255) not NULL, " +
-				" EVENT_END LONG not NULL, " +
-				" GOING_ON_TIME LONGTEXT, " +
-				" GOING_LATE LONGTEXT, " +
-				" NOT_GOING LONGTEXT, " +
-				" UNDECIDED LONGTEXT, " +
-				" PRIMARY KEY (GUILD_ID, EVENT_ID))";
-			String createAPITable = "CREATE TABLE IF NOT EXISTS " + apiTableName +
-				" (USER_ID varchar(255) not NULL, " +
-				" API_KEY varchar(64) not NULL, " +
-				" BLOCKED BOOLEAN not NULL, " +
-				" TIME_ISSUED LONG not NULL, " +
-				" USES INT not NULL, " +
-				" PRIMARY KEY (USER_ID, API_KEY))";
-			statement.executeUpdate(createAnnouncementTable);
-			statement.executeUpdate(createSettingsTable);
-			statement.executeUpdate(createCalendarTable);
-			statement.executeUpdate(createEventTable);
-			statement.executeUpdate(createRsvpTable);
-			statement.executeUpdate(createAPITable);
-			statement.close();
-			System.out.println("Successfully created needed tables in MySQL database!");
-		} catch (SQLException e) {
-			System.out.println("Failed to created database tables! Something must be wrong.");
-			Logger.getLogger().exception(null, "Creating MySQL tables failed", e, true, this.getClass());
-			e.printStackTrace();
 		}
 	}
 

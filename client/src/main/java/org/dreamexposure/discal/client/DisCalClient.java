@@ -71,7 +71,7 @@ public class DisCalClient {
 
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();
-		DatabaseManager.getManager().createTables();
+		DatabaseManager.getManager().handleMigrations();
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
