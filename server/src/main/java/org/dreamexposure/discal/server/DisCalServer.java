@@ -57,7 +57,7 @@ public class DisCalServer {
 		}
 
 		//Start Redis PubSub Listeners
-		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
+		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
 		//We must register each channel we want to use. This is super important.
 		PubSubManager.get().register(-1, BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive");
 

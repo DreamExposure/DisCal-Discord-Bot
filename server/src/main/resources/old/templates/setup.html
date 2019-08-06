@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+
+		<!-- ****** faviconit.com favicons ****** -->
+		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/images/favicon.ico">
+		<link rel="icon" type="image/png" sizes="196x196" href="/assets/images/favicon/favicon-192.png">
+		<link rel="icon" type="image/png" sizes="160x160" href="/assets/images/favicon/favicon-160.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96.png">
+		<link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon/favicon-64.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
+		<link rel="apple-touch-icon" href="/assets/images/favicon/favicon-57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/favicon-114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/favicon-72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/favicon-144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/favicon-60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/favicon-120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/favicon-76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/favicon-152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/favicon-180.png">
+		<meta name="msapplication-TileColor" content="#FFFFFF">
+		<meta name="msapplication-TileImage" content="/assets/images/favicon/favicon-144.png">
+		<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml">
+		<!-- ****** faviconit.com favicons ****** -->
+		<title>Setup - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles-old/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<a href="/" class="title"><h1>DISCAL</h1></a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a class="active" href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+			<a href="/status">Status</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' + ${redirUri}">Log
+				In</a>
+		</div>
+
+		<div id="content">
+			<h1>DisCal Bot - Setup</h1>
+			<p>
+				The following page is a step by step instruction for how to properly setup DisCal.
+				<br><br>
+				It's quite simple, but you must create a new calendar in order for DisCal to function fully.
+			</p>
+
+			<div id="invite">
+				<h3>1. Add DisCal to your Discord server</h3>
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/examples/DisCal-Invite-Perms.jpg"
+					     style="max-width: 300px; max-height: 300px;">
+				</div>
+				<p>
+					<strong>Skip this step if you have just added DisCal to your server.</strong>
+					<br><br><br>
+					Click the button below to authorize DisCal and select the server you want it on.
+					<br><br><br><br>
+					You must have the "Manage Server" permission to add the bot. Contact the server owner or admin to
+					invite DisCal if you cannot.
+					<br><br><br>
+				</p>
+				<a href="https://discordapp.com/oauth2/authorize?client_id=265523588918935552&scope=bot&permissions=201845824&redirect_uri=https://www.discalbot.com/setup"
+				   target="_blank">
+					<button>Add DisCal to Discord Server</button>
+				</a>
+			</div>
+
+			<hr>
+
+			<div id="role">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/examples/DisCal-Role-Perms.jpg"
+					     style="max-width: 300px; max-height: 300px;">
+				</div>
+				<h3>2. Give DisCal permissions at server level and not at channel level (channel permissions don't
+					always work right)</h3>
+				<p>
+					If you have a Bot permission group, assign DisCal that permission.
+					<br><br>
+					If not, create a new permission role with the following permissions so that DisCal may read and send
+					messages based on its commands:
+					<br><br>
+					- Read Messages*
+					<br>
+					- Send Messages
+					<br>
+					- Embed Links
+					<br>
+					- Mention Everyone
+					<br>
+					- Manager Messages
+					<br>
+					- Reactions/External Emojis
+					<br><br><br>
+					* DisCal will not log or save any messages.
+					<br><br>
+				</p>
+			</div>
+
+			<hr>
+
+			<div id="calendar">
+				<div class="image-wrapper" style="float: left">
+					<img src="/assets/images/examples/DisCal-Calendar-Creation.jpg"
+					     style="max-width: 300px; max-height: 300px;">
+				</div>
+				<h3>3. Create a Calendar for your Discord</h3>
+				<p>
+					DisCal currently only allows 1 calendar per server. Use the command "!calendar create [calendar
+					name]" in any channel. (You can create a special channel just for DisCal commands if you want.)
+					<br> <br>
+					Once that command is issued, DisCal will handle the rest and walk you through a step by step guide
+					into creating your new calendar!
+					<br> <br>
+					Optionally you may attach an external calendar. (This feature is currently in open testing for
+					Patreon supporters. Visit our Discord server for more information.)
+					<br><br><br>
+					For all information on existing commands as well as some tutorial .gifs, click the button below.
+				</p>
+				<a href="commands.html">
+					<button>View Commands</button>
+				</a>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>
+			<span th:text="'© DreamExposure ' + ${year} + '. All rights reserved.'"></span>
+			<span> | </span>
+			<a href="/policy/privacy">Privacy Policy</a>
+			<span> | </span>
+			<a href="/policy/tos">Terms of Service</a>
+			<span> | </span>
+			<a href="/docs/api/overview">Developer API</a>
+			<span> | </span>
+			<a href="https://www.dreamexposure.org">Powered By DreamExposure</a>
+			<span> | </span>
+			<span>DisCal is not endorsed or supported by Discord</span>
+		</p>
+	</footer>
+</html>

@@ -1,118 +1,244 @@
 <!DOCTYPE html>
-<!--suppress HtmlUnknownTarget -->
-<html xmlns:th="http://www.thymeleaf.org">
-	<head>
-		<!--Meta stuffs-->
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
-		<meta property="og:title" content="DisCal Bot"/>
-		<meta property="og:url" content="https://discalbot.com"/>
-		<meta property="og:description"
-		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
-		<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-		<!-- ****** faviconit.com favicons ****** -->
-		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
-		<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/images/favicon.ico">
-		<link rel="icon" type="image/png" sizes="196x196" href="/assets/images/favicon/favicon-192.png">
-		<link rel="icon" type="image/png" sizes="160x160" href="/assets/images/favicon/favicon-160.png">
-		<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96.png">
-		<link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon/favicon-64.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
-		<link rel="apple-touch-icon" href="/assets/images/favicon/favicon-57.png">
-		<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/favicon-114.png">
-		<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/favicon-72.png">
-		<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/favicon-144.png">
-		<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/favicon-60.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/favicon-120.png">
-		<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/favicon-76.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/favicon-152.png">
-		<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/favicon-180.png">
-		<meta name="msapplication-TileColor" content="#FFFFFF">
-		<meta name="msapplication-TileImage" content="/assets/images/favicon/favicon-144.png">
-		<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml">
-		<!-- ****** faviconit.com favicons ****** -->
-		<title>Dashboard - DisCal</title>
+<head>
+	<!--Meta Stuffs-->
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="The Ultimate Discord Calendar Bot">
 
-		<!--Locally hosted-->
-		<link href="/styles/global.css" rel="stylesheet">
-	</head>
+	<meta property="og:title" content="DisCal"/>
+	<meta property="og:url" content="https://www.discalbot.com"/>
+	<meta property="og:description" content="The Ultimate Discord Calendar Bot"/>
+	<meta property="og:image" content="">
 
-	<body>
-		<div class="top-nav">
-			<a href="/" class="title"><h1>DISCAL</h1></a>
-			<a href="/about">About</a>
-			<a href="/commands">Commands</a>
-			<a href="/setup">Setup</a>
-			<a href="/lazy-discal">Lazy DisCal</a>
-			<a class="active" href="/dashboard">Dashboard</a>
-			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
-			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
-			<a href="/status">Status</a>
+    <title>DisCal - Dashboard</title>
 
-			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
-			<a class="account" th:unless="${loggedIn}"
-			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' + ${redirUri}">Log
-				In</a>
-		</div>
+    <!-- Custom fonts for this template-->
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+          rel="stylesheet">
 
-		<div id="content">
-			<!--Check if logged in, if not, handle login...-->
-			<div th:if="${loggedIn}">
-				<h1 th:text="'Welcome, ' + ${username} + '!'"></h1>
-				<h3>Select a guild below!</h3>
+    <!-- Custom styles for this template-->
+    <link href="/assets/css/sb-admin-2.min.css" rel="stylesheet">
 
-				<!--TODO: Do this in JS so that it is dynamic!!!-->
-				<th:block th:each="guild : ${guilds}">
-					<!--TODO: Remove patron/dev only  on full release-->
-					<th:block th:if="${guild.settings.patronGuild} == true or ${guild.settings.devGuild} == true">
-						<th:block th:if="${guild.manageServer} == true or ${guild.discalRole} == true">
-							<form method="post" action="/api/v1/dashboard/select/guild">
-								<input type="hidden" name="guild" th:value="${guild.id}">
-								<button type="submit" class="guild" th:text="${guild.name}"></button>
-							</form>
-							<br>
-						</th:block>
-						<th:block th:unless="${guild.manageServer} == true or ${guild.discalRole} == true">
-							<form method="post" action="" disabled="true">
-								<input type="hidden" name="guild" th:value="${guild.id}">
-								<button disabled type="submit" class="guild" th:text="${guild.name}"></button>
-							</form>
-							<br>
-						</th:block>
-					</th:block>
-				</th:block>
-				<br>
-				<br>
-				<br>
-				<p>
-					*Guild not listed? Until the full release, only patron guilds are supported!
-					<br>
-					**Button grayed out/not working? You don't have high enough permissions to manage that server!
-				</p>
-			</div>
-			<div th:unless="${loggedIn}">
-				<h1>YOU ARE NOT LOGGED IN!</h1>
-				<p>Please login to continue.</p>
-			</div>
-		</div>
-	</body>
+</head>
 
-	<footer id="footer">
-		<p>
-			<span th:text="'© DreamExposure ' + ${year} + '. All rights reserved.'"></span>
-			<span> | </span>
-			<a href="/policy/privacy">Privacy Policy</a>
-			<span> | </span>
-			<a href="/policy/tos">Terms of Service</a>
-			<span> | </span>
-			<a href="/docs/api/overview">Developer API</a>
-			<span> | </span>
-			<a href="https://www.dreamexposure.org">Powered By DreamExposure</a>
-			<span> | </span>
-			<span>DisCal is not endorsed or supported by Discord</span>
-		</p>
-	</footer>
+<body id="page-top">
+
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-headphones"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">DISCAL</div>
+        </a>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
+
+        <!-- Nav Item - Commands -->
+        <li class="nav-item">
+            <a class="nav-link" href="/commands">
+                <i class="fas fa-fw fa-terminal"></i>
+                <span>Commands</span></a>
+        </li>
+
+        <!-- Nav Item - Status -->
+        <li class="nav-item">
+            <a class="nav-link" href="/status">
+                <i class="fas fa-fw fa-info-circle"></i>
+                <span>Status</span></a>
+        </li>
+
+        <!-- Nav Item - Dashboard -->
+        <li class="nav-item active">
+            <a class="nav-link" href="/dashboard">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span></a>
+        </li>
+
+        <!-- Divider -->
+        <hr class="sidebar-divider">
+
+        <!-- Guilds list (only displayed if logged in) -->
+        <div th:if="${logged_in}">
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Guilds
+            </div>
+
+            <!-- Start Nav Item - Guild Container -->
+            <th:block th:each="guild : ${guilds}">
+                <div class="nav-item">
+                    <a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span th:text="${guild.name}"></span>
+                    </a>
+                </div>
+            </th:block>
+            <!-- End Nav Item - Guild Container -->
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+        </div>
+        <!-- End Guilds list -->
+
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
+
+    </ul>
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <!-- Main Content -->
+        <div id="content">
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                <!-- Sidebar Toggle (Topbar) -->
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+
+                <!-- Topbar Navbar -->
+                <ul class="navbar-nav ml-auto">
+
+                    <!-- Nav Item - Support Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="${support_invite}" target="_blank">
+                            <i class="fas fa-question-circle fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Support
+                        </a>
+                    </li>
+
+                    <!-- Nav Item - Invite Link -->
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="${bot_invite}" target="_blank">
+                            <i class="fas fa-envelope-open-text fa-sm fa-fw mr-2 text-gray-400"></i>
+                            Invite
+                        </a>
+                    </li>
+
+                    <div class="topbar-divider d-none d-sm-block"></div>
+
+                    <!-- Nav Item - User Information -->
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-lg-inline text-gray-600 small" th:text="${username}"></span>
+                            <img class="img-profile rounded-circle" th:src="${pfp}"
+                                 alt="pfp">
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                             aria-labelledby="userDropdown">
+                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
+
+                </ul>
+
+            </nav>
+            <!-- End of Topbar -->
+
+            <!-- Begin Page Content -->
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                </div>
+
+                <!-- Content Row -->
+                <div class="row">
+                    <p class="text-center">Please select a guild from the side panel to begin.</p>
+
+                </div>
+
+                <!-- Content Row -->
+                <div class="row">
+
+                </div>
+
+                <!-- Content Row -->
+                <div class="row">
+
+                </div>
+            </div>
+
+        </div>
+        <!-- End of Main Content -->
+
+        <!-- Footer -->
+        <footer class="sticky-footer bg-white">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
+                </div>
+            </div>
+        </footer>
+        <!-- End of Footer -->
+
+    </div>
+    <!-- End of Content Wrapper -->
+
+</div>
+<!-- End of Page Wrapper -->
+
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Logout Modal-->
+<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-primary" href="/account/logout">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap core JavaScript-->
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core plugin JavaScript-->
+<script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+<!-- Custom scripts for all pages-->
+<script src="/assets/js/sb-admin-2.min.js"></script>
+
+<!-- Page level plugins -->
+<script src="/vendor/chart.js/Chart.min.js"></script>
+
+</body>
+
 </html>

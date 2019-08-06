@@ -12,3 +12,4 @@ hs_err_pid*
 **/*.iml
 **/dependency-reduced-pom.xml
 **/META-INF/
+/node_modules/

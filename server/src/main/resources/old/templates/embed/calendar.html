@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+
+		<!-- ****** faviconit.com favicons ****** -->
+		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/images/favicon.ico">
+		<link rel="icon" type="image/png" sizes="196x196" href="/assets/images/favicon/favicon-192.png">
+		<link rel="icon" type="image/png" sizes="160x160" href="/assets/images/favicon/favicon-160.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96.png">
+		<link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon/favicon-64.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
+		<link rel="apple-touch-icon" href="/assets/images/favicon/favicon-57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/favicon-114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/favicon-72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/favicon-144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/favicon-60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/favicon-120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/favicon-76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/favicon-152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/favicon-180.png">
+		<meta name="msapplication-TileColor" content="#FFFFFF">
+		<meta name="msapplication-TileImage" content="/assets/images/favicon/favicon-144.png">
+		<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml">
+		<!-- ****** faviconit.com favicons ****** -->
+		<title>Calendar - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles-old/global.css" rel="stylesheet">
+		<link href="/styles-old/fix.css" rel="stylesheet">
+		<link href="/styles-old/calendar.css" rel="stylesheet">
+		<link href="/styles-old/bootstrap/modal-only.css" rel="stylesheet">
+
+		<script src="/scripts/embed/calendar.js"></script>
+		<script src="/scripts/snackbar.js"></script>
+
+		<!--Externally hosted-->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"
+		        integrity="sha256-obZACiHd7gkOk9iIL/pimWMTJ4W/pBsKu+oZnSeBIek=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/is_js/0.9.0/is.min.js"
+		        integrity="sha256-lnJeulOa3e5IO2EzHr8jKJ3CbT80MBwkS5a+n2ooIr4=" crossorigin="anonymous"></script>
+	</head>
+
+	<body onload="init()">
+		<div class="top-nav">
+			<a href="/" class="title"><h1>DISCAL</h1></a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+			<a href="/status">Status</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' + ${redirUri}">Log
+				In</a>
+		</div>
+
+		<div id="content">
+
+			<!--No calendar-->
+			<div th:if="${embed.calendar.id} == primary" style="text-align: left">
+				<br>
+				<p>The guild does not have a calendar!</p>
+			</div>
+			<!--Has calendar-->
+
+			<div th:unless="${embed.calendar.id} == primary" style="text-align: left">
+				<div id="calendar-container">
+					<table id="calendar" style="border-color: #ef0813; margin: auto;" border="#ef0813"
+					       cellpadding="4"
+					       cellspacing="0">
+						<tbody>
+						<tr style="height: 50px;">
+							<th class="nav" onclick="previousMonth()"><</th>
+							<th></th>
+							<th></th>
+							<th id="month-display"></th>
+							<th></th>
+							<th></th>
+							<th class="nav" onclick="nextMonth()">></th>
+						</tr>
+						<tr style="height: 40px;">
+							<th>Sunday</th>
+							<th>Monday</th>
+							<th>Tuesday</th>
+							<th>Wednesday</th>
+							<th>Thursday</th>
+							<th>Friday</th>
+							<th>Saturday</th>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r1c1"></td>
+							<td onclick="selectDate(this.id)" id="r1c2"></td>
+							<td onclick="selectDate(this.id)" id="r1c3"></td>
+							<td onclick="selectDate(this.id)" id="r1c4"></td>
+							<td onclick="selectDate(this.id)" id="r1c5"></td>
+							<td onclick="selectDate(this.id)" id="r1c6"></td>
+							<td onclick="selectDate(this.id)" id="r1c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r2c1"></td>
+							<td onclick="selectDate(this.id)" id="r2c2"></td>
+							<td onclick="selectDate(this.id)" id="r2c3"></td>
+							<td onclick="selectDate(this.id)" id="r2c4"></td>
+							<td onclick="selectDate(this.id)" id="r2c5"></td>
+							<td onclick="selectDate(this.id)" id="r2c6"></td>
+							<td onclick="selectDate(this.id)" id="r2c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r3c1"></td>
+							<td onclick="selectDate(this.id)" id="r3c2"></td>
+							<td onclick="selectDate(this.id)" id="r3c3"></td>
+							<td onclick="selectDate(this.id)" id="r3c4"></td>
+							<td onclick="selectDate(this.id)" id="r3c5"></td>
+							<td onclick="selectDate(this.id)" id="r3c6"></td>
+							<td onclick="selectDate(this.id)" id="r3c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r4c1"></td>
+							<td onclick="selectDate(this.id)" id="r4c2"></td>
+							<td onclick="selectDate(this.id)" id="r4c3"></td>
+							<td onclick="selectDate(this.id)" id="r4c4"></td>
+							<td onclick="selectDate(this.id)" id="r4c5"></td>
+							<td onclick="selectDate(this.id)" id="r4c6"></td>
+							<td onclick="selectDate(this.id)" id="r4c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r5c1"></td>
+							<td onclick="selectDate(this.id)" id="r5c2"></td>
+							<td onclick="selectDate(this.id)" id="r5c3"></td>
+							<td onclick="selectDate(this.id)" id="r5c4"></td>
+							<td onclick="selectDate(this.id)" id="r5c5"></td>
+							<td onclick="selectDate(this.id)" id="r5c6"></td>
+							<td onclick="selectDate(this.id)" id="r5c7"></td>
+						</tr>
+						<tr>
+							<td onclick="selectDate(this.id)" id="r6c1"></td>
+							<td onclick="selectDate(this.id)" id="r6c2"></td>
+							<td onclick="selectDate(this.id)" id="r6c3"></td>
+							<td onclick="selectDate(this.id)" id="r6c4"></td>
+							<td onclick="selectDate(this.id)" id="r6c5"></td>
+							<td onclick="selectDate(this.id)" id="r6c6"></td>
+							<td onclick="selectDate(this.id)" id="r6c7"></td>
+						</tr>
+						</tbody>
+					</table>
+					<p style="text-align: center; font-size: 20px" id="local-time-display">All Dates and Times are
+						displayed in your local timezone!</p>
+					<br>
+					<br>
+					<a target="_blank"
+					   th:href="'https://calendar.google.com/calendar/embed?src=' + ${embed.calendar.id}">
+						<button>View on Google Calendar</button>
+					</a>
+				</div>
+				<hr>
+				<br>
+				<h6>Events for Selected Date</h6>
+				<!--Add events for selected date via JS and JQuery-->
+				<div id="event-container">
+
+				</div>
+
+				<div id="snackbar"></div>
+			</div>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>
+			<span th:text="'© DreamExposure ' + ${year} + '. All rights reserved.'"></span>
+			<span> | </span>
+			<a href="/policy/privacy">Privacy Policy</a>
+			<span> | </span>
+			<a href="/policy/tos">Terms of Service</a>
+			<span> | </span>
+			<a href="/docs/api/overview">Developer API</a>
+			<span> | </span>
+			<a href="https://www.dreamexposure.org">Powered By DreamExposure</a>
+			<span> | </span>
+			<span>DisCal is not endorsed or supported by Discord</span>
+		</p>
+	</footer>
+</html>

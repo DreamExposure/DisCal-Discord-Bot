@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.handler;
 
-import okhttp3.*;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
@@ -9,10 +8,23 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.json.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+
+import javax.servlet.http.HttpServletRequest;
+
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 @SuppressWarnings({"unchecked", "RedundantCast", "Duplicates", "WeakerAccess", "unused", "ConstantConditions"})
 public class DiscordAccountHandler {
@@ -272,7 +284,7 @@ public class DiscordAccountHandler {
 	}
 
 	private void removeTimedOutAccounts() {
-		long limit = Long.valueOf(BotSettings.TIME_OUT.get());
+		long limit = Long.parseLong(BotSettings.TIME_OUT.get());
 		final List<String> toRemove = new ArrayList<>();
 		for (String id : discordAccounts.keySet()) {
 			Map m = discordAccounts.get(id);

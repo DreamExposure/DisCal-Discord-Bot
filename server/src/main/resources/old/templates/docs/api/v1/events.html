@@ -1,0 +1,760 @@
+<!DOCTYPE HTML>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+
+		<!-- ****** faviconit.com favicons ****** -->
+		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/images/favicon.ico">
+		<link rel="icon" type="image/png" sizes="196x196" href="/assets/images/favicon/favicon-192.png">
+		<link rel="icon" type="image/png" sizes="160x160" href="/assets/images/favicon/favicon-160.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96.png">
+		<link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon/favicon-64.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
+		<link rel="apple-touch-icon" href="/assets/images/favicon/favicon-57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/favicon-114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/favicon-72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/favicon-144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/favicon-60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/favicon-120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/favicon-76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/favicon-152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/favicon-180.png">
+		<meta name="msapplication-TileColor" content="#FFFFFF">
+		<meta name="msapplication-TileImage" content="/assets/images/favicon/favicon-144.png">
+		<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml">
+		<!-- ****** faviconit.com favicons ****** -->
+		<title>API Docs - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles-old/global.css" rel="stylesheet">
+		<link href="/styles-old/docs.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<a href="/" class="title"><h1>DISCAL</h1></a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+			<a href="/status">Status</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' + ${redirUri}">Log
+				In</a>
+		</div>
+
+		<div id="content">
+			<div id="side-nav">
+				<h4>API</h4>
+				<a href="/docs/api/overview">
+					<button>Overview</button>
+				</a>
+				<br>
+				<a href="/docs/api/errors">
+					<button>Errors</button>
+				</a>
+				<hr>
+				<h4>v1 Endpoints</h4>
+				<a href="/docs/api/v1/announcement">
+					<button>Announcements</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/calendar">
+					<button>Calendar</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events">
+					<button>Events</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/guild">
+					<button>Guild</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/rsvp">
+					<button>RSVP</button>
+				</a>
+				<hr>
+				<h4>Jump</h4>
+				<a href="/docs/api/v1/events#list-month">
+					<button>/list/month</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events#list-date">
+					<button>/list/date</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events#create">
+					<button>/create</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events#update">
+					<button>/update</button>
+				</a>
+				<br>
+				<a href="/docs/api/v1/events#delete">
+					<button>/delete</button>
+				</a>
+			</div>
+			<h1>API v1 Docs - Events Endpoint</h1>
+			<p>
+				The events endpoint allows you to create events, get events for the date or month, edit, and delete
+				events.
+			</p>
+			<br>
+
+			<hr>
+
+			<h2 id="list-month">/events/list/month</h2>
+			<p>
+				Returns a list of events for the specified month.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"DaysInMonth": 31,
+				"EpochStart": 1519884000000
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"count": 1,
+				"events": [{
+					"id": "e7gqkup5l8",
+					"epochStart": 1521732600000,
+					"epochEnd": 1521761400000
+				}]
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>DaysInMonth</td>
+					<td>int</td>
+					<td>Days in the month</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>EpochStart</td>
+					<td>long</td>
+					<td>First unix millisecond of the month</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Count</td>
+					<td>int</td>
+					<td>Amount of events in month</td>
+				</tr>
+				<tr>
+					<td>events</td>
+					<td>List</td>
+					<td>List of events in month</td>
+				</tr>
+				<tr>
+					<td>events.id</td>
+					<td>String</td>
+					<td>The event's ID</td>
+				</tr>
+				<tr>
+					<td>events.epochStart</td>
+					<td>long</td>
+					<td>Unix start time of event</td>
+				</tr>
+				<tr>
+					<td>events.epochEnd</td>
+					<td>long</td>
+					<td>Unix end time of event</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="list-date">/events/list/date</h2>
+			<p>
+				Returns a list of events for the specified date. Automatically adds 24 hours to the start time.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"startEpoch": 1521694800000
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"count": 1,
+				"events": [{
+					"id": "e7gqkup5l8",
+					"epochStart": 1521732600000,
+					"epochEnd": 1521732600000,
+					"timezone": "America/Chicago",
+					"summary": "Made in the dashboard!",
+					"description": "This event was created using the new dashboard",
+					"location": "The void",
+					"color": "BLUE",
+					"isParent": true,
+					"recurrence": {
+						"recur": false,
+						"frequency": "DAILY",
+						"count": -1,
+						"interval": 1,
+					},
+					"image": "https://goo.gl/nqi64A"
+				}]
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>StartEpoch</td>
+					<td>long</td>
+					<td>First unix millisecond of the date</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Count</td>
+					<td>int</td>
+					<td>Amount of events in month</td>
+				</tr>
+				<tr>
+					<td>events</td>
+					<td>List</td>
+					<td>List of events in month</td>
+				</tr>
+				<tr>
+					<td>events.id</td>
+					<td>String</td>
+					<td>The event's ID</td>
+				</tr>
+				<tr>
+					<td>events.epochStart</td>
+					<td>long</td>
+					<td>Unix start time of event</td>
+				</tr>
+				<tr>
+					<td>events.epochEnd</td>
+					<td>long</td>
+					<td>Unix end time of event</td>
+				</tr>
+				<tr>
+					<td>events.timezone</td>
+					<td>String</td>
+					<td>The Timezone of the event/calendar</td>
+				</tr>
+				<tr>
+					<td>events.summary</td>
+					<td>String</td>
+					<td>The summary/name of the event</td>
+				</tr>
+				<tr>
+					<td>events.description</td>
+					<td>String</td>
+					<td>The description of the event</td>
+				</tr>
+				<tr>
+					<td>events.location</td>
+					<td>String</td>
+					<td>The location the event takes place</td>
+				</tr>
+				<tr>
+					<td>events.color</td>
+					<td>String</td>
+					<td>The name of the event color, "NONE" if no color used</td>
+				</tr>
+				<tr>
+					<td>events.image</td>
+					<td>String/URL</td>
+					<td>URL of the event's image</td>
+				</tr>
+				<tr>
+					<td>events.isParent</td>
+					<td>Boolean</td>
+					<td>Whether or not the event is a parent. (default true)</td>
+				</tr>
+				<tr>
+					<td>events.recurrence.recur</td>
+					<td>Boolean</td>
+					<td>Whether or not the event is set to recur.</td>
+				</tr>
+				<tr>
+					<td>events.recurrence.frequency</td>
+					<td>String</td>
+					<td>The frequency of the event's recurrence.</td>
+				</tr>
+				<tr>
+					<td>events.recurrence.recurCount</td>
+					<td>int</td>
+					<td>The amount of times the event recurs. (-1 or 0 for infinite)</td>
+				</tr>
+				<tr>
+					<td>events.recurrence.interval</td>
+					<td>int</td>
+					<td>Interval at which the event recurs (compliant to the above values)</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="create">/events/create</h2>
+			<p>
+				Creates a new event with the specified data.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"epochStart": 1521732600000,
+				"epochEnd": 1521732600000,
+				"summary": "My cool event!",
+				"description": "Event edited via REST API",
+				"location": "The nether",
+				"color": "RED",
+				"recurrence": {
+					"recur": false,
+					"frequency": "DAILY",
+					"count": -1,
+					"interval": 1,
+				},
+				"image": "https://goo.gl/nqi64A"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully created event!",
+				"id": "e7gqkup5l8"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>epochStart</td>
+					<td>long</td>
+					<td>Unix time of event start</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>epochEnd</td>
+					<td>long</td>
+					<td>Unix time of event start</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>summary</td>
+					<td>String</td>
+					<td>The Summary/Name of the event</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>description</td>
+					<td>String</td>
+					<td>The description of event</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>location</td>
+					<td>String</td>
+					<td>Where the event takes place</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>color</td>
+					<td>String</td>
+					<td>The color of the event (1 of 12 supported colors)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>image</td>
+					<td>String/URL</td>
+					<td>The URL to the event's image</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.recur</td>
+					<td>Boolean</td>
+					<td>Whether or not the event should recur</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.frequency</td>
+					<td>String</td>
+					<td>The frequency at which the event should recur</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.count</td>
+					<td>int</td>
+					<td>How many times the event should recur (-1 or 0 for infinite)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.interval</td>
+					<td>int</td>
+					<td>The interval for which the event should recur (compliant to above values)</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of creation</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>ID of the event created</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="update">/events/update</h2>
+			<p>
+				Updates the specified event with the provided data.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"id": e7gqkup5l8,
+				"epochStart": 1521732600000,
+				"epochEnd": 1521732600000,
+				"summary": "My cool event!",
+				"description": "Event edited via REST API",
+				"location": "The nether",
+				"color": "RED",
+				"recurrence": {
+					"recur": false,
+					"count": -1,
+					"interval": 1,
+				},
+				"image": "https://goo.gl/nqi64A"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully updated event!"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>ID of the event to edit</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>epochStart</td>
+					<td>long</td>
+					<td>Unix time of event start</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>epochEnd</td>
+					<td>long</td>
+					<td>Unix time of event start</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>summary</td>
+					<td>String</td>
+					<td>The Summary/Name of the event</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>description</td>
+					<td>String</td>
+					<td>The description of event</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>location</td>
+					<td>String</td>
+					<td>Where the event takes place</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>color</td>
+					<td>String</td>
+					<td>The color of the event (1 of 12 supported colors)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>image</td>
+					<td>String/URL</td>
+					<td>The URL to the event's image</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.recur</td>
+					<td>Boolean</td>
+					<td>Whether or not the event should recur</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.frequency</td>
+					<td>String</td>
+					<td>The frequency at which the event should recur</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.count</td>
+					<td>int</td>
+					<td>How many times the event should recur (-1 or 0 for infinite)</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>recurrence.interval</td>
+					<td>int</td>
+					<td>The interval for which the event should recur (compliant to above values)</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of update.</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<hr>
+
+			<h2 id="delete">/events/delete</h2>
+			<p>
+				Deletes the specified event.
+			</p>
+			<br>
+
+			<h6>Example Request Body</h6>
+			<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"id": e7gqkup5l8
+				}
+			</code></pre>
+			<br>
+
+			<h6>Example Response</h6>
+			<br>
+			<pre class="code"><code>
+				{
+				"Message": "Successfully deleted event!"
+				}
+			</code></pre>
+			<br>
+
+			<h6>Supported Values in Request</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+					<th>Required</th>
+				</tr>
+				<tr>
+					<td>guild_id</td>
+					<td>long</td>
+					<td>The Guild ID</td>
+					<td>True</td>
+				</tr>
+				<tr>
+					<td>id</td>
+					<td>String</td>
+					<td>ID of the event to delete</td>
+					<td>True</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+
+			<h6>Returned Values</h6>
+			<table style="border-color: #ef0813; margin: auto;" border="#ef0813" cellpadding="4" cellspacing="0">
+				<tbody>
+				<tr>
+					<th>Key</th>
+					<th>Value Type</th>
+					<th>Info</th>
+				</tr>
+				<tr>
+					<td>Message</td>
+					<td>String</td>
+					<td>Status of deletion</td>
+				</tr>
+				</tbody>
+			</table>
+			<br>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>
+			<span th:text="'© DreamExposure ' + ${year} + '. All rights reserved.'"></span>
+			<span> | </span>
+			<a href="/policy/privacy">Privacy Policy</a>
+			<span> | </span>
+			<a href="/policy/tos">Terms of Service</a>
+			<span> | </span>
+			<a href="/docs/api/overview">Developer API</a>
+			<span> | </span>
+			<a href="https://www.dreamexposure.org">Powered By DreamExposure</a>
+			<span> | </span>
+			<span>DisCal is not endorsed or supported by Discord</span>
+		</p>
+	</footer>
+</html>

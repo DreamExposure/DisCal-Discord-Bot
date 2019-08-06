@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<!--suppress HtmlUnknownTarget -->
+<html xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<!--Meta stuffs-->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="DisCal is a bot that implements Google Calendar seamlessly into Discord">
+		<meta property="og:title" content="DisCal Bot"/>
+		<meta property="og:url" content="https://discalbot.com"/>
+		<meta property="og:description"
+		      content="DisCal is a bot that implements Google Calendar seamlessly into Discord"/>
+		<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+
+		<!-- ****** faviconit.com favicons ****** -->
+		<link rel="shortcut icon" href="/assets/images/favicon/favicon.ico">
+		<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/images/favicon.ico">
+		<link rel="icon" type="image/png" sizes="196x196" href="/assets/images/favicon/favicon-192.png">
+		<link rel="icon" type="image/png" sizes="160x160" href="/assets/images/favicon/favicon-160.png">
+		<link rel="icon" type="image/png" sizes="96x96" href="/assets/images/favicon/favicon-96.png">
+		<link rel="icon" type="image/png" sizes="64x64" href="/assets/images/favicon/favicon-64.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
+		<link rel="apple-touch-icon" href="/assets/images/favicon/favicon-57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicon/favicon-114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicon/favicon-72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicon/favicon-144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicon/favicon-60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicon/favicon-120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicon/favicon-76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicon/favicon-152.png">
+		<link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicon/favicon-180.png">
+		<meta name="msapplication-TileColor" content="#FFFFFF">
+		<meta name="msapplication-TileImage" content="/assets/images/favicon/favicon-144.png">
+		<meta name="msapplication-config" content="/assets/images/favicon/browserconfig.xml">
+		<!-- ****** faviconit.com favicons ****** -->
+		<title>Status - DisCal</title>
+
+		<!--Locally hosted-->
+		<link href="/styles-old/global.css" rel="stylesheet">
+	</head>
+
+	<body>
+		<div class="top-nav">
+			<a href="/" class="title"><h1>DISCAL</h1></a>
+			<a href="/about">About</a>
+			<a href="/commands">Commands</a>
+			<a href="/setup">Setup</a>
+			<a href="/lazy-discal">Lazy DisCal</a>
+			<a href="/dashboard">Dashboard</a>
+			<a href="https://discord.gg/2TFqyuy" target="_blank">Support</a>
+			<a href="https://www.patreon.com/Novafox" target="_blank">Patreon</a>
+			<a class="active" href="/status">Status</a>
+
+			<a class="account" th:if="${loggedIn}" href="/account/logout">Log out</a>
+			<a class="account" th:unless="${loggedIn}"
+			   th:href="'https://discordapp.com/oauth2/authorize?client_id=' + ${client} + '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' + ${redirUri}">Log
+				In</a>
+		</div>
+
+		<div id="content">
+			<h1>DisCal Network and Services Status</h1>
+
+			<h2>Server</h2>
+			<p th:text="'Connected Clients: ' + ${status.clientCount}"></p>
+			<p th:text="'Uptime: ' + ${status.uptime}"></p>
+			<p th:text="'Total Guilds: ' + ${status.totalGuildCount}"></p>
+			<p th:text="'Total Calendars: ' + ${status.calendarCount}"></p>
+			<p th:text="'Total Announcements: ' + ${status.announcementCount}"></p>
+
+			<br>
+			<hr>
+			<br>
+
+			<h2>API</h2>
+			<p>Uptime: Not yet tracked</p>
+			<p>Ping: Not yet tracked</p>
+			<p>Requests Processed: not yet tracked</p>
+
+			<br>
+			<hr>
+			<br>
+
+			<h2>Clients</h2>
+			<th:block th:each="client : ${status.clients}">
+				<div th:id="'client-' + ${client.clientIndex}">
+					<h3 th:text="'Client Index: ' + ${client.clientIndex}"></h3>
+					<p th:text="'Guilds: ' + ${client.connectedServers}"></p>
+					<p th:text="'RAM Used: ' + ${client.memUsed} + 'MB'"></p>
+					<p>Announcements: Not Yet Tracked</p>
+					<p th:text="'Uptime: ' + ${client.uptime}"></p>
+					<p th:text="'Last KeepAlive: ' + ${client.lastKeepAliveHumanReadable}"></p>
+					<p>Announcement Service: Not yet tracked</p>
+					<p>Creator Cleaner Service: Not yet tracked</p>
+				</div>
+				<br>
+			</th:block>
+		</div>
+	</body>
+
+	<footer id="footer">
+		<p>
+			<span th:text="'© DreamExposure ' + ${year} + '. All rights reserved.'"></span>
+			<span> | </span>
+			<a href="/policy/privacy">Privacy Policy</a>
+			<span> | </span>
+			<a href="/policy/tos">Terms of Service</a>
+			<span> | </span>
+			<a href="/docs/api/overview">Developer API</a>
+			<span> | </span>
+			<a href="https://www.dreamexposure.org">Powered By DreamExposure</a>
+			<span> | </span>
+			<span>DisCal is not endorsed or supported by Discord</span>
+		</p>
+	</footer>
+</html>
