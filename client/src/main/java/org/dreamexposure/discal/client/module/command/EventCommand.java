@@ -4,9 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.event.EventCreator;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -19,7 +17,12 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.utils.*;
+import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.GeneralUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.TimeUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -28,6 +31,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -492,6 +499,14 @@ public class EventCommand implements ICommand {
 							//Date shuffling done, now actually apply all that damn stuff here.
 							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setStartDateTime(eventDateTime);
 
+							//Apply viewable date/times...
+							SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+							Date dateObjV = sdfV.parse(dateRaw);
+							DateTime dateTimeV = new DateTime(dateObjV);
+							EventDateTime eventDateTimeV = new EventDateTime();
+							eventDateTimeV.setDateTime(dateTimeV);
+							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableStartDate(eventDateTimeV);
+
 
 							//To streamline, check if event end is null, if so, apply 2 hour duration!
 							if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).getEndDateTime() == null) {
@@ -501,6 +516,15 @@ public class EventCommand implements ICommand {
 								end.setDateTime(new DateTime(endLong));
 
 								EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(end);
+
+
+								//Viewable date
+								EventDateTime endV = EventCreator.getCreator().getPreEvent(settings.getGuildID()).getViewableStartDate().clone();
+								long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
+
+								endV.setDateTime(new DateTime(endVLong));
+
+								EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(endV);
 							}
 
 							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
@@ -509,7 +533,7 @@ public class EventCommand implements ICommand {
 								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Start.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.Start.Success", settings);
-								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTime, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTime, settings, true));
+								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
 								MessageManager.sendMessageAsync(msg, event);
 							}
 						} else {
@@ -574,13 +598,21 @@ public class EventCommand implements ICommand {
 							//Date shuffling done, now actually apply all that damn stuff here.
 							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(eventDateTime);
 
+							//Apply viewable date/times...
+							SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+							Date dateObjV = sdfV.parse(dateRaw);
+							DateTime dateTimeV = new DateTime(dateObjV);
+							EventDateTime eventDateTimeV = new EventDateTime();
+							eventDateTimeV.setDateTime(dateTimeV);
+							EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(eventDateTimeV);
+
 							if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
 								MessageManager.deleteMessage(event);
 								MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
 								EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.End.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
 							} else {
 								String msg = MessageManager.getMessage("Creator.Event.End.Success", settings);
-								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTime, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTime, settings, true));
+								msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
 								MessageManager.sendMessageAsync(msg, event);
 							}
 						} else {

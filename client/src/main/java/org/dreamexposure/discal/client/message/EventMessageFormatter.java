@@ -3,9 +3,7 @@ package org.dreamexposure.discal.client.message;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Image;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -19,12 +17,17 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
+
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -208,10 +211,10 @@ public class EventMessageFormatter {
 			} else {
 				spec.addField(MessageManager.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
 			}
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getStartDateTime(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getStartDateTime(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getEndDateTime(), settings, true), true);
-			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getEndDateTime(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartDate", settings), getHumanReadableDate(event.getViewableStartDate(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.StartTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableStartDate(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndDate", settings), getHumanReadableDate(event.getViewableEndDate(), settings, true), true);
+			spec.addField(MessageManager.getMessage("Embed.Event.Pre.EndTime", settings), EventMessageFormatter.getHumanReadableTime(event.getViewableEndDate(), settings, true), true);
 			spec.addField(MessageManager.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
 			if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
