@@ -4,7 +4,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
-import org.dreamexposure.discal.server.handler.DiscordAccountHandler;
+import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
