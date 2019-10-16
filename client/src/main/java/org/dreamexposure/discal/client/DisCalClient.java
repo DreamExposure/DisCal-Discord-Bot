@@ -1,5 +1,35 @@
 package org.dreamexposure.discal.client;
 
+import org.dreamexposure.discal.client.listeners.discal.PubSubListener;
+import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
+import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.module.command.AddCalendarCommand;
+import org.dreamexposure.discal.client.module.command.AnnouncementCommand;
+import org.dreamexposure.discal.client.module.command.CalendarCommand;
+import org.dreamexposure.discal.client.module.command.CommandExecutor;
+import org.dreamexposure.discal.client.module.command.DevCommand;
+import org.dreamexposure.discal.client.module.command.DisCalCommand;
+import org.dreamexposure.discal.client.module.command.EventCommand;
+import org.dreamexposure.discal.client.module.command.EventListCommand;
+import org.dreamexposure.discal.client.module.command.HelpCommand;
+import org.dreamexposure.discal.client.module.command.LinkCalendarCommand;
+import org.dreamexposure.discal.client.module.command.RsvpCommand;
+import org.dreamexposure.discal.client.module.command.TimeCommand;
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.network.google.Authorization;
+import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.novautils.event.EventManager;
+import org.dreamexposure.novautils.network.pubsub.PubSubManager;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Properties;
+
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -12,27 +42,8 @@ import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import org.dreamexposure.discal.client.listeners.discal.PubSubListener;
-import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.client.module.command.*;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
-import org.dreamexposure.discal.core.network.google.Authorization;
-import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Properties;
-
-@SpringBootApplication
-@EnableRedisHttpSession
+@SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
 	private static DiscordClient client;
 
@@ -82,7 +93,9 @@ public class DisCalClient {
 		//Start Spring
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
 			try {
-				SpringApplication.run(DisCalClient.class, args);
+				SpringApplication app = new SpringApplication(DisCalClient.class);
+				app.setAdditionalProfiles(BotSettings.PROFILE.get());
+				app.run(args);
 			} catch (Exception e) {
 				e.printStackTrace();
 				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE Communication'", e, true, DisCalClient.class);
@@ -90,7 +103,7 @@ public class DisCalClient {
 		}
 
 		//Start Redis pub/sub listeners
-		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
+		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
 		//We must register each channel we want to use. This is super important.
 		PubSubManager.get().register(clientId(), BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All");
 
@@ -114,7 +127,7 @@ public class DisCalClient {
 		//Redis info + store service for caching
 		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
 			RedisURI uri = RedisURI.Builder
-				.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.valueOf(BotSettings.REDIS_PORT.get()))
+				.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
 				.withPassword(BotSettings.REDIS_PASSWORD.get())
 				.build();
 
@@ -138,6 +151,6 @@ public class DisCalClient {
 	}
 
 	public static int clientId() {
-		return Integer.valueOf(BotSettings.SHARD_INDEX.get());
+		return Integer.parseInt(BotSettings.SHARD_INDEX.get());
 	}
 }

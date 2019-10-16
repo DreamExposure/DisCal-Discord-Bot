@@ -10,15 +10,14 @@ import org.dreamexposure.novautils.event.EventManager;
 import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-@SpringBootApplication
-@EnableRedisHttpSession
+@SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalWeb {
 	private static NetworkInfo networkInfo = new NetworkInfo();
 
@@ -41,16 +40,21 @@ public class DisCalWeb {
 		//Start Spring
 		try {
 			DiscordAccountHandler.getHandler().init();
-			SpringApplication.run(DisCalWeb.class, args);
+			SpringApplication app = new SpringApplication(DisCalWeb.class);
+			app.setAdditionalProfiles(BotSettings.PROFILE.get());
+			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalWeb.class);
+			System.exit(4);
 		}
 
 		//Start Redis PubSub Listeners
-		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
-		//We must register each channel we want to use. This is super important.
-		PubSubManager.get().register(-1, BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive");
+		if (!BotSettings.PROFILE.get().equalsIgnoreCase("TESTING")) {
+			PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
+			//We must register each channel we want to use. This is super important.
+			PubSubManager.get().register(-1, BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive");
+		}
 	}
 
 	public static NetworkInfo getNetworkInfo() {

@@ -12,15 +12,14 @@ import org.dreamexposure.novautils.event.EventManager;
 import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-@SpringBootApplication
-@EnableRedisHttpSession
+@SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalServer {
 	private static NetworkInfo networkInfo = new NetworkInfo();
 
@@ -46,7 +45,9 @@ public class DisCalServer {
 
 		//Start Spring
 		try {
-			SpringApplication.run(DisCalServer.class, args);
+			SpringApplication app = new SpringApplication(DisCalServer.class);
+			app.setAdditionalProfiles(BotSettings.PROFILE.get());
+			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalServer.class);

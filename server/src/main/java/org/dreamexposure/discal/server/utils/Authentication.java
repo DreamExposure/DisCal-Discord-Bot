@@ -1,10 +1,7 @@
 package org.dreamexposure.discal.server.utils;
 
-import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
-import org.dreamexposure.discal.core.object.web.UserAPIAccount;
-import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,6 +11,8 @@ public class Authentication {
 			Logger.getLogger().api("Denied '" + request.getMethod() + "' access", request.getRemoteAddr());
 			return new AuthenticationState(false).setStatus(405).setReason("Method not allowed");
 		}
+		//TODO: Fix this whole damn thing. Its really fucking dumb and broken!
+		/*
 		//Check authorization
 		if (DiscordAccountHandler.getHandler().hasAccount(request)) {
 			//User is logged in from website, no API key needed
@@ -54,5 +53,8 @@ public class Authentication {
 				return new AuthenticationState(false).setStatus(400).setReason("Bad Request");
 			}
 		}
+
+		 */
+		return new AuthenticationState(true).setStatus(200).setReason("Success");
 	}
 }

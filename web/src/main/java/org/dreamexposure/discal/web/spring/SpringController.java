@@ -9,7 +9,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "SpringMVCViewInspection"})
 @Controller
 public class SpringController {
 
@@ -178,5 +178,27 @@ public class SpringController {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
 		return "status";
+	}
+
+	//Error pages
+	@RequestMapping("/400")
+	public String badRequest(Map<String, Object> model, HttpServletRequest req) {
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "error/400";
+	}
+
+	@RequestMapping("/404")
+	public String notFound(Map<String, Object> model, HttpServletRequest req) {
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "error/404";
+	}
+
+	@RequestMapping("/500")
+	public String internalError(Map<String, Object> model, HttpServletRequest req) {
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "error/500";
 	}
 }
