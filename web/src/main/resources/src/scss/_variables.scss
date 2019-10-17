@@ -1,6 +1,11 @@
 // Override Bootstrap default variables here
 // Do not edit any of the files in /vendor/bootstrap/scss/!
 
+//noinspection CssUnknownTarget
+@import "./node_modules/bootstrap/scss/functions";
+//noinspection CssUnknownTarget
+@import "./node_modules/bootstrap/scss/variables";
+
 // Color Variables
 // Bootstrap Color Overrides
 
@@ -27,10 +32,45 @@ $green: #1cc88a !default;
 $teal: #20c9a6 !default;
 $cyan: #36b9cc !default;
 
-// Custom Colors
-$brand-google: #ea4335;
-$brand-facebook: #3b5998;
-$brand-discord: #7289da;
+// Discord colors
+$discord-blurple: #7289DA !default;
+$discord-full-white: #FFFFFF !default;
+$discord-greyple: #99AAB5 !default;
+$discord-dark-but-not-black: #2C2F33 !default;
+$discord-not-quite-black: #23272A !default;
+
+// DisCal Colors
+$discal-blue: #5566c2 !default;
+$discal-red: #ef0813 !default;
+$discal-light-gray: #bcbcbc !default;
+$discal-dark-gray: #3c3d41 !default;
+$discal-not-black: #242428 !default;
+
+// Brand Colors
+$brand-google: #ea4335 !default;
+$brand-facebook: #3b5998 !default;
+$brand-discord: #7289da !default;
+
+$theme-colors: (
+	// Discord Colors
+	discord-blurple: #7289DA,
+	discord-full-white: #FFFFFF,
+	discord-greyple: #99AAB5,
+	discord-dark-but-not-black: #2C2F33,
+	discord-not-quite-black: #23272A,
+
+	// DisCal colors
+	discal-blue: #5566c2,
+	discal-red: #ef0813,
+	discal-light-gray: #bcbcbc,
+	discal-dark-gray: #3c3d41,
+	discal-not-black: #242428,
+
+	// Brand colors
+	brand-google: #ea4335,
+	brand-facebook: #3b5998,
+	brand-discord: #7289da,
+);
 
 // Set Contrast Threshold
 $yiq-contrasted-threshold: 195 !default;

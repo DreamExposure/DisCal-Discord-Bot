@@ -54,7 +54,7 @@
 <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+    <ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion" id="accordionSidebar">
 
         <!-- Sidebar - Brand -->
         <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
@@ -123,17 +123,17 @@
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content-wrapper" class="d-flex flex-column bg-discal-not-black">
 
         <!-- Main Content -->
         <div id="content">
 
             <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+            <nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
+                    <i class="fa fa-bars text-discord-full-white"></i>
                 </button>
 
                 <!-- Topbar Navbar -->
@@ -141,16 +141,16 @@
 
                     <!-- Nav Item - Support Link -->
                     <li class="nav-item">
-                        <a class="nav-link" th:href="${support_invite}" target="_blank">
-                            <i class="fas fa-question-circle fa-sm fa-fw mr-2 text-gray-400"></i>
+                        <a class="nav-link text-discord-full-white" th:href="${support_invite}" target="_blank">
+                            <i class="fas fa-question-circle fa-sm fa-fw mr-2"></i>
                             Support
                         </a>
                     </li>
 
                     <!-- Nav Item - Invite Link -->
                     <li class="nav-item">
-                        <a class="nav-link" th:href="${bot_invite}" target="_blank">
-                            <i class="fas fa-envelope-open-text fa-sm fa-fw mr-2 text-gray-400"></i>
+                        <a class="nav-link text-discord-full-white" th:href="${bot_invite}" target="_blank">
+                            <i class="fas fa-envelope-open-text fa-sm fa-fw mr-2"></i>
                             Invite
                         </a>
                     </li>
@@ -161,22 +161,22 @@
                     <li th:if="${logged_in}" class="nav-item dropdown no-arrow">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-lg-inline text-gray-600 small" th:text="${username}"></span>
+                            <span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
                             <img class="img-profile rounded-circle" th:src="${pfp}"
                                  alt="pfp">
                         </a>
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                              aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                            <a class="dropdown-item text-discord-full-white" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
                                 Logout
                             </a>
                         </div>
                     </li>
                     <li th:unless="${logged_in}" class="nav-item">
-                        <a class="nav-link" href="/account/login">
-                            <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                        <a class="nav-link text-discord-full-white" href="/login">
+                            <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
                             Login
                         </a>
                     </li>
@@ -196,9 +196,9 @@
         <!-- End of Main Content -->
 
         <!-- Footer -->
-        <footer class="sticky-footer bg-white">
+        <footer class="sticky-footer bg-discal-blue">
             <div class="container my-auto">
-                <div class="copyright text-center my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
                     <span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
                 </div>
             </div>
@@ -230,7 +230,7 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="/account/logout">Logout</a>
+                <a class="btn btn-primary" href="/logout">Logout</a>
             </div>
         </div>
     </div>

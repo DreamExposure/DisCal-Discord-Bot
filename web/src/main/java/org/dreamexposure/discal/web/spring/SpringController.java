@@ -63,6 +63,26 @@ public class SpringController {
 		return "policy/tos";
 	}
 
+	//Account pages
+	@RequestMapping("/login")
+	public String accountLogin(Map<String, Object> model, HttpServletRequest req) {
+		if (DiscordAccountHandler.getHandler().hasAccount(req))
+			return "redirect:/dashboard";
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "account/login";
+	}
+
+	@RequestMapping("/logout")
+	public String accountLogout(Map<String, Object> model, HttpServletRequest req) {
+		if (!DiscordAccountHandler.getHandler().hasAccount(req))
+			return "redirect:/login";
+		DiscordAccountHandler.getHandler().removeAccount(req);
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "redirect:/";
+	}
+
 	//Dashboard pages
 	@RequestMapping("/dashboard")
 	public String dashboard(Map<String, Object> model, HttpServletRequest req) {

@@ -53,132 +53,138 @@
 <!-- Page Wrapper -->
 <div id="wrapper">
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+	<!-- Sidebar -->
+	<ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion" id="accordionSidebar">
 
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-headphones"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">DisCal</div>
-        </a>
+		<!-- Sidebar - Brand -->
+		<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+			<div class="sidebar-brand-icon rotate-n-15">
+				<i class="fas fa-headphones"></i>
+			</div>
+			<div class="sidebar-brand-text mx-3">DISCAL</div>
+		</a>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
+		<!-- Divider -->
+		<hr class="sidebar-divider my-0">
 
-        <!-- Nav Item - Commands -->
-        <li class="nav-item">
-            <a class="nav-link" href="/commands">
-                <i class="fas fa-fw fa-terminal"></i>
-                <span>Commands</span></a>
-        </li>
+		<!-- Nav Item - Commands -->
+		<li class="nav-item">
+			<a class="nav-link" href="/commands">
+				<i class="fas fa-fw fa-terminal"></i>
+				<span>Commands</span></a>
+		</li>
 
-        <!-- Nav Item - Status -->
-        <li class="nav-item">
-            <a class="nav-link" href="/status">
-                <i class="fas fa-fw fa-info-circle"></i>
-                <span>Status</span></a>
-        </li>
+		<!-- Nav Item - Status -->
+		<li class="nav-item">
+			<a class="nav-link" href="/status">
+				<i class="fas fa-fw fa-info-circle"></i>
+				<span>Status</span></a>
+		</li>
 
-        <!-- Nav Item - Dashboard -->
-        <li class="nav-item active">
-            <a class="nav-link" href="/dashboard">
-                <i class="fas fa-fw fa-tachometer-alt"></i>
-                <span>Dashboard</span></a>
-        </li>
+		<!-- Nav Item - Dashboard -->
+		<li class="nav-item">
+			<a class="nav-link" href="/dashboard">
+				<i class="fas fa-fw fa-tachometer-alt"></i>
+				<span>Dashboard</span></a>
+		</li>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider">
+		<!-- Divider -->
+		<hr class="sidebar-divider">
 
-        <!-- Guilds list (only displayed if logged in) -->
-        <div th:if="${logged_in}">
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Guilds
-            </div>
+		<!-- Guilds list (only displayed if logged in) -->
+		<div th:if="${logged_in}">
+			<!-- Heading     -->
+			<div class="sidebar-heading">
+				Guilds
+			</div>
 
-            <!-- Start Nav Item - Guild Container -->
-            <th:block th:each="guild : ${guilds}">
-                <div class="nav-item">
-                    <a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
-                        <i class="fas fa-fw fa-chart-area"></i>
-                        <span th:text="${guild.name}"></span>
-                    </a>
-                </div>
-            </th:block>
-            <!-- End Nav Item - Guild Container -->
+			<!-- Start Nav Item - Guild Container -->
+			<th:block th:each="guild : ${guilds}">
+				<div class="nav-item">
+					<a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
+						<i class="fas fa-fw fa-chart-area"></i>
+						<span th:text="${guild.name}"></span>
+					</a>
+				</div>
+			</th:block>
+			<!-- End Nav Item - Guild Container -->
 
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
-        </div>
-        <!-- End Guilds list -->
+			<!-- Divider -->
+			<hr class="sidebar-divider d-none d-md-block">
+		</div>
+		<!-- End Guilds list -->
 
-        <!-- Sidebar Toggler (Sidebar) -->
-        <div class="text-center d-none d-md-inline">
-            <button class="rounded-circle border-0" id="sidebarToggle"></button>
-        </div>
+		<!-- Sidebar Toggler (Sidebar) -->
+		<div class="text-center d-none d-md-inline">
+			<button class="rounded-circle border-0" id="sidebarToggle"></button>
+		</div>
 
-    </ul>
-    <!-- End of Sidebar -->
+	</ul>
+	<!-- End of Sidebar -->
 
-    <!-- Content Wrapper -->
-    <div id="content-wrapper" class="d-flex flex-column">
+	<!-- Content Wrapper -->
+	<div id="content-wrapper" class="d-flex flex-column bg-discal-not-black">
 
-        <!-- Main Content -->
-        <div id="content">
+		<!-- Main Content -->
+		<div id="content">
 
-            <!-- Topbar -->
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+			<!-- Topbar -->
+			<nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
-                <!-- Sidebar Toggle (Topbar) -->
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
-                </button>
+				<!-- Sidebar Toggle (Topbar) -->
+				<button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+					<i class="fa fa-bars text-discord-full-white"></i>
+				</button>
 
-                <!-- Topbar Navbar -->
-                <ul class="navbar-nav ml-auto">
+				<!-- Topbar Navbar -->
+				<ul class="navbar-nav ml-auto">
 
-                    <!-- Nav Item - Support Link -->
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="${support_invite}" target="_blank">
-                            <i class="fas fa-question-circle fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Support
-                        </a>
-                    </li>
+					<!-- Nav Item - Support Link -->
+					<li class="nav-item">
+						<a class="nav-link text-discord-full-white" th:href="${support_invite}" target="_blank">
+							<i class="fas fa-question-circle fa-sm fa-fw mr-2"></i>
+							Support
+						</a>
+					</li>
 
-                    <!-- Nav Item - Invite Link -->
-                    <li class="nav-item">
-                        <a class="nav-link" th:href="${bot_invite}" target="_blank">
-                            <i class="fas fa-envelope-open-text fa-sm fa-fw mr-2 text-gray-400"></i>
-                            Invite
-                        </a>
-                    </li>
+					<!-- Nav Item - Invite Link -->
+					<li class="nav-item">
+						<a class="nav-link text-discord-full-white" th:href="${bot_invite}" target="_blank">
+							<i class="fas fa-envelope-open-text fa-sm fa-fw mr-2"></i>
+							Invite
+						</a>
+					</li>
 
-                    <div class="topbar-divider d-none d-sm-block"></div>
+					<div class="topbar-divider d-none d-sm-block"></div>
 
-                    <!-- Nav Item - User Information -->
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-lg-inline text-gray-600 small" th:text="${username}"></span>
-                            <img class="img-profile rounded-circle" th:src="${pfp}"
-                                 alt="pfp">
-                        </a>
-                        <!-- Dropdown - User Information -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </li>
+					<!-- Nav Item - User Information -->
+					<li th:if="${logged_in}" class="nav-item dropdown no-arrow">
+						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+						   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
+							<img class="img-profile rounded-circle" th:src="${pfp}"
+								 alt="pfp">
+						</a>
+						<!-- Dropdown - User Information -->
+						<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+							 aria-labelledby="userDropdown">
+							<a class="dropdown-item text-discord-full-white" href="#" data-toggle="modal" data-target="#logoutModal">
+								<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+								Logout
+							</a>
+						</div>
+					</li>
+					<li th:unless="${logged_in}" class="nav-item">
+						<a class="nav-link text-discord-full-white" href="/login">
+							<i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
+							Login
+						</a>
+					</li>
 
-                </ul>
+				</ul>
 
-            </nav>
-            <!-- End of Topbar -->
+			</nav>
+			<!-- End of Topbar -->
 
             <!-- Begin Page Content -->
             <div class="container-fluid">
@@ -207,15 +213,15 @@
         </div>
         <!-- End of Main Content -->
 
-        <!-- Footer -->
-        <footer class="sticky-footer bg-white">
-            <div class="container my-auto">
-                <div class="copyright text-center my-auto">
-                    <span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-                </div>
-            </div>
-        </footer>
-        <!-- End of Footer -->
+		<!-- Footer -->
+		<footer class="sticky-footer bg-discal-blue">
+			<div class="container my-auto">
+				<div class="copyright text-center text-discord-full-white my-auto">
+					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
+				</div>
+			</div>
+		</footer>
+		<!-- End of Footer -->
 
     </div>
     <!-- End of Content Wrapper -->
@@ -242,7 +248,7 @@
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="/account/logout">Logout</a>
+                <a class="btn btn-primary" href="/logout">Logout</a>
             </div>
         </div>
     </div>

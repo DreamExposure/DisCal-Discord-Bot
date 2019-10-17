@@ -3,7 +3,7 @@
 // https://css-tricks.com/glitch-effect-text-images-svg/
 
 .error {
-  color: $gray-800;
+  color: $discord-full-white;
   font-size: 7rem;
   position: relative;
   line-height: 1;
@@ -23,8 +23,8 @@
   left: 2px;
   text-shadow: -1px 0 $red;
   top: 0;
-  color: $gray-800;
-  background: $gray-100;
+  color: $discord-full-white;
+  background: $discal-not-black;
   overflow: hidden;
   clip: rect(0,900px,0,0);
   animation: noise-anim 2s infinite linear alternate-reverse;
@@ -44,8 +44,8 @@
   left: -2px;
   text-shadow: 1px 0 $blue;
   top: 0;
-  color: $gray-800;
-  background: $gray-100;
+  color: $discord-full-white;
+  background: $discal-not-black;
   overflow: hidden;
   clip: rect(0,900px,0,0);
   animation: noise-anim-2 3s infinite linear alternate-reverse;
