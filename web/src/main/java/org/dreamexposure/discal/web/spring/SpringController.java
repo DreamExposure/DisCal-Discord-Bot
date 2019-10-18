@@ -45,7 +45,7 @@ public class SpringController {
 	public String setup(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "setup";
+		return "various/setup";
 	}
 
 	//Policy pages

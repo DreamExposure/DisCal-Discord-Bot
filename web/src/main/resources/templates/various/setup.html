@@ -37,7 +37,7 @@
 	<meta name="msapplication-config" content="/assets/img/favicon/browserconfig.xml">
 	<!-- ****** faviconit.com favicons ****** -->
 
-	<title>DisCal - About</title>
+	<title>DisCal - Setup</title>
 
 	<!-- Custom fonts for this template-->
 	<link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -71,7 +71,7 @@
 		<hr class="sidebar-divider my-0">
 
 		<!-- Nav Item - About -->
-		<li class="nav-item active">
+		<li class="nav-item">
 			<a class="nav-link" href="/about">
 				<i class="fas fa-fw fa-info-circle"></i>
 				<span>About</span></a>
@@ -85,7 +85,7 @@
 		</li>
 
 		<!-- Nav Item - Setup -->
-		<li class="nav-item">
+		<li class="nav-item active">
 			<a class="nav-link" href="/setup">
 				<i class="fas fa-fw fa-cog"></i>
 				<span>Setup</span></a>
@@ -225,75 +225,132 @@
 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
-				<h1 class="text-center text-discal-blue">DisCal - About</h1>
+				<h1 class="text-center text-discal-blue">DisCal - Setup</h1>
 
-				<!-- Start Invite-->
+				<p class="text-center text-discord-full-white">
+					The following page is a step by step instruction for how to properly
+					setup DisCal.
+					<br>
+					<br>
+					It's quite simple, but you must create a new calendar in order for
+					DisCal to function fully.
+				</p>
+
+				<!--Start step one, invite-->
 				<div id="invite">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/logos/discord-logo-white.png"
-							 style="max-width: 300px; max-height: 300px"
-							 alt="Discord Logo, White">
+					<h3 class="text-center text-discal-blue">1. Add DisCal to your Discord
+						server</h3>
+
+					<div class="image-wrapper" style="float: left">
+						<img src="/assets/img/examples/DisCal-Invite-Perms.jpg"
+							 style="max-width: 300px; max-height: 300px;"
+							 alt="DisCal Invite Permissions Screenshot">
 					</div>
 
-					<h3 class="text-lg-left text-discal-blue">Invite To Your Discord Server</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						Seen enough of this amazing bot? Add it to your discord server by clicking
-						the button below, or the "invite" button in the top navigation bar.
+					<p class="text-center text-discord-full-white">
+						<strong>Skip this step if you have just added DisCal to your
+							server.</strong>
 						<br>
 						<br>
-						Once you add DisCal, check out the "Setup" page for more info on configuring
-						the bot!
+						<br>
+						Click the button below to authorize DisCal and select the server you want it
+						on.
+						<br>
+						<br>
+						<br>
+						<br>
+						You must have the "Manage Server" permission to add the bot. Contact the
+						server owner or admin to invite DisCal if you cannot.
+						<br>
+						<br>
+						<br>
 					</p>
 
 					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
 					   style="margin: 0 auto; max-width: 200px"
 					   target="_blank"
 					   th:href="${inviteUrl}">
-						Invite to Server Now!
+						Add To Discal to Server
 					</a>
 
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						Need to see more to convince you? Scroll down the page! You'l learn just how
-						useful DisCal really is and why you need it!
-					</p>
 				</div>
-				<!-- End Invite-->
+				<!--End Step one-->
 
 				<hr>
 
-				<!-- Start commands-->
-				<div id="commands">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/examples/DisCal-Event-Creation.jpg"
+				<!--Start step two, role-->
+				<div id="role">
+					<div class="image-wrapper" style="float: left">
+						<img src="/assets/img/examples/DisCal-Role-Perms.jpg"
 							 style="max-width: 300px; max-height: 300px;"
-							 alt="DisCal Event Creation">
+							 alt="Discal Role Permissions Screenshot">
 					</div>
 
-					<h3 class="text-lg-left text-discal-blue">Commands</h3>
+					<h3 class="text-center text-discal-blue">
+						2. Give DisCal permissions at server level and not at channel level
+						(channel permissions don't always work right)
+					</h3>
 
-					<br>
-					<br>
+					<p class="text-center text-discord-full-white">
+						If you have a Bot permission group, assign DisCal that permission.
+						<br>
+						<br>
+						If not, create a new permission role with the following permissions so that
+						DisCal may read and send messages based on its commands:
+						<br>
+						<br>
+						- Read Messages*
+						<br>
+						- Send Messages
+						<br>
+						- Embed Links
+						<br>
+						- Mention Everyone
+						<br>
+						- Manager Messages
+						<br>
+						- Reactions/External Emojis
+						<br>
+						<br>
+						<br>
+						* DisCal will not log or save any messages.
+						<br>
+						<br>
+					</p>
+				</div>
+				<!--End Step two-->
 
-					<p class="text-left text-discord-full-white">
-						DisCal is designed to be intuitive and powerful.
+				<hr>
+
+				<!--Start step three, calendar-->
+				<div id="calendar">
+					<div class="image-wrapper" style="float: left">
+						<img src="/assets/img/examples/DisCal-Calendar-Creation.jpg"
+							 style="max-width: 300px; max-height: 300px;"
+							 alt="DisCal Calendar Creation Screenshot">
+					</div>
+
+					<h3 class="text-center text-discal-blue">3. Create a Calendar for your
+						Discord</h3>
+
+					<p class="text-center text-discord-full-white">
+						DisCal currently only allows 1 calendar per server.
+						Use the command "!calendar create [calendar name]" in any channel.
+						(You can create a special channel just for DisCal commands if you want.)
+						<br>
+						<br>
+						Once that command is issued, DisCal will handle the rest and walk you
+						through a step by step guide into creating your new calendar!
+						<br>
+						<br>
+						Optionally you may attach an external calendar. (This feature is currently
+						in open testing for Patreon supporters.
+						Visit our Discord server for more information.)
 						<br>
 						<br>
 						<br>
-						Discal uses simple to understand commands. With a customizable prefix,
-						ability to mention DisCal directly,
-						and more DisCal's command system is designed for users in mind.
-						<br>
-						<br>
-						<br>
-						Because of this, DisCal has a ton of commands that allow you to fully
-						utilize it! View all of the documentation on the commands
-						for DisCal by clicking the button below!
+						For all information on existing commands as well as some tutorial .gifs,
+						click the button below.
 					</p>
 
 					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
@@ -302,212 +359,11 @@
 						View Commands
 					</a>
 				</div>
-				<!-- End Commands-->
-
-				<hr>
-
-				<!-- Start Trello -->
-				<div id="trello">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/other/discal-trello.png"
-							 style="max-width: 450px; max-height: 300px;"
-							 alt="Trello Screenshot">
-					</div>
-
-					<h3 class="text-left text-discal-blue">Trello</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						DisCal is meant to be useful, collaborative, and easy to use.
-						<br>
-						<br>
-						<br>
-						We use Trello to track everything we are currently working on.
-						This way, you can see what our progress is, comment on what you want us to
-						work on, or add suggestions and requests.
-						<br>
-						<br>
-						<br>
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   href="https://trello.com/b/OuFo5aXu/discal"
-					   target="_blank"
-					   style="margin: 0 auto; max-width: 200px">
-						Check out DisCal's Trello
-					</a>
-				</div>
-				<!-- End Trello-->
-
-				<hr>
-
-				<!-- Start Support-->
-				<div id="support">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/other/support-server.png"
-							 style="max-width: 450px; max-height: 300px;"
-							 alt="Support Server Screenshot">
-					</div>
-
-					<h3 class="text-left text-discal-blue">Official Support Server</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						If DisCal was meant to be useful, so are we! Join our official DisCal
-						Discord server for extra info and help.
-						<br>
-						<br>
-						<br>
-						Need help with something? Visit our support channel!
-						<br>
-						<br>
-						Want to request a feature we somehow didn't think to add? Send us a message
-						in our feature request channel!
-						<br>
-						<br>
-						<br>
-						Just want to be part of the amazing community using this Bot?
-						Join the discord!
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   href="https://discord.gg/2TFqyuy"
-					   target="_blank"
-					   style="margin: 0 auto; max-width: 200px">
-						Join The Support Server
-					</a>
-				</div>
-				<!-- End Support -->
-
-				<hr>
-
-				<!-- Start GitHub-->
-				<div id="source">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/other/discal-github.jpg"
-							 style="max-width: 450px; max-height: 300px;"
-							 alt="DisCal GitHub Screenshot">
-					</div>
-
-					<h3 class="text-left text-discal-blue">Source Code</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						DisCal was built upon open source APIs. It wouldn't be fair if we didn't
-						open source DisCal.
-						<br>
-						<br>
-						<br>
-						All of the source code behind this amazing bot can be found on the GitHub
-						repo linked below!
-						<br>
-						<br>
-						<br>
-						We encourage those who can to fork the repository and help code DisCal!
-						We are community driven and really love any help we can get.
-						Even just a simple typo fix.
-						<br>
-						<br>
-						And of course, we will credit you with the changes and even give you a
-						special contributor role!!!
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   href="https://github.com/NovaFox161/DisCal-Discord-Bot"
-					   target="_blank"
-					   style="margin: 0 auto; max-width: 200px">
-						DisCal GitHub
-					</a>
-				</div>
-				<!-- End Github-->
-
-				<hr>
-
-				<!-- Start Patreon-->
-				<div id="patreon">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/other/novafox-patreon-page.png"
-							 style="max-width: 450px; max-height: 300px;"
-							 alt="Patreon Screenshot">
-					</div>
-
-					<h3 class="text-left text-discal-blue">Become a Patron Today!</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						DisCal is developed freely, open source, and completely unlimited.
-						However, we still need to support ourselves.
-						<br>
-						<br>
-						Rather than making DisCal limited for free users, we decided to open a
-						patreon, by becoming a patron you help support and fund the further
-						development and support for DisCal. Please consider becoming a patron!
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   href="https://www.patreon.com/Novafox"
-					   target="_blank"
-					   style="margin: 0 auto; max-width: 200px">
-						Become a Patron!
-					</a>
-
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						By becoming a patron, you not only support us and DisCal's development,
-						but will get exclusive access to features early before anyone else!
-					</p>
-				</div>
-				<!-- End Patreon-->
-
-				<hr>
-
-				<!-- Start Dev API -->
-				<div id="developer-api">
-					<div class="image-wrapper" style="float: right">
-						<img src="/assets/img/examples/DisCal-Developer-API.jpg"
-							 style="max-width: 450px; max-height: 300px;"
-							 alt="DisCal Developer API Screenshot">
-					</div>
-
-					<h3 class="text-left text-discal-blue">Developer API</h3>
-
-					<br>
-					<br>
-
-					<p class="text-left text-discord-full-white">
-						With DisCal growing everyday, we decided that a developer API should exist.
-						So, that's exactly what we did!
-						<br>
-						We have built a fully RESTful API into DisCal for you to hook into!
-						Use it for your bots, websites, apps, and more!
-						<br>
-						<br>
-						Simply check out the API documentation and learn how you can easily use
-						DisCal in your projects!
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   href="/docs/api/overview"
-					   style="margin: 0 auto; max-width: 200px">
-						View API Docs
-					</a>
-
-				</div>
-				<!-- End Dev API-->
+				<!--End step three-->
 
 				<br>
 				<br>
 				<br>
-
 			</div>
 			<!-- /.container-fluid -->
 
