@@ -96,6 +96,7 @@ public class DiscordLoginHandler {
 				m.put("client", BotSettings.ID.get());
 				m.put("year", LocalDate.now().getYear());
 				m.put("redirUri", BotSettings.REDIR_URI.get());
+				m.put("inviteUrl", BotSettings.INVITE_URL.get());
 
 				m.put("id", userInfo.getString("id"));
 				m.put("username", userInfo.getString("username"));

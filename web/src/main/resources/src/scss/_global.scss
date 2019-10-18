@@ -1,4 +1,5 @@
 // Global component styles
+@import "variables";
 
 html {
   position: relative;
@@ -13,6 +14,16 @@ a {
   &:focus {
     outline: none;
   }
+}
+
+p {
+	font-size: 12pt;
+}
+
+hr {
+	background-color: $discal-blue;
+	color: $discal-blue;
+	border-color: $discal-blue;
 }
 
 // Main page wrapper
@@ -57,4 +68,10 @@ a {
   i {
     font-weight: 800;
   }
+}
+
+.image-wrapper {
+	position: center;
+	margin: 10px;
+	display: inline-flex;
 }

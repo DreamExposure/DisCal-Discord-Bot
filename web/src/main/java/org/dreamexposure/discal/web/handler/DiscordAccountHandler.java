@@ -101,6 +101,7 @@ public class DiscordAccountHandler {
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirUri", BotSettings.REDIR_URI.get());
+			m.put("inviteUrl", BotSettings.INVITE_URL.get());
 			m.put("status", DisCalWeb.getNetworkInfo());
 
 			//Remove from embed map just in case...
@@ -182,6 +183,8 @@ public class DiscordAccountHandler {
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("status", DisCalWeb.getNetworkInfo());
+			m.put("redirUri", BotSettings.REDIR_URI.get());
+			m.put("inviteUrl", BotSettings.INVITE_URL.get());
 
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
