@@ -67,12 +67,33 @@
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
 
-        <!-- Nav Item - Commands -->
+		<!-- Nav Item - About -->
+		<li class="nav-item">
+			<a class="nav-link" href="/about">
+				<i class="fas fa-fw fa-info-circle"></i>
+				<span>About</span></a>
+		</li>
+
+		<!-- Nav Item - Commands -->
         <li class="nav-item">
             <a class="nav-link" href="/commands">
                 <i class="fas fa-fw fa-terminal"></i>
                 <span>Commands</span></a>
         </li>
+
+		<!-- Nav Item - Setup -->
+		<li class="nav-item">
+			<a class="nav-link" href="/setup">
+				<i class="fas fa-fw fa-cog"></i>
+				<span>Setup</span></a>
+		</li>
+
+		<!-- Nav Item - Lazy DisCal -->
+		<li class="nav-item">
+			<a class="nav-link" href="/lazy-discal">
+				<i class="fas fa-fw fa-magic"></i>
+				<span>Lazy DisCal</span></a>
+		</li>
 
         <!-- Nav Item - Status -->
         <li class="nav-item">
@@ -147,7 +168,16 @@
                         </a>
                     </li>
 
-                    <!-- Nav Item - Invite Link -->
+					<!-- Nav Item - Patreon Link -->
+					<li class="nav-item">
+						<a class="nav-link text-discord-full-white"
+						   href="https://www.patreon.com/Novafox" target="_blank">
+							<i class="fab fa-patreon fa-sm fa-fw mr-2"></i>
+							Patreon
+						</a>
+					</li>
+
+					<!-- Nav Item - Invite Link -->
                     <li class="nav-item">
                         <a class="nav-link text-discord-full-white" th:href="${bot_invite}" target="_blank">
                             <i class="fas fa-envelope-open-text fa-sm fa-fw mr-2"></i>
@@ -205,6 +235,7 @@
 
 				<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
 				   style="margin: 0 auto; max-width: 200px"
+				   target="_blank"
 				   th:href="${inviteUrl}">
 					Add To Discord!
 				</a>

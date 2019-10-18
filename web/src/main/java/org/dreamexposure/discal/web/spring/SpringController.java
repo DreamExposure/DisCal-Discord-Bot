@@ -24,7 +24,7 @@ public class SpringController {
 	public String about(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "about";
+		return "various/about";
 	}
 
 	@RequestMapping("/commands")
