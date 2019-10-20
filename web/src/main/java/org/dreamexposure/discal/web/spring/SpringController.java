@@ -38,7 +38,7 @@ public class SpringController {
 	public String lazyDisCal(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "lazy-discal";
+		return "various/lazy-discal";
 	}
 
 	@RequestMapping("/setup")
