@@ -75,3 +75,34 @@ hr {
 	margin: 10px;
 	display: inline-flex;
 }
+
+.image-wrapper img {
+	width: 100%;
+	display: inline-block;
+}
+
+table {
+	margin: auto;
+}
+
+td {
+	color: $discord-full-white;
+	text-align: center;
+}
+
+th {
+	text-align: center;
+	background-color: $discal-light-gray;
+	border: transparent;
+}
+
+pre.code {
+	background-color: #061d2d;
+	color: $discord-full-white;
+	border: $discal-not-black 1px solid;
+	text-align: left;
+	font-family: monospace;
+	border-radius: 15px;
+	padding: 1%;
+	overflow: auto;
+}
