@@ -31,7 +31,7 @@ public class SpringController {
 	public String commands(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "commands";
+		return "various/commands";
 	}
 
 	@RequestMapping("/lazy-discal")
@@ -131,7 +131,7 @@ public class SpringController {
 	public String docsEventsEventColors(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "docs/events/event-colors";
+		return "docs/event/event-colors";
 	}
 
 	//API Doc pages
@@ -200,7 +200,7 @@ public class SpringController {
 		return "status";
 	}
 
-	//Error pages
+	//Error pages - Only here for testing reasons
 	@RequestMapping("/400")
 	public String badRequest(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
