@@ -197,7 +197,7 @@ public class SpringController {
 	public String status(Map<String, Object> model, HttpServletRequest req) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
-		return "status";
+		return "various/status";
 	}
 
 	//Error pages - Only here for testing reasons

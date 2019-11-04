@@ -61,6 +61,8 @@ public class DisCalServer {
 		//Handle the rest of the bullshit
 		UpdateDisBotData.init();
 		UpdateDisPwData.init();
+
+		//Add shutdown hooks...
 	}
 
 	public static NetworkInfo getNetworkInfo() {

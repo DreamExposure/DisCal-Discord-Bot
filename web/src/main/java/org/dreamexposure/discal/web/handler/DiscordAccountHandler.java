@@ -100,8 +100,9 @@ public class DiscordAccountHandler {
 			m.put("loggedIn", false);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
-			m.put("redirUri", BotSettings.REDIR_URI.get());
-			m.put("inviteUrl", BotSettings.INVITE_URL.get());
+			m.put("redirect_uri", BotSettings.REDIR_URI.get());
+			m.put("bot_invite", BotSettings.INVITE_URL.get());
+			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("status", DisCalWeb.getNetworkInfo());
 
 			//Remove from embed map just in case...
@@ -182,9 +183,10 @@ public class DiscordAccountHandler {
 			m.put("loggedIn", false);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
+			m.put("redirect_uri", BotSettings.REDIR_URI.get());
+			m.put("bot_invite", BotSettings.INVITE_URL.get());
+			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("status", DisCalWeb.getNetworkInfo());
-			m.put("redirUri", BotSettings.REDIR_URI.get());
-			m.put("inviteUrl", BotSettings.INVITE_URL.get());
 
 			//Add guild for guild embed
 			JSONObject requestBody = new JSONObject();
@@ -265,17 +267,6 @@ public class DiscordAccountHandler {
 		m.remove("lastUse");
 		m.put("lastUse", System.currentTimeMillis());
 		discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
-	}
-
-	public void appendAccount(Map m, HttpServletRequest request) {
-		if (discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
-			Map exist = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
-			exist.remove("lastUse");
-			exist.put("lastUse", System.currentTimeMillis());
-			exist.putAll(m);
-		} else {
-			discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
-		}
 	}
 
 	public void removeAccount(HttpServletRequest request) {

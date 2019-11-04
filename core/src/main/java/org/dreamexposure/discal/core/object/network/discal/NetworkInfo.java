@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
-import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -21,6 +20,9 @@ import java.util.List;
 @SuppressWarnings("Duplicates")
 public class NetworkInfo {
 	private List<ConnectedClient> clients = new ArrayList<>();
+
+	private int calCount;
+	private int announcementCount;
 
 	//Getters
 	public List<ConnectedClient> getClients() {
@@ -69,11 +71,11 @@ public class NetworkInfo {
 	}
 
 	public int getCalendarCount() {
-		return DatabaseManager.getManager().getCalendarCount();
+		return this.calCount;
 	}
 
 	public int getAnnouncementCount() {
-		return DatabaseManager.getManager().getAnnouncementCount();
+		return this.announcementCount;
 	}
 
 	public String getUptime() {
@@ -82,5 +84,15 @@ public class NetworkInfo {
 		Period period = interval.toPeriod();
 
 		return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+	}
+
+	//Setters
+
+	public void setCalCount(int calCount) {
+		this.calCount = calCount;
+	}
+
+	public void setAnnouncementCount(int announcementCount) {
+		this.announcementCount = announcementCount;
 	}
 }

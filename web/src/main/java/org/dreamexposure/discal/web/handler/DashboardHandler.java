@@ -116,8 +116,6 @@ public class DashboardHandler {
 
 			m.remove("admin");
 
-			DiscordAccountHandler.getHandler().appendAccount(m, request);
-
 			response.sendRedirect("/dashboard/guild");
 			return "redirect:/dashboard/guild";
 		} catch (JSONException e) {
@@ -144,8 +142,6 @@ public class DashboardHandler {
 
 			Map m = new HashMap();
 			m.put("settings", settings);
-
-			DiscordAccountHandler.getHandler().appendAccount(m, request);
 
 			if (settings.equalsIgnoreCase("calendar")) {
 				response.sendRedirect("/dashboard/guild/calendar");

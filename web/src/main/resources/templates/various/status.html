@@ -37,7 +37,7 @@
 	<meta name="msapplication-config" content="/assets/img/favicon/browserconfig.xml">
 	<!-- ****** faviconit.com favicons ****** -->
 
-	<title>DisCal - Setup</title>
+	<title>DisCal - Status</title>
 
 	<!-- Custom fonts for this template-->
 	<link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -85,7 +85,7 @@
 		</li>
 
 		<!-- Nav Item - Setup -->
-		<li class="nav-item active">
+		<li class="nav-item">
 			<a class="nav-link" href="/setup">
 				<i class="fas fa-fw fa-cog"></i>
 				<span>Setup</span></a>
@@ -99,7 +99,7 @@
 		</li>
 
 		<!-- Nav Item - Status -->
-		<li class="nav-item">
+		<li class="nav-item active">
 			<a class="nav-link" href="/status">
 				<i class="fas fa-fw fa-info-circle"></i>
 				<span>Status</span></a>
@@ -225,145 +225,104 @@
 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
-				<h1 class="text-center text-discal-blue">DisCal - Setup</h1>
+				<h1 class="text-center text-discal-blue">DisCal Network and Services Status</h1>
 
-				<p class="text-center text-discord-full-white">
-					The following page is a step by step instruction for how to properly
-					setup DisCal.
-					<br>
-					<br>
-					It's quite simple, but you must create a new calendar in order for
-					DisCal to function fully.
+				<!--Start Server Status-->
+				<h2 class="text-center text-discal-blue">Server</h2>
+
+				<p class="text-left text-discord-full-white"
+				   th:text="'Connected Clients: ' + ${status.clientCount}">
 				</p>
 
-				<!--Start step one, invite-->
-				<div id="invite">
-					<h3 class="text-center text-discal-blue">1. Add DisCal to your Discord
-						server</h3>
+				<p class="text-left text-discord-full-white"
+				   th:text="'Uptime: ' + ${status.uptime}">
+				</p>
 
-					<div class="image-wrapper" style="float: left">
-						<img src="/assets/img/examples/DisCal-Invite-Perms.jpg"
-							 style="max-width: 300px; max-height: 300px;"
-							 alt="DisCal Invite Permissions Screenshot">
-					</div>
+				<p class="text-left text-discord-full-white"
+				   th:text="'Total Guilds: ' + ${status.totalGuildCount}">
+				</p>
 
-					<p class="text-center text-discord-full-white">
-						<strong>Skip this step if you have just added DisCal to your
-							server.</strong>
-						<br>
-						<br>
-						<br>
-						Click the button below to authorize DisCal and select the server you want it
-						on.
-						<br>
-						<br>
-						<br>
-						<br>
-						You must have the "Manage Server" permission to add the bot. Contact the
-						server owner or admin to invite DisCal if you cannot.
-						<br>
-						<br>
-						<br>
-					</p>
+				<p class="text-left text-discord-full-white"
+				   th:text="'Total Calendars: ' + ${status.calendarCount}">
+				</p>
 
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   style="margin: 0 auto; max-width: 200px"
-					   target="_blank"
-					   th:href="${bot_invite}">
-						Add To Discal to Server
-					</a>
+				<p class="text-left text-discord-full-white"
+				   th:text="'Total Announcements: ' + ${status.announcementCount}">
+				</p>
 
-				</div>
-				<!--End Step one-->
+				<br>
+				<!--End Server Status-->
 
 				<hr>
 
-				<!--Start step two, role-->
-				<div id="role">
-					<div class="image-wrapper" style="float: left">
-						<img src="/assets/img/examples/DisCal-Role-Perms.jpg"
-							 style="max-width: 300px; max-height: 300px;"
-							 alt="Discal Role Permissions Screenshot">
-					</div>
+				<!--Start API Status-->
+				<br>
 
-					<h3 class="text-center text-discal-blue">
-						2. Give DisCal permissions at server level and not at channel level
-						(channel permissions don't always work right)
-					</h3>
+				<h2 class="text-center text-discal-blue">API</h2>
 
-					<p class="text-center text-discord-full-white">
-						If you have a Bot permission group, assign DisCal that permission.
-						<br>
-						<br>
-						If not, create a new permission role with the following permissions so that
-						DisCal may read and send messages based on its commands:
-						<br>
-						<br>
-						- Read Messages*
-						<br>
-						- Send Messages
-						<br>
-						- Embed Links
-						<br>
-						- Mention Everyone
-						<br>
-						- Manager Messages
-						<br>
-						- Reactions/External Emojis
-						<br>
-						<br>
-						<br>
-						* DisCal will not log or save any messages.
-						<br>
-						<br>
-					</p>
-				</div>
-				<!--End Step two-->
+				<p class="text-left text-discord-full-white">
+					Uptime: Not yet tracked
+				</p>
+
+				<p class="text-left text-discord-full-white">
+					Ping: Not yet tracked
+				</p>
+
+				<p class="text-left text-discord-full-white">
+					Requests Processed: not yet tracked
+				</p>
+
+				<br>
+				<!--End API Status-->
+
 
 				<hr>
 
-				<!--Start step three, calendar-->
-				<div id="calendar">
-					<div class="image-wrapper" style="float: left">
-						<img src="/assets/img/examples/DisCal-Calendar-Creation.jpg"
-							 style="max-width: 300px; max-height: 300px;"
-							 alt="DisCal Calendar Creation Screenshot">
+				<!--Start Client Statuses-->
+				<br>
+
+				<h2 class="text-center text-discal-blue">Clients</h2>
+
+				<th:block th:each="client : ${status.clients}">
+
+					<div th:id="'client-' + ${client.clientIndex}">
+						<h3 class="text-left text-discord-full-white"
+							th:text="'Client Index: ' + ${client.clientIndex}"></h3>
+
+						<p class="text-left text-discord-full-white"
+						   th:text="'Guilds: ' + ${client.connectedServers}">
+						</p>
+
+						<p class="text-left text-discord-full-white"
+						   th:text="'RAM Used: ' + ${client.memUsed} + 'MB'">
+						</p>
+
+						<p class="text-left text-discord-full-white">
+							Announcements: Not Yet Tracked
+						</p>
+
+						<p class="text-left text-discord-full-white"
+						   th:text="'Uptime: ' + ${client.uptime}">
+						</p>
+
+						<p class="text-left text-discord-full-white"
+						   th:text="'Last KeepAlive: ' + ${client.lastKeepAliveHumanReadable}">
+						</p>
+
+						<p class="text-left text-discord-full-white">
+							Announcement Service: Not yet tracked
+						</p>
+
+						<p class="text-left text-discord-full-white">
+							Creator Cleaner Service: Not yet tracked
+						</p>
+
 					</div>
 
-					<h3 class="text-center text-discal-blue">3. Create a Calendar for your
-						Discord</h3>
+					<br>
 
-					<p class="text-center text-discord-full-white">
-						DisCal currently only allows 1 calendar per server.
-						Use the command "!calendar create [calendar name]" in any channel.
-						(You can create a special channel just for DisCal commands if you want.)
-						<br>
-						<br>
-						Once that command is issued, DisCal will handle the rest and walk you
-						through a step by step guide into creating your new calendar!
-						<br>
-						<br>
-						Optionally you may attach an external calendar. (This feature is currently
-						in open testing for Patreon supporters.
-						Visit our Discord server for more information.)
-						<br>
-						<br>
-						<br>
-						For all information on existing commands as well as some tutorial .gifs,
-						click the button below.
-					</p>
-
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   style="margin: 0 auto; max-width: 200px"
-					   href="/commands">
-						View Commands
-					</a>
-				</div>
-				<!--End step three-->
-
-				<br>
-				<br>
-				<br>
+				</th:block>
+				<!--End Client Statuses-->
 			</div>
 			<!-- /.container-fluid -->
 
