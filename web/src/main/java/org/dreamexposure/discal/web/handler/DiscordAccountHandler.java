@@ -26,13 +26,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-@SuppressWarnings({"unchecked", "RedundantCast", "Duplicates", "WeakerAccess", "unused", "ConstantConditions"})
+@SuppressWarnings({"RedundantCast", "Duplicates", "WeakerAccess", "unused", "ConstantConditions"})
 public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
 	private static Timer timer;
 
-	private HashMap<String, Map> discordAccounts = new HashMap<>();
-	private HashMap<String, Map> embedMaps = new HashMap<>();
+	private HashMap<String, Map<String, Object>> discordAccounts = new HashMap<>();
+	private HashMap<String, Map<String, Object>> embedMaps = new HashMap<>();
 
 	//Instance handling
 	private DiscordAccountHandler() {
@@ -80,11 +80,11 @@ public class DiscordAccountHandler {
 	}
 
 	//Getters
-	public Map getAccount(HttpServletRequest request) {
+	public Map<String, Object> getAccount(HttpServletRequest request) {
 		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
-			Map m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
-			m.remove("lastUse");
-			m.put("lastUse", System.currentTimeMillis());
+			Map<String, Object> m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
+			m.remove("last_use");
+			m.put("last_use", System.currentTimeMillis());
 
 			m.remove("status");
 			m.put("status", DisCalWeb.getNetworkInfo());
@@ -96,12 +96,12 @@ public class DiscordAccountHandler {
 
 		} else {
 			//Not logged in...
-			Map m = new HashMap();
-			m.put("loggedIn", false);
+			Map<String, Object> m = new HashMap<>();
+			m.put("logged_in", false);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
-			m.put("bot_invite", BotSettings.INVITE_URL.get());
+			m.put("invite_url", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("status", DisCalWeb.getNetworkInfo());
 
@@ -112,15 +112,15 @@ public class DiscordAccountHandler {
 		}
 	}
 
-	public Map getEmbedMap(HttpServletRequest request) {
+	public Map<String, Object> getEmbedMap(HttpServletRequest request) {
 		return embedMaps.get((String) request.getSession(true).getAttribute("embed"));
 	}
 
-	public Map getAccountForGuildEmbed(HttpServletRequest request, String guildId) {
+	public Map<String, Object> getAccountForGuildEmbed(HttpServletRequest request, String guildId) {
 		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
-			Map m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
-			m.remove("lastUse");
-			m.put("lastUse", System.currentTimeMillis());
+			Map<String, Object> m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
+			m.remove("last_use");
+			m.put("last_use", System.currentTimeMillis());
 			m.remove("status");
 			m.put("status", DisCalWeb.getNetworkInfo());
 
@@ -179,12 +179,12 @@ public class DiscordAccountHandler {
 			return m;
 		} else {
 			//Not logged in...
-			Map m = new HashMap();
-			m.put("loggedIn", false);
+			Map<String, Object> m = new HashMap<>();
+			m.put("logged_in", false);
 			m.put("client", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
-			m.put("bot_invite", BotSettings.INVITE_URL.get());
+			m.put("invite_url", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("status", DisCalWeb.getNetworkInfo());
 
@@ -244,12 +244,12 @@ public class DiscordAccountHandler {
 		}
 	}
 
-	public Map findAccount(String userId) {
-		for (Map m : discordAccounts.values()) {
+	public Map<String, Object> findAccount(String userId) {
+		for (Map<String, Object> m : discordAccounts.values()) {
 			if (m.containsKey("id")) {
 				if (m.get("id").equals(userId)) {
-					m.remove("lastUse");
-					m.put("lastUse", System.currentTimeMillis());
+					m.remove("last_use");
+					m.put("last_use", System.currentTimeMillis());
 					return m;
 				}
 			}
@@ -262,10 +262,10 @@ public class DiscordAccountHandler {
 	}
 
 	//Functions
-	public void addAccount(Map m, HttpServletRequest request) {
+	public void addAccount(Map<String, Object> m, HttpServletRequest request) {
 		discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
-		m.remove("lastUse");
-		m.put("lastUse", System.currentTimeMillis());
+		m.remove("last_use");
+		m.put("last_use", System.currentTimeMillis());
 		discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
 	}
 
@@ -283,8 +283,8 @@ public class DiscordAccountHandler {
 		long limit = Long.parseLong(BotSettings.TIME_OUT.get());
 		final List<String> toRemove = new ArrayList<>();
 		for (String id : discordAccounts.keySet()) {
-			Map m = discordAccounts.get(id);
-			long lastUse = (long) m.get("lastUse");
+			Map<String, Object> m = discordAccounts.get(id);
+			long lastUse = (long) m.get("last_use");
 			if (System.currentTimeMillis() - lastUse > limit)
 				toRemove.remove(id); //Timed out, remove account info and require sign in.
 		}

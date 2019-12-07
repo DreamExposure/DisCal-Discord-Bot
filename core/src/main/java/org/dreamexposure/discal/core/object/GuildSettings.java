@@ -1,16 +1,18 @@
 package org.dreamexposure.discal.core.object;
 
-import discord4j.core.object.util.Snowflake;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings("DuplicatedCode")
 public class GuildSettings {
 	private Snowflake guildID;
 
@@ -213,41 +215,80 @@ public class GuildSettings {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("GuildId", guildID.asString());
-		data.put("ExternalCalendar", externalCalendar);
-		data.put("PrivateKey", privateKey);
-		data.put("AccessToken", encryptedAccessToken);
-		data.put("RefreshToken", encryptedRefreshToken);
-		data.put("ControlRole", controlRole);
-		data.put("DisCalChannel", discalChannel);
-		data.put("SimpleAnnouncements", simpleAnnouncements);
-		data.put("Lang", lang);
-		data.put("Prefix", prefix);
-		data.put("PatronGuild", patronGuild);
-		data.put("DevGuild", devGuild);
-		data.put("MaxCalendars", maxCalendars);
-		data.put("TwelveHour", twelveHour);
-		data.put("Branded", branded);
+		data.put("guild_id", guildID.asString());
+		data.put("external_calendar", externalCalendar);
+		data.put("private_key", privateKey);
+		data.put("access_token", encryptedAccessToken);
+		data.put("refresh_token", encryptedRefreshToken);
+		data.put("control_role", controlRole);
+		data.put("discal_channel", discalChannel);
+		data.put("simple_announcements", simpleAnnouncements);
+		data.put("lang", lang);
+		data.put("prefix", prefix);
+		data.put("patron_guild", patronGuild);
+		data.put("dev_guild", devGuild);
+		data.put("max_calendars", maxCalendars);
+		data.put("twelve_hour", twelveHour);
+		data.put("branded", branded);
+
+		return data;
+	}
+
+	public JSONObject toJsonSecure() {
+		JSONObject data = new JSONObject();
+
+		data.put("guild_id", guildID.asString());
+		data.put("external_calendar", externalCalendar);
+		data.put("control_role", controlRole);
+		data.put("discal_channel", discalChannel);
+		data.put("simple_announcement", simpleAnnouncements);
+		data.put("lang", lang);
+		data.put("prefix", prefix);
+		data.put("patron_guild", patronGuild);
+		data.put("dev_guild", devGuild);
+		data.put("max_calendars", maxCalendars);
+		data.put("twelve_hour", twelveHour);
+		data.put("branded", branded);
 
 		return data;
 	}
 
 	public GuildSettings fromJson(JSONObject data) {
-		guildID = Snowflake.of(data.getLong("GuildId"));
-		externalCalendar = data.getBoolean("ExternalCalendar");
-		privateKey = data.getString("PrivateKey");
-		encryptedAccessToken = data.getString("AccessToken");
-		encryptedRefreshToken = data.getString("RefreshToken");
-		controlRole = data.getString("ControlRole");
-		discalChannel = data.getString("DisCalChannel");
-		simpleAnnouncements = data.getBoolean("SimpleAnnouncements");
-		lang = data.getString("Lang");
-		prefix = data.getString("Prefix");
-		patronGuild = data.getBoolean("PatronGuild");
-		devGuild = data.getBoolean("DevGuild");
-		maxCalendars = data.getInt("MaxCalendars");
-		twelveHour = data.getBoolean("TwelveHour");
-		branded = data.getBoolean("Branded");
+		guildID = Snowflake.of(data.getLong("guild_id"));
+		externalCalendar = data.getBoolean("external_calendar");
+		privateKey = data.getString("private_key");
+		encryptedAccessToken = data.getString("access_token");
+		encryptedRefreshToken = data.getString("refresh_token");
+		controlRole = data.getString("control_role");
+		discalChannel = data.getString("discal_channel");
+		simpleAnnouncements = data.getBoolean("simple_announcement");
+		lang = data.getString("lang");
+		prefix = data.getString("prefix");
+		patronGuild = data.getBoolean("patron_guild");
+		devGuild = data.getBoolean("dev_guild");
+		maxCalendars = data.getInt("max_calendars");
+		twelveHour = data.getBoolean("twelve_hour");
+		branded = data.getBoolean("branded");
+
+		return this;
+	}
+
+	public GuildSettings fromJsonSecure(JSONObject data) {
+		guildID = Snowflake.of(data.getLong("guild_id"));
+		externalCalendar = data.getBoolean("external_calendar");
+		//privateKey = data.getString("PrivateKey");
+		//encryptedAccessToken = data.getString("AccessToken");
+		//encryptedRefreshToken = data.getString("RefreshToken");
+		controlRole = data.getString("control_role");
+		discalChannel = data.getString("discal_channel");
+		simpleAnnouncements = data.getBoolean("simple_announcement");
+		lang = data.getString("lang");
+		prefix = data.getString("prefix");
+		patronGuild = data.getBoolean("patron_guild");
+		devGuild = data.getBoolean("dev_guild");
+		maxCalendars = data.getInt("max_calendars");
+		twelveHour = data.getBoolean("twelve_hours");
+		branded = data.getBoolean("branded");
 
 		return this;
 	}

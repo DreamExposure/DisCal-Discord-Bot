@@ -19,8 +19,8 @@ import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
-import org.dreamexposure.discal.server.utils.ResponseUtils;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -96,7 +96,7 @@ public class EventEndpoint {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -194,7 +194,7 @@ public class EventEndpoint {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -278,7 +278,7 @@ public class EventEndpoint {
 
 			response.setContentType("application/json");
 			response.setStatus(200);
-			return ResponseUtils.getJsonResponseMessage("Successfully updated event!");
+			return JsonUtils.getJsonResponseMessage("Successfully updated event!");
 
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, true, EventEndpoint.class);
@@ -417,13 +417,13 @@ public class EventEndpoint {
 			//Deleted!
 			response.setContentType("application/json");
 			response.setStatus(200);
-			return ResponseUtils.getJsonResponseMessage("Successfully deleted event!");
+			return JsonUtils.getJsonResponseMessage("Successfully deleted event!");
 		} else {
 			//Oh nos! we failed >.<
 			response.setContentType("application/json");
 			response.setStatus(500);
 
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 }

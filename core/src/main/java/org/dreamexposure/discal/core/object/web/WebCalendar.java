@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.web;
 
 import com.google.api.services.calendar.model.Calendar;
+
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -112,27 +113,27 @@ public class WebCalendar {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("Id", id);
-		data.put("Address", address);
-		data.put("Link", link);
-		data.put("Name", name);
+		data.put("id", id);
+		data.put("address", address);
+		data.put("link", link);
+		data.put("name", name);
 		if (description != null)
-			data.put("Description", description);
-		data.put("Timezone", timezone);
-		data.put("External", external);
+			data.put("description", description);
+		data.put("timezone", timezone);
+		data.put("external", external);
 
 		return data;
 	}
 
 	public WebCalendar fromJson(JSONObject data) {
-		id = data.getString("Id");
-		address = data.getString("Address");
-		link = data.getString("Link");
-		name = data.getString("Name");
-		if (data.has("Description"))
-			description = data.getString("Description");
-		timezone = data.getString("Timezone");
-		external = data.getBoolean("External");
+		id = data.getString("id");
+		address = data.getString("address");
+		link = data.getString("link");
+		name = data.getString("name");
+		if (data.has("description"))
+			description = data.getString("description");
+		timezone = data.getString("timezone");
+		external = data.getBoolean("external");
 
 		return this;
 	}

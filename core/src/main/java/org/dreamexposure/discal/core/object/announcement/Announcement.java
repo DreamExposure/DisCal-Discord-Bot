@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.object.announcement;
 
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.json.JSONArray;
@@ -10,6 +8,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -395,57 +396,57 @@ public class Announcement {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("GuildId", guildId.asLong());
-		data.put("Id", announcementId.toString());
+		data.put("guild_id", guildId.asLong());
+		data.put("id", announcementId.toString());
 
 		JSONArray roles = new JSONArray();
 		for (String s : subscriberRoleIds) {
 			roles.put(s);
 		}
-		data.put("Roles", roles);
+		data.put("subscriber_roles", roles);
 
 		JSONArray users = new JSONArray();
 		for (String s : subscriberUserIds) {
 			users.put(s);
 		}
-		data.put("Users", users);
+		data.put("subscriber_users", users);
 
-		data.put("ChannelId", announcementChannelId);
-		data.put("Type", type.getName());
-		data.put("EventId", eventId);
-		data.put("EventColor", eventColor.getName());
-		data.put("Hours", hoursBefore);
-		data.put("Minutes", minutesBefore);
-		data.put("Info", info);
-		data.put("Enabled", enabled);
-		data.put("InfoOnly", infoOnly);
+		data.put("channel_id", announcementChannelId);
+		data.put("type", type.getName());
+		data.put("event_id", eventId);
+		data.put("event_color", eventColor.getName());
+		data.put("hours", hoursBefore);
+		data.put("minutes", minutesBefore);
+		data.put("info", info);
+		data.put("enabled", enabled);
+		data.put("info_only", infoOnly);
 
 		return data;
 	}
 
 	public Announcement fromJson(JSONObject data) {
-		guildId = Snowflake.of(data.getLong("GuildId"));
-		announcementId = UUID.fromString(data.getString("Id"));
+		guildId = Snowflake.of(data.getLong("guild_id"));
+		announcementId = UUID.fromString(data.getString("id"));
 
-		JSONArray roles = data.getJSONArray("Roles");
+		JSONArray roles = data.getJSONArray("subscriber_roles");
 		for (int i = 0; i < roles.length(); i++) {
 			subscriberRoleIds.add(roles.getString(i));
 		}
 
-		JSONArray users = data.getJSONArray("Users");
+		JSONArray users = data.getJSONArray("subscriber_users");
 		for (int i = 0; i < users.length(); i++) {
 			subscriberUserIds.add(users.getString(i));
 		}
 
-		announcementChannelId = data.getString("ChannelId");
-		type = AnnouncementType.fromValue(data.getString("Type"));
-		eventId = data.getString("EventId");
-		eventColor = EventColor.valueOf(data.getString("EventColor"));
-		hoursBefore = data.getInt("Hours");
-		minutesBefore = data.getInt("Minutes");
-		info = data.getString("Info");
-		enabled = data.getBoolean("Enabled");
-		infoOnly = data.getBoolean("InfoOnly");
+		announcementChannelId = data.getString("channel_id");
+		type = AnnouncementType.fromValue(data.getString("type"));
+		eventId = data.getString("event_id");
+		eventColor = EventColor.valueOf(data.getString("event_color"));
+		hoursBefore = data.getInt("hours");
+		minutesBefore = data.getInt("minutes");
+		info = data.getString("info");
+		enabled = data.getBoolean("enabled");
+		infoOnly = data.getBoolean("info_only");
 
 		return this;
 	}

@@ -1,12 +1,11 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
-import org.dreamexposure.discal.server.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -64,13 +65,13 @@ public class GuildEndpoint {
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get guild settings error", e, true, GuildEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -106,22 +107,22 @@ public class GuildEndpoint {
 			if (DatabaseManager.getManager().updateSettings(settings)) {
 				response.setContentType("application/json");
 				response.setStatus(200);
-				return ResponseUtils.getJsonResponseMessage("Successfully updated guild settings!");
+				return JsonUtils.getJsonResponseMessage("Successfully updated guild settings!");
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(500);
-				return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+				return JsonUtils.getJsonResponseMessage("Internal Server Error");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal update guild settings error", e, true, GuildEndpoint.class);
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -179,12 +180,12 @@ public class GuildEndpoint {
 			e.printStackTrace();
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get guilds from users error", e, true, GuildEndpoint.class);
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 }

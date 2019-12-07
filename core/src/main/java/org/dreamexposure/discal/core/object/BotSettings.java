@@ -39,6 +39,8 @@ public enum BotSettings {
 
 	USE_REDIS_STORES, USE_WEBHOOKS, UPDATE_SITES, RUN_API,
 
+	BOT_API_TOKEN,
+
 	PROFILE;
 
 

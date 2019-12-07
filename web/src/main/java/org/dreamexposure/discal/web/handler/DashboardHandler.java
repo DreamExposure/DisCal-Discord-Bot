@@ -20,8 +20,8 @@ import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.object.web.WebRole;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.web.DisCalWeb;
-import org.dreamexposure.discal.web.utils.ResponseUtils;
 import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -131,7 +131,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -172,7 +172,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -310,7 +310,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -375,7 +375,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -422,7 +422,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -475,7 +475,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -505,7 +505,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -531,7 +531,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -577,7 +577,7 @@ public class DashboardHandler {
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 }

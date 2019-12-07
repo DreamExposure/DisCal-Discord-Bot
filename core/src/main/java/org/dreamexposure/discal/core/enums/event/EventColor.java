@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.enums.event;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -93,7 +93,7 @@ public enum EventColor {
 				return c;
 			} else {
 				try {
-					int i = Integer.valueOf(nameOrHexOrID);
+					int i = Integer.parseInt(nameOrHexOrID);
 					if (c.getId() == i)
 						return c;
 				} catch (NumberFormatException e) {

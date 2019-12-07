@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.calendar;
 
+import org.json.JSONObject;
+
 import discord4j.core.object.util.Snowflake;
 
 /**
@@ -8,8 +10,8 @@ import discord4j.core.object.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarData {
-	private final Snowflake guildId;
-	private final int calendarNumber;
+	private Snowflake guildId;
+	private int calendarNumber;
 
 	private String calendarId;
 	private String calendarAddress;
@@ -24,6 +26,10 @@ public class CalendarData {
 		calendarAddress = "primary";
 
 		external = false;
+	}
+
+	public CalendarData() {
+
 	}
 
 	//Getters
@@ -58,5 +64,28 @@ public class CalendarData {
 
 	public void setExternal(boolean _external) {
 		external = _external;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("guild_id", guildId.asLong());
+		json.put("calendar_number", calendarNumber);
+		json.put("calendar_id", calendarId);
+		json.put("calendar_address", calendarAddress);
+		json.put("external", external);
+
+		return json;
+	}
+
+	public CalendarData fromJson(JSONObject json) {
+		guildId = Snowflake.of(json.getLong("guild_id"));
+		calendarNumber = json.getInt("calendar_number");
+
+		calendarId = json.getString("calendar_id");
+		calendarAddress = json.getString("calendar_address");
+		external = json.getBoolean("external");
+
+		return this;
 	}
 }

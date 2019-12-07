@@ -3,6 +3,8 @@ package org.dreamexposure.discal.core.object.network.discal;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.joda.time.Interval;
 import org.joda.time.Period;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -94,5 +96,22 @@ public class NetworkInfo {
 
 	public void setAnnouncementCount(int announcementCount) {
 		this.announcementCount = announcementCount;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("uptime", getUptime());
+		json.put("announcements", getAnnouncementCount());
+		json.put("guilds", getTotalGuildCount());
+		json.put("calendars", getCalendarCount());
+
+		JSONArray jClients = new JSONArray();
+		for (ConnectedClient c : clients)
+			jClients.put(c.toJson());
+
+		json.put("clients", jClients);
+
+		return json;
 	}
 }

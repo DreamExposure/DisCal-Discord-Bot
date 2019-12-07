@@ -1,8 +1,5 @@
 package org.dreamexposure.discal.core.object.web;
 
-import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -12,6 +9,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Image;
+import discord4j.core.object.util.Snowflake;
+
 /**
  * Created by Nova Fox on 12/19/17.
  * Website: www.cloudcraftgaming.com
@@ -19,7 +24,7 @@ import java.util.List;
  */
 @SuppressWarnings("ConstantConditions")
 public class WebGuild {
-	private String id;
+	private long id;
 	private String name;
 	private String iconUrl;
 
@@ -39,7 +44,7 @@ public class WebGuild {
 	private WebCalendar calendar;
 
 	//Getters
-	public String getId() {
+	public long getId() {
 		return id;
 	}
 
@@ -100,7 +105,7 @@ public class WebGuild {
 	}
 
 	//Setters
-	public void setId(String _id) {
+	public void setId(long _id) {
 		id = _id;
 	}
 
@@ -135,7 +140,7 @@ public class WebGuild {
 
 	//Functions
 	public WebGuild fromGuild(Guild g) {
-		id = g.getId().asString();
+		id = g.getId().asLong();
 		name = g.getName();
 		if (g.getIconUrl(Image.Format.PNG).isPresent())
 			iconUrl = g.getIconUrl(Image.Format.PNG).get();
@@ -167,68 +172,68 @@ public class WebGuild {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("Id", id);
-		data.put("Name", name);
+		data.put("id", id);
+		data.put("name", name);
 		if (iconUrl != null)
-			data.put("IconUrl", iconUrl);
-		data.put("Settings", settings.toJson());
+			data.put("icon_url", iconUrl);
+		data.put("settings", settings.toJson());
 		if (botNick != null && !botNick.equals(""))
-			data.put("BotNick", botNick);
-		data.put("ManageServer", manageServer);
-		data.put("DiscalRole", discalRole);
+			data.put("bot_nick", botNick);
+		data.put("manage_server", manageServer);
+		data.put("discal_role", discalRole);
 
 		JSONArray jRoles = new JSONArray();
 		for (WebRole wr : roles) {
 			jRoles.put(wr.toJson());
 		}
-		data.put("Roles", jRoles);
+		data.put("roles", jRoles);
 
 		JSONArray jChannels = new JSONArray();
 		for (WebChannel wc : channels) {
 			jChannels.put(wc.toJson());
 		}
-		data.put("Channels", jChannels);
+		data.put("channels", jChannels);
 
 		JSONArray jAnnouncements = new JSONArray();
 		for (Announcement a : announcements) {
 			jAnnouncements.put(a.toJson());
 		}
-		data.put("Announcements", jAnnouncements);
+		data.put("announcements", jAnnouncements);
 
-		data.put("Calendar", calendar.toJson());
+		data.put("calendar", calendar.toJson());
 
 		return data;
 	}
 
 	public WebGuild fromJson(JSONObject data) {
-		id = data.getString("Id");
-		name = data.getString("Name");
-		if (data.has("IconUrl"))
-			iconUrl = data.getString("IconUrl");
-		settings = new GuildSettings(Snowflake.of(id)).fromJson(data.getJSONObject("Settings"));
-		if (data.has("BotNick"))
-			botNick = data.getString("BotNick");
+		id = data.getLong("id");
+		name = data.getString("name");
+		if (data.has("icon_url"))
+			iconUrl = data.getString("icon_url");
+		settings = new GuildSettings(Snowflake.of(id)).fromJson(data.getJSONObject("settings"));
+		if (data.has("bot_nick"))
+			botNick = data.getString("bot_nick");
 		else
 			botNick = "";
-		manageServer = data.getBoolean("ManageServer");
-		discalRole = data.getBoolean("DiscalRole");
+		manageServer = data.getBoolean("manage_server");
+		discalRole = data.getBoolean("discal_role");
 
-		JSONArray jRoles = data.getJSONArray("Roles");
+		JSONArray jRoles = data.getJSONArray("roles");
 		for (int i = 0; i < jRoles.length(); i++) {
 			roles.add(new WebRole().fromJson(jRoles.getJSONObject(i)));
 		}
 
-		JSONArray jChannels = data.getJSONArray("Channels");
+		JSONArray jChannels = data.getJSONArray("channels");
 		for (int i = 0; i < jChannels.length(); i++) {
 			channels.add(new WebChannel().fromJson(jChannels.getJSONObject(i)));
 		}
 
-		JSONArray jAnnouncements = data.getJSONArray("Announcements");
+		JSONArray jAnnouncements = data.getJSONArray("announcements");
 		for (int i = 0; i < jAnnouncements.length(); i++) {
 			announcements.add(new Announcement(Snowflake.of(id)).fromJson(jAnnouncements.getJSONObject(i)));
 		}
 
-		calendar = new WebCalendar().fromJson(data.getJSONObject("Calendar"));
+		calendar = new WebCalendar().fromJson(data.getJSONObject("calendar"));
 
 		return this;
 	}

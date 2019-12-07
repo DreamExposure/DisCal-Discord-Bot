@@ -1,9 +1,12 @@
 package org.dreamexposure.discal.core.object.event;
 
-import discord4j.core.object.util.Snowflake;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -159,5 +162,58 @@ public class RsvpData {
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {
 		return goingOnTime.size() > 0 || goingLate.size() > 0 || notGoing.size() > 0 || undecided.size() > 0;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("guild_id", guildId.asLong());
+		json.put("event_id", eventId);
+		json.put("event_end", eventEnd);
+
+		JSONArray jOnTime = new JSONArray();
+		for (String s : goingOnTime)
+			jOnTime.put(s);
+		json.put("on_time", jOnTime);
+
+		JSONArray jLate = new JSONArray();
+		for (String s : goingLate)
+			jLate.put(s);
+		json.put("late", jLate);
+
+		JSONArray jNot = new JSONArray();
+		for (String s : notGoing)
+			jNot.put(s);
+		json.put("not_going", jNot);
+
+		JSONArray jUndecided = new JSONArray();
+		for (String s : undecided)
+			jUndecided.put(s);
+		json.put("undecided", jUndecided);
+
+		return json;
+	}
+
+	public RsvpData fromJson(JSONObject json) {
+		eventId = json.getString("event_id");
+		eventEnd = json.getLong("event_end");
+
+		JSONArray jOnTime = json.getJSONArray("on_time");
+		for (int i = 0; i < jOnTime.length(); i++)
+			goingOnTime.add(jOnTime.getString(i));
+
+		JSONArray jLate = json.getJSONArray("late");
+		for (int i = 0; i < jLate.length(); i++)
+			goingLate.add(jLate.getString(i));
+
+		JSONArray jNot = json.getJSONArray("not_going");
+		for (int i = 0; i < jNot.length(); i++)
+			notGoing.add(jNot.getString(i));
+
+		JSONArray jUndecided = json.getJSONArray("undecided");
+		for (int i = 0; i < jUndecided.length(); i++)
+			undecided.add(jUndecided.getString(i));
+
+		return this;
 	}
 }

@@ -7,6 +7,10 @@ public class AuthenticationState {
 
 	private String reason;
 
+	private boolean fromDiscalNetwork;
+
+	private String keyUsed;
+
 	public AuthenticationState(boolean _success) {
 		success = _success;
 	}
@@ -23,6 +27,14 @@ public class AuthenticationState {
 		return reason;
 	}
 
+	public String getKeyUsed() {
+		return keyUsed;
+	}
+
+	public boolean isFromDiscalNetwork() {
+		return fromDiscalNetwork;
+	}
+
 	public AuthenticationState setStatus(int _status) {
 		status = _status;
 		return this;
@@ -30,6 +42,16 @@ public class AuthenticationState {
 
 	public AuthenticationState setReason(String _reason) {
 		reason = _reason;
+		return this;
+	}
+
+	public AuthenticationState setKeyUsed(String _key) {
+		keyUsed = _key;
+		return this;
+	}
+
+	public AuthenticationState setFromDisCalNetwork(boolean _fromDisCal) {
+		fromDiscalNetwork = _fromDisCal;
 		return this;
 	}
 

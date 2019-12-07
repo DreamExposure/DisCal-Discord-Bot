@@ -1,8 +1,9 @@
 package org.dreamexposure.discal.core.object.web;
 
-import discord4j.core.object.entity.Role;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
+
+import discord4j.core.object.entity.Role;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -82,21 +83,21 @@ public class WebRole {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("Id", id);
-		data.put("Name", name);
-		data.put("Managed", managed);
-		data.put("ControlRole", controlRole);
-		data.put("Everyone", everyone);
+		data.put("id", id);
+		data.put("name", name);
+		data.put("managed", managed);
+		data.put("control_role", controlRole);
+		data.put("everyone", everyone);
 
 		return data;
 	}
 
 	public WebRole fromJson(JSONObject data) {
-		id = data.getLong("Id");
-		name = data.getString("Name");
-		managed = data.getBoolean("Managed");
-		controlRole = data.getBoolean("ControlRole");
-		everyone = data.getBoolean("Everyone");
+		id = data.getLong("id");
+		name = data.getString("name");
+		managed = data.getBoolean("managed");
+		controlRole = data.getBoolean("control_role");
+		everyone = data.getBoolean("everyone");
 
 		return this;
 	}

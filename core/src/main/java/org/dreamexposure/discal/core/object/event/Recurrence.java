@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.object.event;
 
 import org.dreamexposure.discal.core.enums.event.EventFrequency;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.json.JSONObject;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -119,7 +120,7 @@ public class Recurrence {
 			} else if (c.contains("INTERVAL=")) {
 				String inter = c.replaceAll("INTERVAL=", "");
 				try {
-					interval = Integer.valueOf(inter);
+					interval = Integer.parseInt(inter);
 				} catch (NumberFormatException e) {
 					//Not valid number, safe to ignore error.
 					interval = 1;
@@ -127,13 +128,31 @@ public class Recurrence {
 			} else if (c.contains("COUNT=")) {
 				String con = c.replaceAll("COUNT=", "");
 				try {
-					count = Integer.valueOf(con);
+					count = Integer.parseInt(con);
 				} catch (NumberFormatException e) {
 					//Not valid number, can ignore.
 					count = -1;
 				}
 			}
 		}
+		return this;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("frequency", frequency.getName());
+		json.put("interval", interval);
+		json.put("count", count);
+
+		return json;
+	}
+
+	public Recurrence fromJson(JSONObject json) {
+		frequency = EventFrequency.fromValue(json.getString("frequency"));
+		interval = json.getInt("interval");
+		count = json.getInt("count");
+
 		return this;
 	}
 }

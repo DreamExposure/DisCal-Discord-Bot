@@ -1,14 +1,13 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
-import org.dreamexposure.discal.server.utils.ResponseUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,10 +15,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -71,20 +73,20 @@ public class AnnouncementEndpoint {
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(200);
-				return ResponseUtils.getJsonResponseMessage("Announcement not found.");
+				return JsonUtils.getJsonResponseMessage("Announcement not found.");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal get announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -132,20 +134,20 @@ public class AnnouncementEndpoint {
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(500);
-				return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+				return JsonUtils.getJsonResponseMessage("Internal Server Error");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal create announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -193,29 +195,29 @@ public class AnnouncementEndpoint {
 				if (DatabaseManager.getManager().updateAnnouncement(a)) {
 					response.setContentType("application/json");
 					response.setStatus(200);
-					return ResponseUtils.getJsonResponseMessage("Successfully updated announcement");
+					return JsonUtils.getJsonResponseMessage("Successfully updated announcement");
 				} else {
 					response.setContentType("application/json");
 					response.setStatus(500);
-					return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+					return JsonUtils.getJsonResponseMessage("Internal Server Error");
 				}
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(404);
-				return ResponseUtils.getJsonResponseMessage("Announcement not found");
+				return JsonUtils.getJsonResponseMessage("Announcement not found");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal update announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -239,29 +241,29 @@ public class AnnouncementEndpoint {
 				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
 					response.setContentType("application/json");
 					response.setStatus(200);
-					return ResponseUtils.getJsonResponseMessage("Successfully deleted announcement");
+					return JsonUtils.getJsonResponseMessage("Successfully deleted announcement");
 				} else {
 					response.setContentType("application/json");
 					response.setStatus(500);
-					return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+					return JsonUtils.getJsonResponseMessage("Internal Server Error");
 				}
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(404);
-				return ResponseUtils.getJsonResponseMessage("Announcement not found");
+				return JsonUtils.getJsonResponseMessage("Announcement not found");
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal delete announcement error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 
@@ -339,13 +341,13 @@ public class AnnouncementEndpoint {
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-			return ResponseUtils.getJsonResponseMessage("Bad Request");
+			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
 			Logger.getLogger().exception(null, "[WEB-API] Internal list announcements error", e, true, AnnouncementEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-			return ResponseUtils.getJsonResponseMessage("Internal Server Error");
+			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 }

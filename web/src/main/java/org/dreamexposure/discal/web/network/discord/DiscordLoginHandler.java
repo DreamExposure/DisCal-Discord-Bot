@@ -5,11 +5,9 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.web.DisCalWeb;
-import org.dreamexposure.discal.web.handler.DashboardHandler;
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,39 +23,39 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import okhttp3.Credentials;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+@SuppressWarnings("ConstantConditions")
 @RestController
 public class DiscordLoginHandler {
 
-	@GetMapping("/account/login")
-	public static String handleDiscordCode(HttpServletRequest req, HttpServletResponse res, @RequestParam(value = "code") String code) throws IOException {
+	@GetMapping(value = "/account/login")
+	public String handleDiscordCode(HttpServletRequest req, HttpServletResponse res, @RequestParam(value = "code") String code) throws IOException {
 		OkHttpClient client = new OkHttpClient();
 
 		try {
+			//Handle getting discord account data....
 			RequestBody body = new FormBody.Builder()
-				.addEncoded("client_id", BotSettings.ID.get())
-				.addEncoded("client_secret", BotSettings.SECRET.get())
-				.addEncoded("grant_type", "authorization_code")
-				.addEncoded("code", code)
-				.addEncoded("redirect_uri", BotSettings.REDIR_URL.get())
-				.build();
+					.addEncoded("client_id", BotSettings.ID.get())
+					.addEncoded("client_secret", BotSettings.SECRET.get())
+					.addEncoded("grant_type", "authorization_code")
+					.addEncoded("code", code)
+					.addEncoded("redirect_uri", BotSettings.REDIR_URI.get())
+					.build();
 
 			okhttp3.Request httpRequest = new okhttp3.Request.Builder()
-				.url("https://discordapp.com/api/v6/oauth2/token")
-				.post(body)
-				.header("Content-Type", "application/x-www-form-urlencoded")
-				.build();
+					.url("https://discordapp.com/api/v6/oauth2/token")
+					.post(body)
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.build();
 
 			//POST request to discord for access...
 			okhttp3.Response httpResponse = client.newCall(httpRequest).execute();
@@ -68,124 +66,143 @@ public class DiscordLoginHandler {
 			if (info.has("access_token")) {
 				//GET request for user info...
 				Request userDataRequest = new Request.Builder()
-					.url("https://discordapp.com/api/v6/users/@me")
-					.header("Authorization", "Bearer " + info.getString("access_token"))
-					.build();
+						.url("https://discordapp.com/api/v6/users/@me")
+						.header("Authorization", "Bearer " + info.getString("access_token"))
+						.build();
 
 				Response userDataResponse = client.newCall(userDataRequest).execute();
 
 				Request userGuildsRequest = new Request.Builder()
-					.url("https://discordapp.com/api/v6/users/@me/guilds")
-					.header("Authorization", "Bearer " + info.getString("access_token"))
-					.build();
+						.url("https://discordapp.com/api/v6/users/@me/guilds")
+						.header("Authorization", "Bearer " + info.getString("access_token"))
+						.build();
 
 				Response userGuildsResponse = client.newCall(userGuildsRequest).execute();
 
 				JSONObject userInfo = new JSONObject(userDataResponse.body().string());
 				JSONArray jGuilds = new JSONArray(userGuildsResponse.body().string());
 
-				//Get list of guild IDs.
-				JSONArray servers = new JSONArray();
-				for (int i = 0; i < jGuilds.length(); i++) {
-					servers.put(jGuilds.getJSONObject(i).getLong("id"));
-				}
+				//We have the data we need, now map it, and request an API token for this session.
 
-				//Saving session info and access info to memory until moved into the database...
+				//Saving session info and access info to memory...
 				Map<String, Object> m = new HashMap<>();
-				m.put("loggedIn", true);
+
+				//The universal stuffs
+				m.put("logged_in", true);
 				m.put("client", BotSettings.ID.get());
 				m.put("year", LocalDate.now().getYear());
-				m.put("redirUri", BotSettings.REDIR_URI.get());
-				m.put("inviteUrl", BotSettings.INVITE_URL.get());
+				m.put("redirect_uri", BotSettings.REDIR_URI.get());
+				m.put("invite_url", BotSettings.INVITE_URL.get());
+				m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
+				m.put("status", DisCalWeb.getNetworkInfo());
 
+				//More universal stuff, but for the dashboard only
+				m.put("good_timezones", GoodTimezone.values());
+				m.put("announcement_types", AnnouncementType.values());
+				m.put("event_colors", EventColor.values());
+
+				//User info
 				m.put("id", userInfo.getString("id"));
 				m.put("username", userInfo.getString("username"));
 				m.put("discrim", userInfo.getString("discriminator"));
-
-
-				List<WebGuild> guilds = new ArrayList<>();
-				try {
-					OkHttpClient clientWithTimeout = new OkHttpClient.Builder()
-						.connectTimeout(1, TimeUnit.SECONDS)
-						.build();
-
-					JSONObject comBody = new JSONObject();
-					comBody.put("member_id", Long.valueOf(m.get("id") + ""));
-					comBody.put("guilds", servers);
-
-					RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, comBody.toString());
-
-					//TODO: Fix this shit. Really just remove it. Mirror what we did with Remx
-					for (ConnectedClient cc : DisCalWeb.getNetworkInfo().getClients()) {
-
-						try {
-							Request requestNew = new Request.Builder()
-								.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/dashboard/defaults")
-								.post(httpRequestBody)
-								.header("Content-Type", "application/json")
-								.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
-								.build();
-
-							Response responseNew = clientWithTimeout.newCall(requestNew).execute();
-
-
-							if (responseNew.code() == 200) {
-								JSONObject responseBody = new JSONObject(responseNew.body().string());
-
-								JSONArray guildsData = responseBody.getJSONArray("guilds");
-								for (int i = 0; i < guildsData.length(); i++) {
-									guilds.add(new WebGuild().fromJson(guildsData.getJSONObject(i)));
-								}
-							} else if (responseNew.code() >= 500) {
-								//Client must be down... lets remove it...
-								DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-							}
-						} catch (Exception e) {
-							Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
-							//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
-							DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-
-						}
-					}
-				} catch (Exception e) {
-					Logger.getLogger().exception(null, "Failed to handle dashboard guild get", e, true, DashboardHandler.class);
+				if (userInfo.has("avatar") && !userInfo.isNull("avatar")) {
+					m.put("pfp", "https://cdn.discordapp.com/avatars/"
+							+ userInfo.getString("id")
+							+ "/"
+							+ userInfo.getString("avatar")
+							+ ".png");
+				} else {
+					m.put("pfp", "/assets/img/default/pfp.png");
 				}
 
+				//Guild stuffs
+				List<WebGuild> guilds = new ArrayList<>();
+				for (int i = 0; i < jGuilds.length(); i++) {
+					JSONObject jGuild = jGuilds.getJSONObject(i);
 
+					WebGuild wg = new WebGuild();
+					wg.setId(jGuild.getLong("id"));
+					wg.setName(jGuild.getString("name"));
+
+					if (jGuild.has("icon") && !jGuild.isNull("icon")) {
+						wg.setIcon("https://cdn.discordapp.com/icons/"
+								+ wg.getId()
+								+ "/"
+								+ jGuild.getString("icon")
+								+ ".png");
+					} else {
+						wg.setIcon("/assets/img/default/guild-icon.png");
+					}
+
+					guilds.add(wg);
+				}
 				m.put("guilds", guilds);
-
-				m.put("goodTz", GoodTimezone.values());
-				m.put("anTypes", AnnouncementType.values());
-				m.put("eventColors", EventColor.values());
 
 				String newSessionId = UUID.randomUUID().toString();
 
 				req.getSession(true).setAttribute("account", newSessionId);
 
-				DiscordAccountHandler.getHandler().addAccount(m, req);
+				//Request temporary API key....
+				RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
+
+				Request keyGrantRequest = new Request.Builder()
+						.url("https://api.discalbot.com/v2/account/login")
+						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+						.post(keyGrantRequestBody)
+						.build();
+
+				Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
+
+				//Handle response...
+				if (keyGrantResponse.code() == 200) {
+					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+					//API key received, map....
+					m.put("key", keyGrantResponseBody.getString("key"));
+					DiscordAccountHandler.getHandler().addAccount(m, req);
+				} else {
+					//Something didn't work... just redirect back to the login page....
+					res.sendRedirect("/login");
+					return "redirect:/login";
+				}
 
 				//Finally redirect to the dashboard seamlessly.
 				res.sendRedirect("/dashboard");
 				return "redirect:/dashboard";
 			} else {
-				//Token not provided. Authentication denied or errored... Redirect to dashboard so user knows auth failed.
-				res.sendRedirect("/dashboard");
-				return "redirect:/dashboard";
+				//Token not provided. Authentication denied or errored... Redirect to login page so user knows auth failed.
+				res.sendRedirect("/login");
+				return "redirect:/login";
 			}
 		} catch (JSONException e) {
-			Logger.getLogger().exception(null, "[WEB] JSON || Discord login failed!", e, true, DiscordLoginHandler.class);
+			Logger.getLogger().exception(null, "[LOGIN-Discord] JSON || Discord login failed!", e, true, this.getClass());
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Discord login failed!", e, true, DiscordLoginHandler.class);
+			Logger.getLogger().exception(null, "[LOGIN-Discord] Discord login failed!", e, true, this.getClass());
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		}
 	}
 
 	@GetMapping("/account/logout")
-	public static String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
+	public String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
 		try {
+			//Tell the API server the user has logged out and to delete the temporary key.
+			OkHttpClient client = new OkHttpClient();
+
+			Map<String, Object> map = DiscordAccountHandler.getHandler().getAccount(request);
+
+			RequestBody logoutRequestBody = RequestBody.create(GlobalConst.JSON, "");
+
+			Request logoutRequest = new Request.Builder()
+					.url("https://api.discalbot.com/v2/account/logout")
+					.header("Authorization", (String) map.get("private_token"))
+					.post(logoutRequestBody)
+					.build();
+
+			//We don't need a return, if it fails, it will be auto-deleted anyway...
+			client.newCall(logoutRequest).execute();
+
 			DiscordAccountHandler.getHandler().removeAccount(request);
 			request.getSession().invalidate();
 

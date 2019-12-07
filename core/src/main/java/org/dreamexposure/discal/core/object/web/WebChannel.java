@@ -1,8 +1,9 @@
 package org.dreamexposure.discal.core.object.web;
 
-import discord4j.core.object.entity.TextChannel;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
+
+import discord4j.core.object.entity.TextChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -54,17 +55,17 @@ public class WebChannel {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("Id", id);
-		data.put("Name", name);
-		data.put("DisCalChannel", discalChannel);
+		data.put("id", id);
+		data.put("name", name);
+		data.put("discal_channel", discalChannel);
 
 		return data;
 	}
 
 	public WebChannel fromJson(JSONObject data) {
-		id = data.getLong("Id");
-		name = data.getString("Name");
-		discalChannel = data.getBoolean("DisCalChannel");
+		id = data.getLong("id");
+		name = data.getString("name");
+		discalChannel = data.getBoolean("discal_channel");
 
 		return this;
 	}

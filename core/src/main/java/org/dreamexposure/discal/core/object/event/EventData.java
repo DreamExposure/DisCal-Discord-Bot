@@ -1,8 +1,10 @@
 package org.dreamexposure.discal.core.object.event;
 
-import discord4j.core.object.util.Snowflake;
+import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -53,5 +55,24 @@ public class EventData {
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {
 		return imageLink != null;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("guild_id", guildId.asLong());
+		json.put("event_id", eventId);
+		json.put("event_end", eventEnd);
+		json.put("image_link", imageLink);
+
+		return json;
+	}
+
+	public EventData fromJson(JSONObject json) {
+		eventId = json.getString("event_id");
+		eventEnd = json.getLong("event_end");
+		imageLink = json.getString("image_link");
+
+		return this;
 	}
 }

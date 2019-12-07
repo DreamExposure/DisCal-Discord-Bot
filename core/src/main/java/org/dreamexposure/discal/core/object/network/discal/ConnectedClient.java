@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -71,5 +73,17 @@ public class ConnectedClient {
 
 	public void setMemUsed(double _mem) {
 		memUsed = _mem;
+	}
+
+	public JSONObject toJson() {
+		JSONObject json = new JSONObject();
+
+		json.put("index", clientIndex);
+		json.put("servers", connectedServers);
+		json.put("keep_alive", lastKeepAlive);
+		json.put("uptime", uptime);
+		json.put("memory", memUsed);
+
+		return json;
 	}
 }
