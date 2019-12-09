@@ -127,6 +127,13 @@
 				<span>RSVP</span></a>
 		</li>
 
+		<!-- Nav Item - v2 Status -->
+		<li class="nav-item">
+			<a class="nav-link" href="/docs/api/v2/status">
+				<i class="fas fa-fw fa-calendar-check"></i>
+				<span>Status</span></a>
+		</li>
+
 		<!-- Divider -->
 		<hr class="sidebar-divider">
 
@@ -324,23 +331,10 @@
 				<hr>
 
 				<!-- Start get endpoint-->
-				<h2 id="get" class="text-center text-discal-blue">event/get</h2>
+				<h2 id="get" class="text-center text-discal-blue">events/get</h2>
 
 				<p class="text-left text-discord-full-white">
-					The /get endpoint is currently not public and therefore not documented. It will
-					become available soon after the API is fixed up. Sorry for the inconvenience.
-				</p>
-
-				<br>
-				<!-- End get endpoint-->
-
-				<hr>
-
-				<!-- Start list-month endpoint-->
-				<h2 id="list-month" class="text-center text-discal-blue">/list/month</h2>
-
-				<p class="text-left text-discord-full-white">
-					Returns a list of events for the specified month.
+					Returns the event requested.
 				</p>
 
 				<br>
@@ -350,8 +344,8 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"DaysInMonth": 31,
-				"EpochStart": 1519884000000
+				"event_id": "e7gqkup5l8",
+				"calendar_number": 1
 				}
 				</code></pre>
 
@@ -363,12 +357,21 @@
 
 				<pre class="code"><code>
 				{
-				"count": 1,
-				"events": [{
-					"id": "e7gqkup5l8",
-					"epochStart": 1521732600000,
-					"epochEnd": 1521761400000
-				}]
+				"event_id": "e7gqkup5l8",
+				"epoch_start": 1521732600000,
+				"epoch_end": 1521732600000,
+				"summary": "Weekly study group",
+				"description": "Time to study!",
+				"location": "Building A, Room 205",
+				"is_parent": false,
+				"color": "NONE",
+				"recur": true,
+				"recurrence": {
+					"frequency": "WEEKLY",
+					"count": -1,
+					"interval": 1
+					},
+				"image": "https://imgur.com/totallyARealLink.png"
 				}
 				</code></pre>
 
@@ -392,15 +395,15 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>DaysInMonth</td>
-						<td>int</td>
-						<td>Days in the month</td>
+						<td>event_id</td>
+						<td>String</td>
+						<td>The ID of the event to get</td>
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>EpochStart</td>
-						<td>long</td>
-						<td>First unix millisecond of the month</td>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The calendar number to get the event from, "1" for main calendar</td>
 						<td>True</td>
 					</tr>
 					</tbody>
@@ -419,44 +422,92 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>Count</td>
-						<td>int</td>
-						<td>Amount of events in month</td>
-					</tr>
-					<tr>
-						<td>events</td>
-						<td>List</td>
-						<td>List of events in month</td>
-					</tr>
-					<tr>
-						<td>events.id</td>
+						<td>event_id</td>
 						<td>String</td>
-						<td>The event's ID</td>
+						<td>The ID of the event</td>
 					</tr>
 					<tr>
-						<td>events.epochStart</td>
+						<td>epoch_start</td>
 						<td>long</td>
-						<td>Unix start time of event</td>
+						<td>The time the event starts at</td>
 					</tr>
 					<tr>
-						<td>events.epochEnd</td>
+						<td>epoch_end</td>
 						<td>long</td>
-						<td>Unix end time of event</td>
+						<td>The time the event ends at</td>
+					</tr>
+					<tr>
+						<td>summary</td>
+						<td>String</td>
+						<td>The summary/name of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>description</td>
+						<td>String</td>
+						<td>The long description of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>location</td>
+						<td>String</td>
+						<td>Where the event is held *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>is_parent</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a parent of other events *Only applicable
+							if "recur" is true*
+						</td>
+					</tr>
+					<tr>
+						<td>color</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set</td>
+					</tr>
+					<tr>
+						<td>recur</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a recurring event</td>
+					</tr>
+					<tr>
+						<td>recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
+					</tr>
+					<tr>
+						<td>recurrence.frequency</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
+					</tr>
+					<tr>
+						<td>recurrence.count</td>
+						<td>int</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
+					</tr>
+					<tr>
+						<td>recurrence.interval</td>
+						<td>int</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *May not always be included*</td>
 					</tr>
 					</tbody>
 				</table>
 
 				<br>
-				<!-- End list-month endpoint-->
+				<!-- End get endpoint-->
 
 				<hr>
 
-				<!-- Start list-date endpoint-->
-				<h2 id="list-date" class="text-center text-discal-blue">/list/date</h2>
+				<!-- Start list-month endpoint-->
+				<h2 id="list-month" class="text-center text-discal-blue">events/list/month</h2>
 
 				<p class="text-left text-discord-full-white">
-					Returns a list of events for the specified date. Automatically adds 24 hours to
-					the start time.
+					Returns a list of events for the specified month.
 				</p>
 
 				<br>
@@ -466,7 +517,9 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"startEpoch": 1521694800000
+				"calendar_number": 1,
+				"days_in_month": 31,
+				"epoch_start": 1519884000000
 				}
 				</code></pre>
 
@@ -478,24 +531,22 @@
 
 				<pre class="code"><code>
 				{
-				"count": 1,
 				"events": [{
-					"id": "e7gqkup5l8",
-					"epochStart": 1521732600000,
-					"epochEnd": 1521732600000,
-					"timezone": "America/Chicago",
-					"summary": "Made in the dashboard!",
-					"description": "This event was created using the new dashboard",
-					"location": "The void",
-					"color": "BLUE",
-					"isParent": true,
+					"event_id": "e7gqkup5l8",
+					"epoch_start": 1521732600000,
+					"epoch_end": 1521732600000,
+					"summary": "Weekly study group",
+					"description": "Time to study!",
+					"location": "Building A, Room 205",
+					"is_parent": false,
+					"color": "NONE",
+					"recur": true,
 					"recurrence": {
-						"recur": false,
-						"frequency": "DAILY",
+						"frequency": "WEEKLY",
 						"count": -1,
-						"interval": 1,
+						"interval": 1
 					},
-					"image": "https://goo.gl/nqi64A"
+					"image": "https://imgur.com/totallyARealLink.png"
 				}]
 				}
 				</code></pre>
@@ -520,7 +571,200 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>StartEpoch</td>
+						<td>days_in_month</td>
+						<td>int</td>
+						<td>Days in the month</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>epoch_start</td>
+						<td>long</td>
+						<td>First unix millisecond of the month</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The number of the calendar to use. *"1" for the main calendar*</td>
+						<td>True</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Returned Values</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>events</td>
+						<td>List</td>
+						<td>List of events in month</td>
+					</tr>
+					<tr>
+						<td>events.event_id</td>
+						<td>String</td>
+						<td>The ID of the event</td>
+					</tr>
+					<tr>
+						<td>events.epoch_start</td>
+						<td>long</td>
+						<td>The time the event starts at</td>
+					</tr>
+					<tr>
+						<td>events.epoch_end</td>
+						<td>long</td>
+						<td>The time the event ends at</td>
+					</tr>
+					<tr>
+						<td>events.summary</td>
+						<td>String</td>
+						<td>The summary/name of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.description</td>
+						<td>String</td>
+						<td>The long description of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.location</td>
+						<td>String</td>
+						<td>Where the event is held *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.is_parent</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a parent of other events *Only applicable
+							if "recur" is true*
+						</td>
+					</tr>
+					<tr>
+						<td>events.color</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set</td>
+					</tr>
+					<tr>
+						<td>events.recur</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a recurring event</td>
+					</tr>
+					<tr>
+						<td>events.recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.frequency</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.count</td>
+						<td>int</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.interval</td>
+						<td>int</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>events.image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *May not always be included*</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+				<!-- End list-month endpoint-->
+
+				<hr>
+
+				<!-- Start list-date endpoint-->
+				<h2 id="list-date" class="text-center text-discal-blue">events/list/date</h2>
+
+				<p class="text-left text-discord-full-white">
+					Returns a list of events for the specified date. Automatically adds 24 hours to
+					the start time.
+				</p>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Request Body</h6>
+
+				<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"calendar_number": 1,
+				"epoch_start": 1521694800000
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Response</h6>
+
+				<br>
+
+				<pre class="code"><code>
+				{
+				"events": [{
+					"event_id": "e7gqkup5l8",
+					"epoch_start": 1521732600000,
+					"epoch_end": 1521732600000,
+					"summary": "Weekly study group",
+					"description": "Time to study!",
+					"location": "Building A, Room 205",
+					"is_parent": false,
+					"color": "NONE",
+					"recur": true,
+					"recurrence": {
+						"frequency": "WEEKLY",
+						"count": -1,
+						"interval": 1
+					},
+					"image": "https://imgur.com/totallyARealLink.png"
+				}]
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+						<th>Required</th>
+					</tr>
+					<tr>
+						<td>guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The number of the calendar to use, *1 for the main calendar*</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>epoch_start</td>
 						<td>long</td>
 						<td>First unix millisecond of the date</td>
 						<td>True</td>
@@ -541,84 +785,83 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>Count</td>
-						<td>int</td>
-						<td>Amount of events in month</td>
-					</tr>
-					<tr>
 						<td>events</td>
 						<td>List</td>
 						<td>List of events in month</td>
 					</tr>
 					<tr>
-						<td>events.id</td>
+						<td>events.event_id</td>
 						<td>String</td>
-						<td>The event's ID</td>
+						<td>The ID of the event</td>
 					</tr>
 					<tr>
-						<td>events.epochStart</td>
+						<td>events.epoch_start</td>
 						<td>long</td>
-						<td>Unix start time of event</td>
+						<td>The time the event starts at</td>
 					</tr>
 					<tr>
-						<td>events.epochEnd</td>
+						<td>events.epoch_end</td>
 						<td>long</td>
-						<td>Unix end time of event</td>
-					</tr>
-					<tr>
-						<td>events.timezone</td>
-						<td>String</td>
-						<td>The Timezone of the event/calendar</td>
+						<td>The time the event ends at</td>
 					</tr>
 					<tr>
 						<td>events.summary</td>
 						<td>String</td>
-						<td>The summary/name of the event</td>
+						<td>The summary/name of the event. *May not always be included*</td>
 					</tr>
 					<tr>
 						<td>events.description</td>
 						<td>String</td>
-						<td>The description of the event</td>
+						<td>The long description of the event. *May not always be included*</td>
 					</tr>
 					<tr>
 						<td>events.location</td>
 						<td>String</td>
-						<td>The location the event takes place</td>
+						<td>Where the event is held *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.is_parent</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a parent of other events *Only applicable
+							if "recur" is true*
+						</td>
 					</tr>
 					<tr>
 						<td>events.color</td>
-						<td>String</td>
-						<td>The name of the event color, "NONE" if no color used</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set</td>
 					</tr>
 					<tr>
-						<td>events.image</td>
-						<td>String/URL</td>
-						<td>URL of the event's image</td>
-					</tr>
-					<tr>
-						<td>events.isParent</td>
+						<td>events.recur</td>
 						<td>Boolean</td>
-						<td>Whether or not the event is a parent. (default true)</td>
+						<td>Whether or not this event is a recurring event</td>
 					</tr>
 					<tr>
-						<td>events.recurrence.recur</td>
-						<td>Boolean</td>
-						<td>Whether or not the event is set to recur.</td>
+						<td>events.recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
 					</tr>
 					<tr>
 						<td>events.recurrence.frequency</td>
-						<td>String</td>
-						<td>The frequency of the event's recurrence.</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
 					</tr>
 					<tr>
-						<td>events.recurrence.recurCount</td>
+						<td>events.recurrence.count</td>
 						<td>int</td>
-						<td>The amount of times the event recurs. (-1 or 0 for infinite)</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
 					</tr>
 					<tr>
 						<td>events.recurrence.interval</td>
 						<td>int</td>
-						<td>Interval at which the event recurs (compliant to the above values)</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>events.image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *May not always be included*</td>
 					</tr>
 					</tbody>
 				</table>
@@ -628,11 +871,11 @@
 
 				<hr>
 
-				<!-- Start create endpoint-->
-				<h2 id="create" class="text-center text-discal-blue">/create</h2>
+				<!-- Start list-range endpoint-->
+				<h2 id="list-range" class="text-center text-discal-blue">events/list/range</h2>
 
 				<p class="text-left text-discord-full-white">
-					Creates a new event with the specified data.
+					Returns a list of events for the specified range.
 				</p>
 
 				<br>
@@ -642,19 +885,9 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"epochStart": 1521732600000,
-				"epochEnd": 1521732600000,
-				"summary": "My cool event!",
-				"description": "Event edited via REST API",
-				"location": "The nether",
-				"color": "RED",
-				"recurrence": {
-					"recur": false,
-					"frequency": "DAILY",
-					"count": -1,
-					"interval": 1,
-				},
-				"image": "https://goo.gl/nqi64A"
+				"calendar_number": 1,
+				"epoch_start": 1521694800000,
+				"epoch_end": 1521744800000,
 				}
 				</code></pre>
 
@@ -666,8 +899,23 @@
 
 				<pre class="code"><code>
 				{
-				"Message": "Successfully created event!",
-				"id": "e7gqkup5l8"
+				"events": [{
+					"event_id": "e7gqkup5l8",
+					"epoch_start": 1521732600000,
+					"epoch_end": 1521732600000,
+					"summary": "Weekly study group",
+					"description": "Time to study!",
+					"location": "Building A, Room 205",
+					"is_parent": false,
+					"color": "NONE",
+					"recur": true,
+					"recurrence": {
+						"frequency": "WEEKLY",
+						"count": -1,
+						"interval": 1
+					},
+					"image": "https://imgur.com/totallyARealLink.png"
+				}]
 				}
 				</code></pre>
 
@@ -691,71 +939,21 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>epochStart</td>
-						<td>long</td>
-						<td>Unix time of event start</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>epochEnd</td>
-						<td>long</td>
-						<td>Unix time of event start</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>summary</td>
-						<td>String</td>
-						<td>The Summary/Name of the event</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>description</td>
-						<td>String</td>
-						<td>The description of event</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>location</td>
-						<td>String</td>
-						<td>Where the event takes place</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>color</td>
-						<td>String</td>
-						<td>The color of the event (1 of 12 supported colors)</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>image</td>
-						<td>String/URL</td>
-						<td>The URL to the event's image</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>recurrence.recur</td>
-						<td>Boolean</td>
-						<td>Whether or not the event should recur</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>recurrence.frequency</td>
-						<td>String</td>
-						<td>The frequency at which the event should recur</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>recurrence.count</td>
+						<td>calendar_number</td>
 						<td>int</td>
-						<td>How many times the event should recur (-1 or 0 for infinite)</td>
+						<td>The number of the calendar to use, *1 for the main calendar*</td>
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>recurrence.interval</td>
-						<td>int</td>
-						<td>The interval for which the event should recur (compliant to above
-							values)
-						</td>
+						<td>epoch_start</td>
+						<td>long</td>
+						<td>First unix millisecond of the range</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>epoch_end</td>
+						<td>long</td>
+						<td>Last unix millisecond of the range</td>
 						<td>True</td>
 					</tr>
 					</tbody>
@@ -774,7 +972,243 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>Message</td>
+						<td>events</td>
+						<td>List</td>
+						<td>List of events in month</td>
+					</tr>
+					<tr>
+						<td>events.event_id</td>
+						<td>String</td>
+						<td>The ID of the event</td>
+					</tr>
+					<tr>
+						<td>events.epoch_start</td>
+						<td>long</td>
+						<td>The time the event starts at</td>
+					</tr>
+					<tr>
+						<td>events.epoch_end</td>
+						<td>long</td>
+						<td>The time the event ends at</td>
+					</tr>
+					<tr>
+						<td>events.summary</td>
+						<td>String</td>
+						<td>The summary/name of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.description</td>
+						<td>String</td>
+						<td>The long description of the event. *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.location</td>
+						<td>String</td>
+						<td>Where the event is held *May not always be included*</td>
+					</tr>
+					<tr>
+						<td>events.is_parent</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a parent of other events *Only applicable
+							if "recur" is true*
+						</td>
+					</tr>
+					<tr>
+						<td>events.color</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set</td>
+					</tr>
+					<tr>
+						<td>events.recur</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a recurring event</td>
+					</tr>
+					<tr>
+						<td>events.recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.frequency</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.count</td>
+						<td>int</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
+					</tr>
+					<tr>
+						<td>events.recurrence.interval</td>
+						<td>int</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>events.image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *May not always be included*</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+				<!-- End list-range endpoint-->
+
+				<hr>
+
+				<!-- Start create endpoint-->
+				<h2 id="create" class="text-center text-discal-blue">/create</h2>
+
+				<p class="text-left text-discord-full-white">
+					Creates a new event with the specified data.
+				</p>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Request Body</h6>
+
+				<pre class="code"><code>
+				{
+				"guild_id": 375357265198317579,
+				"calendar_number": 1,
+				"event_id": "e7gqkup5l8",
+				"epoch_start": 1521732600000,
+				"epoch_end": 1521732600000,
+				"summary": "Weekly study group",
+				"description": "Time to study!",
+				"location": "Building A, Room 205",
+				"is_parent": false,
+				"color": "NONE",
+				"recur": true,
+				"recurrence": {
+					"frequency": "WEEKLY",
+					"count": -1,
+					"interval": 1
+				},
+				"image": "https://imgur.com/totallyARealLink.png"
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Response</h6>
+
+				<br>
+
+				<pre class="code"><code>
+				{
+				"message": "Successfully created event!",
+				"id": "e7gqkup5l8"
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The number of the calendar to use, *1 for the main calendar*</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>epoch_start</td>
+						<td>long</td>
+						<td>The time the event starts at</td>
+					</tr>
+					<tr>
+						<td>epoch_end</td>
+						<td>long</td>
+						<td>The time the event ends at</td>
+					</tr>
+					<tr>
+						<td>summary</td>
+						<td>String</td>
+						<td>The summary/name of the event. *Optional*</td>
+					</tr>
+					<tr>
+						<td>description</td>
+						<td>String</td>
+						<td>The long description of the event. *Optional*</td>
+					</tr>
+					<tr>
+						<td>location</td>
+						<td>String</td>
+						<td>Where the event is held *Optional*</td>
+					</tr>
+					<tr>
+						<td>color</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set *Optional*</td>
+					</tr>
+					<tr>
+						<td>recur</td>
+						<td>Boolean</td>
+						<td>Whether or not this event is a recurring event *Optional, only required
+							if recurrence exists*
+						</td>
+					</tr>
+					<tr>
+						<td>events.recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
+					</tr>
+					<tr>
+						<td>recurrence.frequency</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
+					</tr>
+					<tr>
+						<td>recurrence.count</td>
+						<td>int</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
+					</tr>
+					<tr>
+						<td>recurrence.interval</td>
+						<td>int</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *Optional*</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Returned Values</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>message</td>
 						<td>String</td>
 						<td>Status of creation</td>
 					</tr>
@@ -805,19 +1239,13 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"id": e7gqkup5l8,
-				"epochStart": 1521732600000,
-				"epochEnd": 1521732600000,
-				"summary": "My cool event!",
-				"description": "Event edited via REST API",
-				"location": "The nether",
+				"calendar_number": 1,
+				"event_id": "e7gqkup5l8",
+				"epoch_end": 1521732600000,
+				"summary": "Weekly study group",
+				"location": "Building A, Room 205",
+				"is_parent": false,
 				"color": "RED",
-				"recurrence": {
-					"recur": false,
-					"count": -1,
-					"interval": 1,
-				},
-				"image": "https://goo.gl/nqi64A"
 				}
 				</code></pre>
 
@@ -829,7 +1257,7 @@
 
 				<pre class="code"><code>
 				{
-				"Message": "Successfully updated event!"
+				"message": "Event updated successfully!"
 				}
 				</code></pre>
 
@@ -853,78 +1281,80 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>id</td>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The number of the calendar to use, *1 for the main calendar*</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>event_id</td>
 						<td>String</td>
 						<td>ID of the event to edit</td>
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>epochStart</td>
+						<td>epoch_start</td>
 						<td>long</td>
-						<td>Unix time of event start</td>
-						<td>True</td>
+						<td>The time the event starts at</td>
 					</tr>
 					<tr>
-						<td>epochEnd</td>
+						<td>epoch_end</td>
 						<td>long</td>
-						<td>Unix time of event start</td>
-						<td>True</td>
+						<td>The time the event ends at</td>
 					</tr>
 					<tr>
 						<td>summary</td>
 						<td>String</td>
-						<td>The Summary/Name of the event</td>
-						<td>True</td>
+						<td>The summary/name of the event. *Optional*</td>
 					</tr>
 					<tr>
 						<td>description</td>
 						<td>String</td>
-						<td>The description of event</td>
-						<td>True</td>
+						<td>The long description of the event. *Optional*</td>
 					</tr>
 					<tr>
 						<td>location</td>
 						<td>String</td>
-						<td>Where the event takes place</td>
-						<td>True</td>
+						<td>Where the event is held *Optional*</td>
 					</tr>
 					<tr>
 						<td>color</td>
-						<td>String</td>
-						<td>The color of the event (1 of 12 supported colors)</td>
-						<td>True</td>
+						<td>String, enum name of Color enum</td>
+						<td>The color of the event, "NONE" if no color is set *Optional*</td>
 					</tr>
 					<tr>
-						<td>image</td>
-						<td>String/URL</td>
-						<td>The URL to the event's image</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>recurrence.recur</td>
+						<td>recur</td>
 						<td>Boolean</td>
-						<td>Whether or not the event should recur</td>
-						<td>True</td>
+						<td>Whether or not this event is a recurring event *Optional, only required
+							if recurrence exists*
+						</td>
+					</tr>
+					<tr>
+						<td>events.recurrence</td>
+						<td>JSON Object</td>
+						<td>The recurrence settings of this event *Only present if "recur" is
+							true*
+						</td>
 					</tr>
 					<tr>
 						<td>recurrence.frequency</td>
-						<td>String</td>
-						<td>The frequency at which the event should recur</td>
-						<td>True</td>
+						<td>String, enum name of Frequency enum</td>
+						<td>The frequency of the event.</td>
 					</tr>
 					<tr>
 						<td>recurrence.count</td>
 						<td>int</td>
-						<td>How many times the event should recur (-1 or 0 for infinite)</td>
-						<td>True</td>
+						<td>How many times this event recurs, "-1" for infinite</td>
 					</tr>
 					<tr>
 						<td>recurrence.interval</td>
 						<td>int</td>
-						<td>The interval for which the event should recur (compliant to above
-							values)
-						</td>
-						<td>True</td>
+						<td>The skip interval for the event</td>
+					</tr>
+					<tr>
+						<td>image</td>
+						<td>String, link</td>
+						<td>The link to the event's image *Optional*</td>
 					</tr>
 					</tbody>
 				</table>
@@ -942,7 +1372,7 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>Message</td>
+						<td>message</td>
 						<td>String</td>
 						<td>Status of update.</td>
 					</tr>
@@ -968,7 +1398,8 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"id": e7gqkup5l8
+				"calendar_number": 1,
+				"event_id": "e7gqkup5l8",
 				}
 				</code></pre>
 
@@ -980,7 +1411,7 @@
 
 				<pre class="code"><code>
 				{
-				"Message": "Successfully deleted event!"
+				"message": "Event successfully deleted!"
 				}
 				</code></pre>
 
@@ -1004,7 +1435,13 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>id</td>
+						<td>calendar_number</td>
+						<td>int</td>
+						<td>The number of the calendar to use, *1 for main calendar*</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>event_id</td>
 						<td>String</td>
 						<td>ID of the event to delete</td>
 						<td>True</td>
@@ -1025,7 +1462,7 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>Message</td>
+						<td>message</td>
 						<td>String</td>
 						<td>Status of deletion</td>
 					</tr>

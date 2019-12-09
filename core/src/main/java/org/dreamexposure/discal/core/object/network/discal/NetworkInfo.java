@@ -101,9 +101,9 @@ public class NetworkInfo {
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
-		json.put("uptime", getUptime());
+		json.put("api_uptime", getUptime());
 		json.put("announcements", getAnnouncementCount());
-		json.put("guilds", getTotalGuildCount());
+		json.put("total_guilds", getTotalGuildCount());
 		json.put("calendars", getCalendarCount());
 
 		JSONArray jClients = new JSONArray();

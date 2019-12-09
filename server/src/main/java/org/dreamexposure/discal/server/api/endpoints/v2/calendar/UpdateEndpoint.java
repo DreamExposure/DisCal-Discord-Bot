@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
+import org.dreamexposure.discal.core.utils.TimeZoneUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,9 +26,9 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/calendar")
-public class GetEndpoint {
-	@PostMapping(value = "/get", produces = "application/json")
-	public String getCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+public class UpdateEndpoint {
+	@PostMapping(value = "/update", produces = "application/json")
+	public String updateCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
 		if (!authState.isSuccess()) {
@@ -52,18 +53,29 @@ public class GetEndpoint {
 						.get(calData.getCalendarAddress())
 						.execute();
 
-				JSONObject body = new JSONObject();
-				body.put("calendar_address", calData.getCalendarAddress());
-				body.put("calendar_id", calData.getCalendarId());
-				body.put("calendar_number", calData.getCalendarNumber());
-				body.put("external", calData.isExternal());
-				body.put("summary", cal.getSummary());
-				body.put("description", cal.getDescription());
-				body.put("timezone", cal.getTimeZone());
+				if (jsonMain.has("summary"))
+					cal.setSummary(jsonMain.getString("summary"));
+				if (jsonMain.has("description"))
+					cal.setDescription("description");
+				if (jsonMain.has("timezone")) {
+					String tzRaw = jsonMain.getString("timezone");
+					if (TimeZoneUtils.isValid(tzRaw)) {
+						cal.setTimeZone(tzRaw);
+					}
+				}
+
+				com.google.api.services.calendar.model.Calendar confirmed = service.calendars()
+						.update(calData.getCalendarAddress(), cal)
+						.execute();
 
 				response.setContentType("application/json");
-				response.setStatus(200);
-				return body.toString();
+				if (confirmed != null) {
+					response.setStatus(200);
+					return JsonUtils.getJsonResponseMessage("Calendar successfully updated");
+				} else {
+					response.setStatus(500);
+					return JsonUtils.getJsonResponseMessage("Calendar update failed. Perhaps google is at fault!");
+				}
 			} else {
 				response.setContentType("application/json");
 				response.setStatus(404);

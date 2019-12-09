@@ -17,7 +17,7 @@ public class JsonUtils {
 	public static JSONObject convertEventToJson(Event event, GuildSettings settings) {
 		JSONObject json = new JSONObject();
 
-		json.put("id", event.getId());
+		json.put("event_id", event.getId());
 		json.put("epoch_start", event.getStart().getDateTime().getValue());
 		json.put("epoch_end", event.getEnd().getDateTime().getValue());
 

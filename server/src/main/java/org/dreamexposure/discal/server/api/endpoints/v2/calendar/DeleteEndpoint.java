@@ -1,10 +1,11 @@
-package org.dreamexposure.discal.server.api.endpoints.v2.event;
+package org.dreamexposure.discal.server.api.endpoints.v2.calendar;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
-import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -20,10 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import discord4j.core.object.util.Snowflake;
 
 @RestController
-@RequestMapping("/v2/events")
+@RequestMapping("/v2/calendar")
 public class DeleteEndpoint {
 	@PostMapping(value = "/delete", produces = "application/json")
-	public String deleteEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+	public String deleteCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
 		if (!authState.isSuccess()) {
@@ -34,49 +35,41 @@ public class DeleteEndpoint {
 
 		//Okay, now handle actual request.
 		try {
-			JSONObject requestBody = new JSONObject(rBody);
+			JSONObject jsonMain = new JSONObject(requestBody);
+			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+			int calNumber = jsonMain.getInt("calendar_number");
 
-			long guildId = requestBody.getLong("guild_id");
-			int calNumber = requestBody.getInt("calendar_number");
-			String eventId = requestBody.getString("event_id");
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
 
-
-			//okay, lets actually delete the event
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
-
-			if (EventUtils.eventExists(settings, calNumber, eventId)) {
-				if (EventUtils.deleteEvent(settings, eventId)) {
+			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
+				if (CalendarUtils.calendarExists(calendar, settings)) {
+					if (CalendarUtils.deleteCalendar(calendar, settings)) {
+						response.setContentType("application/json");
+						response.setStatus(200);
+						return JsonUtils.getJsonResponseMessage("Calendar successfully deleted");
+					}
 					response.setContentType("application/json");
-					response.setStatus(200);
-					return JsonUtils.getJsonResponseMessage("Event successfully deleted");
+					response.setStatus(500);
+					return JsonUtils.getJsonResponseMessage("Internal Server Error");
 				}
-
-
-				//Something went wrong, but didn't error.... this should never happen...
-				response.setContentType("application/json");
-				response.setStatus(500);
-
-				return JsonUtils.getJsonResponseMessage("Internal Server Error");
-			} else {
-				response.setContentType("application/json");
-				response.setStatus(404);
-
-				return JsonUtils.getJsonResponseMessage("Event Not Found");
 			}
+			response.setContentType("application/json");
+			response.setStatus(404);
+			return JsonUtils.getJsonResponseMessage("Calendar not found");
 		} catch (JSONException e) {
 			e.printStackTrace();
 
 			response.setContentType("application/json");
 			response.setStatus(400);
-
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[API-v2] Failed to update event.", e, true, this.getClass());
+			Logger.getLogger().exception(null, "[API-v2] Internal delete calendar error", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(500);
-
 			return JsonUtils.getJsonResponseMessage("Internal Server Error");
 		}
 	}
 }
+

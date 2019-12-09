@@ -2,13 +2,15 @@ package org.dreamexposure.discal.core.utils;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import discord4j.core.object.util.Snowflake;
+
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.PreEvent;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -45,9 +47,23 @@ public class EventUtils {
 		return false;
 	}
 
+	@Deprecated
 	public static boolean eventExists(GuildSettings settings, String eventId) {
-		//TODO: Support multiple calendars...
 		String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+		try {
+			Calendar service = CalendarAuth.getCalendarService(settings);
+
+			return service.events().get(calendarId, eventId).execute() != null;
+		} catch (Exception e) {
+			//Failed to check event, probably doesn't exist, safely ignore.
+		}
+		return false;
+	}
+
+	public static boolean eventExists(GuildSettings settings, int calNumber, String eventId) {
+		String calendarId = DatabaseManager.getManager()
+				.getCalendar(settings.getGuildID(), calNumber)
+				.getCalendarAddress();
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 

@@ -40,17 +40,13 @@ public class GetEndpoint {
 			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
 			Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guildId);
+
+
+			response.setContentType("application/json");
 			if (a != null) {
-
-				JSONObject responseBody = new JSONObject();
-				responseBody.put("announcement", a.toJson());
-
-
-				response.setContentType("application/json");
 				response.setStatus(200);
-				return responseBody.toString();
+				return a.toJson().toString();
 			} else {
-				response.setContentType("application/json");
 				response.setStatus(404);
 				return JsonUtils.getJsonResponseMessage("Announcement not found");
 			}

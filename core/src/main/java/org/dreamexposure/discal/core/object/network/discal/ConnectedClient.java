@@ -79,7 +79,7 @@ public class ConnectedClient {
 		JSONObject json = new JSONObject();
 
 		json.put("index", clientIndex);
-		json.put("servers", connectedServers);
+		json.put("guilds", connectedServers);
 		json.put("keep_alive", lastKeepAlive);
 		json.put("uptime", uptime);
 		json.put("memory", memUsed);

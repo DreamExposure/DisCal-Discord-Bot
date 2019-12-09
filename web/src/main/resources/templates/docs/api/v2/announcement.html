@@ -94,7 +94,7 @@
 		<div class="sidebar-heading mx-3">v2 Endpoints</div>
 
 		<!-- Nav Item - v2 Announcements -->
-		<li class="nav-item">
+		<li class="nav-item active">
 			<a class="nav-link" href="/docs/api/v2/announcement">
 				<i class="fas fa-fw fa-bullhorn"></i>
 				<span>Announcement</span></a>
@@ -121,7 +121,7 @@
 		</li>
 
 		<!-- Nav Item - v2 RSVP -->
-		<li class="nav-item active">
+		<li class="nav-item">
 			<a class="nav-link" href="/docs/api/v2/rsvp">
 				<i class="fas fa-fw fa-calendar-check"></i>
 				<span>RSVP</span></a>
@@ -147,11 +147,32 @@
 				<span>/get</span></a>
 		</li>
 
+		<!-- Nav Item - Jump - create -->
+		<li class="nav-item">
+			<a class="nav-link" href="#create">
+				<i class="fas fa-fw fa-plus-circle"></i>
+				<span>/create</span></a>
+		</li>
+
 		<!-- Nav Item - Jump - update -->
 		<li class="nav-item">
 			<a class="nav-link" href="#update">
 				<i class="fas fa-fw fa-edit"></i>
 				<span>/update</span></a>
+		</li>
+
+		<!-- Nav Item - Jump - delete -->
+		<li class="nav-item">
+			<a class="nav-link" href="#delete">
+				<i class="fas fa-fw fa-trash"></i>
+				<span>/delete</span></a>
+		</li>
+
+		<!-- Nav Item - Jump - list -->
+		<li class="nav-item">
+			<a class="nav-link" href="#list">
+				<i class="fas fa-fw fa-list"></i>
+				<span>/list</span></a>
 		</li>
 
 		<!-- Divider -->
@@ -284,21 +305,22 @@
 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
-				<h1 class="text-center text-discal-blue">API v2 Docs - RSVP Endpoint</h1>
+				<h1 class="text-center text-discal-blue">API v2 Docs - Announcement Endpoint</h1>
 
 				<p class="text-center text-discord-full-white">
-					The RSVP endpoints allows you to get and edit RSVP status for events in a guild.
+					The announcement endpoints allows you to create, edit, delete, and list
+					announcements for a specific guild.
 				</p>
 
 				<br>
 
 				<hr>
 
-				<!-- Start get endpoint-->
-				<h2 id="get" class="text-center text-discal-blue">rsvp/get</h2>
+				<!-- Start Get-->
+				<h2 id="get" class="text-center text-discal-blue">announcement/get</h2>
 
 				<p class="text-left text-discord-full-white">
-					Returns the specified event's RSVP details.
+					Returns the specified announcement's data.
 				</p>
 
 				<br>
@@ -308,7 +330,7 @@
 				<pre class="code"><code>
 				{
 				"guild_id": 375357265198317579,
-				"event_id": "divq9ihqhoq9hbm2tncj8set04"
+				"announcement_id": "b067378e-2565-4116-aa20-08cc144d1fdb"
 				}
 				</code></pre>
 
@@ -320,10 +342,19 @@
 
 				<pre class="code"><code>
 				{
-				"on_time": ["130510525770629121"],
-				"late": ["233611560545812480", "142107863307780097"],
-				"undecided": [],
-				"not_going": []
+				"guild_id": 375357265198317579,
+				"announcement_id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+				"channel_id": "266666669542342656",
+				"event_id": "divq9ihqhoq9hbm2tncj8set04_20180317T030000Z",
+				"event_color": "NONE",
+				"type": "RECUR",
+				"hours": 1,
+				"minutes": 30,
+				"info": "Event is in 1 hour and thirty minutes!",
+				"enabled": true,
+				"info_only: false,
+				"subscribers_role": ["everyone", "378479752186560512"],
+				"subscribers_user": ["130510525770629121"]
 				}
 				</code></pre>
 
@@ -347,9 +378,9 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>event_id</td>
+						<td>announcement_id</td>
 						<td>String</td>
-						<td>The Event ID</td>
+						<td>The ID of the announcement</td>
 						<td>True</td>
 					</tr>
 					</tbody>
@@ -369,43 +400,68 @@
 					</tr>
 					<tr>
 						<td>guild_id</td>
-						<td>Long</td>
-						<td>The ID of the guild the RSVP data belongs to</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+					</tr>
+					<tr>
+						<td>announcement_id</td>
+						<td>String</td>
+						<td>The ID of the announcement</td>
+					</tr>
+					<tr>
+						<td>channel_id</td>
+						<td>String</td>
+						<td>ID of the channel the announcement will announce in</td>
 					</tr>
 					<tr>
 						<td>event_id</td>
 						<td>String</td>
-						<td>The ID of the event this RSVP object is for</td>
+						<td>ID of the event the announcement is for</td>
 					</tr>
 					<tr>
-						<td>event_id</td>
-						<td>Long</td>
-						<td>Unix time of when the event ends</td>
+						<td>event_color</td>
+						<td>String</td>
+						<td>Event Color the announcement will check for</td>
 					</tr>
 					<tr>
-						<td>on_time</td>
-						<td>List (of Strings)</td>
-						<td>List of users that RSVPed as "on time"</td>
+						<td>type</td>
+						<td>String</td>
+						<td>The announcement's type</td>
 					</tr>
 					<tr>
-						<td>on_time</td>
-						<td>List (of Strings)</td>
-						<td>List of users that RSVPed as "on time"</td>
+						<td>hours</td>
+						<td>int</td>
+						<td>The amount of hours before the event to fire (added to minutes)</td>
 					</tr>
 					<tr>
-						<td>late</td>
-						<td>List (of Strings)</td>
-						<td>List of users that RSVPed as "late"</td>
+						<td>minutes</td>
+						<td>int</td>
+						<td>The amount of minutes before the event to fire (added to hours)</td>
 					</tr>
 					<tr>
-						<td>undecided</td>
-						<td>List (of Strings)</td>
-						<td>List of users that RSVPed as "unsure"/"undecided"</td>
+						<td>info</td>
+						<td>String</td>
+						<td>Additional info for the announcement</td>
 					</tr>
 					<tr>
-						<td>not_going</td>
-						<td>List (of Strings)</td>
-						<td>List of users that RSVPed as "not going"</td>
+						<td>enabled</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement is enabled</td>
+					</tr>
+					<tr>
+						<td>info_only</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement will display just the "info" box</td>
+					</tr>
+					<tr>
+						<td>subscribers_role</td>
+						<td>List(of Strings)</td>
+						<td>List of roles subscribed to the announcement</td>
+					</tr>
+					<tr>
+						<td>subscribers_user</td>
+						<td>List(of Strings)</td>
+						<td>List of users subscribed to the announcement</td>
 					</tr>
 					</tbody>
 				</table>
@@ -415,11 +471,11 @@
 
 				<hr>
 
-				<!-- Start update endpoint-->
-				<h2 id="update" class="text-center text-discal-blue">rsvp/update</h2>
+				<!-- Start create endpoint-->
+				<h2 id="create" class="text-center text-discal-blue">announcement/create</h2>
 
 				<p class="text-left text-discord-full-white">
-					Updates the specified event's RSVP data.
+					Creates a new announcement with the specified information
 				</p>
 
 				<br>
@@ -428,16 +484,13 @@
 
 				<pre class="code"><code>
 				{
-				"guild_id": 375357265198317579,
+				"guild_id": 266063520112574464,
+				"channel": "266666669542342656",
 				"event_id": "divq9ihqhoq9hbm2tncj8set04",
-				"to_add": {
-					"on_time": ["130510525770629121"],
-					"late": ["233611560545812480"]
-					},
-				"to_remove": {
-					"not_going": ["142107863307780097"],
-					"undecided: ["130510525770629121"]
-					}
+				"type": "RECUR",
+				"hours": 1,
+				"minutes": 30,
+				"info": "Recurring type announcement"
 				}
 				</code></pre>
 
@@ -449,8 +502,8 @@
 
 				<pre class="code"><code>
 				{
-				"message": "RSVP successfully updated"
-				}
+				"message": "Announcements successfully created",
+				"id": "b067378e-2565-4116-aa20-08cc144d1fdb"
 				</code></pre>
 
 				<br>
@@ -473,57 +526,53 @@
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>event_id</td>
+						<td>channel</td>
 						<td>String</td>
-						<td>The Event ID</td>
+						<td>ID of channel to post announcement in</td>
 						<td>True</td>
 					</tr>
 					<tr>
-						<td>to_add.on_time</td>
-						<td>List (of Strings)</td>
-						<td>List of users to add that RSVPed as "on time"</td>
-						<td>False</td>
+						<td>type</td>
+						<td>String</td>
+						<td>The announcement type</td>
+						<td>True</td>
 					</tr>
 					<tr>
-						<td>to_add.late</td>
-						<td>List (of Strings)</td>
-						<td>List of users to add that RSVPed as "late"</td>
-						<td>False</td>
+						<td>event_id</td>
+						<td>String</td>
+						<td>ID of event for announcement to check</td>
+						<td>Required if type equals "RECUR" or "SPECIFIC"</td>
 					</tr>
 					<tr>
-						<td>to_add.undecided</td>
-						<td>List (of Strings)</td>
-						<td>List of users to add that RSVPed as "unsure"/"undecided"</td>
-						<td>False</td>
+						<td>event_color</td>
+						<td>String</td>
+						<td>Color of events to check</td>
+						<td>Required if type equals "COLOR"</td>
 					</tr>
 					<tr>
-						<td>to_add.not_going</td>
-						<td>List (of Strings)</td>
-						<td>List of users to remove that RSVPed as "not going"</td>
-						<td>False</td>
+						<td>hours</td>
+						<td>int</td>
+						<td>Amount of hours before event to announce (added to minutes)</td>
+						<td>True</td>
 					</tr>
 					<tr>
-						<td>to_remove.on_time</td>
-						<td>List (of Strings)</td>
-						<td>List of users to remove that RSVPed as "on time"</td>
-						<td>False</td>
+						<td>minutes</td>
+						<td>int</td>
+						<td>Amount of minutes before event to announce (added to hours)</td>
+						<td>True</td>
 					</tr>
 					<tr>
-						<td>to_remove.late</td>
-						<td>List (of Strings)</td>
-						<td>List of users to remove that RSVPed as "late"</td>
-						<td>False</td>
+						<td>info</td>
+						<td>String</td>
+						<td>Additional announcement info</td>
+						<td>False, required if info_only is present and true</td>
 					</tr>
 					<tr>
-						<td>to_remove.undecided</td>
-						<td>List (of Strings)</td>
-						<td>List of users to remove that RSVPed as "unsure"/"undecided"</td>
-						<td>False</td>
-					</tr>
-					<tr>
-						<td>to_remove.not_going</td>
-						<td>List (of Strings)</td>
-						<td>List of users to remove that RSVPed as "not going"</td>
+						<td>info_only</td>
+						<td>Boolean</td>
+						<td>Whether or not to only display the info of the announcement on
+							broadcast
+						</td>
 						<td>False</td>
 					</tr>
 					</tbody>
@@ -544,13 +593,433 @@
 					<tr>
 						<td>message</td>
 						<td>String</td>
-						<td>Status of the update</td>
+						<td>Status of Creation</td>
+					</tr>
+					<tr>
+						<td>id</td>
+						<td>String</td>
+						<td>ID of the new announcement</td>
+					</tr>
+
+					</tbody>
+				</table>
+
+				<br>
+				<!-- end create endpoint-->
+
+				<hr>
+
+				<!-- Start update endpoint-->
+				<h2 id="update" class="text-center text-discal-blue">announcement/update</h2>
+
+				<p class="text-left text-discord-full-white">
+					Updates an announcement with the specified information
+				</p>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Request Body</h6>
+
+				<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"announcement_id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+				"channel": "266666669542342656",
+				"event_id": "divq9ihqhoq9hbm2tncj8set04",
+				"type": "RECUR",
+				"hours": 4,
+				"info": "I just updated this announcement through the API!",
+				"enabled": true,
+				"info_only": false
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Response</h6>
+
+				<br>
+
+				<pre class="code"><code>
+				{
+				"message": "Announcement successfully updated"
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+						<th>Required</th>
+					</tr>
+					<tr>
+						<td>guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>announcement_id</td>
+						<td>String</td>
+						<td>The ID of the announcement</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>channel_id</td>
+						<td>String</td>
+						<td>ID of the channel the announcement will announce in</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>event_id</td>
+						<td>String</td>
+						<td>ID of the event the announcement is for</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>event_color</td>
+						<td>String</td>
+						<td>Event Color the announcement will check for</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>type</td>
+						<td>String</td>
+						<td>The announcement's type</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>hours</td>
+						<td>int</td>
+						<td>The amount of hours before the event to fire (added to minutes)</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>minutes</td>
+						<td>int</td>
+						<td>The amount of minutes before the event to fire (added to hours)</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>info</td>
+						<td>String</td>
+						<td>Additional info for the announcement</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>enabled</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement is enabled</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>info_only</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement will display just the "info" box</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>add_subscribers_role</td>
+						<td>List(of Strings)</td>
+						<td>List of roles to subscribe to the announcement</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>add_subscribers_user</td>
+						<td>List(of Strings)</td>
+						<td>List of users to subscribe to the announcement</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>remove_subscribers_role</td>
+						<td>List(of Strings)</td>
+						<td>List of roles to unsubscribe from the announcement</td>
+						<td>False</td>
+					</tr>
+					<tr>
+						<td>remove_subscribers_user</td>
+						<td>List(of Strings)</td>
+						<td>List of users to unsubscribe from the announcement</td>
+						<td>False</td>
 					</tr>
 					</tbody>
 				</table>
 
 				<br>
+
+				<h6 class="text-left text-discal-blue">Returned Values</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>message</td>
+						<td>String</td>
+						<td>Status of update</td>
+					</tr>
+
+					</tbody>
+				</table>
+
+				<br>
 				<!-- End update endpoint-->
+
+				<hr>
+
+				<!-- Start delete endpoint-->
+				<h2 id="delete" class="text-center text-discal-blue">announcement/delete</h2>
+
+				<p class="text-left text-discord-full-white">
+					Deletes the specified announcement if it exists
+				</p>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Request Body</h6>
+
+				<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"announcement_id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Response</h6>
+
+				<br>
+
+				<pre class="code"><code>
+				{
+				"message": "Announcement successfully deleted"
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+						<th>Required</th>
+					</tr>
+					<tr>
+						<td>guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>announcement_id</td>
+						<td>String</td>
+						<td>The announcement ID</td>
+						<td>True</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Returned Values</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>message</td>
+						<td>String</td>
+						<td>Status of deletion</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+				<!-- End delete endpoint-->
+
+				<hr>
+
+				<!-- Start list endpoint-->
+				<h2 id="list" class="text-center text-discal-blue">announcement/list</h2>
+
+				<p class="text-left text-discord-full-white">
+					Lists the specified amount of announcements from the guild.
+				</p>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Request Body</h6>
+
+				<pre class="code"><code>
+				{
+				"guild_id": 266063520112574464,
+				"amount": -1,
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Example Response</h6>
+
+				<br>
+
+				<pre class="code"><code>
+				{
+				"announcements": [{
+					"guild_id": 375357265198317579,
+					"announcement_id": "b067378e-2565-4116-aa20-08cc144d1fdb",
+					"channel_id": "266666669542342656",
+					"event_id": "divq9ihqhoq9hbm2tncj8set04_20180317T030000Z",
+					"event_color": "NONE",
+					"type": "RECUR",
+					"hours": 1,
+					"minutes": 30,
+					"info": "Event is in 1 hour and thirty minutes!",
+					"enabled": true,
+					"info_only: false,
+					"subscribers_role": ["everyone", "378479752186560512"],
+					"subscribers_user": ["130510525770629121"]
+					}]
+				}
+				</code></pre>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+						<th>Required</th>
+					</tr>
+					<tr>
+						<td>guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+						<td>True</td>
+					</tr>
+					<tr>
+						<td>amount</td>
+						<td>int</td>
+						<td>Amount of announcements to list, "-1" for all</td>
+						<td>True</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+
+				<h6 class="text-left text-discal-blue">Returned Values</h6>
+
+				<table style="border-color: #bcbcbc"
+					   border="#bcbcbc" cellpadding="4" cellspacing="0">
+					<tbody>
+					<tr>
+						<th>Key</th>
+						<th>Value Type</th>
+						<th>Info</th>
+					</tr>
+					<tr>
+						<td>announcements</td>
+						<td>JSON Array</td>
+						<td>A list of all announcements returned</td>
+					</tr>
+					<tr>
+						<td>announcements.guild_id</td>
+						<td>long</td>
+						<td>The Guild ID</td>
+					</tr>
+					<tr>
+						<td>announcements.announcement_id</td>
+						<td>String</td>
+						<td>The ID of the announcement</td>
+					</tr>
+					<tr>
+						<td>announcements.channel_id</td>
+						<td>String</td>
+						<td>ID of the channel the announcement will announce in</td>
+					</tr>
+					<tr>
+						<td>announcements.event_id</td>
+						<td>String</td>
+						<td>ID of the event the announcement is for</td>
+					</tr>
+					<tr>
+						<td>announcements.event_color</td>
+						<td>String</td>
+						<td>Event Color the announcement will check for</td>
+					</tr>
+					<tr>
+						<td>announcements.type</td>
+						<td>String</td>
+						<td>The announcement's type</td>
+					</tr>
+					<tr>
+						<td>announcements.hours</td>
+						<td>int</td>
+						<td>The amount of hours before the event to fire (added to minutes)</td>
+					</tr>
+					<tr>
+						<td>announcements.minutes</td>
+						<td>int</td>
+						<td>The amount of minutes before the event to fire (added to hours)</td>
+					</tr>
+					<tr>
+						<td>announcements.info</td>
+						<td>String</td>
+						<td>Additional info for the announcement</td>
+					</tr>
+					<tr>
+						<td>announcements.enabled</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement is enabled</td>
+					</tr>
+					<tr>
+						<td>announcements.info_only</td>
+						<td>Boolean</td>
+						<td>Whether or not the announcement will display just the "info" box</td>
+					</tr>
+					<tr>
+						<td>announcements.subscribers_role</td>
+						<td>List(of Strings)</td>
+						<td>List of roles subscribed to the announcement</td>
+					</tr>
+					<tr>
+						<td>announcements.subscribers_user</td>
+						<td>List(of Strings)</td>
+						<td>List of users subscribed to the announcement</td>
+					</tr>
+					</tbody>
+				</table>
+
+				<br>
+				<!-- End list endpoint-->
 			</div>
 			<!-- /.container-fluid -->
 

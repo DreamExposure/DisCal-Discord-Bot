@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.utils;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
+
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
@@ -50,6 +51,7 @@ public class CalendarUtils {
 		return true;
 	}
 
+	//TODO: Make sure this supports multi calendar support!!
 	public static boolean calendarExists(CalendarData data, GuildSettings settings) {
 		try {
 			return CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute() != null;

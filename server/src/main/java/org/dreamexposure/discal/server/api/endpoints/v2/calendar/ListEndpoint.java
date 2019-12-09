@@ -1,9 +1,14 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.calendar;
 
+import com.google.api.services.calendar.Calendar;
+
+import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONArray;
@@ -35,12 +40,31 @@ public class ListEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
-			long guildId = jsonMain.getLong("guild_id");
+			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			Calendar service = CalendarAuth.getCalendarService(settings);
 
 			JSONArray jCals = new JSONArray();
-			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(Snowflake.of(guildId))) {
-				if (!cal.getCalendarAddress().equalsIgnoreCase("primary"))
-					jCals.put(cal.toJson());
+			for (CalendarData calData : DatabaseManager.getManager().getAllCalendars(guildId)) {
+				if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
+						&& CalendarUtils.calendarExists(calData, settings)) {
+					com.google.api.services.calendar.model.Calendar cal = service.calendars()
+							.get(calData.getCalendarAddress())
+							.execute();
+
+					JSONObject jCal = new JSONObject();
+
+					jCal.put("calendar_address", calData.getCalendarAddress());
+					jCal.put("calendar_id", calData.getCalendarId());
+					jCal.put("calendar_number", calData.getCalendarNumber());
+					jCal.put("external", calData.isExternal());
+					jCal.put("summary", cal.getSummary());
+					jCal.put("description", cal.getDescription());
+					jCal.put("timezone", cal.getTimeZone());
+
+					jCals.put(jCal);
+				}
 			}
 
 			JSONObject body = new JSONObject();

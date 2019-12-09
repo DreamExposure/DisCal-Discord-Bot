@@ -114,7 +114,7 @@
 				<span>Events</span></a>
 		</li>
 		<!-- Nav Item - v2 Guild -->
-		<li class="nav-item active">
+		<li class="nav-item">
 			<a class="nav-link" href="/docs/api/v2/guild">
 				<i class="fas fa-fw fa-server"></i>
 				<span>Guild</span></a>
@@ -128,7 +128,7 @@
 		</li>
 
 		<!-- Nav Item - v2 Status -->
-		<li class="nav-item">
+		<li class="nav-item active">
 			<a class="nav-link" href="/docs/api/v2/status">
 				<i class="fas fa-fw fa-calendar-check"></i>
 				<span>Status</span></a>
@@ -140,18 +140,39 @@
 		<!-- Jump Heading-->
 		<div class="sidebar-heading mx-3">Jump</div>
 
-		<!-- Nav Item - Jump - settings/get -->
+		<!-- Nav Item - Jump - get -->
 		<li class="nav-item">
-			<a class="nav-link" href="#settings-get">
+			<a class="nav-link" href="#get">
 				<i class="fas fa-fw fa-hand-holding"></i>
-				<span>/settings/get</span></a>
+				<span>/get</span></a>
 		</li>
 
-		<!-- Nav Item - Jump - settings/update -->
+		<!-- Nav Item - Jump - create -->
 		<li class="nav-item">
-			<a class="nav-link" href="#settings-update">
+			<a class="nav-link" href="#create">
+				<i class="fas fa-fw fa-plus-circle"></i>
+				<span>/create</span></a>
+		</li>
+
+		<!-- Nav Item - Jump - update -->
+		<li class="nav-item">
+			<a class="nav-link" href="#update">
 				<i class="fas fa-fw fa-edit"></i>
-				<span>/settings/update</span></a>
+				<span>/update</span></a>
+		</li>
+
+		<!-- Nav Item - Jump - delete -->
+		<li class="nav-item">
+			<a class="nav-link" href="#delete">
+				<i class="fas fa-fw fa-trash"></i>
+				<span>/delete</span></a>
+		</li>
+
+		<!-- Nav Item - Jump - list -->
+		<li class="nav-item">
+			<a class="nav-link" href="#list">
+				<i class="fas fa-fw fa-list"></i>
+				<span>/list</span></a>
 		</li>
 
 		<!-- Divider -->
@@ -284,22 +305,28 @@
 
 			<!-- Begin Page Content -->
 			<div class="container-fluid">
-				<h1 class="text-center text-discal-blue">API v2 Docs - Guild Endpoint</h1>
+				<h1 class="text-center text-discal-blue">API v2 Docs - Status Endpoint</h1>
 
 				<p class="text-center text-discord-full-white">
-					The Guild endpoints allows you to get and edit guild settings for the
-					specified guild.
+					The status endpoints allows reading status info of the DisCal network.
+					This includes, but is not limited to showing uptime, memory usage, shard status,
+					and more
 				</p>
 
 				<br>
 
 				<hr>
 
-				<!-- Start settings/get endpoint-->
-				<h2 id="settings-get" class="text-center text-discal-blue">guild/settings/get</h2>
+				<!-- Start Get-->
+				<h2 id="get" class="text-center text-discal-blue">status/get</h2>
 
 				<p class="text-left text-discord-full-white">
-					Returns the specified guild's settings.
+					Returns the status data.
+
+					<br>
+					<br>
+
+					A request body is not required for this endpoint.
 				</p>
 
 				<br>
@@ -307,156 +334,7 @@
 				<h6 class="text-left text-discal-blue">Example Request Body</h6>
 
 				<pre class="code"><code>
-				{
-				"guild_id": 375357265198317579
-				}
-				</code></pre>
-
-				<br>
-
-				<h6 class="text-left text-discal-blue">Example Response Body</h6>
-
-				<br>
-
-				<pre class="code"><code>
-				{
-					"guild_id": 375357265198317579,
-					"external_calendar": false,
-					"control_role": "everyone",
-					"discal_channel": "all",
-					"simple_announcements": false,
-					"lang": "ENGLISH",
-					"prefix": "!",
-					"patron_guild": false,
-					"dev_guild": true,
-					"max_calendars": 1,
-					"twelve_hour": true,
-					"branded": false
-				}
-				</code></pre>
-
-				<br>
-
-				<h6 class="text-left text-discal-blue">Supported Values in Request</h6>
-
-				<table style="border-color: #bcbcbc"
-					   border="#bcbcbc" cellpadding="4" cellspacing="0">
-					<tbody>
-					<tr>
-						<th>Key</th>
-						<th>Value Type</th>
-						<th>Info</th>
-						<th>Required</th>
-					</tr>
-					<tr>
-						<td>guild_id</td>
-						<td>long</td>
-						<td>The Guild ID</td>
-						<td>True</td>
-					</tr>
-					</tbody>
-				</table>
-
-				<br>
-
-				<h6 class="text-left text-discal-blue">Returned Values</h6>
-
-				<table style="border-color: #bcbcbc"
-					   border="#bcbcbc" cellpadding="4" cellspacing="0">
-					<tbody>
-					<tr>
-						<th>Key</th>
-						<th>Value Type</th>
-						<th>Info</th>
-					</tr>
-					<tr>
-						<td>external_calendar</td>
-						<td>Boolean</td>
-						<td>Whether or not the guild has an external calendar</td>
-					</tr>
-					<tr>
-						<td>control_role</td>
-						<td>String</td>
-						<td>Role ID of the role required to use DisCal ("everyone") for no role</td>
-					</tr>
-					<tr>
-						<td>discal_channel</td>
-						<td>String</td>
-						<td>Channel ID of the channel DisCal can be used in. ("all" for no channel
-							limits)
-						</td>
-					</tr>
-					<tr>
-						<td>simple_announcements</td>
-						<td>Boolean</td>
-						<td>Whether or not the guild has simple announcements enabled</td>
-					</tr>
-					<tr>
-						<td>lang</td>
-						<td>String</td>
-						<td>The language DisCal will post messages in (default "ENGLISH")</td>
-					</tr>
-					<tr>
-						<td>prefix</td>
-						<td>String</td>
-						<td>Prefix to be used for DisCal commands (default "!")</td>
-					</tr>
-					<tr>
-						<td>patron_guild</td>
-						<td>Boolean</td>
-						<td>Whether or not the guild has access to patron only features</td>
-					</tr>
-					<tr>
-						<td>dev_guild</td>
-						<td>Boolean</td>
-						<td>Whether or not the guild has access to features currently being
-							developed
-						</td>
-					</tr>
-					<tr>
-						<td>max_calendars</td>
-						<td>int</td>
-						<td>The maximum amount of calendars the guild can have (default 1)</td>
-					</tr>
-					<tr>
-						<td>twelve_hour</td>
-						<td>Boolean</td>
-						<td>Whether the guild is using a 12 hour or 24 hour time format</td>
-					</tr>
-					<tr>
-						<td>branded</td>
-						<td>Boolean</td>
-						<td>Whether the server is using branding on embeds</td>
-					</tr>
-					</tbody>
-				</table>
-
-				<br>
-				<!-- End settings/get endpoint-->
-
-				<hr>
-
-				<!-- Start settings/update endpoint-->
-				<h2 id="settings-update" class="text-center text-discal-blue">
-					guild/settings/update</h2>
-
-				<p class="text-left text-discord-full-white">
-					Updates the specified guild's settings.
-				</p>
-
-				<br>
-
-				<h6 class="text-left text-discal-blue">Example Request Body</h6>
-
-				<pre class="code"><code>
-				{
-				"guild_id": 375357265198317579,
-				"control_role": "everyone",
-				"discal_channel": "all",
-				"simple_announcements": true,
-				"lang", "ENGLISH",
-				"prefix": "?"
-				}
+				{}
 				</code></pre>
 
 				<br>
@@ -467,7 +345,24 @@
 
 				<pre class="code"><code>
 				{
-				"Message": "Successfully updated guild settings"
+				"api_uptime": "0 months, 5 days, 3 hours, 43 minutes, 16 seconds",
+				"announcements": 8534,
+				"total_guilds": 11509,
+				"calendars: 21367,
+				"clients": [{
+					"index": 0,
+					"guilds": 1642,
+					"keep_alive": 1575934181,
+					"uptime": "0 months, 2 days, 3 hours, 12 minutes, 56 seconds",
+					"memory": 502.12
+					},
+					{
+					"index": 1,
+					"guilds": 1543,
+					"keep_alive": 1575936181,
+					"uptime": "0 months, 8 days, 6 hours, 34 minutes, 27 seconds",
+					"memory": 283.94
+				}]
 				}
 				</code></pre>
 
@@ -483,44 +378,6 @@
 						<th>Value Type</th>
 						<th>Info</th>
 						<th>Required</th>
-					</tr>
-					<tr>
-						<td>guild_id</td>
-						<td>long</td>
-						<td>The Guild ID</td>
-						<td>True</td>
-					</tr>
-					<tr>
-						<td>control_role</td>
-						<td>String</td>
-						<td>Role ID of the role required to use DisCal ("everyone") for no role</td>
-						<td>False</td>
-					</tr>
-					<tr>
-						<td>discal_channel</td>
-						<td>String</td>
-						<td>Channel ID of the channel DisCal can be used in. ("all" for no channel
-							limits)
-						</td>
-						<td>False</td>
-					</tr>
-					<tr>
-						<td>simple_announcements</td>
-						<td>Boolean</td>
-						<td>Whether or not the guild has simple announcements enabled</td>
-						<td>False</td>
-					</tr>
-					<tr>
-						<td>lang</td>
-						<td>String</td>
-						<td>The language DisCal will post messages in (default "ENGLISH")</td>
-						<td>False</td>
-					</tr>
-					<tr>
-						<td>prefix</td>
-						<td>String</td>
-						<td>Prefix to be used for DisCal commands (default "!")</td>
-						<td>False</td>
 					</tr>
 					</tbody>
 				</table>
@@ -538,15 +395,62 @@
 						<th>Info</th>
 					</tr>
 					<tr>
-						<td>message</td>
+						<td>api_uptime</td>
 						<td>String</td>
-						<td>Status of settings update</td>
+						<td>How long the API instance has been online</td>
+					</tr>
+					<tr>
+						<td>announcements</td>
+						<td>int</td>
+						<td>Total amount of announcements across the DisCal network</td>
+					</tr>
+					<tr>
+						<td>total_guilds</td>
+						<td>int</td>
+						<td>Total amount of guilds connected to DisCal</td>
+					</tr>
+					<tr>
+						<td>calendars</td>
+						<td>int</td>
+						<td>Total amount of calendars managed by DisCal</td>
+					</tr>
+					<tr>
+						<td>clients</td>
+						<td>JSON Array</td>
+						<td>An array of data pertaining to each individual DisCal Shard</td>
+					</tr>
+					<tr>
+						<td>clients.index</td>
+						<td>int</td>
+						<td>The index of the shard</td>
+					</tr>
+					<tr>
+						<td>clients.guilds</td>
+						<td>int</td>
+						<td>Total amount of guilds connected to this shard</td>
+					</tr>
+					<tr>
+						<td>clients.keep_alive</td>
+						<td>long</td>
+						<td>The unix timestamp of the last keep alive recorded by the API from this
+							shard
+						</td>
+					</tr>
+					<tr>
+						<td>clients.uptime</td>
+						<td>String</td>
+						<td>How long this shard has been online</td>
+					</tr>
+					<tr>
+						<td>clients.memory</td>
+						<td>double</td>
+						<td>Memory usage of this shard, in Megabytes</td>
 					</tr>
 					</tbody>
 				</table>
 
 				<br>
-				<!-- End settings/update endpoint-->
+				<!-- End get endpoint-->
 			</div>
 			<!-- /.container-fluid -->
 

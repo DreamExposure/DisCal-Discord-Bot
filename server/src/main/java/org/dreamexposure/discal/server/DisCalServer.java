@@ -50,7 +50,7 @@ public class DisCalServer {
 			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalServer.class);
+			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE API'", e, true, DisCalServer.class);
 		}
 
 		//Start Redis PubSub Listeners

@@ -47,8 +47,8 @@ public class RangeEndpoint {
 
 			long guildId = requestBody.getLong("guild_id");
 			int calNumber = requestBody.getInt("calendar_number");
-			long startEpoch = requestBody.getLong("start_epoch");
-			long endEpoch = requestBody.getLong("end_epoch");
+			long startEpoch = requestBody.getLong("epoch_start");
+			long endEpoch = requestBody.getLong("epoch_end");
 			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
 			//okay, lets actually get the range's events.

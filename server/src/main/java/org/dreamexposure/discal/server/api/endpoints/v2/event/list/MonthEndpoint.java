@@ -49,7 +49,7 @@ public class MonthEndpoint {
 			long guildId = requestBody.getLong("guild_id");
 			int calNumber = requestBody.getInt("calendar_number");
 			int daysInMonth = requestBody.getInt("days_in_month");
-			long startEpoch = requestBody.getInt("start_epoch");
+			long startEpoch = requestBody.getInt("epoch_start");
 			long endEpoch = startEpoch + (GlobalConst.oneDayMs * daysInMonth);
 			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 

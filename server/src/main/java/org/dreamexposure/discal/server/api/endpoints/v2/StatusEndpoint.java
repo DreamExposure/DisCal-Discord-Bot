@@ -6,9 +6,7 @@ import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 public class StatusEndpoint {
 
 	@PostMapping(value = "/get", produces = "application/json")
-	public String getStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+	public String getStatus(HttpServletRequest request, HttpServletResponse response) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
 		if (!authState.isSuccess()) {
@@ -31,13 +29,9 @@ public class StatusEndpoint {
 
 		//Okay, now handle actual request.
 		try {
-			JSONObject body = new JSONObject();
-
-			body.put("status", DisCalServer.getNetworkInfo().toJson());
-
 			response.setContentType("application/json");
 			response.setStatus(200);
-			return body.toString();
+			return DisCalServer.getNetworkInfo().toJson().toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 

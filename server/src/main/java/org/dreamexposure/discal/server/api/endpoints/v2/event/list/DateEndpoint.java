@@ -48,7 +48,7 @@ public class DateEndpoint {
 
 			long guildId = requestBody.getLong("guild_id");
 			int calNumber = requestBody.getInt("calendar_number");
-			long startEpoch = requestBody.getLong("start_epoch");
+			long startEpoch = requestBody.getLong("epoch_start");
 			long endEpoch = startEpoch + GlobalConst.oneDayMs;
 			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
