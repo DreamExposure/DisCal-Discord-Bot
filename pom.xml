@@ -39,11 +39,11 @@
 	<repositories>
 		<repository>
 			<id>nova-public</id>
-			<url>http://repo.novafox161.com/repository/nova-public/</url>
+			<url>https://repo.novafox161.com/repository/nova-public/</url>
 		</repository>
 		<repository>
 			<id>jcenter</id>
-			<url>http://jcenter.bintray.com</url>
+			<url>https://jcenter.bintray.com</url>
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
