@@ -91,7 +91,7 @@ gulp.task('clean:build', gulp.series(function () {
 
 // Compile SCSS
 gulp.task('css:compile', gulp.series(function () {
-	return gulp.src('./web/src/main/resources/src/scss/**/*.scss')
+	return gulp.src('./web/src/main/less/**/*.scss')
 		.pipe(sass.sync({
 			outputStyle: 'expanded'
 		}).on('error', sass.logError))
@@ -121,8 +121,8 @@ gulp.task('css:minify', gulp.series(['css:compile'], function () {
 //Compile TS to JS
 gulp.task('js:compile', gulp.series(function () {
 	return gulp.src([
-		'./web/src/main/resources/src/js/**/*.ts',
-		'./web/src/main/resources/src/js/**/*.js'
+		'./web/src/main/javascript/**/*.ts',
+		'./web/src/main/javascript/**/*.js'
 	])
 		.pipe(cleanDest('./web/build'))
 		.pipe(tsProject(ts.reporter.fullReporter(true)))
@@ -168,11 +168,12 @@ gulp.task('browserSync', gulp.series(function() {
 
 // Dev task
 gulp.task('dev', gulp.series(['css', 'js', 'browserSync'], function() {
-	gulp.watch('./web/src/main/resources/src/scss/*.scss').on('change', gulp.series['css']);
-	gulp.watch('/web/src/main/resources/templates/*.html').on('change', function() {
+	gulp.watch('./web/src/main/less/**/*.scss').on('change', gulp.series['css']);
+	gulp.watch('./web/src/main/javascript/**/*.ts').on("change", gulp.series('js'));
+	gulp.watch('/web/src/main/resources/templates/*.html').on('change', function () {
 		browserSync.reload();
 	});
-	gulp.watch('/web/src/main/resources/static/assets/js/*.js').on('change', function() {
+	gulp.watch('/web/src/main/resources/static/assets/js/*.js').on('change', function () {
 		browserSync.reload();
 	});
 }));

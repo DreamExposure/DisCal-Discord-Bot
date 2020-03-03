@@ -13,13 +13,13 @@
 	"outFile": "sb-admin-2.js",
 	"paths": {
 	  "@/*": [
-		"./web/src/main/resources/src/js/*"
+		"./web/src/main/javascript/*"
 	  ]
 	}
   },
   "include": [
-	"./web/src/main/resources/src/js/**/*.ts",
-	"./web/src/main/resources/src/js/**/*.js"
+	"./web/src/main/javascript/**/*.ts",
+	"./web/src/main/javascript/**/*.js"
   ],
   "exclude": [
 	"node_modules"
