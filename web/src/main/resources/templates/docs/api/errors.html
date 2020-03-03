@@ -370,35 +370,47 @@
 					handle various data with ease.
 				</p>
 
-				<br>
-				<br>
+                <br>
+                <br>
 
-				<hr>
+                <hr>
 
-				<h2 id="500" class="text-center text-discal-blue">500 - Internal Server
-					Exception</h2>
+                <h2 id="500" class="text-center text-discal-blue">500 - Internal Server
+                    Exception</h2>
 
-				<p class="text-left text-discord-full-white">
-					An error occurred on our end. Everything you did was likely right, but our
-					system failed in some way.
-					<br>
-					<br>
-					We log all errors that occur and will do our best to correct them. Should you
-					get this error numerous times, contact the development team for further help.
-				</p>
-			</div>
-			<!-- /.container-fluid -->
+                <p class="text-left text-discord-full-white">
+                    An error occurred on our end. Everything you did was likely right, but our
+                    system failed in some way.
+                    <br>
+                    <br>
+                    We log all errors that occur and will do our best to correct them. Should you
+                    get this error numerous times, contact the development team for further help.
+                </p>
+            </div>
+            <!-- /.container-fluid -->
 
-		</div>
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

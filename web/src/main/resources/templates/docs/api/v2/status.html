@@ -434,36 +434,48 @@
 						<td>long</td>
 						<td>The unix timestamp of the last keep alive recorded by the API from this
 							shard
-						</td>
-					</tr>
-					<tr>
-						<td>clients.uptime</td>
-						<td>String</td>
-						<td>How long this shard has been online</td>
-					</tr>
-					<tr>
-						<td>clients.memory</td>
-						<td>double</td>
-						<td>Memory usage of this shard, in Megabytes</td>
-					</tr>
-					</tbody>
-				</table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>clients.uptime</td>
+                        <td>String</td>
+                        <td>How long this shard has been online</td>
+                    </tr>
+                    <tr>
+                        <td>clients.memory</td>
+                        <td>double</td>
+                        <td>Memory usage of this shard, in Megabytes</td>
+                    </tr>
+                    </tbody>
+                </table>
 
-				<br>
-				<!-- End get endpoint-->
-			</div>
-			<!-- /.container-fluid -->
+                <br>
+                <!-- End get endpoint-->
+            </div>
+            <!-- /.container-fluid -->
 
-		</div>
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

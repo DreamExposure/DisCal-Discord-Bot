@@ -7,7 +7,6 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.web.DisCalWeb;
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -94,7 +93,7 @@ public class DiscordLoginHandler {
 				m.put("redirect_uri", BotSettings.REDIR_URI.get());
 				m.put("invite_url", BotSettings.INVITE_URL.get());
 				m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
-				m.put("status", DisCalWeb.getNetworkInfo());
+				m.put("api_url", BotSettings.API_URL.get());
 
 				//More universal stuff, but for the dashboard only
 				m.put("good_timezones", GoodTimezone.values());
@@ -146,7 +145,7 @@ public class DiscordLoginHandler {
 				RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
 
 				Request keyGrantRequest = new Request.Builder()
-						.url("https://api.discalbot.com/v2/account/login")
+						.url(BotSettings.API_URL.get() + "/v2/account/login")
 						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 						.post(keyGrantRequestBody)
 						.build();
@@ -184,7 +183,7 @@ public class DiscordLoginHandler {
 		}
 	}
 
-	@GetMapping("/account/logout")
+	@GetMapping("/logout")
 	public String handleLogout(HttpServletRequest request, HttpServletResponse res) throws IOException {
 		try {
 			//Tell the API server the user has logged out and to delete the temporary key.
@@ -195,7 +194,7 @@ public class DiscordLoginHandler {
 			RequestBody logoutRequestBody = RequestBody.create(GlobalConst.JSON, "");
 
 			Request logoutRequest = new Request.Builder()
-					.url("https://api.discalbot.com/v2/account/logout")
+					.url(BotSettings.API_URL.get() + "/v2/account/logout")
 					.header("Authorization", (String) map.get("private_token"))
 					.post(logoutRequestBody)
 					.build();

@@ -948,35 +948,48 @@
 						<td>announcements.info_only</td>
 						<td>Boolean</td>
 						<td>Whether or not the announcement will only display the "info" box</td>
-					</tr>
-					<tr>
-						<td>announcements.subscribers_role</td>
-						<td>List(of Strings)</td>
-						<td>List of roles subscribed to the announcement</td>
-					</tr>
-					<tr>
-						<td>announcements.subscribers_user</td>
-						<td>List(of Strings)</td>
-						<td>List of users subscribed to the announcement</td>
-					</tr>
-					</tbody>
-				</table>
+                    </tr>
+                    <tr>
+                        <td>announcements.subscribers_role</td>
+                        <td>List(of Strings)</td>
+                        <td>List of roles subscribed to the announcement</td>
+                    </tr>
+                    <tr>
+                        <td>announcements.subscribers_user</td>
+                        <td>List(of Strings)</td>
+                        <td>List of users subscribed to the announcement</td>
+                    </tr>
+                    </tbody>
+                </table>
 
-				<br>
-				<!-- End list endpoint-->
-			</div>
-			<!-- /.container-fluid -->
+                <br>
+                <!-- End list endpoint-->
 
-		</div>
+            </div>
+            <!-- /.container-fluid -->
+
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

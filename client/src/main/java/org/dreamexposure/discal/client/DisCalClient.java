@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.client;
 
-import org.dreamexposure.discal.client.listeners.discal.PubSubListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand;
 import org.dreamexposure.discal.client.module.command.AnnouncementCommand;
 import org.dreamexposure.discal.client.module.command.CalendarCommand;
@@ -15,12 +15,12 @@ import org.dreamexposure.discal.client.module.command.HelpCommand;
 import org.dreamexposure.discal.client.module.command.LinkCalendarCommand;
 import org.dreamexposure.discal.client.module.command.RsvpCommand;
 import org.dreamexposure.discal.client.module.command.TimeCommand;
+import org.dreamexposure.discal.client.service.KeepAliveHandler;
+import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
@@ -62,10 +62,6 @@ public class DisCalClient {
 		//Register discord events
 		client.getEventDispatcher().on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
 
-		//Register discal events
-		EventManager.get().init();
-		EventManager.get().getEventBus().register(new PubSubListener());
-
 		//Register commands
 		CommandExecutor executor = CommandExecutor.getExecutor().enable();
 		executor.registerCommand(new HelpCommand());
@@ -90,6 +86,13 @@ public class DisCalClient {
 		//Load lang files
 		MessageManager.reloadLangs();
 
+		//Start some of the daemon threads
+		AnnouncementThreader.getThreader().init();
+
+		KeepAliveHandler.startKeepAlive(60);
+
+		TimeManager.getManager().init();
+
 		//Start Spring
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
 			try {
@@ -102,10 +105,16 @@ public class DisCalClient {
 			}
 		}
 
-		//Start Redis pub/sub listeners
-		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
-		//We must register each channel we want to use. This is super important.
-		PubSubManager.get().register(clientId(), BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All");
+		//Add shutdown hooks...
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Logger.getLogger().status("Shutting down...", "Shutting down");
+
+			TimeManager.getManager().shutdown();
+			AnnouncementThreader.getThreader().shutdown();
+			DatabaseManager.getManager().disconnectFromMySQL();
+
+			client.logout().block();
+		}));
 
 		//Login
 		client.login().block();

@@ -1,14 +1,12 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
-import org.dreamexposure.discal.client.service.KeepAliveHandler;
-import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.util.Image;
 
 /**
  * @author NovaFox161
@@ -24,14 +22,6 @@ public class ReadyEventListener {
 	public static void handle(ReadyEvent event) {
 		Logger.getLogger().debug("Ready!", false);
 		try {
-			//Start keep-alive
-			KeepAliveHandler.startKeepAlive(60);
-
-			TimeManager.getManager().init();
-
-			//Lets test the new announcement multi-threader...
-			AnnouncementThreader.getThreader().init();
-
 			GlobalConst.iconUrl = DisCalClient.getClient().getApplicationInfo().block().getIcon(Image.Format.PNG).get();
 
 			MessageManager.reloadLangs();

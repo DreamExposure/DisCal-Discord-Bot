@@ -213,8 +213,8 @@
 
 				</ul>
 
-			</nav>
-			<!-- End of Topbar -->
+            </nav>
+            <!-- End of Topbar -->
 
             <!-- Begin Page Content -->
             <div class="container-fluid">
@@ -222,22 +222,36 @@
             </div>
             <!-- /.container-fluid -->
             <!-- 404 Error Text -->
-			<div class="text-center">
-				<div class="error mx-auto text-discord-full-white" data-text="404">404</div>
-				<p class="lead text-discal-red mb-5">Not Found</p>
-				<p class="text-discord-full-white mb-0">It looks like you found a glitch in the matrix...</p>
-				<a href="javascript: history.go(-1)">&larr; Go Back</a>
-			</div>
+            <div class="text-center">
+                <div class="error mx-auto text-discord-full-white" data-text="404">404</div>
+                <p class="lead text-discal-red mb-5">Not Found</p>
+                <p class="text-discord-full-white mb-0">It looks like you found a glitch in the
+                    matrix...</p>
+                <a href="javascript: history.go(-1)">&larr; Go Back</a>
+            </div>
+
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
         </div>
         <!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

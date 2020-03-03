@@ -737,6 +737,8 @@
             </div>
             <!-- /.container-fluid -->
 
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
         </div>
         <!-- End of Main Content -->
 
@@ -744,7 +746,17 @@
         <footer class="sticky-footer bg-discal-blue">
             <div class="container my-auto">
                 <div class="copyright text-center text-discord-full-white my-auto">
-                    <span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
                 </div>
             </div>
         </footer>

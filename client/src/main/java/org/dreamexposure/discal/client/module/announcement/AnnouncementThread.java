@@ -4,8 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
+
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -23,6 +22,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Snowflake;
 
 @SuppressWarnings({"WeakerAccess", "Duplicates"})
 public class AnnouncementThread extends Thread {
@@ -42,6 +44,10 @@ public class AnnouncementThread extends Thread {
 	public void run() {
 		Logger.getLogger().announcement("Starting announcement loop!");
 		try {
+			//Verify the client is logged in
+			if (DisCalClient.getClient() == null || !DisCalClient.getClient().isConnected())
+				return;
+
 			//Get the default stuff.
 			try {
 				discalService = CalendarAuth.getCalendarService(null);

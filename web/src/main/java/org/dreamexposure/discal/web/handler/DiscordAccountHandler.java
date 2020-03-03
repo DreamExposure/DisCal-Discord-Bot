@@ -1,11 +1,7 @@
 package org.dreamexposure.discal.web.handler;
 
-import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
-import org.dreamexposure.discal.core.object.web.WebGuild;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.web.DisCalWeb;
 import org.json.JSONObject;
 
 import java.time.LocalDate;
@@ -15,24 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 
-import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-@SuppressWarnings({"RedundantCast", "Duplicates", "WeakerAccess", "unused", "ConstantConditions"})
+@SuppressWarnings({"RedundantCast", "Duplicates", "WeakerAccess", "ConstantConditions"})
 public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
 	private static Timer timer;
 
 	private HashMap<String, Map<String, Object>> discordAccounts = new HashMap<>();
-	private HashMap<String, Map<String, Object>> embedMaps = new HashMap<>();
 
 	//Instance handling
 	private DiscordAccountHandler() {
@@ -71,14 +63,6 @@ public class DiscordAccountHandler {
 		}
 	}
 
-	public boolean hasEmbedMap(HttpServletRequest request) {
-		try {
-			return embedMaps.containsKey((String) request.getSession(true).getAttribute("embed"));
-		} catch (Exception e) {
-			return false;
-		}
-	}
-
 	//Getters
 	public Map<String, Object> getAccount(HttpServletRequest request) {
 		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
@@ -86,11 +70,8 @@ public class DiscordAccountHandler {
 			m.remove("last_use");
 			m.put("last_use", System.currentTimeMillis());
 
-			m.remove("status");
-			m.put("status", DisCalWeb.getNetworkInfo());
-
-			//Remove from embed map just in case...
-			removeEmbedMap(request);
+			//Remove this in case it exists. A new one is generated when using the embed page anyway.
+			m.remove("embed_key");
 
 			return m;
 
@@ -103,80 +84,47 @@ public class DiscordAccountHandler {
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
 			m.put("invite_url", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
-			m.put("status", DisCalWeb.getNetworkInfo());
-
-			//Remove from embed map just in case...
-			removeEmbedMap(request);
+			m.put("api_url", BotSettings.API_URL.get());
 
 			return m;
 		}
 	}
 
-	public Map<String, Object> getEmbedMap(HttpServletRequest request) {
-		return embedMaps.get((String) request.getSession(true).getAttribute("embed"));
-	}
-
-	public Map<String, Object> getAccountForGuildEmbed(HttpServletRequest request, String guildId) {
+	public Map<String, Object> getEmbedAccount(HttpServletRequest request) {
 		if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
 			Map<String, Object> m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
 			m.remove("last_use");
 			m.put("last_use", System.currentTimeMillis());
-			m.remove("status");
-			m.put("status", DisCalWeb.getNetworkInfo());
 
-			//Add guild for guild embed
-			JSONObject requestBody = new JSONObject();
-			requestBody.put("guild_id", guildId);
-
-			m.remove("embed");
-			try {
-				OkHttpClient client = new OkHttpClient.Builder()
-					.connectTimeout(1, TimeUnit.SECONDS)
-					.build();
-				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, requestBody.toString());
-
-				//TODO: Fix this shit up honestly
-				for (ConnectedClient cc : DisCalWeb.getNetworkInfo().getClients()) {
-
-					try {
-						Request httpRequest = new Request.Builder()
-							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
-							.post(httpRequestBody)
-							.header("Content-Type", "application/json")
-							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
+			if (!m.containsKey("embed_key")) {
+				//Get and add read-only API key for embed page. Only good for one hour.
+				try {
+					OkHttpClient client = new OkHttpClient();
+					RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
+					Request keyGrantRequest = new Request.Builder()
+							.url(BotSettings.API_URL.get() + "/v2/account/key/readonly/get")
+							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+							.post(keyGrantRequestBody)
 							.build();
+					Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
-						Response response = client.newCall(httpRequest).execute();
-
-						if (response.code() == 200) {
-							JSONObject responseBody = new JSONObject(response.body().string());
-
-							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
-							m.put("embed", wg);
-							break; //We got the info, no need to request from the rest
-						} else if (response.code() >= 500) {
-							//Client must be down... lets remove it...
-							DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-						}
-					} catch (Exception e) {
-						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
-						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
-						DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-
+					//Handle response...
+					if (keyGrantResponse.code() == 200) {
+						JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+						//API key received, map....
+						m.put("key", keyGrantResponseBody.getString("key"));
+					} else {
+						//Something didn't work... add invalid key that embed page is programmed to respond to.
+						m.put("embed_key", "internal_error");
 					}
+				} catch (Exception e) {
+					//Something didn't work... add invalid key that embed page is programmed to respond to.
+					m.put("embed_key", "internal_error");
 				}
-			} catch (Exception e) {
-				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
-
-				m.put("embed", new WebGuild());
 			}
 
-			//Add to embed map...
-			UUID embedKey = UUID.randomUUID();
-			request.getSession(true).setAttribute("embed", embedKey.toString());
-			embedMaps.put(embedKey.toString(), m);
-
 			return m;
+
 		} else {
 			//Not logged in...
 			Map<String, Object> m = new HashMap<>();
@@ -186,80 +134,37 @@ public class DiscordAccountHandler {
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
 			m.put("invite_url", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
-			m.put("status", DisCalWeb.getNetworkInfo());
+			m.put("api_url", BotSettings.API_URL.get());
 
-			//Add guild for guild embed
-			JSONObject requestBody = new JSONObject();
-			requestBody.put("guild_id", guildId);
-
-			m.remove("embed");
+			//Get and add read-only API key for embed page. Only good for one hour.
 			try {
-				OkHttpClient client = new OkHttpClient.Builder()
-					.connectTimeout(1, TimeUnit.SECONDS)
-					.build();
-				RequestBody httpRequestBody = RequestBody.create(GlobalConst.JSON, requestBody.toString());
+				OkHttpClient client = new OkHttpClient();
+				RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
+				Request keyGrantRequest = new Request.Builder()
+						.url(BotSettings.API_URL.get() + "/v2/account/key/readonly/get")
+						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+						.post(keyGrantRequestBody)
+						.build();
+				Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
-				//TODO: Fix this shit up honestly
-				for (ConnectedClient cc : DisCalWeb.getNetworkInfo().getClients()) {
-
-					try {
-						Request httpRequest = new Request.Builder()
-							.url("https://" + BotSettings.COM_SUB_DOMAIN.get() + cc.getClientIndex() + ".discalbot.com/api/v1/com/website/embed/calendar")
-							.post(httpRequestBody)
-							.header("Content-Type", "application/json")
-							.header("Authorization", Credentials.basic(BotSettings.COM_USER.get(), BotSettings.COM_PASS.get()))
-							.build();
-
-						Response response = client.newCall(httpRequest).execute();
-
-						if (response.code() == 200) {
-							JSONObject responseBody = new JSONObject(response.body().string());
-
-							WebGuild wg = new WebGuild().fromJson(responseBody.getJSONObject("guild"));
-							m.put("embed", wg);
-							break; //We got the info, no need to request from the rest
-						} else if (response.code() >= 500) {
-							//Client must be down... lets remove it...
-							DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-						}
-					} catch (Exception e) {
-						Logger.getLogger().exception(null, "Client response error", e, true, DiscordAccountHandler.class);
-						//Remove client to be on the safe side. If client is still up, it'll be re-added on the next keepalive
-						DisCalWeb.getNetworkInfo().removeClient(cc.getClientIndex());
-
-					}
+				//Handle response...
+				if (keyGrantResponse.code() == 200) {
+					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+					//API key received, map....
+					m.put("key", keyGrantResponseBody.getString("key"));
+				} else {
+					//Something didn't work... add invalid key that embed page is programmed to respond to.
+					m.put("embed_key", "internal_error");
 				}
 			} catch (Exception e) {
-				Logger.getLogger().exception(null, "[Embed] Failed to get guild!", e, true, this.getClass());
-
-				m.put("embed", new WebGuild());
+				//Something didn't work... add invalid key that embed page is programmed to respond to.
+				m.put("embed_key", "internal_error");
 			}
-
-			//Add to embed map...
-			UUID embedKey = UUID.randomUUID();
-			request.getSession(true).setAttribute("embed", embedKey.toString());
-			embedMaps.put(embedKey.toString(), m);
 
 			return m;
 		}
 	}
 
-	public Map<String, Object> findAccount(String userId) {
-		for (Map<String, Object> m : discordAccounts.values()) {
-			if (m.containsKey("id")) {
-				if (m.get("id").equals(userId)) {
-					m.remove("last_use");
-					m.put("last_use", System.currentTimeMillis());
-					return m;
-				}
-			}
-		}
-		return null;
-	}
-
-	public int accountCount() {
-		return discordAccounts.size();
-	}
 
 	//Functions
 	public void addAccount(Map<String, Object> m, HttpServletRequest request) {
@@ -273,12 +178,6 @@ public class DiscordAccountHandler {
 		if ((String) request.getSession(true).getAttribute("account") != null && hasAccount(request))
 			discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
 	}
-
-	public void removeEmbedMap(HttpServletRequest request) {
-		if ((String) request.getSession(true).getAttribute("embed") != null && hasEmbedMap(request))
-			embedMaps.remove((String) request.getSession(true).getAttribute("embed"));
-	}
-
 	private void removeTimedOutAccounts() {
 		long limit = Long.parseLong(BotSettings.TIME_OUT.get());
 		final List<String> toRemove = new ArrayList<>();

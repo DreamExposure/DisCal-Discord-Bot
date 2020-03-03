@@ -32,7 +32,7 @@ import discord4j.core.object.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events/list")
 public class MonthEndpoint {
-	@PostMapping(value = "/list/month", produces = "application/json")
+	@PostMapping(value = "/month", produces = "application/json")
 	public String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);

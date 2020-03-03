@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+	"target": "ESNext",
+	"module": "System",
+	"strict": true,
+	"strictPropertyInitialization": false,
+	"noImplicitThis": false,
+	"removeComments": true,
+	"allowJs": true,
+	"baseUrl": ".",
+	"jsx": "preserve",
+	"moduleResolution": "node",
+	"outFile": "sb-admin-2.js",
+	"paths": {
+	  "@/*": [
+		"./web/src/main/resources/src/js/*"
+	  ]
+	}
+  },
+  "include": [
+	"./web/src/main/resources/src/js/**/*.ts",
+	"./web/src/main/resources/src/js/**/*.js"
+  ],
+  "exclude": [
+	"node_modules"
+  ]
+}

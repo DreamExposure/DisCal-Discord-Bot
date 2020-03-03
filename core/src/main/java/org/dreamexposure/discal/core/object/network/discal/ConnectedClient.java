@@ -14,12 +14,27 @@ import java.util.Date;
  * Contact: nova@dreamexposure.org
  */
 public class ConnectedClient {
-	private final int clientIndex;
+	private int clientIndex;
 
 	private int connectedServers;
 	private long lastKeepAlive;
 	private String uptime;
 	private double memUsed;
+
+	//This stuff doesn't get published
+	private String ipForRestart;
+	private int portForRestart;
+	private String pid;
+
+	public ConnectedClient() {
+		clientIndex = -1;
+
+		connectedServers = 0;
+		lastKeepAlive = System.currentTimeMillis();
+
+		uptime = "ERROR";
+		memUsed = 0;
+	}
 
 	public ConnectedClient(int _clientIndex) {
 		clientIndex = _clientIndex;
@@ -58,7 +73,23 @@ public class ConnectedClient {
 		return memUsed;
 	}
 
+	public String getIpForRestart() {
+		return ipForRestart;
+	}
+
+	public int getPortForRestart() {
+		return portForRestart;
+	}
+
+	public String getPid() {
+		return pid;
+	}
+
 	//Setters
+	public void setClientIndex(int clientIndex) {
+		this.clientIndex = clientIndex;
+	}
+
 	public void setConnectedServers(int _connectedServers) {
 		connectedServers = _connectedServers;
 	}
@@ -75,6 +106,18 @@ public class ConnectedClient {
 		memUsed = _mem;
 	}
 
+	public void setIpForRestart(String _ip) {
+		ipForRestart = _ip;
+	}
+
+	public void setPortForRestart(int portForRestart) {
+		this.portForRestart = portForRestart;
+	}
+
+	public void setPid(String _pid) {
+		pid = _pid;
+	}
+
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
@@ -85,5 +128,15 @@ public class ConnectedClient {
 		json.put("memory", memUsed);
 
 		return json;
+	}
+
+	public ConnectedClient fromJson(JSONObject json) {
+		clientIndex = json.getInt("index");
+		connectedServers = json.getInt("guilds");
+		lastKeepAlive = json.getLong("keep_alive");
+		uptime = json.getString("uptime");
+		memUsed = json.getDouble("memory");
+
+		return this;
 	}
 }

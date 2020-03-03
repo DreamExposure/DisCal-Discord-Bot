@@ -25,6 +25,10 @@ public class NetworkInfo {
 
 	private int calCount;
 	private int announcementCount;
+	private int guildCount;
+
+	private String uptime;
+	private String pid;
 
 	//Getters
 	public List<ConnectedClient> getClients() {
@@ -55,7 +59,14 @@ public class NetworkInfo {
 	public void removeClient(int clientIndex) {
 		if (clientExists(clientIndex)) {
 			clients.remove(getClient(clientIndex));
-			Logger.getLogger().status("Client Disconnected to Network", "Shard Index of Disconnected Client: " + clientIndex);
+			Logger.getLogger().status("Client Disconnected from Network", "Shard Index of Disconnected Client: " + clientIndex);
+		}
+	}
+
+	public void removeClient(int clientIndex, String reason) {
+		if (clientExists(clientIndex)) {
+			clients.remove(getClient(clientIndex));
+			Logger.getLogger().status("Client Disconnected from Network | Index: " + clientIndex, reason);
 		}
 	}
 
@@ -65,7 +76,8 @@ public class NetworkInfo {
 			count += cc.getConnectedServers();
 		}
 
-		return count;
+		guildCount = count;
+		return guildCount;
 	}
 
 	public int getClientCount() {
@@ -80,12 +92,23 @@ public class NetworkInfo {
 		return this.announcementCount;
 	}
 
-	public String getUptime() {
+	public String getUptimeLatest() {
 		RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
 		Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
 		Period period = interval.toPeriod();
 
-		return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+
+		uptime = String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+
+		return uptime;
+	}
+
+	public String getUptime() {
+		return uptime;
+	}
+
+	public String getPid() {
+		return pid;
 	}
 
 	//Setters
@@ -98,10 +121,15 @@ public class NetworkInfo {
 		this.announcementCount = announcementCount;
 	}
 
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
+
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
-		json.put("api_uptime", getUptime());
+		json.put("api_uptime", getUptimeLatest());
+		json.put("api_pid", getPid());
 		json.put("announcements", getAnnouncementCount());
 		json.put("total_guilds", getTotalGuildCount());
 		json.put("calendars", getCalendarCount());
@@ -113,5 +141,19 @@ public class NetworkInfo {
 		json.put("clients", jClients);
 
 		return json;
+	}
+
+	public NetworkInfo fromJson(JSONObject json) {
+		uptime = json.getString("api_uptime");
+		pid = json.getString("api_pid");
+		announcementCount = json.getInt("announcements");
+		guildCount = json.getInt("total_guilds");
+		calCount = json.getInt("calendars");
+
+		JSONArray jClients = json.getJSONArray("clients");
+		for (int i = 0; i < jClients.length(); i++)
+			clients.add(new ConnectedClient().fromJson(jClients.getJSONObject(i)));
+
+		return this;
 	}
 }

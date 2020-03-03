@@ -1,9 +1,13 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.guild.settings;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.network.DisCalRealm;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GuildUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -17,6 +21,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import discord4j.core.object.util.Snowflake;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 @RestController
 @RequestMapping("/v2/guild/settings")
@@ -29,6 +35,10 @@ public class UpdateEndpoint {
 			response.setStatus(authState.getStatus());
 			response.setContentType("application/json");
 			return authState.toJson();
+		} else if (authState.isReadOnly()) {
+			response.setStatus(401);
+			response.setContentType("application/json");
+			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
 		}
 
 		//Okay, now handle actual request.
@@ -65,6 +75,32 @@ public class UpdateEndpoint {
 			if (DatabaseManager.getManager().updateSettings(settings)) {
 				response.setContentType("application/json");
 				response.setStatus(200);
+
+				//Invalidate the cache on the shard this guild is on...
+				Thread thread = new Thread(() -> {
+					try {
+						JSONObject requestJson = new JSONObject();
+
+						requestJson.put("realm", DisCalRealm.BOT_INVALIDATE_CACHES.name());
+
+						int shardIndex = GuildUtils.findShard(Snowflake.of(guildId));
+
+						OkHttpClient client = new OkHttpClient();
+						okhttp3.RequestBody cacheRequestBody = okhttp3.RequestBody.create(GlobalConst.JSON, requestJson.toString());
+						Request cacheRequest = new Request.Builder()
+								.url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+								.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+								.post(cacheRequestBody)
+								.build();
+						//If this fails, its not a huge deal, the cache will just be out of date for up to an hour max...
+						client.newCall(cacheRequest).execute();
+					} catch (Exception e) {
+						Logger.getLogger().exception(null, "[API-v2] Cache invalidate failed after update", e, true, this.getClass());
+					}
+				});
+				thread.setDaemon(true);
+				thread.start();
+
 				return JsonUtils.getJsonResponseMessage("Successfully updated guild settings!");
 			} else {
 				response.setContentType("application/json");

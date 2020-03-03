@@ -13,12 +13,16 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
+
 import org.dreamexposure.discal.core.crypto.AESEncryption;
-import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.GuildSettings;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -80,14 +84,13 @@ public class CalendarAuth {
 	 */
 	private static Credential authorize() throws IOException {
 		// Load client secrets.
-		//InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json"); <- incase it breaks, this is still here
+		//InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json"); <- in case it breaks, this is still here
 		InputStream in = new FileInputStream(new File("client_secret.json"));
 		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
 		// Build flow and trigger user authorization request.
 		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
 		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		Logger.getLogger().debug("Credentials saved to " + DATA_STORE_DIR.getAbsolutePath(), false);
 
 		//Try to close input stream since I don't think it was ever closed?
 		in.close();

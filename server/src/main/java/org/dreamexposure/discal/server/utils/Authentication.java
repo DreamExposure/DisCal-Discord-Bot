@@ -7,15 +7,21 @@ import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class Authentication {
-	private static Map<String, Long> tempKeys = new HashMap<>();
+	private static Timer timer;
 
-	//TODO: Still gotta figure out how to handle embed, but whatever...
+	private static Map<String, Long> tempKeys = new HashMap<>();
+	private static Map<String, Long> readOnlyKeys = new HashMap<>();
+
 	public static AuthenticationState authenticate(HttpServletRequest request) {
 		if (!request.getMethod().equalsIgnoreCase("POST")) {
 			Logger.getLogger().api("Denied '" + request.getMethod() + "' access", request.getRemoteAddr());
@@ -39,7 +45,14 @@ public class Authentication {
 				return new AuthenticationState(true)
 						.setStatus(200)
 						.setReason("Success")
-						.setKeyUsed(key);
+						.setKeyUsed(key)
+						.setIsReadOnly(false);
+			} else if (readOnlyKeys.containsKey(key)) {
+				return new AuthenticationState(true)
+						.setStatus(200)
+						.setReason("Success")
+						.setKeyUsed(key)
+						.setIsReadOnly(true);
 			} else if (key.equals("teapot")) {
 				return new AuthenticationState(false)
 						.setStatus(418)
@@ -78,5 +91,48 @@ public class Authentication {
 
 	public static void removeTempKey(String key) {
 		tempKeys.remove(key);
+	}
+
+	public static void saveReadOnlyKey(String key) {
+		if (!readOnlyKeys.containsKey(key)) {
+			readOnlyKeys.put(key, System.currentTimeMillis() + GlobalConst.oneHourMs);
+		}
+	}
+
+	//Timer handling
+	public static void init() {
+		timer = new Timer(true);
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				handleExpiredKeys();
+			}
+		}, 60 * 60 * 1000);
+	}
+
+	public static void shutdown() {
+		if (timer != null)
+			timer.cancel();
+	}
+
+	private static void handleExpiredKeys() {
+		List<String> allToRemove = new ArrayList<>();
+
+		for (String key : tempKeys.keySet()) {
+			long expireTime = tempKeys.get(key);
+			if (expireTime >= System.currentTimeMillis())
+				allToRemove.add(key);
+		}
+
+		for (String key : readOnlyKeys.keySet()) {
+			long expireTime = readOnlyKeys.get(key);
+			if (expireTime >= System.currentTimeMillis())
+				allToRemove.add(key);
+		}
+
+		for (String key : allToRemove) {
+			tempKeys.remove(key);
+			readOnlyKeys.remove(key);
+		}
 	}
 }

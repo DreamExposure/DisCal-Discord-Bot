@@ -3,15 +3,21 @@ package org.dreamexposure.discal.client.service;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONObject;
+import org.springframework.boot.system.ApplicationPid;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * @author NovaFox161
@@ -27,16 +33,41 @@ public class KeepAliveHandler {
 		new Timer(true).scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				JSONObject data = new JSONObject();
-				data.put("Reason", "Keep-Alive");
-				data.put("Server-Count", DisCalClient.getClient().getGuilds().count().block());
-				data.put("Mem-Used", usedMemory());
-				data.put("Uptime", humanReadableUptime());
-				//TODO: Add announcement count!!!
+				try {
+					JSONObject data = new JSONObject();
+					data.put("index", Integer.parseInt(BotSettings.SHARD_INDEX.get()));
 
-				PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive", DisCalClient.clientId(), data);
+					if (DisCalClient.getClient() != null && DisCalClient.getClient().isConnected())
+						data.put("guilds", DisCalClient.getClient().getGuilds().count().block());
+					else
+						data.put("guilds", 0);
+					data.put("memory", usedMemory());
+					data.put("uptime", humanReadableUptime());
+					//TODO: Add announcement count!!!
 
-				Logger.getLogger().debug("Sent keep alive to server.", false);
+					//Network handling data
+					data.put("pid", new ApplicationPid().toString());
+					data.put("ip", BotSettings.RESTART_IP.get());
+					data.put("port", Integer.parseInt(BotSettings.RESTART_PORT.get()));
+
+					OkHttpClient client = new OkHttpClient();
+
+					RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
+					Request request = new Request.Builder()
+							.url(BotSettings.API_URL + "/v2/status/keep-alive")
+							.post(body)
+							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+							.header("Content-Type", "application/json")
+							.build();
+
+					Response response = client.newCall(request).execute();
+					if (response.code() == 200) {
+						Logger.getLogger().debug("Sent keep alive to server.", false);
+					}
+					//Failed to send keep alive... perhaps the API is down?
+				} catch (Exception e) {
+					Logger.getLogger().exception(null, "[Heart Beat] Failed to send Keep-Alive", e, true, this.getClass());
+				}
 			}
 		}, seconds * 1000, seconds * 1000);
 	}

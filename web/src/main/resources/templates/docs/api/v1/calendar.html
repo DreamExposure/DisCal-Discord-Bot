@@ -465,37 +465,49 @@
 					<tr>
 						<td>calendars.external</td>
 						<td>Boolean</td>
-						<td>Whether or not the calendar is an external calendar</td>
-					</tr>
-					<tr>
-						<td>calendars.id</td>
-						<td>String</td>
-						<td>The calendar's google ID</td>
-					</tr>
-					<tr>
-						<td>calendars.address</td>
-						<td>String</td>
-						<td>The calendar's google Address</td>
-					</tr>
-					</tbody>
-				</table>
+                        <td>Whether or not the calendar is an external calendar</td>
+                    </tr>
+                    <tr>
+                        <td>calendars.id</td>
+                        <td>String</td>
+                        <td>The calendar's google ID</td>
+                    </tr>
+                    <tr>
+                        <td>calendars.address</td>
+                        <td>String</td>
+                        <td>The calendar's google Address</td>
+                    </tr>
+                    </tbody>
+                </table>
 
-				<br>
-				<!-- End list endpoint-->
+                <br>
+                <!-- End list endpoint-->
 
-			</div>
-			<!-- /.container-fluid -->
+            </div>
+            <!-- /.container-fluid -->
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
 
-		</div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

@@ -31,7 +31,7 @@ import discord4j.core.object.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events/list")
 public class RangeEndpoint {
-	@PostMapping(value = "/list/range", produces = "application/json")
+	@PostMapping(value = "/range", produces = "application/json")
 	public String getEventsForRange(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);

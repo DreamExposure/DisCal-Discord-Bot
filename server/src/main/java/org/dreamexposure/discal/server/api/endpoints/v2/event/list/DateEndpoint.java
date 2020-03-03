@@ -32,7 +32,7 @@ import discord4j.core.object.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events/list")
 public class DateEndpoint {
-	@PostMapping(value = "/list/date", produces = "application/json")
+	@PostMapping(value = "/date", produces = "application/json")
 	public String getEventsForDate(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
@@ -71,6 +71,7 @@ public class DateEndpoint {
 
 			JSONObject body = new JSONObject();
 			body.put("events", jEvents);
+			body.put("message", "Events successfully listed.");
 
 			response.setContentType("application/json");
 			response.setStatus(200);

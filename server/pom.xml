@@ -29,15 +29,21 @@
 	<version>${discal.core.version}</version>
 
 	<dependencies>
-		<!--DisCal Core-->
-		<dependency>
-			<groupId>org.dreamexposure.discal</groupId>
-			<artifactId>core</artifactId>
-			<version>${discal.core.version}</version>
-			<scope>compile</scope>
-		</dependency>
+        <!--DisCal Core-->
+        <dependency>
+            <groupId>org.dreamexposure.discal</groupId>
+            <artifactId>core</artifactId>
+            <version>${discal.core.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--JSch for SSH Tunneling-->
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 	<build>
 		<directory>../target</directory>

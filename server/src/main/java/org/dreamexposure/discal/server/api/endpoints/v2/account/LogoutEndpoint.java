@@ -23,6 +23,10 @@ public class LogoutEndpoint {
 			response.setStatus(authState.getStatus());
 			response.setContentType("application/json");
 			return authState.toJson();
+		} else if (authState.isReadOnly()) {
+			response.setStatus(401);
+			response.setContentType("application/json");
+			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
 		}
 
 		try {

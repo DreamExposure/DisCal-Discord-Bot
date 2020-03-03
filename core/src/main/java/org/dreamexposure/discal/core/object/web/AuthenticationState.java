@@ -9,6 +9,8 @@ public class AuthenticationState {
 
 	private boolean fromDiscalNetwork;
 
+	private boolean readOnly;
+
 	private String keyUsed;
 
 	public AuthenticationState(boolean _success) {
@@ -35,6 +37,10 @@ public class AuthenticationState {
 		return fromDiscalNetwork;
 	}
 
+	public boolean isReadOnly() {
+		return readOnly;
+	}
+
 	public AuthenticationState setStatus(int _status) {
 		status = _status;
 		return this;
@@ -52,6 +58,11 @@ public class AuthenticationState {
 
 	public AuthenticationState setFromDisCalNetwork(boolean _fromDisCal) {
 		fromDiscalNetwork = _fromDisCal;
+		return this;
+	}
+
+	public AuthenticationState setIsReadOnly(boolean _readOnly) {
+		readOnly = _readOnly;
 		return this;
 	}
 

@@ -3,11 +3,7 @@ package org.dreamexposure.discal.web;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
-import org.dreamexposure.discal.web.listeners.discal.PubSubListener;
-import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
@@ -19,8 +15,6 @@ import java.util.Properties;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalWeb {
-	private static NetworkInfo networkInfo = new NetworkInfo();
-
 	public static void main(String[] args) throws IOException {
 		//Get settings
 		Properties p = new Properties();
@@ -29,10 +23,6 @@ public class DisCalWeb {
 
 		//Init logger
 		Logger.getLogger().init();
-
-		//Register DisCal events
-		EventManager.get().init();
-		EventManager.get().getEventBus().register(new PubSubListener());
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
@@ -49,15 +39,10 @@ public class DisCalWeb {
 			System.exit(4);
 		}
 
-		//Start Redis PubSub Listeners
-		if (!BotSettings.PROFILE.get().equalsIgnoreCase("TESTING")) {
-			PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
-			//We must register each channel we want to use. This is super important.
-			PubSubManager.get().register(-1, BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive");
-		}
-	}
-
-	public static NetworkInfo getNetworkInfo() {
-		return networkInfo;
+		//Add shutdown hooks (probably won't work, but worth a shot for graceful shutdown)
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Logger.getLogger().status("Website shutting down", "Website shutting down...");
+			DiscordAccountHandler.getHandler().shutdown();
+		}));
 	}
 }

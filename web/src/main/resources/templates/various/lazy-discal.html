@@ -254,33 +254,45 @@
 						It supports saving and loading of events as text files for quick event
 						creation. It can build events and announcements separately or together and
 						has the capability to build up to 50 announcements at one time.
-					</p>
+                    </p>
 
-					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-					   style="margin: 0 auto; max-width: 200px" download=""
-					   href="/assets/files/Lazy-DisCal/Windows/Lazy_Discal_GUI-latest.exe">
-						Windows
-					</a>
+                    <a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
+                       style="margin: 0 auto; max-width: 200px" download=""
+                       href="/assets/files/Lazy-DisCal/Windows/Lazy_Discal_GUI-latest.exe">
+                        Windows
+                    </a>
 
-					<hr>
+                    <hr>
 
-					<p class="text-center text-discord-full-white">
-						*Note: until Lazy DisCal is developed for linux/mac you can run it via Wine.
-					</p>
-				</div>
-			</div>
-			<!-- /.container-fluid -->
+                    <p class="text-center text-discord-full-white">
+                        *Note: until Lazy DisCal is developed for linux/mac you can run it via Wine.
+                    </p>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
 
-		</div>
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

@@ -8,7 +8,6 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,7 +17,7 @@ public class ServletConfig implements
 	WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
 	public void customize(ConfigurableServletWebServerFactory factory) {
-		factory.setPort(Integer.valueOf(BotSettings.PORT.get()));
+		factory.setPort(Integer.parseInt(BotSettings.PORT.get()));
 		factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/"));
 	}
 
@@ -27,8 +26,8 @@ public class ServletConfig implements
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				CorsRegistration reg = registry.addMapping("/api/**");
-				reg.allowedOrigins("*");
+				registry.addMapping("/api/**").allowedOrigins("*");
+				registry.addMapping("/v2/**").allowedOrigins("*");
 			}
 		};
 	}

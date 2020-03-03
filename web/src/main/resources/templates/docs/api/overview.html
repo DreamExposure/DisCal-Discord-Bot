@@ -330,36 +330,48 @@
 				<h4 class="text-center text-discal-blue">v2</h4>
 
 				<p class="text-left text-discord-full-white">
-					Endpoints can be accessed via: https://api.discalbot.com/v2/*
-					<br>
-					<br>
-					Status: Supported, Default
-				</p>
+                    Endpoints can be accessed via: https://api.discalbot.com/v2/*
+                    <br>
+                    <br>
+                    Status: Supported, Default
+                </p>
 
-				<br>
+                <br>
 
-				<h4 class="text-center text-discal-blue">v1</h4>
+                <h4 class="text-center text-discal-blue">v1</h4>
 
-				<p class="text-left text-discord-full-white">
-					Endpoints can be accessed via: https://api.discalbot.com/api/v1/*
-					<br>
-					<br>
-					Status: Deprecated
-				</p>
+                <p class="text-left text-discord-full-white">
+                    Endpoints can be accessed via: https://api.discalbot.com/api/v1/*
+                    <br>
+                    <br>
+                    Status: Deprecated
+                </p>
 
-			</div>
-			<!-- /.container-fluid -->
+            </div>
+            <!-- /.container-fluid -->
 
-		</div>
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 

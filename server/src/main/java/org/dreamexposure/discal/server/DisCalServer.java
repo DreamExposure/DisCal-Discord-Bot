@@ -5,14 +5,14 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
-import org.dreamexposure.discal.server.listeners.PubSubListener;
+import org.dreamexposure.discal.server.network.discal.NetworkMediator;
 import org.dreamexposure.discal.server.network.discordbots.UpdateDisBotData;
 import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
-import org.dreamexposure.novautils.event.EventManager;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
+import org.dreamexposure.discal.server.utils.Authentication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.boot.system.ApplicationPid;
 
 import java.io.File;
 import java.io.FileReader;
@@ -32,10 +32,6 @@ public class DisCalServer {
 		//Init logger
 		Logger.getLogger().init();
 
-		//Register DisCal events
-		EventManager.get().init();
-		EventManager.get().getEventBus().register(new PubSubListener());
-
 		//Connect to MySQL
 		DatabaseManager.getManager().connectToMySQL();
 		DatabaseManager.getManager().handleMigrations();
@@ -53,16 +49,26 @@ public class DisCalServer {
 			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE API'", e, true, DisCalServer.class);
 		}
 
-		//Start Redis PubSub Listeners
-		PubSubManager.get().init(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()), "N/a", BotSettings.REDIS_PASSWORD.get());
-		//We must register each channel we want to use. This is super important.
-		PubSubManager.get().register(-1, BotSettings.PUBSUB_PREFIX.get() + "/ToServer/KeepAlive");
+		//Start network monitoring
+		NetworkMediator.get().init();
 
 		//Handle the rest of the bullshit
 		UpdateDisBotData.init();
 		UpdateDisPwData.init();
+		Authentication.init();
+
+		//Save pid...
+		networkInfo.setPid(new ApplicationPid().toString());
 
 		//Add shutdown hooks...
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			Logger.getLogger().status("Shutting down API", "API Shutting down...");
+			Authentication.shutdown();
+			NetworkMediator.get().shutdown();
+			UpdateDisBotData.shutdown();
+			UpdateDisPwData.shutdown();
+			DatabaseManager.getManager().disconnectFromMySQL();
+		}));
 	}
 
 	public static NetworkInfo getNetworkInfo() {

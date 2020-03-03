@@ -1,11 +1,14 @@
 let gulp = require('gulp');
 let sass = require('gulp-sass');
+let ts = require('gulp-typescript');
+let tsProject = ts.createProject('tsconfig.json');
 let header = require('gulp-header');
 let cleanDest = require('gulp-clean-dest');
 let cleanCSS = require('gulp-clean-css');
 let rename = require("gulp-rename");
 let autoprefixer = require('gulp-autoprefixer');
 let minify = require("gulp-minify");
+let del = require("del");
 let pkg = require('./package.json');
 let browserSync = require('browser-sync').create();
 
@@ -72,8 +75,22 @@ gulp.task('vendor', gulp.series(function(done) {
 	done();
 }));
 
+gulp.task('clean:all', gulp.series(function () {
+	return del([
+		"./web/build",
+		"./web/src/main/resources/static/assets/js/**",
+		"./web/src/main/resources/static/assets/css/**"
+	])
+}));
+
+gulp.task('clean:build', gulp.series(function () {
+	return del([
+		"./web/build"
+	])
+}));
+
 // Compile SCSS
-gulp.task('css:compile', gulp.series(function() {
+gulp.task('css:compile', gulp.series(function () {
 	return gulp.src('./web/src/main/resources/src/scss/**/*.scss')
 		.pipe(sass.sync({
 			outputStyle: 'expanded'
@@ -89,7 +106,7 @@ gulp.task('css:compile', gulp.series(function() {
 }));
 
 // Minify CSS
-gulp.task('css:minify', gulp.series(['css:compile'], function() {
+gulp.task('css:minify', gulp.series(['css:compile'], function () {
 	return gulp.src([
 		'./web/src/main/resources/static/assets/css/*.css',
 		'!./web/src/main/resources/static/assets/css/*.min.css'
@@ -98,15 +115,25 @@ gulp.task('css:minify', gulp.series(['css:compile'], function() {
 		.pipe(rename({
 			suffix: '.min'
 		}))
-		.pipe(gulp.dest('./web/src/main/resources/static/assets/css'))
+		.pipe(gulp.dest('./web/src/main/resources/static/assets/css'));
+}));
+
+//Compile TS to JS
+gulp.task('js:compile', gulp.series(function () {
+	return gulp.src([
+		'./web/src/main/resources/src/js/**/*.ts',
+		'./web/src/main/resources/src/js/**/*.js'
+	])
+		.pipe(cleanDest('./web/build'))
+		.pipe(tsProject(ts.reporter.fullReporter(true)))
+		.pipe(gulp.dest('./web/build'))
 		.pipe(browserSync.stream());
 }));
 
 //Minify JS
-gulp.task('js:minify', gulp.series(function() {
+gulp.task('js:minify', gulp.series(function () {
 	return gulp.src([
-		'./web/src/main/resources/src/js/**/*.js',
-		'!./web/src/main/resources/src/js/**/*.min.js'
+		'./web/build/**/*.js'
 	])
 		.pipe(cleanDest('./web/src/main/resources/static/assets/js'))
 		.pipe(minify({
@@ -123,12 +150,12 @@ gulp.task('js:minify', gulp.series(function() {
 gulp.task('css', gulp.series(['css:compile', 'css:minify']));
 
 // JS
-gulp.task('js', gulp.series(['js:minify']));
+gulp.task('js', gulp.series(['js:compile', 'js:minify']));
 
 // Default task
-gulp.task('default', gulp.series(['css', 'js', 'vendor']));
+gulp.task('default', gulp.series(['clean:all', 'css', 'js', 'vendor', 'clean:build']));
 
-gulp.task('build', gulp.series(['css', 'js']));
+gulp.task('build', gulp.series(['clean:all', 'css', 'js', 'clean:build']));
 
 // Configure the browserSync task
 gulp.task('browserSync', gulp.series(function() {

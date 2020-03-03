@@ -1,5 +1,26 @@
 package org.dreamexposure.discal.client.module.command;
 
+import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.core.crypto.KeyGenerator;
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.network.DisCalRealm;
+import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.command.CommandInfo;
+import org.dreamexposure.discal.core.object.web.UserAPIAccount;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GuildUtils;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
@@ -8,24 +29,10 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
-import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.crypto.KeyGenerator;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.enums.network.DisCalRealm;
-import org.dreamexposure.discal.core.enums.network.PubSubReason;
-import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.object.web.UserAPIAccount;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.novautils.network.pubsub.PubSubManager;
-import org.json.JSONObject;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import java.util.ArrayList;
-import java.util.function.Consumer;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by Nova Fox on 4/4/2017.
@@ -153,16 +160,36 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with Pub/Sub... and let the changes propagate
-			JSONObject request = new JSONObject();
+			//Just send this direct to the appropriate client
+			try {
+				JSONObject requestJson = new JSONObject();
 
-			request.put("Reason", PubSubReason.HANDLE.name());
-			request.put("Realm", DisCalRealm.GUILD_IS_PATRON);
-			request.put("Guild-Id", args[1]);
+				requestJson.put("realm", DisCalRealm.GUILD_IS_PATRON.name());
+				requestJson.put("guild_id", Snowflake.of(args[1]).asLong());
 
-			PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", DisCalClient.clientId(), request);
+				int shardIndex = GuildUtils.findShard(Snowflake.of(args[1]));
 
-			MessageManager.sendMessageAsync("DisCal will update the isPatron status of the guild (if connected). Please allow some time for this to propagate across the network!", event);
+				OkHttpClient client = new OkHttpClient();
+				RequestBody requestBody = RequestBody.create(GlobalConst.JSON, requestJson.toString());
+				Request request = new Request.Builder()
+						.url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+						.post(requestBody)
+						.build();
+
+				MessageManager.sendMessageAsync("Attempting to update...", event);
+
+				Response response = client.newCall(request).execute();
+
+				if (response.isSuccessful()) {
+					MessageManager.sendMessageAsync("Successfully updated!", event);
+				} else {
+					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
+				}
+			} catch (Exception e) {
+				Logger.getLogger().exception(event.getMember().get(), "Failed to handle patron update", e, true, this.getClass());
+				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
+			}
 		} else {
 			MessageManager.sendMessageAsync("Please specify the ID of the guild to set as a patron guild with `!dev patron <ID>`", event);
 		}
@@ -230,16 +257,36 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with Pub/Sub... and let the changes propagate
-			JSONObject request = new JSONObject();
+			//Just send this direct to the appropriate client
+			try {
+				JSONObject requestJson = new JSONObject();
 
-			request.put("Reason", PubSubReason.HANDLE.name());
-			request.put("Realm", DisCalRealm.GUILD_IS_DEV);
-			request.put("Guild-Id", args[1]);
+				requestJson.put("realm", DisCalRealm.GUILD_IS_DEV.name());
+				requestJson.put("guild_id", Snowflake.of(args[1]).asLong());
 
-			PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", DisCalClient.clientId(), request);
+				int shardIndex = GuildUtils.findShard(Snowflake.of(args[1]));
 
-			MessageManager.sendMessageAsync("DisCal will update the isDevGuild status of the guild (if connected). Please allow some time for this to propagate across the network!", event);
+				OkHttpClient client = new OkHttpClient();
+				RequestBody requestBody = RequestBody.create(GlobalConst.JSON, requestJson.toString());
+				Request request = new Request.Builder()
+						.url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+						.post(requestBody)
+						.build();
+
+				MessageManager.sendMessageAsync("Attempting to update...", event);
+
+				Response response = client.newCall(request).execute();
+
+				if (response.isSuccessful()) {
+					MessageManager.sendMessageAsync("Successfully updated!", event);
+				} else {
+					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
+				}
+			} catch (Exception e) {
+				Logger.getLogger().exception(event.getMember().get(), "Failed to handle dev update", e, true, this.getClass());
+				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
+			}
 		} else {
 			MessageManager.sendMessageAsync("Please specify the ID of the guild to set as a dev guild with `!dev dev <ID>`", event);
 		}
@@ -248,7 +295,7 @@ public class DevCommand implements ICommand {
 	private void moduleMaxCalendars(String[] args, MessageCreateEvent event) {
 		if (args.length == 3) {
 			try {
-				int mc = Integer.valueOf(args[2]);
+				int mc = Integer.parseInt(args[2]);
 				mc = Math.abs(mc);
 
 				try {
@@ -268,17 +315,37 @@ public class DevCommand implements ICommand {
 					return;
 				}
 
-				//Just send this across the network with Pub/Sub... and let the changes propagate
-				JSONObject request = new JSONObject();
+				//Just send this direct to the appropriate client
+				try {
+					JSONObject requestJson = new JSONObject();
 
-				request.put("Reason", PubSubReason.HANDLE.name());
-				request.put("Realm", DisCalRealm.GUILD_MAX_CALENDARS);
-				request.put("Guild-Id", args[1]);
-				request.put("Max-Calendars", mc);
+					requestJson.put("realm", DisCalRealm.GUILD_MAX_CALENDARS.name());
+					requestJson.put("max_calendars", mc);
+					requestJson.put("guild_id", Snowflake.of(args[1]).asLong());
 
-				PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", DisCalClient.clientId(), request);
+					int shardIndex = GuildUtils.findShard(Snowflake.of(args[1]));
 
-				MessageManager.sendMessageAsync("DisCal will update the max calendar limit of the specified guild (if connected). Please allow some time for this to propagate across the network!", event);
+					OkHttpClient client = new OkHttpClient();
+					RequestBody requestBody = RequestBody.create(GlobalConst.JSON, requestJson.toString());
+					Request request = new Request.Builder()
+							.url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+							.post(requestBody)
+							.build();
+
+					MessageManager.sendMessageAsync("Attempting to update...", event);
+
+					Response response = client.newCall(request).execute();
+
+					if (response.isSuccessful()) {
+						MessageManager.sendMessageAsync("Successfully updated!", event);
+					} else {
+						MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
+					}
+				} catch (Exception e) {
+					Logger.getLogger().exception(event.getMember().get(), "Failed to handle max cal update", e, true, this.getClass());
+					MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
+				}
 			} catch (NumberFormatException e) {
 				MessageManager.sendMessageAsync("Max Calendar amount must be a valid Integer!", event);
 			}
@@ -305,31 +372,74 @@ public class DevCommand implements ICommand {
 				return;
 			}
 
-			//Just send this across the network with Pub/Sub... and let the changes propagate
-			JSONObject request = new JSONObject();
+			//Just send this direct to the appropriate client
+			try {
+				JSONObject requestJson = new JSONObject();
 
-			request.put("Reason", PubSubReason.HANDLE.name());
-			request.put("Realm", DisCalRealm.GUILD_LEAVE);
-			request.put("Guild-Id", args[1]);
+				requestJson.put("realm", DisCalRealm.GUILD_LEAVE.name());
+				requestJson.put("guild_id", Snowflake.of(args[1]).asLong());
 
-			PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", DisCalClient.clientId(), request);
+				int shardIndex = GuildUtils.findShard(Snowflake.of(args[1]));
 
-			MessageManager.sendMessageAsync("DisCal will leave the specified guild (if connected). Please allow some time for this to propagate across the network!", event);
+				OkHttpClient client = new OkHttpClient();
+				RequestBody requestBody = RequestBody.create(GlobalConst.JSON, requestJson.toString());
+				Request request = new Request.Builder()
+						.url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+						.post(requestBody)
+						.build();
+
+				MessageManager.sendMessageAsync("Attempting to update...", event);
+
+				Response response = client.newCall(request).execute();
+
+				if (response.isSuccessful()) {
+					MessageManager.sendMessageAsync("Successfully updated!", event);
+				} else {
+					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
+				}
+			} catch (Exception e) {
+				Logger.getLogger().exception(event.getMember().get(), "Failed to handle dev update", e, true, this.getClass());
+				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
+			}
 		} else {
 			MessageManager.sendMessageAsync("Please specify the ID of the guild to leave with `!dev leave <ID>`", event);
 		}
 	}
 
-	private void moduleReloadLangs(MessageCreateEvent event) {
-		MessageManager.reloadLangs();
+	private void moduleReloadLangs(final MessageCreateEvent event) {
+		MessageManager.sendMessageAsync("Sending lang reload request to all clients async, this may take time...", event);
 
-		//Just send this across the network with Pub/Sub... and let the changes propagate
-		JSONObject request = new JSONObject();
+		Thread thread = new Thread(() -> {
+			JSONObject requestJson = new JSONObject();
 
-		request.put("Reason", PubSubReason.HANDLE.name());
-		request.put("Realm", DisCalRealm.BOT_LANGS);
+			requestJson.put("realm", DisCalRealm.BOT_LANGS.name());
 
-		PubSubManager.get().publish(BotSettings.PUBSUB_PREFIX.get() + "/ToClient/All", DisCalClient.clientId(), request);
+			OkHttpClient client = new OkHttpClient.Builder()
+					.connectTimeout(5, TimeUnit.SECONDS)
+					.build();
+
+			for (int i = 0; i < Integer.parseInt(BotSettings.SHARD_COUNT.get()); i++) {
+				try {
+					RequestBody requestBody = RequestBody.create(GlobalConst.JSON, requestJson.toString());
+					Request request = new Request.Builder()
+							.url(BotSettings.COM_SUB_DOMAIN.get() + i + ".discalbot.com/api/v1/com/bot/action/handle")
+							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
+							.post(requestBody)
+							.build();
+					client.newCall(request).execute();
+				} catch (Exception e) {
+					Logger.getLogger().exception(null, "lang reload request fail on shard " + i, e, true, DevCommand.class);
+				}
+			}
+
+			//Once all operations are done.
+			MessageManager.sendMessageAsync("All shards have handled the lang reload request", event);
+		});
+
+		thread.setDaemon(true);
+		thread.start();
+
 
 		MessageManager.sendMessageAsync("Reloading lang files! Please give this time to propagate across the network.", event);
 	}

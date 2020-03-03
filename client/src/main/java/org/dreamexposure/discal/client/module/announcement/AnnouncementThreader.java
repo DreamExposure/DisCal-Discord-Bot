@@ -27,7 +27,7 @@ public class AnnouncementThreader {
 				new Thread(() -> {
 					AnnouncementThread at = new AnnouncementThread();
 					at.setDaemon(true);
-					at.run();
+					at.start();
 				}).start();
 			}
 		}, 5 * 1000 * 60, 5 * 1000 * 60);

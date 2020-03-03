@@ -238,36 +238,48 @@
 					<br>
 					Personal information is never shared or sold to any third parties or services.
 					Personal information is stored on internal services and encrypted. Any
-					credit/debit card information is not stored or accessible by DreamExposure.
-					Billing information is handled directly by the service DreamExposure may utilize
-					for handling billing (SquareUp, Stripe, PayPal, Patreon).
-					<br>
-					<br>
-					IP Addresses are only collected for debugging purposes and deleted every rolling
-					24 hour period. In order to debug various API endpoints and pages, IP addresses
-					may be logged. This information is vital to assessing issues within
-					DreamExposure's websites and services.
-					<br>
-					<br>
-					Passwords for DreamExposure websites are stored in a database and are hashed and
-					salted. Passwords are never stored in plaintext.
-					<br>
-					<br>
-					Last Updated: August 29, 2018.
-				</p>
-			</div>
-			<!-- /.container-fluid -->
+                    credit/debit card information is not stored or accessible by DreamExposure.
+                    Billing information is handled directly by the service DreamExposure may utilize
+                    for handling billing (SquareUp, Stripe, PayPal, Patreon).
+                    <br>
+                    <br>
+                    IP Addresses are only collected for debugging purposes and deleted every rolling
+                    24 hour period. In order to debug various API endpoints and pages, IP addresses
+                    may be logged. This information is vital to assessing issues within
+                    DreamExposure's websites and services.
+                    <br>
+                    <br>
+                    Passwords for DreamExposure websites are stored in a database and are hashed and
+                    salted. Passwords are never stored in plaintext.
+                    <br>
+                    <br>
+                    Last Updated: August 29, 2018.
+                </p>
+            </div>
+            <!-- /.container-fluid -->
 
-		</div>
+            <!--Snackbar for notification popup-->
+            <div id="snackbar"></div>
+        </div>
 		<!-- End of Main Content -->
 
 		<!-- Footer -->
 		<footer class="sticky-footer bg-discal-blue">
-			<div class="container my-auto">
-				<div class="copyright text-center text-discord-full-white my-auto">
-					<span th:text="'&copy; DreamExposure ' + ${year} + '. LGPL-3.'"></span>
-				</div>
-			</div>
+            <div class="container my-auto">
+                <div class="copyright text-center text-discord-full-white my-auto">
+                    <span th:text="'&copy; ' + ${year} + ' DreamExposure Studios'"></span>
+                    <span> | </span>
+                    <a href="/policy/privacy">Privacy</a>
+                    <span> | </span>
+                    <a href="/policy/tos">Terms</a>
+                    <span> | </span>
+                    <a href="/docs/api/overview">API</a>
+                    <span> | </span>
+                    <a href="https://www.dreamexposure.org">DreamExposure</a>
+                    <span> | </span>
+                    <span>DisCal is not endorsed or supported by Discord</span>
+                </div>
+            </div>
 		</footer>
 		<!-- End of Footer -->
 
