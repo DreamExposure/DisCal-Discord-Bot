@@ -25,7 +25,7 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/calendar")
-public class GetEndpoint {
+public class GetCalendarEndpoint {
 	@PostMapping(value = "/get", produces = "application/json")
 	public String getCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...

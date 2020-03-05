@@ -1,11 +1,16 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Permission;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Permission;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -53,6 +58,43 @@ public class PermissionChecker {
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and alert the dev.
 			Logger.getLogger().exception(event.getMessage().getAuthor().get(), "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
+			return true;
+		}
+		return true;
+	}
+
+	public static boolean hasSufficientRole(Guild guild, Member member) {
+		//TODO: Figure out exactly what is causing a NPE here...
+		try {
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getId());
+			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
+				String roleId = settings.getControlRole();
+				Role role = null;
+
+				for (Role r : guild.getRoles().toIterable()) {
+					if (r.getId().asString().equals(roleId)) {
+						role = r;
+						break;
+					}
+				}
+
+				if (role != null) {
+					for (Role r : member.getRoles().toIterable()) {
+						if (r.getId().equals(role.getId()) || r.getPosition().block() > role.getPosition().block())
+							return true;
+
+					}
+					return false;
+				} else {
+					//Role not found... reset Db...
+					settings.setControlRole("everyone");
+					DatabaseManager.getManager().updateSettings(settings);
+					return true;
+				}
+			}
+		} catch (Exception e) {
+			//Something broke so we will harmlessly allow access and notify the dev team
+			Logger.getLogger().exception(member, "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
 			return true;
 		}
 		return true;

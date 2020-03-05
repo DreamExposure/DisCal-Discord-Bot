@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -21,19 +22,15 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/announcement")
-public class DeleteEndpoint {
-	@PostMapping(value = "/delete", produces = "application/json")
-	public String deleteAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+public class GetAnnouncementEndpoint {
+	@PostMapping(value = "/get", produces = "application/json")
+	public String getAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
 		if (!authState.isSuccess()) {
 			response.setStatus(authState.getStatus());
 			response.setContentType("application/json");
 			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
 		}
 
 		//Okay, now handle actual request.
@@ -42,21 +39,17 @@ public class DeleteEndpoint {
 			Snowflake guildId = Snowflake.of(body.getLong("guild_id"));
 			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
-			if (DatabaseManager.getManager().getAnnouncement(announcementId, guildId) != null) {
-				if (DatabaseManager.getManager().deleteAnnouncement(announcementId.toString())) {
-					response.setContentType("application/json");
-					response.setStatus(200);
-					return JsonUtils.getJsonResponseMessage("Announcement successfully deleted");
-				}
-			} else {
-				response.setContentType("application/json");
-				response.setStatus(404);
-				return JsonUtils.getJsonResponseMessage("Announcement not Found");
-			}
+			Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guildId);
+
 
 			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
+			if (a != null) {
+				response.setStatus(200);
+				return a.toJson().toString();
+			} else {
+				response.setStatus(404);
+				return JsonUtils.getJsonResponseMessage("Announcement not found");
+			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 
@@ -64,7 +57,7 @@ public class DeleteEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[API-v2] Internal delete announcement error", e, true, this.getClass());
+			Logger.getLogger().exception(null, "[API-v2] Internal get announcement error", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(500);

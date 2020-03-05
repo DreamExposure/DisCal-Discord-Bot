@@ -1,6 +1,9 @@
-package org.dreamexposure.discal.server.api.endpoints.v2.calendar;
+package org.dreamexposure.discal.server.api.endpoints.v2.event.list;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -8,7 +11,7 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
-import org.dreamexposure.discal.core.utils.CalendarUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONArray;
@@ -19,16 +22,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import discord4j.core.object.util.Snowflake;
 
 @RestController
-@RequestMapping("/v2/calendar")
-public class ListEndpoint {
-	@PostMapping(value = "/list", produces = "application/json")
-	public String listCalendars(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+@RequestMapping("/v2/events/list")
+public class ListEventDateEndpoint {
+	@PostMapping(value = "/date", produces = "application/json")
+	public String getEventsForDate(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
 		//Authenticate...
 		AuthenticationState authState = Authentication.authenticate(request);
 		if (!authState.isSuccess()) {
@@ -39,36 +44,34 @@ public class ListEndpoint {
 
 		//Okay, now handle actual request.
 		try {
-			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+			JSONObject requestBody = new JSONObject(rBody);
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			long guildId = requestBody.getLong("guild_id");
+			int calNumber = requestBody.getInt("calendar_number");
+			long startEpoch = requestBody.getLong("epoch_start");
+			long endEpoch = startEpoch + GlobalConst.oneDayMs;
+			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+
+			//okay, lets actually get the date's events.
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			JSONArray jCals = new JSONArray();
-			for (CalendarData calData : DatabaseManager.getManager().getAllCalendars(guildId)) {
-				if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
-						&& CalendarUtils.calendarExists(calData, settings)) {
-					com.google.api.services.calendar.model.Calendar cal = service.calendars()
-							.get(calData.getCalendarAddress())
-							.execute();
+			CalendarData calendarData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			Events events = service.events().list(calendarData.getCalendarAddress())
+					.setTimeMin(new DateTime(startEpoch))
+					.setTimeMax(new DateTime(endEpoch))
+					.setOrderBy("startTime")
+					.setSingleEvents(true)
+					.setShowDeleted(false)
+					.execute();
+			List<Event> items = events.getItems();
 
-					JSONObject jCal = new JSONObject();
-
-					jCal.put("calendar_address", calData.getCalendarAddress());
-					jCal.put("calendar_id", calData.getCalendarId());
-					jCal.put("calendar_number", calData.getCalendarNumber());
-					jCal.put("external", calData.isExternal());
-					jCal.put("summary", cal.getSummary());
-					jCal.put("description", cal.getDescription());
-					jCal.put("timezone", cal.getTimeZone());
-
-					jCals.put(jCal);
-				}
-			}
+			JSONArray jEvents = new JSONArray();
+			for (Event e : items)
+				jEvents.put(JsonUtils.convertEventToJson(e, settings));
 
 			JSONObject body = new JSONObject();
-			body.put("calendars", jCals);
+			body.put("events", jEvents);
+			body.put("message", "Events successfully listed.");
 
 			response.setContentType("application/json");
 			response.setStatus(200);
@@ -80,7 +83,7 @@ public class ListEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[API-v2] Internal list calendars error", e, true, this.getClass());
+			Logger.getLogger().exception(null, "[API-v2] Failed to retrieve events for a date.", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(500);

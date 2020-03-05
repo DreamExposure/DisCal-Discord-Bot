@@ -19,9 +19,20 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
+import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
+import discord4j.core.object.data.stored.GuildBean;
+import discord4j.core.object.data.stored.MessageBean;
+import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.jdk.JdkStoreService;
+import discord4j.store.redis.RedisStoreService;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalServer {
 	private static NetworkInfo networkInfo = new NetworkInfo();
+	private static DiscordClient client;
 
 	public static void main(String[] args) throws IOException {
 		//Get settings
@@ -38,6 +49,8 @@ public class DisCalServer {
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
+
+		client = createClient();
 
 		//Start Spring
 		try {
@@ -69,6 +82,35 @@ public class DisCalServer {
 			UpdateDisPwData.shutdown();
 			DatabaseManager.getManager().disconnectFromMySQL();
 		}));
+	}
+
+	private static DiscordClient createClient() {
+		DiscordClientBuilder clientBuilder = new DiscordClientBuilder(BotSettings.TOKEN.get());
+		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
+
+		//Redis info + store service for caching
+		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
+			RedisURI uri = RedisURI.Builder
+					.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
+					.withPassword(BotSettings.REDIS_PASSWORD.get())
+					.build();
+
+			RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
+
+			MappingStoreService mss = MappingStoreService.create()
+					.setMappings(rss, GuildBean.class, MessageBean.class)
+					.setFallback(new JdkStoreService());
+
+			clientBuilder.setStoreService(mss);
+		} else {
+			clientBuilder.setStoreService(new JdkStoreService());
+		}
+
+		return clientBuilder.build();
+	}
+
+	public static DiscordClient getClient() {
+		return client;
 	}
 
 	public static NetworkInfo getNetworkInfo() {

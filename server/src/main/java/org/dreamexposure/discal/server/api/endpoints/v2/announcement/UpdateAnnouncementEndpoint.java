@@ -25,7 +25,7 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/announcement")
-public class UpdateEndpoint {
+public class UpdateAnnouncementEndpoint {
 	@PostMapping(value = "/update", produces = "application/json")
 	public String updateAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...

@@ -26,7 +26,7 @@ import okhttp3.Request;
 
 @RestController
 @RequestMapping("/v2/guild/settings")
-public class UpdateEndpoint {
+public class UpdateGuildSettingsEndpoint {
 	@PostMapping(value = "/update", produces = "application/json")
 	public String updateSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...

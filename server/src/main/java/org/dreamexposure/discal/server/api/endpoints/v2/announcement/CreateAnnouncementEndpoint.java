@@ -22,7 +22,7 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/announcement")
-public class CreateEndpoint {
+public class CreateAnnouncementEndpoint {
 	@PostMapping(value = "/create", produces = "application/json")
 	public String createAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
 		//Authenticate...

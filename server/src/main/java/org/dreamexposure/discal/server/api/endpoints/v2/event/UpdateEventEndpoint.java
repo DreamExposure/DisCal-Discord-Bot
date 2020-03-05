@@ -33,7 +33,7 @@ import discord4j.core.object.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/events")
-public class UpdateEndpoint {
+public class UpdateEventEndpoint {
 	@PostMapping(value = "/update", produces = "application/json")
 	public String updateEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
 		//Authenticate...
