@@ -82,6 +82,8 @@ public class DisCalServer {
 			UpdateDisPwData.shutdown();
 			DatabaseManager.getManager().disconnectFromMySQL();
 		}));
+
+		Logger.getLogger().status("Started", "Server and API are now online");
 	}
 
 	private static DiscordClient createClient() {
