@@ -146,7 +146,7 @@ export class EmbedCalendar implements TaskCallback {
         for (let ii = 0; ii < tcc.length; ii++) {
             let e = document.getElementById(tcc[ii])!;
             e.innerHTML = "";
-            e.className = "";
+			e.className = "cal-date";
         }
 
         let tc = this.dateDisplaysToChange(this.findFirstDayOfMonthPosition());
@@ -160,12 +160,12 @@ export class EmbedCalendar implements TaskCallback {
 
                 let thisDate = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), d);
                 if (d === this.selectedDate.getDate()) {
-                    el.className = "selected";
+					el.className = "selected cal-date";
                 }
                 if (thisDate.getMonth() === this.todaysDate.getMonth()
                     && thisDate.getFullYear() === this.todaysDate.getFullYear()
                     && thisDate.getDate() === this.todaysDate.getDate()) {
-                    el.className = "today";
+					el.className = "today cal-date";
                 }
             }
         }
@@ -192,7 +192,6 @@ export class EmbedCalendar implements TaskCallback {
 		let eventReq = new EventListDateRequest(this.guildId, this.calNumber, ds.getTime(), this);
 		eventReq.provideApiDetails(this.apiKey, this.apiUrl);
 
-		ElementUtil.hideEventsContainer();
 		eventReq.execute();
 	}
 
@@ -236,7 +235,7 @@ export class EmbedCalendar implements TaskCallback {
 
     private loadEventDisplay(status: NetworkCallStatus) {
         //Display the selected day's event details for editing and such.
-        let container = document.getElementById("event-container")!;
+		let container = document.getElementById("events-container")!;
 
         while (container.firstChild) {
             container.removeChild(container.firstChild);

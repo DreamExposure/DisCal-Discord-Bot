@@ -230,14 +230,18 @@
                            border="#bcbcbc" cellpadding="4" cellspacing="0">
                         <tbody>
                         <tr style="height: 50px;">
-							<th id="previous-month" class="nav"><</th>
-                            <th></th>
-                            <th></th>
-                            <th id="month-display"></th>
-                            <th></th>
-                            <th></th>
-							<th id="next-month" class="nav">></th>
-                        </tr>
+							<th id="previous-month" class="cal-nav">
+								<i class="fa fa-arrow-left"></i>
+							</th>
+							<th></th>
+							<th></th>
+							<th id="month-display" class="text-center"></th>
+							<th></th>
+							<th></th>
+							<th id="next-month" class="cal-nav">
+								<i class="fa fa-arrow-right"></i>
+							</th>
+						</tr>
                         <tr style="height: 40px;">
                             <th>Sunday</th>
                             <th>Monday</th>
@@ -305,9 +309,9 @@
                     </table>
 
 
-                    <p style="text-align: center; font-size: 20px" id="local-time-display">All Dates
-                        and Times are
-                        displayed in your local timezone!</p>
+					<p class="text-discord-full-white text-center" id="local-time-display">All Dates
+						and Times are
+						displayed in your local timezone!</p>
                     <br>
                     <br>
                     <a id="view-on-google-button"
@@ -322,10 +326,10 @@
                 <hr>
 
                 <!--Start Event Container-->
-                <div id="event-container" hidden="hidden">
-                    <h6>Events for Selected Date</h6>
-                    <!--Add events for selected date via JS and JQuery-->
-                </div>
+				<div id="events-container" hidden="hidden">
+					<h6>Events for Selected Date</h6>
+					<!--Add events for selected date via JS and JQuery-->
+				</div>
                 <!--End Event Container-->
             </div>
             <!--End container fluid-->

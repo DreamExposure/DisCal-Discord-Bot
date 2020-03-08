@@ -72,6 +72,7 @@ public class ListEventMonthEndpoint {
 
 			JSONObject body = new JSONObject();
 			body.put("events", jEvents);
+			body.put("message", "Events successfully listed.");
 
 			response.setContentType("application/json");
 			response.setStatus(200);
