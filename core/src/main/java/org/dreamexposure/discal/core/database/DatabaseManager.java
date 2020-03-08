@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.database;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -24,6 +23,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -79,12 +80,12 @@ public class DatabaseManager {
 
 		try {
 			Flyway flyway = Flyway.configure()
-				.dataSource(masterInfo.getSource())
-				.cleanDisabled(true)
-				.baselineOnMigrate(true)
-				.table(BotSettings.SQL_PREFIX.get() + "schema_history")
-				.placeholders(placeholders)
-				.load();
+					.dataSource(masterInfo.getSource())
+					.cleanDisabled(true)
+					.baselineOnMigrate(true)
+					.table(BotSettings.SQL_PREFIX.get() + "schema_history")
+					.placeholders(placeholders)
+					.load();
 			int sm = flyway.migrate();
 			Logger.getLogger().debug("Migrations Successful, " + sm + " migrations applied!", true);
 		} catch (Exception e) {
@@ -125,8 +126,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("API_KEY") == null) {
 				//Data not present, add to DB.
 				String insertCommand = "INSERT INTO " + tableName +
-					"(USER_ID, API_KEY, BLOCKED, TIME_ISSUED, USES)" +
-					" VALUES (?, ?, ?, ?, ?)";
+						"(USER_ID, API_KEY, BLOCKED, TIME_ISSUED, USES)" +
+						" VALUES (?, ?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, acc.getUserId());
 				ps.setString(2, acc.getAPIKey());
@@ -141,8 +142,8 @@ public class DatabaseManager {
 			} else {
 				//Data present, update.
 				String update = "UPDATE " + tableName
-					+ " SET USER_ID = ?, BLOCKED = ?,"
-					+ " USES = ? WHERE API_KEY = ?";
+						+ " SET USER_ID = ?, BLOCKED = ?,"
+						+ " USES = ? WHERE API_KEY = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 
 				ps.setString(1, acc.getUserId());
@@ -185,8 +186,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("GUILD_ID") == null) {
 				//Data not present, add to DB.
 				String insertCommand = "INSERT INTO " + dataTableName +
-					"(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR, BRANDED)" +
-					" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						"(GUILD_ID, EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR, BRANDED)" +
+						" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, settings.getGuildID().asString());
 				ps.setBoolean(2, settings.useExternalCalendar());
@@ -213,12 +214,12 @@ public class DatabaseManager {
 			} else {
 				//Data present, update.
 				String update = "UPDATE " + dataTableName
-					+ " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
-					+ " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
-					+ " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
-					+ " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
-					+ " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?,"
-					+ " BRANDED = ? WHERE GUILD_ID = ?";
+						+ " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
+						+ " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
+						+ " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
+						+ " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
+						+ " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?,"
+						+ " BRANDED = ? WHERE GUILD_ID = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 
 				ps.setBoolean(1, settings.useExternalCalendar());
@@ -269,8 +270,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("GUILD_ID") == null) {
 				//Data not present, add to DB.
 				String insertCommand = "INSERT INTO " + calendarTableName +
-					"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS, EXTERNAL)" +
-					" VALUES (?, ?, ?, ?, ?)";
+						"(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, CALENDAR_ADDRESS, EXTERNAL)" +
+						" VALUES (?, ?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, calData.getGuildId().asString());
 				ps.setInt(2, calData.getCalendarNumber());
@@ -285,9 +286,9 @@ public class DatabaseManager {
 			} else {
 				//Data present, update.
 				String update = "UPDATE " + calendarTableName
-					+ " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-					+ " CALENDAR_ADDRESS = ?, EXTERNAL = ?"
-					+ " WHERE GUILD_ID = ?";
+						+ " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
+						+ " CALENDAR_ADDRESS = ?, EXTERNAL = ?"
+						+ " WHERE GUILD_ID = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 				ps.setInt(1, calData.getCalendarNumber());
 				ps.setString(2, calData.getCalendarId());
@@ -330,8 +331,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("ANNOUNCEMENT_ID") == null) {
 				//Data not present, add to db.
 				String insertCommand = "INSERT INTO " + announcementTableName +
-					"(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY)" +
-					" VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+						"(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY)" +
+						" VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, announcement.getAnnouncementId().toString());
 				ps.setString(2, announcement.getGuildId().asString());
@@ -355,11 +356,11 @@ public class DatabaseManager {
 				//Data present, update.
 
 				String update = "UPDATE " + announcementTableName
-					+ " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
-					+ " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
-					+ " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
-					+ " INFO = ?, ENABLED = ?, INFO_ONLY = ?"
-					+ " WHERE ANNOUNCEMENT_ID = ?";
+						+ " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
+						+ " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
+						+ " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
+						+ " INFO = ?, ENABLED = ?, INFO_ONLY = ?"
+						+ " WHERE ANNOUNCEMENT_ID = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 
 				ps.setString(1, announcement.getSubscriberRoleIdString());
@@ -411,8 +412,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("EVENT_ID") == null) {
 				//Data not present, add to DB.
 				String insertCommand = "INSERT INTO " + eventTableName +
-					"(GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)" +
-					" VALUES (?, ?, ?, ?)";
+						"(GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)" +
+						" VALUES (?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, data.getGuildId().asString());
 				ps.setString(2, data.getEventId());
@@ -426,8 +427,8 @@ public class DatabaseManager {
 			} else {
 				//Data present, update.
 				String update = "UPDATE " + eventTableName
-					+ " SET IMAGE_LINK = ?, EVENT_END = ?"
-					+ " WHERE EVENT_ID = ?";
+						+ " SET IMAGE_LINK = ?, EVENT_END = ?"
+						+ " WHERE EVENT_ID = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 
 				ps.setString(1, data.getImageLink());
@@ -463,8 +464,8 @@ public class DatabaseManager {
 			if (!hasStuff || res.getString("EVENT_ID") == null) {
 				//Data not present, add to DB.
 				String insertCommand = "INSERT INTO " + rsvpTableName +
-					"(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, NOT_GOING, UNDECIDED)" +
-					" VALUES (?, ?, ?, ?, ?, ?, ?)";
+						"(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, NOT_GOING, UNDECIDED)" +
+						" VALUES (?, ?, ?, ?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, data.getGuildId().asString());
 				ps.setString(2, data.getEventId());
@@ -481,12 +482,12 @@ public class DatabaseManager {
 			} else {
 				//Data present, update.
 				String update = "UPDATE " + rsvpTableName
-					+ " SET EVENT_END = ?,"
-					+ " GOING_ON_TIME = ?,"
-					+ " GOING_LATE = ?,"
-					+ " NOT_GOING = ?,"
-					+ " UNDECIDED = ?"
-					+ " WHERE EVENT_ID = ?";
+						+ " SET EVENT_END = ?,"
+						+ " GOING_ON_TIME = ?,"
+						+ " GOING_LATE = ?,"
+						+ " NOT_GOING = ?,"
+						+ " UNDECIDED = ?"
+						+ " WHERE EVENT_ID = ?";
 				PreparedStatement ps = masterConnection.prepareStatement(update);
 
 				ps.setLong(1, data.getEventEnd());
@@ -601,19 +602,17 @@ public class DatabaseManager {
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String calendarTableName = String.format("%scalendars", slaveInfo.getSettings().getPrefix());
 
-			String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
+			String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? AND CALENDAR_NUMBER = 1";
 			PreparedStatement statement = connection.prepareStatement(query);
 			statement.setString(1, guildId.asString());
 
 			ResultSet res = statement.executeQuery();
+			boolean hasStuff = res.next();
 
-			while (res.next()) {
-				if (res.getInt("CALENDAR_NUMBER") == 1) {
-					calData.setCalendarId(res.getString("CALENDAR_ID"));
-					calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-					calData.setExternal(res.getBoolean("EXTERNAL"));
-					break;
-				}
+			if (hasStuff && res.getString("GUILD_ID") != null) {
+				calData.setCalendarId(res.getString("CALENDAR_ID"));
+				calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+				calData.setExternal(res.getBoolean("EXTERNAL"));
 			}
 			statement.close();
 		} catch (SQLException e) {
@@ -627,20 +626,20 @@ public class DatabaseManager {
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String calendarTableName = String.format("%scalendars", slaveInfo.getSettings().getPrefix());
 
-			String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
+			String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?";
 			PreparedStatement statement = connection.prepareStatement(query);
 			statement.setString(1, guildId.asString());
+			statement.setInt(2, calendarNumber);
 
 			ResultSet res = statement.executeQuery();
+			boolean hasStuff = res.next();
 
-			while (res.next()) {
-				if (res.getInt("CALENDAR_NUMBER") == calendarNumber) {
-					calData.setCalendarId(res.getString("CALENDAR_ID"));
-					calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-					calData.setExternal(res.getBoolean("EXTERNAL"));
-					break;
-				}
+			if (hasStuff && res.getString("GUILD_ID") != null) {
+				calData.setCalendarId(res.getString("CALENDAR_ID"));
+				calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
+				calData.setExternal(res.getBoolean("EXTERNAL"));
 			}
+
 			statement.close();
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get calendar data", e, true, this.getClass());

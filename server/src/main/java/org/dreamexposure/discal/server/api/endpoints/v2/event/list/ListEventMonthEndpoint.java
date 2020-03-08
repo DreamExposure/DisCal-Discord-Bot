@@ -14,7 +14,6 @@ import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +49,7 @@ public class ListEventMonthEndpoint {
 			long guildId = requestBody.getLong("guild_id");
 			int calNumber = requestBody.getInt("calendar_number");
 			int daysInMonth = requestBody.getInt("days_in_month");
-			long startEpoch = requestBody.getInt("epoch_start");
+			long startEpoch = requestBody.getLong("epoch_start");
 			long endEpoch = startEpoch + (GlobalConst.oneDayMs * daysInMonth);
 			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
@@ -57,6 +57,8 @@ public class ListEventMonthEndpoint {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
 			CalendarData calendarData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			Logger.getLogger().debug("start: " + startEpoch + " | end: " + endEpoch, true);
+
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))
@@ -66,9 +68,10 @@ public class ListEventMonthEndpoint {
 					.execute();
 			List<Event> items = events.getItems();
 
-			JSONArray jEvents = new JSONArray();
-			for (Event e : items)
-				jEvents.put(JsonUtils.convertEventToJson(e, settings));
+			List<JSONObject> jEvents = new ArrayList<>();
+			for (Event e : items) {
+				jEvents.add(JsonUtils.convertEventToJson(e, settings));
+			}
 
 			JSONObject body = new JSONObject();
 			body.put("events", jEvents);
@@ -78,7 +81,7 @@ public class ListEventMonthEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (JSONException e) {
-			e.printStackTrace();
+			Logger.getLogger().exception(null, "[v2-EL-M] JSON", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(400);
