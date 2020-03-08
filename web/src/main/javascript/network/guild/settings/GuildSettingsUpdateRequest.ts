@@ -27,9 +27,9 @@ export class GuildSettingsUpdateRequest implements AsyncTask {
     }
 
     provideApiDetails(apiKey: string, apiUrl: string): void {
-        this.apiKey = apiKey;
-        this.apiUrl = apiKey;
-    }
+		this.apiKey = apiKey;
+		this.apiUrl = apiUrl;
+	}
 
     //Setters...
     set controlRole(role: string) {

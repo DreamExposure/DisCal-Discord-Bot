@@ -22,9 +22,9 @@ export class EventGetRequest implements AsyncTask {
     }
 
     provideApiDetails(apiKey: string, apiUrl: string): void {
-        this.apiKey = apiKey;
-        this.apiUrl = apiKey;
-    }
+		this.apiKey = apiKey;
+		this.apiUrl = apiKey;
+	}
 
 
     execute(): void {

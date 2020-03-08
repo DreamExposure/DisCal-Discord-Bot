@@ -23,7 +23,7 @@ export class RsvpUpdateRequest implements AsyncTask {
 
     provideApiDetails(apiKey: string, apiUrl: string): void {
         this.apiKey = apiKey;
-        this.apiUrl = apiKey;
+		this.apiUrl = apiUrl;
     }
 
     execute(): void {

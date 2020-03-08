@@ -29,9 +29,9 @@ export class CalendarUpdateRequest implements AsyncTask {
     }
 
     provideApiDetails(apiKey: string, apiUrl: string): void {
-        this.apiKey = apiKey;
-        this.apiUrl = apiKey;
-    }
+		this.apiKey = apiKey;
+		this.apiUrl = apiUrl;
+	}
 
     //Setters
     set summary(summary: string) {
