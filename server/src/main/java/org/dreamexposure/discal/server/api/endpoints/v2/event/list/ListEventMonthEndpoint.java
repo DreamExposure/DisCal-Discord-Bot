@@ -57,7 +57,6 @@ public class ListEventMonthEndpoint {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
 			CalendarData calendarData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
-			Logger.getLogger().debug("start: " + startEpoch + " | end: " + endEpoch, true);
 
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
@@ -81,8 +80,6 @@ public class ListEventMonthEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (JSONException e) {
-			Logger.getLogger().exception(null, "[v2-EL-M] JSON", e, true, this.getClass());
-
 			response.setContentType("application/json");
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
