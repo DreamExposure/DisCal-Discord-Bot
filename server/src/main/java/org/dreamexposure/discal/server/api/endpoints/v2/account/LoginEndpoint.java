@@ -7,7 +7,7 @@ import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/v2/account")
 public class LoginEndpoint {
-	@GetMapping(value = "/login")
+	@PostMapping(value = "/login", produces = "application/json")
 	public String loginForKey(HttpServletRequest request, HttpServletResponse response) {
 		//Check auth, must be from within DisCal network, as this is generating an API key...
 		AuthenticationState authState = Authentication.authenticate(request);

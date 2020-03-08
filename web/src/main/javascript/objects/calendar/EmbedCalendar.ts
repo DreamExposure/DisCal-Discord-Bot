@@ -9,6 +9,7 @@ import {CalendarGetRequest} from "@/network/calendar/CalendarGetRequest";
 import {EventListMonthRequest} from "@/network/event/list/EventListMonthRequest";
 import {EventListDateRequest} from "@/network/event/list/EventListDateRequest";
 import {Event} from "@/objects/event/Event";
+import {ElementUtil} from "@/utils/ElementUtil";
 
 
 //The calendar class. This just handles all the stuff inside of the calendar, and keeps it isolated.
@@ -39,11 +40,11 @@ export class EmbedCalendar implements TaskCallback {
         this.apiUrl = url;
 
         if (this.apiKey === "internal_error") {
-            this.hideLoader();
-            alert("Failed to get a read-only API key to display your calendar. \n" +
-                "If you keep receiving this error, please contact the developers");
+			ElementUtil.hideLoader();
+			alert("Failed to get a read-only API key to display your calendar. \n" +
+				"If you keep receiving this error, please contact the developers");
 
-        } else {
+		} else {
             //Request calendar information
             let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
             calReq.provideApiDetails(this.apiKey, this.apiUrl);
@@ -56,30 +57,6 @@ export class EmbedCalendar implements TaskCallback {
         return this;
     }
 
-    //Just a bunch of bullshit to reduce rewriting shit to hide/show...
-    showLoader() {
-        document.getElementsByClassName("loader")[0].setAttribute("hidden", "show");
-    }
-
-    hideLoader() {
-        document.getElementsByClassName("loader")[0].setAttribute("hidden", "hidden");
-    }
-
-    showCalendarContainer() {
-        document.getElementById("calendar-container")!.setAttribute("hidden", "show");
-    }
-
-    hideCalendarContainer() {
-        document.getElementById("calendar-container")!.setAttribute("hidden", "hidden");
-    }
-
-    showEventsContainer() {
-        document.getElementById("events-container")!.setAttribute("hidden", "show");
-    }
-
-    hideEventsContainer() {
-        document.getElementById("events-container")!.setAttribute("hidden", "hidden");
-    }
 
     //Utility methods for data to human readable conversions
     getMonthName(index: number) {
@@ -205,17 +182,17 @@ export class EmbedCalendar implements TaskCallback {
     }
 
     getEventsForSelectedDate() {
-        let ds = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
-        ds.setHours(0, 0, 0, 0);
+		let ds = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
+		ds.setHours(0, 0, 0, 0);
 
-        this.hideEventsContainer();
+		ElementUtil.hideEventsContainer();
 
-        let eventReq = new EventListDateRequest(this.guildId, this.calNumber, ds.getTime(), this);
-        eventReq.provideApiDetails(this.apiKey, this.apiUrl);
+		let eventReq = new EventListDateRequest(this.guildId, this.calNumber, ds.getTime(), this);
+		eventReq.provideApiDetails(this.apiKey, this.apiUrl);
 
-        this.hideEventsContainer();
-        eventReq.execute();
-    }
+		ElementUtil.hideEventsContainer();
+		eventReq.execute();
+	}
 
     onCallback(status: NetworkCallStatus): void {
         if (status.isSuccess) {
@@ -224,32 +201,32 @@ export class EmbedCalendar implements TaskCallback {
                     this.calendarData = new WebCalendar().fromJson(status.body);
 
                     (<HTMLLinkElement>document.getElementById("view-on-google-button"))
-                        .href = "https://calendar.google.com/calendar/embed?src="
-                        + this.calendarData.address;
-                    break;
-                case TaskType.EVENT_LIST_MONTH:
-                    //Display the event counts on the calendar...
-                    for (let i = 0; i < status.body.events.length; i++) {
-                        let d = new Date(status.body.events[i].epoch_start);
+						.href = "https://calendar.google.com/calendar/embed?src="
+						+ this.calendarData.address;
+					break;
+				case TaskType.EVENT_LIST_MONTH:
+					//Display the event counts on the calendar...
+					for (let i = 0; i < status.body.events.length; i++) {
+						let d = new Date(status.body.events[i].epoch_start);
 
-                        let e = document.getElementById(this.displays[d.getDate()])!;
+						let e = document.getElementById(this.displays[d.getDate()])!;
 
-                        if (e.innerHTML.indexOf("[") === -1) {
-                            e.innerHTML = d.getDate() + "[1]";
-                        } else {
-                            e.innerHTML = d.getDate().toString()
-                                + "[" + (parseInt(e.innerHTML.split("[")[1][0]) + 1).toString() + "]";
-                        }
-                    }
-                    this.hideLoader();
-                    this.showCalendarContainer();
-                    break;
-                case TaskType.EVENT_LIST_DATE:
-                    this.loadEventDisplay(status);
-                    break;
-                default:
-                    break;
-            }
+						if (e.innerHTML.indexOf("[") === -1) {
+							e.innerHTML = d.getDate() + "[1]";
+						} else {
+							e.innerHTML = d.getDate().toString()
+								+ "[" + (parseInt(e.innerHTML.split("[")[1][0]) + 1).toString() + "]";
+						}
+					}
+					ElementUtil.hideLoader();
+					ElementUtil.showCalendarContainer();
+					break;
+				case TaskType.EVENT_LIST_DATE:
+					this.loadEventDisplay(status);
+					break;
+				default:
+					break;
+			}
         } else {
             Snackbar.showSnackbar("ERROR] " + status.message);
         }
@@ -526,26 +503,26 @@ export class EmbedCalendar implements TaskCallback {
             form.appendChild(idLabel);
             let hiddenId = document.createElement("input");
             hiddenId.type = "text";
-            hiddenId.name = "id";
-            hiddenId.value = event.eventId;
-            hiddenId.id = "editId-" + event.eventId;
-            hiddenId.readOnly = true;
-            idLabel.appendChild(hiddenId);
-            form.appendChild(document.createElement("br"));
-            form.appendChild(document.createElement("br"));
+			hiddenId.name = "id";
+			hiddenId.value = event.eventId;
+			hiddenId.id = "editId-" + event.eventId;
+			hiddenId.readOnly = true;
+			idLabel.appendChild(hiddenId);
+			form.appendChild(document.createElement("br"));
+			form.appendChild(document.createElement("br"));
 
-            //Create modal footer
-            let modalFooter = document.createElement("div");
-            modalFooter.className = "modal-footer";
-            modalCon.appendChild(modalFooter);
+			//Create modal footer
+			let modalFooter = document.createElement("div");
+			modalFooter.className = "modal-footer";
+			modalCon.appendChild(modalFooter);
 
-            let closeButton = document.createElement("button");
-            closeButton.type = "button";
-            closeButton.setAttribute("data-dismiss", "modal");
-            closeButton.innerHTML = "Close";
-            modalFooter.appendChild(closeButton);
-            //Oh my god finally done!!!
-        }
-        this.showEventsContainer();
-    }
+			let closeButton = document.createElement("button");
+			closeButton.type = "button";
+			closeButton.setAttribute("data-dismiss", "modal");
+			closeButton.innerHTML = "Close";
+			modalFooter.appendChild(closeButton);
+			//Oh my god finally done!!!
+		}
+		ElementUtil.showEventsContainer();
+	}
 }

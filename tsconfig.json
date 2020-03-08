@@ -1,25 +1,30 @@
 {
   "compilerOptions": {
-	"target": "ESNext",
-	"module": "System",
+	"target": "ES5",
+	"module": "ES6",
 	"strict": true,
 	"strictPropertyInitialization": false,
 	"noImplicitThis": false,
 	"removeComments": true,
+	"importHelpers": true,
+	"sourceMap": true,
+	"esModuleInterop": true,
+	"allowSyntheticDefaultImports": true,
 	"allowJs": true,
-	"baseUrl": ".",
-	"jsx": "preserve",
 	"moduleResolution": "node",
-	"outFile": "sb-admin-2.js",
+	"baseUrl": ".",
+	"types": [
+	  "jquery"
+	],
 	"paths": {
 	  "@/*": [
-		"./web/src/main/javascript/*"
+		"web/src/main/javascript/*"
 	  ]
 	}
   },
   "include": [
-	"./web/src/main/javascript/**/*.ts",
-	"./web/src/main/javascript/**/*.js"
+	"web/src/main/javascript/**/*.ts",
+	"web/src/main/javascript/**/*.js"
   ],
   "exclude": [
 	"node_modules"

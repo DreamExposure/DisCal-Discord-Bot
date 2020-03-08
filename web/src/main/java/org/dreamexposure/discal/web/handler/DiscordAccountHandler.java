@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.web.handler;
 
+import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONObject;
@@ -79,10 +80,10 @@ public class DiscordAccountHandler {
 			//Not logged in...
 			Map<String, Object> m = new HashMap<>();
 			m.put("logged_in", false);
-			m.put("client", BotSettings.ID.get());
+			m.put("bot_id", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
-			m.put("invite_url", BotSettings.INVITE_URL.get());
+			m.put("bot_invite", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("api_url", BotSettings.API_URL.get());
 
@@ -102,23 +103,25 @@ public class DiscordAccountHandler {
 					OkHttpClient client = new OkHttpClient();
 					RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
 					Request keyGrantRequest = new Request.Builder()
-							.url(BotSettings.API_URL.get() + "/v2/account/key/readonly/get")
+							.url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
 							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 							.post(keyGrantRequestBody)
 							.build();
 					Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
 					//Handle response...
-					if (keyGrantResponse.code() == 200) {
-						JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+					if (keyGrantResponse.isSuccessful()) {
+						JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
 						//API key received, map....
-						m.put("key", keyGrantResponseBody.getString("key"));
+						m.put("embed_key", keyGrantResponseBody.getString("key"));
 					} else {
 						//Something didn't work... add invalid key that embed page is programmed to respond to.
+						Logger.getLogger().debug("Embed Key Fail: " + keyGrantResponse.body().string(), true);
 						m.put("embed_key", "internal_error");
 					}
 				} catch (Exception e) {
 					//Something didn't work... add invalid key that embed page is programmed to respond to.
+					Logger.getLogger().exception(null, "Embed Key get Failure", e, true, this.getClass());
 					m.put("embed_key", "internal_error");
 				}
 			}
@@ -129,10 +132,10 @@ public class DiscordAccountHandler {
 			//Not logged in...
 			Map<String, Object> m = new HashMap<>();
 			m.put("logged_in", false);
-			m.put("client", BotSettings.ID.get());
+			m.put("bot_id", BotSettings.ID.get());
 			m.put("year", LocalDate.now().getYear());
 			m.put("redirect_uri", BotSettings.REDIR_URI.get());
-			m.put("invite_url", BotSettings.INVITE_URL.get());
+			m.put("bot_invite", BotSettings.INVITE_URL.get());
 			m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 			m.put("api_url", BotSettings.API_URL.get());
 
@@ -141,23 +144,25 @@ public class DiscordAccountHandler {
 				OkHttpClient client = new OkHttpClient();
 				RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
 				Request keyGrantRequest = new Request.Builder()
-						.url(BotSettings.API_URL.get() + "/v2/account/key/readonly/get")
+						.url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
 						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 						.post(keyGrantRequestBody)
 						.build();
 				Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
 				//Handle response...
-				if (keyGrantResponse.code() == 200) {
-					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+				if (keyGrantResponse.isSuccessful()) {
+					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
 					//API key received, map....
-					m.put("key", keyGrantResponseBody.getString("key"));
+					m.put("embed_key", keyGrantResponseBody.getString("key"));
 				} else {
 					//Something didn't work... add invalid key that embed page is programmed to respond to.
+					Logger.getLogger().debug("Embed Key Fail: " + keyGrantResponse.body().string(), true);
 					m.put("embed_key", "internal_error");
 				}
 			} catch (Exception e) {
 				//Something didn't work... add invalid key that embed page is programmed to respond to.
+				Logger.getLogger().exception(null, "Embed Key get Failure", e, true, this.getClass());
 				m.put("embed_key", "internal_error");
 			}
 

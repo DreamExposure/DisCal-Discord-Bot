@@ -145,21 +145,22 @@ public class DiscordLoginHandler {
 				RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
 
 				Request keyGrantRequest = new Request.Builder()
-						.url(BotSettings.API_URL.get() + "/v2/account/login")
+						.url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/login")
 						.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 						.post(keyGrantRequestBody)
 						.build();
 
 				Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
-
+				//TODO: Figure out what the fuck is wrong here!!!!!!!
 				//Handle response...
-				if (keyGrantResponse.code() == 200) {
-					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().toString());
+				if (keyGrantResponse.isSuccessful()) {
+					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
 					//API key received, map....
 					m.put("key", keyGrantResponseBody.getString("key"));
 					DiscordAccountHandler.getHandler().addAccount(m, req);
 				} else {
 					//Something didn't work... just redirect back to the login page....
+					Logger.getLogger().debug("login issue: " + keyGrantResponse.body().string(), true);
 					res.sendRedirect("/login");
 					return "redirect:/login";
 				}
@@ -194,8 +195,8 @@ public class DiscordLoginHandler {
 			RequestBody logoutRequestBody = RequestBody.create(GlobalConst.JSON, "");
 
 			Request logoutRequest = new Request.Builder()
-					.url(BotSettings.API_URL.get() + "/v2/account/logout")
-					.header("Authorization", (String) map.get("private_token"))
+					.url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/logout")
+					.header("Authorization", (String) map.get("key"))
 					.post(logoutRequestBody)
 					.build();
 

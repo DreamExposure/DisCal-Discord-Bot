@@ -1,13 +1,9 @@
 let gulp = require('gulp');
 let sass = require('gulp-sass');
-let ts = require('gulp-typescript');
-let tsProject = ts.createProject('tsconfig.json');
 let header = require('gulp-header');
-let cleanDest = require('gulp-clean-dest');
 let cleanCSS = require('gulp-clean-css');
 let rename = require("gulp-rename");
 let autoprefixer = require('gulp-autoprefixer');
-let minify = require("gulp-minify");
 let del = require("del");
 let pkg = require('./package.json');
 let browserSync = require('browser-sync').create();
@@ -118,44 +114,13 @@ gulp.task('css:minify', gulp.series(['css:compile'], function () {
 		.pipe(gulp.dest('./web/src/main/resources/static/assets/css'));
 }));
 
-//Compile TS to JS
-gulp.task('js:compile', gulp.series(function () {
-	return gulp.src([
-		'./web/src/main/javascript/**/*.ts',
-		'./web/src/main/javascript/**/*.js'
-	])
-		.pipe(cleanDest('./web/build'))
-		.pipe(tsProject(ts.reporter.fullReporter(true)))
-		.pipe(gulp.dest('./web/build'))
-		.pipe(browserSync.stream());
-}));
-
-//Minify JS
-gulp.task('js:minify', gulp.series(function () {
-	return gulp.src([
-		'./web/build/**/*.js'
-	])
-		.pipe(cleanDest('./web/src/main/resources/static/assets/js'))
-		.pipe(minify({
-			noSource: true,
-			ext: {
-				min: '.min.js'
-			}
-		}))
-		.pipe(gulp.dest('./web/src/main/resources/static/assets/js'))
-		.pipe(browserSync.stream());
-}));
-
 // CSS
 gulp.task('css', gulp.series(['css:compile', 'css:minify']));
 
-// JS
-gulp.task('js', gulp.series(['js:compile', 'js:minify']));
-
 // Default task
-gulp.task('default', gulp.series(['clean:all', 'css', 'js', 'vendor', 'clean:build']));
+gulp.task('default', gulp.series(['clean:all', 'css', 'vendor', 'clean:build']));
 
-gulp.task('build', gulp.series(['clean:all', 'css', 'js', 'clean:build']));
+gulp.task('build', gulp.series(['clean:all', 'css', 'clean:build']));
 
 // Configure the browserSync task
 gulp.task('browserSync', gulp.series(function() {
@@ -167,9 +132,8 @@ gulp.task('browserSync', gulp.series(function() {
 }));
 
 // Dev task
-gulp.task('dev', gulp.series(['css', 'js', 'browserSync'], function() {
+gulp.task('dev', gulp.series(['css', 'browserSync'], function () {
 	gulp.watch('./web/src/main/less/**/*.scss').on('change', gulp.series['css']);
-	gulp.watch('./web/src/main/javascript/**/*.ts').on("change", gulp.series('js'));
 	gulp.watch('/web/src/main/resources/templates/*.html').on('change', function () {
 		browserSync.reload();
 	});

@@ -67,6 +67,6 @@ public class AuthenticationState {
 	}
 
 	public String toJson() {
-		return "{\"Message\": \"" + reason + "\"}";
+		return "{\"message\": \"" + reason + "\"}";
 	}
 }

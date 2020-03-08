@@ -18,7 +18,7 @@ public class StatusHandler {
 
 			RequestBody body = RequestBody.create(GlobalConst.JSON, "");
 			Request request = new Request.Builder()
-					.url(BotSettings.API_URL + "/v2/status/get")
+					.url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/get")
 					.post(body)
 					.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 					.header("Content-Type", "application/json")

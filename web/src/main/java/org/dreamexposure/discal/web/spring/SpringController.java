@@ -75,8 +75,15 @@ public class SpringController {
 	}
 
 	//Dashboard pages
+	@RequestMapping("/dashboard")
+	public String dashboard(Map<String, Object> model, HttpServletRequest req) {
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "dashboard/dashboard";
+	}
+
 	@RequestMapping("/dashboard/{id}")
-	public String dashboard(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
+	public String dashboardGuild(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
 		return "dashboard/guild";
@@ -185,6 +192,7 @@ public class SpringController {
 	}
 
 	//Embed pages
+	@SuppressWarnings("SpringMVCViewInspection")
 	@RequestMapping("/embed/calendar/{id}")
 	public String embedCalendar(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
 		//This is a deprecated URL, but we are just redirecting for backwards compat.

@@ -23,7 +23,7 @@ public class Authentication {
 	private static Map<String, Long> readOnlyKeys = new HashMap<>();
 
 	public static AuthenticationState authenticate(HttpServletRequest request) {
-		if (!request.getMethod().equalsIgnoreCase("POST")) {
+		if (!request.getMethod().equalsIgnoreCase("POST") || request.getMethod().equalsIgnoreCase("GET")) {
 			Logger.getLogger().api("Denied '" + request.getMethod() + "' access", request.getRemoteAddr());
 			return new AuthenticationState(false)
 					.setStatus(405)

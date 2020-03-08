@@ -48,28 +48,27 @@
 
 </head>
 
-<body id="page-top"
-      th:onload="'javascript:loadEmbedCalendar(' + ${embed_key} + ','+ ${api_url} + ')'">
+<body id="page-top" th:data-embed_key="${embed_key}" th:data-api_url="${api_url}">
 
 <!-- Page Wrapper -->
 <div id="wrapper">
 
-    <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion"
-        id="accordionSidebar">
+	<!-- Sidebar -->
+	<ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion"
+		id="accordionSidebar">
 
-        <!-- Sidebar - Brand -->
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-            <div class="sidebar-brand-icon rotate-n-15">
-                <i class="fas fa-calendar"></i>
-            </div>
-            <div class="sidebar-brand-text mx-3">DISCAL</div>
-        </a>
+		<!-- Sidebar - Brand -->
+		<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+			<div class="sidebar-brand-icon rotate-n-15">
+				<i class="fas fa-calendar"></i>
+			</div>
+			<div class="sidebar-brand-text mx-3">DISCAL</div>
+		</a>
 
-        <!-- Divider -->
-        <hr class="sidebar-divider my-0">
+		<!-- Divider -->
+		<hr class="sidebar-divider my-0">
 
-        <!-- Nav Item - About -->
+		<!-- Nav Item - About -->
         <li class="nav-item">
             <a class="nav-link" href="/about">
                 <i class="fas fa-fw fa-info-circle"></i>
@@ -398,7 +397,7 @@
 <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
 <!-- Custom scripts for all pages-->
-<script src="/assets/js/sb-admin-2.min.js"></script>
+<script src="/assets/js/bundle.js"></script>
 
 <!-- Page level plugins -->
 <script src="/vendor/chart.js/Chart.min.js"></script>

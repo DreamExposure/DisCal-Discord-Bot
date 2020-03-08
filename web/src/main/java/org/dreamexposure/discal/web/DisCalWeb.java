@@ -44,5 +44,7 @@ public class DisCalWeb {
 			Logger.getLogger().status("Website shutting down", "Website shutting down...");
 			DiscordAccountHandler.getHandler().shutdown();
 		}));
+
+		Logger.getLogger().status("Started", "Website is now online!");
 	}
 }

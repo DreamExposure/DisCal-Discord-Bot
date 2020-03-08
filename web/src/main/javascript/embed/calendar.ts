@@ -1,42 +1,49 @@
 import {EmbedCalendar} from "@/objects/calendar/EmbedCalendar";
 
-let embedCalendar: EmbedCalendar;
+export class EmbedCalendarRunner {
+	private embedCalendar: EmbedCalendar;
 
-export function loadEmbedCalendar(key: string, url: string) {
-	embedCalendar = new EmbedCalendar().init(key, url);
-}
 
-//Handle user input for the calendar....
-export function previousEmbedMonth() {
-	embedCalendar.selectedDate.setMonth(embedCalendar.selectedDate.getMonth() - 1);
-	embedCalendar.selectedDate.setDate(1);
+	constructor() {
+		this.embedCalendar = new EmbedCalendar();
+	}
 
-	embedCalendar.setMonth(embedCalendar.selectedDate);
+	init(key: string, url: string) {
+		this.embedCalendar.init(key, url);
+	}
 
-	embedCalendar.getEventsForMonth();
-}
+	//Handle user input for the calendar....
+	previousEmbedMonth() {
+		this.embedCalendar.selectedDate.setMonth(this.embedCalendar.selectedDate.getMonth() - 1);
+		this.embedCalendar.selectedDate.setDate(1);
 
-export function nextEmbedMonth() {
-	embedCalendar.selectedDate.setMonth(embedCalendar.selectedDate.getMonth() + 1);
-	embedCalendar.selectedDate.setDate(1);
+		this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
 
-	embedCalendar.setMonth(embedCalendar.selectedDate);
+		this.embedCalendar.getEventsForMonth();
+	}
 
-	embedCalendar.getEventsForMonth();
-}
+	nextEmbedMonth() {
+		this.embedCalendar.selectedDate.setMonth(this.embedCalendar.selectedDate.getMonth() + 1);
+		this.embedCalendar.selectedDate.setDate(1);
 
-export function selectEmbedDate(clickedId: string) {
-	let e = document.getElementById(clickedId)!;
-	let dateString = e.innerHTML.split("[")[0];
-	if (dateString !== "") {
-		let dateNum = parseInt(dateString);
+		this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
 
-		embedCalendar.selectedDate.setDate(dateNum);
+		this.embedCalendar.getEventsForMonth();
+	}
 
-		embedCalendar.setMonth(embedCalendar.selectedDate);
+	selectEmbedDate(clickedId: string) {
+		let e = document.getElementById(clickedId)!;
+		let dateString = e.innerHTML.split("[")[0];
+		if (dateString !== "") {
+			let dateNum = parseInt(dateString);
 
-		embedCalendar.getEventsForMonth();
+			this.embedCalendar.selectedDate.setDate(dateNum);
 
-		embedCalendar.getEventsForSelectedDate();
+			this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
+
+			this.embedCalendar.getEventsForMonth();
+
+			this.embedCalendar.getEventsForSelectedDate();
+		}
 	}
 }

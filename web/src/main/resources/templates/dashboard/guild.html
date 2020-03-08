@@ -48,8 +48,7 @@
 
 </head>
 
-<body id="page-top"
-	  th:onload="'javascript:loadEmbedCalendar(' + ${embed_key} + ','+ ${api_url} + ')'">
+<body id="page-top" th:data-api_key="${key}" th:data-api_url="${api_url}" th:data-user_id="${id}">
 
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -225,25 +224,90 @@
 			<div class="container-fluid">
 				<div class="loader"></div>
 
-				<!--TODO: load and support changing the following:
-				- DisCal Nickname
-				- Control role
-				- DisCal channel
-				- Prefix
-				- Lang
+				<div id="not-connected" hidden="hidden">
+					<h2 class="text-discal-blue">It seems this guild doesn't have DisCal in it.</h2>
 
-				TODO: Support showing the following:
-				- invite if not in the server
-				- Patron status
-				- Dev status
+					<a class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
+					   style="margin: 0 auto; max-width: 200px"
+					   target="_blank"
+					   th:href="${bot_invite}">
+						Add To Discord!
+					</a>
+				</div>
+
+				<!--TODO: load and support changing the following:
+					- Control role
+					- DisCal channel
+					- Lang
+					-->
+				<!--Start guild settings display-->
+				<div id="guild-settings" hidden="hidden">
+					<!--Start nickname form-->
+					<form id="nickname-form" class="row">
+						<div class="form-row">
+							<div class="col-auto">
+								<label class="sr-only" for="nickname-input">Nickname</label>
+								<input type="text" class="form-control" id="nickname-input"
+									   placeholder="DisCal" maxlength="32">
+							</div>
+							<div class="col-auto">
+								<button type="submit" class="btn btn-discal-blue"
+										id="nick-update-btn">Update
+								</button>
+							</div>
+						</div>
+					</form>
+					<!--End nickname form-->
+
+					<!--Start prefix form-->
+					<form id="prefix-form" class="row">
+						<div class="form-row">
+							<div class="col-auto">
+								<label class="sr-only" for="prefix-input">Prefix</label>
+								<input type="text" class="form-control" id="prefix-input"
+									   placeholder="!" maxlength="5">
+							</div>
+							<div class="col-auto">
+								<button type="submit" class="btn btn-discal-blue"
+										id="prefix-update-btn">Update
+								</button>
+							</div>
+						</div>
+					</form>
+					<!--End prefix form-->
+
+					<!--Start lang form-->
+					<!--End lang form-->
+
+					<!--Start control role form-->
+					<!--End control role form-->
+
+					<!--Start discal channel form-->
+					<!--End discal channel form-->
+				</div>
+				<!--End guild settings display-->
+
+				<!--TODO: Support showing the following:
 				- Shard the server is on
 				-->
 				<!--Begin data display and edit-->
 				<div id="data">
+					<!--Begin patron display-->
+					<div>
+						<p id="patron-display" class="text-discord-full-white text-left"></p>
+					</div>
+					<!--End patron display-->
 
+					<!--Begin dev display-->
+					<div>
+						<p id="dev-display" class="text-discord-full-white text-left"></p>
+					</div>
+					<!--End dev display-->
+
+					<!--Begin shard display-->
+					<!--End shard display-->
 				</div>
 				<!--End data display and edit-->
-
 
 			</div>
 			<!--End container fluid-->
@@ -315,7 +379,7 @@
 <script src="/vendor/jquery-easing/jquery.easing.min.js"></script>
 
 <!-- Custom scripts for all pages-->
-<script src="/assets/js/sb-admin-2.min.js"></script>
+<script src="/assets/js/bundle.js"></script>
 
 <!-- Page level plugins -->
 <script src="/vendor/chart.js/Chart.min.js"></script>

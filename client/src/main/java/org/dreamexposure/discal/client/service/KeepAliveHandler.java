@@ -54,7 +54,7 @@ public class KeepAliveHandler {
 
 					RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
 					Request request = new Request.Builder()
-							.url(BotSettings.API_URL.get() + "/v2/status/keep-alive")
+							.url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/keep-alive")
 							.post(body)
 							.header("Authorization", BotSettings.BOT_API_TOKEN.get())
 							.header("Content-Type", "application/json")
