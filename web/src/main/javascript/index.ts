@@ -7,20 +7,17 @@ function loadDashboardGuildPage(apiKey: string, apiUrl: string, userId: string) 
 }
 
 function loadEmbedCalendar(embedKey: string, apiUrl: string) {
-
 	let embedRunner = new EmbedCalendarRunner();
 	embedRunner.init(embedKey, apiUrl);
 }
 
-document.onload = function () {
-	const body = document.getElementById("page-top");
-	if (body!.dataset.embed_key != null) {
-		loadEmbedCalendar(<string>body!.dataset.embed_key, <string>body!.dataset.api_url);
-	} else if (body!.dataset.api_key != null) {
-		loadDashboardGuildPage(<string>body!.dataset.api_key,
-			<string>body!.dataset.api_url, <string>body!.dataset.user_id)
-	}
-};
+const body = document.getElementById("page-top");
+if (body!.dataset.embedKey != null) {
+	loadEmbedCalendar(<string>body!.dataset.embedKey, <string>body!.dataset.apiUrl);
+} else if (body!.dataset.apiKey != null) {
+	loadDashboardGuildPage(<string>body!.dataset.apiKey,
+		<string>body!.dataset.apiUrl, <string>body!.dataset.userId)
+}
 
 (function ($) {
 	// Toggle the side navigation

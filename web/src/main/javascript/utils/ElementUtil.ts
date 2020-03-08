@@ -8,18 +8,18 @@ export class ElementUtil {
 	}
 
 	static showCalendarContainer() {
-		document.getElementById("calendar-container")!.setAttribute("hidden", "show");
+		document.getElementById("calendar-container")!.hidden = false;
 	}
 
 	static hideCalendarContainer() {
-		document.getElementById("calendar-container")!.setAttribute("hidden", "hidden");
+		document.getElementById("calendar-container")!.hidden = true;
 	}
 
 	static showEventsContainer() {
-		document.getElementById("events-container")!.setAttribute("hidden", "show");
+		document.getElementById("events-container")!.hidden = true;
 	}
 
 	static hideEventsContainer() {
-		document.getElementById("events-container")!.setAttribute("hidden", "hidden");
+		document.getElementById("events-container")!.hidden = true;
 	}
 }

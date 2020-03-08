@@ -48,7 +48,7 @@
 
 </head>
 
-<body id="page-top" th:data-embed_key="${embed_key}" th:data-api_url="${api_url}">
+<body id="page-top" th:data-embed-key="${embed_key}" th:data-api-url="${api_url}">
 
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -230,13 +230,13 @@
                            border="#bcbcbc" cellpadding="4" cellspacing="0">
                         <tbody>
                         <tr style="height: 50px;">
-                            <th class="nav" onclick="previousEmbedMonth()"><</th>
+							<th id="previous-month" class="nav"><</th>
                             <th></th>
                             <th></th>
                             <th id="month-display"></th>
                             <th></th>
                             <th></th>
-                            <th class="nav" onclick="nextEmbedMonth()">></th>
+							<th id="next-month" class="nav">></th>
                         </tr>
                         <tr style="height: 40px;">
                             <th>Sunday</th>
@@ -247,60 +247,60 @@
                             <th>Friday</th>
                             <th>Saturday</th>
                         </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r1c7"></td>
-                        </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r2c7"></td>
-                        </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r3c7"></td>
-                        </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r4c7"></td>
-                        </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r5c7"></td>
-                        </tr>
-                        <tr>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c1"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c2"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c3"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c4"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c5"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c6"></td>
-                            <td onclick="selectEmbedDate(this.id)" id="r6c7"></td>
-                        </tr>
+						<tr>
+							<td class="cal-date" id="r1c1"></td>
+							<td class="cal-date" id="r1c2"></td>
+							<td class="cal-date" id="r1c3"></td>
+							<td class="cal-date" id="r1c4"></td>
+							<td class="cal-date" id="r1c5"></td>
+							<td class="cal-date" id="r1c6"></td>
+							<td class="cal-date" id="r1c7"></td>
+						</tr>
+						<tr>
+							<td class="cal-date" id="r2c1"></td>
+							<td class="cal-date" id="r2c2"></td>
+							<td class="cal-date" id="r2c3"></td>
+							<td class="cal-date" id="r2c4"></td>
+							<td class="cal-date" id="r2c5"></td>
+							<td class="cal-date" id="r2c6"></td>
+							<td class="cal-date" id="r2c7"></td>
+						</tr>
+						<tr>
+							<td class="cal-date" id="r3c1"></td>
+							<td class="cal-date" id="r3c2"></td>
+							<td class="cal-date" id="r3c3"></td>
+							<td class="cal-date" id="r3c4"></td>
+							<td class="cal-date" id="r3c5"></td>
+							<td class="cal-date" id="r3c6"></td>
+							<td class="cal-date" id="r3c7"></td>
+						</tr>
+						<tr>
+							<td class="cal-date" id="r4c1"></td>
+							<td class="cal-date" id="r4c2"></td>
+							<td class="cal-date" id="r4c3"></td>
+							<td class="cal-date" id="r4c4"></td>
+							<td class="cal-date" id="r4c5"></td>
+							<td class="cal-date" id="r4c6"></td>
+							<td class="cal-date" id="r4c7"></td>
+						</tr>
+						<tr>
+							<td class="cal-date" id="r5c1"></td>
+							<td class="cal-date" id="r5c2"></td>
+							<td class="cal-date" id="r5c3"></td>
+							<td class="cal-date" id="r5c4"></td>
+							<td class="cal-date" id="r5c5"></td>
+							<td class="cal-date" id="r5c6"></td>
+							<td class="cal-date" id="r5c7"></td>
+						</tr>
+						<tr>
+							<td class="cal-date" id="r6c1"></td>
+							<td class="cal-date" id="r6c2"></td>
+							<td class="cal-date" id="r6c3"></td>
+							<td class="cal-date" id="r6c4"></td>
+							<td class="cal-date" id="r6c5"></td>
+							<td class="cal-date" id="r6c6"></td>
+							<td class="cal-date" id="r6c7"></td>
+						</tr>
                         </tbody>
                     </table>
 

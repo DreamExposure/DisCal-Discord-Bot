@@ -26,14 +26,14 @@ export class EmbedCalendar implements TaskCallback {
     private calendarData: WebCalendar;
 
     constructor() {
-        this.guildId = parseInt(window.location.pathname.split("/")[2]);
-        this.calNumber = parseInt(window.location.pathname.split("/")[3]);
-        this.todaysDate = new Date();
-        this.selectedDate = new Date();
-        this.displays = [];
-        this.apiKey = "";
-        this.apiUrl = "";
-    }
+		this.guildId = parseInt(window.location.pathname.split("/")[3]);
+		this.calNumber = parseInt(window.location.pathname.split("/")[4]);
+		this.todaysDate = new Date();
+		this.selectedDate = new Date();
+		this.displays = [];
+		this.apiKey = "";
+		this.apiUrl = "";
+	}
 
     init(key: string, url: string) {
         this.apiKey = key;
@@ -45,14 +45,16 @@ export class EmbedCalendar implements TaskCallback {
 				"If you keep receiving this error, please contact the developers");
 
 		} else {
-            //Request calendar information
-            let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
-            calReq.provideApiDetails(this.apiKey, this.apiUrl);
+			//Request calendar information
+			let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
+			calReq.provideApiDetails(this.apiKey, this.apiUrl);
 
-            //Execute the calls
-            calReq.execute();
-            this.getEventsForMonth();
-        }
+			//Execute the calls
+			this.setMonth(this.selectedDate);
+
+			calReq.execute();
+			this.getEventsForMonth();
+		}
 
         return this;
     }

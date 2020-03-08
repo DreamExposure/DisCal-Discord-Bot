@@ -1,0 +1,10 @@
+@import "variables";
+
+.cal-date {
+  width: 40px;
+  height: 40px;
+}
+
+.cal-date:hover {
+  background-color: $discal-red;
+}
