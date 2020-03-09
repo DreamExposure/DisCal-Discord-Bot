@@ -16,7 +16,7 @@ export class ElementUtil {
 	}
 
 	static showEventsContainer() {
-		document.getElementById("events-container")!.hidden = true;
+		document.getElementById("events-container")!.hidden = false;
 	}
 
 	static hideEventsContainer() {

@@ -165,8 +165,14 @@ export class EmbedCalendar implements TaskCallback {
                 if (thisDate.getMonth() === this.todaysDate.getMonth()
                     && thisDate.getFullYear() === this.todaysDate.getFullYear()
                     && thisDate.getDate() === this.todaysDate.getDate()) {
-					el.className = "today cal-date";
-                }
+					if (el.classList.contains("selected")) {
+						el.className = "today selected cal-date";
+						//get events for it
+						this.getEventsForSelectedDate();
+					} else {
+						el.className = "today cal-date";
+					}
+				}
             }
         }
     }

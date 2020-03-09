@@ -38,6 +38,7 @@ export class EmbedCalendarRunner {
 		this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
 
 		this.embedCalendar.getEventsForMonth();
+		this.embedCalendar.getEventsForSelectedDate();
 	}
 
 	nextMonth() {
@@ -47,6 +48,7 @@ export class EmbedCalendarRunner {
 		this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
 
 		this.embedCalendar.getEventsForMonth();
+		this.embedCalendar.getEventsForSelectedDate();
 	}
 
 	selectDate(clickedId: string) {
@@ -56,12 +58,10 @@ export class EmbedCalendarRunner {
 			let dateNum = parseInt(dateString);
 
 			this.embedCalendar.selectedDate.setDate(dateNum);
-
-			this.embedCalendar.setMonth(this.embedCalendar.selectedDate);
-
-			this.embedCalendar.getEventsForMonth();
-
 			this.embedCalendar.getEventsForSelectedDate();
+
+			document.getElementsByClassName("selected")[0].classList.remove("selected");
+			e.classList.add("selected");
 		}
 	}
 }
