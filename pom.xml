@@ -24,11 +24,15 @@
 
 		<discord4j.version>3.0.6</discord4j.version>
 		<discord4j.stores.version>3.0.5</discord4j.stores.version>
+
+		<google.client-api.version>1.28.0</google.client-api.version>
+
+		<revision>3.0.0-SNAPSHOT</revision>
 	</properties>
 
 	<groupId>org.dreamexposure</groupId>
 	<artifactId>DisCal</artifactId>
-	<version>3.0.0</version>
+	<version>${revision}</version>
 
 	<modules>
 		<module>core</module>
@@ -87,7 +91,7 @@
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
-			<version>1.28.0</version>
+			<version>${google.client-api.version}</version>
 			<optional>false</optional>
 		</dependency>
 		<!--Google Calendar API-->
@@ -100,7 +104,7 @@
 		<dependency>
 			<groupId>com.google.oauth-client</groupId>
 			<artifactId>google-oauth-client-jetty</artifactId>
-			<version>1.28.0</version>
+			<version>${google.client-api.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.mortbay.jetty</groupId>

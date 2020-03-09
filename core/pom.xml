@@ -8,12 +8,12 @@
 	<parent>
 		<groupId>org.dreamexposure</groupId>
 		<artifactId>DisCal</artifactId>
-		<version>3.0.0</version>
+		<version>${revision}</version>
 	</parent>
 
 	<groupId>org.dreamexposure.discal</groupId>
 	<artifactId>core</artifactId>
-	<version>3.0.0</version>
+	<version>${revision}</version>
 
 	<dependencies>
 		<!--Discord4J API-->

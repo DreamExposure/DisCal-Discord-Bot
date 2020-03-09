@@ -14,29 +14,27 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<project.build.targetEncoding>UTF-8</project.build.targetEncoding>
-
-		<discal.core.version>3.0.0</discal.core.version>
 	</properties>
 
 	<parent>
 		<groupId>org.dreamexposure</groupId>
 		<artifactId>DisCal</artifactId>
-		<version>3.0.0</version>
+		<version>${revision}</version>
 	</parent>
 
 	<groupId>org.dreamexposure.discal</groupId>
 	<artifactId>server</artifactId>
-	<version>${discal.core.version}</version>
+	<version>${revision}</version>
 
 	<dependencies>
-        <!--DisCal Core-->
-        <dependency>
-            <groupId>org.dreamexposure.discal</groupId>
-            <artifactId>core</artifactId>
-            <version>${discal.core.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--JSch for SSH Tunneling-->
+		<!--DisCal Core-->
+		<dependency>
+			<groupId>org.dreamexposure.discal</groupId>
+			<artifactId>core</artifactId>
+			<version>${revision}</version>
+			<scope>compile</scope>
+		</dependency>
+		<!--JSch for SSH Tunneling-->
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
