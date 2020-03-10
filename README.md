@@ -4,6 +4,8 @@
 	
 [Trello Board](https://trello.com/b/2Xx3Galz)
 
+[![Build Status](https://jenkins.dreamexposure.org/job/DisCal/badge/icon)](https://jenkins.dreamexposure.org/job/DisCal/)
+
 DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
 <br> <br>
 It was built to be powerful yet easy to use! 
@@ -38,9 +40,7 @@ DisCal is developed and maintained by NovaFox161 with help from xaanit.
 
 
 ## Planned Features
-* Link up to external calendar (WIP)
 * Multiple calendars (WIP)
-* Web Dashboard to manage DisCal settings! (WIP)
 * More advanced announcements and notification support.
 * And so much more!!!!!
 
@@ -57,7 +57,7 @@ Don't see something you want?? Request it today!! Contact any of the developers 
 
 As a calendar bot, DisCal reaches global use, and because of this, DisCal now allows users to select the language they wish to use, however, all of the languages and translations are manually made. So we, this DisCal Development Team, are looking for translators!!
 <br> <br>
-If you are interested in translating DisCal, just follow the format provided in the [TEMPLATE LANGUAGE JSON File.](https://github.com/NovaFox161/DisCal-Discord-Bot/blob/master/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
+If you are interested in translating DisCal, just follow the format provided in the [TEMPLATE LANGUAGE JSON File.](https://github.com/Drea,Exposure/DisCal-Discord-Bot/blob/master/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
 
 ### Guidelines
 
