@@ -85,26 +85,38 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.6.0</version>
 				<executions>
-                    <execution>
-                        <id>Compile Website Styles</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>gulp</executable>
-                            <commandlineArgs>build</commandlineArgs>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>Compile Website Javascript</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>webpack</executable>
-                            <workingDirectory>..</workingDirectory>
+					<execution>
+						<id>NPM project install</id>
+						<phase>initialize</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>npm</executable>
+							<commandlineArgs>install</commandlineArgs>
+							<workingDirectory>..</workingDirectory>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Compile Website Styles</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>gulp</executable>
+							<commandlineArgs>build</commandlineArgs>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Compile Website Javascript</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+						<configuration>
+							<executable>webpack</executable>
+							<workingDirectory>..</workingDirectory>
                         </configuration>
                     </execution>
                     <execution>
