@@ -223,9 +223,13 @@
 				<div class="d-sm-flex align-items-center justify-content-between mb-4">
 					<h1 class="h3 mb-0 text-discal-blue">Dashboard</h1>
 				</div>
-
-				<p class="text-center text-discord-full-white">Please select a guild from the side
-					panel to begin.</p>
+				<div th:if="${logged_in}">
+					<p class="text-center text-discord-full-white">Please select a guild from the
+						side panel to begin.</p>
+				</div>
+				<div th:unless="${$logged_in}">
+					<p class="text-center text-discord-full-white">Please log in to continue.</p>
+				</div>
 			</div>
 
             <!--Snackbar for notification popup-->
