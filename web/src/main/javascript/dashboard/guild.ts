@@ -22,7 +22,7 @@ export class DashboardGuildRunner implements TaskCallback {
 		this.apiUrl = apiUrl;
 		this.userId = userId;
 
-		this.guildId = parseInt(window.location.pathname.split("/")[3]);
+		this.guildId = parseInt(window.location.pathname.split("/")[2]);
 	}
 
 	startDashboardGuildPage() {
