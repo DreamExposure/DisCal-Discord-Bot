@@ -91,7 +91,7 @@ public class DiscordLoginHandler {
 				m.put("client", BotSettings.ID.get());
 				m.put("year", LocalDate.now().getYear());
 				m.put("redirect_uri", BotSettings.REDIR_URI.get());
-				m.put("invite_url", BotSettings.INVITE_URL.get());
+				m.put("bot_invite", BotSettings.INVITE_URL.get());
 				m.put("support_invite", BotSettings.SUPPORT_INVITE.get());
 				m.put("api_url", BotSettings.API_URL.get());
 
@@ -151,7 +151,6 @@ public class DiscordLoginHandler {
 						.build();
 
 				Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
-				//TODO: Figure out what the fuck is wrong here!!!!!!!
 				//Handle response...
 				if (keyGrantResponse.isSuccessful()) {
 					JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
