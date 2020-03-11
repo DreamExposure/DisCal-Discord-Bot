@@ -495,19 +495,24 @@
 	 aria-labelledby="exampleModalLabel"
 	 aria-hidden="true">
 	<div class="modal-dialog" role="document">
-		<div class="modal-content">
+		<div class="modal-content bg-discal-not-black">
 			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+				<h5 class="modal-title text-discal-blue" id="exampleModalLabel">Ready to Leave?</h5>
 				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">×</span>
+					<span class="text-discal-red" aria-hidden="true">×</span>
 				</button>
 			</div>
-			<div class="modal-body">Select "Logout" below if you are ready to end your current
-				session.
+			<div class="modal-body">
+				<p class="text-left text-discord-full-white">
+					Select "Logout" below if you are ready to end your current session.
+				</p>
 			</div>
 			<div class="modal-footer">
-				<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-				<a class="btn btn-primary" href="/logout">Logout</a>
+				<button class="btn btn-discal-dark-gray text-discord-full-white"
+						type="button" data-dismiss="modal">Cancel
+				</button>
+
+				<a class="btn btn-discal-red text-discord-full-white" href="/logout">Logout</a>
 			</div>
 		</div>
 	</div>
