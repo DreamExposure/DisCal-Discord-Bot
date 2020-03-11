@@ -49,14 +49,14 @@ export class DashboardGuildRunner implements TaskCallback {
 
 		//load data that cannot be edited
 		if (this.guild.settings.isPatronGuild) {
-			(<HTMLParagraphElement>document.getElementById("patron-display")).innerText = "This guild is a patron guild";
+			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is a patron guild";
 		} else {
-			(<HTMLParagraphElement>document.getElementById("patron-display")).innerText = "This guild is NOT a patron guild";
+			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is NOT a patron guild";
 		}
 		if (this.guild.settings.isDevGuild) {
-			(<HTMLParagraphElement>document.getElementById("dev-display")).innerText = "This guild is a dev guild";
+			(<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is a dev guild";
 		} else {
-			(<HTMLParagraphElement>document.getElementById("dev-display")).innerText = "This guild is NOT a dev guild";
+			(<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is NOT a dev guild";
 		}
 		//display what shard the server is on when we support that...
 
@@ -64,6 +64,7 @@ export class DashboardGuildRunner implements TaskCallback {
 		//Hide loader and show the data container...
 		ElementUtil.hideLoader();
 		document.getElementById("guild-settings")!.hidden = false;
+		document.getElementById("guild-data")!.hidden = false;
 	}
 
 	private updateBotNick() {
@@ -90,7 +91,7 @@ export class DashboardGuildRunner implements TaskCallback {
 	onCallback(status: NetworkCallStatus): void {
 		if (status.isSuccess) {
 			switch (status.type) {
-				case TaskType.GUILD_SETTINGS_GET:
+				case TaskType.WEB_GUILD_GET:
 					this.handleWebGuildGet(status);
 					break;
 				case TaskType.GUILD_SETTINGS_UPDATE:

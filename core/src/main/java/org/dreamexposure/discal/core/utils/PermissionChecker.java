@@ -11,6 +11,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.PermissionSet;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -142,7 +143,8 @@ public class PermissionChecker {
 	}
 
 	public static boolean hasManageServerRole(Member m) {
-		return m.getBasePermissions().block().contains(Permission.MANAGE_GUILD);
+		PermissionSet perms = m.getBasePermissions().block();
+		return (perms.contains(Permission.MANAGE_GUILD) || perms.contains(Permission.ADMINISTRATOR));
 	}
 
 	/**

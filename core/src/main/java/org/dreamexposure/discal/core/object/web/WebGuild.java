@@ -169,7 +169,7 @@ public class WebGuild {
 		return this;
 	}
 
-	public JSONObject toJson() {
+	public JSONObject toJson(boolean secure) {
 		JSONObject data = new JSONObject();
 
 		data.put("id", id);

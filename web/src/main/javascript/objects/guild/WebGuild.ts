@@ -161,17 +161,19 @@ export class WebGuild {
         this.hasDisCalRole = json.discal_role;
 
         for (let i = 0; i < json.roles.length; i++) {
-            this.roles.push(new WebRole().fromJson(json.roles[i]));
-        }
+			this.roles.push(new WebRole().fromJson(json.roles[i]));
+		}
 
-        for (let i = 0; i < json.channels.length; i++) {
-            this.channels.push(new WebChannel().fromJson(json.channels[i]));
-        }
+		for (let i = 0; i < json.channels.length; i++) {
+			this.channels.push(new WebChannel().fromJson(json.channels[i]));
+		}
 
-        for (let i = 0; i < json.announcements.length; i++) {
-            this.roles.push(new WebRole().fromJson(json.roles[i]));
-        }
+		for (let i = 0; i < json.announcements.length; i++) {
+			this.roles.push(new WebRole().fromJson(json.roles[i]));
+		}
 
-        return this;
-    }
+		this.calendar = new WebCalendar().fromJson(json.calendar);
+
+		return this;
+	}
 }

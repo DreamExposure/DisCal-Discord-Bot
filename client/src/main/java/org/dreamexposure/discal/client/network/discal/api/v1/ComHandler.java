@@ -59,7 +59,7 @@ public class ComHandler {
 				wg.setDiscalRole(PermissionChecker.hasSufficientRole(guild.get(), member));
 				wg.setManageServer(PermissionChecker.hasManageServerRole(member));
 
-				jsonResponse.put("guild", new WebGuild().fromGuild(guild.get()).toJson());
+				jsonResponse.put("guild", new WebGuild().fromGuild(guild.get()).toJson(false));
 
 				response.setStatus(200);
 			} else {
@@ -106,7 +106,7 @@ public class ComHandler {
 					wg.setManageServer(PermissionChecker.hasManageServerRole(mem));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g.get(), mem));
 				}
-				webGuilds.put(wg.toJson());
+				webGuilds.put(wg.toJson(false));
 			}
 		}
 
@@ -139,7 +139,7 @@ public class ComHandler {
 		Optional<Guild> guild = GuildFinder.findGuild(Snowflake.of(jsonRequest.getLong("guild_id")));
 
 		if (guild.isPresent()) {
-			jsonResponse.put("guild", new WebGuild().fromGuild(guild.get()).toJson());
+			jsonResponse.put("guild", new WebGuild().fromGuild(guild.get()).toJson(false));
 
 			response.setStatus(200);
 		} else {

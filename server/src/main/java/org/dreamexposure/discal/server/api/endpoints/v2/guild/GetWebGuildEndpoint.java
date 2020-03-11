@@ -56,7 +56,7 @@ public class GetWebGuildEndpoint {
 
 				response.setContentType("application/json");
 				response.setStatus(200);
-				return wg.toJson().toString();
+				return wg.toJson(authState.isFromDiscalNetwork()).toString();
 			}
 			response.setContentType("application/json");
 			response.setStatus(404);
