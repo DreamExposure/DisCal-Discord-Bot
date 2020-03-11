@@ -192,22 +192,23 @@
 
                     <!-- Nav Item - User Information -->
                     <li th:if="${logged_in}" class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
-                            <img class="img-profile rounded-circle" th:src="${pfp}"
-                                 alt="pfp">
-                        </a>
-                        <!-- Dropdown - User Information -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="userDropdown">
-                            <a class="dropdown-item text-discord-full-white" href="#"
-                               data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </li>
+						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+						   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
+							<img class="img-profile rounded-circle" th:src="${pfp}"
+								 alt="pfp">
+						</a>
+						<!-- Dropdown - User Information -->
+						<div class="dropdown-menu dropdown-menu-right shadow
+						animated--grow-in bg-discal-not-black"
+							 aria-labelledby="userDropdown">
+							<a class="dropdown-item text-discord-full-white" href="#"
+							   data-toggle="modal" data-target="#logoutModal">
+								<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+								Logout
+							</a>
+						</div>
+					</li>
                     <li th:unless="${logged_in}" class="nav-item">
                         <a class="nav-link text-discord-full-white" href="/login">
                             <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
