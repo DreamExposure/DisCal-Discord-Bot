@@ -176,6 +176,11 @@ public class WebGuild {
 		data.put("name", name);
 		if (iconUrl != null)
 			data.put("icon_url", iconUrl);
+		if (secure)
+			data.put("settings", settings.toJsonSecure());
+		else
+			data.put("settings", settings.toJson());
+
 		data.put("settings", settings.toJson());
 		if (botNick != null && !botNick.equals(""))
 			data.put("bot_nick", botNick);
