@@ -181,7 +181,6 @@ public class WebGuild {
 		else
 			data.put("settings", settings.toJson());
 
-		data.put("settings", settings.toJson());
 		if (botNick != null && !botNick.equals(""))
 			data.put("bot_nick", botNick);
 		data.put("manage_server", manageServer);

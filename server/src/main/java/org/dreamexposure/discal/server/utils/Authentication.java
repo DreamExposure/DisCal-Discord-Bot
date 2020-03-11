@@ -46,12 +46,14 @@ public class Authentication {
 						.setStatus(200)
 						.setReason("Success")
 						.setKeyUsed(key)
+						.setFromDisCalNetwork(false)
 						.setIsReadOnly(false);
 			} else if (readOnlyKeys.containsKey(key)) {
 				return new AuthenticationState(true)
 						.setStatus(200)
 						.setReason("Success")
 						.setKeyUsed(key)
+						.setFromDisCalNetwork(false)
 						.setIsReadOnly(true);
 			} else if (key.equals("teapot")) {
 				return new AuthenticationState(false)
@@ -69,13 +71,14 @@ public class Authentication {
 				return new AuthenticationState(true)
 						.setStatus(200)
 						.setReason("Success")
-						.setKeyUsed(key);
+						.setKeyUsed(key)
+						.setFromDisCalNetwork(false);
 			}
 
 			//If we reach here, the API key does not exist or is blocked...
 			return new AuthenticationState(false)
-					.setStatus(405)
-					.setReason("Method not allowed");
+					.setStatus(401)
+					.setReason("Authorization Denied");
 		} else {
 			Logger.getLogger().api("Attempted to use API without authorization header", request.getRemoteAddr());
 			return new AuthenticationState(false)
