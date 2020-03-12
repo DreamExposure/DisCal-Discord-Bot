@@ -45,7 +45,7 @@ public class UpdateWebGuildEndpoint {
 
 				//Right now its just the nickname, but more may be added eventually
 				if (jsonMain.has("bot_nick")) {
-					g.changeSelfNickname(jsonMain.getString("bot_nick"));
+					g.changeSelfNickname(jsonMain.getString("bot_nick")).subscribe();
 				}
 
 				response.setContentType("application/json");

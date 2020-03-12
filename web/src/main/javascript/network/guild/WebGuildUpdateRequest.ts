@@ -33,7 +33,7 @@ export class WebGuildUpdateRequest implements AsyncTask {
 	execute(): void {
 		let bodyRaw: any = {
 			"guild_id": this.guildId,
-			"bot_nick": this._botNick
+			"bot_nick": this.botNick
 		};
 
 		$.ajax({
@@ -58,7 +58,7 @@ export class WebGuildUpdateRequest implements AsyncTask {
 				let status = new NetworkCallStatus(false, TaskType.WEB_GUILD_UPDATE);
 				status.code = jqXHR.status;
 				status.body = jqXHR.responseJSON;
-				status.message = jqXHR.responseJSON.message;
+				status.message = jqXHR.responseJSON!.message;
 
 				this.onComplete(status);
 			}.bind(this)
