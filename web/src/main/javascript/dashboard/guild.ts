@@ -62,6 +62,25 @@ export class DashboardGuildRunner implements TaskCallback {
 			this.updateControlRole();
 		}.bind(this);
 
+		let chanSelect = document.getElementById("discal-chan-select")!;
+		for (let i = 0; i < this.guild.channels.length; i++) {
+			let chan = this.guild.channels[i];
+			let opt = document.createElement("option");
+
+			opt.innerHTML = chan.name;
+			opt.value = chan.id.toString();
+			if (chan.id == 0 && this.guild.settings.disCalChannel === "all") {
+				opt.selected = true;
+			} else {
+				opt.selected = chan.id.toString() == this.guild.settings.disCalChannel;
+			}
+			chanSelect.appendChild(opt);
+		}
+		document.getElementById("discal-chan-update-btn")!.onclick = function () {
+			this.updateDiscalChannel();
+		}.bind(this);
+
+
 		//load data that cannot be edited
 		if (this.guild.settings.isPatronGuild) {
 			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is a patron guild";
@@ -109,6 +128,17 @@ export class DashboardGuildRunner implements TaskCallback {
 		let select = <HTMLSelectElement>document.getElementById("control-role-select");
 		request.controlRole = select.selectedOptions[0].value;
 		this.guild.settings.controlRole = request.controlRole;
+
+		request.execute();
+	}
+
+	private updateDiscalChannel() {
+		let request = new GuildSettingsUpdateRequest(this.guildId, this);
+		request.provideApiDetails(this.apiKey, this.apiUrl);
+
+		let select = <HTMLSelectElement>document.getElementById("discal-chan-select");
+		request.discalChannel = select.selectedOptions[0].value;
+		this.guild.settings.disCalChannel = request.discalChannel;
 
 		request.execute();
 	}

@@ -237,7 +237,6 @@
 				</div>
 
 				<!--TODO: load and support changing the following:
-					- DisCal channel
 					- Lang
 					-->
 				<!--Start guild settings display-->
@@ -310,7 +309,26 @@
 					</form>
 					<!--End control role form-->
 
+					<br>
+					<br>
+
 					<!--Start discal channel form-->
+					<form id="discal-chan-form" class="row form-inline pl-3">
+						<label for="discal-chan-select" class="sr-only">DisCal Channel</label>
+
+						<div class="mb-2 mr-sm-2 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">DisCal Channel</span>
+							</div>
+							<select class="form-control" id="discal-chan-select"></select>
+							<div class="input-group-append">
+								<button type="button" class="btn btn-discal-blue"
+										id="discal-chan-update-btn">
+									Update
+								</button>
+							</div>
+						</div>
+					</form>
 					<!--End discal channel form-->
 				</div>
 				<!--End guild settings display-->
