@@ -72,7 +72,7 @@ export class DashboardGuildRunner implements TaskCallback {
 		request.provideApiDetails(this.apiKey, this.apiUrl);
 
 		request.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
-		this.guild.botNick = request.botNick;
+		this.guild.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
 
 		request.execute();
 	}
