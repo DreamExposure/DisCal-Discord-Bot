@@ -84,6 +84,8 @@ public class SpringController {
 
 	@RequestMapping("/dashboard/{id}")
 	public String dashboardGuild(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
+		if (!DiscordAccountHandler.getHandler().hasAccount(req))
+			return "redirect:/dashboard";
 		model.clear();
 		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
 		return "dashboard/guild";
