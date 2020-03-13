@@ -31,29 +31,49 @@ export class GuildSettingsUpdateRequest implements AsyncTask {
 		this.apiUrl = apiUrl;
 	}
 
-    //Setters...
-    set controlRole(role: string) {
-        this._controlRole = role;
-    }
+	//Setter/getter pairs
+	set controlRole(role: string) {
+		this._controlRole = role;
+	}
 
-    set discalChannel(channel: string) {
-        this._discalChannel = channel;
-    }
+	get controlRole() {
+		return this._controlRole;
+	}
 
-    set simpleAnnouncements(use: boolean) {
-        this._simpleAnnouncements = use;
-    }
+	set discalChannel(channel: string) {
+		this._discalChannel = channel;
+	}
 
-    set lang(lang: string) {
-        this._lang = lang;
-    }
+	get discalChannel() {
+		return this._discalChannel;
+	}
 
-    set prefix(prefix: string) {
-        this._prefix = prefix;
-    }
+	set simpleAnnouncements(use: boolean) {
+		this._simpleAnnouncements = use;
+	}
+
+	get simpleAnnouncements() {
+		return this._simpleAnnouncements;
+	}
+
+	set lang(lang: string) {
+		this._lang = lang;
+	}
+
+	get lang() {
+		return this._lang;
+	}
+
+	set prefix(prefix: string) {
+		this._prefix = prefix;
+	}
+
+	get prefix() {
+		return this._prefix;
+	}
 
 
-    execute(): void {
+	execute(): void {
 		let bodyRaw: any = {
 			"guild_id": this.guildId,
 		};

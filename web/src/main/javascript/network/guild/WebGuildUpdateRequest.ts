@@ -30,6 +30,10 @@ export class WebGuildUpdateRequest implements AsyncTask {
 		this._botNick = nick;
 	}
 
+	get botNick() {
+		return this._botNick;
+	}
+
 	execute(): void {
 		let bodyRaw: any = {
 			"guild_id": this.guildId,
