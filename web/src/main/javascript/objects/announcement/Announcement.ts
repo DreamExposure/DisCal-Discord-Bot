@@ -2,32 +2,32 @@ import {AnnouncementType} from "@/enums/AnnouncementType";
 import {EventColor} from "@/enums/EventColor";
 
 export class Announcement {
-    private readonly _guildId: number;
-    private _announcementId: string;
+	private readonly _guildId: number;
+	private _announcementId: string = "";
 
-    private readonly _subscriberRoleIds: string[];
-    private readonly _subscriberUserIds: string[];
+	private readonly _subscriberRoleIds: string[];
+	private readonly _subscriberUserIds: string[];
 
-    private _announcementChannelId: number;
-    private _announcementType: AnnouncementType;
-    private _eventId: string;
-    private _eventColor: EventColor;
-    private _hoursBefore: number;
-    private _minutesBefore: number;
-    private _info: string = "N/a";
+	private _announcementChannelId: number = 0;
+	private _announcementType: AnnouncementType = AnnouncementType.SPECIFIC;
+	private _eventId: string = "";
+	private _eventColor: EventColor = EventColor.NONE;
+	private _hoursBefore: number = 0;
+	private _minutesBefore: number = 0;
+	private _info: string = "N/a";
 
-    private _enabled: boolean;
-    private _infoOnly: boolean;
+	private _enabled: boolean = false;
+	private _infoOnly: boolean = false;
 
-    constructor(guildId: number) {
-        this._guildId = guildId;
+	constructor(guildId: number) {
+		this._guildId = guildId;
 
-        this._subscriberRoleIds = [];
-        this._subscriberUserIds = [];
-    }
+		this._subscriberRoleIds = [];
+		this._subscriberUserIds = [];
+	}
 
-    //Getter/setter pairs
-    get guildId() {
+	//Getter/setter pairs
+	get guildId() {
         return this._guildId;
     }
 

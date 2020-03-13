@@ -23,7 +23,7 @@ export class EmbedCalendar implements TaskCallback {
 
     public selectedDate: Date;
 
-    private calendarData: WebCalendar;
+    private calendarData: WebCalendar = new WebCalendar();
 
     constructor() {
 		this.guildId = parseInt(window.location.pathname.split("/")[3]);

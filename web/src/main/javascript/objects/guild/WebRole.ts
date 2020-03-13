@@ -1,19 +1,19 @@
 export class WebRole {
-    private _id: number;
-    private _name: string;
-    private _isManaged: boolean;
-    private _isControlRole: boolean;
-    private _isEveryone: boolean;
+	private _id: number = 0;
+	private _name: string = "";
+	private _isManaged: boolean = false;
+	private _isControlRole: boolean = false;
+	private _isEveryone: boolean = false;
 
-    constructor() {
-    }
+	constructor() {
+	}
 
-    //Getter/setter pairs
-    get id() {
-        return this._id;
-    }
+	//Getter/setter pairs
+	get id() {
+		return this._id;
+	}
 
-    set id(id) {
+	set id(id) {
         this._id = id;
     }
 

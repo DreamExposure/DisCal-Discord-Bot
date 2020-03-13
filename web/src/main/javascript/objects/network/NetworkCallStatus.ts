@@ -1,20 +1,20 @@
 import {TaskType} from "@/enums/TaskType";
 
 export class NetworkCallStatus {
-    private readonly _success: boolean;
-    private readonly _type: TaskType;
-    private _code: number;
-    private _message: string;
+	private readonly _success: boolean;
+	private readonly _type: TaskType;
+	private _code: number = 0;
+	private _message: string = "";
 
-    private _body: any;
+	private _body: any;
 
-    constructor(success: boolean, type: TaskType) {
-        this._success = success;
-        this._type = type;
-    }
+	constructor(success: boolean, type: TaskType) {
+		this._success = success;
+		this._type = type;
+	}
 
-    //Getter/setter pairs
-    get isSuccess() {
+	//Getter/setter pairs
+	get isSuccess() {
         return this._success;
     }
 

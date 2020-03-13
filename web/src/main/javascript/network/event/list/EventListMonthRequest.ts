@@ -5,25 +5,25 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class EventListMonthRequest implements AsyncTask {
-    private readonly guildId: number;
-    private readonly calNum: number;
-    private readonly days: number;
-    private readonly epochStart: number;
+	private readonly guildId: number;
+	private readonly calNum: number;
+	private readonly days: number;
+	private readonly epochStart: number;
 
-    readonly callback: TaskCallback;
+	readonly callback: TaskCallback;
 
-    apiKey: string;
-    apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
-    constructor(guildId: number, calNum: number, days: number, epochStart: number, callback: TaskCallback) {
-        this.guildId = guildId;
-        this.calNum = calNum;
-        this.days = days;
-        this.epochStart = epochStart;
-        this.callback = callback;
-    }
+	constructor(guildId: number, calNum: number, days: number, epochStart: number, callback: TaskCallback) {
+		this.guildId = guildId;
+		this.calNum = calNum;
+		this.days = days;
+		this.epochStart = epochStart;
+		this.callback = callback;
+	}
 
-    provideApiDetails(apiKey: string, apiUrl: string): void {
+	provideApiDetails(apiKey: string, apiUrl: string): void {
 		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
 	}

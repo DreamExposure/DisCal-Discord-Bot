@@ -5,24 +5,24 @@ import {Announcement} from "@/objects/announcement/Announcement";
 import {WebCalendar} from "@/objects/calendar/WebCalendar";
 
 export class WebGuild {
-    private readonly _id: number;
-    private _name: string;
-    private _icon: string;
+	private readonly _id: number;
+	private _name: string = "";
+	private _icon: string = "";
 
-    private _settings: GuildSettings;
-    private _botNick: string;
+	private _settings: GuildSettings = new GuildSettings(0);
+	private _botNick: string = "";
 
-    private _canManageServer: boolean;
-    private _hasDisCalRole: boolean;
+	private _canManageServer: boolean = false;
+	private _hasDisCalRole: boolean = false;
 
-    private readonly _roles: WebRole[];
-    private readonly _channels: WebChannel[];
-    private readonly _announcements: Announcement[];
+	private readonly _roles: WebRole[];
+	private readonly _channels: WebChannel[];
+	private readonly _announcements: Announcement[];
 
-    private _calendar: WebCalendar;
+	private _calendar: WebCalendar = new WebCalendar();
 
-    constructor(id: number) {
-        this._id = id;
+	constructor(id: number) {
+		this._id = id;
 
         this._roles = [];
         this._channels = [];

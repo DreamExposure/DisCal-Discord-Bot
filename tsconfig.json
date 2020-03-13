@@ -3,7 +3,6 @@
 	"target": "ES5",
 	"module": "ES6",
 	"strict": true,
-	"strictPropertyInitialization": false,
 	"noImplicitThis": false,
 	"removeComments": true,
 	"importHelpers": true,

@@ -2,29 +2,29 @@ import {EventColor} from "@/enums/EventColor";
 import {Recurrence} from "@/objects/event/Recurrence";
 
 export class Event {
-    private _eventId: string = "";
-    private _epochStart: number;
-    private _epochEnd: number;
+	private _eventId: string = "";
+	private _epochStart: number = 0;
+	private _epochEnd: number = 0;
 
-    private _summary: string = "";
-    private _description: string = "";
-    private _location: string = "";
+	private _summary: string = "";
+	private _description: string = "";
+	private _location: string = "";
 
-    private _isParent: boolean;
-    private _color: EventColor = EventColor.NONE;
+	private _isParent: boolean = false;
+	private _color: EventColor = EventColor.NONE;
 
-    private _recur: boolean;
-    private _recurrence: Recurrence;
+	private _recur: boolean = false;
+	private _recurrence: Recurrence = new Recurrence();
 
-    private _image: string = "";
+	private _image: string = "";
 
-    constructor() {
-    }
+	constructor() {
+	}
 
-    //Setter/getter pairs
-    get eventId() {
-        return this._eventId;
-    }
+	//Setter/getter pairs
+	get eventId() {
+		return this._eventId;
+	}
 
     set eventId(id) {
         this._eventId = id;

@@ -1,11 +1,11 @@
 export class WebCalendar {
-	private _id: string;
-	private _address: string;
-	private _number: number;
-	private _external: boolean;
-	private _summary: string;
-	private _description: string;
-	private _timezone: string;
+	private _id: string = "";
+	private _address: string = "";
+	private _number: number = 1;
+	private _external: boolean = false;
+	private _summary: string = "";
+	private _description: string = "";
+	private _timezone: string = "";
 
 	constructor() {
 	}
@@ -15,7 +15,7 @@ export class WebCalendar {
 		return this._id;
 	}
 
-    set id(id) {
+	set id(id) {
         this._id = id;
 	}
 

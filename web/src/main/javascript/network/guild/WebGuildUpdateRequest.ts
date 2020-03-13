@@ -9,10 +9,10 @@ export class WebGuildUpdateRequest implements AsyncTask {
 
 	readonly callback: TaskCallback;
 
-	apiKey: string;
-	apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
-	private _botNick: string;
+	private _botNick: string = "";
 
 
 	constructor(guildId: number, callback: TaskCallback) {

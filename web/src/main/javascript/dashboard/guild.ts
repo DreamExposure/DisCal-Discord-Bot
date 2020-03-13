@@ -9,7 +9,7 @@ import {GuildSettingsUpdateRequest} from "@/network/guild/settings/GuildSettings
 import {WebGuildUpdateRequest} from "@/network/guild/WebGuildUpdateRequest";
 
 export class DashboardGuildRunner implements TaskCallback {
-	guild: WebGuild;
+	guild: WebGuild = new WebGuild(0);
 
 	apiUrl: string;
 	apiKey: string;

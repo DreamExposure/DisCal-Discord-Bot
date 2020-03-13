@@ -1,25 +1,25 @@
 export class GuildSettings {
-    private _id: number;
-    private _hasExternalCalendar: boolean;
-    private _controlRole: string;
-    private _disCalChannel: string;
-    private _hasSimpleAnnouncements: boolean;
-    private _lang: string;
-    private _prefix: string;
-    private _isPatronGuild: boolean;
-    private _isDevGuild: boolean;
-    private _maxCalendars: number;
-    private _usingTwelveHour: boolean;
-    private _isBranded: boolean;
+	private _id: number;
+	private _hasExternalCalendar: boolean = false;
+	private _controlRole: string = "everyone";
+	private _disCalChannel: string = "all";
+	private _hasSimpleAnnouncements: boolean = false;
+	private _lang: string = "";
+	private _prefix: string = "";
+	private _isPatronGuild: boolean = false;
+	private _isDevGuild: boolean = false;
+	private _maxCalendars: number = 1;
+	private _usingTwelveHour: boolean = false;
+	private _isBranded: boolean = false;
 
-    constructor(id: number) {
-        this._id = id;
-    }
+	constructor(id: number) {
+		this._id = id;
+	}
 
-    //Getter/setter pairs
-    get id() {
-        return this._id;
-    }
+	//Getter/setter pairs
+	get id() {
+		return this._id;
+	}
 
     get hasExternalCalendar() {
         return this._hasExternalCalendar;

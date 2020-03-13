@@ -1,19 +1,19 @@
 import {EventFrequency} from "@/enums/EventFrequency";
 
 export class Recurrence {
-    private _frequency: EventFrequency;
-    private _interval: number;
-    private _count: number;
+	private _frequency: EventFrequency = EventFrequency.DAILY;
+	private _interval: number = 0;
+	private _count: number = 0;
 
-    constructor() {
-        this.frequency = EventFrequency.DAILY;
-        this.interval = 1;
-        this.count = -1;
-    }
+	constructor() {
+		this.frequency = EventFrequency.DAILY;
+		this.interval = 1;
+		this.count = -1;
+	}
 
-    //Getter/setter pairs
-    get frequency() {
-        return this._frequency;
+	//Getter/setter pairs
+	get frequency() {
+		return this._frequency;
     }
 
     set frequency(freq) {

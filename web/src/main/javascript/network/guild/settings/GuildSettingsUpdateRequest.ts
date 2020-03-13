@@ -5,28 +5,28 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class GuildSettingsUpdateRequest implements AsyncTask {
-    private readonly guildId: number;
+	private readonly guildId: number;
 
-    readonly callback: TaskCallback;
+	readonly callback: TaskCallback;
 
-    apiKey: string;
-    apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
-    private _controlRole: string;
-    private _discalChannel: string;
-    private _simpleAnnouncements: boolean;
-    private _lang: string;
-    private _prefix: string;
+	private _controlRole: string = "";
+	private _discalChannel: string = "";
+	private _simpleAnnouncements: boolean = false;
+	private _lang: string = "";
+	private _prefix: string = "";
 
-    //Booleans for confirming what gets sent to API...
-    private updateSimpleAnnouncements: boolean;
+	//Booleans for confirming what gets sent to API...
+	private updateSimpleAnnouncements: boolean = false;
 
-    constructor(guildId: number, callback: TaskCallback) {
-        this.guildId = guildId;
-        this.callback = callback;
-    }
+	constructor(guildId: number, callback: TaskCallback) {
+		this.guildId = guildId;
+		this.callback = callback;
+	}
 
-    provideApiDetails(apiKey: string, apiUrl: string): void {
+	provideApiDetails(apiKey: string, apiUrl: string): void {
 		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
 	}

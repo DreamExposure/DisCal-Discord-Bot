@@ -5,22 +5,22 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class CalendarGetRequest implements AsyncTask {
-    private readonly guildId: number;
-    private readonly calNum: number;
+	private readonly guildId: number;
+	private readonly calNum: number;
 
-    readonly callback: TaskCallback;
+	readonly callback: TaskCallback;
 
-    apiKey: string;
-    apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
-    constructor(guildId: number, calNum: number, callback: TaskCallback) {
-        this.guildId = guildId;
-        this.calNum = calNum;
-        this.callback = callback;
-    }
+	constructor(guildId: number, calNum: number, callback: TaskCallback) {
+		this.guildId = guildId;
+		this.calNum = calNum;
+		this.callback = callback;
+	}
 
-    provideApiDetails(apiKey: string, apiUrl: string): void {
-        this.apiKey = apiKey;
+	provideApiDetails(apiKey: string, apiUrl: string): void {
+		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
     }
 

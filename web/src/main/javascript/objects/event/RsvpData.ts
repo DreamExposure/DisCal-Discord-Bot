@@ -1,18 +1,18 @@
 export class RsvpData {
-    private readonly _guildId: number;
+	private readonly _guildId: number;
 
-    private _eventId: string;
-    private _eventEnd: number;
+	private _eventId: string = "";
+	private _eventEnd: number = 0;
 
-    private readonly _goingOnTime: string[];
-    private readonly _goingLate: string[];
-    private readonly _notGoing: string[];
-    private readonly _undecided: string[];
+	private readonly _goingOnTime: string[];
+	private readonly _goingLate: string[];
+	private readonly _notGoing: string[];
+	private readonly _undecided: string[];
 
-    constructor(guildId: number) {
-        this._guildId = guildId;
+	constructor(guildId: number) {
+		this._guildId = guildId;
 
-        this._goingOnTime = [];
+		this._goingOnTime = [];
         this._goingLate = [];
         this._notGoing = [];
         this._undecided = [];

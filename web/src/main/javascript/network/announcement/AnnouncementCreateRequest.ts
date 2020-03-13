@@ -8,21 +8,21 @@ import {EventColor} from "@/enums/EventColor";
 import jqXHR = JQuery.jqXHR;
 
 export class AnnouncementCreateRequest implements AsyncTask {
-    private readonly guildId: number;
-    private readonly announcement: Announcement;
+	private readonly guildId: number;
+	private readonly announcement: Announcement;
 
-    readonly callback: TaskCallback;
+	readonly callback: TaskCallback;
 
-    apiKey: string;
-    apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
-    constructor(guildId: number, ann: Announcement, callback: TaskCallback) {
-        this.guildId = guildId;
-        this.announcement = ann;
-        this.callback = callback;
-    }
+	constructor(guildId: number, ann: Announcement, callback: TaskCallback) {
+		this.guildId = guildId;
+		this.announcement = ann;
+		this.callback = callback;
+	}
 
-    provideApiDetails(apiKey: string, apiUrl: string): void {
+	provideApiDetails(apiKey: string, apiUrl: string): void {
 		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
 	}

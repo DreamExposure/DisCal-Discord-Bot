@@ -10,8 +10,8 @@ export class WebGuildGetRequest implements AsyncTask {
 
 	readonly callback: TaskCallback;
 
-	apiKey: string;
-	apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
 
 	constructor(guildId: number, userId: number, callback: TaskCallback) {

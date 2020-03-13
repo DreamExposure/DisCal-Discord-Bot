@@ -6,23 +6,23 @@ import {RsvpData} from "@/objects/event/RsvpData";
 import jqXHR = JQuery.jqXHR;
 
 export class RsvpUpdateRequest implements AsyncTask {
-    private readonly rsvpToAdd: RsvpData;
-    private readonly rsvpToRemove: RsvpData;
+	private readonly rsvpToAdd: RsvpData;
+	private readonly rsvpToRemove: RsvpData;
 
-    readonly callback: TaskCallback;
+	readonly callback: TaskCallback;
 
-    apiKey: string;
-    apiUrl: string;
+	apiKey: string = "";
+	apiUrl: string = "";
 
 
-    constructor(toAdd: RsvpData, toRemove: RsvpData, callback: TaskCallback) {
-        this.rsvpToAdd = toAdd;
-        this.rsvpToRemove = toRemove;
-        this.callback = callback;
-    }
+	constructor(toAdd: RsvpData, toRemove: RsvpData, callback: TaskCallback) {
+		this.rsvpToAdd = toAdd;
+		this.rsvpToRemove = toRemove;
+		this.callback = callback;
+	}
 
-    provideApiDetails(apiKey: string, apiUrl: string): void {
-        this.apiKey = apiKey;
+	provideApiDetails(apiKey: string, apiUrl: string): void {
+		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
     }
 

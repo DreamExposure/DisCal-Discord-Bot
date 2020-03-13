@@ -1,16 +1,16 @@
 export class WebChannel {
-    private _id: number;
-    private _name: string;
-    private _isDisCalChannel: boolean;
+	private _id: number = 0;
+	private _name: string = "";
+	private _isDisCalChannel: boolean = false;
 
-    constructor() {
-    }
+	constructor() {
+	}
 
-    //Getter/setter pairs
+	//Getter/setter pairs
 
-    get id() {
-        return this._id;
-    }
+	get id() {
+		return this._id;
+	}
 
     set id(id) {
         this._id = id;
