@@ -243,23 +243,20 @@
 				<!--Start guild settings display-->
 				<div id="guild-settings" hidden="hidden">
 					<!--Start nickname form-->
-					<form id="nickname-form" class="row">
-						<div class="form-row">
-							<div class="col-sm-3 my-1">
-								<label for="nickname-input"
-									   class="col-sm-2 col-form-label text-discord-full-white">
-									Nickname
-								</label>
+					<form id="nickname-form" class="row form-inline pl-3">
+						<label for="nickname-input" class="sr-only">Nickname</label>
+
+						<div class="mb-2 mr-sm-2 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">Nickname</span>
 							</div>
-							<div class="col my-1 input-group">
-								<input type="text" class="form-control" id="nickname-input"
-									   placeholder="DisCal" maxlength="32">
-								<div class="input-group-append">
-									<button type="button" class="btn btn-discal-blue"
-											id="nick-update-btn">
-										Update
-									</button>
-								</div>
+							<input type="text" class="form-control" id="nickname-input"
+								   placeholder="DisCal" maxlength="32">
+							<div class="input-group-append">
+								<button type="button" class="btn btn-discal-blue"
+										id="nick-update-btn">
+									Update
+								</button>
 							</div>
 						</div>
 					</form>
@@ -269,23 +266,20 @@
 					<br>
 
 					<!--Start prefix form-->
-					<form id="prefix-form" class="row">
-						<div class="form-row">
-							<div class="col-sm-3 my-1">
-								<label for="prefix-input"
-									   class="col-sm-2 col-form-label text-discord-full-white">
-									Prefix
-								</label>
+					<form id="prefix-form" class="row form-inline pl-3">
+						<label for="prefix-input" class="sr-only">Prefix</label>
+
+						<div class="mb-2 mr-sm-2 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">Prefix</span>
 							</div>
-							<div class="col my-1 input-group">
-								<input type="text" class="form-control" id="prefix-input"
-									   placeholder="!" maxlength="5">
-								<div class="input-group-append">
-									<button type="button" class="btn btn-discal-blue"
-											id="prefix-update-btn">
-										Update
-									</button>
-								</div>
+							<input type="text" class="form-control" id="prefix-input"
+								   placeholder="!" maxlength="5">
+							<div class="input-group-append">
+								<button type="button" class="btn btn-discal-blue"
+										id="prefix-update-btn">
+									Update
+								</button>
 							</div>
 						</div>
 					</form>
@@ -298,22 +292,19 @@
 					<br>
 
 					<!--Start control role form-->
-					<form id="control-role-form" class="row">
-						<div class="form-row">
-							<div class="col-sm-5 my-1">
-								<label for="control-role-select"
-									   class="col col-form-label text-discord-full-white">
-									Control Role
-								</label>
+					<form id="control-role-form" class="row form-inline pl-3">
+						<label for="control-role-select" class="sr-only">Control Role</label>
+
+						<div class="mb-2 mr-sm-2 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">Control Role</span>
 							</div>
-							<div class="col my-1 input-group">
-								<select class="form-control" id="control-role-select"></select>
-								<div class="input-group-append">
-									<button type="button" class="btn btn-discal-blue"
-											id="control-role-update-btn">
-										Update
-									</button>
-								</div>
+							<select class="form-control" id="control-role-select"></select>
+							<div class="input-group-append">
+								<button type="button" class="btn btn-discal-blue"
+										id="control-role-update-btn">
+									Update
+								</button>
 							</div>
 						</div>
 					</form>
