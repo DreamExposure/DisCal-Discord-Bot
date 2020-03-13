@@ -39,12 +39,29 @@ export class DashboardGuildRunner implements TaskCallback {
 		//TODO: load in settings data
 		(<HTMLInputElement>document.getElementById("nickname-input")).value = this.guild.botNick;
 		document.getElementById("nick-update-btn")!.onclick = function () {
-			this.updateBotNick()
+			this.updateBotNick();
 		}.bind(this);
 
 		(<HTMLInputElement>document.getElementById("prefix-input")).value = this.guild.settings.prefix;
 		document.getElementById("prefix-update-btn")!.onclick = function () {
-			this.updatePrefix()
+			this.updatePrefix();
+		}.bind(this);
+
+		let controlRoleSelect = document.getElementById("control-role-select")!;
+		for (let i = 0; i < this.guild.roles.length; i++) {
+			let role = this.guild.roles[i];
+			let opt = document.createElement("option");
+			opt.innerHTML = role.name;
+			opt.value = role.id.toString();
+			if (this.guild.settings.controlRole == "all") {
+				opt.selected = role.id == 0;
+			} else {
+				opt.selected = role.id.toString() == this.guild.settings.controlRole;
+			}
+			controlRoleSelect.appendChild(opt);
+		}
+		document.getElementById("control-role-update-button")!.onclick = function () {
+			this.updateControlRole();
 		}.bind(this);
 
 		//load data that cannot be edited
@@ -85,7 +102,17 @@ export class DashboardGuildRunner implements TaskCallback {
 		this.guild.settings.prefix = request.prefix;
 
 		request.execute();
+	}
 
+	private updateControlRole() {
+		let request = new GuildSettingsUpdateRequest(this.guildId, this);
+		request.provideApiDetails(this.apiKey, this.apiUrl);
+
+		let select = <HTMLSelectElement>document.getElementById("control-role-select");
+		request.controlRole = select.selectedOptions[0].value;
+		this.guild.settings.controlRole = request.controlRole;
+
+		request.execute();
 	}
 
 	onCallback(status: NetworkCallStatus): void {
