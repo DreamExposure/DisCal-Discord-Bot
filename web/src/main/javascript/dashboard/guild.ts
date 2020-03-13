@@ -58,7 +58,7 @@ export class DashboardGuildRunner implements TaskCallback {
 
 			controlRoleSelect.appendChild(opt);
 		}
-		document.getElementById("control-role-update-button")!.onclick = function () {
+		document.getElementById("control-role-update-btn")!.onclick = function () {
 			this.updateControlRole();
 		}.bind(this);
 
