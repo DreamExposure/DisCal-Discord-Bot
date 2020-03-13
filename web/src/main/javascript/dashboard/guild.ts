@@ -51,13 +51,11 @@ export class DashboardGuildRunner implements TaskCallback {
 		for (let i = 0; i < this.guild.roles.length; i++) {
 			let role = this.guild.roles[i];
 			let opt = document.createElement("option");
+
 			opt.innerHTML = role.name;
 			opt.value = role.id.toString();
-			if (this.guild.settings.controlRole == "all") {
-				opt.selected = role.id == 0;
-			} else {
-				opt.selected = role.id.toString() == this.guild.settings.controlRole;
-			}
+			opt.selected = role.id.toString() == this.guild.settings.controlRole;
+
 			controlRoleSelect.appendChild(opt);
 		}
 		document.getElementById("control-role-update-button")!.onclick = function () {

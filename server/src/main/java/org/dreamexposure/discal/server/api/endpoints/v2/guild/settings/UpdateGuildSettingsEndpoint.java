@@ -49,15 +49,15 @@ public class UpdateGuildSettingsEndpoint {
 			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
 
 			//Handle various things that are allowed to change.
-			if (body.has("control_role")) {
-				String id = body.getString("control_role");
+			if (body.has("control_role"))
+				settings.setControlRole(body.getString("control_role"));
+			if (body.has("discal_channel")) {
+				String id = body.getString("discal_channel");
 				if (id.equalsIgnoreCase("0") || id.equalsIgnoreCase("all"))
-					settings.setControlRole("all");
+					settings.setDiscalChannel("all");
 				else
-					settings.setControlRole(id);
+					settings.setDiscalChannel(id);
 			}
-			if (body.has("discal_channel"))
-				settings.setDiscalChannel(body.getString("discal_channel"));
 			if (body.has("simple_announcements"))
 				settings.setSimpleAnnouncements(body.getBoolean("simple_announcements"));
 			if (body.has("lang"))
