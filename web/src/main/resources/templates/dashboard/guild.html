@@ -173,14 +173,14 @@
 			<th:block th:each="guild : ${guilds}">
 				<div class="nav-item">
 					<th:block
-							th:if="${#strings.contains(#httpServletRequest.requestURI, ${guild.id})}">
+							th:if="${#strings.contains(#httpServletRequest.requestURI, guild.id)}">
 						<a class="nav-link active" th:href="'/dashboard/' + ${guild.id}">
 							<i class="fas fa-fw fa-chart-area"></i>
 							<span th:text="${guild.name}"></span>
 						</a>
 					</th:block>
 					<th:block
-							th:unless="${#strings.contains(#httpServletRequest.requestURI, ${guild.id})}">
+							th:unless="${#strings.contains(#httpServletRequest.requestURI, guild.id)}">
 						<a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
 							<i class="fas fa-fw fa-chart-area"></i>
 							<span th:text="${guild.name}"></span>
