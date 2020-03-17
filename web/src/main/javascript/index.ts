@@ -11,12 +11,34 @@ function loadEmbedCalendar(embedKey: string, apiUrl: string) {
 	embedRunner.init(embedKey, apiUrl);
 }
 
-const body = document.getElementById("page-top");
-if (body!.dataset.embedKey != null) {
-	loadEmbedCalendar(<string>body!.dataset.embedKey, <string>body!.dataset.apiUrl);
-} else if (body!.dataset.apiKey != null) {
-	loadDashboardGuildPage(<string>body!.dataset.apiKey,
-		<string>body!.dataset.apiUrl, <string>body!.dataset.userId)
+const body = document.getElementById("page-top")!;
+if (body.dataset.embedKey != null) {
+	//This will eventually be a switch or something when we get more embed pages.
+	loadEmbedCalendar(<string>body.dataset.embedKey, <string>body.dataset.apiUrl);
+} else if (body.dataset.dashboard != null) {
+	//Get the various data attributes we need...
+	const dash = <string>body.dataset.dashboard;
+	const apiKey = <string>body.dataset.apiKey;
+	const apiUrl = <string>body.dataset.apiUrl;
+	const userId = <string>body.dataset.userId;
+
+	switch (dash.toUpperCase()) {
+		case "GUILD":
+			loadDashboardGuildPage(apiKey, apiUrl, userId);
+			break;
+		case "CALENDAR":
+			//TODO: load dashboard calendar page
+			break;
+		case "EVENTS":
+			//TODO: load dashboard events page
+			break;
+		case "ANNOUNCEMENTS":
+			//TODO: load dashboard announcements page
+			break;
+		default:
+			//No default action, if its incorrect we don't do anything.
+			break;
+	}
 }
 
 (function ($) {

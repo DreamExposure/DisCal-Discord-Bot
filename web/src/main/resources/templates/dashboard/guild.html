@@ -48,7 +48,8 @@
 
 </head>
 
-<body id="page-top" th:data-api-key="${key}" th:data-api-url="${api_url}" th:data-user-id="${id}">
+<body id="page-top" th:data-api-key="${key}" th:data-api-url="${api_url}" th:data-user-id="${id}"
+	  data-dashboard="guild">
 
 <!-- Page Wrapper -->
 <div id="wrapper">
@@ -104,7 +105,7 @@
 		</li>
 
 		<!-- Nav Item - Dashboard -->
-		<li class="nav-item">
+		<li class="nav-item active">
 			<a class="nav-link" href="/dashboard">
 				<i class="fas fa-fw fa-tachometer-alt"></i>
 				<span>Dashboard</span></a>
@@ -113,9 +114,57 @@
 		<!-- Divider -->
 		<hr class="sidebar-divider">
 
-		<!-- Guilds list (only displayed if logged in) -->
+		<!-- Modules list (only displayed if logged in) -->
 		<div th:if="${logged_in}">
 			<!-- Heading     -->
+			<div class="sidebar-heading">
+				Modules
+			</div>
+
+			<!-- Start Nav Item - Guild Overview Container -->
+			<div class="nav-item active">
+				<a class="nav-link" href="#" id="dash-overview-select">
+					<i class="fas fa-fw fa-chart-area"></i>
+					<span>Guild Overview</span>
+				</a>
+			</div>
+			<!-- End Nav Item - Guild Overview Container -->
+
+			<!-- Start Nav Item - Guild Calendar Container -->
+			<div class="nav-item">
+				<a class="nav-link" href="#" id="dash-calendar-select">
+					<i class="fas fa-fw fa-chart-area"></i>
+					<span>Calendar</span>
+				</a>
+			</div>
+			<!-- End Nav Item - Guild Calendar Container -->
+
+			<!-- Start Nav Item - Guild Events Container -->
+			<div class="nav-item">
+				<a class="nav-link" href="#" id="dash-events-select">
+					<i class="fas fa-fw fa-chart-area"></i>
+					<span>Events</span>
+				</a>
+			</div>
+			<!-- End Nav Item - Guild Events Container -->
+
+			<!-- Start Nav Item - Guild Announcements Container -->
+			<div class="nav-item">
+				<a class="nav-link" href="#" id="dash-ann-select">
+					<i class="fas fa-fw fa-chart-area"></i>
+					<span>Announcements</span>
+				</a>
+			</div>
+			<!-- End Nav Item - Guild Announcements Container -->
+
+			<!-- Divider -->
+			<hr class="sidebar-divider d-none d-md-block">
+		</div>
+		<!-- End Modules list -->
+
+		<!-- Guilds list (only displayed if logged in) -->
+		<div th:if="${logged_in}">
+			<!-- Heading-->
 			<div class="sidebar-heading">
 				Guilds
 			</div>
@@ -123,10 +172,20 @@
 			<!-- Start Nav Item - Guild Container -->
 			<th:block th:each="guild : ${guilds}">
 				<div class="nav-item">
-					<a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
-						<i class="fas fa-fw fa-chart-area"></i>
-						<span th:text="${guild.name}"></span>
-					</a>
+					<th:block
+							th:if="${#strings.contains(#httpServletRequest.requestURI, ${guild.id})}">
+						<a class="nav-link active" th:href="'/dashboard/' + ${guild.id}">
+							<i class="fas fa-fw fa-chart-area"></i>
+							<span th:text="${guild.name}"></span>
+						</a>
+					</th:block>
+					<th:block
+							th:unless="${#strings.contains(#httpServletRequest.requestURI, ${guild.id})}">
+						<a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
+							<i class="fas fa-fw fa-chart-area"></i>
+							<span th:text="${guild.name}"></span>
+						</a>
+					</th:block>
 				</div>
 			</th:block>
 			<!-- End Nav Item - Guild Container -->
