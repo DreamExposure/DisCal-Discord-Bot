@@ -44,7 +44,7 @@
 	<repositories>
 		<repository>
 			<id>nova-public</id>
-			<url>http://repo.novafox161.com/repository/nova-public/</url>
+			<url>https://repo.novafox161.com/repository/nova-public/</url>
 		</repository>
 		<repository>
 			<id>jcenter</id>
