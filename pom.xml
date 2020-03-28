@@ -27,7 +27,7 @@
 
 		<google.client-api.version>1.28.0</google.client-api.version>
 
-		<revision>3.0.0-SNAPSHOT</revision>
+		<revision>3.1.0-SNAPSHOT</revision>
 	</properties>
 
 	<groupId>org.dreamexposure</groupId>
