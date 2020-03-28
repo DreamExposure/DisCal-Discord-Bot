@@ -123,7 +123,8 @@
 
 			<!-- Start Nav Item - Guild Overview Container -->
 			<div class="nav-item active">
-				<a class="nav-link" href="#" id="dash-overview-select">
+				<a class="nav-link" id="dash-overview-select"
+				   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(2)}">
 					<i class="fas fa-fw fa-book-open"></i>
 					<span>Guild Overview</span>
 				</a>
@@ -132,7 +133,8 @@
 
 			<!-- Start Nav Item - Guild Calendar Container -->
 			<div class="nav-item">
-				<a class="nav-link" href="#" id="dash-calendar-select">
+				<a class="nav-link" id="dash-calendar-select"
+				   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(2)} + '/calendar'">
 					<i class="fas fa-fw fa-calendar-alt"></i>
 					<span>Calendar</span>
 				</a>
@@ -141,7 +143,8 @@
 
 			<!-- Start Nav Item - Guild Events Container -->
 			<div class="nav-item">
-				<a class="nav-link" href="#" id="dash-events-select">
+				<a class="nav-link" id="dash-events-select"
+				   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(2)} + '/events'">
 					<i class="fas fa-fw fa-calendar-day"></i>
 					<span>Events</span>
 				</a>
@@ -150,7 +153,8 @@
 
 			<!-- Start Nav Item - Guild Announcements Container -->
 			<div class="nav-item">
-				<a class="nav-link" href="#" id="dash-ann-select">
+				<a class="nav-link" id="dash-ann-select"
+				   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(2)} + '/announcements'">
 					<i class="fas fa-fw fa-bell"></i>
 					<span>Announcements</span>
 				</a>
