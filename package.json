@@ -29,14 +29,14 @@
 	"webpack-cli": "^3.3.11",
 	"ts-loader": "^6.2.1"
   },
-	"dependencies": {
-	  "@fortawesome/fontawesome-free": "5.9.0",
-	  "bootstrap": "4.3.1",
-	  "typescript": "^3.8.3",
-	  "chart.js": "2.8.0",
-	  "datatables.net-bs4": "1.10.19",
-	  "jquery": "3.4.1",
-	  "jquery.easing": "1.4.1",
-	  "what-input": "5.2.3"
-	}
+  "dependencies": {
+	"@fortawesome/fontawesome-free": "5.9.0",
+	"bootstrap": "4.3.1",
+	"typescript": "^3.8.3",
+	"chart.js": "2.8.0",
+	"datatables.net-bs4": "1.10.19",
+	"jquery": "3.4.1",
+	"jquery.easing": "1.4.1",
+	"what-input": "5.2.3"
+  }
 }

@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.object.web;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
+import org.dreamexposure.discal.core.utils.GuildUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -205,6 +206,9 @@ public class WebGuild {
 		data.put("announcements", jAnnouncements);
 
 		data.put("calendar", calendar.toJson());
+
+		//Add data about shard this guild is expected to be on
+		data.put("shard", GuildUtils.findShard(Snowflake.of(getId())));
 
 		return data;
 	}

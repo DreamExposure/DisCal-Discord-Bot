@@ -82,6 +82,8 @@ export class DashboardGuildRunner implements TaskCallback {
 
 
 		//load data that cannot be edited
+		(<HTMLParagraphElement>document.getElementById("shard-display")).innerHTML = "Shard: " + this.guild.shard;
+
 		if (this.guild.settings.isPatronGuild) {
 			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is a patron guild";
 		} else {

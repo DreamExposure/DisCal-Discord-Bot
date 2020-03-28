@@ -21,34 +21,36 @@ export class WebGuild {
 
 	private _calendar: WebCalendar = new WebCalendar();
 
+	private _shard: number = 0;
+
 	constructor(id: number) {
 		this._id = id;
 
-        this._roles = [];
-        this._channels = [];
-        this._announcements = [];
-    }
+		this._roles = [];
+		this._channels = [];
+		this._announcements = [];
+	}
 
-    //Getter/Setter pairs
-    get id() {
-        return this._id;
-    }
+	//Getter/Setter pairs
+	get id() {
+		return this._id;
+	}
 
-    get name() {
-        return this._name;
-    }
+	get name() {
+		return this._name;
+	}
 
-    set name(name) {
-        this._name = name;
-    }
+	set name(name) {
+		this._name = name;
+	}
 
-    get icon() {
-        return this._icon;
-    }
+	get icon() {
+		return this._icon;
+	}
 
-    set icon(iconUrl) {
-        this._icon = iconUrl;
-    }
+	set icon(iconUrl) {
+		this._icon = iconUrl;
+	}
 
     get settings() {
         return this._settings;
@@ -76,72 +78,82 @@ export class WebGuild {
 
     get hasDisCalRole() {
         return this._hasDisCalRole;
-    }
+	}
 
-    set hasDisCalRole(hasRole) {
-        this._hasDisCalRole = hasRole;
-    }
+	set hasDisCalRole(hasRole) {
+		this._hasDisCalRole = hasRole;
+	}
 
-    get roles() {
-        return this._roles;
-    }
+	get roles() {
+		return this._roles;
+	}
 
-    get channels() {
-        return this._channels;
-    }
+	get channels() {
+		return this._channels;
+	}
 
-    get announcements() {
-        return this._announcements;
-    }
+	get announcements() {
+		return this._announcements;
+	}
 
-    get calendar() {
-        return this._calendar;
-    }
+	get calendar() {
+		return this._calendar;
+	}
 
-    set calendar(calendar) {
-        this._calendar = calendar;
-    }
+	set calendar(calendar) {
+		this._calendar = calendar;
+	}
 
-    //Json conversions
-    toJson() {
-        let json: any = {
-            "id": this.id,
-            "name": this.name,
-            "settings": this.settings.toJson(),
-            "manage_server": this.canManageServer,
-            "discal_role": this.hasDisCalRole,
-            "calendar": this.calendar.toJson()
-        };
-        if (this.icon != null) {
-            json.icon = this.icon;
-        }
-        if (this.botNick != null && this.botNick !== "") {
-            json.bot_nick = this.botNick;
-        }
+	get shard() {
+		return this._shard;
+	}
 
-        let jRoles = [];
-        for (let i = 0; i < this.roles.length; i++) {
-            let role = this.roles[i];
-            jRoles.push(role.toJson());
-        }
-        json.roles = jRoles;
+	set shard(shard) {
+		this._shard = shard;
+	}
 
-        let jChannels = [];
-        for (let i = 0; i < this.channels.length; i++) {
-            let channel = this.channels[i];
-            jChannels.push(channel.toJson());
-        }
-        json.channels = jChannels;
+	//Json conversions
+	toJson() {
+		let json: any = {
+			"id": this.id,
+			"name": this.name,
+			"settings": this.settings.toJson(),
+			"manage_server": this.canManageServer,
+			"discal_role": this.hasDisCalRole,
+			"calendar": this.calendar.toJson()
+		};
+		if (this.icon != null) {
+			json.icon = this.icon;
+		}
+		if (this.botNick != null && this.botNick !== "") {
+			json.bot_nick = this.botNick;
+		}
 
-        let jAnnouncements = [];
-        for (let i = 0; i < this.announcements.length; i++) {
-            let announcement = this.announcements[i];
-            jAnnouncements.push(announcement.toJson());
-        }
-        json.announcements = jAnnouncements;
+		let jRoles = [];
+		for (let i = 0; i < this.roles.length; i++) {
+			let role = this.roles[i];
+			jRoles.push(role.toJson());
+		}
+		json.roles = jRoles;
 
-        return json;
-    }
+		let jChannels = [];
+		for (let i = 0; i < this.channels.length; i++) {
+			let channel = this.channels[i];
+			jChannels.push(channel.toJson());
+		}
+		json.channels = jChannels;
+
+		let jAnnouncements = [];
+		for (let i = 0; i < this.announcements.length; i++) {
+			let announcement = this.announcements[i];
+			jAnnouncements.push(announcement.toJson());
+		}
+		json.announcements = jAnnouncements;
+
+		json.shard = this.shard;
+
+		return json;
+	}
 
     fromJson(json: any) {
         //We don't need to set ID, this is already done...
@@ -173,6 +185,8 @@ export class WebGuild {
 		}
 
 		this.calendar = new WebCalendar().fromJson(json.calendar);
+
+		this.shard = json.shard;
 
 		return this;
 	}
