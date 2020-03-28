@@ -75,7 +75,8 @@ gulp.task('clean:all', gulp.series(function () {
 	return del([
 		"./web/build",
 		"./web/src/main/resources/static/assets/js/**",
-		"./web/src/main/resources/static/assets/css/**"
+		"./web/src/main/resources/static/assets/css/**",
+		"./web/src/main/resources/static/vendor/**"
 	])
 }));
 
@@ -120,7 +121,7 @@ gulp.task('css', gulp.series(['css:compile', 'css:minify']));
 // Default task
 gulp.task('default', gulp.series(['clean:all', 'css', 'vendor', 'clean:build']));
 
-gulp.task('build', gulp.series(['clean:all', 'css', 'clean:build']));
+gulp.task('build', gulp.series(['clean:all', 'css', 'vendor', 'clean:build']));
 
 // Configure the browserSync task
 gulp.task('browserSync', gulp.series(function() {
