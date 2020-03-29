@@ -81,7 +81,7 @@ export class DashboardGuildRunner implements TaskCallback {
 		}.bind(this);
 
 		let langSelect = document.getElementById("discal-lang-select")!;
-		for (let i = 0; i < this.guild.channels.length; i++) {
+		for (let i = 0; i < this.guild.availableLangs.length; i++) {
 			let lang = this.guild.availableLangs[i];
 			let opt = document.createElement("option");
 
