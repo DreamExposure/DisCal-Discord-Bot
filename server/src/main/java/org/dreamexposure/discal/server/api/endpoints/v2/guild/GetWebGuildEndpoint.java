@@ -59,7 +59,7 @@ public class GetWebGuildEndpoint {
 
 				//Add available langs so that editing of langs can be done on the website
 				//noinspection unchecked
-				for (String l : ((ArrayList<String>) ReadFile.readAllLangFiles().keySet())) {
+				for (String l : new ArrayList<String>(ReadFile.readAllLangFiles().keySet())) {
 					wg.getAvailableLangs().add(l);
 				}
 
