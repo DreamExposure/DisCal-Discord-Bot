@@ -301,9 +301,6 @@
 					</a>
 				</div>
 
-				<!--TODO: load and support changing the following:
-					- Lang
-					-->
 				<!--Start guild settings display-->
 				<div id="guild-settings" hidden="hidden">
 					<!--Start nickname form-->
@@ -395,6 +392,28 @@
 						</div>
 					</form>
 					<!--End discal channel form-->
+
+					<br>
+					<br>
+
+					<!--Start discal lang form-->
+					<form id="discal-lang-form" class="row form-inline pl-3">
+						<label for="discal-lang-select" class="sr-only">DisCal Language</label>
+
+						<div class="mb-2 mr-sm-2 input-group">
+							<div class="input-group-prepend">
+								<span class="input-group-text">DisCal Language</span>
+							</div>
+							<select class="form-control" id="discal-lang-select"></select>
+							<div class="input-group-append">
+								<button type="button" class="btn btn-discal-blue"
+										id="discal-lang-update-btn">
+									Update
+								</button>
+							</div>
+						</div>
+					</form>
+					<!--End discal lang form-->
 				</div>
 				<!--End guild settings display-->
 

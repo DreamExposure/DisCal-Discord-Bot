@@ -36,7 +36,7 @@ export class DashboardGuildRunner implements TaskCallback {
 	private handleWebGuildGet(status: NetworkCallStatus) {
 		this.guild = new WebGuild(this.guildId).fromJson(status.body);
 
-		//TODO: load in settings data
+		//load in settings data
 		(<HTMLInputElement>document.getElementById("nickname-input")).value = this.guild.botNick;
 		document.getElementById("nick-update-btn")!.onclick = function () {
 			this.updateBotNick();
@@ -78,6 +78,21 @@ export class DashboardGuildRunner implements TaskCallback {
 		}
 		document.getElementById("discal-chan-update-btn")!.onclick = function () {
 			this.updateDiscalChannel();
+		}.bind(this);
+
+		let langSelect = document.getElementById("discal-lang-select")!;
+		for (let i = 0; i < this.guild.channels.length; i++) {
+			let lang = this.guild.availableLangs[i];
+			let opt = document.createElement("option");
+
+			opt.innerHTML = lang.toUpperCase();
+			opt.value = lang.toUpperCase();
+
+			opt.selected = lang.toUpperCase() == this.guild.settings.lang.toUpperCase();
+			langSelect.appendChild(opt);
+		}
+		document.getElementById("discal-lang-update-btn")!.onclick = function () {
+			this.updateLang();
 		}.bind(this);
 
 
@@ -141,6 +156,17 @@ export class DashboardGuildRunner implements TaskCallback {
 		let select = <HTMLSelectElement>document.getElementById("discal-chan-select");
 		request.discalChannel = select.selectedOptions[0].value;
 		this.guild.settings.disCalChannel = request.discalChannel;
+
+		request.execute();
+	}
+
+	private updateLang() {
+		let request = new GuildSettingsUpdateRequest(this.guildId, this);
+		request.provideApiDetails(this.apiKey, this.apiUrl);
+
+		let select = <HTMLSelectElement>document.getElementById("discal-lang-select");
+		request.lang = select.selectedOptions[0].value;
+		this.guild.settings.lang = request.lang;
 
 		request.execute();
 	}

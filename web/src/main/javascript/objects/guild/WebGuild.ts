@@ -15,9 +15,10 @@ export class WebGuild {
 	private _canManageServer: boolean = false;
 	private _hasDisCalRole: boolean = false;
 
-	private readonly _roles: WebRole[];
-	private readonly _channels: WebChannel[];
-	private readonly _announcements: Announcement[];
+	private readonly _roles: WebRole[] = [];
+	private readonly _channels: WebChannel[] = [];
+	private readonly _announcements: Announcement[] = [];
+	private readonly _availableLangs: string[] = [];
 
 	private _calendar: WebCalendar = new WebCalendar();
 
@@ -25,10 +26,6 @@ export class WebGuild {
 
 	constructor(id: number) {
 		this._id = id;
-
-		this._roles = [];
-		this._channels = [];
-		this._announcements = [];
 	}
 
 	//Getter/Setter pairs
@@ -94,6 +91,10 @@ export class WebGuild {
 
 	get announcements() {
 		return this._announcements;
+	}
+
+	get availableLangs() {
+		return this._availableLangs;
 	}
 
 	get calendar() {
@@ -182,6 +183,10 @@ export class WebGuild {
 
 		for (let i = 0; i < json.announcements.length; i++) {
 			this.roles.push(new WebRole().fromJson(json.roles[i]));
+		}
+
+		for (let i = 0; i < json.available_langs.length; i++) {
+			this.availableLangs.push(json.available_langs[i]);
 		}
 
 		this.calendar = new WebCalendar().fromJson(json.calendar);

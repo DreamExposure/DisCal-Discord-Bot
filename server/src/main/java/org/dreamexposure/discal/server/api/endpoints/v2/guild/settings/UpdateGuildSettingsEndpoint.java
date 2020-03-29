@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.api.endpoints.v2.guild.settings;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
+import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,8 +63,12 @@ public class UpdateGuildSettingsEndpoint {
 			}
 			if (body.has("simple_announcements"))
 				settings.setSimpleAnnouncements(body.getBoolean("simple_announcements"));
-			if (body.has("lang"))
-				settings.setLang(body.getString("lang"));
+			if (body.has("lang")) {
+				String lang = body.getString("lang");
+				//noinspection unchecked
+				if (((ArrayList<String>) ReadFile.readAllLangFiles().keySet()).contains(lang.toUpperCase()))
+					settings.setLang(body.getString("lang"));
+			}
 			if (body.has("prefix"))
 				settings.setPrefix(body.getString("prefix"));
 

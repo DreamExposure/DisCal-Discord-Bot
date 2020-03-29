@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.guild;
 
+import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.object.web.WebGuild;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -52,6 +55,12 @@ public class GetWebGuildEndpoint {
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
+				}
+
+				//Add available langs so that editing of langs can be done on the website
+				//noinspection unchecked
+				for (String l : ((ArrayList<String>) ReadFile.readAllLangFiles().keySet())) {
+					wg.getAvailableLangs().add(l);
 				}
 
 				response.setContentType("application/json");

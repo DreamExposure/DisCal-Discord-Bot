@@ -42,6 +42,8 @@ public class WebGuild {
 	private List<WebChannel> channels = new ArrayList<>();
 	private List<Announcement> announcements = new ArrayList<>();
 
+	private List<String> availableLangs = new ArrayList<>();
+
 	private WebCalendar calendar;
 
 	//Getters
@@ -91,6 +93,10 @@ public class WebGuild {
 
 	public List<Announcement> getAnnouncements() {
 		return announcements;
+	}
+
+	public List<String> getAvailableLangs() {
+		return availableLangs;
 	}
 
 	public WebCalendar getCalendar() {
@@ -209,6 +215,9 @@ public class WebGuild {
 
 		//Add data about shard this guild is expected to be on
 		data.put("shard", GuildUtils.findShard(Snowflake.of(getId())));
+
+		//Available langs to allow web editing of lang to be possible
+		data.put("available_langs", availableLangs);
 
 		return data;
 	}
