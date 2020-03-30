@@ -3,12 +3,12 @@ import {DashboardGuildRunner} from "@/dashboard/guild";
 import {DashboardCalendarRunner} from "@/dashboard/calendar";
 
 function loadDashboardGuildPage(apiKey: string, apiUrl: string, userId: string) {
-	let dgr = new DashboardGuildRunner(apiKey, apiUrl, parseInt(userId));
+	let dgr = new DashboardGuildRunner(apiKey, apiUrl, userId);
 	dgr.start();
 }
 
 function loadDashboardCalendarPage(apiKey: string, apiUrl: string, userId: string) {
-	let dcr = new DashboardCalendarRunner(apiKey, apiUrl, parseInt(userId));
+	let dcr = new DashboardCalendarRunner(apiKey, apiUrl, userId);
 	dcr.start();
 }
 

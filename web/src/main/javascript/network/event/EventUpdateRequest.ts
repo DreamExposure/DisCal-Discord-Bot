@@ -7,7 +7,7 @@ import {EventColor} from "@/enums/EventColor";
 import jqXHR = JQuery.jqXHR;
 
 export class EventUpdateRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly calNum: number;
 	private readonly event: Event;
 
@@ -16,7 +16,7 @@ export class EventUpdateRequest implements AsyncTask {
 	apiKey: string = "";
 	apiUrl: string = "";
 
-	constructor(guildId: number, calNum: number, event: Event, callback: TaskCallback) {
+	constructor(guildId: string, calNum: number, event: Event, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.calNum = calNum;
 		this.event = event;

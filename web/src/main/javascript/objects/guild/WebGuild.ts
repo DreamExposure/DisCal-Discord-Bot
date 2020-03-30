@@ -5,11 +5,11 @@ import {Announcement} from "@/objects/announcement/Announcement";
 import {WebCalendar} from "@/objects/calendar/WebCalendar";
 
 export class WebGuild {
-	private readonly _id: number;
+	private readonly _id: string;
 	private _name: string = "";
 	private _icon: string = "";
 
-	private _settings: GuildSettings = new GuildSettings(0);
+	private _settings: GuildSettings = new GuildSettings("");
 	private _botNick: string = "";
 
 	private _canManageServer: boolean = false;
@@ -24,7 +24,7 @@ export class WebGuild {
 
 	private _shard: number = 0;
 
-	constructor(id: number) {
+	constructor(id: string) {
 		this._id = id;
 	}
 

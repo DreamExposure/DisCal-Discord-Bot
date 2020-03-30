@@ -179,7 +179,7 @@ public class WebGuild {
 	public JSONObject toJson(boolean secure) {
 		JSONObject data = new JSONObject();
 
-		data.put("id", id);
+		data.put("id", String.valueOf(id));
 		data.put("name", name);
 		if (iconUrl != null)
 			data.put("icon_url", iconUrl);
@@ -223,7 +223,7 @@ public class WebGuild {
 	}
 
 	public WebGuild fromJson(JSONObject data) {
-		id = data.getLong("id");
+		id = Long.parseLong(data.getString("id"));
 		name = data.getString("name");
 		if (data.has("icon_url"))
 			iconUrl = data.getString("icon_url");

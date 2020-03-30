@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class GuildSettingsGetRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 
 	readonly callback: TaskCallback;
 
@@ -13,7 +13,7 @@ export class GuildSettingsGetRequest implements AsyncTask {
 	apiUrl: string = "";
 
 
-	constructor(guildId: number, callback: TaskCallback) {
+	constructor(guildId: string, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.callback = callback;
 	}
@@ -23,7 +23,7 @@ export class GuildSettingsGetRequest implements AsyncTask {
 		this.apiUrl = apiUrl;
 	}
 
-    execute(): void {
+	execute(): void {
         let bodyRaw = {
             "guild_id": this.guildId,
         };

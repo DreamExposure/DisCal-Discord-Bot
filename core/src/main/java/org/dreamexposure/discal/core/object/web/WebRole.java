@@ -83,7 +83,7 @@ public class WebRole {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("id", id);
+		data.put("id", String.valueOf(id));
 		data.put("name", name);
 		data.put("managed", managed);
 		data.put("control_role", controlRole);
@@ -93,7 +93,7 @@ public class WebRole {
 	}
 
 	public WebRole fromJson(JSONObject data) {
-		id = data.getLong("id");
+		id = Long.parseLong(data.getString("id"));
 		name = data.getString("name");
 		managed = data.getBoolean("managed");
 		controlRole = data.getBoolean("control_role");

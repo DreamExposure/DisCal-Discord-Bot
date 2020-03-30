@@ -1,5 +1,5 @@
 export class GuildSettings {
-	private _id: number;
+	private _id: string;
 	private _hasExternalCalendar: boolean = false;
 	private _controlRole: string = "everyone";
 	private _disCalChannel: string = "all";
@@ -12,7 +12,7 @@ export class GuildSettings {
 	private _usingTwelveHour: boolean = false;
 	private _isBranded: boolean = false;
 
-	constructor(id: number) {
+	constructor(id: string) {
 		this._id = id;
 	}
 
@@ -21,8 +21,8 @@ export class GuildSettings {
 		return this._id;
 	}
 
-    get hasExternalCalendar() {
-        return this._hasExternalCalendar;
+	get hasExternalCalendar() {
+		return this._hasExternalCalendar;
     }
 
     set hasExternalCalendar(external) {

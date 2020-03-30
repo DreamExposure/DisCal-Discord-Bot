@@ -14,8 +14,8 @@ import {ElementUtil} from "@/utils/ElementUtil";
 
 //The calendar class. This just handles all the stuff inside of the calendar, and keeps it isolated.
 export class EmbedCalendar implements TaskCallback {
-    private readonly guildId: number;
-    private readonly calNumber: number;
+    private readonly guildId: string;
+	private readonly calNumber: number;
     private todaysDate: Date;
     private displays: string[];
     private apiKey: string;
@@ -26,7 +26,7 @@ export class EmbedCalendar implements TaskCallback {
     private calendarData: WebCalendar = new WebCalendar();
 
     constructor() {
-		this.guildId = parseInt(window.location.pathname.split("/")[3]);
+		this.guildId = window.location.pathname.split("/")[3];
 		this.calNumber = parseInt(window.location.pathname.split("/")[4]);
 		this.todaysDate = new Date();
 		this.selectedDate = new Date();

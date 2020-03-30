@@ -55,7 +55,7 @@ public class WebChannel {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("id", id);
+		data.put("id", String.valueOf(id));
 		data.put("name", name);
 		data.put("discal_channel", discalChannel);
 
@@ -63,7 +63,7 @@ public class WebChannel {
 	}
 
 	public WebChannel fromJson(JSONObject data) {
-		id = data.getLong("id");
+		id = Long.parseLong(data.getString("id"));
 		name = data.getString("name");
 		discalChannel = data.getBoolean("discal_channel");
 

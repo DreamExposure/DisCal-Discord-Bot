@@ -69,7 +69,7 @@ public class CalendarData {
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
-		json.put("guild_id", guildId.asLong());
+		json.put("guild_id", guildId.asString());
 		json.put("calendar_number", calendarNumber);
 		json.put("calendar_id", calendarId);
 		json.put("calendar_address", calendarAddress);
@@ -79,7 +79,7 @@ public class CalendarData {
 	}
 
 	public CalendarData fromJson(JSONObject json) {
-		guildId = Snowflake.of(json.getLong("guild_id"));
+		guildId = Snowflake.of(json.getString("guild_id"));
 		calendarNumber = json.getInt("calendar_number");
 
 		calendarId = json.getString("calendar_id");

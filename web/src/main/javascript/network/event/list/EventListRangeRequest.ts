@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class EventListRangeRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly calNum: number;
 	private readonly epochStart: number;
 	private readonly epochEnd: number;
@@ -15,7 +15,7 @@ export class EventListRangeRequest implements AsyncTask {
 	apiKey: string = "";
 	apiUrl: string = "";
 
-	constructor(guildId: number, calNum: number, epochStart: number, epochEnd: number, callback: TaskCallback) {
+	constructor(guildId: string, calNum: number, epochStart: number, epochEnd: number, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.calNum = calNum;
 		this.epochStart = epochStart;

@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class AnnouncementGetRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly anId: string;
 
 	readonly callback: TaskCallback;
@@ -13,7 +13,7 @@ export class AnnouncementGetRequest implements AsyncTask {
 	apiKey: string = "";
 	apiUrl: string = "";
 
-	constructor(guildId: number, anId: string, callback: TaskCallback) {
+	constructor(guildId: string, anId: string, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.anId = anId;
 		this.callback = callback;

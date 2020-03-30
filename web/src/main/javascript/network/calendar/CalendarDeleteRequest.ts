@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class CalendarDeleteRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly calNum: number;
 
 	readonly callback: TaskCallback;
@@ -13,7 +13,7 @@ export class CalendarDeleteRequest implements AsyncTask {
 	apiKey: string = "";
 	apiUrl: string = "";
 
-	constructor(guildId: number, calNum: number, callback: TaskCallback) {
+	constructor(guildId: string, calNum: number, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.calNum = calNum;
 		this.callback = callback;

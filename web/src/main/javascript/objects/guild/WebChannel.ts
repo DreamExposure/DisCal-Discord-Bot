@@ -1,5 +1,5 @@
 export class WebChannel {
-	private _id: number = 0;
+	private _id: string = "";
 	private _name: string = "";
 	private _isDisCalChannel: boolean = false;
 

@@ -53,7 +53,7 @@ public class CreateEventEndpoint {
 		try {
 			JSONObject requestBody = new JSONObject(rBody);
 
-			long guildId = requestBody.getLong("guild_id");
+			String guildId = requestBody.getString("guild_id");
 			int calNumber = requestBody.getInt("calendar_number");
 
 

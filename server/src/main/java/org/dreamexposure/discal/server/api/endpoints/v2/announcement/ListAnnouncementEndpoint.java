@@ -35,7 +35,7 @@ public class ListAnnouncementEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject body = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(body.getLong("guild_id"));
+			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 			int amount = body.getInt("amount");
 
 			JSONArray jAnnouncements = new JSONArray();

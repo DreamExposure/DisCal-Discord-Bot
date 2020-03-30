@@ -44,7 +44,7 @@ public class UpdateCalendarEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 			int calNumber = jsonMain.getInt("calendar_number");
 
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);

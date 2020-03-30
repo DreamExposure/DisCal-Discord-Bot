@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class EventDeleteRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly calNum: number;
 	private readonly eventId: string;
 
@@ -14,7 +14,7 @@ export class EventDeleteRequest implements AsyncTask {
 	apiKey: string = "";
 	apiUrl: string = "";
 
-	constructor(guildId: number, calNum: number, eventId: string, callback: TaskCallback) {
+	constructor(guildId: string, calNum: number, eventId: string, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.calNum = calNum;
 		this.eventId = eventId;

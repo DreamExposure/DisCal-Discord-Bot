@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class RsvpGetRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 	private readonly eventId: string;
 
 	readonly callback: TaskCallback;
@@ -14,7 +14,7 @@ export class RsvpGetRequest implements AsyncTask {
 	apiUrl: string = "";
 
 
-	constructor(guildId: number, eventId: string, callback: TaskCallback) {
+	constructor(guildId: string, eventId: string, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.eventId = eventId;
 		this.callback = callback;

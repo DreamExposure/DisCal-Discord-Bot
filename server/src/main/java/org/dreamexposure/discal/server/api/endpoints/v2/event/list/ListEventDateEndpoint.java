@@ -46,11 +46,11 @@ public class ListEventDateEndpoint {
 		try {
 			JSONObject requestBody = new JSONObject(rBody);
 
-			long guildId = requestBody.getLong("guild_id");
+			Snowflake guildId = Snowflake.of(requestBody.getString("guild_id"));
 			int calNumber = requestBody.getInt("calendar_number");
 			long startEpoch = requestBody.getLong("epoch_start");
 			long endEpoch = startEpoch + GlobalConst.oneDayMs;
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 
 			//okay, lets actually get the date's events.
 			Calendar service = CalendarAuth.getCalendarService(settings);

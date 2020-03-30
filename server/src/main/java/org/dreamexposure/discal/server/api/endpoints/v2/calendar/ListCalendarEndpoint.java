@@ -40,7 +40,7 @@ public class ListCalendarEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
 			Calendar service = CalendarAuth.getCalendarService(settings);

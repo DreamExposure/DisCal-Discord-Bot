@@ -7,20 +7,20 @@ import {ElementUtil} from "@/utils/ElementUtil";
 import {WebGuildGetRequest} from "@/network/guild/WebGuildGetRequest";
 
 export class DashboardCalendarRunner implements TaskCallback {
-	guild: WebGuild = new WebGuild(0);
+	guild: WebGuild = new WebGuild("");
 
 	apiUrl: string;
 	apiKey: string;
 
-	guildId: number;
-	userId: number;
+	guildId: string;
+	userId: string;
 
-	constructor(apiKey: string, apiUrl: string, userId: number) {
+	constructor(apiKey: string, apiUrl: string, userId: string) {
 		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
 		this.userId = userId;
 
-		this.guildId = parseInt(window.location.pathname.split("/")[2]);
+		this.guildId = window.location.pathname.split("/")[2];
 	}
 
 	start() {

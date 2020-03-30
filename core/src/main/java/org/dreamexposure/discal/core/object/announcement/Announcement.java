@@ -396,7 +396,7 @@ public class Announcement {
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
-		data.put("guild_id", guildId.asLong());
+		data.put("guild_id", guildId.asString());
 		data.put("id", announcementId.toString());
 
 		JSONArray roles = new JSONArray();
@@ -425,7 +425,7 @@ public class Announcement {
 	}
 
 	public Announcement fromJson(JSONObject data) {
-		guildId = Snowflake.of(data.getLong("guild_id"));
+		guildId = Snowflake.of(data.getString("guild_id"));
 		announcementId = UUID.fromString(data.getString("id"));
 
 		JSONArray roles = data.getJSONArray("subscriber_roles");

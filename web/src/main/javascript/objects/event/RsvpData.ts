@@ -1,5 +1,5 @@
 export class RsvpData {
-	private readonly _guildId: number;
+	private readonly _guildId: string;
 
 	private _eventId: string = "";
 	private _eventEnd: number = 0;
@@ -9,17 +9,17 @@ export class RsvpData {
 	private readonly _notGoing: string[];
 	private readonly _undecided: string[];
 
-	constructor(guildId: number) {
+	constructor(guildId: string) {
 		this._guildId = guildId;
 
 		this._goingOnTime = [];
-        this._goingLate = [];
-        this._notGoing = [];
-        this._undecided = [];
-    }
+		this._goingLate = [];
+		this._notGoing = [];
+		this._undecided = [];
+	}
 
-    //Getter/setter pairs
-    get guildId() {
+	//Getter/setter pairs
+	get guildId() {
         return this._guildId;
     }
 

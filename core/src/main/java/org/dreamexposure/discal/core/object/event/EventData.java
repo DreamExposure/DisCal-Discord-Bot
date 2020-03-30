@@ -60,7 +60,7 @@ public class EventData {
 	public JSONObject toJson() {
 		JSONObject json = new JSONObject();
 
-		json.put("guild_id", guildId.asLong());
+		json.put("guild_id", guildId.asString());
 		json.put("event_id", eventId);
 		json.put("event_end", eventEnd);
 		json.put("image_link", imageLink);

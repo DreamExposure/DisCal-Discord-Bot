@@ -2,7 +2,7 @@ import {AnnouncementType} from "@/enums/AnnouncementType";
 import {EventColor} from "@/enums/EventColor";
 
 export class Announcement {
-	private readonly _guildId: number;
+	private readonly _guildId: string = "";
 	private _announcementId: string = "";
 
 	private readonly _subscriberRoleIds: string[];
@@ -19,7 +19,7 @@ export class Announcement {
 	private _enabled: boolean = false;
 	private _infoOnly: boolean = false;
 
-	constructor(guildId: number) {
+	constructor(guildId: string) {
 		this._guildId = guildId;
 
 		this._subscriberRoleIds = [];
@@ -28,8 +28,8 @@ export class Announcement {
 
 	//Getter/setter pairs
 	get guildId() {
-        return this._guildId;
-    }
+		return this._guildId;
+	}
 
     get announcementId() {
         return this._announcementId;

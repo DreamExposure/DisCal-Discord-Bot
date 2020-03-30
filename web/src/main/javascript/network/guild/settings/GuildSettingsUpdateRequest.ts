@@ -5,7 +5,7 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class GuildSettingsUpdateRequest implements AsyncTask {
-	private readonly guildId: number;
+	private readonly guildId: string;
 
 	readonly callback: TaskCallback;
 
@@ -21,7 +21,7 @@ export class GuildSettingsUpdateRequest implements AsyncTask {
 	//Booleans for confirming what gets sent to API...
 	private updateSimpleAnnouncements: boolean = false;
 
-	constructor(guildId: number, callback: TaskCallback) {
+	constructor(guildId: string, callback: TaskCallback) {
 		this.guildId = guildId;
 		this.callback = callback;
 	}

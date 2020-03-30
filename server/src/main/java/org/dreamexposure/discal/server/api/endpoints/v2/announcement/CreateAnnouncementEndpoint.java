@@ -40,7 +40,7 @@ public class CreateAnnouncementEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject body = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(body.getLong("guild_id"));
+			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 
 			Announcement a = new Announcement(guildId);
 

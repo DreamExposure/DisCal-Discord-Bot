@@ -9,20 +9,20 @@ import {GuildSettingsUpdateRequest} from "@/network/guild/settings/GuildSettings
 import {WebGuildUpdateRequest} from "@/network/guild/WebGuildUpdateRequest";
 
 export class DashboardGuildRunner implements TaskCallback {
-	guild: WebGuild = new WebGuild(0);
+	guild: WebGuild = new WebGuild("");
 
 	apiUrl: string;
 	apiKey: string;
 
-	guildId: number;
-	userId: number;
+	guildId: string;
+	userId: string;
 
-	constructor(apiKey: string, apiUrl: string, userId: number) {
+	constructor(apiKey: string, apiUrl: string, userId: string) {
 		this.apiKey = apiKey;
 		this.apiUrl = apiUrl;
 		this.userId = userId;
 
-		this.guildId = parseInt(window.location.pathname.split("/")[2]);
+		this.guildId = window.location.pathname.split("/")[2];
 	}
 
 	start() {
@@ -69,7 +69,7 @@ export class DashboardGuildRunner implements TaskCallback {
 
 			opt.innerHTML = chan.name;
 			opt.value = chan.id.toString();
-			if (chan.id == 0 && this.guild.settings.disCalChannel === "all") {
+			if (chan.id == "0" && this.guild.settings.disCalChannel === "all") {
 				opt.selected = true;
 			} else {
 				opt.selected = chan.id.toString() == this.guild.settings.disCalChannel;

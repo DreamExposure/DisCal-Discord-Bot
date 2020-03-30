@@ -1,5 +1,5 @@
 export class WebRole {
-	private _id: number = 0;
+	private _id: string = "";
 	private _name: string = "";
 	private _isManaged: boolean = false;
 	private _isControlRole: boolean = false;

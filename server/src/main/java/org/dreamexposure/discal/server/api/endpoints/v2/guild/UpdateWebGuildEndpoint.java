@@ -35,7 +35,7 @@ public class UpdateWebGuildEndpoint {
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getLong("guild_id"));
+			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
 			Guild g = DisCalServer.getClient()
 					.getGuildById(guildId).onErrorResume(e -> Mono.empty()).block();

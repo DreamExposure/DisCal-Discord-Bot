@@ -254,7 +254,7 @@ public class GuildSettings {
 	}
 
 	public GuildSettings fromJson(JSONObject data) {
-		guildID = Snowflake.of(data.getLong("guild_id"));
+		guildID = Snowflake.of(data.getString("guild_id"));
 		externalCalendar = data.getBoolean("external_calendar");
 		privateKey = data.getString("private_key");
 		encryptedAccessToken = data.getString("access_token");
@@ -274,7 +274,7 @@ public class GuildSettings {
 	}
 
 	public GuildSettings fromJsonSecure(JSONObject data) {
-		guildID = Snowflake.of(data.getLong("guild_id"));
+		guildID = Snowflake.of(data.getString("guild_id"));
 		externalCalendar = data.getBoolean("external_calendar");
 		//privateKey = data.getString("PrivateKey");
 		//encryptedAccessToken = data.getString("AccessToken");
