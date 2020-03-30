@@ -41,6 +41,19 @@
 		<module>web</module>
 	</modules>
 
+	<distributionManagement>
+		<repository>
+			<id>nova-release-pub</id>
+			<name>Releases</name>
+			<url>https://repo.novafox161.com/repository/nova-release-pub/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nova-snapshots-pub</id>
+			<name>Snapshots</name>
+			<url>https://repo.novafox161.com/repository/nova-snapshots-pub/</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 	<repositories>
 		<repository>
 			<id>nova-public</id>
