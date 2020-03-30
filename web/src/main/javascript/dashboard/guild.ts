@@ -25,7 +25,7 @@ export class DashboardGuildRunner implements TaskCallback {
 		this.guildId = parseInt(window.location.pathname.split("/")[2]);
 	}
 
-	startDashboardGuildPage() {
+	start() {
 		//First thing we need to do is load the web guild data so we can display it for editing.
 		let wgr = new WebGuildGetRequest(this.guildId, this.userId, this);
 		wgr.provideApiDetails(this.apiKey, this.apiUrl);

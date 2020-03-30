@@ -1,9 +1,15 @@
-import {DashboardGuildRunner} from "@/dashboard/guild";
 import {EmbedCalendarRunner} from "@/embed/calendar";
+import {DashboardGuildRunner} from "@/dashboard/guild";
+import {DashboardCalendarRunner} from "@/dashboard/calendar";
 
 function loadDashboardGuildPage(apiKey: string, apiUrl: string, userId: string) {
-	let drg = new DashboardGuildRunner(apiKey, apiUrl, parseInt(userId));
-	drg.startDashboardGuildPage();
+	let dgr = new DashboardGuildRunner(apiKey, apiUrl, parseInt(userId));
+	dgr.start();
+}
+
+function loadDashboardCalendarPage(apiKey: string, apiUrl: string, userId: string) {
+	let dcr = new DashboardCalendarRunner(apiKey, apiUrl, parseInt(userId));
+	dcr.start();
 }
 
 function loadEmbedCalendar(embedKey: string, apiUrl: string) {
@@ -27,7 +33,7 @@ if (body.dataset.embedKey != null) {
 			loadDashboardGuildPage(apiKey, apiUrl, userId);
 			break;
 		case "CALENDAR":
-			//TODO: load dashboard calendar page
+			loadDashboardCalendarPage(apiKey, apiUrl, userId);
 			break;
 		case "EVENTS":
 			//TODO: load dashboard events page

@@ -91,6 +91,15 @@ public class SpringController {
 		return "dashboard/guild";
 	}
 
+	@RequestMapping("/dashboard/{id}/calendar")
+	public String dashboardCalendar(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
+		if (!DiscordAccountHandler.getHandler().hasAccount(req))
+			return "redirect:/dashboard";
+		model.clear();
+		model.putAll(DiscordAccountHandler.getHandler().getAccount(req));
+		return "dashboard/calendar";
+	}
+
 	//Random Docs pages
 	@RequestMapping("/docs/event/colors")
 	public String docsEventsEventColors(Map<String, Object> model, HttpServletRequest req) {
