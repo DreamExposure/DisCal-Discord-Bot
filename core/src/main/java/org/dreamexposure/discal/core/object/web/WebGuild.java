@@ -14,6 +14,7 @@ import java.util.List;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -147,45 +148,41 @@ public class WebGuild {
 
 	//Functions
 	public WebGuild fromGuild(Guild g) {
-		Logger.getLogger().debug("web guild conversion p1", true);
 		id = g.getId().asLong();
 		name = g.getName();
-		Logger.getLogger().debug("web guild conversion p2", true);
 		if (g.getIconUrl(Image.Format.PNG).isPresent())
 			iconUrl = g.getIconUrl(Image.Format.PNG).get();
-		Logger.getLogger().debug("web guild conversion p3", true);
+		Logger.getLogger().debug("web guild conversion get nick", true);
 		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("DisCal");
-		Logger.getLogger().debug("web guild conversion p4", true);
+		Logger.getLogger().debug("web guild conversion get settings", true);
 
 		settings = DatabaseManager.getManager().getSettings(g.getId());
-		Logger.getLogger().debug("web guild conversion p5", true);
+		Logger.getLogger().debug("web guild conversion get roles", true);
 
 		//Handle lists and stuffs
-		/*
-		for (Role r : g.getRoles().toIterable()) {
+
+		for (Role r : g.getRoles().collectList().block()) {
 			roles.add(new WebRole().fromRole(r, settings));
 		}
-		 */
-		g.getRoles().doOnNext(role -> roles.add(new WebRole().fromRole(role, settings))).subscribe();
 
-		Logger.getLogger().debug("web guild conversion p6", true);
+		Logger.getLogger().debug("web guild conversion make all", true);
 
 		WebChannel all = new WebChannel();
 		all.setId(0);
 		all.setName("All Channels");
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
-		Logger.getLogger().debug("web guild conversion p7", true);
+		Logger.getLogger().debug("web guild conversion get channels", true);
 		for (GuildChannel c : g.getChannels().toIterable()) {
 			if (c instanceof TextChannel)
 				channels.add(new WebChannel().fromChannel((TextChannel) c, settings));
 		}
-		Logger.getLogger().debug("web guild conversion p8", true);
+		Logger.getLogger().debug("web guild conversion get announcements", true);
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
-		Logger.getLogger().debug("web guild conversion p9", true);
+		Logger.getLogger().debug("web guild conversion get calendar(s)", true);
 
 		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(id)), settings);
-		Logger.getLogger().debug("web guild conversion p10", true);
+		Logger.getLogger().debug("web guild conversion done", true);
 
 		return this;
 	}
