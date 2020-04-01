@@ -38,6 +38,8 @@ public class GetWebGuildEndpoint {
 			return authState.toJson();
 		}
 
+		Logger.getLogger().debug("Handling guild get request 1p", true);
+
 		//Okay, now handle actual request.
 		try {
 			JSONObject jsonMain = new JSONObject(requestBody);
@@ -47,21 +49,27 @@ public class GetWebGuildEndpoint {
 			Guild g = DisCalServer.getClient()
 					.getGuildById(guildId).onErrorResume(e -> Mono.empty()).block();
 
+			Logger.getLogger().debug("Handling guild get request 2p", true);
+
 			if (g != null) {
 				WebGuild wg = new WebGuild().fromGuild(g);
+				Logger.getLogger().debug("Handling guild get request 3.1p", true);
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
+				Logger.getLogger().debug("Handling guild get request 3.2p", true);
 
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
 				}
+				Logger.getLogger().debug("Handling guild get request 3.3p", true);
 
 				//Add available langs so that editing of langs can be done on the website
 				//noinspection unchecked
 				for (String l : new ArrayList<String>(ReadFile.readAllLangFiles().keySet())) {
 					wg.getAvailableLangs().add(l);
 				}
+				Logger.getLogger().debug("Handling guild get request 3.4p", true);
 
 				response.setContentType("application/json");
 				response.setStatus(200);
