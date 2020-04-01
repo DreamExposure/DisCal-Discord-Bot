@@ -14,7 +14,6 @@ import java.util.List;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -162,9 +161,13 @@ public class WebGuild {
 		Logger.getLogger().debug("web guild conversion p5", true);
 
 		//Handle lists and stuffs
+		/*
 		for (Role r : g.getRoles().toIterable()) {
 			roles.add(new WebRole().fromRole(r, settings));
 		}
+		 */
+		g.getRoles().doOnNext(role -> roles.add(new WebRole().fromRole(role, settings))).subscribe();
+
 		Logger.getLogger().debug("web guild conversion p6", true);
 
 		WebChannel all = new WebChannel();
