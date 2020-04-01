@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.web;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.utils.GuildUtils;
@@ -147,31 +148,41 @@ public class WebGuild {
 
 	//Functions
 	public WebGuild fromGuild(Guild g) {
+		Logger.getLogger().debug("web guild conversion p1", true);
 		id = g.getId().asLong();
 		name = g.getName();
+		Logger.getLogger().debug("web guild conversion p2", true);
 		if (g.getIconUrl(Image.Format.PNG).isPresent())
 			iconUrl = g.getIconUrl(Image.Format.PNG).get();
+		Logger.getLogger().debug("web guild conversion p3", true);
 		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("DisCal");
+		Logger.getLogger().debug("web guild conversion p4", true);
 
 		settings = DatabaseManager.getManager().getSettings(g.getId());
+		Logger.getLogger().debug("web guild conversion p5", true);
 
 		//Handle lists and stuffs
 		for (Role r : g.getRoles().toIterable()) {
 			roles.add(new WebRole().fromRole(r, settings));
 		}
+		Logger.getLogger().debug("web guild conversion p6", true);
 
 		WebChannel all = new WebChannel();
 		all.setId(0);
 		all.setName("All Channels");
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
+		Logger.getLogger().debug("web guild conversion p7", true);
 		for (GuildChannel c : g.getChannels().toIterable()) {
 			if (c instanceof TextChannel)
 				channels.add(new WebChannel().fromChannel((TextChannel) c, settings));
 		}
+		Logger.getLogger().debug("web guild conversion p8", true);
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
+		Logger.getLogger().debug("web guild conversion p9", true);
 
 		calendar = new WebCalendar().fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(id)), settings);
+		Logger.getLogger().debug("web guild conversion p10", true);
 
 		return this;
 	}
