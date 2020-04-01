@@ -1,13 +1,8 @@
 package org.dreamexposure.discal.core.logger;
 
-import club.minnced.discord.webhook.WebhookClient;
-import club.minnced.discord.webhook.send.WebhookEmbed;
-import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
-import discord4j.core.object.entity.User;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
-import javax.annotation.Nullable;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,6 +10,13 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Calendar;
+
+import javax.annotation.Nullable;
+
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
+import discord4j.core.object.entity.User;
 
 @SuppressWarnings("Duplicates")
 public class Logger {
@@ -112,18 +114,20 @@ public class Logger {
 				error = error.substring(0, 1500);
 
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
-				.addField(new WebhookEmbed
-					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-				.addField(new WebhookEmbed
-					.EmbedField(false, "Class", clazz.getName()))
-				.setDescription(error)
-				.setColor(GlobalConst.discalColor.getRGB())
-				.setTimestamp(Instant.now());
+					.setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
+					.addField(new WebhookEmbed
+							.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Class", clazz.getName()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Time", timeStamp))
+					.setDescription(error)
+					.setColor(GlobalConst.discalColor.getRGB())
+					.setTimestamp(Instant.now());
 
 			if (author != null) {
 				builder.setAuthor(new WebhookEmbed
-					.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
+						.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
 			}
 			if (message != null) {
 				builder.addField(new WebhookEmbed.EmbedField(false, "Message", message));
@@ -158,16 +162,18 @@ public class Logger {
 		//Post to webhook if wanted.
 		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
-				.addField(new WebhookEmbed
-					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-				.setDescription(message)
-				.setColor(GlobalConst.discalColor.getRGB())
-				.setTimestamp(Instant.now());
+					.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+					.addField(new WebhookEmbed
+							.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Time", timeStamp))
+					.setDescription(message)
+					.setColor(GlobalConst.discalColor.getRGB())
+					.setTimestamp(Instant.now());
 
 			if (author != null) {
 				builder.setAuthor(new WebhookEmbed
-					.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
+						.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
 			}
 			if (info != null) {
 				builder.addField(new WebhookEmbed.EmbedField(false, "Info", info));
@@ -194,12 +200,14 @@ public class Logger {
 		//Post to webhook if wanted.
 		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
-				.addField(new WebhookEmbed
-					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-				.setDescription(message)
-				.setColor(GlobalConst.discalColor.getRGB())
-				.setTimestamp(Instant.now());
+					.setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+					.addField(new WebhookEmbed
+							.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Time", timeStamp))
+					.setDescription(message)
+					.setColor(GlobalConst.discalColor.getRGB())
+					.setTimestamp(Instant.now());
 
 			debugClient.send(builder.build());
 		}
@@ -281,16 +289,17 @@ public class Logger {
 		//Post to webhook if wanted.
 		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true")) {
 			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-				.setTitle(new WebhookEmbed.EmbedTitle("Status", null))
-				.addField(new WebhookEmbed
-					.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-				.setDescription(message)
-				.setColor(GlobalConst.discalColor.getRGB())
-				.setTimestamp(Instant.now());
+					.setTitle(new WebhookEmbed.EmbedTitle("Status", null))
+					.addField(new WebhookEmbed
+							.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+
+					.setDescription(message)
+					.setColor(GlobalConst.discalColor.getRGB())
+					.setTimestamp(Instant.now());
 
 			if (info != null) {
 				builder.addField(new WebhookEmbed
-					.EmbedField(false, "Info", info));
+						.EmbedField(false, "Info", info));
 			}
 
 			statusClient.send(builder.build());
