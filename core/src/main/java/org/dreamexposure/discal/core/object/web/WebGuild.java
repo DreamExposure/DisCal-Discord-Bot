@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.object.web;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.utils.GuildUtils;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
@@ -153,7 +153,10 @@ public class WebGuild {
 		if (g.getIconUrl(Image.Format.PNG).isPresent())
 			iconUrl = g.getIconUrl(Image.Format.PNG).get();
 		Logger.getLogger().debug("web guild conversion get nick", true);
-		botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("DisCal");
+		//botNick = g.getClient().getSelf().flatMap(user -> user.asMember(g.getId())).map(Member::getNickname).block().orElse("DisCal");
+
+		botNick = g.getMemberById(Snowflake.of(BotSettings.ID.get())).map(Member::getNickname).block().orElse("DisCal");
+
 		Logger.getLogger().debug("web guild conversion get settings", true);
 
 		settings = DatabaseManager.getManager().getSettings(g.getId());
@@ -173,9 +176,8 @@ public class WebGuild {
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
 		Logger.getLogger().debug("web guild conversion get channels", true);
-		for (GuildChannel c : g.getChannels().toIterable()) {
-			if (c instanceof TextChannel)
-				channels.add(new WebChannel().fromChannel((TextChannel) c, settings));
+		for (TextChannel c : g.getChannels().ofType(TextChannel.class).collectList().block()) {
+			channels.add(new WebChannel().fromChannel(c, settings));
 		}
 		Logger.getLogger().debug("web guild conversion get announcements", true);
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
