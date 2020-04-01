@@ -9,9 +9,10 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/19/17.
@@ -31,20 +32,18 @@ public class PermissionChecker {
 		try {
 			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().block().getId());
 			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
-				User sender = event.getMessage().getAuthor().get();
+				Member sender = event.getMember().get();
+				Guild guild = event.getGuild().block();
 				String roleId = settings.getControlRole();
-				Role role = null;
-
-				for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
-						role = r;
-						break;
-					}
-				}
+				Role role = guild
+						.getRoleById(Snowflake.of(roleId))
+						.onErrorResume(e -> Mono.empty())
+						.block();
 
 				if (role != null) {
-					for (Role r : event.getGuild().block().getMemberById(sender.getId()).block().getRoles().toIterable()) {
-						if (r.getId().asString().equals(role.getId().asString()) || r.getPosition().block() > role.getPosition().block())
+					int pos = role.getPosition().block();
+					for (Role r : sender.getRoles().collectList().block()) {
+						if (r.getId().asString().equals(role.getId().asString()) || r.getPosition().block() > pos)
 							return true;
 
 					}
@@ -69,19 +68,18 @@ public class PermissionChecker {
 		try {
 			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getId());
 			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
-				String roleId = settings.getControlRole();
-				Role role = null;
 
-				for (Role r : guild.getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
-						role = r;
-						break;
-					}
-				}
+				String roleId = settings.getControlRole();
+				Role role = guild
+						.getRoleById(Snowflake.of(roleId))
+						.onErrorResume(e -> Mono.empty())
+						.block();
 
 				if (role != null) {
-					for (Role r : member.getRoles().toIterable()) {
-						if (r.getId().equals(role.getId()) || r.getPosition().block() > role.getPosition().block())
+					int pos = role.getPosition().block();
+
+					for (Role r : member.getRoles().collectList().block()) {
+						if (r.getId().equals(role.getId()) || r.getPosition().block() > pos)
 							return true;
 
 					}
@@ -101,24 +99,21 @@ public class PermissionChecker {
 		return true;
 	}
 
-	public static boolean hasSufficientRole(Guild guild, User user) {
-		//TODO: Figure out exactly what is causing a NPE here...
+	public static boolean hasSufficientRole(Guild guild, Member member, GuildSettings settings) {
 		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getId());
 			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
-				String roleId = settings.getControlRole();
-				Role role = null;
 
-				for (Role r : guild.getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
-						role = r;
-						break;
-					}
-				}
+				String roleId = settings.getControlRole();
+				Role role = guild
+						.getRoleById(Snowflake.of(roleId))
+						.onErrorResume(e -> Mono.empty())
+						.block();
 
 				if (role != null) {
-					for (Role r : guild.getMemberById(user.getId()).block().getRoles().toIterable()) {
-						if (r.getId().equals(role.getId()) || r.getPosition().block() > role.getPosition().block())
+					int pos = role.getPosition().block();
+
+					for (Role r : member.getRoles().collectList().block()) {
+						if (r.getId().equals(role.getId()) || r.getPosition().block() > pos)
 							return true;
 
 					}
@@ -132,7 +127,7 @@ public class PermissionChecker {
 			}
 		} catch (Exception e) {
 			//Something broke so we will harmlessly allow access and notify the dev team
-			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
+			Logger.getLogger().exception(member, "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
 			return true;
 		}
 		return true;

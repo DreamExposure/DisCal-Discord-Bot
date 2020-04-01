@@ -53,10 +53,13 @@ public class GetWebGuildEndpoint {
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
 
+				Logger.getLogger().debug("Guild get start perm check", true);
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
-					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
+					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m, wg.getSettings()));
 				}
+				Logger.getLogger().debug("Guild get end perm check", true);
+
 				//End slowdown
 				Logger.getLogger().debug("Guild get endpoint slowdown ends here", true);
 
