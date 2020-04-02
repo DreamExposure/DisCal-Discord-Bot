@@ -1,9 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -14,13 +10,29 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.*;
-import reactor.core.publisher.Mono;
+import org.dreamexposure.discal.core.utils.AnnouncementUtils;
+import org.dreamexposure.discal.core.utils.ChannelUtils;
+import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.GeneralUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.RoleUtils;
+import org.dreamexposure.discal.core.utils.UserUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -111,25 +123,25 @@ public class AnnouncementCommand implements ICommand {
 		} else {
 			switch (args[0].toLowerCase()) {
 				case "create":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCreate(event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "confirm":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleConfirm(event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "cancel":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCancel(event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "delete":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleDelete(args, event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -180,13 +192,13 @@ public class AnnouncementCommand implements ICommand {
 					moduleColor(args, event, settings);
 					break;
 				case "copy":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCopy(args, event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "edit":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleEdit(args, event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -842,7 +854,7 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				try {
-					int hoursOr = Integer.valueOf(value);
+					int hoursOr = Integer.parseInt(value);
 					int hours = Math.abs(hoursOr);
 					AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setHoursBefore(hours);
 					if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
@@ -874,7 +886,7 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				try {
-					int minutesOr = Integer.valueOf(value);
+					int minutesOr = Integer.parseInt(value);
 					int minutes = Math.abs(minutesOr);
 					AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setMinutesBefore(minutes);
 					if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
@@ -927,7 +939,7 @@ public class AnnouncementCommand implements ICommand {
 				} else {
 					//List specific amount of announcements
 					try {
-						Integer amount = Integer.valueOf(value);
+						int amount = Integer.parseInt(value);
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.Some", "%amount%", amount + "", settings), event);
 
 						int posted = 0;

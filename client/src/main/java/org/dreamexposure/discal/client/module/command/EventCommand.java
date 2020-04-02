@@ -125,37 +125,37 @@ public class EventCommand implements ICommand {
 		} else {
 			switch (args[0].toLowerCase()) {
 				case "create":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCreate(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "copy":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCopy(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "edit":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleEdit(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "restart":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleRestart(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "cancel":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCancel(event, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "delete":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleDelete(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -165,7 +165,7 @@ public class EventCommand implements ICommand {
 					moduleView(args, event, calendarData, settings);
 					break;
 				case "confirm":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleConfirm(event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);

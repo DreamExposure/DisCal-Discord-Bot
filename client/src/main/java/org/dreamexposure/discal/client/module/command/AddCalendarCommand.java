@@ -2,7 +2,7 @@ package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -15,6 +15,8 @@ import org.dreamexposure.discal.core.utils.PermissionChecker;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
  * Created by Nova Fox on 6/29/2017.
@@ -72,7 +74,7 @@ public class AddCalendarCommand implements ICommand {
 	@Override
 	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		if (settings.isDevGuild() || settings.isPatronGuild()) {
-			if (PermissionChecker.hasManageServerRole(event)) {
+			if (PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
 				if (args.length == 0) {
 					if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Start", settings), event);

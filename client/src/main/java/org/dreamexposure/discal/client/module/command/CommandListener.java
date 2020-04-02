@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
@@ -9,6 +8,8 @@ import org.dreamexposure.discal.core.utils.PermissionChecker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
  * Created by Nova Fox on 1/2/2017.
@@ -30,7 +31,7 @@ class CommandListener {
 				//Message is a valid guild message (not DM and not from a bot). Check if in correct channel.
 				GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuildId().get());
 				if (content.startsWith(settings.getPrefix())) {
-					if (PermissionChecker.isCorrectChannel(event)) {
+					if (PermissionChecker.isCorrectChannel(event, settings).blockOptional().orElse(false)) {
 						//Prefixed with ! which should mean it is a command, convert and confirm.
 						String[] argsOr = content.split("\\s+");
 						if (argsOr.length > 1) {
@@ -45,7 +46,7 @@ class CommandListener {
 						}
 					}
 				} else if (!event.getMessage().mentionsEveryone() && !content.contains("@here") && (content.startsWith("<@" + DisCalClient.getClient().getSelfId().get().asString() + ">") || content.startsWith("<@!" + DisCalClient.getClient().getSelfId().get().asString() + ">"))) {
-					if (PermissionChecker.isCorrectChannel(event)) {
+					if (PermissionChecker.isCorrectChannel(event, settings).blockOptional().orElse(false)) {
 						String[] argsOr = content.split("\\s+");
 						if (argsOr.length > 2) {
 							ArrayList<String> argsOr2 = new ArrayList<>(Arrays.asList(argsOr).subList(2, argsOr.length));

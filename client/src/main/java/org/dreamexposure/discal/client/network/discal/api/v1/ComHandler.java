@@ -56,8 +56,8 @@ public class ComHandler {
 			Member member = guild.get().getMemberById(Snowflake.of(jsonRequest.getLong("member_id"))).block();
 			if (member != null) {
 				WebGuild wg = new WebGuild().fromGuild(guild.get());
-				wg.setDiscalRole(PermissionChecker.hasSufficientRole(guild.get(), member));
-				wg.setManageServer(PermissionChecker.hasManageServerRole(member));
+				wg.setDiscalRole(PermissionChecker.hasSufficientRole(member, wg.getSettings()).blockOptional().orElse(false));
+				wg.setManageServer(PermissionChecker.hasManageServerRole(member).blockOptional().orElse(false));
 
 				jsonResponse.put("guild", new WebGuild().fromGuild(guild.get()).toJson(false));
 
@@ -103,8 +103,8 @@ public class ComHandler {
 				WebGuild wg = new WebGuild().fromGuild(g.get());
 				Member mem = g.get().getMemberById(memId).block();
 				if (mem != null) {
-					wg.setManageServer(PermissionChecker.hasManageServerRole(mem));
-					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g.get(), mem));
+					wg.setManageServer(PermissionChecker.hasManageServerRole(mem).blockOptional().orElse(false));
+					wg.setDiscalRole(PermissionChecker.hasSufficientRole(mem, wg.getSettings()).blockOptional().orElse(false));
 				}
 				webGuilds.put(wg.toJson(false));
 			}

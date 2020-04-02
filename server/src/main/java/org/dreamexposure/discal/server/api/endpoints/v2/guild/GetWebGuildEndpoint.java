@@ -55,8 +55,8 @@ public class GetWebGuildEndpoint {
 
 				Logger.getLogger().debug("Guild get start perm check", true);
 				if (m != null) { //Assume false if we can't get the user...
-					wg.setManageServer(PermissionChecker.hasManageServerRole(m));
-					wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m, wg.getSettings()));
+					wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
+					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
 				}
 				Logger.getLogger().debug("Guild get end perm check", true);
 

@@ -1,6 +1,8 @@
 package org.dreamexposure.discal.client;
 
+import org.dreamexposure.discal.client.listeners.discord.ChannelDeleteListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
+import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand;
@@ -32,7 +34,9 @@ import java.util.Properties;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.core.event.domain.channel.TextChannelDeleteEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.object.data.stored.GuildBean;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Activity;
@@ -61,6 +65,8 @@ public class DisCalClient {
 
 		//Register discord events
 		client.getEventDispatcher().on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
+		client.getEventDispatcher().on(TextChannelDeleteEvent.class).subscribe(ChannelDeleteListener::handle);
+		client.getEventDispatcher().on(RoleDeleteEvent.class).subscribe(RoleDeleteListener::handle);
 
 		//Register commands
 		CommandExecutor executor = CommandExecutor.getExecutor().enable();

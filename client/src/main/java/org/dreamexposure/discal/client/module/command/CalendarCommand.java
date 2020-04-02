@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.calendar.CalendarCreator;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
@@ -17,6 +15,9 @@ import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.utils.TimeZoneUtils;
 
 import java.util.ArrayList;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -96,13 +97,13 @@ public class CalendarCommand implements ICommand {
 
 			switch (args[0].toLowerCase()) {
 				case "create":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCreate(args, event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "cancel":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleCancel(event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -112,14 +113,14 @@ public class CalendarCommand implements ICommand {
 					moduleView(event, calendarData, settings);
 					break;
 				case "confirm":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleConfirm(event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
 					break;
 				case "delete":
 				case "remove":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleDelete(event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -135,7 +136,7 @@ public class CalendarCommand implements ICommand {
 					moduleTimezone(args, event, calendarData, settings);
 					break;
 				case "edit":
-					if (PermissionChecker.hasSufficientRole(event))
+					if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
 						moduleEdit(event, calendarData, settings);
 					else
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -284,7 +285,7 @@ public class CalendarCommand implements ICommand {
 			}
 			return;
 		}
-		if (!PermissionChecker.hasManageServerRole(event)) {
+		if (!PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
 			return;
 		}

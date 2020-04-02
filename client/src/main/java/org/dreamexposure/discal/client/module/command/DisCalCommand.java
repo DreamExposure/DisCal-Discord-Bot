@@ -1,5 +1,20 @@
 package org.dreamexposure.discal.client.module.command;
 
+import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.command.CommandInfo;
+import org.dreamexposure.discal.core.utils.ChannelUtils;
+import org.dreamexposure.discal.core.utils.GeneralUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.RoleUtils;
+
+import java.util.ArrayList;
+import java.util.function.Consumer;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
@@ -7,16 +22,6 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
-import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.*;
-
-import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/5/2017.
@@ -162,7 +167,7 @@ public class DisCalCommand implements ICommand {
 	 * @param event The event received.
 	 */
 	private void moduleControlRole(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (PermissionChecker.hasSufficientRole(event)) {
+		if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false)) {
 			if (args.length > 1) {
 				String roleName = GeneralUtils.getContent(args, 1);
 				Role controlRole;
@@ -290,7 +295,7 @@ public class DisCalCommand implements ICommand {
 	}
 
 	private void modulePrefix(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (PermissionChecker.hasManageServerRole(event)) {
+		if (PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
 			if (args.length == 2) {
 				String prefix = args[1];
 
@@ -307,7 +312,7 @@ public class DisCalCommand implements ICommand {
 	}
 
 	private void moduleLanguage(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (PermissionChecker.hasManageServerRole(event)) {
+		if (PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
 			if (args.length == 2) {
 				String value = args[1];
 				if (MessageManager.isSupported(value)) {
@@ -335,7 +340,7 @@ public class DisCalCommand implements ICommand {
 	}
 
 	private void moduleBrand(MessageCreateEvent event, GuildSettings settings) {
-		if (PermissionChecker.hasSufficientRole(event)) {
+		if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false)) {
 			if (settings.isPatronGuild()) {
 				settings.setBranded(!settings.isBranded());
 				DatabaseManager.getManager().updateSettings(settings);

@@ -1,8 +1,5 @@
 package org.dreamexposure.discal.client.announcement;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -14,6 +11,10 @@ import org.dreamexposure.discal.core.utils.PermissionChecker;
 
 import java.util.ArrayList;
 import java.util.UUID;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -54,7 +55,7 @@ public class AnnouncementCreator {
 			Announcement a = new Announcement(settings.getGuildID());
 			a.setAnnouncementChannelId(e.getMessage().getChannel().block().getId().asString());
 
-			if (PermissionChecker.botHasMessageManagePerms(e)) {
+			if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
 				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {
@@ -74,7 +75,7 @@ public class AnnouncementCreator {
 			//Copy
 			Announcement a = new Announcement(toCopy);
 
-			if (PermissionChecker.botHasMessageManagePerms(e)) {
+			if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
 				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {
@@ -95,7 +96,7 @@ public class AnnouncementCreator {
 			Announcement a = new Announcement(edit, true);
 			a.setEditing(true);
 
-			if (PermissionChecker.botHasMessageManagePerms(e)) {
+			if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
 				Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), e);
 				a.setCreatorMessage(msg);
 			} else {

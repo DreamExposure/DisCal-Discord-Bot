@@ -37,8 +37,8 @@ public class GuildUtils {
 				Member m = g.getMemberById(Snowflake.of(userId)).block();
 
 				WebGuild wg = new WebGuild().fromGuild(g);
-				wg.setManageServer(PermissionChecker.hasManageServerRole(m));
-				wg.setDiscalRole(PermissionChecker.hasSufficientRole(g, m));
+				wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
+				wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
 				guilds.add(wg);
 			}
 		}

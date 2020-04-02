@@ -2,9 +2,7 @@ package org.dreamexposure.discal.client.calendar;
 
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -17,6 +15,10 @@ import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 
 import java.util.ArrayList;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -57,7 +59,7 @@ public class CalendarCreator {
 			PreCalendar calendar = new PreCalendar(settings.getGuildID(), calendarName);
 
 			if (handleCreatorMessage) {
-				if (PermissionChecker.botHasMessageManagePerms(e)) {
+				if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
 					Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Create.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings), e);
 					calendar.setCreatorMessage(msg);
 				} else {
@@ -86,7 +88,7 @@ public class CalendarCreator {
 				preCalendar.setCalendarId(data.getCalendarAddress());
 
 				if (handleCreatorMessage) {
-					if (PermissionChecker.botHasMessageManagePerms(event)) {
+					if (PermissionChecker.botHasMessageManagePerms(event).blockOptional().orElse(false)) {
 						Message msg = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Edit.Init", settings), CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings), event);
 						preCalendar.setCreatorMessage(msg);
 					} else {
