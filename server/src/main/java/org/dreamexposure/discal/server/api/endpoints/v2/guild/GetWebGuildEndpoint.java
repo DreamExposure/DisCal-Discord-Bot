@@ -47,21 +47,14 @@ public class GetWebGuildEndpoint {
 					.getGuildById(guildId).onErrorResume(e -> Mono.empty()).block();
 
 			if (g != null) {
-				//Start slowdown
-				Logger.getLogger().debug("Guild get endpoint convert guild", true);
 				WebGuild wg = WebGuild.fromGuild(g);
-				Logger.getLogger().debug("Guild get endpoint get member", true);
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
 
-				Logger.getLogger().debug("Guild get endpoint check perms", true);
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
 				}
-
-				//End slowdown
-				Logger.getLogger().debug("Guild get endpoint slowdown ends here", true);
 
 				//Add available langs so that editing of langs can be done on the website
 				//noinspection unchecked
