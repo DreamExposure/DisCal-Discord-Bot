@@ -9,11 +9,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -158,19 +158,28 @@ public class WebGuild {
 
 		settings = DatabaseManager.getManager().getSettings(g.getId());
 
-		//Handle lists and stuffs
-		for (Role r : g.getRoles().collectList().block()) {
-			roles.add(new WebRole().fromRole(r, settings));
-		}
+		//Handle web role conversion
+		Collection<WebRole> webRoles = g.getRoles()
+				.map(role -> new WebRole().fromRole(role, settings))
+				.collectList()
+				.block();
+		roles.addAll(webRoles);
 
+		//Handle web channel conversion
 		WebChannel all = new WebChannel();
 		all.setId(0);
 		all.setName("All Channels");
 		all.setDiscalChannel(settings.getDiscalChannel().equalsIgnoreCase("all"));
 		channels.add(all);
-		for (TextChannel c : g.getChannels().ofType(TextChannel.class).collectList().block()) {
-			channels.add(new WebChannel().fromChannel(c, settings));
-		}
+
+		Collection<WebChannel> webChannels = g.getChannels()
+				.ofType(TextChannel.class)
+				.map(channel -> new WebChannel().fromChannel(channel, settings))
+				.collectList()
+				.block();
+		channels.addAll(webChannels);
+
+		//Grab all announcements and calendars from our database
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
 
 		calendar = new WebCalendar()

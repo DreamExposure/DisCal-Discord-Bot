@@ -48,17 +48,16 @@ public class GetWebGuildEndpoint {
 
 			if (g != null) {
 				//Start slowdown
-				Logger.getLogger().debug("Guild get endpoint slowdown starts here", true);
+				Logger.getLogger().debug("Guild get endpoint convert guild", true);
 				WebGuild wg = new WebGuild().fromGuild(g);
+				Logger.getLogger().debug("Guild get endpoint get member", true);
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
 
-				Logger.getLogger().debug("Guild get start perm check", true);
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
 				}
-				Logger.getLogger().debug("Guild get end perm check", true);
 
 				//End slowdown
 				Logger.getLogger().debug("Guild get endpoint slowdown ends here", true);
