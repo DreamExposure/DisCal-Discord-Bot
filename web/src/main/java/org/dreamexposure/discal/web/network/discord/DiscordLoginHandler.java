@@ -119,21 +119,20 @@ public class DiscordLoginHandler {
 				for (int i = 0; i < jGuilds.length(); i++) {
 					JSONObject jGuild = jGuilds.getJSONObject(i);
 
-					WebGuild wg = new WebGuild();
-					wg.setId(jGuild.getLong("id"));
-					wg.setName(jGuild.getString("name"));
-
+					long id = jGuild.getLong("id");
+					String name = jGuild.getString("name");
+					String icon;
 					if (jGuild.has("icon") && !jGuild.isNull("icon")) {
-						wg.setIcon("https://cdn.discordapp.com/icons/"
-								+ wg.getId()
+						icon = "https://cdn.discordapp.com/icons/"
+								+ id
 								+ "/"
 								+ jGuild.getString("icon")
-								+ ".png");
+								+ ".png";
 					} else {
-						wg.setIcon("/assets/img/default/guild-icon.png");
+						icon = "/assets/img/default/guild-icon.png";
 					}
 
-					guilds.add(wg);
+					guilds.add(WebGuild.fromPartialGuild(id, name, icon));
 				}
 				m.put("guilds", guilds);
 

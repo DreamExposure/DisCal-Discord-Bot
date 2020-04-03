@@ -930,10 +930,10 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				if (value.equalsIgnoreCase("all")) {
-					ArrayList<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(settings.getGuildID());
+					List<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(settings.getGuildID());
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.All", "%amount%", announcements.size() + "", settings), event);
 					//Loop and add embeds
-					for (Announcement a: announcements) {
+					for (Announcement a : announcements) {
 						MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
 					}
 				} else {

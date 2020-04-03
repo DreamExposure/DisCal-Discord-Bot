@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -805,7 +806,7 @@ public class DatabaseManager {
 	 * @param guildId The ID of the guild whose data is to be retrieved.
 	 * @return An ArrayList of Announcements that belong to the specified Guild.
 	 */
-	public ArrayList<Announcement> getAnnouncements(Snowflake guildId) {
+	public List<Announcement> getAnnouncements(Snowflake guildId) {
 		ArrayList<Announcement> announcements = new ArrayList<>();
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String announcementTableName = String.format("%sannouncements", slaveInfo.getSettings().getPrefix());

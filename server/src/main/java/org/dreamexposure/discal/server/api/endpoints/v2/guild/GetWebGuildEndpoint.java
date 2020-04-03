@@ -49,7 +49,7 @@ public class GetWebGuildEndpoint {
 			if (g != null) {
 				//Start slowdown
 				Logger.getLogger().debug("Guild get endpoint convert guild", true);
-				WebGuild wg = new WebGuild().fromGuild(g);
+				WebGuild wg = WebGuild.fromGuild(g);
 				Logger.getLogger().debug("Guild get endpoint get member", true);
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();

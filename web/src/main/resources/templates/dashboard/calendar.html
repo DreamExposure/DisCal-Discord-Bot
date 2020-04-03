@@ -290,6 +290,7 @@
 			<div class="container-fluid">
 				<div class="loader"></div>
 
+				<!--Start not connected display-->
 				<div id="not-connected" hidden="hidden">
 					<h2 class="text-discal-blue">It seems this guild doesn't have DisCal in it.</h2>
 
@@ -300,7 +301,30 @@
 						Add To Discord!
 					</a>
 				</div>
+				<!--End not connected display-->
 
+				<!--TODO: Handle the display and editing of the following if allowed:
+					- calendar name/summary
+					- calendar description
+					- calendar timezone
+					- calendar delete
+				-->
+				<!--Start calendar settings display-->
+				<div id="calendar-settings" hidden="hidden">
+
+				</div>
+				<!--End calendar settings display-->
+
+				<!--TODO: Handle creating of a new calendar if one does not exist and allowed:
+					- calendar name/summary
+					- calendar description
+					- calendar timezone
+				-->
+				<!--Start calendar create display-->
+				<div id="calendar-create" hidden="hidden">
+
+				</div>
+				<!--End calendar create display-->
 
 			</div>
 			<!--End container fluid-->
