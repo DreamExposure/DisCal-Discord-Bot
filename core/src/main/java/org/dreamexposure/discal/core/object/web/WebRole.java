@@ -11,14 +11,43 @@ import discord4j.core.object.entity.Role;
  * For Project: DisCal-Discord-Bot
  */
 public class WebRole {
-	private long id;
-	private String name;
+	public static WebRole fromRole(Role r, GuildSettings settings) {
+		boolean controlRole;
+		if (r.isEveryone() && settings.getControlRole().equalsIgnoreCase("everyone"))
+			controlRole = true;
+		else
+			controlRole = settings.getControlRole().equalsIgnoreCase(r.getId().asString());
 
-	private boolean managed;
-	private boolean controlRole;
 
-	private boolean everyone;
+		return new WebRole(r.getId().asLong(), r.getName(), r.isManaged(), controlRole, r.isEveryone());
+	}
 
+	public static WebRole fromJson(JSONObject data) {
+		long id = Long.parseLong(data.getString("id"));
+		String name = data.getString("name");
+		boolean managed = data.getBoolean("managed");
+		boolean controlRole = data.getBoolean("control_role");
+		boolean everyone = data.getBoolean("everyone");
+
+		return new WebRole(id, name, managed, controlRole, everyone);
+	}
+
+
+	private final long id;
+	private final String name;
+
+	private final boolean managed;
+	private final boolean controlRole;
+
+	private final boolean everyone;
+
+	private WebRole(long id, String name, boolean managed, boolean controlRole, boolean everyone) {
+		this.id = id;
+		this.name = name;
+		this.managed = managed;
+		this.controlRole = controlRole;
+		this.everyone = everyone;
+	}
 
 	//Getters
 	public long getId() {
@@ -41,45 +70,7 @@ public class WebRole {
 		return everyone;
 	}
 
-	//Setters
-	public void setId(long _id) {
-		id = _id;
-	}
-
-	public void setName(String _name) {
-		name = _name;
-	}
-
-	public void setManaged(boolean _managed) {
-		managed = _managed;
-	}
-
-	public void setControlRole(boolean _control) {
-		controlRole = _control;
-	}
-
-	public void setEveryone(boolean _everyone) {
-		everyone = _everyone;
-	}
-
 	//functions
-	public WebRole fromRole(Role r, GuildSettings settings) {
-		id = r.getId().asLong();
-		name = r.getName();
-
-		managed = r.isManaged();
-
-		everyone = r.isEveryone();
-
-		if (r.isEveryone() && settings.getControlRole().equalsIgnoreCase("everyone"))
-			controlRole = true;
-		else
-			controlRole = settings.getControlRole().equalsIgnoreCase(String.valueOf(id));
-
-
-		return this;
-	}
-
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
@@ -90,15 +81,5 @@ public class WebRole {
 		data.put("everyone", everyone);
 
 		return data;
-	}
-
-	public WebRole fromJson(JSONObject data) {
-		id = Long.parseLong(data.getString("id"));
-		name = data.getString("name");
-		managed = data.getBoolean("managed");
-		controlRole = data.getBoolean("control_role");
-		everyone = data.getBoolean("everyone");
-
-		return this;
 	}
 }

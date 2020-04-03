@@ -27,8 +27,6 @@ import reactor.function.TupleUtils;
  * For Project: DisCal-Discord-Bot
  */
 public class WebGuild {
-
-	//Functions
 	public static WebGuild fromGuild(Guild g) {
 		long id = g.getId().asLong();
 		String name = g.getName();
@@ -44,16 +42,13 @@ public class WebGuild {
 				.cache();
 
 		Mono<List<WebRole>> roles = settings.flatMapMany(s ->
-				g.getRoles().map(role -> new WebRole().fromRole(role, s)))
+				g.getRoles().map(role -> WebRole.fromRole(role, s)))
 				.collectList();
-
-		Mono<Boolean> discalChannel = settings.map(GuildSettings::getDiscalChannel)
-				.map(c -> c.equalsIgnoreCase("all"));
 
 		Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
 				g.getChannels()
 						.ofType(TextChannel.class)
-						.map(channel -> new WebChannel().fromChannel(channel, s)))
+						.map(channel -> WebChannel.fromChannel(channel, s)))
 				.collectList();
 
 		Mono<List<Announcement>> announcements =
@@ -62,18 +57,14 @@ public class WebGuild {
 
 		Mono<WebCalendar> calendar = settings.flatMap(s -> Mono.fromCallable(() -> {
 			CalendarData data = DatabaseManager.getManager().getMainCalendar(Snowflake.of(id));
-			return new WebCalendar().fromCalendar(data, s);
+			return WebCalendar.fromCalendar(data, s);
 		}).subscribeOn(Schedulers.elastic()));
 
-		return Mono.zip(botNick, settings, roles, discalChannel, webChannels, announcements, calendar)
-				.map(TupleUtils.function((bn, s, r, dc, wc, a, c) -> {
+		return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
+				.map(TupleUtils.function((bn, s, r, wc, a, c) -> {
 					WebGuild wg = new WebGuild(id, name, iconUrl, s, bn, false, false, c);
 
-					WebChannel all = new WebChannel();
-					all.setId(0);
-					all.setName("All Channels");
-					all.setDiscalChannel(dc);
-					wg.getChannels().add(all);
+					wg.getChannels().add(WebChannel.all(s));
 
 					wg.getRoles().addAll(r);
 					wg.getChannels().addAll(wc);
@@ -95,16 +86,16 @@ public class WebGuild {
 				data.optString("bot_nick"),
 				data.getBoolean("manage_server"),
 				data.getBoolean("discal_role"),
-				new WebCalendar().fromJson(data.getJSONObject("calendar")));
+				WebCalendar.fromJson(data.getJSONObject("calendar")));
 
 		JSONArray jRoles = data.getJSONArray("roles");
 		for (int i = 0; i < jRoles.length(); i++) {
-			webGuild.getRoles().add(new WebRole().fromJson(jRoles.getJSONObject(i)));
+			webGuild.getRoles().add(WebRole.fromJson(jRoles.getJSONObject(i)));
 		}
 
 		JSONArray jChannels = data.getJSONArray("channels");
 		for (int i = 0; i < jChannels.length(); i++) {
-			webGuild.getChannels().add(new WebChannel().fromJson(jChannels.getJSONObject(i)));
+			webGuild.getChannels().add(WebChannel.fromJson(jChannels.getJSONObject(i)));
 		}
 
 		JSONArray jAnnouncements = data.getJSONArray("announcements");

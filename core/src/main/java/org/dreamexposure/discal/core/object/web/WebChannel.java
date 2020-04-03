@@ -11,10 +11,38 @@ import discord4j.core.object.entity.TextChannel;
  * For Project: DisCal-Discord-Bot
  */
 public class WebChannel {
-	private long id;
-	private String name;
 
-	private boolean discalChannel;
+
+	public static WebChannel fromChannel(TextChannel c, GuildSettings settings) {
+		boolean dc = settings.getDiscalChannel().equalsIgnoreCase(c.getId().asString());
+
+		return new WebChannel(c.getId().asLong(), c.getName(), dc);
+	}
+
+	public static WebChannel fromJson(JSONObject json) {
+		long id = Long.parseLong(json.getString("id"));
+		String name = json.getString("name");
+		boolean discalChannel = json.getBoolean("discal_channel");
+
+		return new WebChannel(id, name, discalChannel);
+	}
+
+	public static WebChannel all(GuildSettings settings) {
+		boolean dc = settings.getDiscalChannel().equalsIgnoreCase("all");
+
+		return new WebChannel(0, "All Channels", dc);
+	}
+
+	private final long id;
+	private final String name;
+
+	private final boolean discalChannel;
+
+	private WebChannel(long id, String name, boolean discalChannel) {
+		this.id = id;
+		this.name = name;
+		this.discalChannel = discalChannel;
+	}
 
 	//Getters
 	public long getId() {
@@ -29,29 +57,6 @@ public class WebChannel {
 		return discalChannel;
 	}
 
-	//Setters
-	public void setId(long _id) {
-		id = _id;
-	}
-
-	public void setName(String _name) {
-		name = _name;
-	}
-
-	public void setDiscalChannel(boolean _dc) {
-		discalChannel = _dc;
-	}
-
-	//Functions
-	public WebChannel fromChannel(TextChannel c, GuildSettings settings) {
-		id = c.getId().asLong();
-		name = c.getName();
-
-		discalChannel = settings.getDiscalChannel().equalsIgnoreCase(String.valueOf(id));
-
-		return this;
-	}
-
 	public JSONObject toJson() {
 		JSONObject data = new JSONObject();
 
@@ -60,13 +65,5 @@ public class WebChannel {
 		data.put("discal_channel", discalChannel);
 
 		return data;
-	}
-
-	public WebChannel fromJson(JSONObject data) {
-		id = Long.parseLong(data.getString("id"));
-		name = data.getString("name");
-		discalChannel = data.getBoolean("discal_channel");
-
-		return this;
 	}
 }

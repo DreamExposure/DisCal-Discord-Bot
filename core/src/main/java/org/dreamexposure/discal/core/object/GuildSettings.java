@@ -141,15 +141,6 @@ public class GuildSettings {
 		return users.toString();
 	}
 
-	//Dumb getters so that Thymeleaf plays nice...
-	public boolean isExternalCalendar() {
-		return externalCalendar;
-	}
-
-	public boolean isSimpleAnnouncements() {
-		return simpleAnnouncements;
-	}
-
 	//Setters
 	public void setUseExternalCalendar(boolean _useExternal) {
 		externalCalendar = _useExternal;
