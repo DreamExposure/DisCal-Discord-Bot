@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.web;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -149,16 +150,20 @@ public class WebGuild {
 	public WebGuild fromGuild(Guild g) {
 		id = g.getId().asLong();
 		name = g.getName();
+		Logger.getLogger().debug("WebGuild Convert: get icon", true);
 		if (g.getIconUrl(Image.Format.PNG).isPresent())
 			iconUrl = g.getIconUrl(Image.Format.PNG).get();
+		Logger.getLogger().debug("WebGuild Convert: get nick", true);
 		botNick = g.getMemberById(Snowflake.of(BotSettings.ID.get()))
 				.map(Member::getNickname)
 				.block()
 				.orElse("DisCal");
 
+		Logger.getLogger().debug("WebGuild Convert: get settings", true);
 		settings = DatabaseManager.getManager().getSettings(g.getId());
 
 		//Handle web role conversion
+		Logger.getLogger().debug("WebGuild Convert: get roles", true);
 		Collection<WebRole> webRoles = g.getRoles()
 				.map(role -> new WebRole().fromRole(role, settings))
 				.collectList()
@@ -166,6 +171,7 @@ public class WebGuild {
 		roles.addAll(webRoles);
 
 		//Handle web channel conversion
+		Logger.getLogger().debug("WebGuild Convert: get channels", true);
 		WebChannel all = new WebChannel();
 		all.setId(0);
 		all.setName("All Channels");
@@ -180,8 +186,10 @@ public class WebGuild {
 		channels.addAll(webChannels);
 
 		//Grab all announcements and calendars from our database
+		Logger.getLogger().debug("WebGuild Convert: get announcements", true);
 		announcements.addAll(DatabaseManager.getManager().getAnnouncements(g.getId()));
 
+		Logger.getLogger().debug("WebGuild Convert: get calendar", true);
 		calendar = new WebCalendar()
 				.fromCalendar(DatabaseManager.getManager().getMainCalendar(Snowflake.of(id)), settings);
 

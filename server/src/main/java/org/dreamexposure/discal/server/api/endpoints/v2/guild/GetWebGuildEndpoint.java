@@ -54,6 +54,7 @@ public class GetWebGuildEndpoint {
 
 				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
 
+				Logger.getLogger().debug("Guild get endpoint check perms", true);
 				if (m != null) { //Assume false if we can't get the user...
 					wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
 					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
