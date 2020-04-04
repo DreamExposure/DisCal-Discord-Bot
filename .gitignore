@@ -8,6 +8,10 @@ hs_err_pid*
 /src/test/
 **/target/
 **/build
+web/src/main/resources/static/assets/js/
+web/src/main/resources/static/assets/css/
+web/src/main/resources/static/vendor/
+
 /src/main/resources/client_secret.json
 
 **/*.iml
