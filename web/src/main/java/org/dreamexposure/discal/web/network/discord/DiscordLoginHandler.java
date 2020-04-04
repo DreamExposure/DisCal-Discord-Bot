@@ -5,7 +5,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.web.WebGuild;
+import org.dreamexposure.discal.core.object.web.WebPartialGuild;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
 import org.json.JSONArray;
@@ -115,7 +115,7 @@ public class DiscordLoginHandler {
 				}
 
 				//Guild stuffs
-				List<WebGuild> guilds = new ArrayList<>();
+				List<WebPartialGuild> guilds = new ArrayList<>();
 				for (int i = 0; i < jGuilds.length(); i++) {
 					JSONObject jGuild = jGuilds.getJSONObject(i);
 
@@ -132,7 +132,7 @@ public class DiscordLoginHandler {
 						icon = "/assets/img/default/guild-icon.png";
 					}
 
-					guilds.add(WebGuild.fromPartialGuild(id, name, icon));
+					guilds.add(new WebPartialGuild(id, name, icon));
 				}
 				m.put("guilds", guilds);
 
