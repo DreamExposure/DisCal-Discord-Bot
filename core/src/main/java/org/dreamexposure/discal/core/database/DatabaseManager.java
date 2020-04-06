@@ -60,9 +60,23 @@ public class DatabaseManager {
 	 */
 	public void connectToMySQL() {
 		try {
-			DatabaseSettings masterSettings = new DatabaseSettings(BotSettings.SQL_MASTER_HOST.get(), BotSettings.SQL_MASTER_PORT.get(), BotSettings.SQL_DB.get(), BotSettings.SQL_MASTER_USER.get(), BotSettings.SQL_MASTER_PASS.get(), BotSettings.SQL_PREFIX.get());
+			DatabaseSettings masterSettings = new DatabaseSettings(
+					BotSettings.SQL_MASTER_HOST.get(),
+					BotSettings.SQL_MASTER_PORT.get(),
+					BotSettings.SQL_DB.get(),
+					BotSettings.SQL_MASTER_USER.get(),
+					BotSettings.SQL_MASTER_PASS.get(),
+					BotSettings.SQL_PREFIX.get()
+			);
 
-			DatabaseSettings slaveSettings = new DatabaseSettings(BotSettings.SQL_SLAVE_HOST.get(), BotSettings.SQL_SLAVE_PORT.get(), BotSettings.SQL_DB.get(), BotSettings.SQL_SLAVE_USER.get(), BotSettings.SQL_SLAVE_PASS.get(), BotSettings.SQL_PREFIX.get());
+			DatabaseSettings slaveSettings = new DatabaseSettings(
+					BotSettings.SQL_SLAVE_HOST.get(),
+					BotSettings.SQL_SLAVE_PORT.get(),
+					BotSettings.SQL_DB.get(),
+					BotSettings.SQL_SLAVE_USER.get(),
+					BotSettings.SQL_SLAVE_PASS.get(),
+					BotSettings.SQL_PREFIX.get()
+			);
 
 			masterInfo = org.dreamexposure.novautils.database.DatabaseManager.connectToMySQL(masterSettings);
 			slaveInfo = org.dreamexposure.novautils.database.DatabaseManager.connectToMySQL(slaveSettings);
@@ -396,15 +410,16 @@ public class DatabaseManager {
 	public boolean updateEventData(EventData data) {
 		try (final Connection masterConnection = masterInfo.getSource().getConnection()) {
 			String eventTableName = String.format("%sevents", masterInfo.getSettings().getPrefix());
+			String idToUse = data.getEventId();
 
 			if (data.getEventId().contains("_")) {
-				data.setEventId(data.getEventId().split("_")[0]);
+				idToUse = data.getEventId().split("_")[0];
 			}
 
 			String query = "SELECT * FROM " + eventTableName + " WHERE EVENT_ID = ?";
 			final Connection slaveConnection = slaveInfo.getSource().getConnection();
 			PreparedStatement statement = slaveConnection.prepareStatement(query);
-			statement.setString(1, data.getEventId());
+			statement.setString(1, idToUse);
 
 			ResultSet res = statement.executeQuery();
 
@@ -417,7 +432,7 @@ public class DatabaseManager {
 						" VALUES (?, ?, ?, ?)";
 				PreparedStatement ps = masterConnection.prepareStatement(insertCommand);
 				ps.setString(1, data.getGuildId().asString());
-				ps.setString(2, data.getEventId());
+				ps.setString(2, idToUse);
 				ps.setLong(3, data.getEventEnd());
 				ps.setString(4, data.getImageLink());
 
@@ -434,7 +449,7 @@ public class DatabaseManager {
 
 				ps.setString(1, data.getImageLink());
 				ps.setLong(2, data.getEventEnd());
-				ps.setString(3, data.getEventId());
+				ps.setString(3, idToUse);
 
 				ps.executeUpdate();
 
@@ -580,12 +595,8 @@ public class DatabaseManager {
 				settings.setDmAnnouncementsFromString(res.getString("DM_ANNOUNCEMENTS"));
 				settings.setTwelveHour(res.getBoolean("12_HOUR"));
 				settings.setBranded(res.getBoolean("BRANDED"));
-
-				statement.close();
-			} else {
-				//Data not present.
-				statement.close();
 			}
+			statement.close();
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get Guild Settings.", e, true, this.getClass());
 		}
@@ -599,7 +610,6 @@ public class DatabaseManager {
 	}
 
 	public CalendarData getMainCalendar(Snowflake guildId) {
-		CalendarData calData = new CalendarData(guildId, 1);
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String calendarTableName = String.format("%scalendars", slaveInfo.getSettings().getPrefix());
 
@@ -611,19 +621,21 @@ public class DatabaseManager {
 			boolean hasStuff = res.next();
 
 			if (hasStuff && res.getString("GUILD_ID") != null) {
-				calData.setCalendarId(res.getString("CALENDAR_ID"));
-				calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-				calData.setExternal(res.getBoolean("EXTERNAL"));
+				String calId = res.getString("CALENDAR_ID");
+				String calAddr = res.getString("CALENDAR_ADDRESS");
+				boolean external = res.getBoolean("EXTERNAL");
+
+				statement.close();
+				return CalendarData.fromData(guildId, 1, calId, calAddr, external);
 			}
 			statement.close();
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get calendar settings.", e, true, this.getClass());
 		}
-		return calData;
+		return CalendarData.empty();
 	}
 
 	public CalendarData getCalendar(Snowflake guildId, int calendarNumber) {
-		CalendarData calData = new CalendarData(guildId, calendarNumber);
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String calendarTableName = String.format("%scalendars", slaveInfo.getSettings().getPrefix());
 
@@ -636,16 +648,19 @@ public class DatabaseManager {
 			boolean hasStuff = res.next();
 
 			if (hasStuff && res.getString("GUILD_ID") != null) {
-				calData.setCalendarId(res.getString("CALENDAR_ID"));
-				calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-				calData.setExternal(res.getBoolean("EXTERNAL"));
+				String calId = res.getString("CALENDAR_ID");
+				String calAddr = res.getString("CALENDAR_ADDRESS");
+				boolean external = res.getBoolean("EXTERNAL");
+
+				statement.close();
+				return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external);
 			}
 
 			statement.close();
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get calendar data", e, true, this.getClass());
 		}
-		return calData;
+		return CalendarData.empty();
 	}
 
 	public ArrayList<CalendarData> getAllCalendars(Snowflake guildId) {
@@ -660,11 +675,11 @@ public class DatabaseManager {
 			ResultSet res = statement.executeQuery();
 
 			while (res.next()) {
-				CalendarData calData = new CalendarData(guildId, res.getInt("CALENDAR_NUMBER"));
-				calData.setCalendarId(res.getString("CALENDAR_ID"));
-				calData.setCalendarAddress(res.getString("CALENDAR_ADDRESS"));
-				calData.setExternal(res.getBoolean("EXTERNAL"));
-				calendars.add(calData);
+				String calId = res.getString("CALENDAR_ID");
+				String calAddr = res.getString("CALENDAR_ADDRESS");
+				boolean external = res.getBoolean("EXTERNAL");
+
+				calendars.add(CalendarData.fromData(guildId, 1, calId, calAddr, external));
 			}
 			statement.close();
 		} catch (SQLException e) {
@@ -697,13 +712,8 @@ public class DatabaseManager {
 	}
 
 	public EventData getEventData(Snowflake guildId, String eventId) {
-		EventData data = new EventData(guildId);
-
 		if (eventId.contains("_"))
 			eventId = eventId.split("_")[0];
-
-
-		data.setEventId(eventId);
 
 		try (final Connection connection = slaveInfo.getSource().getConnection()) {
 			String eventTableName = String.format("%sevents", slaveInfo.getSettings().getPrefix());
@@ -716,16 +726,19 @@ public class DatabaseManager {
 
 			while (res.next()) {
 				if (res.getString("EVENT_ID").equals(eventId)) {
-					data.setEventEnd(res.getLong("EVENT_END"));
-					data.setImageLink(res.getString("IMAGE_LINK"));
-					break;
+
+					long end = res.getLong("EVENT_END");
+					String imageLink = res.getString("IMAGE_LINK");
+
+					statement.close();
+					return EventData.fromImage(guildId, eventId, end, imageLink);
 				}
 			}
 			statement.close();
 		} catch (SQLException e) {
 			Logger.getLogger().exception(null, "Failed to get event data", e, true, this.getClass());
 		}
-		return data;
+		return EventData.empty();
 	}
 
 	public RsvpData getRsvpData(Snowflake guildId, String eventId) {

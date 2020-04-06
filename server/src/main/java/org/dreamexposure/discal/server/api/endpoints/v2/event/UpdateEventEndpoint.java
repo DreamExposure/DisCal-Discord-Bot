@@ -95,9 +95,12 @@ public class UpdateEventEndpoint {
 				if (requestBody.has("image")) {
 					if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
 						//Link is good...
-						EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), eventId);
-						ed.setImageLink(requestBody.getString("image"));
-						ed.setEventEnd(event.getEnd().getDateTime().getValue());
+						EventData ed = EventData.fromImage(
+								Snowflake.of(guildId),
+								event.getId(),
+								event.getEnd().getDateTime().getValue(),
+								requestBody.getString("image")
+						);
 
 						DatabaseManager.getManager().updateEventData(ed);
 					}

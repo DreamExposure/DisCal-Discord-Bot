@@ -120,11 +120,11 @@ public class AnnouncementCreator {
 			if (a.hasRequiredValues()) {
 				if (DatabaseManager.getManager().updateAnnouncement(a)) {
 					terminate(guildId);
-					return new AnnouncementCreatorResponse(true, a);
+					return new AnnouncementCreatorResponse(true, a, null);
 				}
 			}
 		}
-		return new AnnouncementCreatorResponse(false);
+		return new AnnouncementCreatorResponse(false, null, null);
 	}
 
 	//Getters

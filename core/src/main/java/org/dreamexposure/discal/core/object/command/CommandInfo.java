@@ -9,13 +9,15 @@ import java.util.HashMap;
  */
 public class CommandInfo {
 	private final String name;
-	private String description;
-	private String example;
+	private final String description;
+	private final String example;
 
-	private HashMap<String, String> subCommands = new HashMap<>();
+	private final HashMap<String, String> subCommands = new HashMap<>();
 
-	public CommandInfo(String _name) {
-		name = _name;
+	public CommandInfo(String name, String description, String example) {
+		this.name = name;
+		this.description = description;
+		this.example = example;
 	}
 
 	//Getters
@@ -33,14 +35,5 @@ public class CommandInfo {
 
 	public HashMap<String, String> getSubCommands() {
 		return subCommands;
-	}
-
-	//Setters
-	public void setDescription(String _description) {
-		description = _description;
-	}
-
-	public void setExample(String _example) {
-		example = _example;
 	}
 }

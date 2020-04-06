@@ -73,9 +73,12 @@ public class DevCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo ci = new CommandInfo("dev");
-		ci.setDescription("Used for developer commands. Only able to be used by registered developers");
-		ci.setExample("!dev <function> (value)");
+		CommandInfo ci = new CommandInfo(
+				"dev",
+				"Used for developer commands. Only able to be used by registered developers",
+				"!dev <function> (value)"
+		);
+
 		ci.getSubCommands().put("reloadLangs", "Reloads the lang files across the network.");
 		ci.getSubCommands().put("patron", "Sets a guild as a patron.");
 		ci.getSubCommands().put("dev", "Sets a guild as a test/dev guild.");

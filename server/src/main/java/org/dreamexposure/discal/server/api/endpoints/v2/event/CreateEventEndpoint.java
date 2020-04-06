@@ -92,13 +92,16 @@ public class CreateEventEndpoint {
 				event.setRecurrence(Arrays.asList(rr));
 			}
 
-			EventData eventData = new EventData(settings.getGuildID());
+			EventData eventData = EventData.empty();
 			if (requestBody.has("image")) {
 				if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
 					//Link is good...
-					eventData.setEventId(event.getId());
-					eventData.setImageLink(requestBody.getString("image"));
-					eventData.setEventEnd(event.getEnd().getDateTime().getValue());
+					eventData = EventData.fromImage(
+							Snowflake.of(guildId),
+							event.getId(),
+							event.getEnd().getDateTime().getValue(),
+							requestBody.getString("image")
+					);
 
 				}
 			}

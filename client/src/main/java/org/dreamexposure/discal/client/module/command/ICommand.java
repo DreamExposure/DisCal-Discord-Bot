@@ -1,11 +1,12 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
  * @author NovaFox161
@@ -29,9 +30,11 @@ public interface ICommand {
 	}
 
 	default CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("COMMAND_NAME");
-		info.setDescription("COMMAND_DESCRIPTION");
-		info.setExample("!command <sub> (sub2)");
+		CommandInfo info = new CommandInfo(
+				"COMMAND_NAME",
+				"COMMAND_DESCRIPTION",
+				"!command <sub> (sub2)"
+		);
 
 		info.getSubCommands().put("a", "b");
 

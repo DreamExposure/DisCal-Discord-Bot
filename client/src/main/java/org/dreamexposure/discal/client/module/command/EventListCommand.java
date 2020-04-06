@@ -4,7 +4,7 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -16,6 +16,8 @@ import org.dreamexposure.discal.core.object.command.CommandInfo;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -53,9 +55,11 @@ public class EventListCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("events");
-		info.setDescription("Lists the specified amount of events from the guild calendar.");
-		info.setExample("!events (number or function) (other args if applicable)");
+		CommandInfo info = new CommandInfo(
+				"events",
+				"Lists the specified amount of events from the guild calendar.",
+				"!events (number or function) (other args if applicable)"
+		);
 
 		info.getSubCommands().put("search", "Searches for events based on specific criteria rather than just the next upcoming events");
 		return info;

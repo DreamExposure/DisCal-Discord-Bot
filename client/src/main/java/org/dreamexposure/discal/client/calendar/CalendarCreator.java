@@ -139,24 +139,22 @@ public class CalendarCreator {
 						scope.setType("default");
 						rule.setScope(scope).setRole("reader");
 						service.acl().insert(confirmed.getId(), rule).execute();
-						CalendarData calendarData = new CalendarData(settings.getGuildID(), 1);
-						calendarData.setCalendarId(confirmed.getId());
-						calendarData.setCalendarAddress(confirmed.getId());
+						CalendarData calendarData = CalendarData
+								.fromData(settings.getGuildID(), 1, confirmed.getId(),
+										confirmed.getId(), false);
+
 						DatabaseManager.getManager().updateCalendar(calendarData);
 
-						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
-						response.setEdited(false);
-						response.setCreatorMessage(preCalendar.getCreatorMessage());
+						CalendarCreatorResponse response = new CalendarCreatorResponse(true,
+								confirmed, preCalendar.getCreatorMessage(), false);
 
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, true, this.getClass());
 
-						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
-						response.setEdited(false);
-						response.setCreatorMessage(preCalendar.getCreatorMessage());
-						return response;
+						return new CalendarCreatorResponse(false, null,
+								preCalendar.getCreatorMessage(), false);
 					}
 				} else {
 					//Editing calendar...
@@ -175,24 +173,21 @@ public class CalendarCreator {
 						rule.setScope(scope).setRole("reader");
 						service.acl().insert(confirmed.getId(), rule).execute();
 
-						CalendarCreatorResponse response = new CalendarCreatorResponse(true, confirmed);
-						response.setEdited(true);
-						response.setCreatorMessage(preCalendar.getCreatorMessage());
+						CalendarCreatorResponse response = new CalendarCreatorResponse(true,
+								confirmed, preCalendar.getCreatorMessage(), true);
 
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, true, this.getClass());
 
-						CalendarCreatorResponse response = new CalendarCreatorResponse(false);
-						response.setEdited(true);
-						response.setCreatorMessage(preCalendar.getCreatorMessage());
-						return response;
+						return new CalendarCreatorResponse(false, null,
+								preCalendar.getCreatorMessage(), true);
 					}
 				}
 			}
 		}
-		return new CalendarCreatorResponse(false);
+		return new CalendarCreatorResponse(false, null, null, false);
 	}
 
 	//Getters

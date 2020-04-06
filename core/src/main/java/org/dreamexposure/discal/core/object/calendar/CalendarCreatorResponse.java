@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
+
 import discord4j.core.object.entity.Message;
 
 /**
@@ -10,29 +11,16 @@ import discord4j.core.object.entity.Message;
  */
 public class CalendarCreatorResponse {
 	private final boolean successful;
+	private final boolean edited;
+	private final Message creatorMessage;
+	private final Calendar calendar;
 
-	private boolean edited;
-	private Message creatorMessage;
-	private Calendar calendar;
-
-	/**
-	 * Creates a new response.
-	 *
-	 * @param _successful Whether or not the creation was successful.
-	 */
-	public CalendarCreatorResponse(boolean _successful) {
-		successful = _successful;
-	}
-
-	/**
-	 * Creates a new response.
-	 *
-	 * @param _successful Whether or not the creation was successful.
-	 * @param _calendar   The calendar created.
-	 */
-	public CalendarCreatorResponse(boolean _successful, Calendar _calendar) {
-		successful = _successful;
-		calendar = _calendar;
+	public CalendarCreatorResponse(boolean successful, Calendar calendar, Message message,
+								   boolean edited) {
+		this.successful = successful;
+		this.calendar = calendar;
+		this.creatorMessage = message;
+		this.edited = edited;
 	}
 
 	//Getters
@@ -61,24 +49,5 @@ public class CalendarCreatorResponse {
 
 	public Message getCreatorMessage() {
 		return creatorMessage;
-	}
-
-	//Setters
-
-	/**
-	 * Sets the calendar involved.
-	 *
-	 * @param _calendar The calendar involved.
-	 */
-	public void setCalendar(Calendar _calendar) {
-		calendar = _calendar;
-	}
-
-	public void setEdited(boolean _edit) {
-		edited = _edit;
-	}
-
-	public void setCreatorMessage(Message msg) {
-		creatorMessage = msg;
 	}
 }

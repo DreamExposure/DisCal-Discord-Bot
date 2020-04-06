@@ -16,6 +16,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
+import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GeneralUtils;
@@ -75,9 +76,10 @@ public class EventCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("event");
-		info.setDescription("Used for all event related functions");
-		info.setExample("!event <function> (value(s))");
+		CommandInfo info = new CommandInfo("event",
+				"User for all event related functions",
+				"!event <function> (value(s))"
+		);
 
 		info.getSubCommands().put("create", "Creates a new event");
 		info.getSubCommands().put("copy", "Copies an existing event");
@@ -814,7 +816,7 @@ public class EventCommand implements ICommand {
 			if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
 				if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove") || value.equalsIgnoreCase("clear")) {
 					//Delete picture from event
-					EventCreator.getCreator().getPreEvent(settings.getGuildID()).getEventData().setImageLink(null);
+					EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEventData(EventData.empty());
 
 					if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
 						MessageManager.deleteMessage(event);
@@ -824,7 +826,16 @@ public class EventCommand implements ICommand {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), event);
 					}
 				} else if (ImageUtils.validate(value, settings.isPatronGuild())) {
-					EventCreator.getCreator().getPreEvent(settings.getGuildID()).getEventData().setImageLink(value);
+					PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+					EventData eventData = EventData.fromImage(
+							settings.getGuildID(),
+							preEvent.getEventId(),
+							preEvent.getEndDateTime().getDateTime().getValue(),
+							value
+					);
+					preEvent.setEventData(eventData);
+
 
 					if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
 						MessageManager.deleteMessage(event);

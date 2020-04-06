@@ -60,9 +60,11 @@ public class CalendarCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("calendar");
-		info.setDescription("Used for direct interaction with your DisCal Calendar.");
-		info.setExample("!calendar <subCommand> (value)");
+		CommandInfo info = new CommandInfo(
+				"calendar",
+				"Used for direct interaction with your DisCal Calendar.",
+				"!calendar <subCommand> (value)"
+		);
 
 		info.getSubCommands().put("create", "Starts the creation of a new calendar.");
 		info.getSubCommands().put("cancel", "Cancels the creator/editor");

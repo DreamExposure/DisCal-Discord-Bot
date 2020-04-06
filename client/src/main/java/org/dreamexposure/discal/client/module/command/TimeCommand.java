@@ -1,10 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Image;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -20,6 +17,11 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * Created by Nova Fox on 6/16/17.
@@ -58,10 +60,11 @@ public class TimeCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("time");
-		info.setDescription("Displays the current time for the calendar in its respective TimeZone.");
-		info.setExample("!time");
-		return info;
+		return new CommandInfo(
+				"time",
+				"Displays the current time for the calendar in its respective TimeZone.",
+				"!time"
+		);
 	}
 
 	/**

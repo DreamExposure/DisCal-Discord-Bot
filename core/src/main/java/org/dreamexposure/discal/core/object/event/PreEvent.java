@@ -67,7 +67,7 @@ public class PreEvent {
 		recur = false;
 		recurrence = new Recurrence();
 
-		eventData = new EventData(guildId);
+		eventData = EventData.empty();
 
 		editing = false;
 		lastEdit = System.currentTimeMillis();

@@ -60,9 +60,11 @@ public class DisCalCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("event");
-		info.setDescription("Used to configure DisCal");
-		info.setExample("!DisCal (function) (value)");
+		CommandInfo info = new CommandInfo(
+				"event",
+				"Used to configure DisCal",
+				"!DisCal (function) (value)"
+		);
 
 		info.getSubCommands().put("settings", "Displays the bot's settings.");
 		info.getSubCommands().put("role", "Sets the control role for the bot.");

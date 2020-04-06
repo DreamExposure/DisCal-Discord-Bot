@@ -1,10 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Image;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -18,6 +13,12 @@ import org.dreamexposure.discal.core.utils.UserUtils;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Image;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * Created by Nova Fox on 8/31/17.
@@ -55,9 +56,11 @@ public class RsvpCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("rsvp");
-		info.setDescription("Confirms attendance to an event");
-		info.setExample("!rsvp <subCommand> <eventId>");
+		CommandInfo info = new CommandInfo(
+				"rsvp",
+				"Confirms attendance to an event",
+				"!rsvp <subCommand> <eventId>"
+		);
 
 		info.getSubCommands().put("onTime", "Marks you are going to event");
 		info.getSubCommands().put("late", "Marks that you will be late to event");

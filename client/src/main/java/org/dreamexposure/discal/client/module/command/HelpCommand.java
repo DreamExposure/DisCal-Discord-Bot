@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -9,6 +7,9 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -46,11 +47,9 @@ public class HelpCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("help");
-		info.setDescription("Displays help (duh).");
-		info.setExample("!help (command) (sub-command)");
-
-		return info;
+		return new CommandInfo("help",
+				"Displays help (duh)",
+				"!help (command) (sub-command)");
 	}
 
 	/**

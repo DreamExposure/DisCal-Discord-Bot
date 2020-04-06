@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.event;
 
 import com.google.api.services.calendar.model.Event;
+
 import discord4j.core.object.entity.Message;
 
 /**
@@ -10,31 +11,16 @@ import discord4j.core.object.entity.Message;
  */
 public class EventCreatorResponse {
 	private final boolean successful;
+	private final Event event;
+	private final Message creatorMessage;
+	private final boolean edited;
 
-	private Message creatorMessage;
-
-	private Event event;
-	private boolean edited;
-
-	/**
-	 * Creates a new Response.
-	 *
-	 * @param _successful Whether or not the Creator was successful.
-	 */
-	public EventCreatorResponse(boolean _successful) {
-		successful = _successful;
-	}
-
-	/**
-	 * Creates a new Response.
-	 *
-	 * @param _successful Whether or not the Creator was successful.
-	 * @param _event      The Event that was created.
-	 */
-	public EventCreatorResponse(boolean _successful, Event _event) {
-		successful = _successful;
-		event = _event;
-		edited = false;
+	public EventCreatorResponse(boolean successful, Event event, Message creatorMessage,
+								boolean edited) {
+		this.successful = successful;
+		this.event = event;
+		this.creatorMessage = creatorMessage;
+		this.edited = edited;
 	}
 
 	//Getters
@@ -63,23 +49,5 @@ public class EventCreatorResponse {
 	 */
 	public Event getEvent() {
 		return event;
-	}
-
-	//Setters
-	public void setCreatorMessage(Message _creatorMessage) {
-		creatorMessage = _creatorMessage;
-	}
-
-	/**
-	 * Sets the event that was created.
-	 *
-	 * @param _event The event that was created.
-	 */
-	public void setEvent(Event _event) {
-		event = _event;
-	}
-
-	public void setEdited(boolean _edited) {
-		edited = _edited;
 	}
 }

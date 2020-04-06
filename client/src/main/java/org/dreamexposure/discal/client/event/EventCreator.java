@@ -12,6 +12,7 @@ import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
+import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
@@ -233,51 +234,55 @@ public class EventCreator {
 						Event confirmed = CalendarAuth.getCalendarService(settings).events().insert(calendarId, event).execute();
 
 						if (preEvent.getEventData().shouldBeSaved()) {
-							preEvent.getEventData().setEventId(confirmed.getId());
-							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());
-							DatabaseManager.getManager().updateEventData(preEvent.getEventData());
+							EventData toSave = EventData.fromImage(
+									settings.getGuildID(),
+									confirmed.getId(),
+									confirmed.getEnd().getDateTime().getValue(),
+									preEvent.getEventData().getImageLink()
+							);
+
+							DatabaseManager.getManager().updateEventData(toSave);
 						}
-						EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
-						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
-						response.setEdited(false);
+						EventCreatorResponse response = new EventCreatorResponse(true, confirmed,
+								getCreatorMessage(settings.getGuildID()), false);
 
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, true, this.getClass());
-						EventCreatorResponse response = new EventCreatorResponse(false);
-						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
-						response.setEdited(false);
 
-						return response;
+						return new EventCreatorResponse(false, null,
+								getCreatorMessage(settings.getGuildID()), false);
 					}
 				} else {
 					try {
 						Event confirmed = CalendarAuth.getCalendarService(settings).events().update(calendarId, preEvent.getEventId(), event).execute();
 
 						if (preEvent.getEventData().shouldBeSaved()) {
-							preEvent.getEventData().setEventId(confirmed.getId());
-							preEvent.getEventData().setEventEnd(confirmed.getEnd().getDateTime().getValue());
-							DatabaseManager.getManager().updateEventData(preEvent.getEventData());
+							EventData toSave = EventData.fromImage(
+									settings.getGuildID(),
+									confirmed.getId(),
+									confirmed.getEnd().getDateTime().getValue(),
+									preEvent.getEventData().getImageLink()
+							);
+
+							DatabaseManager.getManager().updateEventData(toSave);
 						}
 
-						EventCreatorResponse response = new EventCreatorResponse(true, confirmed);
-						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
-						response.setEdited(true);
+						EventCreatorResponse response = new EventCreatorResponse(true, confirmed,
+								getCreatorMessage(settings.getGuildID()), true);
 
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
 						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, true, this.getClass());
-						EventCreatorResponse response = new EventCreatorResponse(false);
-						response.setCreatorMessage(getCreatorMessage(settings.getGuildID()));
-						response.setEdited(true);
-						return response;
+						return new EventCreatorResponse(false, null,
+								getCreatorMessage(settings.getGuildID()), true);
 					}
 				}
 			}
 		}
-		return new EventCreatorResponse(false);
+		return new EventCreatorResponse(false, null, null, false);
 	}
 
 	//Getters

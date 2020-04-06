@@ -78,9 +78,11 @@ public class AnnouncementCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("announcement");
-		info.setDescription("Used for all announcement functions.");
-		info.setExample("!announcement <function> (value(s))");
+		CommandInfo info = new CommandInfo(
+				"announcement",
+				"Used for all announcement functions.",
+				"!announcement <function> (value(s))"
+		);
 
 		info.getSubCommands().put("create", "Starts the announcement creator.");
 		info.getSubCommands().put("copy", "Copies an existing announcement.");

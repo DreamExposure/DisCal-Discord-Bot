@@ -54,7 +54,7 @@ public class EventEndpoint {
 		//Okay, now handle actual request.
 		JSONObject requestBody = new JSONObject(rBody);
 
-		Integer daysInMonth = Integer.valueOf(requestBody.getString("DaysInMonth"));
+		int daysInMonth = Integer.parseInt(requestBody.getString("DaysInMonth"));
 		long startEpoch = Long.parseLong(requestBody.getString("StartEpoch"));
 		long endEpoch = startEpoch + (86400000L * daysInMonth);
 		long guildId = requestBody.getLong("guild_id");
@@ -253,11 +253,14 @@ public class EventEndpoint {
 				event.setRecurrence(Arrays.asList(rr));
 			}
 
-			EventData ed = new EventData(settings.getGuildID());
+			EventData ed = EventData.empty();
 			if (!body.getString("image").equalsIgnoreCase("")) {
-				ed.setImageLink(body.getString("image"));
-				ed.setEventId(eventId);
-				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+				ed = EventData.fromImage(
+						Snowflake.of(guildId),
+						eventId,
+						end.getDateTime().getValue(),
+						body.getString("image")
+				);
 
 				if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 					JSONObject respondBody = new JSONObject();
@@ -348,25 +351,26 @@ public class EventEndpoint {
 				event.setRecurrence(Arrays.asList(rr));
 			}
 
-			EventData ed = new EventData(settings.getGuildID());
-			ed.setEventId(event.getId());
-
+			EventData ed = EventData.empty();
 			if (!body.getString("image").equalsIgnoreCase("")) {
-				ed.setImageLink(body.getString("image"));
-				ed.setEventEnd(event.getEnd().getDateTime().getValue());
+				ed = EventData.fromImage(
+						Snowflake.of(guildId),
+						event.getId(),
+						end.getDateTime().getValue(),
+						body.getString("image")
+				);
 
 				if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
-					response.setContentType("application/json");
-					response.setStatus(400);
-
 					JSONObject respondBody = new JSONObject();
-					respondBody.put("Message", "Failed to create event!");
+					respondBody.put("Message", "Failed to update event!");
 					respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
 
+
+					response.setContentType("application/json");
+					response.setStatus(400);
 					return respondBody.toString();
 				}
 			}
-
 
 			if (ed.shouldBeSaved())
 				DatabaseManager.getManager().updateEventData(ed);

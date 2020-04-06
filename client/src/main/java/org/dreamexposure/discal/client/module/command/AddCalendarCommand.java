@@ -23,7 +23,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings({"OptionalGetWithoutIsPresent"})
 public class AddCalendarCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -57,11 +57,11 @@ public class AddCalendarCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("addCalendar");
-		info.setDescription("Starts the process of adding an external calendar");
-		info.setExample("!addCalendar (calendar ID)");
-
-		return info;
+		return new CommandInfo(
+				"addCalendar",
+				"Starts the process of adding an external calendar",
+				"!addCalendar (calendar ID)"
+		);
 	}
 
 	/**
@@ -102,10 +102,9 @@ public class AddCalendarCommand implements ICommand {
 							}
 							if (valid) {
 								//Update and save.
-								CalendarData data = new CalendarData(event.getGuild().block().getId(), 1);
-								data.setCalendarId(args[0]);
-								data.setCalendarAddress(args[0]);
-								data.setExternal(true);
+								CalendarData data = CalendarData.fromData(settings.getGuildID(),
+										1, args[0], args[0], true);
+
 								DatabaseManager.getManager().updateCalendar(data);
 
 								//Update guild settings

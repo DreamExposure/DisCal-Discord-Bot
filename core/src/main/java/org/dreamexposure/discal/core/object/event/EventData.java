@@ -2,8 +2,6 @@ package org.dreamexposure.discal.core.object.event;
 
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
-
 import discord4j.core.object.util.Snowflake;
 
 /**
@@ -12,14 +10,34 @@ import discord4j.core.object.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class EventData {
+	public static EventData fromJson(JSONObject json) {
+		return new EventData(
+				Snowflake.of(json.getString("guild_id")),
+				json.getString("event_id"),
+				json.getLong("event_end"),
+				json.getString("image_link")
+		);
+	}
+
+	public static EventData fromImage(Snowflake guildId, String eventId, long eventEnd,
+									  String imageLink) {
+		return new EventData(guildId, eventId, eventEnd, imageLink);
+	}
+
+	public static EventData empty() {
+		return new EventData(Snowflake.of(0), "", 0, "");
+	}
+
 	private final Snowflake guildId;
+	private final String eventId;
+	private final long eventEnd;
+	private final String imageLink;
 
-	private String eventId;
-	private long eventEnd;
-	private String imageLink;
-
-	public EventData(Snowflake _guildId) {
-		guildId = _guildId;
+	private EventData(Snowflake guildId, String eventId, long eventEnd, String imageLink) {
+		this.guildId = guildId;
+		this.eventId = eventId;
+		this.eventEnd = eventEnd;
+		this.imageLink = imageLink;
 	}
 
 	//Getters
@@ -39,22 +57,9 @@ public class EventData {
 		return imageLink;
 	}
 
-	//Setters
-	public void setEventId(String _eventId) {
-		eventId = _eventId;
-	}
-
-	public void setEventEnd(long _eventEnd) {
-		eventEnd = _eventEnd;
-	}
-
-	public void setImageLink(@Nullable String _link) {
-		imageLink = _link;
-	}
-
 	//Boolean/Checkers
 	public boolean shouldBeSaved() {
-		return imageLink != null;
+		return !imageLink.isEmpty();
 	}
 
 	public JSONObject toJson() {
@@ -66,13 +71,5 @@ public class EventData {
 		json.put("image_link", imageLink);
 
 		return json;
-	}
-
-	public EventData fromJson(JSONObject json) {
-		eventId = json.getString("event_id");
-		eventEnd = json.getLong("event_end");
-		imageLink = json.getString("image_link");
-
-		return this;
 	}
 }

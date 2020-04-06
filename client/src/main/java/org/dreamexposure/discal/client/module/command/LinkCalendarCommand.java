@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -12,6 +12,8 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 
 import java.util.ArrayList;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -54,10 +56,11 @@ public class LinkCalendarCommand implements ICommand {
 	 */
 	@Override
 	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("linkCalendar");
-		info.setDescription("Links the guild's calendar in a pretty embed!");
-		info.setExample("!linkCalendar");
-		return info;
+		return new CommandInfo(
+				"linkCalendar",
+				"Links the guild's calendar in a pretty embed!",
+				"!linkCalendar"
+		);
 	}
 
 	/**
