@@ -25,8 +25,9 @@ public class RsvpData {
 	private final ArrayList<String> notGoing = new ArrayList<>();
 	private final ArrayList<String> undecided = new ArrayList<>();
 
-	public RsvpData(Snowflake _guildId) {
-		guildId = _guildId;
+	public RsvpData(Snowflake guildId, String eventId) {
+		this.guildId = guildId;
+		this.eventId = eventId;
 	}
 
 	//Getters

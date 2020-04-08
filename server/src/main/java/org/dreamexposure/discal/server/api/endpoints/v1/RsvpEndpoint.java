@@ -44,7 +44,7 @@ public class RsvpEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Snowflake.of(guildId), eventId);
+			RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
 			JSONObject body = new JSONObject();
 			body.put("on_time", rsvp.getGoingOnTime());
@@ -86,7 +86,7 @@ public class RsvpEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String eventId = jsonMain.getString("id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Snowflake.of(guildId), eventId);
+			RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
 			if (jsonMain.has("on_time")) {
 				rsvp.getGoingOnTime().clear();
@@ -120,7 +120,7 @@ public class RsvpEndpoint {
 				}
 			}
 
-			if (DatabaseManager.getManager().updateRsvpData(rsvp)) {
+			if (DatabaseManager.updateRsvpData(rsvp).block()) {
 				response.setContentType("application/json");
 				response.setStatus(200);
 				return JsonUtils.getJsonResponseMessage("Successfully updated RSVP data");

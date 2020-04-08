@@ -76,7 +76,7 @@ public class AddCalendarCommand implements ICommand {
 		if (settings.isDevGuild() || settings.isPatronGuild()) {
 			if (PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
 				if (args.length == 0) {
-					if (DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+					if (DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress().equalsIgnoreCase("primary")) {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Start", settings), event);
 						GoogleExternalAuth.getAuth().requestCode(event, settings);
 					} else {
@@ -84,7 +84,7 @@ public class AddCalendarCommand implements ICommand {
 					}
 				} else if (args.length == 1) {
 					//Check if arg is calendar ID that is supported, if so, complete the setup.
-					if (!DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress().equalsIgnoreCase("primary")) {
+					if (!DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress().equalsIgnoreCase("primary")) {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
 					} else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
@@ -93,7 +93,7 @@ public class AddCalendarCommand implements ICommand {
 							Calendar service = CalendarAuth.getCalendarService(settings);
 							List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
 							boolean valid = false;
-							for (CalendarListEntry i: items) {
+							for (CalendarListEntry i : items) {
 								if (!i.isDeleted() && i.getId().equals(args[0])) {
 									//valid
 									valid = true;
@@ -105,11 +105,11 @@ public class AddCalendarCommand implements ICommand {
 								CalendarData data = CalendarData.fromData(settings.getGuildID(),
 										1, args[0], args[0], true);
 
-								DatabaseManager.getManager().updateCalendar(data);
+								DatabaseManager.updateCalendar(data).subscribe();
 
 								//Update guild settings
 								settings.setUseExternalCalendar(true);
-								DatabaseManager.getManager().updateSettings(settings);
+								DatabaseManager.updateSettings(settings).subscribe();
 
 								MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
 							} else {

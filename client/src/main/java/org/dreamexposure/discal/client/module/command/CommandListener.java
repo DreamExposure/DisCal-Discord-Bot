@@ -29,7 +29,7 @@ class CommandListener {
 			if (event.getMessage().getContent().isPresent() && !event.getMessage().getContent().get().isEmpty() && event.getMember().isPresent() && !event.getMember().get().isBot()) {
 				String content = event.getMessage().getContent().get();
 				//Message is a valid guild message (not DM and not from a bot). Check if in correct channel.
-				GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuildId().get());
+				GuildSettings settings = DatabaseManager.getSettings(event.getGuildId().get()).block();
 				if (content.startsWith(settings.getPrefix())) {
 					if (PermissionChecker.isCorrectChannel(event, settings).blockOptional().orElse(false)) {
 						//Prefixed with ! which should mean it is a command, convert and confirm.

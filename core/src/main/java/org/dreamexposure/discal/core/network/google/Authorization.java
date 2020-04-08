@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.network.google;
 
 import com.google.api.client.http.HttpStatusCodes;
-import okhttp3.*;
+
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.Logger;
@@ -9,6 +9,12 @@ import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
 import org.json.JSONObject;
+
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -68,7 +74,7 @@ public class Authorization {
 
 				//Update Db data.
 				settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 
 				//Okay, we can return the access token to be used when this method is called.
 				return autoRefreshResponse.getString("access_token");

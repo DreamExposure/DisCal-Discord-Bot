@@ -74,7 +74,7 @@ public class LinkCalendarCommand implements ICommand {
 	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+			CalendarData data = DatabaseManager.getMainCalendar(event.getGuild().block().getId()).block();
 
 			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
 				//Does not have a calendar.

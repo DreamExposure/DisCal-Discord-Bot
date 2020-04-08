@@ -49,7 +49,7 @@ public class AnnouncementEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId));
+			Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId)).block();
 
 			if (a != null) {
 
@@ -122,7 +122,7 @@ public class AnnouncementEndpoint {
 			a.setMinutesBefore(body.getInt("minutes"));
 			a.setInfo(body.getString("info"));
 
-			if (DatabaseManager.getManager().updateAnnouncement(a)) {
+			if (DatabaseManager.updateAnnouncement(a).block()) {
 				response.setContentType("application/json");
 				response.setStatus(200);
 
@@ -167,7 +167,7 @@ public class AnnouncementEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId));
+			Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId)).block();
 
 			if (a != null) {
 
@@ -192,7 +192,7 @@ public class AnnouncementEndpoint {
 				if (body.has("info_only"))
 					a.setInfoOnly(body.getBoolean("info_only"));
 
-				if (DatabaseManager.getManager().updateAnnouncement(a)) {
+				if (DatabaseManager.updateAnnouncement(a).block()) {
 					response.setContentType("application/json");
 					response.setStatus(200);
 					return JsonUtils.getJsonResponseMessage("Successfully updated announcement");
@@ -237,8 +237,8 @@ public class AnnouncementEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			String announcementId = jsonMain.getString("id");
 
-			if (DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId)) != null) {
-				if (DatabaseManager.getManager().deleteAnnouncement(announcementId)) {
+			if (DatabaseManager.getAnnouncement(UUID.fromString(announcementId), Snowflake.of(guildId)).block() != null) {
+				if (DatabaseManager.deleteAnnouncement(announcementId).block()) {
 					response.setContentType("application/json");
 					response.setStatus(200);
 					return JsonUtils.getJsonResponseMessage("Successfully deleted announcement");
@@ -286,7 +286,7 @@ public class AnnouncementEndpoint {
 
 			ArrayList<JSONObject> announcements = new ArrayList<>();
 			if (amount == -1) {
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Snowflake.of(guildId))) {
+				for (Announcement a : DatabaseManager.getAnnouncements(Snowflake.of(guildId)).block()) {
 					JSONObject obj = new JSONObject();
 					obj.put("id", a.getAnnouncementId().toString());
 					obj.put("channel", a.getAnnouncementChannelId());
@@ -305,7 +305,7 @@ public class AnnouncementEndpoint {
 				}
 			} else {
 				int i = 0;
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(Snowflake.of(guildId))) {
+				for (Announcement a : DatabaseManager.getAnnouncements(Snowflake.of(guildId)).block()) {
 					if (i < amount) {
 						JSONObject obj = new JSONObject();
 						obj.put("id", a.getAnnouncementId().toString());

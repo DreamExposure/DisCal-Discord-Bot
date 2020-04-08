@@ -46,11 +46,10 @@ public class JsonUtils {
 		} else
 			json.put("recur", false);
 
-		EventData ed = DatabaseManager.getManager()
-				.getEventData(settings.getGuildID(), event.getId());
+		EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
 
 		//Event image is also optional
-		if (ed.getImageLink() != null)
+		if (ed != null && ed.getImageLink() != null)
 			json.put("image", ed.getImageLink());
 
 		return json;

@@ -155,9 +155,9 @@ public class DevCommand implements ICommand {
 
 			//Check if its on this shard...
 			if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
+				GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(args[1])).block();
 				settings.setPatronGuild(!settings.isPatronGuild());
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 
 				MessageManager.sendMessageAsync("Guild connected to this shard. isPatronGuild value updated!", event);
 				return;
@@ -252,9 +252,9 @@ public class DevCommand implements ICommand {
 			}
 			//Check if its on this shard...
 			if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
-				GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
+				GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(args[1])).block();
 				settings.setDevGuild(!settings.isDevGuild());
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 
 				MessageManager.sendMessageAsync("Guild connected to this shard. isDevGuild value updated!", event);
 				return;
@@ -310,9 +310,9 @@ public class DevCommand implements ICommand {
 
 				//Check if its on this shard...
 				if (DisCalClient.getClient().getGuildById(Snowflake.of(args[1])).block() != null) {
-					GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(args[1]));
+					GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(args[1])).block();
 					settings.setMaxCalendars(mc);
-					DatabaseManager.getManager().updateSettings(settings);
+					DatabaseManager.updateSettings(settings).subscribe();
 
 					MessageManager.sendMessageAsync("Guild connected to this shard. Max calendar value has been updated!", event);
 					return;
@@ -461,7 +461,7 @@ public class DevCommand implements ICommand {
 			account.setBlocked(false);
 			account.setUses(0);
 
-			if (DatabaseManager.getManager().updateAPIAccount(account)) {
+			if (DatabaseManager.updateAPIAccount(account).block()) {
 				MessageManager.sendMessageAsync("Check your DMs for the new API Key!", event);
 				MessageManager.sendDirectMessageAsync(account.getAPIKey(), event.getMember().get());
 			} else {
@@ -478,10 +478,10 @@ public class DevCommand implements ICommand {
 
 			String key = args[1];
 
-			UserAPIAccount account = DatabaseManager.getManager().getAPIAccount(key);
+			UserAPIAccount account = DatabaseManager.getAPIAccount(key).block();
 			account.setBlocked(true);
 
-			if (DatabaseManager.getManager().updateAPIAccount(account))
+			if (DatabaseManager.updateAPIAccount(account).block())
 				MessageManager.sendMessageAsync("Successfully blocked API key!", event);
 			else
 				MessageManager.sendMessageAsync("Error occurred! Could not block API key!", event);

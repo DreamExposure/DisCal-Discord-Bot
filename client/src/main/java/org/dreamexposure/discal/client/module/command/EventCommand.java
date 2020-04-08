@@ -121,7 +121,7 @@ public class EventCommand implements ICommand {
 	@Override
 	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
 		//TODO: Add multiple calendar handling.
-		CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+		CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 		if (args.length < 1) {
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Few", settings), event);
 		} else {

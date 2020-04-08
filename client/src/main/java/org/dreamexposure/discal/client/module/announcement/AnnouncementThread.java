@@ -56,13 +56,13 @@ public class AnnouncementThread extends Thread {
 			}
 
 			for (Guild g : DisCalClient.getClient().getGuilds().toIterable()) {
-				List<Announcement> allAnnouncements = DatabaseManager.getManager().getEnabledAnnouncements(g.getId());
+				List<Announcement> allAnnouncements = DatabaseManager.getEnabledAnnouncements(g.getId()).block();
 				for (Announcement a : allAnnouncements) {
 					try {
 						Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 						//Check if guild is part of DisCal's guilds. This way we can clear out the database...
 						if (!GuildUtils.active(a.getGuildId())) {
-							DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+							DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
 							continue;
 						}
 						//Get everything we need ready.
@@ -87,7 +87,7 @@ public class AnnouncementThread extends Thread {
 											//We can announce it.
 											AnnouncementMessageFormatter.sendAnnouncementMessage(a, e, calendar, settings);
 											//And now lets delete it
-											DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+											DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
 										}
 									} catch (IOException e) {
 										//Event getting error, we know it exists tho
@@ -95,7 +95,7 @@ public class AnnouncementThread extends Thread {
 									}
 								} else {
 									//Event is gone, we can just delete this shit.
-									DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+									DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
 								}
 								break;
 							case UNIVERSAL:
@@ -164,7 +164,7 @@ public class AnnouncementThread extends Thread {
 		if (difference < 0) {
 			//Event past, we can delete announcement depending on the type
 			if (a.getAnnouncementType() == AnnouncementType.SPECIFIC)
-				DatabaseManager.getManager().deleteAnnouncement(a.getAnnouncementId().toString());
+				DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
 
 			return false;
 		} else {
@@ -182,14 +182,14 @@ public class AnnouncementThread extends Thread {
 
 	private GuildSettings getSettings(Announcement a) {
 		if (!allSettings.containsKey(a.getGuildId()))
-			allSettings.put(a.getGuildId(), DatabaseManager.getManager().getSettings(a.getGuildId()));
+			allSettings.put(a.getGuildId(), DatabaseManager.getSettings(a.getGuildId()).block());
 
 		return allSettings.get(a.getGuildId());
 	}
 
 	private CalendarData getCalendarData(Announcement a) {
 		if (!calendars.containsKey(a.getGuildId()))
-			calendars.put(a.getGuildId(), DatabaseManager.getManager().getMainCalendar(a.getGuildId()));
+			calendars.put(a.getGuildId(), DatabaseManager.getMainCalendar(a.getGuildId()).block());
 
 		return calendars.get(a.getGuildId());
 	}

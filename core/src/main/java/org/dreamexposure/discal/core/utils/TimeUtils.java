@@ -54,11 +54,14 @@ public class TimeUtils {
 		if (EventUtils.eventExists(settings, eventId)) {
 			try {
 				Calendar service = CalendarAuth.getCalendarService(settings);
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID())
+						.block();
+				if (calendarData == null)
+					return false;
 				Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
 				return inPast(e);
 			} catch (Exception e) {
-				Logger.getLogger().exception(null, "Failed to get calendar auth", e, true, TimeUtils.class);
+				Logger.getLogger().exception("Failed to get calendar auth", e, true, TimeUtils.class);
 				//Return false and allow RSVP so user is not adversely affected.
 				return false;
 			}

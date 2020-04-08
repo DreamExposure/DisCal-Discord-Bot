@@ -49,12 +49,12 @@ public class ListEventRangeEndpoint {
 			int calNumber = requestBody.getInt("calendar_number");
 			long startEpoch = requestBody.getLong("epoch_start");
 			long endEpoch = requestBody.getLong("epoch_end");
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
 			//okay, lets actually get the range's events.
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))

@@ -58,13 +58,13 @@ public class EventEndpoint {
 		long startEpoch = Long.parseLong(requestBody.getString("StartEpoch"));
 		long endEpoch = startEpoch + (86400000L * daysInMonth);
 		long guildId = requestBody.getLong("guild_id");
-		GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+		GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 		//okay, lets actually get the month's events.
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))
@@ -115,13 +115,13 @@ public class EventEndpoint {
 		long startEpoch = Long.parseLong(requestBody.getString("StartEpoch"));
 		long endEpoch = startEpoch + 86400000L;
 		long guildId = requestBody.getLong("guild_id");
-		GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+		GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 		//okay, lets actually get the month's events.
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
 					.setTimeMax(new DateTime(endEpoch))
@@ -175,7 +175,7 @@ public class EventEndpoint {
 					jo.put("recurrence", rjo);
 				}
 
-				EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), e.getId());
+				EventData ed = DatabaseManager.getEventData(settings.getGuildID(), e.getId()).block();
 
 				jo.put("image", ed.getImageLink());
 
@@ -212,13 +212,13 @@ public class EventEndpoint {
 		JSONObject body = new JSONObject(rBody);
 		String eventId = body.getString("id");
 		long guildId = body.getLong("guild_id");
-		GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+		GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 		//Okay, time to update the event
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
 			Event event = new Event();
@@ -275,7 +275,7 @@ public class EventEndpoint {
 			}
 
 			if (ed.shouldBeSaved())
-				DatabaseManager.getManager().updateEventData(ed);
+				DatabaseManager.updateEventData(ed).subscribe();
 
 			service.events().update(calendarData.getCalendarId(), eventId, event).execute();
 
@@ -310,13 +310,13 @@ public class EventEndpoint {
 		//Okay, now handle actual request.
 		JSONObject body = new JSONObject(rBody);
 		long guildId = body.getLong("guild_id");
-		GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+		GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 		//Okay, time to create the event
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 			com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
 			Event event = new Event();
@@ -373,7 +373,7 @@ public class EventEndpoint {
 			}
 
 			if (ed.shouldBeSaved())
-				DatabaseManager.getManager().updateEventData(ed);
+				DatabaseManager.updateEventData(ed).subscribe();
 
 			Event confirmed = service.events().insert(calendarData.getCalendarId(), event).execute();
 
@@ -414,7 +414,7 @@ public class EventEndpoint {
 		JSONObject requestBody = new JSONObject(rBody);
 		String eventId = requestBody.getString("id");
 		long guildId = requestBody.getLong("guild_id");
-		GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+		GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 		//okay, time to properly delete the event
 		if (EventUtils.deleteEvent(settings, eventId)) {

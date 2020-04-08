@@ -43,7 +43,7 @@ public class GuildEndpoint {
 			JSONObject jsonMain = new JSONObject(requestBody);
 			long guildId = jsonMain.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 			response.setContentType("application/json");
 			response.setStatus(200);
@@ -91,7 +91,7 @@ public class GuildEndpoint {
 
 			long guildId = body.getLong("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 			if (body.has("control_role"))
 				settings.setControlRole(body.getString("control_role"));
@@ -104,7 +104,7 @@ public class GuildEndpoint {
 			if (body.has("prefix"))
 				settings.setPrefix(body.getString("prefix"));
 
-			if (DatabaseManager.getManager().updateSettings(settings)) {
+			if (DatabaseManager.updateSettings(settings).block()) {
 				response.setContentType("application/json");
 				response.setStatus(200);
 				return JsonUtils.getJsonResponseMessage("Successfully updated guild settings!");

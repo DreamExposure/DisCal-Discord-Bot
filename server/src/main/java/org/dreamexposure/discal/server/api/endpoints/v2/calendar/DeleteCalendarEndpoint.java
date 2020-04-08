@@ -43,8 +43,8 @@ public class DeleteCalendarEndpoint {
 			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 			int calNumber = jsonMain.getInt("calendar_number");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-			CalendarData calendar = DatabaseManager.getManager().getCalendar(guildId, calNumber);
+			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+			CalendarData calendar = DatabaseManager.getCalendar(guildId, calNumber).block();
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 				if (CalendarUtils.calendarExists(calendar, settings)) {

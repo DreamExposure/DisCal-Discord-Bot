@@ -70,7 +70,7 @@ public class AnnouncementCreator {
 
 	public Announcement init(MessageCreateEvent e, String announcementId, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID()) && AnnouncementUtils.announcementExists(announcementId, settings.getGuildID())) {
-			Announcement toCopy = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), settings.getGuildID());
+			Announcement toCopy = DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID()).block();
 
 			//Copy
 			Announcement a = new Announcement(toCopy);
@@ -90,7 +90,7 @@ public class AnnouncementCreator {
 
 	public Announcement edit(MessageCreateEvent e, String announcementId, GuildSettings settings) {
 		if (!hasAnnouncement(settings.getGuildID()) && AnnouncementUtils.announcementExists(announcementId, settings.getGuildID())) {
-			Announcement edit = DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementId), settings.getGuildID());
+			Announcement edit = DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID()).block();
 
 			//Copy
 			Announcement a = new Announcement(edit, true);
@@ -118,7 +118,7 @@ public class AnnouncementCreator {
 		if (hasAnnouncement(guildId)) {
 			Announcement a = getAnnouncement(guildId);
 			if (a.hasRequiredValues()) {
-				if (DatabaseManager.getManager().updateAnnouncement(a)) {
+				if (DatabaseManager.updateAnnouncement(a).block()) {
 					terminate(guildId);
 					return new AnnouncementCreatorResponse(true, a, null);
 				}

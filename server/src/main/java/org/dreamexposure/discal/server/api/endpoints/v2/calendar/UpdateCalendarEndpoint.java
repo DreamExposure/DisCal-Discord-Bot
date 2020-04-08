@@ -47,8 +47,8 @@ public class UpdateCalendarEndpoint {
 			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 			int calNumber = jsonMain.getInt("calendar_number");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
-			CalendarData calData = DatabaseManager.getManager().getCalendar(guildId, calNumber);
+			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+			CalendarData calData = DatabaseManager.getCalendar(guildId, calNumber).block();
 
 			if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
 					&& CalendarUtils.calendarExists(calData, settings)) {

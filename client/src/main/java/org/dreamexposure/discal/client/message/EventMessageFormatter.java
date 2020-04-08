@@ -46,7 +46,7 @@ public class EventMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getEventEmbed(Event event, GuildSettings settings) {
 		return spec -> {
-			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
+			EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
 			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
 
 			if (settings.isBranded() && guild != null)
@@ -82,7 +82,7 @@ public class EventMessageFormatter {
 
 			try {
 				//TODO: add support for multiple calendars...
-				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 				Calendar service = CalendarAuth.getCalendarService(settings);
 				String tz = service.calendars().get(data.getCalendarAddress()).execute().getTimeZone();
 				spec.addField(MessageManager.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
@@ -127,7 +127,7 @@ public class EventMessageFormatter {
 				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
 			spec.setTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
-			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
+			EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 				spec.setThumbnail(ed.getImageLink());
 
@@ -242,7 +242,7 @@ public class EventMessageFormatter {
 	 */
 	public static Consumer<EmbedCreateSpec> getEventConfirmationEmbed(EventCreatorResponse ecr, GuildSettings settings) {
 		return spec -> {
-			EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), ecr.getEvent().getId());
+			EventData ed = DatabaseManager.getEventData(settings.getGuildID(), ecr.getEvent().getId()).block();
 			Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
 
 			if (settings.isBranded() && guild != null)
@@ -288,7 +288,7 @@ public class EventMessageFormatter {
 				return "NOT SET";
 			} else {
 				//Get timezone
-				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 
 				String timezone;
 				if (!preEvent) {
@@ -329,7 +329,7 @@ public class EventMessageFormatter {
 				return "NOT SET";
 			} else {
 				//Get timezone
-				CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+				CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 
 				String timezone;
 				if (!preEvent) {

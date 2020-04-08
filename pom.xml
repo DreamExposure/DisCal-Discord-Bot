@@ -22,10 +22,12 @@
 		<spring.version>2.1.5.RELEASE</spring.version>
 		<spring.security.version>5.1.5.RELEASE</spring.security.version>
 
-		<discord4j.version>3.0.6</discord4j.version>
-		<discord4j.stores.version>3.0.5</discord4j.stores.version>
+		<discord4j.version>3.0.13</discord4j.version>
+		<discord4j.stores.version>3.0.13</discord4j.stores.version>
 
 		<google.client-api.version>1.28.0</google.client-api.version>
+
+		<r2dbc.version>0.8.1.RELEASE</r2dbc.version>
 
 		<revision>3.1.0-SNAPSHOT</revision>
 	</properties>
@@ -125,11 +127,17 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--MySQL Driver-->
+		<!--r2jdbc API for reactive database queries-->
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.15</version>
+			<groupId>dev.miku</groupId>
+			<artifactId>r2dbc-mysql</artifactId>
+			<version>${r2dbc.version}</version>
+		</dependency>
+		<!--r2dbc pools API for mysql connection pooling-->
+		<dependency>
+			<groupId>io.r2dbc</groupId>
+			<artifactId>r2dbc-pool</artifactId>
+			<version>${r2dbc.version}</version>
 		</dependency>
 		<!--JSON API-->
 		<dependency>

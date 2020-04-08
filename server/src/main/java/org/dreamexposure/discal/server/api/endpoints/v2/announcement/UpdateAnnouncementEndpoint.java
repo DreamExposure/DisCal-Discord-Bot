@@ -46,7 +46,7 @@ public class UpdateAnnouncementEndpoint {
 			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guildId);
+			Announcement a = DatabaseManager.getAnnouncement(announcementId, guildId).block();
 
 			if (a != null) {
 				if (body.has("channel"))
@@ -92,7 +92,7 @@ public class UpdateAnnouncementEndpoint {
 				}
 
 				//Update in database now.
-				if (DatabaseManager.getManager().updateAnnouncement(a)) {
+				if (DatabaseManager.updateAnnouncement(a).block()) {
 					response.setContentType("application/json");
 					response.setStatus(200);
 					return JsonUtils.getJsonResponseMessage("Announcement successfully updated");

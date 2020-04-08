@@ -100,9 +100,9 @@ public class PreEvent {
 		endDateTime = e.getEnd();
 
 		//Here is where I need to fix the display times
-		GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+		GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 		//TODO: Support multiple calendars
-		CalendarData data = DatabaseManager.getManager().getMainCalendar(guildId);
+		CalendarData data = DatabaseManager.getMainCalendar(guildId).block();
 
 		Calendar cal = null;
 		try {
@@ -129,7 +129,7 @@ public class PreEvent {
 			viewableEndDate = e.getEnd();
 		}
 
-		eventData = DatabaseManager.getManager().getEventData(guildId, e.getId());
+		eventData = DatabaseManager.getEventData(guildId, e.getId()).block();
 
 		editing = false;
 		lastEdit = System.currentTimeMillis();

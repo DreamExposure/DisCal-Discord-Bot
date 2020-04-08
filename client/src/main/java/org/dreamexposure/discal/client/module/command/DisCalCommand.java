@@ -153,8 +153,8 @@ public class DisCalCommand implements ICommand {
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 3.0.6", false);
 			spec.addField("Shard Index", BotSettings.SHARD_INDEX.get() + "/" + BotSettings.SHARD_COUNT.get(), true);
 			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), DisCalClient.getClient().getGuilds().count().block() + "", true);
-			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getManager().getCalendarCount() + "", true);
-			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getManager().getAnnouncementCount() + "", true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getCalendarCount().block() + "", true);
+			spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getAnnouncementCount().block() + "", true);
 			spec.setFooter(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
 			spec.setUrl("https://www.discalbot.com");
 			spec.setColor(GlobalConst.discalColor);
@@ -179,7 +179,7 @@ public class DisCalCommand implements ICommand {
 
 					if (controlRole != null) {
 						settings.setControlRole(controlRole.getId().asString());
-						DatabaseManager.getManager().updateSettings(settings);
+						DatabaseManager.updateSettings(settings).subscribe();
 						//Send message.
 						MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.ControlRole.Set", "%role%", controlRole.getName(), settings), event);
 
@@ -190,7 +190,7 @@ public class DisCalCommand implements ICommand {
 				} else {
 					//Role is @everyone, set this so that anyone can control the bot.
 					settings.setControlRole("everyone");
-					DatabaseManager.getManager().updateSettings(settings);
+					DatabaseManager.updateSettings(settings).subscribe();
 					//Send message
 					MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.ControlRole.Reset", settings), event);
 				}
@@ -214,14 +214,14 @@ public class DisCalCommand implements ICommand {
 			if (channelName.equalsIgnoreCase("all")) {
 				//Reset channel info.
 				settings.setDiscalChannel("all");
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Channel.All", settings), event);
 			} else {
 				if (ChannelUtils.channelExists(channelName, event)) {
 					GuildChannel channel = ChannelUtils.getChannelFromNameOrId(channelName, event);
 					if (channel != null) {
 						settings.setDiscalChannel(channel.getId().asString());
-						DatabaseManager.getManager().updateSettings(settings);
+						DatabaseManager.updateSettings(settings).subscribe();
 						MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Channel.Set", "%channel%", channel.getName(), settings), event);
 					} else {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Discal.Channel.NotFound", settings), event);
@@ -237,7 +237,7 @@ public class DisCalCommand implements ICommand {
 
 	private void moduleSimpleAnnouncement(MessageCreateEvent event, GuildSettings settings) {
 		settings.setSimpleAnnouncements(!settings.usingSimpleAnnouncements());
-		DatabaseManager.getManager().updateSettings(settings);
+		DatabaseManager.updateSettings(settings).subscribe();
 
 		MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings), event);
 	}
@@ -284,11 +284,11 @@ public class DisCalCommand implements ICommand {
 
 			if (settings.getDmAnnouncements().contains(user.getId().asString())) {
 				settings.getDmAnnouncements().remove(user.getId().asString());
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.DmAnnouncements.Off", settings), event);
 			} else {
 				settings.getDmAnnouncements().add(user.getId().asString());
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.DmAnnouncements.On", settings), event);
 			}
 		} else {
@@ -302,7 +302,7 @@ public class DisCalCommand implements ICommand {
 				String prefix = args[1];
 
 				settings.setPrefix(prefix);
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event);
 			} else {
@@ -321,7 +321,7 @@ public class DisCalCommand implements ICommand {
 					String valid = MessageManager.getValidLang(value);
 
 					settings.setLang(valid);
-					DatabaseManager.getManager().updateSettings(settings);
+					DatabaseManager.updateSettings(settings).subscribe();
 
 					MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Lang.Success", settings), event);
 				} else {
@@ -345,7 +345,7 @@ public class DisCalCommand implements ICommand {
 		if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false)) {
 			if (settings.isPatronGuild()) {
 				settings.setBranded(!settings.isBranded());
-				DatabaseManager.getManager().updateSettings(settings);
+				DatabaseManager.updateSettings(settings).subscribe();
 
 				MessageManager.sendMessageAsync(MessageManager.getMessage("DisCal.Brand", "%value%", settings.isBranded() + "", settings), event);
 			} else {

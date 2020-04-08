@@ -57,8 +57,8 @@ public class UpdateEventEndpoint {
 			String eventId = requestBody.getString("event_id");
 
 			//Handle actually updating the event
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
-			CalendarData calData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+			CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
 			com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
 			Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
@@ -102,7 +102,7 @@ public class UpdateEventEndpoint {
 								requestBody.getString("image")
 						);
 
-						DatabaseManager.getManager().updateEventData(ed);
+						DatabaseManager.updateEventData(ed).subscribe();
 					}
 				}
 				//Everything supported is now checked for, lets update this on google's end now.

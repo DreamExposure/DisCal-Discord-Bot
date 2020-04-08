@@ -82,10 +82,6 @@ public class DisCalClient {
 		executor.registerCommand(new AnnouncementCommand());
 		executor.registerCommand(new DevCommand());
 
-		//Connect to MySQL
-		DatabaseManager.getManager().connectToMySQL();
-		DatabaseManager.getManager().handleMigrations();
-
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
 
@@ -117,7 +113,7 @@ public class DisCalClient {
 
 			TimeManager.getManager().shutdown();
 			AnnouncementThreader.getThreader().shutdown();
-			DatabaseManager.getManager().disconnectFromMySQL();
+			DatabaseManager.disconnectFromMySQL();
 
 			client.logout().block();
 		}));

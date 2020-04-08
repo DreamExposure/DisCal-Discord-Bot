@@ -4,14 +4,7 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
-import discord4j.core.spec.EmbedCreateSpec;
-import okhttp3.FormBody;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
+
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -27,6 +20,15 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * @author NovaFox161
@@ -106,7 +108,7 @@ public class GoogleExternalAuth {
 	}
 
 	void pollForAuth(Poll poll) {
-		GuildSettings settings = DatabaseManager.getManager().getSettings(poll.getGuild().getId());
+		GuildSettings settings = DatabaseManager.getSettings(poll.getGuild().getId()).block();
 		try {
 			RequestBody body = new FormBody.Builder()
 					.addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
@@ -158,12 +160,12 @@ public class GoogleExternalAuth {
 				JSONObject aprGrant = new JSONObject(response.body().string());
 
 				//Save credentials securely.
-				GuildSettings gs = DatabaseManager.getManager().getSettings(poll.getGuild().getId());
+				GuildSettings gs = DatabaseManager.getSettings(poll.getGuild().getId()).block();
 				AESEncryption encryption = new AESEncryption(gs);
 				gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
 				gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
 				gs.setUseExternalCalendar(true);
-				DatabaseManager.getManager().updateSettings(gs);
+				DatabaseManager.updateSettings(gs).subscribe();
 
 				try {
 					Calendar service = CalendarAuth.getCalendarService(gs);

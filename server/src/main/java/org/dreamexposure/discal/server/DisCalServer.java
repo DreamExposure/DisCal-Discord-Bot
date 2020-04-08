@@ -9,6 +9,9 @@ import org.dreamexposure.discal.server.network.discal.NetworkMediator;
 import org.dreamexposure.discal.server.network.discordbots.UpdateDisBotData;
 import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
 import org.dreamexposure.discal.server.utils.Authentication;
+import org.dreamexposure.novautils.database.DatabaseInfo;
+import org.dreamexposure.novautils.database.DatabaseSettings;
+import org.flywaydb.core.Flyway;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
@@ -17,6 +20,8 @@ import org.springframework.boot.system.ApplicationPid;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import discord4j.core.DiscordClient;
@@ -43,9 +48,8 @@ public class DisCalServer {
 		//Init logger
 		Logger.getLogger().init();
 
-		//Connect to MySQL
-		DatabaseManager.getManager().connectToMySQL();
-		DatabaseManager.getManager().handleMigrations();
+		//Handle database migrations
+		handleMigrations();
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
@@ -59,7 +63,8 @@ public class DisCalServer {
 			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE API'", e, true, DisCalServer.class);
+			Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE API'", e, true,
+					DisCalServer.class);
 		}
 
 		//Start network monitoring
@@ -80,7 +85,7 @@ public class DisCalServer {
 			NetworkMediator.get().shutdown();
 			UpdateDisBotData.shutdown();
 			UpdateDisPwData.shutdown();
-			DatabaseManager.getManager().disconnectFromMySQL();
+			DatabaseManager.disconnectFromMySQL();
 		}));
 
 		Logger.getLogger().status("Started", "Server and API are now online");
@@ -93,7 +98,8 @@ public class DisCalServer {
 		//Redis info + store service for caching
 		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
 			RedisURI uri = RedisURI.Builder
-					.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
+					.redis(BotSettings.REDIS_HOSTNAME.get(),
+							Integer.parseInt(BotSettings.REDIS_PORT.get()))
 					.withPassword(BotSettings.REDIS_PASSWORD.get())
 					.build();
 
@@ -117,5 +123,38 @@ public class DisCalServer {
 
 	public static NetworkInfo getNetworkInfo() {
 		return networkInfo;
+	}
+
+	private static void handleMigrations() {
+		Map<String, String> placeholders = new HashMap<>();
+		placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
+
+		DatabaseSettings settings = new DatabaseSettings(
+				BotSettings.SQL_MASTER_HOST.get(),
+				BotSettings.SQL_MASTER_PORT.get(),
+				BotSettings.SQL_DB.get(),
+				BotSettings.SQL_MASTER_USER.get(),
+				BotSettings.SQL_MASTER_PASS.get(),
+				BotSettings.SQL_PREFIX.get()
+		);
+		DatabaseInfo info = org.dreamexposure.novautils.database.DatabaseManager
+				.connectToMySQL(settings);
+
+		try {
+			Flyway flyway = Flyway.configure()
+					.dataSource(info.getSource())
+					.cleanDisabled(true)
+					.baselineOnMigrate(true)
+					.table(BotSettings.SQL_PREFIX.get() + "schema_history")
+					.placeholders(placeholders)
+					.load();
+			int sm = flyway.migrate();
+
+			org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
+			Logger.getLogger().debug("Migrations Successful, " + sm + " migrations applied!", true);
+		} catch (Exception e) {
+			Logger.getLogger().exception("Migrations Failure", e, true, DisCalServer.class);
+			System.exit(2);
+		}
 	}
 }

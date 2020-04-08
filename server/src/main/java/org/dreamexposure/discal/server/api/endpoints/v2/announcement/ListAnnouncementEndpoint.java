@@ -40,11 +40,11 @@ public class ListAnnouncementEndpoint {
 
 			JSONArray jAnnouncements = new JSONArray();
 			if (amount < 1) {
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId))
+				for (Announcement a : DatabaseManager.getAnnouncements(guildId).block())
 					jAnnouncements.put(a.toJson());
 			} else {
 				int i = 0;
-				for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
+				for (Announcement a : DatabaseManager.getAnnouncements(guildId).block()) {
 					if (i < amount) {
 						jAnnouncements.put(a.toJson());
 						i++;

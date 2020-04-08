@@ -95,7 +95,7 @@ public class CalendarCommand implements ICommand {
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Few", settings), event);
 		} else {
 			//TODO: Add support for multiple calendars...
-			CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 
 			switch (args[0].toLowerCase()) {
 				case "create":

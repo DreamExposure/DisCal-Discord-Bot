@@ -49,7 +49,7 @@ public class UpdateGuildSettingsEndpoint {
 			JSONObject body = new JSONObject(requestBody);
 			String guildId = body.getString("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 			//Handle various things that are allowed to change.
 			if (body.has("control_role"))
@@ -84,7 +84,7 @@ public class UpdateGuildSettingsEndpoint {
 					settings.setBranded(body.getBoolean("branded"));
 			}
 
-			if (DatabaseManager.getManager().updateSettings(settings)) {
+			if (DatabaseManager.updateSettings(settings).block()) {
 				response.setContentType("application/json");
 				response.setStatus(200);
 

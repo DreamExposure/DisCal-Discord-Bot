@@ -8,9 +8,11 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -27,21 +29,28 @@ public class EventUtils {
 	 */
 	public static Boolean deleteEvent(GuildSettings settings, String eventId) {
 		//TODO: Support multiple calendars...
-		String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+		CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+		if (data == null)
+			return false;
+
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 			try {
-				service.events().delete(calendarId, eventId).execute();
+				service.events().delete(data.getCalendarAddress(), eventId).execute();
 			} catch (Exception e) {
 				//Failed to delete event...
 				return false;
 			}
-			DatabaseManager.getManager().deleteAnnouncementsForEvent(settings.getGuildID(), eventId);
-			DatabaseManager.getManager().deleteEventData(eventId);
+
+			Mono.zip(
+					DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
+					DatabaseManager.deleteEventData(eventId)
+			).subscribe();
+
 			return true;
 		} catch (Exception e) {
 			System.out.println("Something weird happened when deleting an event!");
-			Logger.getLogger().exception(null, "Failed to delete event.", e, true, EventUtils.class);
+			Logger.getLogger().exception("Failed to delete event.", e, true, EventUtils.class);
 			e.printStackTrace();
 		}
 		return false;
@@ -49,11 +58,13 @@ public class EventUtils {
 
 	@Deprecated
 	public static boolean eventExists(GuildSettings settings, String eventId) {
-		String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+		CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+		if (data == null)
+			return false;
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			return service.events().get(calendarId, eventId).execute() != null;
+			return service.events().get(data.getCalendarAddress(), eventId).execute() != null;
 		} catch (Exception e) {
 			//Failed to check event, probably doesn't exist, safely ignore.
 		}
@@ -61,13 +72,13 @@ public class EventUtils {
 	}
 
 	public static boolean eventExists(GuildSettings settings, int calNumber, String eventId) {
-		String calendarId = DatabaseManager.getManager()
-				.getCalendar(settings.getGuildID(), calNumber)
-				.getCalendarAddress();
+		CalendarData data = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+		if (data == null)
+			return false;
 		try {
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			return service.events().get(calendarId, eventId).execute() != null;
+			return service.events().get(data.getCalendarAddress(), eventId).execute() != null;
 		} catch (Exception e) {
 			//Failed to check event, probably doesn't exist, safely ignore.
 		}
@@ -84,7 +95,7 @@ public class EventUtils {
 		else
 			pe.setColor(EventColor.RED);
 
-		pe.setEventData(DatabaseManager.getManager().getEventData(guildId, event.getId()));
+		pe.setEventData(DatabaseManager.getEventData(guildId, event.getId()).block());
 
 		return pe;
 	}

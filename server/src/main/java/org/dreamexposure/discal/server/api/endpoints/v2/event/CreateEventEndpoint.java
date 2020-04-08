@@ -58,8 +58,8 @@ public class CreateEventEndpoint {
 
 
 			//okay, lets actually create the event
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
-			CalendarData calData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+			CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
 			com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
 			Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
@@ -108,7 +108,7 @@ public class CreateEventEndpoint {
 			//Everything supported is now checked for, lets create this on google's end now.
 			Event confirmed = service.events().insert(cal.getId(), event).execute();
 			if (eventData.shouldBeSaved())
-				DatabaseManager.getManager().updateEventData(eventData);
+				DatabaseManager.updateEventData(eventData).subscribe();
 
 			//If we get here, nothing errored, and everything should be created correctly...
 			JSONObject responseBody = new JSONObject();

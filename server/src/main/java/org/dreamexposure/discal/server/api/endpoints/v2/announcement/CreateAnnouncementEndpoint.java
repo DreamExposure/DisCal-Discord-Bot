@@ -65,7 +65,7 @@ public class CreateAnnouncementEndpoint {
 			if (body.has("info_only"))
 				a.setInfoOnly(body.getBoolean("info_only"));
 
-			if (DatabaseManager.getManager().updateAnnouncement(a)) {
+			if (DatabaseManager.updateAnnouncement(a).block()) {
 				JSONObject responseBody = new JSONObject();
 				responseBody.put("message", "Announcement successfully created");
 				responseBody.put("announcement_id", a.getAnnouncementId().toString());

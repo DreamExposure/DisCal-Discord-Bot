@@ -42,8 +42,8 @@ public class DeleteAnnouncementEndpoint {
 			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
-			if (DatabaseManager.getManager().getAnnouncement(announcementId, guildId) != null) {
-				if (DatabaseManager.getManager().deleteAnnouncement(announcementId.toString())) {
+			if (DatabaseManager.getAnnouncement(announcementId, guildId).block() != null) {
+				if (DatabaseManager.deleteAnnouncement(announcementId.toString()).block()) {
 					response.setContentType("application/json");
 					response.setStatus(200);
 					return JsonUtils.getJsonResponseMessage("Announcement successfully deleted");

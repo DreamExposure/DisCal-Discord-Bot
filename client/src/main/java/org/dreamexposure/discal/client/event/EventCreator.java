@@ -63,7 +63,7 @@ public class EventCreator {
 			PreEvent event = new PreEvent(settings.getGuildID());
 			try {
 				//TODO: Handle multiple calendars...
-				String calId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+				String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
 				event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
 			} catch (Exception exc) {
 				//Failed to get timezone, ignore safely.
@@ -90,7 +90,7 @@ public class EventCreator {
 			event.setSummary(summary);
 			try {
 				//TODO: Handle multiple calendars...
-				String calId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+				String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
 
 				event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
 			} catch (Exception exc) {
@@ -117,7 +117,7 @@ public class EventCreator {
 		if (!hasPreEvent(settings.getGuildID())) {
 			//TODO: Handle multiple calendars...
 			try {
-				String calId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+				String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
 				Calendar service = CalendarAuth.getCalendarService(settings);
 
 				Event calEvent = service.events().get(calId, eventId).execute();
@@ -154,7 +154,7 @@ public class EventCreator {
 		if (!hasPreEvent(settings.getGuildID())) {
 			//TODO: Handle multiple calendars...
 			try {
-				String calId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+				String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
 				Calendar service = CalendarAuth.getCalendarService(settings);
 
 				Event calEvent = service.events().get(calId, eventId).execute();
@@ -226,7 +226,7 @@ public class EventCreator {
 				}
 
 				//TODO handle multiple calendars...
-				String calendarId = DatabaseManager.getManager().getMainCalendar(settings.getGuildID()).getCalendarAddress();
+				String calendarId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
 
 				if (!preEvent.isEditing()) {
 					event.setId(KeyGenerator.generateEventId());
@@ -241,7 +241,7 @@ public class EventCreator {
 									preEvent.getEventData().getImageLink()
 							);
 
-							DatabaseManager.getManager().updateEventData(toSave);
+							DatabaseManager.updateEventData(toSave).subscribe();
 						}
 						EventCreatorResponse response = new EventCreatorResponse(true, confirmed,
 								getCreatorMessage(settings.getGuildID()), false);
@@ -266,7 +266,7 @@ public class EventCreator {
 									preEvent.getEventData().getImageLink()
 							);
 
-							DatabaseManager.getManager().updateEventData(toSave);
+							DatabaseManager.updateEventData(toSave).subscribe();
 						}
 
 						EventCreatorResponse response = new EventCreatorResponse(true, confirmed,

@@ -63,10 +63,10 @@ public class Authentication {
 			}
 
 			//Check if this key is in the database...
-			UserAPIAccount acc = DatabaseManager.getManager().getAPIAccount(key);
+			UserAPIAccount acc = DatabaseManager.getAPIAccount(key).block();
 			if (acc != null && !acc.isBlocked()) {
 				acc.setUses(acc.getUses() + 1);
-				DatabaseManager.getManager().updateAPIAccount(acc);
+				DatabaseManager.updateAPIAccount(acc).subscribe();
 
 				return new AuthenticationState(true)
 						.setStatus(200)

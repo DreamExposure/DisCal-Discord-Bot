@@ -46,7 +46,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 			int calNumber = jsonMain.getInt("number");
 
-			CalendarData calendar = DatabaseManager.getManager().getCalendar(Snowflake.of(guildId), calNumber);
+			CalendarData calendar = DatabaseManager.getCalendar(Snowflake.of(guildId), calNumber).block();
 
 			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
 
@@ -94,7 +94,7 @@ public class CalendarEndpoint {
 			long guildId = jsonMain.getLong("guild_id");
 
 			ArrayList<JSONObject> cals = new ArrayList<>();
-			for (CalendarData cal : DatabaseManager.getManager().getAllCalendars(Snowflake.of(guildId))) {
+			for (CalendarData cal : DatabaseManager.getAllCalendars(Snowflake.of(guildId)).block()) {
 				if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
 					JSONObject body = new JSONObject();
 					body.put("number", cal.getCalendarNumber());

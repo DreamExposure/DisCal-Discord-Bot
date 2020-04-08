@@ -4,7 +4,6 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GuildUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,7 +17,6 @@ import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.function.TupleUtils;
 
 /**
@@ -36,10 +34,7 @@ public class WebGuild {
 				.flatMap(Mono::justOrEmpty)
 				.defaultIfEmpty("DisCal");
 
-		Mono<GuildSettings> settings = Mono.fromCallable(() ->
-				DatabaseManager.getManager().getSettings(g.getId()))
-				.subscribeOn(Schedulers.elastic())
-				.cache();
+		Mono<GuildSettings> settings = DatabaseManager.getSettings(g.getId()).cache();
 
 		Mono<List<WebRole>> roles = settings.flatMapMany(s ->
 				g.getRoles().map(role -> WebRole.fromRole(role, s)))
@@ -51,14 +46,12 @@ public class WebGuild {
 						.map(channel -> WebChannel.fromChannel(channel, s)))
 				.collectList();
 
-		Mono<List<Announcement>> announcements =
-				Mono.fromCallable(() -> DatabaseManager.getManager().getAnnouncements(g.getId()))
-						.subscribeOn(Schedulers.elastic());
+		Mono<List<Announcement>> announcements = DatabaseManager.getAnnouncements(g.getId());
 
-		Mono<WebCalendar> calendar = settings.flatMap(s -> Mono.fromCallable(() -> {
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(Snowflake.of(id));
-			return WebCalendar.fromCalendar(data, s);
-		}).subscribeOn(Schedulers.elastic()));
+		Mono<WebCalendar> calendar = settings.flatMap(s ->
+				DatabaseManager.getMainCalendar(Snowflake.of(id))
+						.flatMap(d -> Mono.just(WebCalendar.fromCalendar(d, s)))
+		);
 
 		return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
 				.map(TupleUtils.function((bn, s, r, wc, a, c) -> {

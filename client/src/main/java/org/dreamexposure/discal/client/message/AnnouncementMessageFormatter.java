@@ -2,10 +2,7 @@ package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -19,9 +16,18 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
-import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
+
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Image;
+import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -58,7 +64,7 @@ public class AnnouncementMessageFormatter {
 
 			if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
-				EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
+				EventData ed = DatabaseManager.getEventData(a.getGuildId(), a.getEventId()).block();
 				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 					spec.setImage(ed.getImageLink());
 
@@ -66,7 +72,7 @@ public class AnnouncementMessageFormatter {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
 			} else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
-				EventData ed = DatabaseManager.getManager().getEventData(a.getGuildId(), a.getEventId());
+				EventData ed = DatabaseManager.getEventData(a.getGuildId(), a.getEventId()).block();
 				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 					spec.setImage(ed.getImageLink());
 			}
@@ -110,9 +116,9 @@ public class AnnouncementMessageFormatter {
 
 					//TODO: Handle multiple calendars...
 
-					CalendarData data = DatabaseManager.getManager().getMainCalendar(a.getGuildId());
+					CalendarData data = DatabaseManager.getMainCalendar(a.getGuildId()).block();
 					Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
-					EventData ed = DatabaseManager.getManager().getEventData(settings.getGuildID(), event.getId());
+					EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
 					if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 						spec.setThumbnail(ed.getImageLink());
 
@@ -164,7 +170,7 @@ public class AnnouncementMessageFormatter {
 					spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
 				spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
-				EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
+				EventData ed = DatabaseManager.getEventData(announcement.getGuildId(), event.getId()).block();
 				if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
 					spec.setImage(ed.getImageLink());
 
@@ -255,7 +261,7 @@ public class AnnouncementMessageFormatter {
 
 			if (channel == null) {
 				//Channel does not exist or could not be found, automatically delete announcement to prevent issues.
-				DatabaseManager.getManager().deleteAnnouncement(announcement.getAnnouncementId().toString());
+				DatabaseManager.deleteAnnouncement(announcement.getAnnouncementId().toString()).subscribe();
 				return;
 			}
 
@@ -272,7 +278,7 @@ public class AnnouncementMessageFormatter {
 				spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
 			spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
-			EventData ed = DatabaseManager.getManager().getEventData(announcement.getGuildId(), event.getId());
+			EventData ed = DatabaseManager.getEventData(announcement.getGuildId(), event.getId()).block();
 			if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
 				spec.setImage(ed.getImageLink());
 			}

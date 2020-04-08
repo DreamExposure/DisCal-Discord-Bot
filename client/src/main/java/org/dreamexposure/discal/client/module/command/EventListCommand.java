@@ -106,7 +106,7 @@ public class EventListCommand implements ICommand {
 				Calendar service = CalendarAuth.getCalendarService(settings);
 
 				DateTime now = new DateTime(System.currentTimeMillis());
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+				CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 				Events events = service.events().list(calendarData.getCalendarAddress())
 						.setMaxResults(1)
 						.setTimeMin(now)
@@ -140,7 +140,7 @@ public class EventListCommand implements ICommand {
 					Calendar service = CalendarAuth.getCalendarService(settings);
 
 					DateTime now = new DateTime(System.currentTimeMillis());
-					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+					CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 					Events events = service.events().list(calendarData.getCalendarAddress())
 							.setMaxResults(eventNum)
 							.setTimeMin(now)
@@ -185,7 +185,7 @@ public class EventListCommand implements ICommand {
 
 				DateTime now = new DateTime(System.currentTimeMillis());
 				DateTime twentyFourHoursFromNow = new DateTime(now.getValue() + 86400000L);
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+				CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 				Events events = service.events().list(calendarData.getCalendarAddress())
 						.setMaxResults(20)
 						.setTimeMin(now)

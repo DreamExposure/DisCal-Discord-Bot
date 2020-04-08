@@ -39,7 +39,7 @@ public class GetAnnouncementEndpoint {
 			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
-			Announcement a = DatabaseManager.getManager().getAnnouncement(announcementId, guildId);
+			Announcement a = DatabaseManager.getAnnouncement(announcementId, guildId).block();
 
 
 			response.setContentType("application/json");

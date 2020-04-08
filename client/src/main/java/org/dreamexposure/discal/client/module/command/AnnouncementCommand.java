@@ -325,7 +325,7 @@ public class AnnouncementCommand implements ICommand {
 		} else if (args.length == 2) {
 			String value = args[1];
 			if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-				if (DatabaseManager.getManager().deleteAnnouncement(value)) {
+				if (DatabaseManager.deleteAnnouncement(value).block()) {
 
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.Success", settings), event);
 				} else {
@@ -364,7 +364,7 @@ public class AnnouncementCommand implements ICommand {
 				}
 			} else {
 				try {
-					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), settings.getGuildID());
+					Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
 					if (a != null) {
 						MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getSubscriberNames(a), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event);
 					} else {
@@ -484,7 +484,7 @@ public class AnnouncementCommand implements ICommand {
 			}
 		} else {
 			if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), settings.getGuildID());
+				Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
 				if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
 					a.getSubscriberUserIds().add(user.getId().asString());
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Success", settings), event);
@@ -519,7 +519,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 
 		if (AnnouncementUtils.announcementExists(announcementID, settings.getGuildID()) || !updateDb) {
-			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()) : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+			Announcement a = updateDb ? DatabaseManager.getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()).block() : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
 			for (int i = 1; i < args.length; i++) {
 				Member u = null;
@@ -568,7 +568,7 @@ public class AnnouncementCommand implements ICommand {
 
 			MessageManager.sendMessageAsync(embed, event);
 			if (updateDb)
-				DatabaseManager.getManager().updateAnnouncement(a);
+				DatabaseManager.updateAnnouncement(a).subscribe();
 		} else {
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 		}
@@ -694,7 +694,7 @@ public class AnnouncementCommand implements ICommand {
 			}
 		} else {
 			if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-				Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), settings.getGuildID());
+				Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
 				if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
 					a.getSubscriberUserIds().remove(user.getId().asString());
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings), event);
@@ -729,7 +729,7 @@ public class AnnouncementCommand implements ICommand {
 		}
 
 		if (AnnouncementUtils.announcementExists(announcementID, settings.getGuildID()) || !updateDb) {
-			Announcement a = updateDb ? DatabaseManager.getManager().getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()) : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+			Announcement a = updateDb ? DatabaseManager.getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()).block() : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
 			for (int i = 1; i < args.length; i++) {
 				Member u = null;
@@ -778,7 +778,7 @@ public class AnnouncementCommand implements ICommand {
 
 			MessageManager.sendMessageAsync(embed, event);
 			if (updateDb)
-				DatabaseManager.getManager().updateAnnouncement(a);
+				DatabaseManager.updateAnnouncement(a).subscribe();
 		} else {
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 		}
@@ -932,7 +932,7 @@ public class AnnouncementCommand implements ICommand {
 			String value = args[1];
 			if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
 				if (value.equalsIgnoreCase("all")) {
-					List<Announcement> announcements = DatabaseManager.getManager().getAnnouncements(settings.getGuildID());
+					List<Announcement> announcements = DatabaseManager.getAnnouncements(settings.getGuildID()).block();
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.All", "%amount%", announcements.size() + "", settings), event);
 					//Loop and add embeds
 					for (Announcement a : announcements) {
@@ -945,7 +945,7 @@ public class AnnouncementCommand implements ICommand {
 						MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.Some", "%amount%", amount + "", settings), event);
 
 						int posted = 0;
-						for (Announcement a : DatabaseManager.getManager().getAnnouncements(settings.getGuildID())) {
+						for (Announcement a : DatabaseManager.getAnnouncements(settings.getGuildID()).block()) {
 							if (posted < amount) {
 								MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
 
@@ -1078,10 +1078,10 @@ public class AnnouncementCommand implements ICommand {
 				if (!AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				} else {
-					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), settings.getGuildID());
+					Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
 					a.setEnabled(!a.isEnabled());
 
-					DatabaseManager.getManager().updateAnnouncement(a);
+					DatabaseManager.updateAnnouncement(a).subscribe();
 
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.Enable.Success", "%value%", a.isEnabled() + "", settings), event);
 				}
@@ -1100,10 +1100,10 @@ public class AnnouncementCommand implements ICommand {
 				if (!AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
 				} else {
-					Announcement a = DatabaseManager.getManager().getAnnouncement(UUID.fromString(value), settings.getGuildID());
+					Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
 					a.setInfoOnly(!a.isInfoOnly());
 
-					DatabaseManager.getManager().updateAnnouncement(a);
+					DatabaseManager.updateAnnouncement(a).subscribe();
 
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.InfoOnly.Success", "%value%", a.isInfoOnly() + "", settings), event);
 				}

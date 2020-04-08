@@ -36,7 +36,7 @@ public class GetGuildSettingsEndpoint {
 			JSONObject jsonMain = new JSONObject(requestBody);
 			String guildId = jsonMain.getString("guild_id");
 
-			GuildSettings settings = DatabaseManager.getManager().getSettings(Snowflake.of(guildId));
+			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
 			response.setContentType("application/json");
 			response.setStatus(200);

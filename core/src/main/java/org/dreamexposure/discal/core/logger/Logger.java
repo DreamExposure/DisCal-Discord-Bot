@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.logger;
 
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class Logger {
 		}
 	}
 
-	public void exception(@Nullable User author, @Nullable String message, Exception e, boolean postWebhook, Class clazz) {
+	public void exception(@Nullable String message, Throwable e, boolean postWebhook, Class clazz) {
 		String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -93,8 +94,6 @@ public class Logger {
 		try {
 			FileWriter exceptions = new FileWriter(exceptionsFile, true);
 			exceptions.write("ERROR --- " + timeStamp + " ---" + GlobalConst.lineBreak);
-			if (author != null)
-				exceptions.write("user: " + author.getUsername() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
 
 			if (message != null)
 				exceptions.write("message: " + message + GlobalConst.lineBreak);
@@ -124,11 +123,63 @@ public class Logger {
 					.setDescription(error)
 					.setColor(GlobalConst.discalColor.getRGB())
 					.setTimestamp(Instant.now());
-
-			if (author != null) {
-				builder.setAuthor(new WebhookEmbed
-						.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null));
+			if (message != null) {
+				builder.addField(new WebhookEmbed.EmbedField(false, "Message", message));
 			}
+
+			exceptionClient.send(builder.build());
+		}
+	}
+
+	public void exception(@NotNull User author, @Nullable String message, Throwable e, boolean postWebhook, Class clazz) {
+		String timeStamp = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime());
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		e.printStackTrace(pw);
+		String error = sw.toString(); // stack trace as a string
+		pw.close();
+		try {
+			sw.close();
+		} catch (IOException e1) {
+			//Can ignore silently...
+		}
+
+		//ALWAYS LOG TO FILE!
+		try {
+			FileWriter exceptions = new FileWriter(exceptionsFile, true);
+			exceptions.write("ERROR --- " + timeStamp + " ---" + GlobalConst.lineBreak);
+			exceptions.write("user: " + author.getUsername() + "#" + author.getDiscriminator() + GlobalConst.lineBreak);
+
+			if (message != null)
+				exceptions.write("message: " + message + GlobalConst.lineBreak);
+
+			exceptions.write("Class:" + clazz.getName() + GlobalConst.lineBreak);
+
+			exceptions.write(error + GlobalConst.lineBreak);
+			exceptions.close();
+		} catch (IOException io) {
+			io.printStackTrace();
+		}
+
+		//Post to webhook if wanted.
+		if (BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true") && postWebhook) {
+			//Shorten error message...
+			if (error.length() > 1500)
+				error = error.substring(0, 1500);
+
+			WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+					.setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
+					.addField(new WebhookEmbed
+							.EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Class", clazz.getName()))
+					.addField(new WebhookEmbed
+							.EmbedField(false, "Time", timeStamp))
+					.setDescription(error)
+					.setAuthor(new WebhookEmbed
+							.EmbedAuthor(author.getUsername(), author.getAvatarUrl(), null))
+					.setColor(GlobalConst.discalColor.getRGB())
+					.setTimestamp(Instant.now());
 			if (message != null) {
 				builder.addField(new WebhookEmbed.EmbedField(false, "Message", message));
 			}

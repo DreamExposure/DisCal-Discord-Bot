@@ -1,8 +1,10 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.announcement.Announcement;
+
+import java.util.UUID;
+
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -17,11 +19,11 @@ public class AnnouncementUtils {
 	 * @return <code>true</code> if the announcement exists, else <code>false</code>.
 	 */
 	public static Boolean announcementExists(String value, Snowflake guildId) {
-		for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
-			if (a.getAnnouncementId().toString().equals(value))
-				return true;
-
+		try {
+			UUID id = UUID.fromString(value);
+			return DatabaseManager.getAnnouncement(id, guildId).block() != null;
+		} catch (Exception e) {
+			return false;
 		}
-		return false;
 	}
 }

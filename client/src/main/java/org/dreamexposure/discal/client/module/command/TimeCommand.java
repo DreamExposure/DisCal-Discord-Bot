@@ -84,7 +84,7 @@ public class TimeCommand implements ICommand {
 	private void calendarTime(MessageCreateEvent event, GuildSettings settings) {
 		try {
 			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+			CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 
 			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
 				//Does not have a calendar.

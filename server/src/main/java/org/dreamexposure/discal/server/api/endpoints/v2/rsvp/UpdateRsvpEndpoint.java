@@ -43,7 +43,7 @@ public class UpdateRsvpEndpoint {
 			String guildId = requestBody.getString("guild_id");
 			String eventId = requestBody.getString("event_id");
 
-			RsvpData rsvp = DatabaseManager.getManager().getRsvpData(Snowflake.of(guildId), eventId);
+			RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
 			//Handle additions...
 			if (requestBody.has("to_add")) {
@@ -95,7 +95,7 @@ public class UpdateRsvpEndpoint {
 				}
 			}
 
-			if (DatabaseManager.getManager().updateRsvpData(rsvp)) {
+			if (DatabaseManager.updateRsvpData(rsvp).block()) {
 				response.setContentType("application/json");
 				response.setStatus(200);
 

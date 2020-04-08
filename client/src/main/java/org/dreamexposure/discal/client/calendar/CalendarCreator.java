@@ -76,7 +76,7 @@ public class CalendarCreator {
 	public PreCalendar edit(MessageCreateEvent event, GuildSettings settings, boolean handleCreatorMessage) {
 		if (!hasPreCalendar(settings.getGuildID())) {
 			//TODO: Support multiple calendars
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(settings.getGuildID());
+			CalendarData data = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
 
 			try {
 				com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
@@ -143,7 +143,7 @@ public class CalendarCreator {
 								.fromData(settings.getGuildID(), 1, confirmed.getId(),
 										confirmed.getId(), false);
 
-						DatabaseManager.getManager().updateCalendar(calendarData);
+						DatabaseManager.updateCalendar(calendarData).subscribe();
 
 						CalendarCreatorResponse response = new CalendarCreatorResponse(true,
 								confirmed, preCalendar.getCreatorMessage(), false);

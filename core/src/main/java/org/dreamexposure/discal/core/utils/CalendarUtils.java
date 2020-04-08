@@ -9,6 +9,8 @@ import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 
+import reactor.core.publisher.Mono;
+
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
@@ -31,7 +33,7 @@ public class CalendarUtils {
 			}
 		} catch (Exception e) {
 			//Fail silently.
-			Logger.getLogger().exception(null, "Failed to delete calendar", e, true, CalendarUtils.class);
+			Logger.getLogger().exception("Failed to delete calendar", e, true, CalendarUtils.class);
 			return false;
 		}
 		if (settings.useExternalCalendar()) {
@@ -39,14 +41,16 @@ public class CalendarUtils {
 			settings.setUseExternalCalendar(false);
 			settings.setEncryptedAccessToken("N/a");
 			settings.setEncryptedRefreshToken("N/a");
-			DatabaseManager.getManager().updateSettings(settings);
+			DatabaseManager.updateSettings(settings).subscribe();
 		}
 
 		//Delete everything that is specific to the calendar...
-		DatabaseManager.getManager().deleteCalendar(data);
-		DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
-		DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
-		DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
+		Mono.when(
+				DatabaseManager.deleteCalendar(data),
+				DatabaseManager.deleteAllEventData(data.getGuildId()),
+				DatabaseManager.deleteAllRSVPData(data.getGuildId()),
+				DatabaseManager.deleteAllAnnouncementData(data.getGuildId())
+		).subscribe();
 
 		return true;
 	}
@@ -61,20 +65,22 @@ public class CalendarUtils {
 				settings.setUseExternalCalendar(false);
 				settings.setEncryptedRefreshToken("N/a");
 				settings.setEncryptedAccessToken("N/a");
-				DatabaseManager.getManager().updateSettings(settings);
 
-				DatabaseManager.getManager().deleteCalendar(data);
-				DatabaseManager.getManager().deleteAllEventData(data.getGuildId());
-				DatabaseManager.getManager().deleteAllRSVPData(data.getGuildId());
-				DatabaseManager.getManager().deleteAllAnnouncementData(data.getGuildId());
+				Mono.when(
+						DatabaseManager.updateSettings(settings),
+						DatabaseManager.deleteCalendar(data),
+						DatabaseManager.deleteAllEventData(data.getGuildId()),
+						DatabaseManager.deleteAllRSVPData(data.getGuildId()),
+						DatabaseManager.deleteAllAnnouncementData(data.getGuildId())
+				).subscribe();
 
 				return false;
 			} else {
-				Logger.getLogger().exception(null, "Unknown google error when checking for calendar exist", ge, true, CalendarUtils.class);
+				Logger.getLogger().exception("Unknown google error when checking for calendar exist", ge, true, CalendarUtils.class);
 				return true;
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Unknown error when checking for calendar exist", e, true, CalendarUtils.class);
+			Logger.getLogger().exception("Unknown error when checking for calendar exist", e, true, CalendarUtils.class);
 			return true;
 		}
 	}

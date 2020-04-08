@@ -51,12 +51,12 @@ public class ListEventMonthEndpoint {
 			int daysInMonth = requestBody.getInt("days_in_month");
 			long startEpoch = requestBody.getLong("epoch_start");
 			long endEpoch = startEpoch + (GlobalConst.oneDayMs * daysInMonth);
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guildId);
+			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
 			//okay, lets actually get the month's events.
 			Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getManager().getCalendar(settings.getGuildID(), calNumber);
+			CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
 			Events events = service.events().list(calendarData.getCalendarAddress())
 					.setTimeMin(new DateTime(startEpoch))
