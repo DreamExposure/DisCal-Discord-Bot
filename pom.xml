@@ -27,7 +27,10 @@
 
 		<google.client-api.version>1.28.0</google.client-api.version>
 
-		<r2dbc.version>0.8.1.RELEASE</r2dbc.version>
+		<r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
+		<r2dbc.pool.version>0.8.2.RELEASE</r2dbc.pool.version>
+
+		<netty.version.forced>4.1.44.Final</netty.version.forced>
 
 		<revision>3.1.0-SNAPSHOT</revision>
 	</properties>
@@ -89,6 +92,12 @@
 			<artifactId>annotations</artifactId>
 			<version>17.0.0</version>
 		</dependency>
+		<!--  *dies*  forced due to stores-redis:lettuce-core giving 4.1.38 -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>${netty.version.forced}</version>
+		</dependency>
 		<!--NovaUtils API-->
 		<dependency>
 			<groupId>org.dreamexposure</groupId>
@@ -131,13 +140,19 @@
 		<dependency>
 			<groupId>dev.miku</groupId>
 			<artifactId>r2dbc-mysql</artifactId>
-			<version>${r2dbc.version}</version>
+			<version>${r2dbc.mysql.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.netty</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!--r2dbc pools API for mysql connection pooling-->
 		<dependency>
 			<groupId>io.r2dbc</groupId>
 			<artifactId>r2dbc-pool</artifactId>
-			<version>${r2dbc.version}</version>
+			<version>${r2dbc.pool.version}</version>
 		</dependency>
 		<!--JSON API-->
 		<dependency>
