@@ -49,7 +49,10 @@ public class DisCalServer {
 		Logger.getLogger().init();
 
 		//Handle database migrations
-		handleMigrations();
+		if (args.length > 0 && args[0].equalsIgnoreCase("--repair"))
+			handleMigrations(true);
+		else
+			handleMigrations(false);
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
@@ -125,7 +128,7 @@ public class DisCalServer {
 		return networkInfo;
 	}
 
-	private static void handleMigrations() {
+	private static void handleMigrations(boolean repair) {
 		Map<String, String> placeholders = new HashMap<>();
 		placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
 
@@ -148,7 +151,13 @@ public class DisCalServer {
 					.table(BotSettings.SQL_PREFIX.get() + "schema_history")
 					.placeholders(placeholders)
 					.load();
-			int sm = flyway.migrate();
+
+			int sm = 0;
+			if (repair)
+				flyway.repair();
+			else
+				sm = flyway.migrate();
+
 
 			org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
 			Logger.getLogger().debug("Migrations Successful, " + sm + " migrations applied!", true);
