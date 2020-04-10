@@ -13,6 +13,7 @@ import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,12 +21,14 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import discord4j.core.object.util.Snowflake;
+import io.netty.util.IllegalReferenceCountException;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
+import io.r2dbc.spi.Result;
 import reactor.core.publisher.Mono;
 
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
@@ -42,7 +45,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"UnusedReturnValue", "Duplicates", "unused", "ConstantConditions"})
+@SuppressWarnings({"UnusedReturnValue", "Duplicates", "unused", "ConstantConditions", "SqlResolve"})
 public class DatabaseManager {
 	private final static DatabaseSettings settings;
 
@@ -464,7 +467,7 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					UserAPIAccount account = new UserAPIAccount();
 					account.setAPIKey(APIKey);
 					account.setUserId(row.get("USER_ID", String.class));
@@ -472,8 +475,9 @@ public class DatabaseManager {
 					account.setTimeIssued(row.get("TIME_ISSUED", Long.class));
 					account.setUses(row.get("USES", Integer.class));
 
-					return Mono.just(account);
+					return account;
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get calendar data", e, true,
 							DatabaseManager.class);
@@ -494,14 +498,14 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					GuildSettings set = new GuildSettings(guildId);
 
 					set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
 					set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
 					set.setEncryptedAccessToken(row.get("ACCESS_TOKEN", String.class));
 					set.setEncryptedRefreshToken(row.get("REFRESH_TOKEN", String.class));
-					set.setControlRole(row.get("CONTROL_ROW", String.class));
+					set.setControlRole(row.get("CONTROL_ROLE", String.class));
 					set.setDiscalChannel(row.get("DISCAL_CHANNEL", String.class));
 					set.setSimpleAnnouncements(row.get("SIMPLE_ANNOUNCEMENT", Boolean.class));
 					set.setLang(row.get("LANG", String.class));
@@ -517,8 +521,9 @@ public class DatabaseManager {
 					guildSettingsCache.remove(guildId);
 					guildSettingsCache.put(guildId, set);
 
-					return Mono.just(set);
+					return set;
 				})
+				.onErrorReturn(IllegalReferenceCountException.class, new GuildSettings(guildId))
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get guild settings", e, true, DatabaseManager.class);
 					return Mono.just(new GuildSettings(guildId));
@@ -537,13 +542,14 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					String calId = row.get("CALENDAR_ID", String.class);
 					String calAddr = row.get("CALENDAR_ADDRESS", String.class);
 					boolean external = row.get("EXTERNAL", Boolean.class);
-					return Mono.just(CalendarData.fromData(guildId, 1, calId,
-							calAddr, external));
+					return CalendarData.fromData(guildId, 1, calId,
+							calAddr, external);
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get calendar data", e, true,
 							DatabaseManager.class);
@@ -563,17 +569,18 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					String calId = row.get("CALENDAR_ID", String.class);
 					String calAddr = row.get("CALENDAR_ADDRESS", String.class);
 					boolean external = row.get("EXTERNAL", Boolean.class);
-					return Mono.just(CalendarData.fromData(guildId, calendarNumber, calId,
-							calAddr, external));
+					return CalendarData.fromData(guildId, calendarNumber, calId,
+							calAddr, external);
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get calendar data", e, true,
 							DatabaseManager.class);
-					return Mono.just(CalendarData.empty());
+					return Mono.empty();
 				});
 	}
 
@@ -594,10 +601,11 @@ public class DatabaseManager {
 					return CalendarData.fromData(guildId, 1, calId, calAddr, external);
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception(null, "Failed to get all guild calendars.", e,
 							true, DatabaseManager.class);
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -610,6 +618,7 @@ public class DatabaseManager {
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
 				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(-1))
+				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get calendar count", e, true,
 							DatabaseManager.class);
@@ -632,17 +641,18 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					String id = row.get("EVENT_ID", String.class);
 					long end = row.get("EVENT_END", Long.class);
 					String img = row.get("IMAGE_LINK", String.class);
 
-					return Mono.just(EventData.fromImage(guildId, id, end, img));
+					return EventData.fromImage(guildId, id, end, img);
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get event data", e, true,
 							DatabaseManager.class);
-					return Mono.just(EventData.empty());
+					return Mono.empty();
 				});
 	}
 
@@ -657,7 +667,7 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(row -> {
+				.map(row -> {
 					RsvpData data = new RsvpData(guildId, eventId);
 					data.setEventEnd(row.get("EVENT_END", Long.class));
 					data.setGoingOnTimeFromString(row.get("GOING_ON_TIME", String.class));
@@ -665,12 +675,13 @@ public class DatabaseManager {
 					data.setNotGoingFromString(row.get("NOT_GOING", String.class));
 					data.setUndecidedFromString(row.get("UNDECIDED", String.class));
 
-					return Mono.just(data);
+					return data;
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get announcement", e, true,
 							DatabaseManager.class);
-					return Mono.just(new RsvpData(guildId, eventId));
+					return Mono.empty();
 				});
 	}
 
@@ -684,7 +695,7 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
-				.flatMap(r -> {
+				.map(r -> {
 					Announcement a = new Announcement(announcementId, guildId);
 					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
 					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
@@ -702,8 +713,9 @@ public class DatabaseManager {
 					a.setEnabled(r.get("ENABLED", Boolean.class));
 					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
 
-					return Mono.just(a);
+					return a;
 				})
+				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get announcement", e, true,
 							DatabaseManager.class);
@@ -743,11 +755,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get all announcements for guild", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -783,11 +796,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get all announcements by type", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -825,11 +839,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get all announcements by type", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -865,11 +880,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get all enabled announcements", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -907,11 +923,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get enabled announcements by type", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -948,11 +965,12 @@ public class DatabaseManager {
 					return a;
 				})
 				.collectList()
+				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get enabled announcements for guild", e,
 							true, DatabaseManager.class);
 
-					return Mono.empty();
+					return Mono.just(new ArrayList<>());
 				});
 	}
 
@@ -965,6 +983,7 @@ public class DatabaseManager {
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.next()
 				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(0))
+				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to get announcement count", e, true,
 							DatabaseManager.class);
@@ -980,8 +999,9 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, announcementId)
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete announcement", e, true,
 							DatabaseManager.class);
@@ -1000,8 +1020,9 @@ public class DatabaseManager {
 					.bind(1, guildId.asString())
 					.bind(2, AnnouncementType.SPECIFIC.name())
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete announcements for event", e,
 							true, DatabaseManager.class);
@@ -1020,8 +1041,9 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, eventId)
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete all event data for guild", e,
 							true, DatabaseManager.class);
@@ -1038,8 +1060,9 @@ public class DatabaseManager {
 					.bind(0, guildId.asString())
 					.execute());
 
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete all event data for guild", e,
 							true, DatabaseManager.class);
@@ -1055,8 +1078,9 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId.asString())
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete all announcements for guild", e,
 							true, DatabaseManager.class);
@@ -1072,8 +1096,9 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId.asString())
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete all RSVP data for guild", e,
 							true, DatabaseManager.class);
@@ -1091,8 +1116,9 @@ public class DatabaseManager {
 					.bind(0, data.getGuildId().asString())
 					.bind(1, data.getCalendarAddress())
 					.execute());
-		}).flatMap(res -> Mono.from(res.getRowsUpdated()))
-				.thenReturn(true)
+		}).flatMapMany(Result::getRowsUpdated)
+				.then(Mono.just(true))
+				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					Logger.getLogger().exception("Failed to delete calendar data for guild", e,
 							true, DatabaseManager.class);

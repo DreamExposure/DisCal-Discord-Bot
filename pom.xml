@@ -22,8 +22,8 @@
 		<spring.version>2.1.5.RELEASE</spring.version>
 		<spring.security.version>5.1.5.RELEASE</spring.security.version>
 
-		<discord4j.version>3.0.13</discord4j.version>
-		<discord4j.stores.version>3.0.13</discord4j.stores.version>
+		<discord4j.version>3.0.14</discord4j.version>
+		<discord4j.stores.version>3.0.14</discord4j.stores.version>
 
 		<google.client-api.version>1.28.0</google.client-api.version>
 
