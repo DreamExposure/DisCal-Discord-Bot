@@ -32,7 +32,7 @@ public class WebCalendar {
 				description = cal.getDescription();
 				timezone = cal.getTimeZone().replaceAll("/", "___");
 			} catch (Exception e) {
-				Logger.getLogger().exception(null, "[WEB] Failed to get calendar!", e, true, WebCalendar.class);
+				Logger.getLogger().exception("[WEB] Failed to get calendar!", e, true, WebCalendar.class);
 				name = "ERROR!";
 				description = "ERROR";
 				timezone = "ERROR";

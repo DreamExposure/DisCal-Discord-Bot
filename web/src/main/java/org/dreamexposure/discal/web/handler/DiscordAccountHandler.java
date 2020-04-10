@@ -25,7 +25,7 @@ public class DiscordAccountHandler {
 	private static DiscordAccountHandler instance;
 	private static Timer timer;
 
-	private HashMap<String, Map<String, Object>> discordAccounts = new HashMap<>();
+	private final HashMap<String, Map<String, Object>> discordAccounts = new HashMap<>();
 
 	//Instance handling
 	private DiscordAccountHandler() {
@@ -121,7 +121,7 @@ public class DiscordAccountHandler {
 					}
 				} catch (Exception e) {
 					//Something didn't work... add invalid key that embed page is programmed to respond to.
-					Logger.getLogger().exception(null, "Embed Key get Failure", e, true, this.getClass());
+					Logger.getLogger().exception("Embed Key get Failure", e, true, this.getClass());
 					m.put("embed_key", "internal_error");
 				}
 			}
@@ -162,7 +162,7 @@ public class DiscordAccountHandler {
 				}
 			} catch (Exception e) {
 				//Something didn't work... add invalid key that embed page is programmed to respond to.
-				Logger.getLogger().exception(null, "Embed Key get Failure", e, true, this.getClass());
+				Logger.getLogger().exception("Embed Key get Failure", e, true, this.getClass());
 				m.put("embed_key", "internal_error");
 			}
 

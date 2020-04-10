@@ -52,7 +52,7 @@ public class KeyRequestEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[API-v2] Internal read only key request exception", e, true, this.getClass());
+			Logger.getLogger().exception("[API-v2] Internal read only key request exception", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(500);

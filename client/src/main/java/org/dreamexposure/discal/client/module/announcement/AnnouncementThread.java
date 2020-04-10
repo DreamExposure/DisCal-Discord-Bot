@@ -31,10 +31,10 @@ public class AnnouncementThread extends Thread {
 
 	private Calendar discalService;
 
-	private HashMap<Snowflake, GuildSettings> allSettings = new HashMap<>();
-	private HashMap<Snowflake, CalendarData> calendars = new HashMap<>();
-	private HashMap<Snowflake, Calendar> customServices = new HashMap<>();
-	private HashMap<Snowflake, List<Event>> allEvents = new HashMap<>();
+	private final HashMap<Snowflake, GuildSettings> allSettings = new HashMap<>();
+	private final HashMap<Snowflake, CalendarData> calendars = new HashMap<>();
+	private final HashMap<Snowflake, Calendar> customServices = new HashMap<>();
+	private final HashMap<Snowflake, List<Event>> allEvents = new HashMap<>();
 
 	public AnnouncementThread() {
 	}
@@ -52,7 +52,7 @@ public class AnnouncementThread extends Thread {
 			try {
 				discalService = CalendarAuth.getCalendarService(null);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "Failed to get service! 01a0101", e, true, this.getClass());
+				Logger.getLogger().exception("Failed to get service! 01a0101", e, true, this.getClass());
 			}
 
 			for (Guild g : DisCalClient.getClient().getGuilds().toIterable()) {
@@ -73,7 +73,7 @@ public class AnnouncementThread extends Thread {
 						try {
 							service = getService(settings);
 						} catch (Exception e) {
-							Logger.getLogger().exception(null, "Failed to handle service! 01a102", e, true, this.getClass());
+							Logger.getLogger().exception("Failed to handle service! 01a102", e, true, this.getClass());
 							continue;
 						}
 
@@ -91,7 +91,7 @@ public class AnnouncementThread extends Thread {
 										}
 									} catch (IOException e) {
 										//Event getting error, we know it exists tho
-										Logger.getLogger().exception(null, "Failed to get event! 01a103", e, true, this.getClass());
+										Logger.getLogger().exception("Failed to get event! 01a103", e, true, this.getClass());
 									}
 								} else {
 									//Event is gone, we can just delete this shit.
@@ -129,7 +129,7 @@ public class AnnouncementThread extends Thread {
 						}
 						Logger.getLogger().announcement("finished an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 					} catch (Exception e) {
-						Logger.getLogger().exception(null, "Announcement failed! ID: " + a.getAnnouncementId() + ", GUILD: " + a.getGuildId(), e, true, this.getClass());
+						Logger.getLogger().exception("Announcement failed! ID: " + a.getAnnouncementId() + ", GUILD: " + a.getGuildId(), e, true, this.getClass());
 					}
 				}
 			}
@@ -143,7 +143,7 @@ public class AnnouncementThread extends Thread {
 
 			Logger.getLogger().announcement("Finished announcement loop!");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "SOMETHING BAD IN THE ANNOUNCER!!!!!", e, true, this.getClass());
+			Logger.getLogger().exception("SOMETHING BAD IN THE ANNOUNCER!!!!!", e, true, this.getClass());
 
 			//Clear everything because why take up RAM after is broke???
 			allSettings.clear();
@@ -218,7 +218,7 @@ public class AnnouncementThread extends Thread {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				Logger.getLogger().exception(null, "Failed to get events list! 01ae2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, true, this.getClass());
+				Logger.getLogger().exception("Failed to get events list! 01ae2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, true, this.getClass());
 				return new ArrayList<>();
 			}
 		}

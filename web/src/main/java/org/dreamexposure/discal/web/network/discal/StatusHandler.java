@@ -31,7 +31,7 @@ public class StatusHandler {
 			}
 			return new NetworkInfo(); //Just return an empty object, its fine...
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[STATUS REQUEST] Failed to get status", e, true, StatusHandler.class);
+			Logger.getLogger().exception("[STATUS REQUEST] Failed to get status", e, true, StatusHandler.class);
 
 			return new NetworkInfo(); //Just return an empty object, its fine.
 		}

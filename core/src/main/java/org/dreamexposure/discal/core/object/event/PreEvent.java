@@ -40,7 +40,7 @@ public class PreEvent {
 	private String location;
 
 	private boolean recur;
-	private Recurrence recurrence;
+	private final Recurrence recurrence;
 
 	private EventData eventData;
 
@@ -108,7 +108,7 @@ public class PreEvent {
 		try {
 			cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
 		} catch (Exception ex) {
-			Logger.getLogger().exception(null, "Failed to get proper date time for event!", ex, true, this.getClass());
+			Logger.getLogger().exception("Failed to get proper date time for event!", ex, true, this.getClass());
 		}
 
 		if (cal != null) {

@@ -132,7 +132,7 @@ public class AnnouncementMessageFormatter {
 					}
 				} catch (Exception e) {
 					//Failed to get from google cal.
-					Logger.getLogger().exception(null, "Failed to get event for announcement.", e, true, AnnouncementMessageFormatter.class);
+					Logger.getLogger().exception("Failed to get event for announcement.", e, true, AnnouncementMessageFormatter.class);
 				}
 			} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
@@ -256,7 +256,7 @@ public class AnnouncementMessageFormatter {
 				if (guild != null)
 					channel = guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).ofType(TextChannel.class).onErrorResume(e -> Mono.empty()).block();
 			} catch (Exception e) {
-				Logger.getLogger().exception(null, "An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId().asString(), e, true, AnnouncementMessageFormatter.class);
+				Logger.getLogger().exception("An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId().asString(), e, true, AnnouncementMessageFormatter.class);
 			}
 
 			if (channel == null) {

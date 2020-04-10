@@ -61,7 +61,7 @@ public class UpdateDisPwData {
 		} catch (Exception e) {
 			//Handle issue.
 			System.out.println("Failed to update Discord PW list metadata!");
-			Logger.getLogger().exception(null, "Failed to update Discord PW list.", e, true, UpdateDisPwData.class);
+			Logger.getLogger().exception("Failed to update Discord PW list.", e, true, UpdateDisPwData.class);
 			e.printStackTrace();
 		}
 	}

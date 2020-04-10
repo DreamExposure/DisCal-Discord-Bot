@@ -172,11 +172,11 @@ public class DiscordLoginHandler {
 				return "redirect:/login";
 			}
 		} catch (JSONException e) {
-			Logger.getLogger().exception(null, "[LOGIN-Discord] JSON || Discord login failed!", e, true, this.getClass());
+			Logger.getLogger().exception("[LOGIN-Discord] JSON || Discord login failed!", e, true, this.getClass());
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[LOGIN-Discord] Discord login failed!", e, true, this.getClass());
+			Logger.getLogger().exception("[LOGIN-Discord] Discord login failed!", e, true, this.getClass());
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		}
@@ -207,7 +207,7 @@ public class DiscordLoginHandler {
 			res.sendRedirect("/");
 			return "redirect:/";
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Discord logout failed!", e, true, DiscordLoginHandler.class);
+			Logger.getLogger().exception("[WEB] Discord logout failed!", e, true, DiscordLoginHandler.class);
 			res.sendRedirect("/");
 			return "redirect:/";
 		}

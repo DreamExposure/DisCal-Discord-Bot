@@ -42,7 +42,7 @@ import okhttp3.Response;
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "Duplicates"})
 public class DevCommand implements ICommand {
 
-	private ScriptEngine factory = new ScriptEngineManager().getEngineByName("nashorn");
+	private final ScriptEngine factory = new ScriptEngineManager().getEngineByName("nashorn");
 
 	/**
 	 * Gets the command this Object is responsible for.
@@ -432,7 +432,7 @@ public class DevCommand implements ICommand {
 							.build();
 					client.newCall(request).execute();
 				} catch (Exception e) {
-					Logger.getLogger().exception(null, "lang reload request fail on shard " + i, e, true, DevCommand.class);
+					Logger.getLogger().exception("lang reload request fail on shard " + i, e, true, DevCommand.class);
 				}
 			}
 

@@ -1,21 +1,22 @@
 package org.dreamexposure.discal.client.message;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.entity.User;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -34,7 +35,7 @@ public class MessageManager {
 			langs = ReadFile.readAllLangFiles();
 			return true;
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to reload lang files!", e, true, MessageManager.class);
+			Logger.getLogger().exception("Failed to reload lang files!", e, true, MessageManager.class);
 			return false;
 		}
 	}

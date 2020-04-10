@@ -66,7 +66,7 @@ public class KeepAliveHandler {
 					}
 					//Failed to send keep alive... perhaps the API is down?
 				} catch (Exception e) {
-					Logger.getLogger().exception(null, "[Heart Beat] Failed to send Keep-Alive", e, true, this.getClass());
+					Logger.getLogger().exception("[Heart Beat] Failed to send Keep-Alive", e, true, this.getClass());
 				}
 			}
 		}, seconds * 1000, seconds * 1000);

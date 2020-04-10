@@ -181,7 +181,7 @@ public class EventMessageFormatter {
 				}
 			} catch (NullPointerException e) {
 				//TODO: find out why this is happening
-				Logger.getLogger().exception(null, "[Event] Failed to handle event image. Is event null?", e, true, EventMessageFormatter.class);
+				Logger.getLogger().exception("[Event] Failed to handle event image. Is event null?", e, true, EventMessageFormatter.class);
 			}
 			if (event.isEditing())
 				spec.addField(MessageManager.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
@@ -312,7 +312,7 @@ public class EventMessageFormatter {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to format date", e, true, EventMessageFormatter.class);
+			Logger.getLogger().exception("Failed to format date", e, true, EventMessageFormatter.class);
 			return "ERROR! Code: E001";
 		}
 	}
@@ -353,7 +353,7 @@ public class EventMessageFormatter {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "Failed to format date", e, true, EventMessageFormatter.class);
+			Logger.getLogger().exception("Failed to format date", e, true, EventMessageFormatter.class);
 			return "ERROR! Code: E002";
 		}
 	}

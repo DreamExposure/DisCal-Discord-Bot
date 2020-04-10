@@ -79,7 +79,7 @@ public class NetworkMediator {
 				//noinspection UnstableApiUsage
 				return CharStreams.toString(new InputStreamReader(output));
 			} catch (JSchException | IOException e) {
-				Logger.getLogger().exception(null, "[NETWORK] Failed to restart shard.s2: " + c.getClientIndex(), e, true, this.getClass());
+				Logger.getLogger().exception("[NETWORK] Failed to restart shard.s2: " + c.getClientIndex(), e, true, this.getClass());
 				closeConnection(channel, session);
 			} finally {
 				closeConnection(channel, session);
@@ -88,7 +88,7 @@ public class NetworkMediator {
 			//Tell network manager to remove this client until it restarts.
 			DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart issued by mediator for missed heartbeats");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[NETWORK] Failed to restart shard.s1: " + c.getClientIndex(), e, true, this.getClass());
+			Logger.getLogger().exception("[NETWORK] Failed to restart shard.s1: " + c.getClientIndex(), e, true, this.getClass());
 		}
 
 		return "ERROR";

@@ -86,7 +86,7 @@ public class Authorization {
 
 		} catch (Exception e) {
 			//Error occurred, lets just log it and return null.
-			Logger.getLogger().exception(null, "Failed to request new access token.", e, true, this.getClass());
+			Logger.getLogger().exception("Failed to request new access token.", e, true, this.getClass());
 			return null;
 		}
 	}

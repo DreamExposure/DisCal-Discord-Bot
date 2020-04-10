@@ -30,7 +30,7 @@ public class ReadyEventListener {
 
 			Logger.getLogger().status("Ready Event Success!", null);
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "BAD!!!", e, true, ReadyEventListener.class);
+			Logger.getLogger().exception("BAD!!!", e, true, ReadyEventListener.class);
 		}
 	}
 }

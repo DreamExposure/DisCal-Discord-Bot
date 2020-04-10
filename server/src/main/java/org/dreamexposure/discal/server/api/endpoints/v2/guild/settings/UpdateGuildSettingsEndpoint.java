@@ -107,7 +107,7 @@ public class UpdateGuildSettingsEndpoint {
 						//If this fails, its not a huge deal, the cache will just be out of date for up to an hour max...
 						client.newCall(cacheRequest).execute();
 					} catch (Exception e) {
-						Logger.getLogger().exception(null, "[API-v2] Cache invalidate failed after update", e, true, this.getClass());
+						Logger.getLogger().exception("[API-v2] Cache invalidate failed after update", e, true, this.getClass());
 					}
 				});
 				thread.setDaemon(true);
@@ -126,7 +126,7 @@ public class UpdateGuildSettingsEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[API-v2] Internal update guild settings error", e, true, this.getClass());
+			Logger.getLogger().exception("[API-v2] Internal update guild settings error", e, true, this.getClass());
 
 			response.setContentType("application/json");
 			response.setStatus(500);

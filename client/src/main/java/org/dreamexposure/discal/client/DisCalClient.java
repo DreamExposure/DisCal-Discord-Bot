@@ -103,7 +103,7 @@ public class DisCalClient {
 				app.run(args);
 			} catch (Exception e) {
 				e.printStackTrace();
-				Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE Communication'", e, true, DisCalClient.class);
+				Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE Communication'", e, true, DisCalClient.class);
 			}
 		}
 

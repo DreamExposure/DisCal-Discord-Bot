@@ -92,7 +92,7 @@ public class EventEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for a month.", e, true, EventEndpoint.class);
+			Logger.getLogger().exception("[WEB] Failed to retrieve events for a month.", e, true, EventEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -190,7 +190,7 @@ public class EventEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to retrieve events for specific date!", e, true, EventEndpoint.class);
+			Logger.getLogger().exception("[WEB] Failed to retrieve events for specific date!", e, true, EventEndpoint.class);
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -284,7 +284,7 @@ public class EventEndpoint {
 			return JsonUtils.getJsonResponseMessage("Successfully updated event!");
 
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to update event!", e, true, EventEndpoint.class);
+			Logger.getLogger().exception("[WEB] Failed to update event!", e, true, EventEndpoint.class);
 			e.printStackTrace();
 
 			JSONObject respondBody = new JSONObject();
@@ -386,7 +386,7 @@ public class EventEndpoint {
 			return respondBody.toString();
 
 		} catch (Exception e) {
-			Logger.getLogger().exception(null, "[WEB] Failed to create event!", e, true, EventEndpoint.class);
+			Logger.getLogger().exception("[WEB] Failed to create event!", e, true, EventEndpoint.class);
 			e.printStackTrace();
 
 			JSONObject respondBody = new JSONObject();

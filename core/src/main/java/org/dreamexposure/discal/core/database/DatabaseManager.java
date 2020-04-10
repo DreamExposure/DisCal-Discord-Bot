@@ -29,6 +29,7 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.Result;
+import io.r2dbc.spi.ValidationDepth;
 import reactor.core.publisher.Mono;
 
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
@@ -90,7 +91,15 @@ public class DatabaseManager {
 
 	private static <T> Mono<T> connect(ConnectionPool connectionPool,
 									   Function<Connection, Mono<T>> connection) {
-		return Mono.usingWhen(connectionPool.create(), connection, Connection::close, Connection::close);
+		return connectionPool.create().flatMap(c -> connection.apply(c)
+				.flatMap(item -> Mono.from(c.validate(ValidationDepth.LOCAL))
+						.flatMap(validate -> {
+							if (validate) {
+								return Mono.from(c.close()).thenReturn(item);
+							} else {
+								return Mono.just(item);
+							}
+						})));
 	}
 
 	private DatabaseManager() {
@@ -142,7 +151,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update API account", e, true,
+					Logger.getLogger().exception("Failed to update API account", e, true,
 							DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -226,7 +235,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update/insert guild settings.", e,
+					Logger.getLogger().exception("Failed to update/insert guild settings.", e,
 							true, DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -277,7 +286,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update/insert calendar data.", e,
+					Logger.getLogger().exception("Failed to update/insert calendar data.", e,
 							true, DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -345,7 +354,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update/insert announcement.", e,
+					Logger.getLogger().exception("Failed to update/insert announcement.", e,
 							true, DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -395,7 +404,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update/insert event data.", e,
+					Logger.getLogger().exception("Failed to update/insert event data.", e,
 							true, DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -451,7 +460,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to update/insert event data.", e,
+					Logger.getLogger().exception("Failed to update/insert event data.", e,
 							true, DatabaseManager.class);
 					return Mono.just(false);
 				});
@@ -603,7 +612,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception(null, "Failed to get all guild calendars.", e,
+					Logger.getLogger().exception("Failed to get all guild calendars.", e,
 							true, DatabaseManager.class);
 					return Mono.just(new ArrayList<>());
 				});

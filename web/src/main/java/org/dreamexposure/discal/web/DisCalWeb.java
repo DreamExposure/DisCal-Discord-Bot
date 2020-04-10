@@ -35,7 +35,7 @@ public class DisCalWeb {
 			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception(null, "'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalWeb.class);
+			Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalWeb.class);
 			System.exit(4);
 		}
 
