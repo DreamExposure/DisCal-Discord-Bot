@@ -61,7 +61,7 @@ public class UpdateCalendarEndpoint {
 				if (jsonMain.has("summary"))
 					cal.setSummary(jsonMain.getString("summary"));
 				if (jsonMain.has("description"))
-					cal.setDescription("description");
+					cal.setDescription(jsonMain.getString("description"));
 				if (jsonMain.has("timezone")) {
 					String tzRaw = jsonMain.getString("timezone");
 					if (TimeZoneUtils.isValid(tzRaw)) {

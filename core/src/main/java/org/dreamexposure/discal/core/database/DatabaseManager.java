@@ -591,7 +591,7 @@ public class DatabaseManager {
 			String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 
 			return Mono.from(c.createStatement(query)
-					.bind(0, guildId)
+					.bind(0, guildId.asString())
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
 				.map(row -> {
