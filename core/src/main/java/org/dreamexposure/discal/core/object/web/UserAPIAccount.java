@@ -5,7 +5,6 @@ public class UserAPIAccount {
 	private String APIKey;
 	private boolean blocked;
 	private long timeIssued;
-	private int uses;
 
 	//Getters
 	public String getUserId() {
@@ -24,10 +23,6 @@ public class UserAPIAccount {
 		return timeIssued;
 	}
 
-	public int getUses() {
-		return uses;
-	}
-
 	//Setters
 	public void setUserId(String _userId) {
 		userId = _userId;
@@ -43,9 +38,5 @@ public class UserAPIAccount {
 
 	public void setTimeIssued(long _time) {
 		timeIssued = _time;
-	}
-
-	public void setUses(int _uses) {
-		uses = _uses;
 	}
 }

@@ -465,7 +465,6 @@ public class DevCommand implements ICommand {
 			account.setAPIKey(KeyGenerator.csRandomAlphaNumericString(64));
 			account.setTimeIssued(System.currentTimeMillis());
 			account.setBlocked(false);
-			account.setUses(0);
 
 			if (DatabaseManager.updateAPIAccount(account).block()) {
 				MessageManager.sendMessageAsync("Check your DMs for the new API Key!", event);

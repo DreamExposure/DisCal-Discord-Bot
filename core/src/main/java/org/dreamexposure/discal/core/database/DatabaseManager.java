@@ -126,27 +126,25 @@ public class DatabaseManager {
 					if (exists) {
 						String updateCommand = "UPDATE " + table
 								+ " SET USER_ID = ?, BLOCKED = ?,"
-								+ " USES = ? WHERE API_KEY = ?";
+								+ " WHERE API_KEY = ?";
 
 						return connect(master, c -> Mono.from(c.createStatement(updateCommand)
 								.bind(0, acc.getUserId())
 								.bind(1, acc.isBlocked())
-								.bind(2, acc.getUses())
-								.bind(3, acc.getAPIKey())
+								.bind(2, acc.getAPIKey())
 								.execute())
 						).flatMap(res -> Mono.from(res.getRowsUpdated()))
 								.thenReturn(true);
 					} else {
 						String insertCommand = "INSERT INTO " + table +
-								"(USER_ID, API_KEY, BLOCKED, TIME_ISSUED, USES)" +
-								" VALUES (?, ?, ?, ?, ?)";
+								"(USER_ID, API_KEY, BLOCKED, TIME_ISSUED)" +
+								" VALUES (?, ?, ?, ?)";
 
 						return connect(master, c -> Mono.from(c.createStatement(insertCommand)
 								.bind(0, acc.getUserId())
 								.bind(1, acc.getAPIKey())
 								.bind(2, acc.isBlocked())
 								.bind(3, acc.getTimeIssued())
-								.bind(4, acc.getUses())
 								.execute())
 						).flatMap(res -> Mono.from(res.getRowsUpdated()))
 								.thenReturn(true);
@@ -477,7 +475,6 @@ public class DatabaseManager {
 					account.setUserId(row.get("USER_ID", String.class));
 					account.setBlocked(row.get("BLOCKED", Boolean.class));
 					account.setTimeIssued(row.get("TIME_ISSUED", Long.class));
-					account.setUses(row.get("USES", Integer.class));
 
 					return account;
 				})
