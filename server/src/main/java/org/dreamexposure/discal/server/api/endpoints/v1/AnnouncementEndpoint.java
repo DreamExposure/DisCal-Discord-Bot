@@ -3,7 +3,8 @@ package org.dreamexposure.discal.server.api.endpoints.v1;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
@@ -82,7 +83,8 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal get announcement error", e, true, AnnouncementEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get announcement err", e, AnnouncementEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -143,7 +145,8 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal create announcement error", e, true, AnnouncementEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "create announcement err", e, AnnouncementEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -213,7 +216,8 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal update announcement error", e, true, AnnouncementEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "Update announcement err", e, AnnouncementEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -259,7 +263,8 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal delete announcement error", e, true, AnnouncementEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "delete announcement err", e, AnnouncementEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -343,7 +348,8 @@ public class AnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal list announcements error", e, true, AnnouncementEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "List announcements err", e, AnnouncementEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

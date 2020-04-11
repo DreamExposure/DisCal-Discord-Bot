@@ -5,7 +5,8 @@ import com.google.api.services.calendar.Calendar;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 
@@ -33,7 +34,8 @@ public class CalendarUtils {
 			}
 		} catch (Exception e) {
 			//Fail silently.
-			Logger.getLogger().exception("Failed to delete calendar", e, true, CalendarUtils.class);
+			LogFeed.log(LogObject
+					.forException("Failed to delete calendar", e, CalendarUtils.class));
 			return false;
 		}
 		if (settings.useExternalCalendar()) {
@@ -76,11 +78,14 @@ public class CalendarUtils {
 
 				return false;
 			} else {
-				Logger.getLogger().exception("Unknown google error when checking for calendar exist", ge, true, CalendarUtils.class);
+				LogFeed.log(LogObject
+						.forException("Unknown google error when checking for calendar exist", ge,
+								CalendarUtils.class));
 				return true;
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception("Unknown error when checking for calendar exist", e, true, CalendarUtils.class);
+			LogFeed.log(LogObject.forException("Unknown error when checking for calendar exist", e,
+					CalendarUtils.class));
 			return true;
 		}
 	}

@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.web.network.discal;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -31,7 +32,8 @@ public class StatusHandler {
 			}
 			return new NetworkInfo(); //Just return an empty object, its fine...
 		} catch (Exception e) {
-			Logger.getLogger().exception("[STATUS REQUEST] Failed to get status", e, true, StatusHandler.class);
+			LogFeed.log(LogObject
+					.forException("[STATUS REQUEST] Failed to get status", e, StatusHandler.class));
 
 			return new NetworkInfo(); //Just return an empty object, its fine.
 		}

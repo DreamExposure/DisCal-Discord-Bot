@@ -8,7 +8,8 @@ import com.google.api.services.calendar.model.EventDateTime;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.TimeUtils;
@@ -108,7 +109,8 @@ public class PreEvent {
 		try {
 			cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
 		} catch (Exception ex) {
-			Logger.getLogger().exception("Failed to get proper date time for event!", ex, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("Failed to get proper data time for event!", ex, this.getClass()));
 		}
 
 		if (cal != null) {

@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -64,7 +65,8 @@ public class DeleteAnnouncementEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[API-v2] Internal delete announcement error", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[API-v2]", "Delete announcement err", e, this.getClass()));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

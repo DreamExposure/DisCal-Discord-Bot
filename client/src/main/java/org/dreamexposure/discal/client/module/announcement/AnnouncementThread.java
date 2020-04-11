@@ -11,7 +11,8 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -42,7 +43,6 @@ public class AnnouncementThread extends Thread {
 
 	@Override
 	public void run() {
-		Logger.getLogger().announcement("Starting announcement loop!");
 		try {
 			//Verify the client is logged in
 			if (DisCalClient.getClient() == null || !DisCalClient.getClient().isConnected())
@@ -52,14 +52,13 @@ public class AnnouncementThread extends Thread {
 			try {
 				discalService = CalendarAuth.getCalendarService(null);
 			} catch (IOException e) {
-				Logger.getLogger().exception("Failed to get service! 01a0101", e, true, this.getClass());
+				LogFeed.log(LogObject.forException("Failed to get service", e, this.getClass()));
 			}
 
 			for (Guild g : DisCalClient.getClient().getGuilds().toIterable()) {
 				List<Announcement> allAnnouncements = DatabaseManager.getEnabledAnnouncements(g.getId()).block();
 				for (Announcement a : allAnnouncements) {
 					try {
-						Logger.getLogger().announcement("starting an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 						//Check if guild is part of DisCal's guilds. This way we can clear out the database...
 						if (!GuildUtils.active(a.getGuildId())) {
 							DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
@@ -73,7 +72,8 @@ public class AnnouncementThread extends Thread {
 						try {
 							service = getService(settings);
 						} catch (Exception e) {
-							Logger.getLogger().exception("Failed to handle service! 01a102", e, true, this.getClass());
+							LogFeed.log(LogObject
+									.forException("Failed to handle server", e, this.getClass()));
 							continue;
 						}
 
@@ -91,7 +91,9 @@ public class AnnouncementThread extends Thread {
 										}
 									} catch (IOException e) {
 										//Event getting error, we know it exists tho
-										Logger.getLogger().exception("Failed to get event! 01a103", e, true, this.getClass());
+										LogFeed.log(LogObject
+												.forException("Failed to get event", e,
+														this.getClass()));
 									}
 								} else {
 									//Event is gone, we can just delete this shit.
@@ -127,9 +129,11 @@ public class AnnouncementThread extends Thread {
 								}
 								break;
 						}
-						Logger.getLogger().announcement("finished an announcement", a.getGuildId() + "", a.getAnnouncementId() + "", "N/a");
 					} catch (Exception e) {
-						Logger.getLogger().exception("Announcement failed! ID: " + a.getAnnouncementId() + ", GUILD: " + a.getGuildId(), e, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("Announcement Failed",
+										"ID: " + a.getAnnouncementId() + ", GUILD: " +
+												a.getGuildId(), e, this.getClass()));
 					}
 				}
 			}
@@ -140,10 +144,9 @@ public class AnnouncementThread extends Thread {
 			calendars.clear();
 			customServices.clear();
 			allEvents.clear();
-
-			Logger.getLogger().announcement("Finished announcement loop!");
 		} catch (Exception e) {
-			Logger.getLogger().exception("SOMETHING BAD IN THE ANNOUNCER!!!!!", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("SOMETHING BAD IN THE ANNOUNCER", e, this.getClass()));
 
 			//Clear everything because why take up RAM after is broke???
 			allSettings.clear();
@@ -206,7 +209,6 @@ public class AnnouncementThread extends Thread {
 
 	private List<Event> getEvents(GuildSettings gs, CalendarData cd, Calendar service, Announcement a) {
 		if (!allEvents.containsKey(gs.getGuildID())) {
-			Logger.getLogger().announcement("getting events for guild...", gs.getGuildID() + "", a.getAnnouncementId() + "", "N/a");
 			try {
 				Events events = service.events().list(cd.getCalendarAddress())
 						.setMaxResults(15)
@@ -218,7 +220,10 @@ public class AnnouncementThread extends Thread {
 				List<Event> items = events.getItems();
 				allEvents.put(gs.getGuildID(), items);
 			} catch (IOException e) {
-				Logger.getLogger().exception("Failed to get events list! 01ae2304 | Guild: " + gs.getGuildID() + " | Announcement: " + a.getAnnouncementId(), e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("Failed to event events list",
+								"Guild: " + gs.getGuildID() + " | Announcement: "
+										+ a.getAnnouncementId(), e, this.getClass()));
 				return new ArrayList<>();
 			}
 		}

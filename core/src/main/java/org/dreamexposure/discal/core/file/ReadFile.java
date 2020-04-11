@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.file;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.json.JSONObject;
 
@@ -37,7 +38,7 @@ public class ReadFile {
 				fr.close();
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception("Failed to load lang files!", e, true, ReadFile.class);
+			LogFeed.log(LogObject.forException("Failed to load lang files", e, ReadFile.class));
 		}
 		return langs;
 	}

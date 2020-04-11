@@ -3,7 +3,8 @@ package org.dreamexposure.discal.server.api.endpoints.v2.guild.settings;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
 import org.dreamexposure.discal.core.file.ReadFile;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
@@ -107,7 +108,8 @@ public class UpdateGuildSettingsEndpoint {
 						//If this fails, its not a huge deal, the cache will just be out of date for up to an hour max...
 						client.newCall(cacheRequest).execute();
 					} catch (Exception e) {
-						Logger.getLogger().exception("[API-v2] Cache invalidate failed after update", e, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("[API-v2]", "cache invalidate fail", e, this.getClass()));
 					}
 				});
 				thread.setDaemon(true);
@@ -126,7 +128,8 @@ public class UpdateGuildSettingsEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[API-v2] Internal update guild settings error", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[API-v2]", "Update guild settings err", e, this.getClass()));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

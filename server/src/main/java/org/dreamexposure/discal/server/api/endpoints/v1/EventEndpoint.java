@@ -11,7 +11,8 @@ import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.enums.event.EventFrequency;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.EventData;
@@ -92,7 +93,8 @@ public class EventEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB] Failed to retrieve events for a month.", e, true, EventEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get events for month err", e, EventEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -190,7 +192,8 @@ public class EventEndpoint {
 			response.setStatus(200);
 			return body.toString();
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB] Failed to retrieve events for specific date!", e, true, EventEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get events for date err", e, EventEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -284,7 +287,8 @@ public class EventEndpoint {
 			return JsonUtils.getJsonResponseMessage("Successfully updated event!");
 
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB] Failed to update event!", e, true, EventEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "update event err", e, EventEndpoint.class));
 			e.printStackTrace();
 
 			JSONObject respondBody = new JSONObject();
@@ -386,7 +390,8 @@ public class EventEndpoint {
 			return respondBody.toString();
 
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB] Failed to create event!", e, true, EventEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "Event create err", e, EventEndpoint.class));
 			e.printStackTrace();
 
 			JSONObject respondBody = new JSONObject();

@@ -6,7 +6,8 @@ import com.google.api.services.calendar.model.Event;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
@@ -49,8 +50,7 @@ public class EventUtils {
 
 			return true;
 		} catch (Exception e) {
-			System.out.println("Something weird happened when deleting an event!");
-			Logger.getLogger().exception("Failed to delete event.", e, true, EventUtils.class);
+			LogFeed.log(LogObject.forException("Failed to delete event", e, EventUtils.class));
 			e.printStackTrace();
 		}
 		return false;

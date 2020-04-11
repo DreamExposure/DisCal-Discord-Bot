@@ -9,7 +9,8 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.EventData;
@@ -34,7 +35,7 @@ import discord4j.core.object.util.Snowflake;
 public class EventCreator {
 	private static EventCreator instance;
 
-	private ArrayList<PreEvent> events = new ArrayList<>();
+	private final ArrayList<PreEvent> events = new ArrayList<>();
 
 	private EventCreator() {
 	} //Prevent initialization.
@@ -249,7 +250,8 @@ public class EventCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to create event.", ex, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("Failed to create event", ex, this.getClass()));
 
 						return new EventCreatorResponse(false, null,
 								getCreatorMessage(settings.getGuildID()), false);
@@ -275,7 +277,8 @@ public class EventCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to update event.", ex, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("Failed to update event", ex, this.getClass()));
 						return new EventCreatorResponse(false, null,
 								getCreatorMessage(settings.getGuildID()), true);
 					}

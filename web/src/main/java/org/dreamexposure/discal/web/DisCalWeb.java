@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.web;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler;
@@ -21,9 +22,6 @@ public class DisCalWeb {
 		p.load(new FileReader(new File("settings.properties")));
 		BotSettings.init(p);
 
-		//Init logger
-		Logger.getLogger().init();
-
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
 
@@ -35,16 +33,17 @@ public class DisCalWeb {
 			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE WEBSITE'", e, true, DisCalWeb.class);
+			LogFeed.log(LogObject
+					.forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
 			System.exit(4);
 		}
 
 		//Add shutdown hooks (probably won't work, but worth a shot for graceful shutdown)
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Logger.getLogger().status("Website shutting down", "Website shutting down...");
+			LogFeed.log(LogObject.forStatus("Website shutting down", "Website shutting down..."));
 			DiscordAccountHandler.getHandler().shutdown();
 		}));
 
-		Logger.getLogger().status("Started", "Website is now online!");
+		LogFeed.log(LogObject.forStatus("Started", "Website is now online!"));
 	}
 }

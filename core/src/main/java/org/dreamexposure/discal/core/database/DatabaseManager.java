@@ -3,7 +3,8 @@ package org.dreamexposure.discal.core.database;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -151,8 +152,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update API account", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update API Account", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -235,8 +235,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update/insert guild settings.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update guild settings", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -286,8 +285,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update/insert calendar data.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update calendar data", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -354,8 +352,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update/insert announcement.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update announcement", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -404,8 +401,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update/insert event data.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update event data", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -460,8 +456,7 @@ public class DatabaseManager {
 								.thenReturn(true);
 					}
 				}).onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to update/insert event data.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to update rsvp data", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -488,8 +483,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get calendar data", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -534,7 +528,7 @@ public class DatabaseManager {
 				})
 				.onErrorReturn(IllegalReferenceCountException.class, new GuildSettings(guildId))
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get guild settings", e, true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get guild settings", e, DatabaseManager.class));
 					return Mono.just(new GuildSettings(guildId));
 				});
 	}
@@ -560,8 +554,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get calendar data", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -587,8 +580,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get calendar data", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -612,8 +604,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get all guild calendars.", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get all guild calendars", e, DatabaseManager.class));
 					return Mono.just(new ArrayList<>());
 				});
 	}
@@ -629,8 +620,7 @@ public class DatabaseManager {
 				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(-1))
 				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get calendar count", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get calendar count", e, DatabaseManager.class));
 					return Mono.just(-1);
 				});
 	}
@@ -659,8 +649,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get event data", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get event data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -688,8 +677,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get announcement", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get rsvp data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -726,8 +714,7 @@ public class DatabaseManager {
 				})
 				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get announcement", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get announcement", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -766,8 +753,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get all announcements for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get all announcements for guild", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -807,8 +793,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get all announcements by type", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -850,8 +835,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get all announcements by type", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -891,8 +875,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get all enabled announcements", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get enabled announcements", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -934,8 +917,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get enabled announcements by type", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -976,8 +958,7 @@ public class DatabaseManager {
 				.collectList()
 				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get enabled announcements for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get enabled announcements for guild", e, DatabaseManager.class));
 
 					return Mono.just(new ArrayList<>());
 				});
@@ -994,8 +975,7 @@ public class DatabaseManager {
 				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(0))
 				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to get announcement count", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to get announcement count", e, DatabaseManager.class));
 					return Mono.just(-1);
 				});
 	}
@@ -1012,8 +992,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete announcement", e, true,
-							DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete announcement", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1033,8 +1012,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete announcements for event", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete announcements for event", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1054,8 +1032,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete all event data for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete event data", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1073,8 +1050,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete all event data for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete all event data for guild", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1091,8 +1067,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete all announcements for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete all announcements for guild", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1109,8 +1084,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete all RSVP data for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete all rsvps for guild", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}
@@ -1129,8 +1103,7 @@ public class DatabaseManager {
 				.then(Mono.just(true))
 				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
-					Logger.getLogger().exception("Failed to delete calendar data for guild", e,
-							true, DatabaseManager.class);
+					LogFeed.log(LogObject.forException("Failed to delete calendar", e, DatabaseManager.class));
 					return Mono.just(false);
 				});
 	}

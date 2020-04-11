@@ -5,7 +5,8 @@ import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
@@ -61,7 +62,7 @@ public class TimeUtils {
 				Event e = service.events().get(calendarData.getCalendarId(), eventId).execute();
 				return inPast(e);
 			} catch (Exception e) {
-				Logger.getLogger().exception("Failed to get calendar auth", e, true, TimeUtils.class);
+				LogFeed.log(LogObject.forException("Failed to get calendar auth", e, TimeUtils.class));
 				//Return false and allow RSVP so user is not adversely affected.
 				return false;
 			}

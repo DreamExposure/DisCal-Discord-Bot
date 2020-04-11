@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.network.discordpw;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.server.DisCalServer;
@@ -57,11 +58,12 @@ public class UpdateDisPwData {
 			Response response = client.newCall(request).execute();
 
 			if (response.code() == 200)
-				Logger.getLogger().debug("Successfully updated Discord PW List!", true);
+				LogFeed.log(LogObject.forDebug("Successfully updated Discord PW list"));
 		} catch (Exception e) {
 			//Handle issue.
 			System.out.println("Failed to update Discord PW list metadata!");
-			Logger.getLogger().exception("Failed to update Discord PW list.", e, true, UpdateDisPwData.class);
+			LogFeed.log(LogObject
+					.forException("Failed to update Discord PW list", e, UpdateDisPwData.class));
 			e.printStackTrace();
 		}
 	}

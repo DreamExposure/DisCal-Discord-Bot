@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.client.service;
 
 import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.joda.time.Interval;
@@ -17,7 +18,6 @@ import java.util.TimerTask;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * @author NovaFox161
@@ -60,13 +60,11 @@ public class KeepAliveHandler {
 							.header("Content-Type", "application/json")
 							.build();
 
-					Response response = client.newCall(request).execute();
-					if (response.code() == 200) {
-						Logger.getLogger().debug("Sent keep alive to server.", false);
-					}
-					//Failed to send keep alive... perhaps the API is down?
+					client.newCall(request).execute();
 				} catch (Exception e) {
-					Logger.getLogger().exception("[Heart Beat] Failed to send Keep-Alive", e, true, this.getClass());
+					LogFeed.log(LogObject
+							.forException("[Heart Beat]", "Failed to send keep-alive", e,
+									this.getClass()));
 				}
 			}
 		}, seconds * 1000, seconds * 1000);

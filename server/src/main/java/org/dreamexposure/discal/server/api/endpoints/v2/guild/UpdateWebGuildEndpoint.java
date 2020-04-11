@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.guild;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.DisCalServer;
@@ -62,7 +63,8 @@ public class UpdateWebGuildEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[API-v2] Internal get guild settings error", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[API-v2]", "get guild settings err", e, this.getClass()));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

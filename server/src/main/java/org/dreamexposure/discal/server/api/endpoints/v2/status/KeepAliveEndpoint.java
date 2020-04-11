@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.status;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
@@ -53,7 +54,8 @@ public class KeepAliveEndpoint {
 					//Was restarted at some point, so we are "re-adding" to network
 					cc.setPid(body.getString("pid"));
 
-					Logger.getLogger().status("Client pid changed", "Shard Index of changed Client: " + cc.getClientIndex());
+					LogFeed.log(LogObject
+							.forStatus("Client pid changed", "Shard index: " + cc.getClientIndex()));
 				}
 			} else {
 				//Not in network, add info...
@@ -82,7 +84,7 @@ public class KeepAliveEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[API-v2] Internal keep alive error", e, true, this.getClass());
+			LogFeed.log(LogObject.forException("[API-v2]", "keep alive err", e, this.getClass()));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

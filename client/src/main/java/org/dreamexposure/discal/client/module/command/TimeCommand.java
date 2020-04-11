@@ -6,7 +6,8 @@ import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -118,7 +119,8 @@ public class TimeCommand implements ICommand {
 				MessageManager.sendMessageAsync(embed, event);
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("Failed to connect to google cal", e, this.getClass()));
 			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
 		}
 	}

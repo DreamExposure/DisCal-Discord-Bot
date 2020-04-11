@@ -6,7 +6,8 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -79,7 +80,9 @@ public class NetworkMediator {
 				//noinspection UnstableApiUsage
 				return CharStreams.toString(new InputStreamReader(output));
 			} catch (JSchException | IOException e) {
-				Logger.getLogger().exception("[NETWORK] Failed to restart shard.s2: " + c.getClientIndex(), e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s2"
+								, e, this.getClass()));
 				closeConnection(channel, session);
 			} finally {
 				closeConnection(channel, session);
@@ -88,7 +91,9 @@ public class NetworkMediator {
 			//Tell network manager to remove this client until it restarts.
 			DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart issued by mediator for missed heartbeats");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[NETWORK] Failed to restart shard.s1: " + c.getClientIndex(), e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s1"
+							, e, this.getClass()));
 		}
 
 		return "ERROR";

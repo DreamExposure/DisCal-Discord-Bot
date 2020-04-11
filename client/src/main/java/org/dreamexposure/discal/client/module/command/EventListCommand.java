@@ -9,7 +9,8 @@ import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -24,7 +25,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings({"ConstantConditions"})
 public class EventListCommand implements ICommand {
 	/**
 	 * Gets the command this Object is responsible for.
@@ -122,12 +123,11 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-				e.printStackTrace();
+				LogFeed.log(LogObject.forException("Failed to list events", e, this.getClass()));
 			}
 		} else if (args.length == 1) {
 			try {
-				Integer eventNum = Integer.valueOf(args[0]);
+				int eventNum = Integer.parseInt(args[0]);
 				if (eventNum > 15) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Amount.Over", settings), event);
 					return;
@@ -161,8 +161,7 @@ public class EventListCommand implements ICommand {
 					}
 				} catch (Exception e) {
 					MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-					Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-					e.printStackTrace();
+					LogFeed.log(LogObject.forException("Failed to list events", e, this.getClass()));
 				}
 			} catch (NumberFormatException e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
@@ -208,8 +207,7 @@ public class EventListCommand implements ICommand {
 				}
 			} catch (Exception e) {
 				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-				e.printStackTrace();
+				LogFeed.log(LogObject.forException("Failed to list events", e, this.getClass()));
 			}
 		}
 	}

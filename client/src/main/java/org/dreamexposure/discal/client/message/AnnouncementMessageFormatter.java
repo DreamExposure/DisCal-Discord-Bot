@@ -8,7 +8,8 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -132,7 +133,9 @@ public class AnnouncementMessageFormatter {
 					}
 				} catch (Exception e) {
 					//Failed to get from google cal.
-					Logger.getLogger().exception("Failed to get event for announcement.", e, true, AnnouncementMessageFormatter.class);
+					LogFeed.log(LogObject
+							.forException("Failed to get event for announcement", e,
+									AnnouncementMessageFormatter.class));
 				}
 			} else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
 				spec.addField(MessageManager.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
@@ -256,7 +259,12 @@ public class AnnouncementMessageFormatter {
 				if (guild != null)
 					channel = guild.getChannelById(Snowflake.of(announcement.getAnnouncementChannelId())).ofType(TextChannel.class).onErrorResume(e -> Mono.empty()).block();
 			} catch (Exception e) {
-				Logger.getLogger().exception("An error occurred when looking for announcement channel! | Announcement: " + announcement.getAnnouncementId() + " | TYPE: " + announcement.getAnnouncementType() + " | Guild: " + announcement.getGuildId().asString(), e, true, AnnouncementMessageFormatter.class);
+				LogFeed.log(LogObject
+						.forException("An error occurred when looking for announcement channel! " +
+										"| Announcement: " + announcement.getAnnouncementId() + " | TYPE: "
+										+ announcement.getAnnouncementType() + " | Guild: " +
+										announcement.getGuildId().asString(), e,
+								AnnouncementMessageFormatter.class));
 			}
 
 			if (channel == null) {

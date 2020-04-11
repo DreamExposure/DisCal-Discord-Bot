@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONArray;
@@ -21,7 +22,7 @@ import java.util.List;
  */
 @SuppressWarnings("Duplicates")
 public class NetworkInfo {
-	private List<ConnectedClient> clients = new ArrayList<>();
+	private final List<ConnectedClient> clients = new ArrayList<>();
 
 	private int calCount;
 	private int announcementCount;
@@ -53,20 +54,25 @@ public class NetworkInfo {
 
 	public void addClient(ConnectedClient client) {
 		clients.add(client);
-		Logger.getLogger().status("Client Connected to Network", "Shard Index of Connected Client: " + client.getClientIndex());
+		LogFeed.log(LogObject
+				.forStatus("Client Connected to Network",
+						"Shard index of connected client: " + client.getClientIndex()));
 	}
 
 	public void removeClient(int clientIndex) {
 		if (clientExists(clientIndex)) {
 			clients.remove(getClient(clientIndex));
-			Logger.getLogger().status("Client Disconnected from Network", "Shard Index of Disconnected Client: " + clientIndex);
+			LogFeed.log(LogObject
+					.forStatus("Client Disconnected from Network",
+							"Shard Index of Disconnected Client: " + clientIndex));
 		}
 	}
 
 	public void removeClient(int clientIndex, String reason) {
 		if (clientExists(clientIndex)) {
 			clients.remove(getClient(clientIndex));
-			Logger.getLogger().status("Client Disconnected from Network | Index: " + clientIndex, reason);
+			LogFeed.log(LogObject
+					.forStatus("Client Disconnected from Network | Index: " + clientIndex, reason));
 		}
 	}
 

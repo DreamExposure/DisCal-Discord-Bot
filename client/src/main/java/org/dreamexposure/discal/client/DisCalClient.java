@@ -20,7 +20,8 @@ import org.dreamexposure.discal.client.module.command.TimeCommand;
 import org.dreamexposure.discal.client.service.KeepAliveHandler;
 import org.dreamexposure.discal.client.service.TimeManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.springframework.boot.SpringApplication;
@@ -56,9 +57,6 @@ public class DisCalClient {
 		Properties p = new Properties();
 		p.load(new FileReader(new File("settings.properties")));
 		BotSettings.init(p);
-
-		//Init logger
-		Logger.getLogger().init();
 
 		//Handle client setup
 		client = createClient();
@@ -103,13 +101,15 @@ public class DisCalClient {
 				app.run(args);
 			} catch (Exception e) {
 				e.printStackTrace();
-				Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE Communication'", e, true, DisCalClient.class);
+				LogFeed.log(LogObject
+						.forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
+								DisCalClient.class));
 			}
 		}
 
 		//Add shutdown hooks...
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Logger.getLogger().status("Shutting down...", "Shutting down");
+			LogFeed.log(LogObject.forStatus("Shutting down Shard", "Shard shutting down"));
 
 			TimeManager.getManager().shutdown();
 			AnnouncementThreader.getThreader().shutdown();

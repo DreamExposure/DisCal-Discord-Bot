@@ -7,7 +7,8 @@ import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -118,7 +119,8 @@ public class AddCalendarCommand implements ICommand {
 							}
 						} catch (Exception e) {
 							MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-							Logger.getLogger().exception(event.getMember().get(), "Failed to connect external calendar!", e, true, this.getClass());
+							LogFeed.log(LogObject.forException("Failed to connect external cal", e,
+									this.getClass()));
 						}
 					}
 				} else {

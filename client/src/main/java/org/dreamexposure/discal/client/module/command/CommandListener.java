@@ -2,7 +2,8 @@ package org.dreamexposure.discal.client.module.command;
 
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 
@@ -65,7 +66,9 @@ class CommandListener {
 				}
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Command error; event message: " + event.getMessage().getContent().get(), e, true, CommandListener.class);
+			LogFeed.log(LogObject
+					.forException("Command error", event.getMessage().getContent().get(), e,
+							CommandListener.class));
 		}
 	}
 }

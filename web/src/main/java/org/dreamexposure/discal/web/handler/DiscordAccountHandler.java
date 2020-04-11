@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.web.handler;
 
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONObject;
@@ -116,12 +117,13 @@ public class DiscordAccountHandler {
 						m.put("embed_key", keyGrantResponseBody.getString("key"));
 					} else {
 						//Something didn't work... add invalid key that embed page is programmed to respond to.
-						Logger.getLogger().debug("Embed Key Fail: " + keyGrantResponse.body().string(), true);
+						LogFeed.log(LogObject
+								.forDebug("Embed Key Fail: ", keyGrantResponse.body().string()));
 						m.put("embed_key", "internal_error");
 					}
 				} catch (Exception e) {
 					//Something didn't work... add invalid key that embed page is programmed to respond to.
-					Logger.getLogger().exception("Embed Key get Failure", e, true, this.getClass());
+					LogFeed.log(LogObject.forException("Embed key get failure", e, this.getClass()));
 					m.put("embed_key", "internal_error");
 				}
 			}
@@ -157,12 +159,13 @@ public class DiscordAccountHandler {
 					m.put("embed_key", keyGrantResponseBody.getString("key"));
 				} else {
 					//Something didn't work... add invalid key that embed page is programmed to respond to.
-					Logger.getLogger().debug("Embed Key Fail: " + keyGrantResponse.body().string(), true);
+					LogFeed.log(LogObject.forDebug("Embed key fail",
+							keyGrantResponse.body().string()));
 					m.put("embed_key", "internal_error");
 				}
 			} catch (Exception e) {
 				//Something didn't work... add invalid key that embed page is programmed to respond to.
-				Logger.getLogger().exception("Embed Key get Failure", e, true, this.getClass());
+				LogFeed.log(LogObject.forException("Embed key get failure", e, this.getClass()));
 				m.put("embed_key", "internal_error");
 			}
 

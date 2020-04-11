@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
@@ -62,7 +63,8 @@ public class RsvpEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal get RSVP data error", e, true, RsvpEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get RSVP err", e, RsvpEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -136,7 +138,8 @@ public class RsvpEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal update RSVP data error", e, true, RsvpEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "update RSVP err", e, RsvpEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

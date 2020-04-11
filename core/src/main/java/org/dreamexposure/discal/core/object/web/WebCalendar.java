@@ -3,7 +3,8 @@ package org.dreamexposure.discal.core.object.web;
 import com.google.api.services.calendar.model.Calendar;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.json.JSONObject;
@@ -32,7 +33,8 @@ public class WebCalendar {
 				description = cal.getDescription();
 				timezone = cal.getTimeZone().replaceAll("/", "___");
 			} catch (Exception e) {
-				Logger.getLogger().exception("[WEB] Failed to get calendar!", e, true, WebCalendar.class);
+				LogFeed.log(LogObject.
+						forException("[WEB] Failed to get calendar!", e, WebCalendar.class));
 				name = "ERROR!";
 				description = "ERROR";
 				timezone = "ERROR";

@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
@@ -67,7 +68,8 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal get guild settings error", e, true, GuildEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get guild settings err", e, GuildEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -119,7 +121,8 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal update guild settings error", e, true, GuildEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "update guild settings err", e, GuildEndpoint.class));
 			response.setContentType("application/json");
 			response.setStatus(500);
 			return JsonUtils.getJsonResponseMessage("Internal Server Error");
@@ -182,7 +185,8 @@ public class GuildEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal get guilds from users error", e, true, GuildEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get guilds for user err", e, GuildEndpoint.class));
 			response.setContentType("application/json");
 			response.setStatus(500);
 			return JsonUtils.getJsonResponseMessage("Internal Server Error");

@@ -3,7 +3,8 @@ package org.dreamexposure.discal.client.service;
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.calendar.CalendarCreator;
 import org.dreamexposure.discal.client.event.EventCreator;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.object.event.PreEvent;
@@ -68,7 +69,7 @@ public class CreatorCleaner extends TimerTask {
 				AnnouncementCreator.getCreator().terminate(a.getGuildId());
 			}
 		} catch (Exception e) {
-			Logger.getLogger().exception("Error in CreatorCleaner", e, true, this.getClass());
+			LogFeed.log(LogObject.forException("Error in cleaner", e, this.getClass()));
 		}
 	}
 }

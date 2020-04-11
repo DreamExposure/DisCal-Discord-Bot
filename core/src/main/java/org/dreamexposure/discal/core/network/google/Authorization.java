@@ -4,7 +4,8 @@ import com.google.api.client.http.HttpStatusCodes;
 
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
@@ -80,13 +81,16 @@ public class Authorization {
 				return autoRefreshResponse.getString("access_token");
 			} else {
 				//Failed to get OK. Send debug info.
-				Logger.getLogger().debug(null, "Error requesting new access token.", "Status code: " + httpResponse.code() + " | " + httpResponse.message() + " | " + httpResponse.body().string(), true, this.getClass());
+				LogFeed.log(LogObject.forDebug("Error requesting new access token.",
+						"Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+								" | " + httpResponse.body().string()));
 				return null;
 			}
 
 		} catch (Exception e) {
 			//Error occurred, lets just log it and return null.
-			Logger.getLogger().exception("Failed to request new access token.", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("Failed to request new access token.", e, this.getClass()));
 			return null;
 		}
 	}

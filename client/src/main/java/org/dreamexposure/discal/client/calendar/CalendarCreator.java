@@ -7,7 +7,8 @@ import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarCreatorResponse;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -29,7 +30,7 @@ import discord4j.core.object.util.Snowflake;
 public class CalendarCreator {
 	private static CalendarCreator instance;
 
-	private ArrayList<PreCalendar> calendars = new ArrayList<>();
+	private final ArrayList<PreCalendar> calendars = new ArrayList<>();
 
 	private CalendarCreator() {
 	} //Prevent initialization
@@ -99,7 +100,8 @@ public class CalendarCreator {
 				calendars.add(preCalendar);
 				return preCalendar;
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getMember().get(), "Failed to init calendar editor", e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("Failed to init calendar editor", e, this.getClass()));
 				return null;
 			}
 		} else {
@@ -151,7 +153,8 @@ public class CalendarCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to confirm calendar.", ex, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("Failed to confirm calendar", ex, this.getClass()));
 
 						return new CalendarCreatorResponse(false, null,
 								preCalendar.getCreatorMessage(), false);
@@ -179,7 +182,8 @@ public class CalendarCreator {
 						terminate(settings.getGuildID());
 						return response;
 					} catch (Exception ex) {
-						Logger.getLogger().exception(e.getMember().get(), "Failed to update calendar.", ex, true, this.getClass());
+						LogFeed.log(LogObject
+								.forException("Failed to update calendar", ex, this.getClass()));
 
 						return new CalendarCreatorResponse(false, null,
 								preCalendar.getCreatorMessage(), true);

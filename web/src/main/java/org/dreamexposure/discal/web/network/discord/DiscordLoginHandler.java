@@ -3,7 +3,8 @@ package org.dreamexposure.discal.web.network.discord;
 import org.dreamexposure.discal.core.enums.GoodTimezone;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.web.WebPartialGuild;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -158,7 +159,7 @@ public class DiscordLoginHandler {
 					DiscordAccountHandler.getHandler().addAccount(m, req);
 				} else {
 					//Something didn't work... just redirect back to the login page....
-					Logger.getLogger().debug("login issue: " + keyGrantResponse.body().string(), true);
+					LogFeed.log(LogObject.forDebug("Login Issue", keyGrantResponse.body().string()));
 					res.sendRedirect("/login");
 					return "redirect:/login";
 				}
@@ -172,11 +173,13 @@ public class DiscordLoginHandler {
 				return "redirect:/login";
 			}
 		} catch (JSONException e) {
-			Logger.getLogger().exception("[LOGIN-Discord] JSON || Discord login failed!", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[LOGIN-Discord] JSON", "Discord login failed!", e, this.getClass()));
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		} catch (Exception e) {
-			Logger.getLogger().exception("[LOGIN-Discord] Discord login failed!", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[LOGIN-Discord]", "Discord login failed!", e, this.getClass()));
 			res.sendRedirect("/dashboard");
 			return "redirect:/dashboard";
 		}
@@ -207,7 +210,7 @@ public class DiscordLoginHandler {
 			res.sendRedirect("/");
 			return "redirect:/";
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB] Discord logout failed!", e, true, DiscordLoginHandler.class);
+			LogFeed.log(LogObject.forException("[WEB] Discord logout failed", e, this.getClass()));
 			res.sendRedirect("/");
 			return "redirect:/";
 		}

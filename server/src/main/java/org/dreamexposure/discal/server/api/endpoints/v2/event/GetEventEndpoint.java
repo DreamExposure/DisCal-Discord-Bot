@@ -5,7 +5,8 @@ import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
@@ -66,7 +67,8 @@ public class GetEventEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[API-v2] Failed to retrieve event by ID.", e, true, this.getClass());
+			LogFeed.log(LogObject
+					.forException("[API-v2]", "get event by ID err", e, this.getClass()));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

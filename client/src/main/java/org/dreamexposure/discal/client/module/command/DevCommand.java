@@ -5,7 +5,8 @@ import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.network.DisCalRealm;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -190,7 +191,8 @@ public class DevCommand implements ICommand {
 					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
 				}
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getMember().get(), "Failed to handle patron update", e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("Failed to handle patron update", e, this.getClass()));
 				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
 			}
 		} else {
@@ -287,7 +289,8 @@ public class DevCommand implements ICommand {
 					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
 				}
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getMember().get(), "Failed to handle dev update", e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("Failed to handle dev update", e, this.getClass()));
 				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
 			}
 		} else {
@@ -346,7 +349,8 @@ public class DevCommand implements ICommand {
 						MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
 					}
 				} catch (Exception e) {
-					Logger.getLogger().exception(event.getMember().get(), "Failed to handle max cal update", e, true, this.getClass());
+					LogFeed.log(LogObject
+							.forException("Failed to handle max cal update", e, this.getClass()));
 					MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
 				}
 			} catch (NumberFormatException e) {
@@ -402,7 +406,8 @@ public class DevCommand implements ICommand {
 					MessageManager.sendMessageAsync("Failed to update, please check the logs", event);
 				}
 			} catch (Exception e) {
-				Logger.getLogger().exception(event.getMember().get(), "Failed to handle dev update", e, true, this.getClass());
+				LogFeed.log(LogObject
+						.forException("Failed to handle dev update", e, this.getClass()));
 				MessageManager.sendMessageAsync("An error occurred, it has been logged", event);
 			}
 		} else {
@@ -432,7 +437,8 @@ public class DevCommand implements ICommand {
 							.build();
 					client.newCall(request).execute();
 				} catch (Exception e) {
-					Logger.getLogger().exception("lang reload request fail on shard " + i, e, true, DevCommand.class);
+					LogFeed.log(LogObject
+							.forException("Lang reload failed", "Shard: " + i, e, this.getClass()));
 				}
 			}
 

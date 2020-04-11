@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.server.api.endpoints.v1;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.JsonUtils;
@@ -70,7 +71,8 @@ public class CalendarEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal get calendar error", e, true, CalendarEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "get calendar err", e, CalendarEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);
@@ -120,7 +122,8 @@ public class CalendarEndpoint {
 			response.setStatus(400);
 			return JsonUtils.getJsonResponseMessage("Bad Request");
 		} catch (Exception e) {
-			Logger.getLogger().exception("[WEB-API] Internal list calendars error", e, true, CalendarEndpoint.class);
+			LogFeed.log(LogObject
+					.forException("[WEB-API-v1]", "List calendars err", e, CalendarEndpoint.class));
 
 			response.setContentType("application/json");
 			response.setStatus(500);

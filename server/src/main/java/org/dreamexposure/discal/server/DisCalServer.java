@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.server;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
@@ -36,7 +37,7 @@ import io.lettuce.core.RedisURI;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalServer {
-	private static NetworkInfo networkInfo = new NetworkInfo();
+	private static final NetworkInfo networkInfo = new NetworkInfo();
 	private static DiscordClient client;
 
 	public static void main(String[] args) throws IOException {
@@ -45,14 +46,8 @@ public class DisCalServer {
 		p.load(new FileReader(new File("settings.properties")));
 		BotSettings.init(p);
 
-		//Init logger
-		Logger.getLogger().init();
-
 		//Handle database migrations
-		if (args.length > 0 && args[0].equalsIgnoreCase("--repair"))
-			handleMigrations(true);
-		else
-			handleMigrations(false);
+		handleMigrations(args.length > 0 && args[0].equalsIgnoreCase("--repair"));
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
@@ -66,8 +61,8 @@ public class DisCalServer {
 			app.run(args);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.getLogger().exception("'Spring ERROR' by 'PANIC! AT THE API'", e, true,
-					DisCalServer.class);
+			LogFeed.log(LogObject
+					.forException("SPRING ERROR", "by 'PANIC! At The API'", e, DisCalServer.class));
 		}
 
 		//Start network monitoring
@@ -83,7 +78,7 @@ public class DisCalServer {
 
 		//Add shutdown hooks...
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			Logger.getLogger().status("Shutting down API", "API Shutting down...");
+			LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."));
 			Authentication.shutdown();
 			NetworkMediator.get().shutdown();
 			UpdateDisBotData.shutdown();
@@ -91,7 +86,7 @@ public class DisCalServer {
 			DatabaseManager.disconnectFromMySQL();
 		}));
 
-		Logger.getLogger().status("Started", "Server and API are now online");
+		LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online"));
 	}
 
 	private static DiscordClient createClient() {
@@ -160,9 +155,9 @@ public class DisCalServer {
 
 
 			org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
-			Logger.getLogger().debug("Migrations Successful, " + sm + " migrations applied!", true);
+			LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
 		} catch (Exception e) {
-			Logger.getLogger().exception("Migrations Failure", e, true, DisCalServer.class);
+			LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
 			System.exit(2);
 		}
 	}
