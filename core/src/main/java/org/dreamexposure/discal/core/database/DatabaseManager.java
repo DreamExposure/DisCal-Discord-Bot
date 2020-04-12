@@ -600,9 +600,9 @@ public class DatabaseManager {
 
 			return Mono.from(c.createStatement(query).execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
-			Integer calendars = row.get(0, Integer.class);
+			Long calendars = row.get(0, Long.class);
 
-			return calendars == null ? 0 : calendars;
+			return calendars == null ? 0 : calendars.intValue();
 		}))
 				.next()
 				.onErrorResume(e -> {
@@ -939,8 +939,8 @@ public class DatabaseManager {
 
 			return Mono.from(c.createStatement(query).execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
-			Integer announcements = row.get(0, Integer.class);
-			return announcements == null ? 0 : announcements;
+			Long announcements = row.get(0, Long.class);
+			return announcements == null ? 0 : announcements.intValue();
 		}))
 				.next()
 				.onErrorResume(e -> {
