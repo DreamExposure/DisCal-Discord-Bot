@@ -93,6 +93,9 @@ public class DisCalClient {
 
 		TimeManager.getManager().init();
 
+		//Login
+		client.login().subscribe();
+
 		//Start Spring
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
 			try {
@@ -117,9 +120,6 @@ public class DisCalClient {
 
 			client.logout().block();
 		}));
-
-		//Login
-		client.login().block();
 	}
 
 	/**
