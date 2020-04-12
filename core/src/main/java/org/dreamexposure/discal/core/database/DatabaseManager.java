@@ -22,7 +22,6 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import discord4j.core.object.util.Snowflake;
-import io.netty.util.IllegalReferenceCountException;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
@@ -467,20 +466,18 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, APIKey)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.next()
-				.map(row -> {
-					UserAPIAccount account = new UserAPIAccount();
-					account.setAPIKey(APIKey);
-					account.setUserId(row.get("USER_ID", String.class));
-					account.setBlocked(row.get("BLOCKED", Boolean.class));
-					account.setTimeIssued(row.get("TIME_ISSUED", Long.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UserAPIAccount account = new UserAPIAccount();
+			account.setAPIKey(APIKey);
+			account.setUserId(row.get("USER_ID", String.class));
+			account.setBlocked(row.get("BLOCKED", Boolean.class));
+			account.setTimeIssued(row.get("TIME_ISSUED", Long.class));
 
-					return account;
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
+			return account;
+		}))
+				.next()
 				.onErrorResume(e -> {
-					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
+					LogFeed.log(LogObject.forException("Failed to get API user data", e, DatabaseManager.class));
 					return Mono.empty();
 				});
 	}
@@ -496,34 +493,32 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId.asString())
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			GuildSettings set = new GuildSettings(guildId);
+
+			set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
+			set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
+			set.setEncryptedAccessToken(row.get("ACCESS_TOKEN", String.class));
+			set.setEncryptedRefreshToken(row.get("REFRESH_TOKEN", String.class));
+			set.setControlRole(row.get("CONTROL_ROLE", String.class));
+			set.setDiscalChannel(row.get("DISCAL_CHANNEL", String.class));
+			set.setSimpleAnnouncements(row.get("SIMPLE_ANNOUNCEMENT", Boolean.class));
+			set.setLang(row.get("LANG", String.class));
+			set.setPrefix(row.get("PREFIX", String.class));
+			set.setPatronGuild(row.get("PATRON_GUILD", Boolean.class));
+			set.setDevGuild(row.get("DEV_GUILD", Boolean.class));
+			set.setMaxCalendars(row.get("MAX_CALENDARS", Integer.class));
+			set.setDmAnnouncementsFromString(row.get("DM_ANNOUNCEMENTS", String.class));
+			set.setTwelveHour(row.get("12_HOUR", Boolean.class));
+			set.setBranded(row.get("BRANDED", Boolean.class));
+
+			//Store in cache...
+			guildSettingsCache.remove(guildId);
+			guildSettingsCache.put(guildId, set);
+
+			return set;
+		}))
 				.next()
-				.map(row -> {
-					GuildSettings set = new GuildSettings(guildId);
-
-					set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
-					set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
-					set.setEncryptedAccessToken(row.get("ACCESS_TOKEN", String.class));
-					set.setEncryptedRefreshToken(row.get("REFRESH_TOKEN", String.class));
-					set.setControlRole(row.get("CONTROL_ROLE", String.class));
-					set.setDiscalChannel(row.get("DISCAL_CHANNEL", String.class));
-					set.setSimpleAnnouncements(row.get("SIMPLE_ANNOUNCEMENT", Boolean.class));
-					set.setLang(row.get("LANG", String.class));
-					set.setPrefix(row.get("PREFIX", String.class));
-					set.setPatronGuild(row.get("PATRON_GUILD", Boolean.class));
-					set.setDevGuild(row.get("DEV_GUILD", Boolean.class));
-					set.setMaxCalendars(row.get("MAX_CALENDARS", Integer.class));
-					set.setDmAnnouncementsFromString(row.get("DM_ANNOUNCEMENTS", String.class));
-					set.setTwelveHour(row.get("12_HOUR", Boolean.class));
-					set.setBranded(row.get("BRANDED", Boolean.class));
-
-					//Store in cache...
-					guildSettingsCache.remove(guildId);
-					guildSettingsCache.put(guildId, set);
-
-					return set;
-				})
-				.onErrorReturn(IllegalReferenceCountException.class, new GuildSettings(guildId))
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get guild settings", e, DatabaseManager.class));
 					return Mono.just(new GuildSettings(guildId));
@@ -540,16 +535,13 @@ public class DatabaseManager {
 					.bind(0, guildId.asString())
 					.bind(1, 1)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			String calId = row.get("CALENDAR_ID", String.class);
+			String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+			boolean external = row.get("EXTERNAL", Boolean.class);
+			return CalendarData.fromData(guildId, 1, calId, calAddr, external);
+		}))
 				.next()
-				.map(row -> {
-					String calId = row.get("CALENDAR_ID", String.class);
-					String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-					boolean external = row.get("EXTERNAL", Boolean.class);
-					return CalendarData.fromData(guildId, 1, calId,
-							calAddr, external);
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
 					return Mono.empty();
@@ -566,16 +558,13 @@ public class DatabaseManager {
 					.bind(0, guildId.asString())
 					.bind(1, calendarNumber)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			String calId = row.get("CALENDAR_ID", String.class);
+			String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+			boolean external = row.get("EXTERNAL", Boolean.class);
+			return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external);
+		}))
 				.next()
-				.map(row -> {
-					String calId = row.get("CALENDAR_ID", String.class);
-					String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-					boolean external = row.get("EXTERNAL", Boolean.class);
-					return CalendarData.fromData(guildId, calendarNumber, calId,
-							calAddr, external);
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
 					return Mono.empty();
@@ -590,16 +579,14 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId.asString())
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(row -> {
-					String calId = row.get("CALENDAR_ID", String.class);
-					String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-					boolean external = row.get("EXTERNAL", Boolean.class);
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			String calId = row.get("CALENDAR_ID", String.class);
+			String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+			boolean external = row.get("EXTERNAL", Boolean.class);
 
-					return CalendarData.fromData(guildId, 1, calId, calAddr, external);
-				})
+			return CalendarData.fromData(guildId, 1, calId, calAddr, external);
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get all guild calendars", e, DatabaseManager.class));
 					return Mono.just(new ArrayList<>());
@@ -612,10 +599,12 @@ public class DatabaseManager {
 			String query = "SELECT COUNT(*) FROM " + calendarTableName + ";";
 
 			return Mono.from(c.createStatement(query).execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			Integer calendars = row.get(0, Integer.class);
+
+			return calendars == null ? 0 : calendars;
+		}))
 				.next()
-				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(-1))
-				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get calendar count", e, DatabaseManager.class));
 					return Mono.just(-1);
@@ -635,16 +624,14 @@ public class DatabaseManager {
 					.bind(0, guildId.asString())
 					.bind(1, copiedEventId)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.next()
-				.map(row -> {
-					String id = row.get("EVENT_ID", String.class);
-					long end = row.get("EVENT_END", Long.class);
-					String img = row.get("IMAGE_LINK", String.class);
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			String id = row.get("EVENT_ID", String.class);
+			long end = row.get("EVENT_END", Long.class);
+			String img = row.get("IMAGE_LINK", String.class);
 
-					return EventData.fromImage(guildId, id, end, img);
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
+			return EventData.fromImage(guildId, id, end, img);
+		}))
+				.next()
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get event data", e, DatabaseManager.class));
 					return Mono.empty();
@@ -660,19 +647,17 @@ public class DatabaseManager {
 					.bind(0, guildId.asString())
 					.bind(1, eventId)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.next()
-				.map(row -> {
-					RsvpData data = new RsvpData(guildId, eventId);
-					data.setEventEnd(row.get("EVENT_END", Long.class));
-					data.setGoingOnTimeFromString(row.get("GOING_ON_TIME", String.class));
-					data.setGoingLateFromString(row.get("GOING_LATE", String.class));
-					data.setNotGoingFromString(row.get("NOT_GOING", String.class));
-					data.setUndecidedFromString(row.get("UNDECIDED", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			RsvpData data = new RsvpData(guildId, eventId);
+			data.setEventEnd(row.get("EVENT_END", Long.class));
+			data.setGoingOnTimeFromString(row.get("GOING_ON_TIME", String.class));
+			data.setGoingLateFromString(row.get("GOING_LATE", String.class));
+			data.setNotGoingFromString(row.get("NOT_GOING", String.class));
+			data.setUndecidedFromString(row.get("UNDECIDED", String.class));
 
-					return data;
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
+			return data;
+		}))
+				.next()
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get rsvp data", e, DatabaseManager.class));
 					return Mono.empty();
@@ -687,29 +672,27 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, announcementId)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.next()
-				.map(r -> {
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
-				.onErrorResume(IllegalReferenceCountException.class, e -> Mono.empty())
+			return a;
+		}))
+				.next()
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get announcement", e, DatabaseManager.class));
 					return Mono.empty();
@@ -724,31 +707,29 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId.asString())
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get all announcements for guild", e, DatabaseManager.class));
 
@@ -763,32 +744,30 @@ public class DatabaseManager {
 
 			return Mono.from(c.createStatement(query)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
-					Snowflake guildId = Snowflake.of(r.get("GUILD_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+			Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -805,32 +784,30 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, type.name())
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
-					Snowflake guildId = Snowflake.of(r.get("GUILD_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+			Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -845,32 +822,30 @@ public class DatabaseManager {
 
 			return Mono.from(c.createStatement(query)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
-					Snowflake guildId = Snowflake.of(r.get("GUILD_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+			Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get enabled announcements", e, DatabaseManager.class));
 
@@ -887,32 +862,30 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, type.name())
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
-					Snowflake guildId = Snowflake.of(r.get("GUILD_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+			Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -929,31 +902,29 @@ public class DatabaseManager {
 			return Mono.from(c.createStatement(query)
 					.bind(0, guildId)
 					.execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-				.map(r -> {
-					UUID announcementId = UUID.fromString(r.get("ANNOUNCEMENT_ID", String.class));
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-					Announcement a = new Announcement(announcementId, guildId);
-					a.setSubscriberRoleIdsFromString(r.get("SUBSCRIBERS_ROLE", String.class));
-					a.setSubscriberUserIdsFromString(r.get("SUBSCRIBERS_USER", String.class));
-					a.setAnnouncementChannelId(r.get("CHANNEL_ID", String.class));
-					a.setAnnouncementType(AnnouncementType
-							.valueOf(r.get("ANNOUNCEMENT_TYPE", String.class))
-					);
-					a.setEventId(r.get("EVENT_ID", String.class));
-					a.setEventColor(EventColor
-							.fromNameOrHexOrID(r.get("EVENT_COLOR", String.class))
-					);
-					a.setHoursBefore(r.get("HOURS_BEFORE", Integer.class));
-					a.setMinutesBefore(r.get("MINUTES_BEFORE", Integer.class));
-					a.setInfo(r.get("INFO", String.class));
-					a.setEnabled(r.get("ENABLED", Boolean.class));
-					a.setInfoOnly(r.get("INFO_ONLY", Boolean.class));
+			Announcement a = new Announcement(announcementId, guildId);
+			a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
+			a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
+			a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
+			a.setAnnouncementType(AnnouncementType
+					.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
+			);
+			a.setEventId(row.get("EVENT_ID", String.class));
+			a.setEventColor(EventColor
+					.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
+			);
+			a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
+			a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
+			a.setInfo(row.get("INFO", String.class));
+			a.setEnabled(row.get("ENABLED", Boolean.class));
+			a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
 
-					return a;
-				})
+			return a;
+		}))
 				.collectList()
-				.onErrorReturn(IllegalReferenceCountException.class, new ArrayList<>())
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get enabled announcements for guild", e, DatabaseManager.class));
 
@@ -967,10 +938,11 @@ public class DatabaseManager {
 			String query = "SELECT COUNT(*) FROM " + announcementTableName + ";";
 
 			return Mono.from(c.createStatement(query).execute());
-		}).flatMapMany(res -> res.map((row, rowMetadata) -> row))
+		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
+			Integer announcements = row.get(0, Integer.class);
+			return announcements == null ? 0 : announcements;
+		}))
 				.next()
-				.flatMap(row -> Mono.justOrEmpty(row.get(0, Integer.class)).defaultIfEmpty(0))
-				.onErrorReturn(IllegalReferenceCountException.class, -1)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to get announcement count", e, DatabaseManager.class));
 					return Mono.just(-1);
@@ -987,7 +959,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete announcement", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1007,7 +978,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete announcements for event", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1027,7 +997,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete event data", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1045,7 +1014,6 @@ public class DatabaseManager {
 
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete all event data for guild", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1062,7 +1030,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete all announcements for guild", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1079,7 +1046,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete all rsvps for guild", e, DatabaseManager.class));
 					return Mono.just(false);
@@ -1098,7 +1064,6 @@ public class DatabaseManager {
 					.execute());
 		}).flatMapMany(Result::getRowsUpdated)
 				.then(Mono.just(true))
-				.onErrorReturn(IllegalReferenceCountException.class, false)
 				.onErrorResume(e -> {
 					LogFeed.log(LogObject.forException("Failed to delete calendar", e, DatabaseManager.class));
 					return Mono.just(false);
