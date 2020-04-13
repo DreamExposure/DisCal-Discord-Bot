@@ -22,43 +22,43 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/guild/settings")
 public class GetGuildSettingsEndpoint {
-	@PostMapping(value = "/get", produces = "application/json")
-	public String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/get", produces = "application/json")
+    public String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject jsonMain = new JSONObject(requestBody);
-			String guildId = jsonMain.getString("guild_id");
+        //Okay, now handle actual request.
+        try {
+            JSONObject jsonMain = new JSONObject(requestBody);
+            String guildId = jsonMain.getString("guild_id");
 
-			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			if (authState.isFromDiscalNetwork())
-				return settings.toJson().toString();
-			else
-				return settings.toJsonSecure().toString();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            if (authState.isFromDiscalNetwork())
+                return settings.toJson().toString();
+            else
+                return settings.toJsonSecure().toString();
 
-		} catch (JSONException e) {
-			e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "get guild settings err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "get guild settings err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

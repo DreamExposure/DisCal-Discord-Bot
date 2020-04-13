@@ -33,64 +33,64 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events/list")
 public class ListEventMonthEndpoint {
-	@PostMapping(value = "/month", produces = "application/json")
-	public String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/month", produces = "application/json")
+    public String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject requestBody = new JSONObject(rBody);
+        //Okay, now handle actual request.
+        try {
+            JSONObject requestBody = new JSONObject(rBody);
 
-			Snowflake guildId = Snowflake.of(requestBody.getString("guild_id"));
-			int calNumber = requestBody.getInt("calendar_number");
-			int daysInMonth = requestBody.getInt("days_in_month");
-			long startEpoch = requestBody.getLong("epoch_start");
-			long endEpoch = startEpoch + (GlobalConst.oneDayMs * daysInMonth);
-			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+            Snowflake guildId = Snowflake.of(requestBody.getString("guild_id"));
+            int calNumber = requestBody.getInt("calendar_number");
+            int daysInMonth = requestBody.getInt("days_in_month");
+            long startEpoch = requestBody.getLong("epoch_start");
+            long endEpoch = startEpoch + (GlobalConst.oneDayMs * daysInMonth);
+            GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
-			//okay, lets actually get the month's events.
-			Calendar service = CalendarAuth.getCalendarService(settings);
+            //okay, lets actually get the month's events.
+            Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-			Events events = service.events().list(calendarData.getCalendarAddress())
-					.setTimeMin(new DateTime(startEpoch))
-					.setTimeMax(new DateTime(endEpoch))
-					.setOrderBy("startTime")
-					.setSingleEvents(true)
-					.setShowDeleted(false)
-					.execute();
-			List<Event> items = events.getItems();
+            Events events = service.events().list(calendarData.getCalendarAddress())
+                    .setTimeMin(new DateTime(startEpoch))
+                    .setTimeMax(new DateTime(endEpoch))
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .setShowDeleted(false)
+                    .execute();
+            List<Event> items = events.getItems();
 
-			List<JSONObject> jEvents = new ArrayList<>();
-			for (Event e : items) {
-				jEvents.add(JsonUtils.convertEventToJson(e, settings));
-			}
+            List<JSONObject> jEvents = new ArrayList<>();
+            for (Event e : items) {
+                jEvents.add(JsonUtils.convertEventToJson(e, settings));
+            }
 
-			JSONObject body = new JSONObject();
-			body.put("events", jEvents);
-			body.put("message", "Events successfully listed.");
+            JSONObject body = new JSONObject();
+            body.put("events", jEvents);
+            body.put("message", "Events successfully listed.");
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return body.toString();
-		} catch (JSONException e) {
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "get events for month err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return body.toString();
+        } catch (JSONException e) {
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "get events for month err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

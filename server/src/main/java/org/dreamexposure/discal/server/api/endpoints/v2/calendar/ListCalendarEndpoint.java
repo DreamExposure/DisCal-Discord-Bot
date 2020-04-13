@@ -28,64 +28,64 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/calendar")
 public class ListCalendarEndpoint {
-	@PostMapping(value = "/list", produces = "application/json")
-	public String listCalendars(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/list", produces = "application/json")
+    public String listCalendars(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
+        //Okay, now handle actual request.
+        try {
+            JSONObject jsonMain = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
-			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
-			Calendar service = CalendarAuth.getCalendarService(settings);
+            GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+            Calendar service = CalendarAuth.getCalendarService(settings);
 
-			JSONArray jCals = new JSONArray();
-			for (CalendarData calData : DatabaseManager.getAllCalendars(guildId).block()) {
-				if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
-						&& CalendarUtils.calendarExists(calData, settings)) {
-					com.google.api.services.calendar.model.Calendar cal = service.calendars()
-							.get(calData.getCalendarAddress())
-							.execute();
+            JSONArray jCals = new JSONArray();
+            for (CalendarData calData : DatabaseManager.getAllCalendars(guildId).block()) {
+                if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
+                        && CalendarUtils.calendarExists(calData, settings)) {
+                    com.google.api.services.calendar.model.Calendar cal = service.calendars()
+                            .get(calData.getCalendarAddress())
+                            .execute();
 
-					JSONObject jCal = new JSONObject();
+                    JSONObject jCal = new JSONObject();
 
-					jCal.put("calendar_address", calData.getCalendarAddress());
-					jCal.put("calendar_id", calData.getCalendarId());
-					jCal.put("calendar_number", calData.getCalendarNumber());
-					jCal.put("external", calData.isExternal());
-					jCal.put("summary", cal.getSummary());
-					jCal.put("description", cal.getDescription());
-					jCal.put("timezone", cal.getTimeZone());
+                    jCal.put("calendar_address", calData.getCalendarAddress());
+                    jCal.put("calendar_id", calData.getCalendarId());
+                    jCal.put("calendar_number", calData.getCalendarNumber());
+                    jCal.put("external", calData.isExternal());
+                    jCal.put("summary", cal.getSummary());
+                    jCal.put("description", cal.getDescription());
+                    jCal.put("timezone", cal.getTimeZone());
 
-					jCals.put(jCal);
-				}
-			}
+                    jCals.put(jCal);
+                }
+            }
 
-			JSONObject body = new JSONObject();
-			body.put("calendars", jCals);
+            JSONObject body = new JSONObject();
+            body.put("calendars", jCals);
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return body.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return body.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("[API-v2]", "list calendars err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("[API-v2]", "list calendars err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

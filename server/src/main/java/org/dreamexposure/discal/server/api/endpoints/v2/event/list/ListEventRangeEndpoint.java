@@ -32,62 +32,62 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events/list")
 public class ListEventRangeEndpoint {
-	@PostMapping(value = "/range", produces = "application/json")
-	public String getEventsForRange(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/range", produces = "application/json")
+    public String getEventsForRange(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject requestBody = new JSONObject(rBody);
+        //Okay, now handle actual request.
+        try {
+            JSONObject requestBody = new JSONObject(rBody);
 
-			Snowflake guildId = Snowflake.of(requestBody.getString("guild_id"));
-			int calNumber = requestBody.getInt("calendar_number");
-			long startEpoch = requestBody.getLong("epoch_start");
-			long endEpoch = requestBody.getLong("epoch_end");
-			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+            Snowflake guildId = Snowflake.of(requestBody.getString("guild_id"));
+            int calNumber = requestBody.getInt("calendar_number");
+            long startEpoch = requestBody.getLong("epoch_start");
+            long endEpoch = requestBody.getLong("epoch_end");
+            GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
-			//okay, lets actually get the range's events.
-			Calendar service = CalendarAuth.getCalendarService(settings);
+            //okay, lets actually get the range's events.
+            Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
-			Events events = service.events().list(calendarData.getCalendarAddress())
-					.setTimeMin(new DateTime(startEpoch))
-					.setTimeMax(new DateTime(endEpoch))
-					.setOrderBy("startTime")
-					.setSingleEvents(true)
-					.setShowDeleted(false)
-					.execute();
-			List<Event> items = events.getItems();
+            CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            Events events = service.events().list(calendarData.getCalendarAddress())
+                    .setTimeMin(new DateTime(startEpoch))
+                    .setTimeMax(new DateTime(endEpoch))
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .setShowDeleted(false)
+                    .execute();
+            List<Event> items = events.getItems();
 
-			JSONArray jEvents = new JSONArray();
-			for (Event e : items)
-				jEvents.put(JsonUtils.convertEventToJson(e, settings));
+            JSONArray jEvents = new JSONArray();
+            for (Event e : items)
+                jEvents.put(JsonUtils.convertEventToJson(e, settings));
 
-			JSONObject body = new JSONObject();
-			body.put("events", jEvents);
+            JSONObject body = new JSONObject();
+            body.put("events", jEvents);
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return body.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return body.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "get events for range err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "get events for range err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

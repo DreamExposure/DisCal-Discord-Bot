@@ -16,34 +16,34 @@ import java.util.Properties;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalWeb {
-	public static void main(String[] args) throws IOException {
-		//Get settings
-		Properties p = new Properties();
-		p.load(new FileReader(new File("settings.properties")));
-		BotSettings.init(p);
+    public static void main(String[] args) throws IOException {
+        //Get settings
+        Properties p = new Properties();
+        p.load(new FileReader(new File("settings.properties")));
+        BotSettings.init(p);
 
-		//Start Google authorization daemon
-		Authorization.getAuth().init();
+        //Start Google authorization daemon
+        Authorization.getAuth().init();
 
-		//Start Spring
-		try {
-			DiscordAccountHandler.getHandler().init();
-			SpringApplication app = new SpringApplication(DisCalWeb.class);
-			app.setAdditionalProfiles(BotSettings.PROFILE.get());
-			app.run(args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			LogFeed.log(LogObject
-					.forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
-			System.exit(4);
-		}
+        //Start Spring
+        try {
+            DiscordAccountHandler.getHandler().init();
+            SpringApplication app = new SpringApplication(DisCalWeb.class);
+            app.setAdditionalProfiles(BotSettings.PROFILE.get());
+            app.run(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogFeed.log(LogObject
+                    .forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
+            System.exit(4);
+        }
 
-		//Add shutdown hooks (probably won't work, but worth a shot for graceful shutdown)
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			LogFeed.log(LogObject.forStatus("Website shutting down", "Website shutting down..."));
-			DiscordAccountHandler.getHandler().shutdown();
-		}));
+        //Add shutdown hooks (probably won't work, but worth a shot for graceful shutdown)
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LogFeed.log(LogObject.forStatus("Website shutting down", "Website shutting down..."));
+            DiscordAccountHandler.getHandler().shutdown();
+        }));
 
-		LogFeed.log(LogObject.forStatus("Started", "Website is now online!"));
-	}
+        LogFeed.log(LogObject.forStatus("Started", "Website is now online!"));
+    }
 }

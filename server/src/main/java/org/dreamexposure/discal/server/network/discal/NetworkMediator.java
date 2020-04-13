@@ -24,102 +24,102 @@ import java.util.TimerTask;
 
 @SuppressWarnings("UnusedReturnValue")
 public class NetworkMediator {
-	private static NetworkMediator instance;
+    private static NetworkMediator instance;
 
-	private Timer timer;
+    private Timer timer;
 
-	private NetworkMediator() {
-	}
+    private NetworkMediator() {
+    }
 
-	public static NetworkMediator get() {
-		if (instance == null)
-			instance = new NetworkMediator();
+    public static NetworkMediator get() {
+        if (instance == null)
+            instance = new NetworkMediator();
 
-		return instance;
-	}
+        return instance;
+    }
 
-	public void init() {
-		timer = new Timer(true);
+    public void init() {
+        timer = new Timer(true);
 
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				List<ConnectedClient> downShards = new ArrayList<>();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                List<ConnectedClient> downShards = new ArrayList<>();
 
-				for (ConnectedClient c : DisCalServer.getNetworkInfo().getClients()) {
-					if (System.currentTimeMillis() > c.getLastKeepAlive() + (5 * GlobalConst.oneMinuteMs))
-						downShards.add(c); //Missed last 5+ heartbeats...
-				}
+                for (ConnectedClient c : DisCalServer.getNetworkInfo().getClients()) {
+                    if (System.currentTimeMillis() > c.getLastKeepAlive() + (5 * GlobalConst.oneMinuteMs))
+                        downShards.add(c); //Missed last 5+ heartbeats...
+                }
 
-				//Now we issue the restarts for the shards...
-				for (ConnectedClient c : downShards)
-					issueRestart(c);
+                //Now we issue the restarts for the shards...
+                for (ConnectedClient c : downShards)
+                    issueRestart(c);
 
-			}
-		}, 60 * 1000, 60 * 1000);
-	}
+            }
+        }, 60 * 1000, 60 * 1000);
+    }
 
-	public void shutdown() {
-		if (timer != null)
-			timer.cancel();
-	}
+    public void shutdown() {
+        if (timer != null)
+            timer.cancel();
+    }
 
-	public String issueRestart(ConnectedClient c) {
-		try {
-			Session session = createSession(c.getIpForRestart(), c.getPortForRestart());
-			session.connect();
+    public String issueRestart(ConnectedClient c) {
+        try {
+            Session session = createSession(c.getIpForRestart(), c.getPortForRestart());
+            session.connect();
 
-			ChannelExec channel = (ChannelExec) session.openChannel("exec");
+            ChannelExec channel = (ChannelExec) session.openChannel("exec");
 
-			try {
-				channel.setCommand(BotSettings.RESTART_CMD.get().replace("%index%", c.getClientIndex() + ""));
-				channel.setInputStream(null);
-				InputStream output = channel.getInputStream();
-				channel.connect();
+            try {
+                channel.setCommand(BotSettings.RESTART_CMD.get().replace("%index%", c.getClientIndex() + ""));
+                channel.setInputStream(null);
+                InputStream output = channel.getInputStream();
+                channel.connect();
 
-				//noinspection UnstableApiUsage
-				return CharStreams.toString(new InputStreamReader(output));
-			} catch (JSchException | IOException e) {
-				LogFeed.log(LogObject
-						.forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s2"
-								, e, this.getClass()));
-				closeConnection(channel, session);
-			} finally {
-				closeConnection(channel, session);
-			}
+                //noinspection UnstableApiUsage
+                return CharStreams.toString(new InputStreamReader(output));
+            } catch (JSchException | IOException e) {
+                LogFeed.log(LogObject
+                        .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s2"
+                                , e, this.getClass()));
+                closeConnection(channel, session);
+            } finally {
+                closeConnection(channel, session);
+            }
 
-			//Tell network manager to remove this client until it restarts.
-			DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart issued by mediator for missed heartbeats");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s1"
-							, e, this.getClass()));
-		}
+            //Tell network manager to remove this client until it restarts.
+            DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart issued by mediator for missed heartbeats");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s1"
+                            , e, this.getClass()));
+        }
 
-		return "ERROR";
-	}
+        return "ERROR";
+    }
 
-	private Session createSession(String ip, int port) throws JSchException {
-		//Handle config
-		Properties config = new Properties();
-		config.put("StrictHostKeyChecking", "no");
+    private Session createSession(String ip, int port) throws JSchException {
+        //Handle config
+        Properties config = new Properties();
+        config.put("StrictHostKeyChecking", "no");
 
-		//Handle identity
-		JSch jSch = new JSch();
-		jSch.addIdentity(BotSettings.RESTART_SSH_KEY.get());
+        //Handle identity
+        JSch jSch = new JSch();
+        jSch.addIdentity(BotSettings.RESTART_SSH_KEY.get());
 
-		//Actual session
-		Session session = jSch.getSession(BotSettings.RESTART_USER.get(), ip, port);
-		session.setConfig(config);
+        //Actual session
+        Session session = jSch.getSession(BotSettings.RESTART_USER.get(), ip, port);
+        session.setConfig(config);
 
-		return session;
-	}
+        return session;
+    }
 
-	private void closeConnection(ChannelExec channel, Session session) {
-		try {
-			channel.disconnect();
-		} catch (Exception ignored) {
-		}
-		session.disconnect();
-	}
+    private void closeConnection(ChannelExec channel, Session session) {
+        try {
+            channel.disconnect();
+        } catch (Exception ignored) {
+        }
+        session.disconnect();
+    }
 }

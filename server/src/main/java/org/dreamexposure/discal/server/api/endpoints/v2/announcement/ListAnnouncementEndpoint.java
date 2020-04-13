@@ -23,57 +23,57 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/announcement")
 public class ListAnnouncementEndpoint {
-	@PostMapping(value = "/list", produces = "application/json")
-	public String listAnnouncements(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/list", produces = "application/json")
+    public String listAnnouncements(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject body = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
-			int amount = body.getInt("amount");
+        //Okay, now handle actual request.
+        try {
+            JSONObject body = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+            int amount = body.getInt("amount");
 
-			JSONArray jAnnouncements = new JSONArray();
-			if (amount < 1) {
-				for (Announcement a : DatabaseManager.getAnnouncements(guildId).block())
-					jAnnouncements.put(a.toJson());
-			} else {
-				int i = 0;
-				for (Announcement a : DatabaseManager.getAnnouncements(guildId).block()) {
-					if (i < amount) {
-						jAnnouncements.put(a.toJson());
-						i++;
-					} else
-						break;
-				}
-			}
+            JSONArray jAnnouncements = new JSONArray();
+            if (amount < 1) {
+                for (Announcement a : DatabaseManager.getAnnouncements(guildId).block())
+                    jAnnouncements.put(a.toJson());
+            } else {
+                int i = 0;
+                for (Announcement a : DatabaseManager.getAnnouncements(guildId).block()) {
+                    if (i < amount) {
+                        jAnnouncements.put(a.toJson());
+                        i++;
+                    } else
+                        break;
+                }
+            }
 
-			JSONObject responseBody = new JSONObject();
-			responseBody.put("message", "Listed announcements successfully");
-			responseBody.put("announcements", jAnnouncements);
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("message", "Listed announcements successfully");
+            responseBody.put("announcements", jAnnouncements);
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return responseBody.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return responseBody.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "List announcements err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "List announcements err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

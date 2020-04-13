@@ -17,29 +17,29 @@ import java.nio.file.Paths;
  * For Project: DisCal-Discord-Bot
  */
 public class ReadFile {
-	@SuppressWarnings("ConstantConditions")
-	public static JSONObject readAllLangFiles() {
-		JSONObject langs = new JSONObject();
+    @SuppressWarnings("ConstantConditions")
+    public static JSONObject readAllLangFiles() {
+        JSONObject langs = new JSONObject();
 
-		try {
-			File langDir = new File(BotSettings.LANG_PATH.get());
+        try {
+            File langDir = new File(BotSettings.LANG_PATH.get());
 
-			for (File f: langDir.listFiles()) {
-				// Open the file
-				FileReader fr = new FileReader(f);
+            for (File f : langDir.listFiles()) {
+                // Open the file
+                FileReader fr = new FileReader(f);
 
-				byte[] encoded = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-				String contents = new String(encoded, StandardCharsets.UTF_8);
+                byte[] encoded = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
+                String contents = new String(encoded, StandardCharsets.UTF_8);
 
-				JSONObject json = new JSONObject(contents);
+                JSONObject json = new JSONObject(contents);
 
-				langs.put(json.getString("Language"), json);
+                langs.put(json.getString("Language"), json);
 
-				fr.close();
-			}
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("Failed to load lang files", e, ReadFile.class));
-		}
-		return langs;
-	}
+                fr.close();
+            }
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("Failed to load lang files", e, ReadFile.class));
+        }
+        return langs;
+    }
 }

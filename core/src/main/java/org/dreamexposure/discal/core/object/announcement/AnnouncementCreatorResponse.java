@@ -8,38 +8,38 @@ import discord4j.core.object.entity.Message;
  * For Project: DisCal-Discord-Bot
  */
 public class AnnouncementCreatorResponse {
-	private final boolean successful;
-	private final Announcement announcement;
-	private final Message creatorMessage;
+    private final boolean successful;
+    private final Announcement announcement;
+    private final Message creatorMessage;
 
-	public AnnouncementCreatorResponse(boolean successful, Announcement announcement,
-									   Message creatorMessage) {
-		this.successful = successful;
-		this.announcement = announcement;
-		this.creatorMessage = creatorMessage;
-	}
+    public AnnouncementCreatorResponse(boolean successful, Announcement announcement,
+                                       Message creatorMessage) {
+        this.successful = successful;
+        this.announcement = announcement;
+        this.creatorMessage = creatorMessage;
+    }
 
-	//Getters
+    //Getters
 
-	/**
-	 * Gets whether or not the creator was successful.
-	 *
-	 * @return Whether or not the creator was successful.
-	 */
-	public boolean isSuccessful() {
-		return successful;
-	}
+    /**
+     * Gets whether or not the creator was successful.
+     *
+     * @return Whether or not the creator was successful.
+     */
+    public boolean isSuccessful() {
+        return successful;
+    }
 
-	/**
-	 * Gets the announcement involved.
-	 *
-	 * @return The Announcement involved.
-	 */
-	public Announcement getAnnouncement() {
-		return announcement;
-	}
+    /**
+     * Gets the announcement involved.
+     *
+     * @return The Announcement involved.
+     */
+    public Announcement getAnnouncement() {
+        return announcement;
+    }
 
-	public Message getCreatorMessage() {
-		return creatorMessage;
-	}
+    public Message getCreatorMessage() {
+        return creatorMessage;
+    }
 }

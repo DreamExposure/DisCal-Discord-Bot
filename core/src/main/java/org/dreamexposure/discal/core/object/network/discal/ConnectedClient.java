@@ -14,129 +14,129 @@ import java.util.Date;
  * Contact: nova@dreamexposure.org
  */
 public class ConnectedClient {
-	private int clientIndex;
+    private int clientIndex;
 
-	private int connectedServers;
-	private long lastKeepAlive;
-	private String uptime;
-	private double memUsed;
+    private int connectedServers;
+    private long lastKeepAlive;
+    private String uptime;
+    private double memUsed;
 
-	//This stuff doesn't get published
-	private String ipForRestart;
-	private int portForRestart;
-	private String pid;
+    //This stuff doesn't get published
+    private String ipForRestart;
+    private int portForRestart;
+    private String pid;
 
-	public ConnectedClient() {
-		clientIndex = -1;
+    public ConnectedClient() {
+        clientIndex = -1;
 
-		connectedServers = 0;
-		lastKeepAlive = System.currentTimeMillis();
+        connectedServers = 0;
+        lastKeepAlive = System.currentTimeMillis();
 
-		uptime = "ERROR";
-		memUsed = 0;
-	}
+        uptime = "ERROR";
+        memUsed = 0;
+    }
 
-	public ConnectedClient(int _clientIndex) {
-		clientIndex = _clientIndex;
+    public ConnectedClient(int _clientIndex) {
+        clientIndex = _clientIndex;
 
-		connectedServers = 0;
-		lastKeepAlive = System.currentTimeMillis();
+        connectedServers = 0;
+        lastKeepAlive = System.currentTimeMillis();
 
-		uptime = "ERROR";
-		memUsed = 0;
-	}
+        uptime = "ERROR";
+        memUsed = 0;
+    }
 
-	//Getters
-	public int getClientIndex() {
-		return clientIndex;
-	}
+    //Getters
+    public int getClientIndex() {
+        return clientIndex;
+    }
 
-	public int getConnectedServers() {
-		return connectedServers;
-	}
+    public int getConnectedServers() {
+        return connectedServers;
+    }
 
-	public long getLastKeepAlive() {
-		return lastKeepAlive;
-	}
+    public long getLastKeepAlive() {
+        return lastKeepAlive;
+    }
 
-	public String getLastKeepAliveHumanReadable() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    public String getLastKeepAliveHumanReadable() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-		return sdf.format(new Date(lastKeepAlive));
-	}
+        return sdf.format(new Date(lastKeepAlive));
+    }
 
-	public String getUptime() {
-		return uptime;
-	}
+    public String getUptime() {
+        return uptime;
+    }
 
-	public double getMemUsed() {
-		return memUsed;
-	}
+    public double getMemUsed() {
+        return memUsed;
+    }
 
-	public String getIpForRestart() {
-		return ipForRestart;
-	}
+    public String getIpForRestart() {
+        return ipForRestart;
+    }
 
-	public int getPortForRestart() {
-		return portForRestart;
-	}
+    public int getPortForRestart() {
+        return portForRestart;
+    }
 
-	public String getPid() {
-		return pid;
-	}
+    public String getPid() {
+        return pid;
+    }
 
-	//Setters
-	public void setClientIndex(int clientIndex) {
-		this.clientIndex = clientIndex;
-	}
+    //Setters
+    public void setClientIndex(int clientIndex) {
+        this.clientIndex = clientIndex;
+    }
 
-	public void setConnectedServers(int _connectedServers) {
-		connectedServers = _connectedServers;
-	}
+    public void setConnectedServers(int _connectedServers) {
+        connectedServers = _connectedServers;
+    }
 
-	public void setLastKeepAlive(long _lastKeepAlive) {
-		lastKeepAlive = _lastKeepAlive;
-	}
+    public void setLastKeepAlive(long _lastKeepAlive) {
+        lastKeepAlive = _lastKeepAlive;
+    }
 
-	public void setUptime(String _uptime) {
-		uptime = _uptime;
-	}
+    public void setUptime(String _uptime) {
+        uptime = _uptime;
+    }
 
-	public void setMemUsed(double _mem) {
-		memUsed = _mem;
-	}
+    public void setMemUsed(double _mem) {
+        memUsed = _mem;
+    }
 
-	public void setIpForRestart(String _ip) {
-		ipForRestart = _ip;
-	}
+    public void setIpForRestart(String _ip) {
+        ipForRestart = _ip;
+    }
 
-	public void setPortForRestart(int portForRestart) {
-		this.portForRestart = portForRestart;
-	}
+    public void setPortForRestart(int portForRestart) {
+        this.portForRestart = portForRestart;
+    }
 
-	public void setPid(String _pid) {
-		pid = _pid;
-	}
+    public void setPid(String _pid) {
+        pid = _pid;
+    }
 
-	public JSONObject toJson() {
-		JSONObject json = new JSONObject();
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
 
-		json.put("index", clientIndex);
-		json.put("guilds", connectedServers);
-		json.put("keep_alive", lastKeepAlive);
-		json.put("uptime", uptime);
-		json.put("memory", memUsed);
+        json.put("index", clientIndex);
+        json.put("guilds", connectedServers);
+        json.put("keep_alive", lastKeepAlive);
+        json.put("uptime", uptime);
+        json.put("memory", memUsed);
 
-		return json;
-	}
+        return json;
+    }
 
-	public ConnectedClient fromJson(JSONObject json) {
-		clientIndex = json.getInt("index");
-		connectedServers = json.getInt("guilds");
-		lastKeepAlive = json.getLong("keep_alive");
-		uptime = json.getString("uptime");
-		memUsed = json.getDouble("memory");
+    public ConnectedClient fromJson(JSONObject json) {
+        clientIndex = json.getInt("index");
+        connectedServers = json.getInt("guilds");
+        lastKeepAlive = json.getLong("keep_alive");
+        uptime = json.getString("uptime");
+        memUsed = json.getDouble("memory");
 
-		return this;
-	}
+        return this;
+    }
 }

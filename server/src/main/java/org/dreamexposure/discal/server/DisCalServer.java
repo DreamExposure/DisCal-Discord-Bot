@@ -30,102 +30,102 @@ import discord4j.core.DiscordClientBuilder;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalServer {
-	private static final NetworkInfo networkInfo = new NetworkInfo();
-	private static DiscordClient client;
+    private static final NetworkInfo networkInfo = new NetworkInfo();
+    private static DiscordClient client;
 
-	public static void main(String[] args) throws IOException {
-		//Get settings
-		Properties p = new Properties();
-		p.load(new FileReader(new File("settings.properties")));
-		BotSettings.init(p);
+    public static void main(String[] args) throws IOException {
+        //Get settings
+        Properties p = new Properties();
+        p.load(new FileReader(new File("settings.properties")));
+        BotSettings.init(p);
 
-		//Handle database migrations
-		handleMigrations(args.length > 0 && args[0].equalsIgnoreCase("--repair"));
+        //Handle database migrations
+        handleMigrations(args.length > 0 && args[0].equalsIgnoreCase("--repair"));
 
-		//Start Google authorization daemon
-		Authorization.getAuth().init();
+        //Start Google authorization daemon
+        Authorization.getAuth().init();
 
-		client = DiscordClientBuilder.create(BotSettings.TOKEN.get()).build();
+        client = DiscordClientBuilder.create(BotSettings.TOKEN.get()).build();
 
-		//Start Spring
-		try {
-			SpringApplication app = new SpringApplication(DisCalServer.class);
-			app.setAdditionalProfiles(BotSettings.PROFILE.get());
-			app.run(args);
-		} catch (Exception e) {
-			e.printStackTrace();
-			LogFeed.log(LogObject
-					.forException("SPRING ERROR", "by 'PANIC! At The API'", e, DisCalServer.class));
-		}
+        //Start Spring
+        try {
+            SpringApplication app = new SpringApplication(DisCalServer.class);
+            app.setAdditionalProfiles(BotSettings.PROFILE.get());
+            app.run(args);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogFeed.log(LogObject
+                    .forException("SPRING ERROR", "by 'PANIC! At The API'", e, DisCalServer.class));
+        }
 
-		//Start network monitoring
-		NetworkMediator.get().init();
+        //Start network monitoring
+        NetworkMediator.get().init();
 
-		//Handle the rest of the bullshit
-		UpdateDisBotData.init();
-		UpdateDisPwData.init();
-		Authentication.init();
+        //Handle the rest of the bullshit
+        UpdateDisBotData.init();
+        UpdateDisPwData.init();
+        Authentication.init();
 
-		//Save pid...
-		networkInfo.setPid(new ApplicationPid().toString());
+        //Save pid...
+        networkInfo.setPid(new ApplicationPid().toString());
 
-		//Add shutdown hooks...
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."));
-			Authentication.shutdown();
-			NetworkMediator.get().shutdown();
-			UpdateDisBotData.shutdown();
-			UpdateDisPwData.shutdown();
-			DatabaseManager.disconnectFromMySQL();
-		}));
+        //Add shutdown hooks...
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."));
+            Authentication.shutdown();
+            NetworkMediator.get().shutdown();
+            UpdateDisBotData.shutdown();
+            UpdateDisPwData.shutdown();
+            DatabaseManager.disconnectFromMySQL();
+        }));
 
-		LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online"));
-	}
+        LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online"));
+    }
 
-	public static DiscordClient getClient() {
-		return client;
-	}
+    public static DiscordClient getClient() {
+        return client;
+    }
 
-	public static NetworkInfo getNetworkInfo() {
-		return networkInfo;
-	}
+    public static NetworkInfo getNetworkInfo() {
+        return networkInfo;
+    }
 
-	private static void handleMigrations(boolean repair) {
-		Map<String, String> placeholders = new HashMap<>();
-		placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
+    private static void handleMigrations(boolean repair) {
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
 
-		DatabaseSettings settings = new DatabaseSettings(
-				BotSettings.SQL_MASTER_HOST.get(),
-				BotSettings.SQL_MASTER_PORT.get(),
-				BotSettings.SQL_DB.get(),
-				BotSettings.SQL_MASTER_USER.get(),
-				BotSettings.SQL_MASTER_PASS.get(),
-				BotSettings.SQL_PREFIX.get()
-		);
-		DatabaseInfo info = org.dreamexposure.novautils.database.DatabaseManager
-				.connectToMySQL(settings);
+        DatabaseSettings settings = new DatabaseSettings(
+                BotSettings.SQL_MASTER_HOST.get(),
+                BotSettings.SQL_MASTER_PORT.get(),
+                BotSettings.SQL_DB.get(),
+                BotSettings.SQL_MASTER_USER.get(),
+                BotSettings.SQL_MASTER_PASS.get(),
+                BotSettings.SQL_PREFIX.get()
+        );
+        DatabaseInfo info = org.dreamexposure.novautils.database.DatabaseManager
+                .connectToMySQL(settings);
 
-		try {
-			Flyway flyway = Flyway.configure()
-					.dataSource(info.getSource())
-					.cleanDisabled(true)
-					.baselineOnMigrate(true)
-					.table(BotSettings.SQL_PREFIX.get() + "schema_history")
-					.placeholders(placeholders)
-					.load();
+        try {
+            Flyway flyway = Flyway.configure()
+                    .dataSource(info.getSource())
+                    .cleanDisabled(true)
+                    .baselineOnMigrate(true)
+                    .table(BotSettings.SQL_PREFIX.get() + "schema_history")
+                    .placeholders(placeholders)
+                    .load();
 
-			int sm = 0;
-			if (repair)
-				flyway.repair();
-			else
-				sm = flyway.migrate();
+            int sm = 0;
+            if (repair)
+                flyway.repair();
+            else
+                sm = flyway.migrate();
 
 
-			org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
-			LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
-			System.exit(2);
-		}
-	}
+            org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
+            LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
+            System.exit(2);
+        }
+    }
 }

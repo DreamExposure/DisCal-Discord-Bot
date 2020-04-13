@@ -4,5 +4,5 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 
 public interface Logger {
 
-	void write(LogObject logObject);
+    void write(LogObject logObject);
 }

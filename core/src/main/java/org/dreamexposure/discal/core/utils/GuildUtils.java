@@ -10,12 +10,12 @@ import discord4j.rest.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class GuildUtils {
-	public static int findShard(Snowflake id) {
-		return ((int) id.asLong() >> 22) % Integer.parseInt(BotSettings.SHARD_COUNT.get());
-	}
+    public static int findShard(Snowflake id) {
+        return ((int) id.asLong() >> 22) % Integer.parseInt(BotSettings.SHARD_COUNT.get());
+    }
 
-	public static boolean active(Snowflake id) {
-		//TODO: Determine an accurate way to detect if a guild is still connected to DisCal
-		return true;
-	}
+    public static boolean active(Snowflake id) {
+        //TODO: Determine an accurate way to detect if a guild is still connected to DisCal
+        return true;
+    }
 }

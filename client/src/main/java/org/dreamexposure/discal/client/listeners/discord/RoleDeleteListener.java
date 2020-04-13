@@ -7,12 +7,12 @@ import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class RoleDeleteListener {
-	public static Mono<Void> handle(RoleDeleteEvent event) {
-		return DatabaseManager.getSettings(event.getGuildId())
-				.filter(settings -> !settings.getControlRole().equalsIgnoreCase("everyone"))
-				.filter(settings -> event.getRoleId().equals(Snowflake.of(settings.getControlRole())))
-				.doOnNext(settings -> settings.setControlRole("everyone"))
-				.flatMap(DatabaseManager::updateSettings)
-				.then();
-	}
+    public static Mono<Void> handle(RoleDeleteEvent event) {
+        return DatabaseManager.getSettings(event.getGuildId())
+                .filter(settings -> !settings.getControlRole().equalsIgnoreCase("everyone"))
+                .filter(settings -> event.getRoleId().equals(Snowflake.of(settings.getControlRole())))
+                .doOnNext(settings -> settings.setControlRole("everyone"))
+                .flatMap(DatabaseManager::updateSettings)
+                .then();
+    }
 }

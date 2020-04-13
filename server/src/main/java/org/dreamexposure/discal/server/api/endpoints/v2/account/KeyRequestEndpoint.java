@@ -18,48 +18,48 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/v2/account/key")
 public class KeyRequestEndpoint {
-	@PostMapping(value = "/readonly/get")
-	public String getReadonlyKey(HttpServletRequest request, HttpServletResponse response) {
-		//Check auth, must be from within DisCal network, as this is generating an API key...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (!authState.isFromDiscalNetwork()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Unauthorized to use this Endpoint.");
-		}
+    @PostMapping(value = "/readonly/get")
+    public String getReadonlyKey(HttpServletRequest request, HttpServletResponse response) {
+        //Check auth, must be from within DisCal network, as this is generating an API key...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (!authState.isFromDiscalNetwork()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Unauthorized to use this Endpoint.");
+        }
 
-		try {
-			//Generate readonly API key. This key should only be valid for 1 hour...
-			String key = KeyGenerator.csRandomAlphaNumericString(64);
+        try {
+            //Generate readonly API key. This key should only be valid for 1 hour...
+            String key = KeyGenerator.csRandomAlphaNumericString(64);
 
-			//Save key to memory... so it can be used for authentication just like the others
-			Authentication.saveReadOnlyKey(key);
+            //Save key to memory... so it can be used for authentication just like the others
+            Authentication.saveReadOnlyKey(key);
 
-			//Return key to web....
-			JSONObject responseBody = new JSONObject();
-			responseBody.put("key", key);
+            //Return key to web....
+            JSONObject responseBody = new JSONObject();
+            responseBody.put("key", key);
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return responseBody.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return responseBody.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "read-only key req err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "read-only key req err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }
 

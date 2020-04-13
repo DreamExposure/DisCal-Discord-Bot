@@ -17,29 +17,29 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * Contact: nova@dreamexposure.org
  */
 public interface ICommand {
-	default String getCommand() {
-		return "COMMAND_NAME";
-	}
+    default String getCommand() {
+        return "COMMAND_NAME";
+    }
 
-	default List<String> getAliases() {
-		List<String> aliases = new ArrayList<>();
+    default List<String> getAliases() {
+        List<String> aliases = new ArrayList<>();
 
-		aliases.add("ALIAS");
+        aliases.add("ALIAS");
 
-		return aliases;
-	}
+        return aliases;
+    }
 
-	default CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo(
-				"COMMAND_NAME",
-				"COMMAND_DESCRIPTION",
-				"!command <sub> (sub2)"
-		);
+    default CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo(
+                "COMMAND_NAME",
+                "COMMAND_DESCRIPTION",
+                "!command <sub> (sub2)"
+        );
 
-		info.getSubCommands().put("a", "b");
+        info.getSubCommands().put("a", "b");
 
-		return info;
-	}
+        return info;
+    }
 
-	boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings);
+    boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings);
 }

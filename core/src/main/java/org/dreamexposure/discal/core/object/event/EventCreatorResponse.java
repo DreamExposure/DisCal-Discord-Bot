@@ -10,44 +10,44 @@ import discord4j.core.object.entity.Message;
  * For Project: DisCal-Discord-Bot
  */
 public class EventCreatorResponse {
-	private final boolean successful;
-	private final Event event;
-	private final Message creatorMessage;
-	private final boolean edited;
+    private final boolean successful;
+    private final Event event;
+    private final Message creatorMessage;
+    private final boolean edited;
 
-	public EventCreatorResponse(boolean successful, Event event, Message creatorMessage,
-								boolean edited) {
-		this.successful = successful;
-		this.event = event;
-		this.creatorMessage = creatorMessage;
-		this.edited = edited;
-	}
+    public EventCreatorResponse(boolean successful, Event event, Message creatorMessage,
+                                boolean edited) {
+        this.successful = successful;
+        this.event = event;
+        this.creatorMessage = creatorMessage;
+        this.edited = edited;
+    }
 
-	//Getters
+    //Getters
 
-	/**
-	 * Whether or not the creator was successful.
-	 *
-	 * @return <code>true</code> if successful, else <code>false</code>.
-	 */
-	public boolean isSuccessful() {
-		return successful;
-	}
+    /**
+     * Whether or not the creator was successful.
+     *
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
+    public boolean isSuccessful() {
+        return successful;
+    }
 
-	public Message getCreatorMessage() {
-		return creatorMessage;
-	}
+    public Message getCreatorMessage() {
+        return creatorMessage;
+    }
 
-	public boolean isEdited() {
-		return edited;
-	}
+    public boolean isEdited() {
+        return edited;
+    }
 
-	/**
-	 * Gets the event that was created.
-	 *
-	 * @return The event that was created.
-	 */
-	public Event getEvent() {
-		return event;
-	}
+    /**
+     * Gets the event that was created.
+     *
+     * @return The event that was created.
+     */
+    public Event getEvent() {
+        return event;
+    }
 }

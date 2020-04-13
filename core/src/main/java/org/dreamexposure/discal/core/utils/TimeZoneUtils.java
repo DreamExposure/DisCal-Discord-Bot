@@ -9,21 +9,21 @@ import org.joda.time.DateTimeZone;
  * For Project: DisCal
  */
 public class TimeZoneUtils {
-	public static boolean isValid(String value) {
-		try {
-			DateTimeZone tz = DateTimeZone.forID(value);
-			return tz != null && !isBadTz(value);
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-	}
+    public static boolean isValid(String value) {
+        try {
+            DateTimeZone tz = DateTimeZone.forID(value);
+            return tz != null && !isBadTz(value);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
-	private static boolean isBadTz(String value) {
-		try {
-			BadTimezone.valueOf(value.replaceAll("/", "_"));
-			return true;
-		} catch (IllegalArgumentException e) {
-			return false;
-		}
-	}
+    private static boolean isBadTz(String value) {
+        try {
+            BadTimezone.valueOf(value.replaceAll("/", "_"));
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }

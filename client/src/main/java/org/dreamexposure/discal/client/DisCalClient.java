@@ -52,135 +52,135 @@ import io.lettuce.core.RedisURI;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
-	private static GatewayDiscordClient client;
+    private static GatewayDiscordClient client;
 
-	@SuppressWarnings("CallingSubscribeInNonBlockingScope")
-	public static void main(String[] args) throws IOException {
-		//Get settings
-		Properties p = new Properties();
-		p.load(new FileReader(new File("settings.properties")));
-		BotSettings.init(p);
+    @SuppressWarnings("CallingSubscribeInNonBlockingScope")
+    public static void main(String[] args) throws IOException {
+        //Get settings
+        Properties p = new Properties();
+        p.load(new FileReader(new File("settings.properties")));
+        BotSettings.init(p);
 
-		//Start Google authorization daemon
-		Authorization.getAuth().init();
+        //Start Google authorization daemon
+        Authorization.getAuth().init();
 
-		//Load lang files
-		MessageManager.reloadLangs();
+        //Load lang files
+        MessageManager.reloadLangs();
 
-		//Start some of the daemon threads
-		AnnouncementThreader.getThreader().init();
+        //Start some of the daemon threads
+        AnnouncementThreader.getThreader().init();
 
-		KeepAliveHandler.startKeepAlive(60);
+        KeepAliveHandler.startKeepAlive(60);
 
-		TimeManager.getManager().init();
+        TimeManager.getManager().init();
 
-		//Start Spring
-		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
-			try {
-				SpringApplication app = new SpringApplication(DisCalClient.class);
-				app.setAdditionalProfiles(BotSettings.PROFILE.get());
-				app.run(args);
-			} catch (Exception e) {
-				e.printStackTrace();
-				LogFeed.log(LogObject
-						.forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
-								DisCalClient.class));
-			}
-		}
+        //Start Spring
+        if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
+            try {
+                SpringApplication app = new SpringApplication(DisCalClient.class);
+                app.setAdditionalProfiles(BotSettings.PROFILE.get());
+                app.run(args);
+            } catch (Exception e) {
+                e.printStackTrace();
+                LogFeed.log(LogObject
+                        .forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
+                                DisCalClient.class));
+            }
+        }
 
-		//Add shutdown hooks...
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			LogFeed.log(LogObject.forStatus("Shutting down Shard", "Shard shutting down"));
+        //Add shutdown hooks...
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LogFeed.log(LogObject.forStatus("Shutting down Shard", "Shard shutting down"));
 
-			TimeManager.getManager().shutdown();
-			AnnouncementThreader.getThreader().shutdown();
-			DatabaseManager.disconnectFromMySQL();
+            TimeManager.getManager().shutdown();
+            AnnouncementThreader.getThreader().shutdown();
+            DatabaseManager.disconnectFromMySQL();
 
-			client.logout().subscribe();
-		}));
+            client.logout().subscribe();
+        }));
 
-		//Login
-		DiscordClientBuilder.create(BotSettings.TOKEN.get())
-				.build().gateway()
-				.setSharding(getStrategy())
-				.setStoreService(getStores())
-				.setInitialStatus(shard -> Presence.online(Activity.playing("Booting Up!")))
-				.withGateway(client -> {
-					DisCalClient.client = client;
+        //Login
+        DiscordClientBuilder.create(BotSettings.TOKEN.get())
+                .build().gateway()
+                .setSharding(getStrategy())
+                .setStoreService(getStores())
+                .setInitialStatus(shard -> Presence.online(Activity.playing("Booting Up!")))
+                .withGateway(client -> {
+                    DisCalClient.client = client;
 
-					//Register listeners
-					client.on(ReadyEvent.class)
-							.flatMap(ReadyEventListener::handle)
-							.subscribe();
-					client.on(TextChannelDeleteEvent.class)
-							.flatMap(ChannelDeleteListener::handle)
-							.subscribe();
-					client.on(RoleDeleteEvent.class)
-							.flatMap(RoleDeleteListener::handle)
-							.subscribe();
+                    //Register listeners
+                    client.on(ReadyEvent.class)
+                            .flatMap(ReadyEventListener::handle)
+                            .subscribe();
+                    client.on(TextChannelDeleteEvent.class)
+                            .flatMap(ChannelDeleteListener::handle)
+                            .subscribe();
+                    client.on(RoleDeleteEvent.class)
+                            .flatMap(RoleDeleteListener::handle)
+                            .subscribe();
 
-					/*
-					Mono<Void> onReady = client.on(ReadyEvent.class)
-							.flatMap(ReadyEventListener::handle)
-							.then();
+                    /*
+                    Mono<Void> onReady = client.on(ReadyEvent.class)
+                            .flatMap(ReadyEventListener::handle)
+                            .then();
 
-					Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
-							.flatMap(ChannelDeleteListener::handle)
-							.then();
+                    Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
+                            .flatMap(ChannelDeleteListener::handle)
+                            .then();
 
-					Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
-							.flatMap(RoleDeleteListener::handle)
-							.then();
-					 */
+                    Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
+                            .flatMap(RoleDeleteListener::handle)
+                            .then();
+                     */
 
-					//Register commands
-					CommandExecutor executor = CommandExecutor.getExecutor().enable();
-					executor.registerCommand(new HelpCommand());
-					executor.registerCommand(new DisCalCommand());
-					executor.registerCommand(new CalendarCommand());
-					executor.registerCommand(new AddCalendarCommand());
-					executor.registerCommand(new TimeCommand());
-					executor.registerCommand(new LinkCalendarCommand());
-					executor.registerCommand(new EventListCommand());
-					executor.registerCommand(new EventCommand());
-					executor.registerCommand(new RsvpCommand());
-					executor.registerCommand(new AnnouncementCommand());
-					executor.registerCommand(new DevCommand());
+                    //Register commands
+                    CommandExecutor executor = CommandExecutor.getExecutor().enable();
+                    executor.registerCommand(new HelpCommand());
+                    executor.registerCommand(new DisCalCommand());
+                    executor.registerCommand(new CalendarCommand());
+                    executor.registerCommand(new AddCalendarCommand());
+                    executor.registerCommand(new TimeCommand());
+                    executor.registerCommand(new LinkCalendarCommand());
+                    executor.registerCommand(new EventListCommand());
+                    executor.registerCommand(new EventCommand());
+                    executor.registerCommand(new RsvpCommand());
+                    executor.registerCommand(new AnnouncementCommand());
+                    executor.registerCommand(new DevCommand());
 
-					//return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
-					return client.onDisconnect();
-				}).block();
-	}
+                    //return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
+                    return client.onDisconnect();
+                }).block();
+    }
 
-	private static ShardingStrategy getStrategy() {
-		return ShardingStrategy.builder()
-				.count(Integer.parseInt(BotSettings.SHARD_COUNT.get()))
-				.indices(Integer.parseInt(BotSettings.SHARD_INDEX.get()))
-				.build();
-	}
+    private static ShardingStrategy getStrategy() {
+        return ShardingStrategy.builder()
+                .count(Integer.parseInt(BotSettings.SHARD_COUNT.get()))
+                .indices(Integer.parseInt(BotSettings.SHARD_INDEX.get()))
+                .build();
+    }
 
-	private static StoreService getStores() {
-		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
-			RedisURI uri = RedisURI.Builder
-					.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
-					.withPassword(BotSettings.REDIS_PASSWORD.get())
-					.build();
+    private static StoreService getStores() {
+        if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
+            RedisURI uri = RedisURI.Builder
+                    .redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
+                    .withPassword(BotSettings.REDIS_PASSWORD.get())
+                    .build();
 
-			RedisStoreService rss = new RedisStoreService.Builder()
-					.redisClient(RedisClient.create(uri))
-					.build();
+            RedisStoreService rss = new RedisStoreService.Builder()
+                    .redisClient(RedisClient.create(uri))
+                    .build();
 
-			return MappingStoreService.create()
-					.setMappings(rss, GuildData.class, MessageData.class)
-					.setFallback(new JdkStoreService());
-		} else {
-			return new JdkStoreService();
-		}
-	}
+            return MappingStoreService.create()
+                    .setMappings(rss, GuildData.class, MessageData.class)
+                    .setFallback(new JdkStoreService());
+        } else {
+            return new JdkStoreService();
+        }
+    }
 
-	//Public stuffs
-	@Deprecated
-	public static GatewayDiscordClient getClient() {
-		return client;
-	}
+    //Public stuffs
+    @Deprecated
+    public static GatewayDiscordClient getClient() {
+        return client;
+    }
 }

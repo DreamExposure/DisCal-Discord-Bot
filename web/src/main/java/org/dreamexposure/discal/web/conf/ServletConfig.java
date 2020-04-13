@@ -11,14 +11,14 @@ import org.springframework.http.HttpStatus;
 @Configuration
 @EnableAutoConfiguration
 public class ServletConfig implements
-	WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+        WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
-	public void customize(ConfigurableServletWebServerFactory factory) {
-		factory.setPort(Integer.parseInt(BotSettings.PORT.get()));
-		factory.addErrorPages(
-			new ErrorPage(HttpStatus.NOT_FOUND, "/404"),
-			new ErrorPage(HttpStatus.BAD_REQUEST, "/400"),
-			new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500")
-		);
-	}
+    public void customize(ConfigurableServletWebServerFactory factory) {
+        factory.setPort(Integer.parseInt(BotSettings.PORT.get()));
+        factory.addErrorPages(
+                new ErrorPage(HttpStatus.NOT_FOUND, "/404"),
+                new ErrorPage(HttpStatus.BAD_REQUEST, "/400"),
+                new ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500")
+        );
+    }
 }

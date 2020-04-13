@@ -24,74 +24,74 @@ import okhttp3.Response;
  */
 @SuppressWarnings("ConstantConditions")
 public class Authorization {
-	private static Authorization instance;
-	private ClientData clientData;
-	private OkHttpClient client;
+    private static Authorization instance;
+    private ClientData clientData;
+    private OkHttpClient client;
 
-	private Authorization() {
-	} //Prevent initialization.
+    private Authorization() {
+    } //Prevent initialization.
 
-	public static Authorization getAuth() {
-		if (instance == null)
-			instance = new Authorization();
+    public static Authorization getAuth() {
+        if (instance == null)
+            instance = new Authorization();
 
-		return instance;
-	}
+        return instance;
+    }
 
-	public void init() {
-		clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
-		client = new OkHttpClient();
-	}
+    public void init() {
+        clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
+        client = new OkHttpClient();
+    }
 
-	//Getters
-	public ClientData getClientData() {
-		return clientData;
-	}
+    //Getters
+    public ClientData getClientData() {
+        return clientData;
+    }
 
-	public OkHttpClient getClient() {
-		return client;
-	}
+    public OkHttpClient getClient() {
+        return client;
+    }
 
 
-	public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
-		try {
-			RequestBody body = new FormBody.Builder()
-					.addEncoded("client_id", clientData.getClientId())
-					.addEncoded("client_secret", clientData.getClientSecret())
-					.addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
-					.addEncoded("grant_type", "refresh_token")
-					.build();
+    public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
+        try {
+            RequestBody body = new FormBody.Builder()
+                    .addEncoded("client_id", clientData.getClientId())
+                    .addEncoded("client_secret", clientData.getClientSecret())
+                    .addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
+                    .addEncoded("grant_type", "refresh_token")
+                    .build();
 
-			Request httpRequest = new okhttp3.Request.Builder()
-					.url("https://www.googleapis.com/oauth2/v4/token")
-					.post(body)
-					.header("Content-Type", "application/x-www-form-urlencoded")
-					.build();
+            Request httpRequest = new okhttp3.Request.Builder()
+                    .url("https://www.googleapis.com/oauth2/v4/token")
+                    .post(body)
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .build();
 
-			Response httpResponse = client.newCall(httpRequest).execute();
+            Response httpResponse = client.newCall(httpRequest).execute();
 
-			if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
-				JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
+            if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
+                JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
-				//Update Db data.
-				settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
-				DatabaseManager.updateSettings(settings).subscribe();
+                //Update Db data.
+                settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
+                DatabaseManager.updateSettings(settings).subscribe();
 
-				//Okay, we can return the access token to be used when this method is called.
-				return autoRefreshResponse.getString("access_token");
-			} else {
-				//Failed to get OK. Send debug info.
-				LogFeed.log(LogObject.forDebug("Error requesting new access token.",
-						"Status code: " + httpResponse.code() + " | " + httpResponse.message() +
-								" | " + httpResponse.body().string()));
-				return null;
-			}
+                //Okay, we can return the access token to be used when this method is called.
+                return autoRefreshResponse.getString("access_token");
+            } else {
+                //Failed to get OK. Send debug info.
+                LogFeed.log(LogObject.forDebug("Error requesting new access token.",
+                        "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+                                " | " + httpResponse.body().string()));
+                return null;
+            }
 
-		} catch (Exception e) {
-			//Error occurred, lets just log it and return null.
-			LogFeed.log(LogObject
-					.forException("Failed to request new access token.", e, this.getClass()));
-			return null;
-		}
-	}
+        } catch (Exception e) {
+            //Error occurred, lets just log it and return null.
+            LogFeed.log(LogObject
+                    .forException("Failed to request new access token.", e, this.getClass()));
+            return null;
+        }
+    }
 }

@@ -24,57 +24,57 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/calendar")
 public class DeleteCalendarEndpoint {
-	@PostMapping(value = "/delete", produces = "application/json")
-	public String deleteCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @PostMapping(value = "/delete", produces = "application/json")
+    public String deleteCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
-			int calNumber = jsonMain.getInt("calendar_number");
+        //Okay, now handle actual request.
+        try {
+            JSONObject jsonMain = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
+            int calNumber = jsonMain.getInt("calendar_number");
 
-			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
-			CalendarData calendar = DatabaseManager.getCalendar(guildId, calNumber).block();
+            GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+            CalendarData calendar = DatabaseManager.getCalendar(guildId, calNumber).block();
 
-			if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
-				if (CalendarUtils.calendarExists(calendar, settings)) {
-					if (CalendarUtils.deleteCalendar(calendar, settings)) {
-						response.setContentType("application/json");
-						response.setStatus(200);
-						return JsonUtils.getJsonResponseMessage("Calendar successfully deleted");
-					}
-					response.setContentType("application/json");
-					response.setStatus(500);
-					return JsonUtils.getJsonResponseMessage("Internal Server Error");
-				}
-			}
-			response.setContentType("application/json");
-			response.setStatus(404);
-			return JsonUtils.getJsonResponseMessage("Calendar not found");
-		} catch (JSONException e) {
-			e.printStackTrace();
+            if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
+                if (CalendarUtils.calendarExists(calendar, settings)) {
+                    if (CalendarUtils.deleteCalendar(calendar, settings)) {
+                        response.setContentType("application/json");
+                        response.setStatus(200);
+                        return JsonUtils.getJsonResponseMessage("Calendar successfully deleted");
+                    }
+                    response.setContentType("application/json");
+                    response.setStatus(500);
+                    return JsonUtils.getJsonResponseMessage("Internal Server Error");
+                }
+            }
+            response.setContentType("application/json");
+            response.setStatus(404);
+            return JsonUtils.getJsonResponseMessage("Calendar not found");
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("[API-v2]", "Delete cal err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("[API-v2]", "Delete cal err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }
 

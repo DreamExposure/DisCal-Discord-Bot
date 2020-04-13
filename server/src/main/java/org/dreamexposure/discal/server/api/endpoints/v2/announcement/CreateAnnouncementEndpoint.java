@@ -24,74 +24,74 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/announcement")
 public class CreateAnnouncementEndpoint {
-	@PostMapping(value = "/create", produces = "application/json")
-	public String createAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @PostMapping(value = "/create", produces = "application/json")
+    public String createAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject body = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+        //Okay, now handle actual request.
+        try {
+            JSONObject body = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 
-			Announcement a = new Announcement(guildId);
+            Announcement a = new Announcement(guildId);
 
-			a.setAnnouncementChannelId(body.getString("channel"));
-			a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+            a.setAnnouncementChannelId(body.getString("channel"));
+            a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
 
-			if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
-				a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("color")));
+            if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
+                a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("color")));
 
-			if (a.getAnnouncementType().equals(AnnouncementType.RECUR) ||
-					a.getAnnouncementType().equals(AnnouncementType.SPECIFIC))
-				a.setEventId(body.getString("event_id"));
+            if (a.getAnnouncementType().equals(AnnouncementType.RECUR) ||
+                    a.getAnnouncementType().equals(AnnouncementType.SPECIFIC))
+                a.setEventId(body.getString("event_id"));
 
-			a.setHoursBefore(body.getInt("hours"));
-			a.setMinutesBefore(body.getInt("minutes"));
+            a.setHoursBefore(body.getInt("hours"));
+            a.setMinutesBefore(body.getInt("minutes"));
 
-			if (body.has("info"))
-				a.setInfo(body.getString("info"));
-			else
-				a.setInfo("N/a");
+            if (body.has("info"))
+                a.setInfo(body.getString("info"));
+            else
+                a.setInfo("N/a");
 
-			if (body.has("info_only"))
-				a.setInfoOnly(body.getBoolean("info_only"));
+            if (body.has("info_only"))
+                a.setInfoOnly(body.getBoolean("info_only"));
 
-			if (DatabaseManager.updateAnnouncement(a).block()) {
-				JSONObject responseBody = new JSONObject();
-				responseBody.put("message", "Announcement successfully created");
-				responseBody.put("announcement_id", a.getAnnouncementId().toString());
+            if (DatabaseManager.updateAnnouncement(a).block()) {
+                JSONObject responseBody = new JSONObject();
+                responseBody.put("message", "Announcement successfully created");
+                responseBody.put("announcement_id", a.getAnnouncementId().toString());
 
-				response.setContentType("application/json");
-				response.setStatus(200);
-				return responseBody.toString();
-			}
+                response.setContentType("application/json");
+                response.setStatus(200);
+                return responseBody.toString();
+            }
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "create announcement err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "create announcement err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

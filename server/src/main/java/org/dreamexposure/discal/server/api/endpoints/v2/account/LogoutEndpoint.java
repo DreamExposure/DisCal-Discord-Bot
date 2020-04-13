@@ -16,40 +16,40 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/v2/account")
 public class LogoutEndpoint {
-	@GetMapping(value = "/logout")
-	public String logoutOfAccount(HttpServletRequest request, HttpServletResponse response) {
-		//Check auth
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @GetMapping(value = "/logout")
+    public String logoutOfAccount(HttpServletRequest request, HttpServletResponse response) {
+        //Check auth
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		try {
-			//If this is a temp key, it will be removed...
-			Authentication.removeTempKey(authState.getKeyUsed());
+        try {
+            //If this is a temp key, it will be removed...
+            Authentication.removeTempKey(authState.getKeyUsed());
 
-			response.setContentType("application/json");
-			response.setStatus(200);
-			return JsonUtils.getJsonResponseMessage("Logged Out");
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            return JsonUtils.getJsonResponseMessage("Logged Out");
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "logout of acc err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "logout of acc err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

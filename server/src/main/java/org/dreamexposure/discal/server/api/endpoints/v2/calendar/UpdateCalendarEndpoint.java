@@ -28,76 +28,76 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/calendar")
 public class UpdateCalendarEndpoint {
-	@PostMapping(value = "/update", produces = "application/json")
-	public String updateCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @PostMapping(value = "/update", produces = "application/json")
+    public String updateCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject jsonMain = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
-			int calNumber = jsonMain.getInt("calendar_number");
+        //Okay, now handle actual request.
+        try {
+            JSONObject jsonMain = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
+            int calNumber = jsonMain.getInt("calendar_number");
 
-			GuildSettings settings = DatabaseManager.getSettings(guildId).block();
-			CalendarData calData = DatabaseManager.getCalendar(guildId, calNumber).block();
+            GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+            CalendarData calData = DatabaseManager.getCalendar(guildId, calNumber).block();
 
-			if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
-					&& CalendarUtils.calendarExists(calData, settings)) {
-				Calendar service = CalendarAuth.getCalendarService(settings);
-				com.google.api.services.calendar.model.Calendar cal = service.calendars()
-						.get(calData.getCalendarAddress())
-						.execute();
+            if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
+                    && CalendarUtils.calendarExists(calData, settings)) {
+                Calendar service = CalendarAuth.getCalendarService(settings);
+                com.google.api.services.calendar.model.Calendar cal = service.calendars()
+                        .get(calData.getCalendarAddress())
+                        .execute();
 
-				if (jsonMain.has("summary"))
-					cal.setSummary(jsonMain.getString("summary"));
-				if (jsonMain.has("description"))
-					cal.setDescription(jsonMain.getString("description"));
-				if (jsonMain.has("timezone")) {
-					String tzRaw = jsonMain.getString("timezone");
-					if (TimeZoneUtils.isValid(tzRaw)) {
-						cal.setTimeZone(tzRaw);
-					}
-				}
+                if (jsonMain.has("summary"))
+                    cal.setSummary(jsonMain.getString("summary"));
+                if (jsonMain.has("description"))
+                    cal.setDescription(jsonMain.getString("description"));
+                if (jsonMain.has("timezone")) {
+                    String tzRaw = jsonMain.getString("timezone");
+                    if (TimeZoneUtils.isValid(tzRaw)) {
+                        cal.setTimeZone(tzRaw);
+                    }
+                }
 
-				com.google.api.services.calendar.model.Calendar confirmed = service.calendars()
-						.update(calData.getCalendarAddress(), cal)
-						.execute();
+                com.google.api.services.calendar.model.Calendar confirmed = service.calendars()
+                        .update(calData.getCalendarAddress(), cal)
+                        .execute();
 
-				response.setContentType("application/json");
-				if (confirmed != null) {
-					response.setStatus(200);
-					return JsonUtils.getJsonResponseMessage("Calendar successfully updated");
-				} else {
-					response.setStatus(500);
-					return JsonUtils.getJsonResponseMessage("Calendar update failed. Perhaps google is at fault!");
-				}
-			} else {
-				response.setContentType("application/json");
-				response.setStatus(404);
-				return JsonUtils.getJsonResponseMessage("Calendar not found");
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+                response.setContentType("application/json");
+                if (confirmed != null) {
+                    response.setStatus(200);
+                    return JsonUtils.getJsonResponseMessage("Calendar successfully updated");
+                } else {
+                    response.setStatus(500);
+                    return JsonUtils.getJsonResponseMessage("Calendar update failed. Perhaps google is at fault!");
+                }
+            } else {
+                response.setContentType("application/json");
+                response.setStatus(404);
+                return JsonUtils.getJsonResponseMessage("Calendar not found");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("[API-v2]", "get calendar err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("[API-v2]", "get calendar err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

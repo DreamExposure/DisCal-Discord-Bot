@@ -23,54 +23,54 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/announcement")
 public class DeleteAnnouncementEndpoint {
-	@PostMapping(value = "/delete", produces = "application/json")
-	public String deleteAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @PostMapping(value = "/delete", produces = "application/json")
+    public String deleteAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject body = new JSONObject(requestBody);
-			Snowflake guildId = Snowflake.of(body.getString("guild_id"));
-			UUID announcementId = UUID.fromString(body.getString("announcement_id"));
+        //Okay, now handle actual request.
+        try {
+            JSONObject body = new JSONObject(requestBody);
+            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+            UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
-			if (DatabaseManager.getAnnouncement(announcementId, guildId).block() != null) {
-				if (DatabaseManager.deleteAnnouncement(announcementId.toString()).block()) {
-					response.setContentType("application/json");
-					response.setStatus(200);
-					return JsonUtils.getJsonResponseMessage("Announcement successfully deleted");
-				}
-			} else {
-				response.setContentType("application/json");
-				response.setStatus(404);
-				return JsonUtils.getJsonResponseMessage("Announcement not Found");
-			}
+            if (DatabaseManager.getAnnouncement(announcementId, guildId).block() != null) {
+                if (DatabaseManager.deleteAnnouncement(announcementId.toString()).block()) {
+                    response.setContentType("application/json");
+                    response.setStatus(200);
+                    return JsonUtils.getJsonResponseMessage("Announcement successfully deleted");
+                }
+            } else {
+                response.setContentType("application/json");
+                response.setStatus(404);
+                return JsonUtils.getJsonResponseMessage("Announcement not Found");
+            }
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "Delete announcement err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "Delete announcement err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

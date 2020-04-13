@@ -11,14 +11,14 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @Profile({"prod", "dev"})
 @EnableRedisHttpSession
 public class LettuceConfig {
-	@Bean
-	public LettuceConnectionFactory lettuceConnectionFactory() {
-		final LettuceConnectionFactory factory = new LettuceConnectionFactory();
+    @Bean
+    public LettuceConnectionFactory lettuceConnectionFactory() {
+        final LettuceConnectionFactory factory = new LettuceConnectionFactory();
 
-		factory.setHostName(BotSettings.REDIS_HOSTNAME.get());
-		factory.setPort(Integer.parseInt(BotSettings.REDIS_PORT.get()));
-		factory.setPassword(BotSettings.REDIS_PASSWORD.get());
+        factory.setHostName(BotSettings.REDIS_HOSTNAME.get());
+        factory.setPort(Integer.parseInt(BotSettings.REDIS_PORT.get()));
+        factory.setPassword(BotSettings.REDIS_PASSWORD.get());
 
-		return factory;
-	}
+        return factory;
+    }
 }

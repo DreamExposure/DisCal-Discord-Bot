@@ -13,29 +13,29 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class StatusHandler {
-	public static NetworkInfo getLatestStatusInfo() {
-		try {
-			OkHttpClient client = new OkHttpClient();
+    public static NetworkInfo getLatestStatusInfo() {
+        try {
+            OkHttpClient client = new OkHttpClient();
 
-			RequestBody body = RequestBody.create(GlobalConst.JSON, "");
-			Request request = new Request.Builder()
-					.url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/get")
-					.post(body)
-					.header("Authorization", BotSettings.BOT_API_TOKEN.get())
-					.header("Content-Type", "application/json")
-					.build();
+            RequestBody body = RequestBody.create(GlobalConst.JSON, "");
+            Request request = new Request.Builder()
+                    .url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/get")
+                    .post(body)
+                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                    .header("Content-Type", "application/json")
+                    .build();
 
-			Response response = client.newCall(request).execute();
+            Response response = client.newCall(request).execute();
 
-			if (response.code() == 200) {
-				return new NetworkInfo().fromJson(new JSONObject(response.body().string()));
-			}
-			return new NetworkInfo(); //Just return an empty object, its fine...
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[STATUS REQUEST] Failed to get status", e, StatusHandler.class));
+            if (response.code() == 200) {
+                return new NetworkInfo().fromJson(new JSONObject(response.body().string()));
+            }
+            return new NetworkInfo(); //Just return an empty object, its fine...
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[STATUS REQUEST] Failed to get status", e, StatusHandler.class));
 
-			return new NetworkInfo(); //Just return an empty object, its fine.
-		}
-	}
+            return new NetworkInfo(); //Just return an empty object, its fine.
+        }
+    }
 }

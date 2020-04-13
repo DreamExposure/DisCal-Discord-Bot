@@ -35,101 +35,101 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events")
 public class UpdateEventEndpoint {
-	@PostMapping(value = "/update", produces = "application/json")
-	public String updateEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		} else if (authState.isReadOnly()) {
-			response.setStatus(401);
-			response.setContentType("application/json");
-			return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
-		}
+    @PostMapping(value = "/update", produces = "application/json")
+    public String updateEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        } else if (authState.isReadOnly()) {
+            response.setStatus(401);
+            response.setContentType("application/json");
+            return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject requestBody = new JSONObject(rBody);
+        //Okay, now handle actual request.
+        try {
+            JSONObject requestBody = new JSONObject(rBody);
 
-			String guildId = requestBody.getString("guild_id");
-			int calNumber = requestBody.getInt("calendar_number");
-			String eventId = requestBody.getString("event_id");
+            String guildId = requestBody.getString("guild_id");
+            int calNumber = requestBody.getInt("calendar_number");
+            String eventId = requestBody.getString("event_id");
 
-			//Handle actually updating the event
-			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
-			CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            //Handle actually updating the event
+            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-			com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
-			Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
+            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
-			Event event = service.events().get(calData.getCalendarId(), eventId).execute();
+            Event event = service.events().get(calData.getCalendarId(), eventId).execute();
 
-			if (event != null) {
-				if (requestBody.has("epoch_start")) {
-					EventDateTime start = new EventDateTime();
-					start.setDateTime(new DateTime(requestBody.getLong("epoch_start")));
-					event.setStart(start.setTimeZone(cal.getTimeZone()));
-				}
-				if (requestBody.has("epoch_end")) {
-					EventDateTime end = new EventDateTime();
-					end.setDateTime(new DateTime(requestBody.getLong("epoch_end")));
-					event.setEnd(end.setTimeZone(cal.getTimeZone()));
-				}
-				if (requestBody.has("summary"))
-					event.setSummary(requestBody.getString("summary"));
-				if (requestBody.has("description"))
-					event.setDescription(requestBody.getString("description"));
-				if (requestBody.has("color"))
-					event.setColorId(EventColor.fromNameOrHexOrID(requestBody.getString("color")).getId() + "");
-				if (requestBody.has("location"))
-					event.setLocation(requestBody.getString("location"));
-				if (requestBody.has("recur") && requestBody.getBoolean("recur")) {
-					JSONObject recur = requestBody.getJSONObject("recurrence");
+            if (event != null) {
+                if (requestBody.has("epoch_start")) {
+                    EventDateTime start = new EventDateTime();
+                    start.setDateTime(new DateTime(requestBody.getLong("epoch_start")));
+                    event.setStart(start.setTimeZone(cal.getTimeZone()));
+                }
+                if (requestBody.has("epoch_end")) {
+                    EventDateTime end = new EventDateTime();
+                    end.setDateTime(new DateTime(requestBody.getLong("epoch_end")));
+                    event.setEnd(end.setTimeZone(cal.getTimeZone()));
+                }
+                if (requestBody.has("summary"))
+                    event.setSummary(requestBody.getString("summary"));
+                if (requestBody.has("description"))
+                    event.setDescription(requestBody.getString("description"));
+                if (requestBody.has("color"))
+                    event.setColorId(EventColor.fromNameOrHexOrID(requestBody.getString("color")).getId() + "");
+                if (requestBody.has("location"))
+                    event.setLocation(requestBody.getString("location"));
+                if (requestBody.has("recur") && requestBody.getBoolean("recur")) {
+                    JSONObject recur = requestBody.getJSONObject("recurrence");
 
-					Recurrence recurrence = new Recurrence().fromJson(recur);
-					String[] rr = new String[]{recurrence.toRRule()};
+                    Recurrence recurrence = new Recurrence().fromJson(recur);
+                    String[] rr = new String[]{recurrence.toRRule()};
 
-					event.setRecurrence(Arrays.asList(rr));
-				}
-				if (requestBody.has("image")) {
-					if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
-						//Link is good...
-						EventData ed = EventData.fromImage(
-								Snowflake.of(guildId),
-								event.getId(),
-								event.getEnd().getDateTime().getValue(),
-								requestBody.getString("image")
-						);
+                    event.setRecurrence(Arrays.asList(rr));
+                }
+                if (requestBody.has("image")) {
+                    if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
+                        //Link is good...
+                        EventData ed = EventData.fromImage(
+                                Snowflake.of(guildId),
+                                event.getId(),
+                                event.getEnd().getDateTime().getValue(),
+                                requestBody.getString("image")
+                        );
 
-						DatabaseManager.updateEventData(ed).subscribe();
-					}
-				}
-				//Everything supported is now checked for, lets update this on google's end now.
-				service.events().update(calData.getCalendarId(), eventId, event).execute();
+                        DatabaseManager.updateEventData(ed).subscribe();
+                    }
+                }
+                //Everything supported is now checked for, lets update this on google's end now.
+                service.events().update(calData.getCalendarId(), eventId, event).execute();
 
-				//If we get here, nothing errored, and everything should be updated correctly...
-				response.setContentType("application/json");
-				response.setStatus(200);
-				return JsonUtils.getJsonResponseMessage("Event updated Successfully");
-			} else {
-				response.setContentType("application/json");
-				response.setStatus(404);
-				return JsonUtils.getJsonResponseMessage("Event not found");
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+                //If we get here, nothing errored, and everything should be updated correctly...
+                response.setContentType("application/json");
+                response.setStatus(200);
+                return JsonUtils.getJsonResponseMessage("Event updated Successfully");
+            } else {
+                response.setContentType("application/json");
+                response.setStatus(404);
+                return JsonUtils.getJsonResponseMessage("Event not found");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject.forException("[API-v2]", "Update event err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject.forException("[API-v2]", "Update event err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }

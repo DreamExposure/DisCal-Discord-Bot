@@ -9,58 +9,58 @@ import discord4j.core.object.entity.User;
  * For Project: DisCal-Discord-Bot
  */
 public class Poll {
-	private final User user;
-	private final Guild guild;
+    private final User user;
+    private final Guild guild;
 
-	private int interval;
-	private int expires_in;
-	private int remainingSeconds;
-	private String device_code;
+    private int interval;
+    private int expires_in;
+    private int remainingSeconds;
+    private String device_code;
 
-	public Poll(User _user, Guild _guild) {
-		user = _user;
-		guild = _guild;
-	}
+    public Poll(User _user, Guild _guild) {
+        user = _user;
+        guild = _guild;
+    }
 
-	//Getters
-	public User getUser() {
-		return user;
-	}
+    //Getters
+    public User getUser() {
+        return user;
+    }
 
-	public Guild getGuild() {
-		return guild;
-	}
+    public Guild getGuild() {
+        return guild;
+    }
 
-	public int getInterval() {
-		return interval;
-	}
+    public int getInterval() {
+        return interval;
+    }
 
-	public int getExpires_in() {
-		return expires_in;
-	}
+    public int getExpires_in() {
+        return expires_in;
+    }
 
-	public int getRemainingSeconds() {
-		return remainingSeconds;
-	}
+    public int getRemainingSeconds() {
+        return remainingSeconds;
+    }
 
-	public String getDevice_code() {
-		return device_code;
-	}
+    public String getDevice_code() {
+        return device_code;
+    }
 
-	//Setters
-	public void setInterval(int _interval) {
-		interval = _interval;
-	}
+    //Setters
+    public void setInterval(int _interval) {
+        interval = _interval;
+    }
 
-	public void setExpires_in(int _expiresIn) {
-		expires_in = _expiresIn;
-	}
+    public void setExpires_in(int _expiresIn) {
+        expires_in = _expiresIn;
+    }
 
-	public void setRemainingSeconds(int _remainingSeconds) {
-		remainingSeconds = _remainingSeconds;
-	}
+    public void setRemainingSeconds(int _remainingSeconds) {
+        remainingSeconds = _remainingSeconds;
+    }
 
-	public void setDevice_code(String _deviceCode) {
-		device_code = _deviceCode;
-	}
+    public void setDevice_code(String _deviceCode) {
+        device_code = _deviceCode;
+    }
 }

@@ -27,52 +27,52 @@ import discord4j.rest.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events")
 public class GetEventEndpoint {
-	@PostMapping(value = "/get", produces = "application/json")
-	public String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
-		//Authenticate...
-		AuthenticationState authState = Authentication.authenticate(request);
-		if (!authState.isSuccess()) {
-			response.setStatus(authState.getStatus());
-			response.setContentType("application/json");
-			return authState.toJson();
-		}
+    @PostMapping(value = "/get", produces = "application/json")
+    public String getEventsForMonth(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+        //Authenticate...
+        AuthenticationState authState = Authentication.authenticate(request);
+        if (!authState.isSuccess()) {
+            response.setStatus(authState.getStatus());
+            response.setContentType("application/json");
+            return authState.toJson();
+        }
 
-		//Okay, now handle actual request.
-		try {
-			JSONObject requestBody = new JSONObject(rBody);
+        //Okay, now handle actual request.
+        try {
+            JSONObject requestBody = new JSONObject(rBody);
 
-			String guildId = requestBody.getString("guild_id");
-			int calNumber = requestBody.getInt("calendar_number");
-			String eventId = requestBody.getString("event_id");
-			GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            String guildId = requestBody.getString("guild_id");
+            int calNumber = requestBody.getInt("calendar_number");
+            String eventId = requestBody.getString("event_id");
+            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
-			//okay, get the calendar service and then the event
-			Calendar service = CalendarAuth.getCalendarService(settings);
+            //okay, get the calendar service and then the event
+            Calendar service = CalendarAuth.getCalendarService(settings);
 
-			CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
-			Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();
+            CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();
 
-			response.setContentType("application/json");
-			if (event != null) {
-				response.setStatus(200);
-				return JsonUtils.convertEventToJson(event, settings).toString();
-			} else {
-				response.setStatus(404);
-				return JsonUtils.getJsonResponseMessage("Event not Found");
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+            response.setContentType("application/json");
+            if (event != null) {
+                response.setStatus(200);
+                return JsonUtils.convertEventToJson(event, settings).toString();
+            } else {
+                response.setStatus(404);
+                return JsonUtils.getJsonResponseMessage("Event not Found");
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
 
-			response.setContentType("application/json");
-			response.setStatus(400);
-			return JsonUtils.getJsonResponseMessage("Bad Request");
-		} catch (Exception e) {
-			LogFeed.log(LogObject
-					.forException("[API-v2]", "get event by ID err", e, this.getClass()));
+            response.setContentType("application/json");
+            response.setStatus(400);
+            return JsonUtils.getJsonResponseMessage("Bad Request");
+        } catch (Exception e) {
+            LogFeed.log(LogObject
+                    .forException("[API-v2]", "get event by ID err", e, this.getClass()));
 
-			response.setContentType("application/json");
-			response.setStatus(500);
-			return JsonUtils.getJsonResponseMessage("Internal Server Error");
-		}
-	}
+            response.setContentType("application/json");
+            response.setStatus(500);
+            return JsonUtils.getJsonResponseMessage("Internal Server Error");
+        }
+    }
 }
