@@ -109,10 +109,15 @@ public class DisCalClient {
 					DisCalClient.client = client;
 
 					//Register listeners
-
-					client.on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
-					client.on(TextChannelDeleteEvent.class).subscribe(ChannelDeleteListener::handle);
-					client.on(RoleDeleteEvent.class).subscribe(RoleDeleteListener::handle);
+					client.on(ReadyEvent.class)
+							.flatMap(ReadyEventListener::handle)
+							.subscribe();
+					client.on(TextChannelDeleteEvent.class)
+							.flatMap(ChannelDeleteListener::handle)
+							.subscribe();
+					client.on(RoleDeleteEvent.class)
+							.flatMap(RoleDeleteListener::handle)
+							.subscribe();
 
 					/*
 					Mono<Void> onReady = client.on(ReadyEvent.class)
@@ -177,9 +182,5 @@ public class DisCalClient {
 	@Deprecated
 	public static GatewayDiscordClient getClient() {
 		return client;
-	}
-
-	public static int clientId() {
-		return Integer.parseInt(BotSettings.SHARD_INDEX.get());
 	}
 }
