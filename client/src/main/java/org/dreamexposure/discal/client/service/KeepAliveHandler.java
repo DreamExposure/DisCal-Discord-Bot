@@ -60,7 +60,7 @@ public class KeepAliveHandler {
 							.header("Content-Type", "application/json")
 							.build();
 
-					client.newCall(request).execute();
+					client.newCall(request).execute().close();
 				} catch (Exception e) {
 					LogFeed.log(LogObject
 							.forException("[Heart Beat]", "Failed to send keep-alive", e,

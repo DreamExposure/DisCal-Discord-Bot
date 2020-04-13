@@ -7,19 +7,13 @@ import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class ChannelDeleteListener {
-	public static void handle(TextChannelDeleteEvent event) {
+	public static Mono<Void> handle(TextChannelDeleteEvent event) {
 		//Check if deleted channel is discal channel...
-
-		DatabaseManager.getSettings(event.getChannel().getGuildId()).flatMap(settings -> {
-			if (settings.getDiscalChannel().equalsIgnoreCase("all"))
-				return Mono.empty();
-
-			if (event.getChannel().getId().equals(Snowflake.of(settings.getDiscalChannel()))) {
-				settings.setDiscalChannel("all");
-				return DatabaseManager.updateSettings(settings);
-			}
-
-			return Mono.empty();
-		}).subscribe();
+		return DatabaseManager.getSettings(event.getChannel().getGuildId())
+				.filter(settings -> !settings.getDiscalChannel().equalsIgnoreCase("all"))
+				.filter(settings -> event.getChannel().getId().equals(Snowflake.of(settings.getDiscalChannel())))
+				.doOnNext(settings -> settings.setDiscalChannel("all"))
+				.flatMap(DatabaseManager::updateSettings)
+				.then();
 	}
 }

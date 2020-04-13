@@ -109,24 +109,22 @@ public class DisCalClient {
 					DisCalClient.client = client;
 
 					//Register listeners
+
 					client.on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
 					client.on(TextChannelDeleteEvent.class).subscribe(ChannelDeleteListener::handle);
 					client.on(RoleDeleteEvent.class).subscribe(RoleDeleteListener::handle);
 
 					/*
-					Mono<Void> onReady = client.getEventDispatcher()
-							.on(ReadyEvent.class)
-							.doOnNext(ReadyEventListener::handle)
+					Mono<Void> onReady = client.on(ReadyEvent.class)
+							.flatMap(ReadyEventListener::handle)
 							.then();
 
-					Mono<Void> onTextChannelDelete = client.getEventDispatcher()
-							.on(TextChannelDeleteEvent.class)
-							.doOnNext(ChannelDeleteListener::handle)
+					Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
+							.flatMap(ChannelDeleteListener::handle)
 							.then();
 
-					Mono<Void> onRoleDelete = client.getEventDispatcher()
-							.on(RoleDeleteEvent.class)
-							.doOnNext(RoleDeleteListener::handle)
+					Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
+							.flatMap(RoleDeleteListener::handle)
 							.then();
 					 */
 
@@ -144,11 +142,7 @@ public class DisCalClient {
 					executor.registerCommand(new AnnouncementCommand());
 					executor.registerCommand(new DevCommand());
 
-					/*
-					return Mono.when(onReady, onTextChannelDelete, onRoleDelete)
-							.doOnSubscribe(s -> LogFeed.log(LogObject.forDebug("Chain execution")))
-							.doOnError(e -> LogFeed.log(LogObject.forException("Chain error", e, DisCalClient.class)));
-					 */
+					//return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
 					return client.onDisconnect();
 				}).block();
 	}
@@ -180,6 +174,7 @@ public class DisCalClient {
 	}
 
 	//Public stuffs
+	@Deprecated
 	public static GatewayDiscordClient getClient() {
 		return client;
 	}
