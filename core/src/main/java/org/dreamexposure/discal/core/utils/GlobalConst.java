@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.object.util.Snowflake;
-import okhttp3.MediaType;
+import java.awt.Color;
 
-import java.awt.*;
+import discord4j.rest.util.Snowflake;
+import okhttp3.MediaType;
 
 public class GlobalConst {
 	public static final String version = "3.0.0";

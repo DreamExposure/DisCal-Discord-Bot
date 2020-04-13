@@ -17,11 +17,11 @@ import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.Image;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Image;
 
 /**
  * Created by Nova Fox on 1/5/2017.

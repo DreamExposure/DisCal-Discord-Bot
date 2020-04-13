@@ -1,16 +1,18 @@
 package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.function.Consumer;
+
+import discord4j.core.object.entity.Guild;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Image;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

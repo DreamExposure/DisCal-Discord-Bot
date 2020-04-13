@@ -7,7 +7,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.util.Image;
+import discord4j.rest.util.Image;
 
 /**
  * @author NovaFox161
@@ -22,11 +22,8 @@ public class ReadyEventListener {
 
 	public static void handle(ReadyEvent event) {
 		try {
-			GlobalConst.iconUrl = DisCalClient.getClient()
-					.getApplicationInfo().
-							block()
-					.getIcon(Image.Format.PNG)
-					.get();
+			GlobalConst.iconUrl = DisCalClient.getClient().getApplicationInfo()
+					.map(info -> info.getIconUrl(Image.Format.PNG)).block().get();
 
 			MessageManager.reloadLangs();
 

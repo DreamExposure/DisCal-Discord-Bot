@@ -22,8 +22,8 @@
 		<spring.version>2.1.5.RELEASE</spring.version>
 		<spring.security.version>5.1.5.RELEASE</spring.security.version>
 
-		<discord4j.version>3.0.13</discord4j.version>
-		<discord4j.stores.version>3.0.13</discord4j.stores.version>
+		<discord4j.version>3.1.0-SNAPSHOT</discord4j.version>
+		<discord4j.stores.version>3.1.0-SNAPSHOT</discord4j.stores.version>
 
 		<google.client-api.version>1.28.0</google.client-api.version>
 
@@ -76,6 +76,13 @@
 			<id>spring-releases</id>
 			<url>https://repo.spring.io/libs-release</url>
 		</repository>
+		<repository>
+			<id>snapshots-repo</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<pluginRepositories>
@@ -84,6 +91,19 @@
 			<url>https://repo.spring.io/libs-release</url>
 		</pluginRepository>
 	</pluginRepositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>Dysprosium-SR6</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 
 	<dependencies>
 		<!--For Annotations-->
@@ -97,6 +117,11 @@
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
 			<version>${netty.version.forced}</version>
+		</dependency>
+		<!--Forcing reactor version-->
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-core</artifactId>
 		</dependency>
 		<!--NovaUtils API-->
 		<dependency>
@@ -144,6 +169,10 @@
 			<exclusions>
 				<exclusion>
 					<groupId>io.netty</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.projectreactor</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
 			</exclusions>

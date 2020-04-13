@@ -13,9 +13,13 @@ import java.util.List;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.util.Image;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
@@ -25,6 +29,53 @@ import reactor.function.TupleUtils;
  * For Project: DisCal-Discord-Bot
  */
 public class WebGuild {
+
+	public static WebGuild fromGuild(RestGuild g) {
+		GuildUpdateData data = g.getData().block();
+
+		Snowflake id = Snowflake.of(data.id());
+		String name = data.name();
+		String iconUrl = data.icon().orElse("");
+
+		Mono<String> botNick = g.member(Long.parseLong(BotSettings.ID.get()))
+				.getData()
+				.map(MemberData::nick)
+				.map(Possible::flatOpt)
+				.flatMap(Mono::justOrEmpty)
+				.defaultIfEmpty("DisCal");
+
+		Mono<GuildSettings> settings = DatabaseManager.getSettings(id).cache();
+
+		Mono<List<WebRole>> roles = settings.flatMapMany(s ->
+				g.getRoles().map(role -> WebRole.fromRole(role, s)))
+				.collectList();
+
+		Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
+				g.getChannels()
+						.ofType(TextChannel.class)
+						.map(channel -> WebChannel.fromChannel(channel, s)))
+				.collectList();
+
+		Mono<List<Announcement>> announcements = DatabaseManager.getAnnouncements(id);
+
+		Mono<WebCalendar> calendar = settings.flatMap(s ->
+				DatabaseManager.getMainCalendar(id)
+						.flatMap(d -> Mono.just(WebCalendar.fromCalendar(d, s)))
+		);
+
+		return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
+				.map(TupleUtils.function((bn, s, r, wc, a, c) -> {
+					WebGuild wg = new WebGuild(id.asLong(), name, iconUrl, s, bn, false, false, c);
+
+					wg.getChannels().add(WebChannel.all(s));
+
+					wg.getRoles().addAll(r);
+					wg.getChannels().addAll(wc);
+					wg.getAnnouncements().addAll(a);
+					return wg;
+				})).block();
+	}
+
 	public static WebGuild fromGuild(Guild g) {
 		long id = g.getId().asLong();
 		String name = g.getName();
@@ -97,10 +148,6 @@ public class WebGuild {
 		}
 
 		return webGuild;
-	}
-
-	public static WebGuild fromPartialGuild(long id, String name, String icon) {
-		return new WebGuild(id, name, icon, null, null, false, false, null);
 	}
 
 	private final long id;

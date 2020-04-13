@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.client.module.command;
 
-import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 
@@ -27,8 +27,8 @@ class CommandListener {
 	 */
 	static void onMessageEvent(MessageCreateEvent event) {
 		try {
-			if (event.getMessage().getContent().isPresent() && !event.getMessage().getContent().get().isEmpty() && event.getMember().isPresent() && !event.getMember().get().isBot()) {
-				String content = event.getMessage().getContent().get();
+			if (!event.getMessage().getContent().isEmpty() && event.getMember().isPresent() && !event.getMember().get().isBot()) {
+				String content = event.getMessage().getContent();
 				//Message is a valid guild message (not DM and not from a bot). Check if in correct channel.
 				GuildSettings settings = DatabaseManager.getSettings(event.getGuildId().get()).block();
 				if (content.startsWith(settings.getPrefix())) {
@@ -46,7 +46,7 @@ class CommandListener {
 							CommandExecutor.getExecutor().issueCommand(argsOr[0].replace(settings.getPrefix(), ""), new String[0], event, settings);
 						}
 					}
-				} else if (!event.getMessage().mentionsEveryone() && !content.contains("@here") && (content.startsWith("<@" + DisCalClient.getClient().getSelfId().get().asString() + ">") || content.startsWith("<@!" + DisCalClient.getClient().getSelfId().get().asString() + ">"))) {
+				} else if (!event.getMessage().mentionsEveryone() && !content.contains("@here") && (content.startsWith("<@" + BotSettings.ID.get() + ">") || content.startsWith("<@!" + BotSettings.ID.get() + ">"))) {
 					if (PermissionChecker.isCorrectChannel(event, settings).blockOptional().orElse(false)) {
 						String[] argsOr = content.split("\\s+");
 						if (argsOr.length > 2) {
@@ -67,7 +67,7 @@ class CommandListener {
 			}
 		} catch (Exception e) {
 			LogFeed.log(LogObject
-					.forException("Command error", event.getMessage().getContent().get(), e,
+					.forException("Command error", event.getMessage().getContent(), e,
 							CommandListener.class));
 		}
 	}

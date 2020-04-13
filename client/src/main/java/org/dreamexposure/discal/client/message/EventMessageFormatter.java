@@ -27,8 +27,8 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Image;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Image;
 
 /**
  * Created by Nova Fox on 1/3/2017.

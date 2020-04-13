@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.utils;
 
 import org.dreamexposure.discal.core.object.BotSettings;
 
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/6/17.

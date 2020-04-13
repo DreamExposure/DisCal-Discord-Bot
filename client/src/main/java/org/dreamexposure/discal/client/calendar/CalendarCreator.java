@@ -19,14 +19,14 @@ import java.util.ArrayList;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 1/4/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"ConstantConditions", "Duplicates", "OptionalGetWithoutIsPresent"})
+@SuppressWarnings({"ConstantConditions", "Duplicates"})
 public class CalendarCreator {
 	private static CalendarCreator instance;
 

@@ -1,15 +1,16 @@
 package org.dreamexposure.discal.core.filter;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.turbo.TurboFilter;
-import ch.qos.logback.core.spi.FilterReply;
-import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.Opcode;
 import org.slf4j.Marker;
 
 import java.util.Arrays;
 import java.util.List;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.turbo.TurboFilter;
+import ch.qos.logback.core.spi.FilterReply;
+import discord4j.discordjson.json.gateway.Opcode;
+import discord4j.gateway.json.GatewayPayload;
 
 @SuppressWarnings("unused")
 public class GatewayEventFilter extends TurboFilter {

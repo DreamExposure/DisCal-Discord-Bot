@@ -33,52 +33,33 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.channel.TextChannelDeleteEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
-import discord4j.core.object.data.stored.GuildBean;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.shard.ShardingStrategy;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.MessageData;
 import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.api.service.StoreService;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import reactor.core.publisher.Mono;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
-	private static DiscordClient client;
+	private static GatewayDiscordClient client;
 
 	public static void main(String[] args) throws IOException {
 		//Get settings
 		Properties p = new Properties();
 		p.load(new FileReader(new File("settings.properties")));
 		BotSettings.init(p);
-
-		//Handle client setup
-		client = createClient();
-
-		//Register discord events
-		client.getEventDispatcher().on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
-		client.getEventDispatcher().on(TextChannelDeleteEvent.class).subscribe(ChannelDeleteListener::handle);
-		client.getEventDispatcher().on(RoleDeleteEvent.class).subscribe(RoleDeleteListener::handle);
-
-		//Register commands
-		CommandExecutor executor = CommandExecutor.getExecutor().enable();
-		executor.registerCommand(new HelpCommand());
-		executor.registerCommand(new DisCalCommand());
-		executor.registerCommand(new CalendarCommand());
-		executor.registerCommand(new AddCalendarCommand());
-		executor.registerCommand(new TimeCommand());
-		executor.registerCommand(new LinkCalendarCommand());
-		executor.registerCommand(new EventListCommand());
-		executor.registerCommand(new EventCommand());
-		executor.registerCommand(new RsvpCommand());
-		executor.registerCommand(new AnnouncementCommand());
-		executor.registerCommand(new DevCommand());
 
 		//Start Google authorization daemon
 		Authorization.getAuth().init();
@@ -92,9 +73,6 @@ public class DisCalClient {
 		KeepAliveHandler.startKeepAlive(60);
 
 		TimeManager.getManager().init();
-
-		//Login
-		client.login().subscribe();
 
 		//Start Spring
 		if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
@@ -118,46 +96,86 @@ public class DisCalClient {
 			AnnouncementThreader.getThreader().shutdown();
 			DatabaseManager.disconnectFromMySQL();
 
-			client.logout().block();
+			client.logout().subscribe();
 		}));
+
+		//Login
+		DiscordClientBuilder.create(BotSettings.TOKEN.get())
+				.build().gateway()
+				.setSharding(getStrategy())
+				.setStoreService(getStores())
+				.setInitialStatus(shard -> Presence.online(Activity.playing("Booting Up!")))
+				.withGateway(client -> {
+					DisCalClient.client = client;
+
+					//Register listeners
+					Mono<Void> onReady = client.getEventDispatcher()
+							.on(ReadyEvent.class)
+							.map(e -> {
+								ReadyEventListener.handle(e);
+								return Mono.empty();
+							}).then();
+
+					Mono<Void> onTextChannelDelete = client.getEventDispatcher()
+							.on(TextChannelDeleteEvent.class)
+							.map(e -> {
+								ChannelDeleteListener.handle(e);
+								return Mono.empty();
+							}).then();
+
+					Mono<Void> onRoleDelete = client.getEventDispatcher()
+							.on(RoleDeleteEvent.class)
+							.map(e -> {
+								RoleDeleteListener.handle(e);
+								return Mono.empty();
+							}).then();
+
+					//Register commands
+					CommandExecutor executor = CommandExecutor.getExecutor().enable();
+					executor.registerCommand(new HelpCommand());
+					executor.registerCommand(new DisCalCommand());
+					executor.registerCommand(new CalendarCommand());
+					executor.registerCommand(new AddCalendarCommand());
+					executor.registerCommand(new TimeCommand());
+					executor.registerCommand(new LinkCalendarCommand());
+					executor.registerCommand(new EventListCommand());
+					executor.registerCommand(new EventCommand());
+					executor.registerCommand(new RsvpCommand());
+					executor.registerCommand(new AnnouncementCommand());
+					executor.registerCommand(new DevCommand());
+
+					return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
+				}).block();
 	}
 
-	/**
-	 * Creates the DisCal bot client.
-	 *
-	 * @return The client if successful, otherwise <code>null</code>.
-	 */
-	private static DiscordClient createClient() {
-		DiscordClientBuilder clientBuilder = new DiscordClientBuilder(BotSettings.TOKEN.get());
-		//Handle shard count and index for multiple java instances
-		clientBuilder.setShardIndex(Integer.valueOf(BotSettings.SHARD_INDEX.get()));
-		clientBuilder.setShardCount(Integer.valueOf(BotSettings.SHARD_COUNT.get()));
-		clientBuilder.setInitialPresence(Presence.online(Activity.playing("Booting Up!")));
+	private static ShardingStrategy getStrategy() {
+		return ShardingStrategy.builder()
+				.count(Integer.parseInt(BotSettings.SHARD_COUNT.get()))
+				.indices(Integer.parseInt(BotSettings.SHARD_INDEX.get()))
+				.build();
+	}
 
-
-		//Redis info + store service for caching
+	private static StoreService getStores() {
 		if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
 			RedisURI uri = RedisURI.Builder
-				.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
-				.withPassword(BotSettings.REDIS_PASSWORD.get())
-				.build();
+					.redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
+					.withPassword(BotSettings.REDIS_PASSWORD.get())
+					.build();
 
-			RedisStoreService rss = new RedisStoreService(RedisClient.create(uri));
+			RedisStoreService rss = new RedisStoreService.Builder()
+					.redisClient(RedisClient.create(uri))
+					.build();
 
-			MappingStoreService mss = MappingStoreService.create()
-				.setMappings(rss, GuildBean.class, MessageBean.class)
-				.setFallback(new JdkStoreService());
-
-			clientBuilder.setStoreService(mss);
+			return MappingStoreService.create()
+					.setMappings(rss, GuildData.class, MessageData.class)
+					.setFallback(new JdkStoreService());
 		} else {
-			clientBuilder.setStoreService(new JdkStoreService());
+			return new JdkStoreService();
 		}
-
-		return clientBuilder.build();
 	}
 
 	//Public stuffs
-	public static DiscordClient getClient() {
+	public static GatewayDiscordClient getClient() {
 		return client;
 	}
 

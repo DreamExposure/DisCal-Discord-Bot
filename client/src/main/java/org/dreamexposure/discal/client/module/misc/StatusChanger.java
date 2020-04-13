@@ -40,17 +40,20 @@ public class StatusChanger extends TimerTask {
 
 	@Override
 	public void run() {
-		String status = statuses.get(index);
-		status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().count().block() + "");
-		status = status.replace("%calCount%", DatabaseManager.getCalendarCount().block() + "");
-		status = status.replace("%annCount%", DatabaseManager.getAnnouncementCount().block() + "");
-		status = status.replace("%shards%", BotSettings.SHARD_COUNT.get());
+		if (DisCalClient.getClient() != null) {
 
-		DisCalClient.getClient().updatePresence(Presence.online(Activity.playing(status))).subscribe();
-		//Set new index.
-		if (index + 1 >= statuses.size())
-			index = 0;
-		else
-			index++;
+			String status = statuses.get(index);
+			status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().count().block() + "");
+			status = status.replace("%calCount%", DatabaseManager.getCalendarCount().block() + "");
+			status = status.replace("%annCount%", DatabaseManager.getAnnouncementCount().block() + "");
+			status = status.replace("%shards%", BotSettings.SHARD_COUNT.get());
+
+			DisCalClient.getClient().updatePresence(Presence.online(Activity.playing(status))).subscribe();
+			//Set new index.
+			if (index + 1 >= statuses.size())
+				index = 0;
+			else
+				index++;
+		}
 	}
 }

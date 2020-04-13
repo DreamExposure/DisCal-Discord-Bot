@@ -14,7 +14,7 @@ import java.util.UUID;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -25,7 +25,7 @@ import discord4j.core.object.util.Snowflake;
 public class AnnouncementCreator {
 	private static AnnouncementCreator instance;
 
-	private ArrayList<Announcement> announcements = new ArrayList<>();
+	private final ArrayList<Announcement> announcements = new ArrayList<>();
 
 	private AnnouncementCreator() {
 	} //Prevent initialization

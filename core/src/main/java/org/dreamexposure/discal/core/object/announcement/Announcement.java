@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.UUID;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

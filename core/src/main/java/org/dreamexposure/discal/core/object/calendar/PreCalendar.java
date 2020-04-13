@@ -1,8 +1,9 @@
 package org.dreamexposure.discal.core.object.calendar;
 
 import com.google.api.services.calendar.model.Calendar;
+
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

@@ -37,7 +37,7 @@ public class KeepAliveHandler {
 					JSONObject data = new JSONObject();
 					data.put("index", Integer.parseInt(BotSettings.SHARD_INDEX.get()));
 
-					if (DisCalClient.getClient() != null && DisCalClient.getClient().isConnected())
+					if (DisCalClient.getClient() != null)
 						data.put("guilds", DisCalClient.getClient().getGuilds().count().block());
 					else
 						data.put("guilds", 0);

@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
 
 import discord4j.core.object.entity.Role;
+import discord4j.discordjson.json.RoleData;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -20,6 +21,18 @@ public class WebRole {
 
 
 		return new WebRole(r.getId().asLong(), r.getName(), r.isManaged(), controlRole, r.isEveryone());
+	}
+
+	public static WebRole fromRole(RoleData r, GuildSettings settings) {
+		boolean controlRole;
+		boolean everyone = r.id().equals(settings.getGuildID().asString());
+		if (everyone && settings.getControlRole().equalsIgnoreCase("everyone"))
+			controlRole = true;
+		else
+			controlRole = settings.getControlRole().equalsIgnoreCase(r.id());
+
+
+		return new WebRole(Long.parseLong(r.id()), r.name(), r.managed(), controlRole, everyone);
 	}
 
 	public static WebRole fromJson(JSONObject data) {

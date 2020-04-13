@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
-import reactor.core.publisher.Mono;
+import discord4j.discordjson.json.ImmutableNicknameModifyData;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/guild/")
@@ -38,15 +40,16 @@ public class UpdateWebGuildEndpoint {
 			JSONObject jsonMain = new JSONObject(requestBody);
 			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
-			Guild g = DisCalServer.getClient()
-					.getGuildById(guildId).onErrorResume(e -> Mono.empty()).block();
+			RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
 			if (g != null) {
 				//Handle the changes now that we have confirmed the guild exists..
 
 				//Right now its just the nickname, but more may be added eventually
 				if (jsonMain.has("bot_nick")) {
-					g.changeSelfNickname(jsonMain.getString("bot_nick")).block();
+					g.modifyOwnNickname(ImmutableNicknameModifyData
+							.of(Optional.ofNullable(jsonMain.getString("bot_nick")))
+					).subscribe();
 				}
 
 				response.setContentType("application/json");

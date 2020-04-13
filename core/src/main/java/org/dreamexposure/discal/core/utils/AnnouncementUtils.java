@@ -4,7 +4,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 
 import java.util.UUID;
 
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

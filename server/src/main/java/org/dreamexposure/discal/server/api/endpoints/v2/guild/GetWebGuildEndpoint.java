@@ -21,10 +21,9 @@ import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Snowflake;
-import reactor.core.publisher.Mono;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/guild/")
@@ -44,17 +43,16 @@ public class GetWebGuildEndpoint {
 			Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 			Snowflake userId = Snowflake.of(jsonMain.getString("user_id"));
 
-			Guild g = DisCalServer.getClient()
-					.getGuildById(guildId).onErrorResume(e -> Mono.empty()).block();
+			RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
 			if (g != null) {
 				WebGuild wg = WebGuild.fromGuild(g);
 
-				Member m = g.getMemberById(userId).onErrorResume(e -> Mono.empty()).block();
+				RestMember m = g.member(userId.asLong());
 
 				if (m != null) { //Assume false if we can't get the user...
-					wg.setManageServer(PermissionChecker.hasManageServerRole(m).blockOptional().orElse(false));
-					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
+					wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).block());
+					wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).block());
 				}
 
 				//Add available langs so that editing of langs can be done on the website

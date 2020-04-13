@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 @SuppressWarnings({"WeakerAccess", "Duplicates"})
 public class AnnouncementThread extends Thread {
@@ -45,7 +45,7 @@ public class AnnouncementThread extends Thread {
 	public void run() {
 		try {
 			//Verify the client is logged in
-			if (DisCalClient.getClient() == null || !DisCalClient.getClient().isConnected())
+			if (DisCalClient.getClient() == null)
 				return;
 
 			//Get the default stuff.

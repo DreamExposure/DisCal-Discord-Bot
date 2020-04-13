@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.object.web;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
 
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.

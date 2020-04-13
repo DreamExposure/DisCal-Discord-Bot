@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Connection;
@@ -900,7 +900,7 @@ public class DatabaseManager {
 					+ " WHERE ENABLED = 1 AND GUILD_ID = ?";
 
 			return Mono.from(c.createStatement(query)
-					.bind(0, guildId)
+					.bind(0, guildId.asString())
 					.execute());
 		}).flatMapMany(res -> res.map((row, rowMetadata) -> {
 			UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));

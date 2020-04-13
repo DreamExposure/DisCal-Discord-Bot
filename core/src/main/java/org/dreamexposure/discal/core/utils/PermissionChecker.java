@@ -3,12 +3,21 @@ package org.dreamexposure.discal.core.utils;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 
+import java.util.function.Predicate;
+
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.Permission;
-import discord4j.core.object.util.Snowflake;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
+import discord4j.rest.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -44,6 +53,15 @@ public class PermissionChecker {
 		);
 	}
 
+	public static Mono<Boolean> hasSufficientRole(RestMember member, GuildSettings settings) {
+		if (settings.getControlRole().equalsIgnoreCase("everyone"))
+			return Mono.just(true);
+
+		return member.getData()
+				.map(MemberData::roles)
+				.map(roles -> roles.contains(settings.getControlRole()));
+	}
+
 	public static Mono<Boolean> hasManageServerRole(MessageCreateEvent event) {
 		return Mono.justOrEmpty(event.getMember())
 				.flatMap(Member::getBasePermissions)
@@ -57,6 +75,25 @@ public class PermissionChecker {
 				.map(perms -> perms.contains(Permission.MANAGE_GUILD)
 						|| perms.contains(Permission.ADMINISTRATOR)
 				);
+	}
+
+	public static Mono<Boolean> hasManageServerRole(RestMember m, RestGuild g) {
+		return hasPermissions(m, g, permissions ->
+				permissions.contains(Permission.MANAGE_GUILD)
+						|| permissions.contains(Permission.ADMINISTRATOR));
+	}
+
+	public static Mono<Boolean> hasPermissions(RestMember m, RestGuild g,
+											   Predicate<PermissionSet> pred) {
+		return m.getData().flatMap(memberData ->
+				g.getData().map(GuildUpdateData::roles)
+						.flatMapMany(Flux::fromIterable)
+						.filter(roleData -> memberData.roles().contains(roleData.id()))
+						.map(RoleData::permissions)
+						.reduce(0L, (perm, accumulator) -> accumulator | perm)
+						.map(PermissionSet::of)
+						.map(pred::test)
+		);
 	}
 
 	/**
