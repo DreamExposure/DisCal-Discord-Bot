@@ -49,12 +49,12 @@ import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
-import reactor.core.publisher.Mono;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
 	private static GatewayDiscordClient client;
 
+	@SuppressWarnings("CallingSubscribeInNonBlockingScope")
 	public static void main(String[] args) throws IOException {
 		//Get settings
 		Properties p = new Properties();
@@ -109,26 +109,26 @@ public class DisCalClient {
 					DisCalClient.client = client;
 
 					//Register listeners
+					client.on(ReadyEvent.class).subscribe(ReadyEventListener::handle);
+					client.on(TextChannelDeleteEvent.class).subscribe(ChannelDeleteListener::handle);
+					client.on(RoleDeleteEvent.class).subscribe(RoleDeleteListener::handle);
+
+					/*
 					Mono<Void> onReady = client.getEventDispatcher()
 							.on(ReadyEvent.class)
-							.map(e -> {
-								ReadyEventListener.handle(e);
-								return Mono.empty();
-							}).then();
+							.doOnNext(ReadyEventListener::handle)
+							.then();
 
 					Mono<Void> onTextChannelDelete = client.getEventDispatcher()
 							.on(TextChannelDeleteEvent.class)
-							.map(e -> {
-								ChannelDeleteListener.handle(e);
-								return Mono.empty();
-							}).then();
+							.doOnNext(ChannelDeleteListener::handle)
+							.then();
 
 					Mono<Void> onRoleDelete = client.getEventDispatcher()
 							.on(RoleDeleteEvent.class)
-							.map(e -> {
-								RoleDeleteListener.handle(e);
-								return Mono.empty();
-							}).then();
+							.doOnNext(RoleDeleteListener::handle)
+							.then();
+					 */
 
 					//Register commands
 					CommandExecutor executor = CommandExecutor.getExecutor().enable();
@@ -144,7 +144,12 @@ public class DisCalClient {
 					executor.registerCommand(new AnnouncementCommand());
 					executor.registerCommand(new DevCommand());
 
-					return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
+					/*
+					return Mono.when(onReady, onTextChannelDelete, onRoleDelete)
+							.doOnSubscribe(s -> LogFeed.log(LogObject.forDebug("Chain execution")))
+							.doOnError(e -> LogFeed.log(LogObject.forException("Chain error", e, DisCalClient.class)));
+					 */
+					return client.onDisconnect();
 				}).block();
 	}
 
