@@ -129,7 +129,7 @@ public class EventMessageFormatter {
 
             spec.setTitle(MessageManager.getMessage("Embed.Event.Condensed.Title", settings));
             EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
-            if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+            if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
                 spec.setThumbnail(ed.getImageLink());
 
             if (event.getSummary() != null) {

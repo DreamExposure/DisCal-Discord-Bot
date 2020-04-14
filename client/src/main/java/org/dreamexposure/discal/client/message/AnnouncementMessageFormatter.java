@@ -66,7 +66,7 @@ public class AnnouncementMessageFormatter {
             if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
                 spec.addField(MessageManager.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
                 EventData ed = DatabaseManager.getEventData(a.getGuildId(), a.getEventId()).block();
-                if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+                if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
                     spec.setImage(ed.getImageLink());
 
             } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
@@ -74,7 +74,7 @@ public class AnnouncementMessageFormatter {
             } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
                 spec.addField(MessageManager.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
                 EventData ed = DatabaseManager.getEventData(a.getGuildId(), a.getEventId()).block();
-                if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+                if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
                     spec.setImage(ed.getImageLink());
             }
             spec.addField(MessageManager.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
@@ -120,7 +120,7 @@ public class AnnouncementMessageFormatter {
                     CalendarData data = DatabaseManager.getMainCalendar(a.getGuildId()).block();
                     Event event = service.events().get(data.getCalendarAddress(), a.getEventId()).execute();
                     EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
-                    if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+                    if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
                         spec.setThumbnail(ed.getImageLink());
 
                     if (event.getSummary() != null) {
@@ -174,7 +174,7 @@ public class AnnouncementMessageFormatter {
 
                 spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
                 EventData ed = DatabaseManager.getEventData(announcement.getGuildId(), event.getId()).block();
-                if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+                if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
                     spec.setImage(ed.getImageLink());
 
                 spec.setUrl(event.getHtmlLink());
@@ -287,7 +287,7 @@ public class AnnouncementMessageFormatter {
 
             spec.setTitle(MessageManager.getMessage("Embed.Announcement.Announce.Title", settings));
             EventData ed = DatabaseManager.getEventData(announcement.getGuildId(), event.getId()).block();
-            if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
+            if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
                 spec.setImage(ed.getImageLink());
             }
             if (event.getSummary() != null) {
