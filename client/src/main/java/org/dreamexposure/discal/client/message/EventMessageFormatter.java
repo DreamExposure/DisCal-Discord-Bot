@@ -254,9 +254,11 @@ public class EventMessageFormatter {
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
             spec.setTitle(MessageManager.getMessage("Embed.Event.Confirm.Title", settings));
-            if (ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
+
+            if (ed != null && ed.getImageLink() != null && ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
                 spec.setImage(ed.getImageLink());
             }
+
             spec.addField(MessageManager.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
             spec.addField(MessageManager.getMessage("Embed.Event.Confirm.Date", settings), getHumanReadableDate(ecr.getEvent().getStart(), settings, false), false);
             if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
