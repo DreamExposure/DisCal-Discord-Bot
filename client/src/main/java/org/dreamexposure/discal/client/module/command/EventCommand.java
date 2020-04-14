@@ -127,37 +127,37 @@ public class EventCommand implements ICommand {
         } else {
             switch (args[0].toLowerCase()) {
                 case "create":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCreate(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "copy":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCopy(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "edit":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleEdit(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "restart":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleRestart(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "cancel":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCancel(event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "delete":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleDelete(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -167,7 +167,7 @@ public class EventCommand implements ICommand {
                     moduleView(args, event, calendarData, settings);
                     break;
                 case "confirm":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleConfirm(event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -324,10 +324,8 @@ public class EventCommand implements ICommand {
             if (msg != null) {
                 MessageManager.deleteMessage(event);
                 MessageManager.deleteMessage(msg);
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
             }
+            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
         } else {
             MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
         }
@@ -876,7 +874,7 @@ public class EventCommand implements ICommand {
                     return;
                 }
                 try {
-                    boolean value = Boolean.valueOf(valueString);
+                    boolean value = Boolean.parseBoolean(valueString);
                     EventCreator.getCreator().getPreEvent(settings.getGuildID()).setShouldRecur(value);
                     if (value) {
                         if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {

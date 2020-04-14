@@ -99,13 +99,13 @@ public class CalendarCommand implements ICommand {
 
             switch (args[0].toLowerCase()) {
                 case "create":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCreate(args, event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "cancel":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCancel(event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -115,14 +115,14 @@ public class CalendarCommand implements ICommand {
                     moduleView(event, calendarData, settings);
                     break;
                 case "confirm":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleConfirm(event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "delete":
                 case "remove":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleDelete(event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -138,7 +138,7 @@ public class CalendarCommand implements ICommand {
                     moduleTimezone(args, event, calendarData, settings);
                     break;
                 case "edit":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleEdit(event, calendarData, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -184,12 +184,9 @@ public class CalendarCommand implements ICommand {
             boolean editing = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID()).isEditing();
             if (CalendarCreator.getCreator().terminate(settings.getGuildID())) {
                 if (message != null) {
-                    if (!editing) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    } else {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(settings.getGuildID()));
+                    MessageManager.deleteMessage(event);
+                    MessageManager.deleteMessage(CalendarCreator.getCreator().getCreatorMessage(settings.getGuildID()));
+                    if (editing) {
                         CalendarCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Calendar.Cancel.Edit.Success", settings), event));
                     }
                 } else {

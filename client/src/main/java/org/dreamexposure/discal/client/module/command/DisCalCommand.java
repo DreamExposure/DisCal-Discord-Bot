@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.client.module.command;
 
-import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.MessageManager;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -152,7 +151,7 @@ public class DisCalCommand implements ICommand {
             spec.addField(MessageManager.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
             spec.addField(MessageManager.getMessage("Embed.DisCal.Info.Library", settings), "Discord4J, version 3.0.6", false);
             spec.addField("Shard Index", BotSettings.SHARD_INDEX.get() + "/" + BotSettings.SHARD_COUNT.get(), true);
-            spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), DisCalClient.getClient().getGuilds().count().block() + "", true);
+            spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalGuilds", settings), event.getClient().getGuilds().count().block() + "", true);
             spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalCalendars", settings), DatabaseManager.getCalendarCount().block() + "", true);
             spec.addField(MessageManager.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), DatabaseManager.getAnnouncementCount().block() + "", true);
             spec.setFooter(MessageManager.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
@@ -169,7 +168,7 @@ public class DisCalCommand implements ICommand {
      * @param event The event received.
      */
     private void moduleControlRole(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false)) {
+        if (PermissionChecker.hasDisCalRole(event, settings).block()) {
             if (args.length > 1) {
                 String roleName = GeneralUtils.getContent(args, 1);
                 Role controlRole;
@@ -342,7 +341,7 @@ public class DisCalCommand implements ICommand {
     }
 
     private void moduleBrand(MessageCreateEvent event, GuildSettings settings) {
-        if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false)) {
+        if (PermissionChecker.hasDisCalRole(event, settings).block()) {
             if (settings.isPatronGuild()) {
                 settings.setBranded(!settings.isBranded());
                 DatabaseManager.updateSettings(settings).subscribe();

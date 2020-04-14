@@ -125,25 +125,25 @@ public class AnnouncementCommand implements ICommand {
         } else {
             switch (args[0].toLowerCase()) {
                 case "create":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCreate(event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "confirm":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleConfirm(event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "cancel":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCancel(event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "delete":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleDelete(args, event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -194,13 +194,13 @@ public class AnnouncementCommand implements ICommand {
                     moduleColor(args, event, settings);
                     break;
                 case "copy":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleCopy(args, event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                     break;
                 case "edit":
-                    if (PermissionChecker.hasSufficientRole(event, settings).blockOptional().orElse(false))
+                    if (PermissionChecker.hasDisCalRole(event, settings).block())
                         moduleEdit(args, event, settings);
                     else
                         MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);

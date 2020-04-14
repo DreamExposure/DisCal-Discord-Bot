@@ -26,25 +26,69 @@ import reactor.core.publisher.Mono;
  * For Project: DisCal
  */
 public class PermissionChecker {
-    /**
-     * Checks if the user who sent the received message has the proper role to use a command.
-     *
-     * @param event The Event received to check for the user and guild.
-     * @return <code>true</code> if the user has the proper role, otherwise <code>false</code>.
-     */
+    public static Mono<Boolean> hasDisCalRole(MessageCreateEvent event, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
+
+        Mono<Member> member = Mono.justOrEmpty(event.getMember());
+
+        //User doesn't need bot control role if they have admin permissions.
+        return member.flatMap(Member::getBasePermissions)
+                .map(perms ->
+                        perms.contains(Permission.ADMINISTRATOR)
+                                || perms.contains(Permission.MANAGE_GUILD)
+                ).flatMap(hasAdmin -> {
+                    if (hasAdmin) {
+                        return Mono.just(true);
+                    } else {
+                        return member.flatMapMany(Member::getRoles)
+                                .map(Role::getId)
+                                .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+                    }
+                });
+    }
+
+    public static Mono<Boolean> hasDisCalRole(Member member, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
+
+        //User doesn't need bot control role if they have admin permissions.
+        Mono<Boolean> hasAdmin = Mono.just(member).flatMap(Member::getBasePermissions).map(perms ->
+                perms.contains(Permission.ADMINISTRATOR) || perms.contains(Permission.MANAGE_GUILD));
+
+        return hasAdmin.flatMap(has -> {
+            if (has) {
+                return Mono.just(true);
+            } else {
+                return Mono.just(member).flatMapMany(Member::getRoles)
+                        .map(Role::getId)
+                        .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+            }
+        });
+    }
+
+    @Deprecated
     public static Mono<Boolean> hasSufficientRole(MessageCreateEvent event, GuildSettings settings) {
         if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return Mono.justOrEmpty(event.getMember())
                 .flatMapMany(Member::getRoles)
                 .map(Role::getId)
                 .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())));
-
     }
 
+    @Deprecated
     public static Mono<Boolean> hasSufficientRole(Member member, GuildSettings settings) {
         if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return Mono.from(member.getRoles()
@@ -55,6 +99,8 @@ public class PermissionChecker {
 
     public static Mono<Boolean> hasSufficientRole(RestMember member, GuildSettings settings) {
         if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return member.getData()
@@ -96,12 +142,6 @@ public class PermissionChecker {
         );
     }
 
-    /**
-     * Checks if the user sent the command in a DisCal channel (if set).
-     *
-     * @param event The event received to check for the correct channel.
-     * @return <code>true</code> if in correct channel, otherwise <code>false</code>.
-     */
     public static Mono<Boolean> isCorrectChannel(MessageCreateEvent event, GuildSettings settings) {
         if (settings.getDiscalChannel().equalsIgnoreCase("all"))
             return Mono.just(true);

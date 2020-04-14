@@ -49,12 +49,13 @@ import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
     private static GatewayDiscordClient client;
 
-    @SuppressWarnings("CallingSubscribeInNonBlockingScope")
     public static void main(String[] args) throws IOException {
         //Get settings
         Properties p = new Properties();
@@ -109,17 +110,6 @@ public class DisCalClient {
                     DisCalClient.client = client;
 
                     //Register listeners
-                    client.on(ReadyEvent.class)
-                            .flatMap(ReadyEventListener::handle)
-                            .subscribe();
-                    client.on(TextChannelDeleteEvent.class)
-                            .flatMap(ChannelDeleteListener::handle)
-                            .subscribe();
-                    client.on(RoleDeleteEvent.class)
-                            .flatMap(RoleDeleteListener::handle)
-                            .subscribe();
-
-                    /*
                     Mono<Void> onReady = client.on(ReadyEvent.class)
                             .flatMap(ReadyEventListener::handle)
                             .then();
@@ -131,24 +121,25 @@ public class DisCalClient {
                     Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
                             .flatMap(RoleDeleteListener::handle)
                             .then();
-                     */
 
                     //Register commands
-                    CommandExecutor executor = CommandExecutor.getExecutor().enable();
-                    executor.registerCommand(new HelpCommand());
-                    executor.registerCommand(new DisCalCommand());
-                    executor.registerCommand(new CalendarCommand());
-                    executor.registerCommand(new AddCalendarCommand());
-                    executor.registerCommand(new TimeCommand());
-                    executor.registerCommand(new LinkCalendarCommand());
-                    executor.registerCommand(new EventListCommand());
-                    executor.registerCommand(new EventCommand());
-                    executor.registerCommand(new RsvpCommand());
-                    executor.registerCommand(new AnnouncementCommand());
-                    executor.registerCommand(new DevCommand());
+                    Mono<Void> commands = Mono.fromRunnable(() -> {
+                        CommandExecutor executor = CommandExecutor.getExecutor().enable();
+                        executor.registerCommand(new HelpCommand());
+                        executor.registerCommand(new DisCalCommand());
+                        executor.registerCommand(new CalendarCommand());
+                        executor.registerCommand(new AddCalendarCommand());
+                        executor.registerCommand(new TimeCommand());
+                        executor.registerCommand(new LinkCalendarCommand());
+                        executor.registerCommand(new EventListCommand());
+                        executor.registerCommand(new EventCommand());
+                        executor.registerCommand(new RsvpCommand());
+                        executor.registerCommand(new AnnouncementCommand());
+                        executor.registerCommand(new DevCommand());
+                    }).subscribeOn(Schedulers.boundedElastic())
+                            .then();
 
-                    //return Mono.when(onReady, onTextChannelDelete, onRoleDelete);
-                    return client.onDisconnect();
+                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, commands);
                 }).block();
     }
 
