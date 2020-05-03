@@ -52,11 +52,11 @@ public class UpdateCalendarEndpoint {
             CalendarData calData = DatabaseManager.getCalendar(guildId, calNumber).block();
 
             if (!calData.getCalendarAddress().equalsIgnoreCase("primary")
-                    && CalendarUtils.calendarExists(calData, settings)) {
-                Calendar service = CalendarAuth.getCalendarService(settings);
+                && CalendarUtils.calendarExists(calData, settings).block()) {
+                Calendar service = CalendarAuth.getCalendarService(settings).block();
                 com.google.api.services.calendar.model.Calendar cal = service.calendars()
-                        .get(calData.getCalendarAddress())
-                        .execute();
+                    .get(calData.getCalendarAddress())
+                    .execute();
 
                 if (jsonMain.has("summary"))
                     cal.setSummary(jsonMain.getString("summary"));

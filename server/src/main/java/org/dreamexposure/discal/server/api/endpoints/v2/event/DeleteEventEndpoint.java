@@ -49,8 +49,8 @@ public class DeleteEventEndpoint {
             //okay, lets actually delete the event
             GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
-            if (EventUtils.eventExists(settings, calNumber, eventId)) {
-                if (EventUtils.deleteEvent(settings, eventId)) {
+            if (EventUtils.eventExists(settings, calNumber, eventId).block()) {
+                if (EventUtils.deleteEvent(settings, calNumber, eventId).block()) {
                     response.setContentType("application/json");
                     response.setStatus(200);
                     return JsonUtils.getJsonResponseMessage("Event successfully deleted");

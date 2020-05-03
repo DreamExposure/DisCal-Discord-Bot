@@ -47,7 +47,7 @@ public class GetEventEndpoint {
             GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
             //okay, get the calendar service and then the event
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
             Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();

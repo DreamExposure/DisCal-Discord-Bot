@@ -9,10 +9,10 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.function.Consumer;
 
-import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -20,73 +20,89 @@ import discord4j.rest.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarMessageFormatter {
-    //TODO: Add support for multiple calendars.
+    @Deprecated
     public static String getCalendarLink(Snowflake guildId) {
-        return "https://www.discalbot.com/embed/calendar/" + guildId.asString();
+        return "https://www.discalbot.com/embed/calendar/" + guildId.asString() + "/1";
     }
 
-    public static Consumer<EmbedCreateSpec> getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
-        return spec -> {
-            Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
+    public static String getCalendarLink(Snowflake guildId, int calNumber) {
+        return "https://www.discalbot.com/embed/calendar" + guildId + "/" + calNumber;
+    }
 
-            if (settings.isBranded() && guild != null)
-                spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+    @Deprecated
+    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
+        return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
+            if (settings.isBranded())
+                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-            spec.setTitle(MessageManager.getMessage("Embed.Calendar.Link.Title", settings));
+            spec.setTitle(Messages.getMessage("Embed.Calendar.Link.Title", settings));
 
             if (cal.getSummary() != null)
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
+                spec.addField(Messages.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
 
             if (cal.getDescription() != null)
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
+                spec.addField(Messages.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
 
-            spec.addField(MessageManager.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
+            spec.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
             spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
-            spec.setFooter(MessageManager.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
+            spec.setFooter(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
             spec.setColor(GlobalConst.discalColor);
-        };
+        });
     }
 
-    /**
-     * Creates an EmbedObject for the PreCalendar.
-     *
-     * @param calendar The PreCalendar to create an EmbedObject for.
-     * @return The EmbedObject for the PreCalendar.
-     */
-    public static Consumer<EmbedCreateSpec> getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
-        return spec -> {
-            Guild guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
-
-            if (settings.isBranded() && guild != null)
-                spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(Calendar cal, int calNum, GuildSettings settings) {
+        return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
+            if (settings.isBranded())
+                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-            spec.setTitle(MessageManager.getMessage("Embed.Calendar.Pre.Title", settings));
-            if (calendar.getSummary() != null)
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
+            spec.setTitle(Messages.getMessage("Embed.Calendar.Link.Title", settings));
+
+            if (cal.getSummary() != null)
+                spec.addField(Messages.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
+
+            if (cal.getDescription() != null)
+                spec.addField(Messages.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
+
+            spec.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
+            spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calNum));
+            spec.setFooter(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
+            spec.setColor(GlobalConst.discalColor);
+        });
+    }
+
+    public static Mono<Consumer<EmbedCreateSpec>> getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
+        return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
+            if (settings.isBranded())
+                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.Summary", settings), "***UNSET***", true);
+                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
+            spec.setTitle(Messages.getMessage("Embed.Calendar.Pre.Title", settings));
+            if (calendar.getSummary() != null)
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
+            else
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.Summary", settings), "***UNSET***", true);
 
             if (calendar.getDescription() != null)
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
             else
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.Description", settings), "***UNSET***", false);
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.Description", settings), "***UNSET***", false);
 
             if (calendar.getTimezone() != null)
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), calendar.getTimezone(), true);
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.TimeZone", settings), calendar.getTimezone(), true);
             else
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
 
             if (calendar.isEditing())
-                spec.addField(MessageManager.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), false);
+                spec.addField(Messages.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), false);
 
 
-            spec.setFooter(MessageManager.getMessage("Embed.Calendar.Pre.Key", settings), null);
+            spec.setFooter(Messages.getMessage("Embed.Calendar.Pre.Key", settings), null);
             spec.setColor(GlobalConst.discalColor);
-
-        };
+        });
     }
 }

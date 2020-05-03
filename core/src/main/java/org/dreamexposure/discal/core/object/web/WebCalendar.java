@@ -2,11 +2,11 @@ package org.dreamexposure.discal.core.object.web;
 
 import com.google.api.services.calendar.model.Calendar;
 
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
 
 /**
@@ -28,7 +28,7 @@ public class WebCalendar {
             String description;
             String timezone;
             try {
-                Calendar cal = CalendarAuth.getCalendarService(gs).calendars().get(id).execute();
+                Calendar cal = CalendarWrapper.getCalendar(cd, gs).block();
                 name = cal.getSummary();
                 description = cal.getDescription();
                 timezone = cal.getTimeZone().replaceAll("/", "___");

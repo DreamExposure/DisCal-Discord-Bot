@@ -62,7 +62,7 @@ public class CreateEventEndpoint {
             GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
             CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
+            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
             Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
             Event event = new Event();
@@ -95,13 +95,13 @@ public class CreateEventEndpoint {
 
             EventData eventData = EventData.empty();
             if (requestBody.has("image")) {
-                if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
+                if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild()).block()) {
                     //Link is good...
                     eventData = EventData.fromImage(
-                            Snowflake.of(guildId),
-                            event.getId(),
-                            event.getEnd().getDateTime().getValue(),
-                            requestBody.getString("image")
+                        Snowflake.of(guildId),
+                        event.getId(),
+                        event.getEnd().getDateTime().getValue(),
+                        requestBody.getString("image")
                     );
 
                 }

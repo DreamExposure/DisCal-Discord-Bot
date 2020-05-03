@@ -5,7 +5,6 @@ import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -13,6 +12,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.TimeUtils;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
 import discord4j.core.object.entity.Message;
 import discord4j.rest.util.Snowflake;
@@ -107,7 +107,7 @@ public class PreEvent {
 
         Calendar cal = null;
         try {
-            cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
+            cal = CalendarWrapper.getCalendar(data, settings).block();
         } catch (Exception ex) {
             LogFeed.log(LogObject
                     .forException("Failed to get proper data time for event!", ex, this.getClass()));

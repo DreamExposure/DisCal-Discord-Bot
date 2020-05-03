@@ -1,21 +1,17 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 
 import org.dreamexposure.discal.client.event.EventCreator;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.enums.event.EventFrequency;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.EventUtils;
@@ -24,6 +20,7 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.utils.TimeUtils;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,8 +31,8 @@ import java.util.TimeZone;
 import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -43,7 +40,7 @@ import discord4j.core.spec.EmbedCreateSpec;
  * For Project: DisCal
  */
 @SuppressWarnings("Duplicates")
-public class EventCommand implements ICommand {
+public class EventCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
      *
@@ -77,8 +74,8 @@ public class EventCommand implements ICommand {
     @Override
     public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo("event",
-                "User for all event related functions",
-                "!event <function> (value(s))"
+            "User for all event related functions",
+            "!event <function> (value(s))"
         );
 
         info.getSubCommands().put("create", "Creates a new event");
@@ -119,600 +116,642 @@ public class EventCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        //TODO: Add multiple calendar handling.
-        CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
-        if (args.length < 1) {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Few", settings), event);
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "create":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCreate(args, event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "copy":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCopy(args, event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "edit":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleEdit(args, event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "restart":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleRestart(args, event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "cancel":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCancel(event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "delete":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleDelete(args, event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "view":
-                case "review":
-                    moduleView(args, event, calendarData, settings);
-                    break;
-                case "confirm":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleConfirm(event, calendarData, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "startdate":
-                case "start":
-                    moduleStartDate(args, event, settings);
-                    break;
-                case "enddate":
-                case "end":
-                    moduleEndDate(args, event, settings);
-                    break;
-                case "summary":
-                    moduleSummary(args, event, settings);
-                    break;
-                case "description":
-                    moduleDescription(args, event, settings);
-                    break;
-                case "color":
-                case "colour":
-                    moduleColor(args, event, settings);
-                    break;
-                case "location":
-                case "loc":
-                    moduleLocation(args, event, settings);
-                    break;
-                case "image":
-                case "attachment":
-                    moduleAttachment(args, event, settings);
-                    break;
-                case "recur":
-                    moduleRecur(args, event, settings);
-                    break;
-                case "frequency":
-                case "freq":
-                    moduleFrequency(args, event, settings);
-                    break;
-                case "count":
-                    moduleCount(args, event, settings);
-                    break;
-                case "interval":
-                    moduleInterval(args, event, settings);
-                    break;
-                default:
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Notification.Args.Invalid", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        //TODO: Add multi-cal handling
+        return DatabaseManager.getMainCalendar(settings.getGuildID()).defaultIfEmpty(CalendarData.empty())
+            .flatMap(calData -> {
+                if (args.length < 1) {
+                    return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
+                } else {
+                    switch (args[0].toLowerCase()) {
+                        case "create":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleCreate(args, event, calData, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "copy":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleCopy(args, event, calData, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "edit":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleEdit(args, event, calData, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "cancel":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleCancel(event, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "delete":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleDelete(args, event, calData, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "view":
+                        case "review":
+                            return moduleView(args, event, calData, settings);
+                        case "confirm":
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return moduleConfirm(event, calData, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                                });
+                        case "startdate":
+                        case "start":
+                            return moduleStartDate(args, event, settings);
+                        case "enddate":
+                        case "end":
+                            return moduleEndDate(args, event, settings);
+                        case "summary":
+                            return moduleSummary(args, event, settings);
+                        case "description":
+                            return moduleDescription(args, event, settings);
+                        case "color":
+                        case "colour":
+                            return moduleColor(args, event, settings);
+                        case "location":
+                        case "loc":
+                            return moduleLocation(args, event, settings);
+                        case "image":
+                        case "attachment":
+                            return moduleAttachment(args, event, settings);
+                        case "recur":
+                            return moduleRecur(args, event, settings);
+                        case "frequency":
+                        case "freq":
+                            return moduleFrequency(args, event, settings);
+                        case "count":
+                            return moduleCount(args, event, settings);
+                        case "interval":
+                            return moduleInterval(args, event, settings);
+                        default:
+                            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Notification.Args.Invalid", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            } else {
+                                return Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
+                            }
                     }
-                    break;
-            }
-        }
-        return false;
+                }
+            }).then();
     }
 
 
-    private void moduleCreate(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-            if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).getCreatorMessage() != null) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
-            }
-        } else {
-            if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                PreEvent e;
+    private Mono<Void> moduleCreate(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
+                    .doOnNext(pre::setCreatorMessage);
+            } else if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
                 if (args.length == 1)
-                    e = EventCreator.getCreator().init(event, settings, true);
+                    return EventCreator.getCreator().init(event, settings);
                 else
-                    e = EventCreator.getCreator().init(event, settings, GeneralUtils.getContent(args, 1), true);
-
-                if (e.getCreatorMessage() == null)
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Create.Init", settings), event);
+                    return EventCreator.getCreator().init(event, settings, GeneralUtils.getContent(args, 1));
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             }
-        }
+        }).then();
     }
 
-    private void moduleCopy(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-            if (!EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+    private Mono<Void> moduleCopy(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                //Already in creator/editor
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
+                    .doOnNext(pre::setCreatorMessage);
+            } else if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //Has calendar, not in creator/editor, start it.
                 if (args.length == 2) {
                     String eventId = args[1];
-                    if (EventUtils.eventExists(settings, eventId)) {
-                        PreEvent preEvent = EventCreator.getCreator().init(event, eventId, settings, true);
-                        if (preEvent != null) {
-                            if (preEvent.getCreatorMessage() == null) {
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Copy.Init", settings), EventMessageFormatter.getPreEventEmbed(preEvent, settings), event);
+                    return EventUtils.eventExists(settings, calendarData.getCalendarNumber(), eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return EventCreator.getCreator().init(event, eventId, settings);
+                            } else {
+                                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event);
                             }
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-                        }
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
-                    }
+                        });
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Copy.Specify", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("Creator.Event.Copy.Specify", settings), event);
                 }
             } else {
-                if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).getCreatorMessage() != null) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
-                }
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleEdit(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-            if (!EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+    private Mono<Void> moduleEdit(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                //Already in creator
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
+                    .doOnNext(pre::setCreatorMessage);
+            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //Does not have calendar
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
+            } else {
+                //Not in creator, start editor
                 if (args.length == 2) {
                     String eventId = args[1];
-                    if (EventUtils.eventExists(settings, eventId)) {
-                        PreEvent preEvent = EventCreator.getCreator().edit(event, eventId, settings, true);
-                        if (preEvent.getCreatorMessage() == null) {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Edit.Init", settings), EventMessageFormatter.getPreEventEmbed(preEvent, settings), event);
-                        }
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
-                    }
+
+                    return EventUtils.eventExists(settings, calendarData.getCalendarNumber(), eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return EventCreator.getCreator().edit(event, eventId, settings);
+                            } else {
+                                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event);
+                            }
+                        });
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Edit.Specify", settings), event);
-                }
-            } else {
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.AlreadyInit", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("Creator.Event.Edit.Specify", settings), event);
                 }
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleCancel(MessageCreateEvent event, GuildSettings settings) {
-        Message msg = null;
-        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID()))
-            msg = EventCreator.getCreator().getCreatorMessage(settings.getGuildID());
-
-        if (EventCreator.getCreator().terminate(settings.getGuildID())) {
-            if (msg != null) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(msg);
-            }
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Cancel.Success", settings), event);
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-        }
-    }
-
-    private void moduleRestart(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        Message msg = null;
-        boolean editing = false;
-        if (EventCreator.getCreator().hasPreEvent(settings.getGuildID()))
-            editing = EventCreator.getCreator().getPreEvent(settings.getGuildID()).isEditing();
-
-
-        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID()))
-            msg = EventCreator.getCreator().getCreatorMessage(settings.getGuildID());
-
-        if (EventCreator.getCreator().terminate(settings.getGuildID())) {
-            if (msg != null) {
-                MessageManager.deleteMessage(msg);
-                MessageManager.deleteMessage(event);
-            }
-            if (!editing)
-                moduleCreate(args, event, calendarData, settings);
-            else
-                moduleEdit(args, event, calendarData, settings);
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-        }
-    }
-
-    private void moduleDelete(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (args.length == 2) {
-            if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                if (!EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                    if (EventUtils.deleteEvent(settings, args[1])) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Delete.Success", settings), event);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
-                    }
-                } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Delete.Failure.Creator", settings), event);
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Delete.Specify", settings), event);
-        }
-    }
-
-    private void moduleView(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (args.length == 1) {
+    private Mono<Void> moduleCancel(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Event.View.Creator.Confirm", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Event.View.Creator.Confirm", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Event.View.Args.Few", settings), event);
-            }
-        } else if (args.length == 2) {
-            //Try to get the event by ID.
-            if (!EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                    try {
-                        Calendar service = CalendarAuth.getCalendarService(settings);
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                        Event calEvent = service.events().get(calendarData.getCalendarAddress(), args[1]).execute();
-                        MessageManager.sendMessageAsync(EventMessageFormatter.getEventEmbed(calEvent, settings), event);
-                    } catch (Exception e) {
-                        //Event probably doesn't exist...
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotFound", settings), event);
-                    }
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
-                }
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                EventCreator.getCreator().terminate(settings.getGuildID());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(Messages.sendMessage(Messages.getMessage("Creator.Event.Cancel.Success", settings), event));
             } else {
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Event.View.Creator.Active", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Event.View.Creator.Active", settings), event);
-                }
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Event.View.Specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleConfirm(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
-        if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-            if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).hasRequiredValues()) {
-                if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
-                    EventCreatorResponse response = EventCreator.getCreator().confirmEvent(event, settings);
-                    if (response.isSuccessful()) {
-                        if (!response.isEdited()) {
-                            if (response.getCreatorMessage() != null) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(response.getCreatorMessage());
-                                MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Create", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
-                            } else {
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Confirm.Create", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
-                            }
-                        } else {
-                            if (response.getCreatorMessage() != null) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(response.getCreatorMessage());
-                                MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Edit", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
-                            } else {
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Confirm.Edit", settings), EventMessageFormatter.getEventConfirmationEmbed(response, settings), event);
-                            }
-                        }
-                    } else {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Confirm.Failure", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Confirm.Failure", settings), event);
-                        }
-                    }
-                } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoCalendar", settings), event);
-                    }
-                }
-            } else {
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.NoRequired", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NoRequired", settings), event);
-                }
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-        }
-    }
-
-    private void moduleStartDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
+    private Mono<Void> moduleDelete(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                String dateRaw = args[1].trim();
-                if (dateRaw.length() > 10) {
-                    try {
-                        //Do a lot of date shuffling to get to proper formats and shit like that.
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                        TimeZone tz = TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(settings.getGuildID()).getTimeZone());
-                        sdf.setTimeZone(tz);
-                        Date dateObj = sdf.parse(dateRaw);
-                        DateTime dateTime = new DateTime(dateObj);
-                        EventDateTime eventDateTime = new EventDateTime();
-                        eventDateTime.setDateTime(dateTime);
+                //In creator/editor, cannot delete
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                        //Wait! Lets check now if its in the future and not the past!
-                        if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.startAfterEnd(dateRaw, tz, EventCreator.getCreator().getPreEvent(settings.getGuildID()))) {
-                            //Date shuffling done, now actually apply all that damn stuff here.
-                            EventCreator.getCreator().getPreEvent(settings.getGuildID()).setStartDateTime(eventDateTime);
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
-                            //Apply viewable date/times...
-                            SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            Date dateObjV = sdfV.parse(dateRaw);
-                            DateTime dateTimeV = new DateTime(dateObjV);
-                            EventDateTime eventDateTimeV = new EventDateTime();
-                            eventDateTimeV.setDateTime(dateTimeV);
-                            EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableStartDate(eventDateTimeV);
-
-
-                            //To streamline, check if event end is null, if so, apply 2 hour duration!
-                            if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).getEndDateTime() == null) {
-                                EventDateTime end = EventCreator.getCreator().getPreEvent(settings.getGuildID()).getStartDateTime().clone();
-                                long endLong = end.getDateTime().getValue() + 3600000; //Add an hour
-
-                                end.setDateTime(new DateTime(endLong));
-
-                                EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(end);
-
-
-                                //Viewable date
-                                EventDateTime endV = EventCreator.getCreator().getPreEvent(settings.getGuildID()).getViewableStartDate().clone();
-                                long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
-
-                                endV.setDateTime(new DateTime(endVLong));
-
-                                EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(endV);
-                            }
-
-                            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Start.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                            } else {
-                                String msg = MessageManager.getMessage("Creator.Event.Start.Success", settings);
-                                msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
-                                MessageManager.sendMessageAsync(msg, event);
-                            }
-                        } else {
-                            //Oops! Time is in the past or after end...
-                            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                            } else {
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Start.Failure.Illegal", settings), event);
-                            }
-                        }
-                    } catch (ParseException e) {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event);
-                        }
-                    }
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .flatMap(em -> Messages.sendMessage(Messages
+                        .getMessage("Creator.Event.Delete.Failure.Creator", settings), em, event))
+                    .doOnNext(pre::setCreatorMessage);
+            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //Does not have calendar..
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
+            } else {
+                //Delete event
+                if (args.length == 2) {
+                    return EventUtils.deleteEvent(settings, calendarData.getCalendarNumber(), args[1])
+                        .flatMap(success -> {
+                            if (success)
+                                return Messages.sendMessage(Messages.getMessage("Creator.Event.Delete.Success", settings), event);
+                            else
+                                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event);
+                        });
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                    return Messages.sendMessage(Messages.getMessage("Creator.Event.Delete.Specify", settings), event);
+                }
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleView(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                // In editor, show that
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .flatMap(em -> Messages.sendMessage(Messages.getMessage("Event.View.Creator.Confirm", settings), em, event))
+                    .doOnNext(pre::setCreatorMessage);
+            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //Does not have calendar...
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
+            } else {
+                //Check if enough args and event exists...
+                if (args.length == 2) {
+                    return EventWrapper.getEvent(calendarData, settings, args[1])
+                        .flatMap(e -> EventMessageFormatter.getEventEmbed(e, calendarData.getCalendarNumber(), settings))
+                        .flatMap(em -> Messages.sendMessage(em, event))
+                        .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event));
+                } else {
+                    return Messages.sendMessage(Messages.getMessage("Event.View.Specify", settings), event);
+                }
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleConfirm(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                if (pre.hasRequiredValues()) {
+                    return EventCreator.getCreator().confirmEvent(settings).flatMap(response -> {
+                        if (response.isSuccessful()) {
+                            String msg;
+                            if (response.isEdited())
+                                msg = Messages.getMessage("Creator.Event.Confirm.Edit", settings);
+                            else
+                                msg = Messages.getMessage("Creator.Event.Confirm.Create", settings);
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getEventEmbed(response.getEvent(),
+                                    calendarData.getCalendarNumber(), settings))
+                                .flatMap(em -> Messages.sendMessage(msg, em, event));
+                        } else {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(),
+                                    settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Event.Confirm.Failure", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
+                        }
+                    });
+                } else {
+                    //Some values are unset, tell user.
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                        .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.NoRequired", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
+                }
+            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                //No calendar...
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleStartDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (args[1].trim().length() > 10) {
+                        return Mono.just(args[1].trim()).flatMap(dateRaw -> {
+                            //Do a lot of date shuffling to get to proper formats and shit like that.
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                            TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            sdf.setTimeZone(tz);
+                            Date dateObj;
+                            try {
+                                dateObj = sdf.parse(dateRaw);
+                            } catch (ParseException e) {
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            }
+                            DateTime dateTime = new DateTime(dateObj);
+                            EventDateTime eventDateTime = new EventDateTime();
+                            eventDateTime.setDateTime(dateTime);
+
+                            //Wait! Lets check now if its in the future and not the past!
+                            if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.startAfterEnd(dateRaw, tz, pre)) {
+                                //Date shuffling done, now actually apply all that damn stuff here.
+                                pre.setStartDateTime(eventDateTime);
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV;
+                                try {
+                                    dateObjV = sdfV.parse(dateRaw);
+                                } catch (ParseException e) {
+                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                        .flatMap(em -> Messages.sendMessage(
+                                            Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
+                                        .doOnNext(pre::setCreatorMessage);
+                                }
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                pre.setViewableStartDate(eventDateTimeV);
+
+                                //To streamline, check if event end is null, if so, apply 1 hour duration!
+                                if (pre.getEndDateTime() == null) {
+                                    EventDateTime end = pre.getStartDateTime().clone();
+                                    long endLong = end.getDateTime().getValue() + 3600000; //Add an hour
+
+                                    end.setDateTime(new DateTime(endLong));
+
+                                    pre.setEndDateTime(end);
+
+                                    //Viewable date
+                                    EventDateTime endV = pre.getViewableStartDate().clone();
+                                    long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
+
+                                    endV.setDateTime(new DateTime(endVLong));
+
+                                    pre.setViewableEndDate(endV);
+                                }
+
+                                //Okay, all done, now time send back the creator message..
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(Messages
+                                        .getMessage("Creator.Event.Start.Success.New", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            } else {
+                                //Oops! Time is in the past or after end...
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(Messages
+                                        .getMessage("Creator.Event.Start.Failure.Illegal", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            }
+                        }).onErrorResume(ParseException.class, e ->
+                            Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings)
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Time.Invalid", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage)));
                     } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event);
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-            }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Start.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Start.Specify", settings), event);
-            }
-        }
-    }
-
-    private void moduleEndDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                String dateRaw = args[1].trim();
-                if (dateRaw.length() > 10) {
-                    try {
-                        //Do a lot of date shuffling to get to proper formats and shit like that.
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                        TimeZone tz = TimeZone.getTimeZone(EventCreator.getCreator().getPreEvent(settings.getGuildID()).getTimeZone());
-                        sdf.setTimeZone(tz);
-                        Date dateObj = sdf.parse(dateRaw);
-                        DateTime dateTime = new DateTime(dateObj);
-                        EventDateTime eventDateTime = new EventDateTime();
-                        eventDateTime.setDateTime(dateTime);
-
-                        //Wait! Lets check now if its in the future and not the past!
-                        if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.endBeforeStart(dateRaw, tz, EventCreator.getCreator().getPreEvent(settings.getGuildID()))) {
-                            //Date shuffling done, now actually apply all that damn stuff here.
-                            EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEndDateTime(eventDateTime);
-
-                            //Apply viewable date/times...
-                            SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            Date dateObjV = sdfV.parse(dateRaw);
-                            DateTime dateTimeV = new DateTime(dateObjV);
-                            EventDateTime eventDateTimeV = new EventDateTime();
-                            eventDateTimeV.setDateTime(dateTimeV);
-                            EventCreator.getCreator().getPreEvent(settings.getGuildID()).setViewableEndDate(eventDateTimeV);
-
-                            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.End.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                            } else {
-                                String msg = MessageManager.getMessage("Creator.Event.End.Success", settings);
-                                msg = msg.replaceAll("%date%", EventMessageFormatter.getHumanReadableDate(eventDateTimeV, settings, true)).replaceAll("%time%", EventMessageFormatter.getHumanReadableTime(eventDateTimeV, settings, true));
-                                MessageManager.sendMessageAsync(msg, event);
-                            }
-                        } else {
-                            //Oops! Time is in the past or before the starting time...
-                            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                                MessageManager.deleteMessage(event);
-                                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.End.Failure.Illegal", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                            } else {
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.End.Failure.Illegal", settings), event);
-                            }
-                        }
-                    } catch (ParseException e) {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Time.Invalid", settings), event);
-                        }
+                        //Invalid format used for time...
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.Start.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleEndDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (args[1].trim().length() > 10) {
+                        return Mono.just(args[1].trim()).flatMap(dateRaw -> {
+                            //Do a lot of date shuffling to get to proper formats and shit like that.
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                            TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            sdf.setTimeZone(tz);
+                            Date dateObj;
+                            try {
+                                dateObj = sdf.parse(dateRaw);
+                            } catch (ParseException e) {
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            }
+                            DateTime dateTime = new DateTime(dateObj);
+                            EventDateTime eventDateTime = new EventDateTime();
+                            eventDateTime.setDateTime(dateTime);
+
+                            //Wait! Lets check now if its in the future and not the past!
+                            if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.endBeforeStart(dateRaw, tz, pre)) {
+                                //Date shuffling done, now actually apply all that damn stuff here.
+                                pre.setEndDateTime(eventDateTime);
+
+                                //Apply viewable date/times...
+                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                                Date dateObjV;
+                                try {
+                                    dateObjV = sdfV.parse(dateRaw);
+                                } catch (ParseException e) {
+                                    return Mono.error(e);
+                                }
+                                DateTime dateTimeV = new DateTime(dateObjV);
+                                EventDateTime eventDateTimeV = new EventDateTime();
+                                eventDateTimeV.setDateTime(dateTimeV);
+                                pre.setViewableEndDate(eventDateTimeV);
+
+                                //Okay, all done, now time send back the creator message..
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(Messages
+                                        .getMessage("Creator.Event.End.Success.New", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            } else {
+                                //Oops! Time is in the past or after end...
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(Messages
+                                        .getMessage("Creator.Event.End.Failure.Illegal", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            }
+                        }).onErrorResume(ParseException.class, e ->
+                            Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings)
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Time.Invalid", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage)));
                     } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Time.InvalidFormat", settings), event);
+                        //Invalid format used for time...
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-            }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.End.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.End.Specify", settings), event);
-            }
-        }
-    }
-
-    private void moduleSummary(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length > 1) {
-            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                String content = GeneralUtils.getContent(args, 1);
-                EventCreator.getCreator().getPreEvent(settings.getGuildID()).setSummary(content);
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Summary.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Summary.Success", "%summary%", GeneralUtils.getContent(args, 1), settings), event);
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.End.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Summary.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Summary.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleDescription(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length > 1) {
+    private Mono<Void> moduleSummary(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                String content = GeneralUtils.getContent(args, 1);
-                EventCreator.getCreator().getPreEvent(settings.getGuildID()).setDescription(content);
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Description.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length > 1) {
+                    pre.setSummary(GeneralUtils.getContent(args, 1));
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages
+                            .getMessage("Creator.Event.Summary.Success.New", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Description.Success", "%description%", content, settings), event);
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages
+                            .getMessage("Creator.Event.Summary.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Description.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Description.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
-            if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors") || value.equalsIgnoreCase("colours")) {
+    private Mono<Void> moduleDescription(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length > 1) {
+                    pre.setDescription(GeneralUtils.getContent(args, 1));
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages
+                            .getMessage("Creator.Event.Description.Success.New", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages
+                            .getMessage("Creator.Event.Description.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    String value = args[1];
+                    if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")
+                        || value.equalsIgnoreCase("colours")) {
+                        Consumer<EmbedCreateSpec> embed = spec -> {
+                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
+                            spec.setTitle("Available Colors");
+                            spec.setUrl("https://discalbot.com/docs/event/colors");
+                            spec.setColor(GlobalConst.discalColor);
+                            spec.setFooter("Click Title for previews of the colors!", null);
+
+                            for (EventColor ec : EventColor.values()) {
+                                spec.addField(ec.name(), ec.getId() + "", true);
+                            }
+                        };
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(Messages.sendMessage("All Supported Colors. " +
+                                "Use either the name or ID in the command: `!event color <name/id>`", embed, event))
+                            .doOnNext(pre::setCreatorMessage);
+                    } else {
+                        if (EventColor.exists(value)) {
+                            pre.setColor(EventColor.fromNameOrHexOrID(value));
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Event.Color.Success.New", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
+                        } else {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Event.Color.Invalid", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
+                        }
+                    }
+                } else {
+                    //Not enough args...
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Color.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
+                }
+            } else {
+                //Not in creator/editor, just default to listing the supported colors.
                 Consumer<EmbedCreateSpec> embed = spec -> {
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
@@ -725,335 +764,307 @@ public class EventCommand implements ICommand {
                         spec.addField(ec.name(), ec.getId() + "", true);
                     }
                 };
-
-
-                if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(event);
-                    MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync("All Supported Colors. Use either the name or ID in the command: `!event color <name/id>`", embed, event));
-                } else {
-                    MessageManager.sendMessageAsync("All Supported Colors. Use either the name or ID in the command: `!event color <name/id>`", embed, event);
-                }
-            } else {
-                if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                    //Attempt to get color.
-                    if (EventColor.exists(value)) {
-                        EventColor color = EventColor.fromNameOrHexOrID(value);
-                        EventCreator.getCreator().getPreEvent(settings.getGuildID()).setColor(color);
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Color.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Color.Success", "%color%", color.name(), settings), event);
-                        }
-                    } else {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Color.Invalid", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Color.Invalid", settings), event);
-                        }
-                    }
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
-                }
+                return Messages.sendMessage("All Supported Colors. " +
+                    "Use either the name or ID in the command: `!event color <name/id>`", embed, event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Color.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Color.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleLocation(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length > 1) {
+    private Mono<Void> moduleLocation(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                String content = GeneralUtils.getContent(args, 1);
-                if (!content.equalsIgnoreCase("clear")) {
-                    EventCreator.getCreator().getPreEvent(settings.getGuildID()).setLocation(content);
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Location.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length > 1) {
+                    if (args[1].equalsIgnoreCase("clear")) {
+                        pre.setLocation(null);
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(Messages
+                                .getMessage("Creator.Event.Location.Success.Clear", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Location.Success", "%location%", content, settings), event);
+                        pre.setLocation(GeneralUtils.getContent(args, 1));
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(Messages
+                                .getMessage("Creator.Event.Location.Success.New", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    EventCreator.getCreator().getPreEvent(settings.getGuildID()).setLocation(null);
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Location.Success.Clear", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Location.Success.Clear", settings), event);
-                    }
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(Messages
+                            .getMessage("Creator.Event.Location.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Location.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Location.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleAttachment(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
+    private Mono<Void> moduleAttachment(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove") || value.equalsIgnoreCase("clear")) {
-                    //Delete picture from event
-                    EventCreator.getCreator().getPreEvent(settings.getGuildID()).setEventData(EventData.empty());
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    String value = args[1].trim();
+                    if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove")
+                        || value.equalsIgnoreCase("clear")) {
+                        pre.setEventData(EventData.empty());
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Attachment.Delete", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Attachment.Delete", settings), event);
-                    }
-                } else if (ImageUtils.validate(value, settings.isPatronGuild())) {
-                    PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                        return ImageUtils.validate(value, settings.isPatronGuild()).flatMap(valid -> {
+                            if (valid) {
+                                PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                    EventData eventData = EventData.fromImage(
-                            settings.getGuildID(),
-                            preEvent.getEventId(),
-                            preEvent.getEndDateTime().getDateTime().getValue(),
-                            value
-                    );
-                    preEvent.setEventData(eventData);
+                                EventData eventData = EventData.fromImage(
+                                    settings.getGuildID(),
+                                    preEvent.getEventId(),
+                                    preEvent.getEndDateTime().getDateTime().getValue(),
+                                    value
+                                );
+                                preEvent.setEventData(eventData);
 
-
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Attachment.Success", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Attachment.Success", settings), event);
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Attachment.Success", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            } else {
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Event.Attachment.Failure", settings), em, event))
+                                    .doOnNext(pre::setCreatorMessage);
+                            }
+                        });
                     }
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Attachment.Failure", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    }
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Attachment.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Attachment.Specify", settings), event);
-        }
+        }).then();
     }
 
     //Event recurrence settings
-    private void moduleRecur(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String valueString = args[1];
+    private Mono<Void> moduleRecur(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
                 PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
-                if (pre.isEditing() && pre.getEventId().contains("_")) {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split("_")[0], settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Failure.Child", "%id%", pre.getEventId().split("_")[0], settings), event);
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    String valueString = args[1];
+                    if (pre.isEditing() && pre.getEventId().contains("_")) {
+                        //This event is a child of a recurring parent. we can't edit it's recurrence
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.Failure.Child",
+                                    "%id%", pre.getEventId().split("_")[0], settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
-                    return;
-                }
-                try {
-                    boolean value = Boolean.parseBoolean(valueString);
-                    EventCreator.getCreator().getPreEvent(settings.getGuildID()).setShouldRecur(value);
-                    if (value) {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.True", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.True", settings), event);
-                        }
+
+                    boolean shouldRecur = Boolean.parseBoolean(valueString);
+                    pre.setShouldRecur(shouldRecur);
+
+                    if (shouldRecur) {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.True", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     } else {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.False", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.False", settings), event);
-                        }
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.False", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
-                } catch (Exception e) {
-                    //Could not convert to boolean
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Failure.Invalid", settings), event);
-                    }
+
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Recur.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleFrequency(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
+    private Mono<Void> moduleFrequency(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).shouldRecur()) {
-                    String value = args[1];
-                    if (EventFrequency.isValid(value)) {
-                        EventFrequency freq = EventFrequency.fromValue(value);
-                        EventCreator.getCreator().getPreEvent(settings.getGuildID()).getRecurrence().setFrequency(freq);
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Frequency.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (pre.shouldRecur()) {
+                        if (EventFrequency.isValid(args[1])) {
+                            pre.getRecurrence().setFrequency(EventFrequency.fromValue(args[1]));
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Event.Frequency.Success.New", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
                         } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Frequency.Success", "%freq%", freq.name(), settings), event);
+                            String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Event.Frequency.List", "%types%", values, settings)
+                                    , em, event))
+                                .doOnNext(pre::setCreatorMessage);
                         }
                     } else {
-                        String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", value, settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Frequency.List", "%types%", values, settings), event);
-                        }
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.Not", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
-                    }
+                    String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings)
+                            , em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Frequency.Specify", "%types%", values, settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleCount(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
+    private Mono<Void> moduleCount(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).shouldRecur()) {
-                    try {
-                        Integer amount = Integer.valueOf(args[1]);
-                        EventCreator.getCreator().getPreEvent(settings.getGuildID()).getRecurrence().setCount(amount);
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Count.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Count.Success", "%count%", amount + "", settings), event);
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (pre.shouldRecur()) {
+                        int amount = 0;
+
+                        try {
+                            Integer.parseInt(args[1]);
+                        } catch (NumberFormatException e) {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Notification.Args.Value.Integer", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
                         }
-                    } catch (NumberFormatException e) {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
-                        }
+
+                        pre.getRecurrence().setCount(amount);
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Count.Success.New", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
+                    } else {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.Not", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
-                    }
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Count.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.NotInit", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Count.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Count.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleInterval(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
+    private Mono<Void> moduleInterval(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                if (EventCreator.getCreator().getPreEvent(settings.getGuildID()).shouldRecur()) {
-                    try {
-                        Integer amount = Integer.valueOf(args[1]);
-                        EventCreator.getCreator().getPreEvent(settings.getGuildID()).getRecurrence().setInterval(amount);
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Interval.Success.New", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Interval.Success", "%amount%", amount + "", settings), event);
+                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (pre.shouldRecur()) {
+                        int amount = 1;
+
+                        try {
+                            Integer.parseInt(args[1]);
+                        } catch (NumberFormatException e) {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Notification.Args.Value.Integer", settings), em, event))
+                                .doOnNext(pre::setCreatorMessage);
                         }
-                    } catch (NumberFormatException e) {
-                        if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(event);
-                            MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
-                        }
+
+                        pre.getRecurrence().setInterval(amount);
+
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Interval.Success.New", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
+                    } else {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Recur.Not", settings), em, event))
+                            .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(event);
-                        MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-                    }
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Recur.Not", settings), event);
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Interval.Specify", settings), em, event))
+                        .doOnNext(pre::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync("Event Creator not initialized!", event);
+                return Messages.sendMessage(Messages.getMessage("Creator.Event.NotInit", settings), event);
             }
-        } else {
-            if (EventCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(event);
-                MessageManager.deleteMessage(EventCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                EventCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Interval.Specify", settings), EventMessageFormatter.getPreEventEmbed(EventCreator.getCreator().getPreEvent(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Event.Interval.Specify", settings), event);
-            }
-        }
+        }).then();
     }
 }

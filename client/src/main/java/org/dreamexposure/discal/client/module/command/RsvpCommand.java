@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
 import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -12,6 +12,7 @@ import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.dreamexposure.discal.core.utils.UserUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -19,14 +20,15 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 8/31/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent")
-public class RsvpCommand implements ICommand {
+public class RsvpCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
      *
@@ -57,9 +59,9 @@ public class RsvpCommand implements ICommand {
     @Override
     public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo(
-                "rsvp",
-                "Confirms attendance to an event",
-                "!rsvp <subCommand> <eventId>"
+            "rsvp",
+            "Confirms attendance to an event",
+            "!rsvp <subCommand> <eventId>"
         );
 
         info.getSubCommands().put("onTime", "Marks you are going to event");
@@ -80,216 +82,282 @@ public class RsvpCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length > 0) {
-            switch (args[0].toLowerCase()) {
-                case "ontime":
-                    moduleGoing(args, event, settings);
-                    break;
-                case "late":
-                    moduleGoingLate(args, event, settings);
-                    break;
-                case "not":
-                    moduleNotGoing(args, event, settings);
-                    break;
-                case "unsure":
-                    moduleUnsure(args, event, settings);
-                    break;
-                case "remove":
-                    moduleRemove(args, event, settings);
-                    break;
-                case "list":
-                    moduleList(args, event, settings);
-                    break;
-                default:
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
-                    break;
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Few", settings), event);
-        }
-        return false;
-    }
-
-    private void moduleGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                if (!TimeUtils.inPast(eventId, settings)) {
-                    RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-                    data.removeCompletely(event.getMember().get().getId().asString());
-                    data.getGoingOnTime().add(event.getMember().get().getId().asString());
-
-                    DatabaseManager.updateRsvpData(data).subscribe();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.going.success", settings), getRsvpEmbed(data, settings), event);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length > 0) {
+                switch (args[0].toLowerCase()) {
+                    case "ontime":
+                        return moduleGoing(args, event, settings);
+                    case "late":
+                        return moduleGoingLate(args, event, settings);
+                    case "not":
+                        return moduleNotGoing(args, event, settings);
+                    case "unsure":
+                        return moduleUnsure(args, event, settings);
+                    case "remove":
+                        return moduleRemove(args, event, settings);
+                    case "list":
+                        return moduleList(args, event, settings);
+                    default:
+                        return Messages.sendMessage(Messages.getMessage("Notification.Args.InvalidSubCmd", settings), event);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
+                return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.going.specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleGoingLate(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                if (!TimeUtils.inPast(eventId, settings)) {
-                    RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-                    data.removeCompletely(event.getMember().get().getId().asString());
-                    data.getGoingLate().add(event.getMember().get().getId().asString());
-
-                    DatabaseManager.updateRsvpData(data).subscribe();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.late.success", settings), getRsvpEmbed(data, settings), event);
+    private Mono<Void> moduleGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.justOrEmpty(event.getMember())
+            .flatMap(mem -> {
+                if (args.length == 2) {
+                    return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                    if (!inPast) {
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .doOnNext(data -> data.getGoingOnTime().add(mem.getId().asString()))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage(
+                                                    Messages.getMessage("RSVP.going.success", settings), embed, event))
+                                            );
+                                    } else {
+                                        return Messages
+                                            .sendMessage(Messages.getMessage("Notifications.Event.InPast", settings), event);
+                                    }
+                                });
+                            } else {
+                                return Messages
+                                    .sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings), event);
+                            }
+                        })
+                    );
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("RSVP.going.specify", settings), event);
                 }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.late.specify", settings), event);
-        }
+            }).then();
     }
 
-    private void moduleNotGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                if (!TimeUtils.inPast(eventId, settings)) {
-                    RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-                    data.removeCompletely(event.getMember().get().getId().asString());
-                    data.getNotGoing().add(event.getMember().get().getId().asString());
-
-                    DatabaseManager.updateRsvpData(data).subscribe();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.not.success", settings), getRsvpEmbed(data, settings), event);
+    private Mono<Void> moduleGoingLate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.justOrEmpty(event.getMember())
+            .flatMap(mem -> {
+                if (args.length == 2) {
+                    return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                    if (!inPast) {
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .doOnNext(data -> data.getGoingLate().add(mem.getId().asString()))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage(
+                                                    Messages.getMessage("RSVP.late.success", settings), embed, event))
+                                            );
+                                    } else {
+                                        return Messages
+                                            .sendMessage(Messages.getMessage("Notifications.Event.InPast", settings), event);
+                                    }
+                                });
+                            } else {
+                                return Messages
+                                    .sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings), event);
+                            }
+                        })
+                    );
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("RSVP.late.specify", settings), event);
                 }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.not.specify", settings), event);
-        }
+            }).then();
     }
 
-    private void moduleRemove(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                if (!TimeUtils.inPast(eventId, settings)) {
-                    RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-                    data.removeCompletely(event.getMember().get().getId().asString());
-
-                    DatabaseManager.updateRsvpData(data).subscribe();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.remove.success", settings), getRsvpEmbed(data, settings), event);
+    private Mono<Void> moduleNotGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.justOrEmpty(event.getMember())
+            .flatMap(mem -> {
+                if (args.length == 2) {
+                    return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                    if (!inPast) {
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .doOnNext(data -> data.getNotGoing().add(mem.getId().asString()))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage(
+                                                    Messages.getMessage("RSVP.not.success", settings), embed, event))
+                                            );
+                                    } else {
+                                        return Messages
+                                            .sendMessage(Messages.getMessage("Notifications.Event.InPast", settings), event);
+                                    }
+                                });
+                            } else {
+                                return Messages
+                                    .sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings), event);
+                            }
+                        })
+                    );
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("RSVP.not.specify", settings), event);
                 }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.remove.specify", settings), event);
-        }
+            }).then();
     }
 
-    private void moduleUnsure(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                if (!TimeUtils.inPast(eventId, settings)) {
-                    RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-                    data.removeCompletely(event.getMember().get().getId().asString());
-                    data.getUndecided().add(event.getMember().get().getId().asString());
-
-                    DatabaseManager.updateRsvpData(data).subscribe();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.unsure.success", settings), getRsvpEmbed(data, settings), event);
+    private Mono<Void> moduleRemove(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.justOrEmpty(event.getMember())
+            .flatMap(mem -> {
+                if (args.length == 2) {
+                    return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                    if (!inPast) {
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage(
+                                                    Messages.getMessage("RSVP.remove.success", settings), embed, event))
+                                            );
+                                    } else {
+                                        return Messages
+                                            .sendMessage(Messages.getMessage("Notifications.Event.InPast", settings), event);
+                                    }
+                                });
+                            } else {
+                                return Messages
+                                    .sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings), event);
+                            }
+                        })
+                    );
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.InPast", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("RSVP.remove.specify", settings), event);
                 }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NotExist", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.unsure.specify", settings), event);
-        }
+            }).then();
     }
 
-    private void moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String eventId = args[1];
-            if (EventUtils.eventExists(settings, eventId)) {
-                RsvpData data = DatabaseManager.getRsvpData(settings.getGuildID(), eventId).block();
-
-                MessageManager.sendMessageAsync(getRsvpEmbed(data, settings), event);
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notifications.Event.NoExist", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("RSVP.list.specify", settings), event);
-        }
+    private Mono<Void> moduleUnsure(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.justOrEmpty(event.getMember())
+            .flatMap(mem -> {
+                if (args.length == 2) {
+                    return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                    if (!inPast) {
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .doOnNext(data -> data.getUndecided().add(mem.getId().asString()))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage(
+                                                    Messages.getMessage("RSVP.unsure.success", settings), embed, event))
+                                            );
+                                    } else {
+                                        return Messages
+                                            .sendMessage(Messages.getMessage("Notifications.Event.InPast", settings), event);
+                                    }
+                                });
+                            } else {
+                                return Messages
+                                    .sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings), event);
+                            }
+                        })
+                    );
+                } else {
+                    return Messages.sendMessage(Messages.getMessage("RSVP.unsure.specify", settings), event);
+                }
+            }).then();
     }
 
 
-    private Consumer<EmbedCreateSpec> getRsvpEmbed(RsvpData data, GuildSettings settings) {
-        return spec -> {
-            Guild g = DisCalClient.getClient().getGuildById(settings.getGuildID()).block();
-
-            if (settings.isBranded() && g != null)
-                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
-            else
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-
-            spec.setTitle(MessageManager.getMessage("Embed.RSVP.List.Title", settings));
-            spec.addField("Event ID", data.getEventId(), false);
-
-            StringBuilder onTime = new StringBuilder();
-            for (Member u : UserUtils.getUsers(data.getGoingOnTime(), g)) {
-                onTime.append(u.getDisplayName()).append(", ");
+    private Mono<Void> moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 2) {
+                return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                .flatMap(data -> getRsvpEmbed(data, settings))
+                                .flatMap(embed -> Messages.sendMessage(embed, event));
+                        } else {
+                            return Messages
+                                .sendMessage(Messages.getMessage("Notifications.Event.NoExist", settings), event);
+                        }
+                    }));
+            } else {
+                return Messages.sendMessage(Messages.getMessage("RSVP.list.specify", settings), event);
             }
+        }).then();
+    }
 
-            StringBuilder late = new StringBuilder();
-            for (Member u : UserUtils.getUsers(data.getGoingLate(), g)) {
-                late.append(u.getDisplayName()).append(", ");
-            }
 
-            StringBuilder unsure = new StringBuilder();
-            for (Member u : UserUtils.getUsers(data.getUndecided(), g)) {
-                unsure.append(u.getDisplayName()).append(", ");
-            }
+    private Mono<Consumer<EmbedCreateSpec>> getRsvpEmbed(RsvpData data, GuildSettings settings) {
+        Mono<Guild> guildMono = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
-            StringBuilder notGoing = new StringBuilder();
-            for (Member u : UserUtils.getUsers(data.getNotGoing(), g)) {
-                notGoing.append(u.getDisplayName()).append(", ");
-            }
+        Mono<List<Member>> onTimeMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingOnTime(), g));
+        Mono<List<Member>> lateMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingLate(), g));
+        Mono<List<Member>> undecidedMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getUndecided(), g));
+        Mono<List<Member>> notGoingMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getNotGoing(), g));
 
-            if (onTime.toString().isEmpty())
-                spec.addField("On time", "N/a", true);
-            else
-                spec.addField("On Time", onTime.toString(), true);
+        return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono)
+            .map(TupleUtils.function((guild, onTime, late, undecided, notGoing) -> spec -> {
+                if (settings.isBranded())
+                    spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                else
+                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-            if (late.toString().isEmpty())
-                spec.addField("Late", "N/a", true);
-            else
-                spec.addField("Late", late.toString(), true);
+                spec.setTitle(Messages.getMessage("Embed.RSVP.List.Title", settings));
+                spec.addField("Event ID", data.getEventId(), false);
 
-            if (unsure.toString().isEmpty())
-                spec.addField("Unsure", "N/a", true);
-            else
-                spec.addField("Unsure", unsure.toString(), true);
+                StringBuilder onTimeBuilder = new StringBuilder();
+                for (Member u : onTime) {
+                    onTimeBuilder.append(u.getDisplayName()).append(", ");
+                }
 
-            if (notGoing.toString().isEmpty())
-                spec.addField("Not Going", "N/a", true);
-            else
-                spec.addField("Not Going", notGoing.toString(), true);
+                StringBuilder lateBuilder = new StringBuilder();
+                for (Member u : late) {
+                    lateBuilder.append(u.getDisplayName()).append(", ");
+                }
 
-            spec.setFooter(MessageManager.getMessage("Embed.RSVP.List.Footer", settings), null);
-            spec.setColor(GlobalConst.discalColor);
-        };
+                StringBuilder unsureBuilder = new StringBuilder();
+                for (Member u : undecided) {
+                    unsureBuilder.append(u.getDisplayName()).append(", ");
+                }
+
+                StringBuilder notGoingBuilder = new StringBuilder();
+                for (Member u : notGoing) {
+                    notGoingBuilder.append(u.getDisplayName()).append(", ");
+                }
+
+                if (onTimeBuilder.toString().isEmpty())
+                    spec.addField("On time", "N/a", true);
+                else
+                    spec.addField("On Time", onTimeBuilder.toString(), true);
+
+                if (lateBuilder.toString().isEmpty())
+                    spec.addField("Late", "N/a", true);
+                else
+                    spec.addField("Late", lateBuilder.toString(), true);
+
+                if (unsureBuilder.toString().isEmpty())
+                    spec.addField("Unsure", "N/a", true);
+                else
+                    spec.addField("Unsure", unsureBuilder.toString(), true);
+
+                if (notGoingBuilder.toString().isEmpty())
+                    spec.addField("Not Going", "N/a", true);
+                else
+                    spec.addField("Not Going", notGoingBuilder.toString(), true);
+
+                spec.setFooter(Messages.getMessage("Embed.RSVP.List.Footer", settings), null);
+                spec.setColor(GlobalConst.discalColor);
+            }));
     }
 }

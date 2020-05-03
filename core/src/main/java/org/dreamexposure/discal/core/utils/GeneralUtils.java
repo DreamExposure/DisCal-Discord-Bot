@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.utils;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -8,6 +9,21 @@ import java.util.Random;
  * For Project: DisCal-Discord-Bot
  */
 public class GeneralUtils {
+    /**
+     * Gets the contents of the message at a set offset.
+     *
+     * @param args   The args of the command.
+     * @param offset The offset in the string.
+     * @return The contents of the message at a set offset.
+     */
+    public static String getContent(List<String> args, int offset) {
+        StringBuilder content = new StringBuilder();
+        for (int i = offset; i < args.size(); i++) {
+            content.append(args.get(i)).append(" ");
+        }
+        return content.toString().trim();
+    }
+
     /**
      * Gets the contents of the message at a set offset.
      *

@@ -14,6 +14,7 @@ public class JsonUtils {
         return "{\"message\": \"" + msg + "\"}";
     }
 
+    //TODO: rewrite to non-blocking
     public static JSONObject convertEventToJson(Event event, GuildSettings settings) {
         JSONObject json = new JSONObject();
 

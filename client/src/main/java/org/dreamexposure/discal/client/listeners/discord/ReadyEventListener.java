@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -21,8 +21,8 @@ import reactor.core.publisher.Mono;
 public class ReadyEventListener {
     public static Mono<Void> handle(ReadyEvent event) {
         return event.getClient().getApplicationInfo()
-                .doOnNext(info -> GlobalConst.iconUrl = info.getIconUrl(Image.Format.PNG).get())
-                .doOnNext(info -> MessageManager.reloadLangs())
+            .doOnNext(info -> GlobalConst.iconUrl = info.getIconUrl(Image.Format.PNG).get())
+            .doOnNext(info -> Messages.reloadLangs())
                 .doOnNext(info ->
                         LogFeed.log(LogObject.forDebug("[ReadyEvent]",
                                 "Connection success! Session ID: " + event.getSessionId()))

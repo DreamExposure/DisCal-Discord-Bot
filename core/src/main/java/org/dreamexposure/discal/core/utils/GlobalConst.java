@@ -1,12 +1,37 @@
 package org.dreamexposure.discal.core.utils;
 
+import org.springframework.core.io.ClassPathResource;
+
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import discord4j.rest.util.Snowflake;
 import okhttp3.MediaType;
 
 public class GlobalConst {
-    public static final String version = "3.0.0";
+    static {
+        String version1;
+        String d4jVersion1;
+
+        ClassPathResource resource = new ClassPathResource("application.properties");
+        Properties p = new Properties();
+        try (InputStream inputStream = resource.getInputStream()) {
+            p.load(inputStream);
+
+            version1 = p.getProperty("application.version");
+            d4jVersion1 = "Discord4J v" + p.getProperty("library.discord4j.version");
+        } catch (IOException e) {
+            version1 = "Unknown";
+            d4jVersion1 = "Unknown";
+        }
+        version = version1;
+        d4jVersion = d4jVersion1;
+    }
+
+    public static final String version;
+    public static final String d4jVersion;
 
     public static String iconUrl;
     public static final String lineBreak = System.getProperty("line.separator");

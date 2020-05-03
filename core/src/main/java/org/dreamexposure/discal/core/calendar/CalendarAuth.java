@@ -12,6 +12,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 
 import org.dreamexposure.discal.core.crypto.AESEncryption;
@@ -20,11 +21,14 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -80,44 +84,61 @@ public class CalendarAuth {
      * Creates an authorized Credential object.
      *
      * @return an authorized Credential object.
-     * @throws IOException In the event authorization fails.
      */
-    private static Credential authorize() throws IOException {
-        // Load client secrets.
-        //InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json"); <- in case it breaks, this is still here
-        InputStream in = new FileInputStream(new File("client_secret.json"));
-        GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+    private static Mono<Credential> authorize() {
+        return Mono.fromCallable(() -> {
+            // Load client secrets.
+            //InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json"); <- in case it breaks, this is still here
+            InputStream in = new FileInputStream(new File("client_secret.json"));
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+            // Build flow and trigger user authorization request.
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+            Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 
-        //Try to close input stream since I don't think it was ever closed?
-        in.close();
+            //Try to close input stream since I don't think it was ever closed?
+            in.close();
 
-        return credential;
+            return credential;
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    private static Credential authorize(GuildSettings g) throws Exception {
-        if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a"))
-            throw new IllegalAccessException("Guild does not have proper access token!");
+    @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
+    private static Mono<Credential> authorize(GuildSettings g) {
+        return Mono.fromCallable(() -> {
+            if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a"))
+                return null;
 
+            AESEncryption encryption = new AESEncryption(g);
+            String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
 
-        AESEncryption encryption = new AESEncryption(g);
-        String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
-
-        GoogleCredential credential = new GoogleCredential();
-        credential.setAccessToken(accessToken);
-        return credential;
+            Credential credential = new GoogleCredential();
+            credential.setAccessToken(accessToken);
+            return credential;
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    public static com.google.api.services.calendar.Calendar getCalendarService(GuildSettings g) throws Exception {
-        if (g != null && g.useExternalCalendar()) {
-            Credential credential = authorize(g);
-            return new com.google.api.services.calendar.Calendar.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential).setApplicationName(APPLICATION_NAME).build();
-        } else {
-            Credential credential = authorize();
-            return new com.google.api.services.calendar.Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
-        }
+    public static Mono<Calendar> getCalendarService(GuildSettings g) {
+        return Mono.fromCallable(() -> {
+            if (g == null) {
+                return authorize().map(cred ->
+                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
+                        .setApplicationName(APPLICATION_NAME)
+                        .build());
+            }
+
+            if (g.useExternalCalendar()) {
+                return authorize(g).map(cred ->
+                    new Calendar.
+                        Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
+                        .setApplicationName(APPLICATION_NAME)
+                        .build());
+            } else {
+                return authorize().map(cred ->
+                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
+                        .setApplicationName(APPLICATION_NAME)
+                        .build());
+            }
+        }).flatMap(Function.identity());
     }
 }

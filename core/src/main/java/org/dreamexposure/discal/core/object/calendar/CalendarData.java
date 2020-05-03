@@ -27,7 +27,7 @@ public class CalendarData {
     }
 
     public static CalendarData empty() {
-        return new CalendarData(Snowflake.of(0), 1, "primary", "primary", false);
+        return new CalendarData(Snowflake.of(0), 0, "primary", "primary", false);
     }
 
     private final Snowflake guildId;

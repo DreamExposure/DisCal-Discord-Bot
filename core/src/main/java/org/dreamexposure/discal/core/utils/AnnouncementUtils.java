@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import java.util.UUID;
 
 import discord4j.rest.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -18,12 +19,10 @@ public class AnnouncementUtils {
      * @param value The announcement ID.
      * @return <code>true</code> if the announcement exists, else <code>false</code>.
      */
-    public static Boolean announcementExists(String value, Snowflake guildId) {
-        try {
-            UUID id = UUID.fromString(value);
-            return DatabaseManager.getAnnouncement(id, guildId).block() != null;
-        } catch (Exception e) {
-            return false;
-        }
+    public static Mono<Boolean> announcementExists(String value, Snowflake guildId) {
+        return Mono.just(UUID.fromString(value))
+            .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId)
+                .hasElement())
+            .onErrorReturn(false); //If there's an error because of a bad value
     }
 }

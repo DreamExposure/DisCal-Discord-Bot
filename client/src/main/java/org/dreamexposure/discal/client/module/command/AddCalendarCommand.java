@@ -1,31 +1,27 @@
 package org.dreamexposure.discal.client.module.command;
 
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.CalendarListEntry;
-
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 6/29/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent"})
-public class AddCalendarCommand implements ICommand {
+public class AddCalendarCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
      *
@@ -59,9 +55,9 @@ public class AddCalendarCommand implements ICommand {
     @Override
     public CommandInfo getCommandInfo() {
         return new CommandInfo(
-                "addCalendar",
-                "Starts the process of adding an external calendar",
-                "!addCalendar (calendar ID)"
+            "addCalendar",
+            "Starts the process of adding an external calendar",
+            "!addCalendar (calendar ID)"
         );
     }
 
@@ -73,65 +69,66 @@ public class AddCalendarCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (settings.isDevGuild() || settings.isPatronGuild()) {
-            if (PermissionChecker.hasManageServerRole(event).blockOptional().orElse(false)) {
-                if (args.length == 0) {
-                    if (DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress().equalsIgnoreCase("primary")) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Start", settings), event);
-                        GoogleExternalAuth.getAuth().requestCode(event, settings);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                    }
-                } else if (args.length == 1) {
-                    //Check if arg is calendar ID that is supported, if so, complete the setup.
-                    if (!DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress().equalsIgnoreCase("primary")) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                    } else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a") && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.NotAuth", settings), event);
-                    } else {
-                        try {
-                            Calendar service = CalendarAuth.getCalendarService(settings);
-                            List<CalendarListEntry> items = service.calendarList().list().setMinAccessRole("writer").execute().getItems();
-                            boolean valid = false;
-                            for (CalendarListEntry i : items) {
-                                if (!i.isDeleted() && i.getId().equals(args[0])) {
-                                    //valid
-                                    valid = true;
-                                    break;
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.just(settings)
+            .filter(s -> s.isDevGuild() || s.isPatronGuild())
+            .flatMap(s -> PermissionChecker.hasManageServerRole(event)
+                .filter(identity -> identity)
+                .flatMap(ignore -> {
+                    if (args.length == 0) {
+                        return DatabaseManager.getMainCalendar(settings.getGuildID())
+                            .hasElement()
+                            .flatMap(hasCal -> {
+                                if (hasCal) {
+                                    return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                                } else {
+                                    GoogleExternalAuth.getAuth().requestCode(event, settings);
+                                    return Messages.sendMessage(Messages.getMessage("AddCalendar.Start", settings), event);
                                 }
-                            }
-                            if (valid) {
-                                //Update and save.
-                                CalendarData data = CalendarData.fromData(settings.getGuildID(),
-                                        1, args[0], args[0], true);
+                            });
+                    } else if (args.length == 1) {
+                        return DatabaseManager.getMainCalendar(settings.getGuildID())
+                            .hasElement()
+                            .flatMap(hasCal -> {
+                                if (hasCal) {
+                                    return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                                } else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a")
+                                    && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
+                                    return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
+                                } else {
+                                    return CalendarWrapper.getUsersExternalCalendars(settings)
+                                        .flatMapMany(Flux::fromIterable)
+                                        .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
+                                        .flatMap(valid -> {
+                                            if (valid) {
+                                                CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
+                                                    args[0], args[0], true);
 
-                                DatabaseManager.updateCalendar(data).subscribe();
+                                                //update guild settings to reflect changes...
+                                                settings.setUseExternalCalendar(true);
 
-                                //Update guild settings
-                                settings.setUseExternalCalendar(true);
-                                DatabaseManager.updateSettings(settings).subscribe();
+                                                //combine db calls and message send to be executed together async
+                                                Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
+                                                Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
+                                                Mono<Message> sendMsg = Messages.sendMessage(
+                                                    Messages.getMessage("AddCalendar.Select.Success", settings), event);
 
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Success", settings), event);
-                            } else {
-                                //Invalid
-                                MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
-                            }
-                        } catch (Exception e) {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Select.Failure.Unknown", settings), event);
-                            LogFeed.log(LogObject.forException("Failed to connect external cal", e,
-                                    this.getClass()));
-                        }
+                                                return Mono.when(calInsert, settingsUpdate, sendMsg);
+                                            } else {
+                                                return Messages.sendMessage(Messages
+                                                    .getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
+                                            }
+                                        });
+                                }
+                            });
+                    } else {
+                        //Invalid argument count...
+                        return Messages.sendMessage(Messages.getMessage("AddCalendar.Specify", settings), event);
                     }
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("AddCalendar.Specify", settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Patron", settings), event);
-        }
-        return false;
+                })
+                .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
+            )
+            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event))
+            .then();
     }
 }

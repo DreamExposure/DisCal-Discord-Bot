@@ -1,301 +1,209 @@
 package org.dreamexposure.discal.client.event;
 
-import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.utils.EventUtils;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import discord4j.rest.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"Duplicates", "ConstantConditions"})
 public class EventCreator {
-    private static EventCreator instance;
+    static {
+        instance = new EventCreator();
+    }
 
+    private static final EventCreator instance;
     private final ArrayList<PreEvent> events = new ArrayList<>();
 
     private EventCreator() {
     } //Prevent initialization.
 
-    /**
-     * Gets the instance of the EventCreator.
-     *
-     * @return The instance of the EventCreator
-     */
     public static EventCreator getCreator() {
-        if (instance == null)
-            instance = new EventCreator();
         return instance;
     }
 
     //Functional
-
-    /**
-     * Initiates the EventCreator for a specific guild.
-     *
-     * @param e The event received upon initialization.
-     * @return The PreEvent for the guild.
-     */
-    public PreEvent init(MessageCreateEvent e, GuildSettings settings, boolean handleMessage) {
+    public Mono<PreEvent> init(MessageCreateEvent e, GuildSettings settings) {
         if (!hasPreEvent(settings.getGuildID())) {
-            PreEvent event = new PreEvent(settings.getGuildID());
-            try {
-                //TODO: Handle multiple calendars...
-                String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
-                event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
-            } catch (Exception exc) {
-                //Failed to get timezone, ignore safely.
-            }
-            if (handleMessage) {
-                if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
-                    Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
-                    event.setCreatorMessage(message);
-                    MessageManager.deleteMessage(e);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
-                }
-            }
+            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+                .flatMap(calData -> {
+                    PreEvent event = new PreEvent(settings.getGuildID());
+                    events.add(event);
 
-            events.add(event);
-            return event;
+                    return CalendarWrapper.getCalendar(calData, settings)
+                        .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                        .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
+                        .flatMap(embed -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Copy.Init", settings), embed, e))
+                        .doOnNext(event::setCreatorMessage)
+                        .thenReturn(event);
+                });
         }
-        return getPreEvent(settings.getGuildID());
+        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
     }
 
-    public PreEvent init(MessageCreateEvent e, GuildSettings settings, String summary, boolean handleMessage) {
+    public Mono<PreEvent> init(MessageCreateEvent e, GuildSettings settings, String summary) {
         if (!hasPreEvent(settings.getGuildID())) {
-            PreEvent event = new PreEvent(settings.getGuildID());
-            event.setSummary(summary);
-            try {
-                //TODO: Handle multiple calendars...
-                String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
+            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+                .flatMap(calData -> {
+                    PreEvent event = new PreEvent(settings.getGuildID());
+                    event.setSummary(summary);
 
-                event.setTimeZone(CalendarAuth.getCalendarService(settings).calendars().get(calId).execute().getTimeZone());
-            } catch (Exception exc) {
-                //Failed to get timezone, ignore safely.
-            }
-            if (handleMessage) {
-                if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
-                    Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Create.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
-                    event.setCreatorMessage(message);
-                    MessageManager.deleteMessage(e);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
-                }
-            }
+                    events.add(event);
 
-            events.add(event);
-            return event;
+                    return CalendarWrapper.getCalendar(calData, settings)
+                        .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                        .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
+                        .flatMap(embed -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Event.Create.Init", settings), embed, e))
+                        .doOnNext(event::setCreatorMessage)
+                        .thenReturn(event);
+                });
         }
-        return getPreEvent(settings.getGuildID());
+        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
     }
 
     //Copy event
-    public PreEvent init(MessageCreateEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
+    public Mono<PreEvent> init(MessageCreateEvent e, String eventId, GuildSettings settings) {
         if (!hasPreEvent(settings.getGuildID())) {
-            //TODO: Handle multiple calendars...
-            try {
-                String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
-                Calendar service = CalendarAuth.getCalendarService(settings);
+            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+                .flatMap(calData -> EventWrapper.getEvent(calData, settings, eventId)
+                    .flatMap(toCopy -> {
+                        PreEvent event = new PreEvent(settings.getGuildID(), toCopy);
 
-                Event calEvent = service.events().get(calId, eventId).execute();
+                        events.add(event);
 
-                PreEvent event = EventUtils.copyEvent(settings.getGuildID(), calEvent);
-
-                try {
-                    event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
-                } catch (IOException e1) {
-                    //Failed to get tz, ignore safely.
-                }
-
-                if (handleMessage) {
-                    if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
-                        Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Copy.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
-                        event.setCreatorMessage(message);
-                        MessageManager.deleteMessage(e);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
-                    }
-                }
-
-                events.add(event);
-                return event;
-            } catch (Exception exc) {
-                //Something failed...
-            }
-            return null;
+                        return CalendarWrapper.getCalendar(calData, settings)
+                            .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                            .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
+                            .flatMap(embed -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Copy.Init", settings), embed, e))
+                            .doOnNext(event::setCreatorMessage)
+                            .thenReturn(event);
+                    }));
         }
-        return getPreEvent(settings.getGuildID());
+        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
     }
 
-    public PreEvent edit(MessageCreateEvent e, String eventId, GuildSettings settings, boolean handleMessage) {
+    public Mono<PreEvent> edit(MessageCreateEvent e, String eventId, GuildSettings settings) {
         if (!hasPreEvent(settings.getGuildID())) {
-            //TODO: Handle multiple calendars...
-            try {
-                String calId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
-                Calendar service = CalendarAuth.getCalendarService(settings);
+            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+                .flatMap(calData -> EventWrapper.getEvent(calData, settings, eventId)
+                    .flatMap(toEdit -> {
+                        PreEvent event = new PreEvent(settings.getGuildID(), toEdit);
+                        event.setEditing(true);
 
-                Event calEvent = service.events().get(calId, eventId).execute();
+                        events.add(event);
 
-                PreEvent event = new PreEvent(settings.getGuildID(), calEvent);
-                event.setEditing(true);
-
-                try {
-                    event.setTimeZone(service.calendars().get(calId).execute().getTimeZone());
-                } catch (IOException ignore) {
-                    //Failed to get tz, ignore safely.
-                }
-
-                if (handleMessage) {
-                    if (PermissionChecker.botHasMessageManagePerms(e).blockOptional().orElse(false)) {
-                        Message message = MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Event.Edit.Init", settings), EventMessageFormatter.getPreEventEmbed(event, settings), e);
-                        event.setCreatorMessage(message);
-                        MessageManager.deleteMessage(e);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Notif.MANAGE_MESSAGES", settings), e);
-                    }
-                }
-
-                events.add(event);
-                return event;
-            } catch (Exception exc) {
-                //Oops
-            }
-            return null;
+                        return CalendarWrapper.getCalendar(calData, settings)
+                            .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                            .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
+                            .flatMap(embed -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Event.Edit.Init", settings), embed, e))
+                            .doOnNext(event::setCreatorMessage)
+                            .thenReturn(event);
+                    }));
         }
-        return getPreEvent(settings.getGuildID());
+        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
     }
 
-    public boolean terminate(Snowflake guildId) {
-        if (hasPreEvent(guildId)) {
-            events.remove(getPreEvent(guildId));
-            return true;
-        }
-        return false;
+    public void terminate(Snowflake guildId) {
+        events.remove(getPreEvent(guildId));
     }
 
-    /**
-     * Confirms the event in the creator for the specific guild.
-     *
-     * @param e The event received upon confirmation.
-     * @return The response containing detailed info about the confirmation.
-     */
-    public EventCreatorResponse confirmEvent(MessageCreateEvent e, GuildSettings settings) {
-        if (hasPreEvent(settings.getGuildID())) {
-            PreEvent preEvent = getPreEvent(settings.getGuildID());
-            if (preEvent.hasRequiredValues()) {
-                Event event = new Event();
-                event.setSummary(preEvent.getSummary());
-                event.setDescription(preEvent.getDescription());
-                event.setStart(preEvent.getStartDateTime().setTimeZone(preEvent.getTimeZone()));
-                event.setEnd(preEvent.getEndDateTime().setTimeZone(preEvent.getTimeZone()));
-                event.setVisibility("public");
-                if (!preEvent.getColor().equals(EventColor.NONE))
-                    event.setColorId(String.valueOf(preEvent.getColor().getId()));
+    public Mono<EventCreatorResponse> confirmEvent(GuildSettings settings) {
+        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()))
+            .filter(PreEvent::hasRequiredValues)
+            .flatMap(pre ->
+                DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: Add multi-cal support
+                    .flatMap(calData -> {
+                        Event event = new Event();
+                        event.setSummary(pre.getSummary());
+                        event.setDescription(pre.getDescription());
+                        event.setStart(pre.getStartDateTime().setTimeZone(pre.getTimeZone()));
+                        event.setEnd(pre.getEndDateTime().setTimeZone(pre.getTimeZone()));
+                        event.setVisibility("public");
+                        if (!pre.getColor().equals(EventColor.NONE))
+                            event.setColorId(String.valueOf(pre.getColor().getId()));
 
-                if (preEvent.getLocation() != null && !preEvent.getLocation().equalsIgnoreCase(""))
-                    event.setLocation(preEvent.getLocation());
+                        if (pre.getLocation() != null && !pre.getLocation().equalsIgnoreCase(""))
+                            event.setLocation(pre.getLocation());
 
-
-                //Set recurrence
-                if (preEvent.shouldRecur()) {
-                    String[] recurrence = new String[]{preEvent.getRecurrence().toRRule()};
-                    event.setRecurrence(Arrays.asList(recurrence));
-                }
-
-                //TODO handle multiple calendars...
-                String calendarId = DatabaseManager.getMainCalendar(settings.getGuildID()).block().getCalendarAddress();
-
-                if (!preEvent.isEditing()) {
-                    event.setId(KeyGenerator.generateEventId());
-                    try {
-                        Event confirmed = CalendarAuth.getCalendarService(settings).events().insert(calendarId, event).execute();
-
-                        if (preEvent.getEventData().shouldBeSaved()) {
-                            EventData toSave = EventData.fromImage(
-                                    settings.getGuildID(),
-                                    confirmed.getId(),
-                                    confirmed.getEnd().getDateTime().getValue(),
-                                    preEvent.getEventData().getImageLink()
-                            );
-
-                            DatabaseManager.updateEventData(toSave).subscribe();
-                        }
-                        EventCreatorResponse response = new EventCreatorResponse(true, confirmed,
-                                getCreatorMessage(settings.getGuildID()), false);
-
-                        terminate(settings.getGuildID());
-                        return response;
-                    } catch (Exception ex) {
-                        LogFeed.log(LogObject
-                                .forException("Failed to create event", ex, this.getClass()));
-
-                        return new EventCreatorResponse(false, null,
-                                getCreatorMessage(settings.getGuildID()), false);
-                    }
-                } else {
-                    try {
-                        Event confirmed = CalendarAuth.getCalendarService(settings).events().update(calendarId, preEvent.getEventId(), event).execute();
-
-                        if (preEvent.getEventData().shouldBeSaved()) {
-                            EventData toSave = EventData.fromImage(
-                                    settings.getGuildID(),
-                                    confirmed.getId(),
-                                    confirmed.getEnd().getDateTime().getValue(),
-                                    preEvent.getEventData().getImageLink()
-                            );
-
-                            DatabaseManager.updateEventData(toSave).subscribe();
+                        //Set recurrence
+                        if (pre.shouldRecur()) {
+                            String[] recurrence = new String[]{pre.getRecurrence().toRRule()};
+                            event.setRecurrence(Arrays.asList(recurrence));
                         }
 
-                        EventCreatorResponse response = new EventCreatorResponse(true, confirmed,
-                                getCreatorMessage(settings.getGuildID()), true);
+                        if (!pre.isEditing()) {
+                            event.setId(KeyGenerator.generateEventId());
 
-                        terminate(settings.getGuildID());
-                        return response;
-                    } catch (Exception ex) {
-                        LogFeed.log(LogObject
-                                .forException("Failed to update event", ex, this.getClass()));
-                        return new EventCreatorResponse(false, null,
-                                getCreatorMessage(settings.getGuildID()), true);
-                    }
-                }
-            }
-        }
-        return new EventCreatorResponse(false, null, null, false);
+                            return EventWrapper.createEvent(calData, event, settings)
+                                .flatMap(confirmed -> {
+                                    EventCreatorResponse response = new EventCreatorResponse(true,
+                                        confirmed, pre.getCreatorMessage(), false);
+
+                                    EventData eventData = EventData.fromImage(
+                                        settings.getGuildID(),
+                                        confirmed.getId(),
+                                        confirmed.getEnd().getDateTime().getValue(),
+                                        pre.getEventData().getImageLink()
+                                    );
+
+                                    terminate(settings.getGuildID());
+
+                                    return Mono.just(eventData)
+                                        .filter(EventData::shouldBeSaved)
+                                        .flatMap(DatabaseManager::updateEventData)
+                                        .thenReturn(response);
+                                }).defaultIfEmpty(new EventCreatorResponse(false, null,
+                                    pre.getCreatorMessage(), false));
+                        } else {
+                            return EventWrapper.updateEvent(calData, event, settings)
+                                .flatMap(confirmed -> {
+                                    EventCreatorResponse response = new EventCreatorResponse(true,
+                                        confirmed, pre.getCreatorMessage(), true);
+
+                                    EventData eventData = EventData.fromImage(
+                                        settings.getGuildID(),
+                                        confirmed.getId(),
+                                        confirmed.getEnd().getDateTime().getValue(),
+                                        pre.getEventData().getImageLink()
+                                    );
+
+                                    terminate(settings.getGuildID());
+
+                                    return Mono.just(eventData)
+                                        .filter(EventData::shouldBeSaved)
+                                        .flatMap(DatabaseManager::updateEventData)
+                                        .thenReturn(response);
+                                }).defaultIfEmpty(new EventCreatorResponse(false, null,
+                                    pre.getCreatorMessage(), true));
+                        }
+                    })
+            ).defaultIfEmpty(new EventCreatorResponse(false, null, null, false));
     }
 
     //Getters
-
-    /**
-     * gets the PreEvent for the specified guild.
-     *
-     * @param guildId The ID of the guild.
-     * @return The PreEvent belonging to the guild.
-     */
     public PreEvent getPreEvent(Snowflake guildId) {
         for (PreEvent e : events) {
             if (e.getGuildId().equals(guildId)) {
@@ -306,39 +214,16 @@ public class EventCreator {
         return null;
     }
 
-    public Message getCreatorMessage(Snowflake guildId) {
-        if (hasPreEvent(guildId))
-            return getPreEvent(guildId).getCreatorMessage();
-        return null;
-    }
-
     public ArrayList<PreEvent> getAllPreEvents() {
         return events;
     }
 
     //Booleans/Checkers
-
-    /**
-     * Checks if the specified guild has a PreEvent in the creator.
-     *
-     * @param guildId The ID of the guild.
-     * @return <code>true</code> if a PreEvent exists, otherwise <code>false</code>.
-     */
     public boolean hasPreEvent(Snowflake guildId) {
         for (PreEvent e : events) {
             if (e.getGuildId().equals(guildId))
                 return true;
         }
         return false;
-    }
-
-    public boolean hasCreatorMessage(Snowflake guildId) {
-        return hasPreEvent(guildId) && getPreEvent(guildId).getCreatorMessage() != null;
-    }
-
-    //Setters
-    public void setCreatorMessage(Message msg) {
-        if (msg != null && hasPreEvent(msg.getGuild().block().getId()))
-            getPreEvent(msg.getGuild().block().getId()).setCreatorMessage(msg);
     }
 }

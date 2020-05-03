@@ -24,11 +24,9 @@ public class AnnouncementThreader {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                new Thread(() -> {
-                    AnnouncementThread at = new AnnouncementThread();
-                    at.setDaemon(true);
-                    at.start();
-                }).start();
+                AnnouncementThread t = new AnnouncementThread();
+                t.setDaemon(true);
+                t.start();
             }
         }, 5 * 1000 * 60, 5 * 1000 * 60);
     }

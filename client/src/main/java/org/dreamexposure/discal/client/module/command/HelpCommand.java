@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.module.command;
 
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -10,14 +10,14 @@ import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("Duplicates")
-public class HelpCommand implements ICommand {
+public class HelpCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
      *
@@ -48,8 +48,8 @@ public class HelpCommand implements ICommand {
     @Override
     public CommandInfo getCommandInfo() {
         return new CommandInfo("help",
-                "Displays help (duh)",
-                "!help (command) (sub-command)");
+            "Displays help (duh)",
+            "!help (command) (sub-command)");
     }
 
     /**
@@ -60,47 +60,43 @@ public class HelpCommand implements ICommand {
      * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length < 1) {
-            Consumer<EmbedCreateSpec> embed = spec -> {
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                spec.setTitle("DisCal Command Help");
-                for (ICommand c : CommandExecutor.getExecutor().getCommands()) {
-                    if (c.getAliases().size() > 0) {
-                        String al = c.getAliases().toString();
-                        spec.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
-                    } else {
-                        spec.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.just(args).flatMap(ignore -> {
+            if (args.length < 1) {
+                Consumer<EmbedCreateSpec> embed = spec -> {
+                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setTitle("DisCal Command Help");
+                    for (Command c : CommandExecutor.getCommands()) {
+                        if (c.getAliases().size() > 0) {
+                            String al = c.getAliases().toString();
+                            spec.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
+                        } else {
+                            spec.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
+                        }
                     }
-                }
-                spec.setFooter("Check out the official site for more command info!", null);
-                spec.setUrl("https://www.discalbot.com/commands");
-                spec.setColor(GlobalConst.discalColor);
-            };
-            MessageManager.sendMessageAsync(embed, event);
-        } else if (args.length == 1) {
-            String cmdFor = args[0];
-            ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
-            if (cmd != null)
-                MessageManager.sendMessageAsync(getCommandInfoEmbed(cmd), event);
-
-        } else if (args.length == 2) {
-            //Display sub command info
-            String cmdFor = args[0];
-            ICommand cmd = CommandExecutor.getExecutor().getCommand(cmdFor);
-            if (cmd != null) {
-                if (cmd.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
-                    MessageManager.sendMessageAsync(getSubCommandEmbed(cmd, args[1].toLowerCase()), event);
-                else
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.InvalidSubCmd", settings), event);
+                    spec.setFooter("Check out the official site for more command info!", null);
+                    spec.setUrl("https://www.discalbot.com/commands");
+                    spec.setColor(GlobalConst.discalColor);
+                };
+                return Messages.sendMessage(embed, event);
+            } else if (args.length == 1) {
+                return CommandExecutor.getCommand(args[0])
+                    .flatMap(cmd -> Messages.sendMessage(getCommandInfoEmbed(cmd), event));
+            } else if (args.length == 2) {
+                return CommandExecutor.getCommand(args[0])
+                    .filter(c -> c.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
+                    .flatMap(c -> Messages.sendMessage(getSubCommandEmbed(c, args[1].toLowerCase()), event))
+                    .switchIfEmpty(Messages.sendMessage(
+                        Messages.getMessage("Notifications.Args.InvalidSubCommand", settings), event)
+                    );
+            } else {
+                return Mono.empty();
             }
-        }
-
-        return false;
+        }).then();
     }
 
     //Embed formatters
-    private Consumer<EmbedCreateSpec> getCommandInfoEmbed(ICommand cmd) {
+    private Consumer<EmbedCreateSpec> getCommandInfoEmbed(Command cmd) {
         return spec -> {
             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
             spec.addField("Command", cmd.getCommand(), true);
@@ -123,7 +119,7 @@ public class HelpCommand implements ICommand {
         };
     }
 
-    private Consumer<EmbedCreateSpec> getSubCommandEmbed(ICommand cmd, String subCommand) {
+    private Consumer<EmbedCreateSpec> getSubCommandEmbed(Command cmd, String subCommand) {
         return spec -> {
             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
             spec.addField("Command", cmd.getCommand(), true);

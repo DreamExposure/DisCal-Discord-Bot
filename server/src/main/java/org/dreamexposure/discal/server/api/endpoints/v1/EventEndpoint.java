@@ -63,7 +63,7 @@ public class EventEndpoint {
 
         //okay, lets actually get the month's events.
         try {
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
             Events events = service.events().list(calendarData.getCalendarAddress())
@@ -121,7 +121,7 @@ public class EventEndpoint {
 
         //okay, lets actually get the month's events.
         try {
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
             Events events = service.events().list(calendarData.getCalendarAddress())
@@ -219,7 +219,7 @@ public class EventEndpoint {
 
         //Okay, time to update the event
         try {
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
             com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
@@ -265,7 +265,7 @@ public class EventEndpoint {
                         body.getString("image")
                 );
 
-                if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
+                if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()).block()) {
                     JSONObject respondBody = new JSONObject();
                     respondBody.put("Message", "Failed to create event!");
                     respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
@@ -318,7 +318,7 @@ public class EventEndpoint {
 
         //Okay, time to create the event
         try {
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
             com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
@@ -364,7 +364,7 @@ public class EventEndpoint {
                         body.getString("image")
                 );
 
-                if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild())) {
+                if (!ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()).block()) {
                     JSONObject respondBody = new JSONObject();
                     respondBody.put("Message", "Failed to update event!");
                     respondBody.put("reason", "Invalid image link and/or GIF image not supported.");
@@ -422,7 +422,7 @@ public class EventEndpoint {
         GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
         //okay, time to properly delete the event
-        if (EventUtils.deleteEvent(settings, eventId)) {
+        if (EventUtils.deleteEvent(settings, 1, eventId).block()) {
             //Deleted!
             response.setContentType("application/json");
             response.setStatus(200);

@@ -1,9 +1,10 @@
 package org.dreamexposure.discal.client;
 
 import org.dreamexposure.discal.client.listeners.discord.ChannelDeleteListener;
+import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener;
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand;
 import org.dreamexposure.discal.client.module.command.AnnouncementCommand;
@@ -37,6 +38,7 @@ import discord4j.core.DiscordClientBuilder;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.channel.TextChannelDeleteEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
@@ -50,7 +52,6 @@ import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalClient {
@@ -66,7 +67,20 @@ public class DisCalClient {
         Authorization.getAuth().init();
 
         //Load lang files
-        MessageManager.reloadLangs();
+        Messages.reloadLangs();
+
+        //Register commands
+        CommandExecutor.registerCommand(new HelpCommand());
+        CommandExecutor.registerCommand(new DisCalCommand());
+        CommandExecutor.registerCommand(new CalendarCommand());
+        CommandExecutor.registerCommand(new AddCalendarCommand());
+        CommandExecutor.registerCommand(new TimeCommand());
+        CommandExecutor.registerCommand(new LinkCalendarCommand());
+        CommandExecutor.registerCommand(new EventListCommand());
+        CommandExecutor.registerCommand(new EventCommand());
+        CommandExecutor.registerCommand(new RsvpCommand());
+        CommandExecutor.registerCommand(new AnnouncementCommand());
+        CommandExecutor.registerCommand(new DevCommand());
 
         //Start some of the daemon threads
         AnnouncementThreader.getThreader().init();
@@ -111,35 +125,22 @@ public class DisCalClient {
 
                     //Register listeners
                     Mono<Void> onReady = client.on(ReadyEvent.class)
-                            .flatMap(ReadyEventListener::handle)
-                            .then();
+                        .flatMap(ReadyEventListener::handle)
+                        .then();
 
                     Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
-                            .flatMap(ChannelDeleteListener::handle)
-                            .then();
+                        .flatMap(ChannelDeleteListener::handle)
+                        .then();
 
                     Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
-                            .flatMap(RoleDeleteListener::handle)
-                            .then();
+                        .flatMap(RoleDeleteListener::handle)
+                        .then();
 
-                    //Register commands
-                    Mono<Void> commands = Mono.fromRunnable(() -> {
-                        CommandExecutor executor = CommandExecutor.getExecutor().enable();
-                        executor.registerCommand(new HelpCommand());
-                        executor.registerCommand(new DisCalCommand());
-                        executor.registerCommand(new CalendarCommand());
-                        executor.registerCommand(new AddCalendarCommand());
-                        executor.registerCommand(new TimeCommand());
-                        executor.registerCommand(new LinkCalendarCommand());
-                        executor.registerCommand(new EventListCommand());
-                        executor.registerCommand(new EventCommand());
-                        executor.registerCommand(new RsvpCommand());
-                        executor.registerCommand(new AnnouncementCommand());
-                        executor.registerCommand(new DevCommand());
-                    }).subscribeOn(Schedulers.boundedElastic())
-                            .then();
+                    Mono<Void> onCommand = client.on(MessageCreateEvent.class)
+                        .flatMap(MessageCreateListener::handle)
+                        .then();
 
-                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, commands);
+                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand);
                 }).block();
     }
 

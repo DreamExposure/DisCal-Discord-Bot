@@ -53,7 +53,7 @@ public class ListEventRangeEndpoint {
             GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
             //okay, lets actually get the range's events.
-            Calendar service = CalendarAuth.getCalendarService(settings);
+            Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
             Events events = service.events().list(calendarData.getCalendarAddress())

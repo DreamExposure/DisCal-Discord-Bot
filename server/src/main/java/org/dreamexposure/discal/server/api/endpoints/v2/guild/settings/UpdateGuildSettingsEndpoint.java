@@ -67,7 +67,7 @@ public class UpdateGuildSettingsEndpoint {
             if (body.has("lang")) {
                 String lang = body.getString("lang");
                 //noinspection unchecked
-                if (new ArrayList<String>(ReadFile.readAllLangFiles().keySet()).contains(lang.toUpperCase()))
+                if (new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet()).contains(lang.toUpperCase()))
                     settings.setLang(body.getString("lang"));
             }
             if (body.has("prefix"))

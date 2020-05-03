@@ -61,7 +61,7 @@ public class UpdateEventEndpoint {
             GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
             CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings);
+            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
             Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
             Event event = service.events().get(calData.getCalendarId(), eventId).execute();
@@ -94,13 +94,13 @@ public class UpdateEventEndpoint {
                     event.setRecurrence(Arrays.asList(rr));
                 }
                 if (requestBody.has("image")) {
-                    if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild())) {
+                    if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild()).block()) {
                         //Link is good...
                         EventData ed = EventData.fromImage(
-                                Snowflake.of(guildId),
-                                event.getId(),
-                                event.getEnd().getDateTime().getValue(),
-                                requestBody.getString("image")
+                            Snowflake.of(guildId),
+                            event.getId(),
+                            event.getEnd().getDateTime().getValue(),
+                            requestBody.getString("image")
                         );
 
                         DatabaseManager.updateEventData(ed).subscribe();

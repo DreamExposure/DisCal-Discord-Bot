@@ -1,17 +1,20 @@
 package org.dreamexposure.discal.core.utils;
 
 import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Iterator;
+import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
+
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -19,70 +22,56 @@ import javax.imageio.stream.ImageInputStream;
  * For Project: DisCal-Discord-Bot
  */
 public class ImageUtils {
-    public static boolean validate(String url, boolean allowGif) {
-        try {
+    //TODO: Also, find a better working solution for validating images since this fails too much
+    public static Mono<Boolean> validate(String url, boolean allowGif) {
+        return Mono.fromCallable(() -> {
             Image image = ImageIO.read(new URL(url));
-
-            if (image != null)
-                return true;
-
-            //Check if gif
-            if (allowGif)
-                return validateGif(url);
-
-            return false;
-        } catch (IOException e) {
-            //Check if gif
-            if (allowGif)
-                return validateGif(url);
-
-            return false;
-        }
+            return image != null;
+        })
+            .subscribeOn(Schedulers.boundedElastic())
+            .onErrorResume(IOException.class, e -> {
+                if (allowGif)
+                    return validateGif(url);
+                else
+                    return Mono.just(false);
+            });
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private static boolean validateGif(String url) {
-        try {
+    @SuppressWarnings("BlockingMethodInNonBlockingContext")
+    private static Mono<Boolean> validateGif(String url) {
+        return Mono.fromCallable(() -> {
             URLConnection connection = new URL(url).openConnection();
             connection.setConnectTimeout(3000);
             connection.setReadTimeout(3000);
-            InputStream in;
-            try {
-                in = connection.getInputStream();
-                return readGif(in).equalsIgnoreCase("gif");
-            } catch (IOException | NullPointerException e) {
-                return false;
-            }
-        } catch (IOException e) {
-            return false;
-        }
+            InputStream in = connection.getInputStream();
+
+            return readGif(in);
+        })
+            .subscribeOn(Schedulers.boundedElastic())
+            .flatMap(Function.identity())
+            .map(s -> s.equalsIgnoreCase("gif"));
     }
 
-    private static String readGif(InputStream input) throws IOException {
-        ImageInputStream stream = ImageIO.createImageInputStream(input);
-
-        Iterator iter = ImageIO.getImageReaders(stream);
-        if (!iter.hasNext()) {
-            return null;
-        }
-        ImageReader reader = (ImageReader) iter.next();
-        ImageReadParam param = reader.getDefaultReadParam();
-        reader.setInput(stream, true, true);
-        BufferedImage bi;
-        try {
-            bi = reader.read(0, param);
-        } catch (IOException e) {
-            // Auto-generated catch block
-            //e.printStackTrace();
-        } finally {
-            reader.dispose();
-            try {
-                stream.close();
-            } catch (IOException e) {
-                //  Auto-generated catch block
-                //e.printStackTrace();
+    @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
+    private static Mono<String> readGif(InputStream input) {
+        return Mono.fromCallable(() -> {
+            ImageInputStream stream = ImageIO.createImageInputStream(input);
+            Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
+            if (!iter.hasNext()) {
+                return null;
             }
-        }
-        return reader.getFormatName();
+            ImageReader reader = null;
+            try {
+                reader = iter.next();
+                ImageReadParam param = reader.getDefaultReadParam();
+                reader.setInput(stream, true, true);
+                reader.read(0, param);
+            } catch (IOException | NullPointerException ignore) {
+            } finally {
+                if (reader != null)
+                    reader.dispose();
+            }
+            return reader.getFormatName();
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 }

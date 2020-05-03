@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -16,7 +17,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-public interface ICommand {
+public interface Command {
     default String getCommand() {
         return "COMMAND_NAME";
     }
@@ -41,5 +42,5 @@ public interface ICommand {
         return info;
     }
 
-    boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings);
+    Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings);
 }

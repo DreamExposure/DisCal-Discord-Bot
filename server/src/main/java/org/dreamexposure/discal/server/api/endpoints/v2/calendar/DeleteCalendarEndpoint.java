@@ -48,8 +48,8 @@ public class DeleteCalendarEndpoint {
             CalendarData calendar = DatabaseManager.getCalendar(guildId, calNumber).block();
 
             if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
-                if (CalendarUtils.calendarExists(calendar, settings)) {
-                    if (CalendarUtils.deleteCalendar(calendar, settings)) {
+                if (CalendarUtils.calendarExists(calendar, settings).block()) {
+                    if (CalendarUtils.deleteCalendar(calendar, settings).block()) {
                         response.setContentType("application/json");
                         response.setStatus(200);
                         return JsonUtils.getJsonResponseMessage("Calendar successfully deleted");

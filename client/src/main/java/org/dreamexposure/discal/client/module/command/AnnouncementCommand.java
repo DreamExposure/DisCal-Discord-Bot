@@ -2,13 +2,12 @@ package org.dreamexposure.discal.client.module.command;
 
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
-import org.dreamexposure.discal.client.message.MessageManager;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
-import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.AnnouncementUtils;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
@@ -20,27 +19,27 @@ import org.dreamexposure.discal.core.utils.RoleUtils;
 import org.dreamexposure.discal.core.utils.UserUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 3/4/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"Duplicates", "OptionalGetWithoutIsPresent", "ConstantConditions", "DuplicateExpressions"})
-public class AnnouncementCommand implements ICommand {
+public class AnnouncementCommand implements Command {
 
     /**
      * Gets the command this Object is responsible for.
@@ -79,9 +78,9 @@ public class AnnouncementCommand implements ICommand {
     @Override
     public CommandInfo getCommandInfo() {
         CommandInfo info = new CommandInfo(
-                "announcement",
-                "Used for all announcement functions.",
-                "!announcement <function> (value(s))"
+            "announcement",
+            "Used for all announcement functions.",
+            "!announcement <function> (value(s))"
         );
 
         info.getSubCommands().put("create", "Starts the announcement creator.");
@@ -116,1109 +115,1301 @@ public class AnnouncementCommand implements ICommand {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
      */
     @Override
-    public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length < 1) {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Few", settings), event);
-        } else {
-            switch (args[0].toLowerCase()) {
-                case "create":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCreate(event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "confirm":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleConfirm(event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "cancel":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCancel(event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "delete":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleDelete(args, event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "view":
-                case "review":
-                    moduleView(args, event, settings);
-                    break;
-                case "subscribe":
-                case "sub":
-                    moduleSubscribeRewrite(args, event, settings);
-                    break;
-                case "unsubscribe":
-                case "unsub":
-                    moduleUnsubscribeRewrite(args, event, settings);
-                    break;
-                case "type":
-                    moduleType(args, event, settings);
-                    break;
-                case "hours":
-                    moduleHours(args, event, settings);
-                    break;
-                case "minutes":
-                    moduleMinutes(args, event, settings);
-                    break;
-                case "list":
-                    moduleList(args, event, settings);
-                    break;
-                case "event":
-                    moduleEvent(args, event, settings);
-                    break;
-                case "info":
-                    moduleInfo(args, event, settings);
-                    break;
-                case "enable":
-                case "enabled":
-                case "disable":
-                case "disabled":
-                    moduleEnable(args, event, settings);
-                    break;
-                case "infoonly":
-                    moduleInfoOnly(args, event, settings);
-                case "channel":
-                    moduleChannel(args, event, settings);
-                    break;
-                case "color":
-                case "colour":
-                    moduleColor(args, event, settings);
-                    break;
-                case "copy":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleCopy(args, event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                case "edit":
-                    if (PermissionChecker.hasDisCalRole(event, settings).block())
-                        moduleEdit(args, event, settings);
-                    else
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
-                    break;
-                default:
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Invalid", settings), event);
-                    break;
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length < 1) {
+                return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
+            } else {
+                switch (args[0].toLowerCase()) {
+                    case "create":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleCreate(event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    case "confirm":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleConfirm(event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    case "cancel":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleCancel(event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    case "delete":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleDelete(args, event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    case "view":
+                    case "review":
+                        return moduleView(args, event, settings);
+                    case "subscribe":
+                    case "sub":
+                        return moduleSubscribeRewrite(args, event, settings);
+                    case "unsubscribe":
+                    case "unsub":
+                        return moduleUnsubscribeRewrite(args, event, settings);
+                    case "type":
+                        return moduleType(args, event, settings);
+                    case "hours":
+                        return moduleHours(args, event, settings);
+                    case "minutes":
+                        return moduleMinutes(args, event, settings);
+                    case "list":
+                        return moduleList(args, event, settings);
+                    case "event":
+                        return moduleEvent(args, event, settings);
+                    case "info":
+                        return moduleInfo(args, event, settings);
+                    case "enable":
+                    case "enabled":
+                    case "disable":
+                    case "disabled":
+                        return moduleEnable(args, event, settings);
+                    case "infoonly":
+                        return moduleInfoOnly(args, event, settings);
+                    case "channel":
+                        return moduleChannel(args, event, settings);
+                    case "color":
+                    case "colour":
+                        return moduleColor(args, event, settings);
+                    case "copy":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleCopy(args, event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    case "edit":
+                        return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
+                            if (has)
+                                return moduleEdit(args, event, settings);
+                            else
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                        });
+                    default:
+                        return Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
+                }
             }
-        }
-        return false;
+        }).then();
     }
 
 
-    private void moduleCreate(MessageCreateEvent event, GuildSettings settings) {
-
-        if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            AnnouncementCreator.getCreator().init(event, settings);
-            if (!AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID()))
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Create.Init", settings), event);
-            else
-                MessageManager.deleteMessage(event);
-        } else {
-            if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                MessageManager.deleteMessage(event);
-                AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
-            }
-        }
-    }
-
-    private void moduleEdit(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            if (args.length == 2) {
-                String anId = args[1];
-                if (AnnouncementUtils.announcementExists(anId, settings.getGuildID())) {
-                    Announcement announcement = AnnouncementCreator.getCreator().edit(event, anId, settings);
-
-                    if (announcement.getCreatorMessage() == null) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Edit.Init", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(announcement, settings), event);
-                    } else {
-                        MessageManager.deleteMessage(event);
-                    }
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Edit.Specify", settings), event);
-            }
-        } else {
-            if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                MessageManager.deleteMessage(event);
-                AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
-            }
-        }
-    }
-
-    private void moduleConfirm(MessageCreateEvent event, GuildSettings settings) {
-        if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            AnnouncementCreatorResponse acr = AnnouncementCreator.getCreator().confirmAnnouncement(settings.getGuildID());
-            if (acr.isSuccessful()) {
-                if (acr.getAnnouncement().isEditing()) {
-                    if (acr.getAnnouncement().getCreatorMessage() != null) {
-                        MessageManager.deleteMessage(acr.getAnnouncement().getCreatorMessage());
-                        MessageManager.deleteMessage(event);
-                    }
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Confirm.Edit.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), event);
-                } else {
-                    if (acr.getAnnouncement().getCreatorMessage() != null) {
-                        MessageManager.deleteMessage(acr.getAnnouncement().getCreatorMessage());
-                        MessageManager.deleteMessage(event);
-                    }
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Confirm.Create.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(acr.getAnnouncement(), settings), event);
-                }
-            } else {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Confirm.Failure", settings), event);
-                }
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-        }
-    }
-
-    private void moduleCancel(MessageCreateEvent event, GuildSettings settings) {
-        if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            Message creatorMessage = AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID());
-            AnnouncementCreator.getCreator().terminate(settings.getGuildID());
-
-            if (creatorMessage != null) {
-                MessageManager.deleteMessage(creatorMessage);
-                MessageManager.deleteMessage(event);
-            }
-
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Cancel.Success", settings), event);
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-        }
-    }
-
-    private void moduleDelete(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 1) {
-            if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.Specify", settings), event);
-            } else {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Delete.InCreator", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                }
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.InCreator", settings), event);
-            }
-        } else if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                if (DatabaseManager.deleteAnnouncement(value).block()) {
-
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.Success", settings), event);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.Failure", settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Delete.Specify", settings), event);
-        }
-    }
-
-    private void moduleView(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 1) {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.View.Specify", settings), event);
-            }
-        } else if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.View.InCreator", settings), event);
-                }
-            } else {
-                try {
-                    Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
-                    if (a != null) {
-                        MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getSubscriberNames(a), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                    }
-                } catch (Exception e) {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                }
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.View.Specify", settings), event);
-        }
-    }
-
-    private void moduleSubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
-        Member user = event.getMember().get();
-        if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-            if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
-                a.getSubscriberUserIds().add(user.getId().asString());
-                if (a.getCreatorMessage() != null) {
-                    MessageManager.deleteMessage(a.getCreatorMessage());
-                    MessageManager.deleteMessage(event);
-                    a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Success", settings), event);
-                }
-            } else {
-                //Announcement contains user ID
-                if (a.getCreatorMessage() != null) {
-                    MessageManager.deleteMessage(a.getCreatorMessage());
-                    MessageManager.deleteMessage(event);
-                    a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Already", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Already", settings), event);
-                }
-            }
-        } else {
-            //User not creating an announcement
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Specify", settings), event);
-        }
-    }
-
-    private void moduleSubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        Message message = event.getMessage();
-        Guild guild = event.getGuild().block();
-        Member user = event.getMember().get();
-        String value = args[1];
-        if (args[1].length() <= 32) {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-                Member u = guild.getMemberById(UserUtils.getUser(value, message)).onErrorResume(e -> Mono.empty()).block();
-                Role r = guild.getRoleById(RoleUtils.getRole(value, message)).onErrorResume(e -> Mono.empty()).block();
-                if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
-                    String men = value.toLowerCase();
-                    if (!a.getSubscriberRoleIds().contains(men)) {
-                        a.getSubscriberRoleIds().add(men);
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", men, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", men, settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", men, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", men, settings), event);
-                        }
-                    }
-                } else if (u != null) {
-                    String username = u.getUsername();
-                    if (!a.getSubscriberUserIds().contains(u.getId().asString())) {
-                        a.getSubscriberUserIds().add(u.getId().asString());
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", username, settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", username, settings), event);
-                        }
-                    }
-                } else if (r != null) {
-                    String username = r.getName();
-                    if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
-                        a.getSubscriberRoleIds().add(r.getId().asString());
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", username, settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", username, settings), event);
-                        }
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Specify", settings), event);
-            }
-        } else {
-            if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
-                if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
-                    a.getSubscriberUserIds().add(user.getId().asString());
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Success", settings), event);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Self.Already", settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-            }
-        }
-    }
-
-    private void moduleSubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        Guild guild = event.getGuild().block();
-        List<String> subscribedUsers = new ArrayList<>();
-        List<String> subscribedRoles = new ArrayList<>();
-
-        String announcementID;
-        boolean updateDb;
-        if (args[1].length() > 32) {
-            AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-            updateDb = true;
-            announcementID = args[1];
-        } else {
-            updateDb = false;
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                announcementID = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).getAnnouncementId().toString();
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Specify", settings), event);
-                return;
-            }
-        }
-
-        if (AnnouncementUtils.announcementExists(announcementID, settings.getGuildID()) || !updateDb) {
-            Announcement a = updateDb ? DatabaseManager.getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()).block() : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-
-            for (int i = 1; i < args.length; i++) {
-                Member u = null;
-                Role r = null;
-
-                Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
-                if (usf != null)
-                    u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
-
-                Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
-                if (rsf != null)
-                    r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
-
-                if (args[i].equalsIgnoreCase("everyone") || args[i].equalsIgnoreCase("here")) {
-                    //Here or everyone is to be subscribed...
-                    String men = args[i].toLowerCase();
-                    if (!a.getSubscriberRoleIds().contains(men)) {
-                        a.getSubscriberRoleIds().add(men);
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%", men, settings), event);
-                        subscribedUsers.add(men);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Subscribe.Other.Already", "%value%", men, settings), event);
-                    }
-                }
-
-                if (u != null) {
-                    if (!a.getSubscriberUserIds().contains(u.getId().asString())) {
-                        subscribedUsers.add(u.getDisplayName());
-                        a.getSubscriberUserIds().add(u.getId().asString());
-                    }
-                } else if (r != null) {
-                    if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
-                        subscribedRoles.add(r.getName());
-                        a.getSubscriberRoleIds().add(r.getId().asString());
-                    }
-                }
-            }
-
-            Consumer<EmbedCreateSpec> embed = spec -> {
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-
-                spec.setColor(GlobalConst.discalColor);
-                spec.setDescription(MessageManager.getMessage("Embed.Announcement.Subscribe.Users", "%users%", subscribedUsers.toString(), settings) + GlobalConst.lineBreak + MessageManager.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
-                spec.setFooter(MessageManager.getMessage("Embed.Announcement.Subscribe.Footer", "%id%", a.getAnnouncementId().toString(), settings), null);
-            };
-
-            MessageManager.sendMessageAsync(embed, event);
-            if (updateDb)
-                DatabaseManager.updateAnnouncement(a).subscribe();
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-        }
-    }
-
-    private void moduleSubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 1)
-            moduleSubscribeRewriteArgsOne(event, settings);
-        else if (args.length == 2)
-            moduleSubscribeRewriteArgsTwo(args, event, settings);
-        else
-            moduleSubscribeRewriteArgsThree(args, event, settings);
-    }
-
-    private void moduleUnsubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
-        Member user = event.getMember().get();
-        if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-            Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-            if (a.getSubscriberUserIds().contains(user.getId().asString())) {
-                a.getSubscriberUserIds().remove(user.getId().asString());
-                if (a.getCreatorMessage() != null) {
-                    MessageManager.deleteMessage(a.getCreatorMessage());
-                    MessageManager.deleteMessage(event);
-                    a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings), event);
-                }
-            } else { // Announcement does not contain user ID
-                if (a.getCreatorMessage() != null) {
-                    MessageManager.deleteMessage(a.getCreatorMessage());
-                    MessageManager.deleteMessage(event);
-                    a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Not", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Not", settings), event);
-                }
-            }
-        } else { // User not creating an announcement
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Specify", settings), event);
-        }
-    }
-
-    private void moduleUnsubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        Guild guild = event.getGuild().block();
-        Member user = event.getMember().get();
-        String value = args[1];
-        if (args[1].length() <= 32) {
+    private Mono<Void> moduleCreate(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
                 Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Member u = null;
-                Role r = null;
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
-                Snowflake usf = UserUtils.getUser(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
-                if (usf != null)
-                    u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
-
-                Snowflake rsf = RoleUtils.getRole(value.matches("<@?!?#?&?[0-9]+>") ? value.replaceAll("<@?!?#?&?[0-9]+>", "") : value, guild);
-                if (rsf != null)
-                    r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
-
-                if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
-                    String men = value.toLowerCase();
-                    if (a.getSubscriberRoleIds().contains(men)) {
-                        a.getSubscriberRoleIds().remove(men);
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", men, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", men, settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", men, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", men, settings), event);
-                        }
-                    }
-                } else if (u != null) {
-                    if (a.getSubscriberUserIds().contains(u.getId().asString())) {
-                        a.getSubscriberUserIds().remove(u.getId().asString());
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", u.getUsername(), settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", u.getUsername(), settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", u.getUsername(), settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", u.getUsername(), settings), event);
-                        }
-                    }
-                } else if (r != null) {
-                    String username = r.getName();
-                    if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
-                        a.getSubscriberRoleIds().remove(r.getId().asString());
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", username, settings), event);
-                        }
-                    } else {
-                        if (a.getCreatorMessage() != null) {
-                            MessageManager.deleteMessage(a.getCreatorMessage());
-                            MessageManager.deleteMessage(event);
-                            a.setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", username, settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", username, settings), event);
-                        }
-                    }
-                }
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.AlreadyInit", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Specify", settings), event);
+                return AnnouncementCreator.getCreator().init(event, settings)
+                    .then(Messages.deleteMessage(event));
             }
-        } else {
-            if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
-                if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
-                    a.getSubscriberUserIds().remove(user.getId().asString());
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings), event);
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Self.Not", settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-            }
-        }
+        }).then();
     }
 
-    private void moduleUnsubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        Guild guild = event.getGuild().block();
-        List<String> subscribedUsers = new ArrayList<>();
-        List<String> subscribedRoles = new ArrayList<>();
-
-        String announcementID;
-        boolean updateDb;
-        if (args[1].length() > 32) {
-            AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-            updateDb = true;
-            announcementID = args[1];
-        } else {
-            updateDb = false;
+    private Mono<Void> moduleEdit(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                announcementID = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).getAnnouncementId().toString();
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.AlreadyInit", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Specify", settings), event);
-                return;
-            }
-        }
-
-        if (AnnouncementUtils.announcementExists(announcementID, settings.getGuildID()) || !updateDb) {
-            Announcement a = updateDb ? DatabaseManager.getAnnouncement(UUID.fromString(announcementID), settings.getGuildID()).block() : AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-
-            for (int i = 1; i < args.length; i++) {
-                Member u = null;
-                Role r = null;
-
-                Snowflake usf = UserUtils.getUser(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
-                if (usf != null)
-                    u = guild.getMemberById(usf).onErrorResume(e -> Mono.empty()).block();
-
-                Snowflake rsf = RoleUtils.getRole(args[i].matches("<@?!?#?&?[0-9]+>") ? args[i].replaceAll("<@?!?#?&?[0-9]+>", "") : args[i], guild);
-                if (rsf != null)
-                    r = guild.getRoleById(rsf).onErrorResume(e -> Mono.empty()).block();
-
-                if (args[i].toLowerCase().contains("everyone") || args[i].toLowerCase().contains("here")) {
-                    //Here or everyone is to be subscribed...
-                    String men = args[i].toLowerCase();
-                    if (a.getSubscriberRoleIds().contains(men)) {
-                        a.getSubscriberRoleIds().remove(men);
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%", men, settings), event);
-                        subscribedUsers.add(men);
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%", men, settings), event);
-                    }
-                }
-
-                if (u != null) {
-                    if (a.getSubscriberUserIds().contains(u.getId().asString())) {
-                        subscribedUsers.add(u.getUsername());
-                        a.getSubscriberUserIds().remove(u.getId().asString());
-                    }
-                } else if (r != null) {
-                    if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
-                        subscribedRoles.add(r.getName());
-                        a.getSubscriberRoleIds().remove(r.getId().asString());
-                    }
-                }
-            }
-
-            Consumer<EmbedCreateSpec> embed = spec -> {
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-
-                spec.setColor(GlobalConst.discalColor);
-                spec.setDescription(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%", subscribedUsers.toString(), settings) + GlobalConst.lineBreak + MessageManager.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%", subscribedRoles.toString(), settings));
-                spec.setFooter(MessageManager.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%", a.getAnnouncementId().toString(), settings), null);
-            };
-
-            MessageManager.sendMessageAsync(embed, event);
-            if (updateDb)
-                DatabaseManager.updateAnnouncement(a).subscribe();
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-        }
-
-    }
-
-    private void moduleUnsubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 1)
-            moduleUnsubscribeRewriteArgsOne(event, settings);
-        else if (args.length == 2)
-            moduleUnsubscribeRewriteArgsTwo(args, event, settings);
-        else
-            moduleUnsubscribeRewriteArgsThree(args, event, settings);
-    }
-
-    private void moduleType(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementType.isValid(value)) {
-                    AnnouncementType type = AnnouncementType.fromValue(value);
-                    AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setAnnouncementType(type);
-                    if (type.equals(AnnouncementType.SPECIFIC)) {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Success.Specific", settings), event);
-                        }
-                    } else if (type.equals(AnnouncementType.COLOR)) {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Success.Color", settings), event);
-                        }
-                    } else if (type.equals(AnnouncementType.RECUR)) {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Success.Recur", settings), event);
-                        }
-                    } else {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Success.Universal", settings), event);
-                        }
-                    }
-                } else {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Type.Specify", settings), event);
-        }
-    }
-
-    private void moduleHours(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                try {
-                    int hoursOr = Integer.parseInt(value);
-                    int hours = Math.abs(hoursOr);
-                    AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setHoursBefore(hours);
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Hours.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Hours.Success", "%hours%", hours + "", settings), event);
-                    }
-                } catch (NumberFormatException e) {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Hours.NotInt", settings), event);
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Hours.Specify", settings), event);
-        }
-    }
-
-    private void moduleMinutes(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                try {
-                    int minutesOr = Integer.parseInt(value);
-                    int minutes = Math.abs(minutesOr);
-                    AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setMinutesBefore(minutes);
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Minutes.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Minutes.Success", "%minutes%", minutes + "", settings), event);
-                    }
-                } catch (NumberFormatException e) {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Minutes.NotInt", settings), event);
-                    }
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Minutes.Specify", settings), event);
-        }
-    }
-
-    private void moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 1) {
-            if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
-            } else {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
-                }
-            }
-        } else if (args.length == 2) {
-            String value = args[1];
-            if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (value.equalsIgnoreCase("all")) {
-                    List<Announcement> announcements = DatabaseManager.getAnnouncements(settings.getGuildID()).block();
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.All", "%amount%", announcements.size() + "", settings), event);
-                    //Loop and add embeds
-                    for (Announcement a : announcements) {
-                        MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
-                    }
-                } else {
-                    //List specific amount of announcements
-                    try {
-                        int amount = Integer.parseInt(value);
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.Some", "%amount%", amount + "", settings), event);
-
-                        int posted = 0;
-                        for (Announcement a : DatabaseManager.getAnnouncements(settings.getGuildID()).block()) {
-                            if (posted < amount) {
-                                MessageManager.sendMessageAsync(AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings), event);
-
-                                posted++;
+                if (args.length == 2) {
+                    return AnnouncementUtils.announcementExists(args[1], settings.getGuildID())
+                        .flatMap(exists -> {
+                            if (exists) {
+                                return AnnouncementCreator.getCreator().edit(event, args[1], settings);
                             } else {
-                                break;
+                                return Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                            }
+                        });
+                } else {
+                    return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Edit.Specify", settings), event);
+                }
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleConfirm(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementCreator.getCreator().confirmAnnouncement(settings.getGuildID()))
+                    .flatMap(acr -> {
+                        if (acr.isSuccessful()) {
+                            String msg;
+                            if (a.isEditing())
+                                msg = Messages.getMessage("Creator.Announcement.Confirm.Edit.Success", settings);
+                            else
+                                msg = Messages.getMessage("Creator.Announcement.Confirm.Create.Success", settings);
+
+                            return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
+                                .flatMap(em -> Messages.sendMessage(msg, em, event));
+                        } else {
+                            return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Confirm.Failure", settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleCancel(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                Mono<Message> sendMsg = Messages.sendMessage(Messages.getMessage("Creator.Announcement.Cancel.Success", settings), event);
+
+                AnnouncementCreator.getCreator().terminate(settings.getGuildID());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage, sendMsg);
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleDelete(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.Delete.InCreator", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else if (args.length == 2) {
+                return AnnouncementUtils.announcementExists(args[1], settings.getGuildID())
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return DatabaseManager.deleteAnnouncement(args[1]).flatMap(success -> {
+                                if (success) {
+                                    return Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.Delete.Success", settings), event);
+                                } else {
+                                    return Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.Delete.Failure", settings), event);
+                                }
+                            });
+                        } else {
+                            return Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                        }
+                    });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Delete.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleView(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else {
+                if (args.length == 2) {
+                    UUID id;
+                    try {
+                        id = UUID.fromString(args[1]);
+                    } catch (IllegalArgumentException e) {
+                        return Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                    }
+
+                    return DatabaseManager.getAnnouncement(id, settings.getGuildID()).flatMap(a -> {
+                        Mono<String> subNamesMono = event.getGuild()
+                            .flatMap(g -> AnnouncementMessageFormatter.getSubscriberNames(a, g));
+                        Mono<Consumer<EmbedCreateSpec>> emMono = AnnouncementMessageFormatter
+                            .getFormatAnnouncementEmbed(a, settings);
+
+                        return Mono.zip(subNamesMono, emMono)
+                            .flatMap(TupleUtils.function((subs, embed) -> Messages.sendMessage(subs, embed, event)));
+                    }).switchIfEmpty(Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event));
+
+                } else {
+                    return Messages.sendMessage(Messages.getMessage("Creator.Announcement.View.Specify", settings), event);
+                }
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleSubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return event.getMessage().getAuthorAsMember()
+                    .flatMap(user -> {
+                        if (a.getSubscriberUserIds().contains(user.getId().asString())) {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Subscribe.Self.Already", settings),
+                                    em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        } else {
+                            a.getSubscriberUserIds().add(user.getId().asString());
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Subscribe.Self.Success", settings),
+                                    em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Subscribe.Self.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleSubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            String value = args[1];
+            if (value.length() <= 32) {
+                if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                    Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                    Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                    Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                    if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
+                        if (!a.getSubscriberRoleIds().contains(value.toLowerCase().trim())) {
+                            a.getSubscriberRoleIds().add(value.toLowerCase().trim());
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%",
+                                        value.toLowerCase(), settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        } else {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Subscribe.Other.Success", "%value%",
+                                        value.toLowerCase(), settings), event)
+                                )
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    } else {
+                        //Well, now we check if a user exists, then if not, we check for a role that exists...
+                        return event.getGuild().flatMap(guild ->
+                            UserUtils.getUser(value, guild).flatMap(mem -> {
+                                if (!a.getSubscriberUserIds().contains(mem.getId().asString())) {
+                                    a.getSubscriberUserIds().add(mem.getId().asString());
+
+                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                        .flatMap(em -> Messages.sendMessage(
+                                            Messages.getMessage("Creator.Announcement.Subscribe.Other.Success",
+                                                "%value%", mem.getUsername(), settings), em, event))
+                                        .doOnNext(msg -> a.setCreatorMessage(msg));
+                                } else {
+                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                        .flatMap(em -> Messages.sendMessage(
+                                            Messages.getMessage("Creator.Announcement.Subscribe.Other.Already",
+                                                "%value%", mem.getUsername(), settings), em, event))
+                                        .doOnNext(msg -> a.setCreatorMessage(msg));
+                                }
+                            }).switchIfEmpty(RoleUtils.getRole(value, guild)
+                                .flatMap(role -> {
+                                    if (!a.getSubscriberRoleIds().contains(role.getId().asString())) {
+                                        a.getSubscriberRoleIds().add(role.getId().asString());
+
+                                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                            .flatMap(em -> Messages.sendMessage(
+                                                Messages.getMessage("Creator.Announcement.Subscribe.Other.Success",
+                                                    "%value%", role.getName(), settings), em, event))
+                                            .doOnNext(msg -> a.setCreatorMessage(msg));
+                                    } else {
+                                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                            .flatMap(em -> Messages.sendMessage(
+                                                Messages.getMessage("Creator.Announcement.Subscribe.Other.Already",
+                                                    "%value%", role.getName(), settings), em, event))
+                                            .doOnNext(msg -> a.setCreatorMessage(msg));
+                                    }
+                                })
+                            ));
+                    }
+                } else {
+                    return Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.Subscribe.Self.Specify", settings), event);
+                }
+            } else {
+                return AnnouncementUtils.announcementExists(value, settings.getGuildID())
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID())
+                                .flatMap(a -> event.getMessage().getAuthorAsMember()
+                                    .filter(u -> !a.getSubscriberUserIds().contains(u.getId().asString()))
+                                    .doOnNext(u -> a.getSubscriberUserIds().add(u.getId().asString()))
+                                    .flatMap(u -> DatabaseManager.updateAnnouncement(a))
+                                )
+                                .then(Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Subscribe.Self.Success", settings),
+                                    event));
+
+                        } else {
+                            return Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                        }
+                    });
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleSubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return event.getGuild().flatMap(guild -> {
+            //First we check if the first arg is an announcement ID, because we don't want to stop people from subbing,
+            //while a staff member is creating an announcement.
+            if (args[1].length() > 32) {
+                return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
+                    //We have the announcement, now lets handle subscribing all of those users/roles...
+                    List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
+
+                    Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                        .flatMap(str -> UserUtils.getUser(str, guild))
+                        .collectList()
+                        .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                    Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                        .flatMap(str -> RoleUtils.getRole(str, guild))
+                        .collectList()
+                        .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                    return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
+                        List<String> subbedMembers = new ArrayList<>();
+                        List<String> subbedRoles = new ArrayList<>();
+
+                        for (Member m : members) {
+                            if (!a.getSubscriberUserIds().contains(m.getId().asString())) {
+                                a.getSubscriberUserIds().add(m.getId().asString());
+                                subbedMembers.add(m.getDisplayName());
                             }
                         }
-                    } catch (NumberFormatException e) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.NotInt", settings), event);
+
+                        for (Role r : roles) {
+                            if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
+                                a.getSubscriberRoleIds().add(r.getId().asString());
+                                subbedRoles.add(r.getName());
+                            }
+                        }
+
+                        String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                        String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                        Consumer<EmbedCreateSpec> embed = spec -> {
+                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            spec.setColor(GlobalConst.discalColor);
+
+                            spec.setTitle("Subscribed the Following");
+
+                            spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
+                                subMemString, settings)
+                                + GlobalConst.lineBreak
+                                + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
+                                subRoleString, settings));
+
+                            spec.setFooter(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
+                                a.getAnnouncementId().toString(), settings), null);
+                        };
+
+                        return DatabaseManager.updateAnnouncement(a).thenReturn(embed);
+                    }))
+                        .flatMap(em -> Messages.sendMessage(em, event));
+                })
+                    .switchIfEmpty(Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event))
+                    .onErrorResume(IllegalArgumentException.class, e ->
+                        Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement",
+                            settings), event));
+            } else if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                //Okay, now lets just go about subscribing all of the users/roles...
+                List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
+
+                Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                    .flatMap(str -> UserUtils.getUser(str, guild))
+                    .collectList()
+                    .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                    .flatMap(str -> RoleUtils.getRole(str, guild))
+                    .collectList()
+                    .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
+                    List<String> subbedMembers = new ArrayList<>();
+                    List<String> subbedRoles = new ArrayList<>();
+
+                    for (Member m : members) {
+                        if (!a.getSubscriberUserIds().contains(m.getId().asString())) {
+                            a.getSubscriberUserIds().add(m.getId().asString());
+                            subbedMembers.add(m.getDisplayName());
+                        }
                     }
-                }
+
+                    for (Role r : roles) {
+                        if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
+                            a.getSubscriberRoleIds().add(r.getId().asString());
+                            subbedRoles.add(r.getName());
+                        }
+                    }
+
+                    String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                    String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                    Consumer<EmbedCreateSpec> embed = spec -> {
+                        spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                        spec.setColor(GlobalConst.discalColor);
+
+                        spec.setTitle("Subscribed the Following");
+
+                        spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
+                            subMemString, settings)
+                            + GlobalConst.lineBreak
+                            + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
+                            subRoleString, settings));
+
+                        spec.setFooter(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
+                            a.getAnnouncementId().toString(), settings), null);
+                    };
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage).thenReturn(embed);
+                }))
+                    .flatMap(em -> Messages.sendMessage(em, event))
+                    .doOnNext(a::setCreatorMessage);
             } else {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.InCreator", settings), event);
-                }
+                //No announcement being created/edited, and no ID is specified, so we can't sub anyone.
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Subscribe.Other.Specify", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.List.Specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleEvent(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
+    private Mono<Void> moduleSubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 1)
+                return moduleSubscribeRewriteArgsOne(event, settings);
+            else if (args.length == 2)
+                return moduleSubscribeRewriteArgsTwo(args, event, settings);
+            else
+                return moduleSubscribeRewriteArgsThree(args, event, settings);
+        });
+    }
+
+    private Mono<Void> moduleUnsubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return event.getMessage().getAuthorAsMember()
+                    .flatMap(user -> {
+                        if (!a.getSubscriberUserIds().contains(user.getId().asString())) {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Not", settings),
+                                    em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        } else {
+                            a.getSubscriberUserIds().remove(user.getId().asString());
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings),
+                                    em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleUnsubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
-                    if (EventUtils.eventExists(settings, value)) {
-                        AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setEventId(value);
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Event.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
+            if (value.length() <= 32) {
+                if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                    Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                    Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                    Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                    if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
+                        if (a.getSubscriberRoleIds().contains(value.toLowerCase().trim())) {
+                            a.getSubscriberRoleIds().remove(value.toLowerCase().trim());
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Success", "%value%",
+                                        value.toLowerCase(), settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
                         } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Not", "%value%",
+                                        value.toLowerCase(), settings), event)
+                                )
+                                .doOnNext(a::setCreatorMessage);
                         }
                     } else {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
-                        }
-                    }
-                } else if (AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).getAnnouncementType().equals(AnnouncementType.RECUR)) {
-                    if (EventUtils.eventExists(settings, value)) {
-                        if (value.contains("_")) {
-                            String[] stuff = value.split("_");
-                            value = stuff[0];
-                        }
-                        AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setEventId(value);
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Event.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Event.Success", "%id%", value, settings), event);
-                        }
-                    } else {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Event", settings), event);
-                        }
+                        //Well, now we check if a user exists, then if not, we check for a role that exists...
+                        return event.getGuild().flatMap(guild ->
+                            UserUtils.getUser(value, guild).flatMap(mem -> {
+                                if (a.getSubscriberUserIds().contains(mem.getId().asString())) {
+                                    a.getSubscriberUserIds().remove(mem.getId().asString());
+
+                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                        .flatMap(em -> Messages.sendMessage(
+                                            Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Success",
+                                                "%value%", mem.getUsername(), settings), em, event))
+                                        .doOnNext(msg -> a.setCreatorMessage(msg));
+                                } else {
+                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                        .flatMap(em -> Messages.sendMessage(
+                                            Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Not",
+                                                "%value%", mem.getUsername(), settings), em, event))
+                                        .doOnNext(msg -> a.setCreatorMessage(msg));
+                                }
+                            }).switchIfEmpty(RoleUtils.getRole(value, guild)
+                                .flatMap(role -> {
+                                    if (!a.getSubscriberRoleIds().contains(role.getId().asString())) {
+                                        a.getSubscriberRoleIds().remove(role.getId().asString());
+
+                                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                            .flatMap(em -> Messages.sendMessage(
+                                                Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Success",
+                                                    "%value%", role.getName(), settings), em, event))
+                                            .doOnNext(msg -> a.setCreatorMessage(msg));
+                                    } else {
+                                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                            .flatMap(em -> Messages.sendMessage(
+                                                Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Not",
+                                                    "%value%", role.getName(), settings), em, event))
+                                            .doOnNext(msg -> a.setCreatorMessage(msg));
+                                    }
+                                })
+                            ));
                     }
                 } else {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Event.Failure.Type", settings), event);
-                    }
+                    return Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Specify", settings), event);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
+                return AnnouncementUtils.announcementExists(value, settings.getGuildID())
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID())
+                                .flatMap(a -> event.getMessage().getAuthorAsMember()
+                                    .doOnNext(u -> a.getSubscriberUserIds().remove(u.getId().asString()))
+                                    .flatMap(u -> DatabaseManager.updateAnnouncement(a)))
+                                .then(Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings),
+                                    event));
+
+                        } else {
+                            return Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                        }
+                    });
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Event.Specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleInfo(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length < 2) {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Info.Specify", settings), event);
-        } else if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setInfo(value);
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Info.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-            }
-        } else {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                String value = GeneralUtils.getContent(args, 1);
-                AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setInfo(value);
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Info.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Info.Success", "%info%", value, settings), event);
-                }
-            } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
-            }
-        }
-    }
+    private Mono<Void> moduleUnsubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return event.getGuild().flatMap(guild -> {
+            //First we check if the first arg is an announcement ID, because we don't want to stop people from unsubbing,
+            //while a staff member is creating an announcement.
+            if (args[1].length() > 32) {
+                return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
+                    //We have the announcement, now lets handle subscribing all of those users/roles...
+                    List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
 
-    private void moduleEnable(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.Enable.Creator", settings), event);
-            } else {
-                String value = args[1];
-                if (!AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                } else {
-                    Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
-                    a.setEnabled(!a.isEnabled());
+                    Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                        .flatMap(str -> UserUtils.getUser(str, guild))
+                        .collectList()
+                        .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                    DatabaseManager.updateAnnouncement(a).subscribe();
+                    Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                        .flatMap(str -> RoleUtils.getRole(str, guild))
+                        .collectList()
+                        .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.Enable.Success", "%value%", a.isEnabled() + "", settings), event);
-                }
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.Enable.Specify", settings), event);
-        }
-    }
+                    return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
+                        List<String> subbedMembers = new ArrayList<>();
+                        List<String> subbedRoles = new ArrayList<>();
 
-    private void moduleInfoOnly(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.InfoOnly.Creator", settings), event);
-            } else {
-                String value = args[1];
-                if (!AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                } else {
-                    Announcement a = DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID()).block();
-                    a.setInfoOnly(!a.isInfoOnly());
-
-                    DatabaseManager.updateAnnouncement(a).subscribe();
-
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.InfoOnly.Success", "%value%", a.isInfoOnly() + "", settings), event);
-                }
-            }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Announcement.InfoOnly.Specify", settings), event);
-        }
-    }
-
-    private void moduleChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (ChannelUtils.channelExists(value, event)) {
-                    GuildChannel c = ChannelUtils.getChannelFromNameOrId(value, event);
-                    if (c != null) {
-                        AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setAnnouncementChannelId(c.getId().asString());
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Channel.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Channel.Success", "%channel%", c.getName(), settings), event);
+                        for (Member m : members) {
+                            if (a.getSubscriberUserIds().contains(m.getId().asString())) {
+                                a.getSubscriberUserIds().remove(m.getId().asString());
+                                subbedMembers.add(m.getDisplayName());
+                            }
                         }
-                    } else {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
+
+                        for (Role r : roles) {
+                            if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
+                                a.getSubscriberRoleIds().remove(r.getId().asString());
+                                subbedRoles.add(r.getName());
+                            }
+                        }
+
+                        String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                        String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                        Consumer<EmbedCreateSpec> embed = spec -> {
+                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            spec.setColor(GlobalConst.discalColor);
+
+                            spec.setTitle("Unsubscribed the Following");
+
+                            spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
+                                subMemString, settings)
+                                + GlobalConst.lineBreak
+                                + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
+                                subRoleString, settings));
+
+                            spec.setFooter(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
+                                a.getAnnouncementId().toString(), settings), null);
+                        };
+
+                        return DatabaseManager.updateAnnouncement(a).thenReturn(embed);
+                    }))
+                        .flatMap(em -> Messages.sendMessage(em, event));
+                })
+                    .switchIfEmpty(Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event))
+                    .onErrorResume(IllegalArgumentException.class, e ->
+                        Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement",
+                            settings), event));
+            } else if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                //Okay, now lets just go about subscribing all of the users/roles...
+                List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
+
+                Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                    .flatMap(str -> UserUtils.getUser(str, guild))
+                    .collectList()
+                    .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                    .flatMap(str -> RoleUtils.getRole(str, guild))
+                    .collectList()
+                    .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
+
+                return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
+                    List<String> subbedMembers = new ArrayList<>();
+                    List<String> subbedRoles = new ArrayList<>();
+
+                    for (Member m : members) {
+                        if (a.getSubscriberUserIds().contains(m.getId().asString())) {
+                            a.getSubscriberUserIds().remove(m.getId().asString());
+                            subbedMembers.add(m.getDisplayName());
                         }
                     }
-                } else {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Channel", settings), event);
+
+                    for (Role r : roles) {
+                        if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
+                            a.getSubscriberRoleIds().remove(r.getId().asString());
+                            subbedRoles.add(r.getName());
+                        }
                     }
-                }
+
+                    String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                    String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                    Consumer<EmbedCreateSpec> embed = spec -> {
+                        spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                        spec.setColor(GlobalConst.discalColor);
+
+                        spec.setTitle("Unsubscribed the Following");
+
+                        spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
+                            subMemString, settings)
+                            + GlobalConst.lineBreak
+                            + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
+                            subRoleString, settings));
+
+                        spec.setFooter(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
+                            a.getAnnouncementId().toString(), settings), null);
+                    };
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage).thenReturn(embed);
+                }))
+                    .flatMap(em -> Messages.sendMessage(em, event))
+                    .doOnNext(a::setCreatorMessage);
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
+                //No announcement being created/edited, and no ID is specified, so we can't sub anyone.
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Unsubscribe.Other.Specify", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Channel.Specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
+    private Mono<Void> moduleUnsubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 1)
+                return moduleUnsubscribeRewriteArgsOne(event, settings);
+            else if (args.length == 2)
+                return moduleUnsubscribeRewriteArgsTwo(args, event, settings);
+            else
+                return moduleUnsubscribeRewriteArgsThree(args, event, settings);
+        });
+    }
+
+    private Mono<Void> moduleType(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).getAnnouncementType().equals(AnnouncementType.COLOR)) {
-                    if (EventColor.exists(value)) {
-                        EventColor color = EventColor.fromNameOrHexOrID(value);
-                        AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()).setEventColor(color);
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Color.Success.New", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Color.Success", "%color%", color.name(), settings), event);
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (AnnouncementType.isValid(args[1])) {
+                        AnnouncementType type = AnnouncementType.fromValue(args[1]);
+                        a.setAnnouncementType(type);
+
+                        //Get the correct message to send depending on the type...
+                        String msg;
+                        switch (type) {
+                            case SPECIFIC:
+                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Specific", settings);
+                                break;
+                            case UNIVERSAL:
+                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Universal", settings);
+                                break;
+                            case COLOR:
+                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Color", settings);
+                                break;
+                            case RECUR:
+                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Recur", settings);
+                                break;
+                            default:
+                                msg = "Type message somehow not handled. Ugh. Contact the devs please";
                         }
+
+                        //Okay, now we can return with the message...
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(msg, em, event))
+                            .doOnNext(a::setCreatorMessage);
                     } else {
-                        if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                            MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                            MessageManager.deleteMessage(event);
-                            AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                        } else {
-                            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
-                        }
+                        //Not valid type...
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.Type.Specify", settings), em, event))
+                            .doOnNext(a::setCreatorMessage);
                     }
                 } else {
-                    if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                        MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                        MessageManager.deleteMessage(event);
-                        AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                    } else {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Color.Failure.Type", settings), event);
-                    }
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Type.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
                 }
             } else {
-                MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.NotInit", settings), event);
+                //Not in creator.
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Color.Specify", settings), event);
-        }
+        }).then();
     }
 
-    private void moduleCopy(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        if (args.length == 2) {
-            String value = args[1];
+    private Mono<Void> moduleHours(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length == 2) {
+                    int hours;
+                    try {
+                        hours = Math.abs(Integer.parseInt(args[1]));
+                    } catch (NumberFormatException ignore) {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.Hours.NotInt", settings), em, event))
+                            .doOnNext(a::setCreatorMessage);
+                    }
+                    a.setHoursBefore(hours);
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Hours.Success.New", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Hours.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleMinutes(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length == 2) {
+                    int minutes;
+                    try {
+                        minutes = Math.abs(Integer.parseInt(args[1]));
+                    } catch (NumberFormatException ignore) {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.Minutes.NotInt", settings), em, event))
+                            .doOnNext(a::setCreatorMessage);
+                    }
+                    a.setMinutesBefore(minutes);
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Minutes.Success.New", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Minutes.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.List.InCreator", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else if (args.length == 2) {
+                if (args[1].equalsIgnoreCase("all")) {
+                    return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(announcements ->
+                        Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.All", "%amount%",
+                            announcements.size() + "", settings), event)
+                            .then(Flux.fromIterable(announcements)
+                                .flatMap(a -> AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(em, event))
+                                .then()));
+                } else {
+                    //List specific amount of announcements...
+                    int amount;
+                    try {
+                        amount = Integer.parseInt(args[1]);
+                    } catch (NumberFormatException ignore) {
+                        return Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.NotInt", settings),
+                            event);
+                    }
+
+                    return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(allAnnouncements -> {
+                        List<Announcement> toPost; //We only post the amount listed...
+                        if (allAnnouncements.size() > amount)
+                            toPost = allAnnouncements.subList(0, amount);
+                        else
+                            toPost = allAnnouncements;
+
+                        return Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.Some", "%amount%",
+                            toPost.size() + "", settings), event)
+                            .then(Flux.fromIterable(toPost)
+                                .flatMap(a -> AnnouncementMessageFormatter.getCondensedAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(em, event))
+                                .then());
+                    });
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleEvent(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length == 2) {
+                    if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                        return EventUtils.eventExists(settings, args[1]).flatMap(exists -> {
+                            if (exists) {
+                                a.setEventId(args[1]);
+
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.Event.Success.New", settings),
+                                        em, event))
+                                    .doOnNext(a::setCreatorMessage);
+                            } else {
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.CannotFind.Event", settings),
+                                        em, event))
+                                    .doOnNext(a::setCreatorMessage);
+                            }
+                        });
+                    } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                        return EventUtils.eventExists(settings, args[1]).flatMap(exists -> {
+                            if (exists) {
+                                String value = args[1];
+                                if (args[1].contains("_"))
+                                    value = args[1].split("_")[0];
+
+                                a.setEventId(value);
+
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.Event.Success.New", settings),
+                                        em, event))
+                                    .doOnNext(a::setCreatorMessage);
+                            } else {
+                                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                    .flatMap(em -> Messages.sendMessage(
+                                        Messages.getMessage("Creator.Announcement.CannotFind.Event", settings),
+                                        em, event))
+                                    .doOnNext(a::setCreatorMessage);
+                            }
+                        });
+                    } else {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.Event.Failure.Type", settings), em, event))
+                            .doOnNext(a::setCreatorMessage);
+                    }
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Event.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleInfo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length >= 2) {
+                    a.setInfo(GeneralUtils.getContent(args, 1));
+
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Info.Success.New", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Info.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleEnable(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Announcement.Enable.Creator", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else if (args.length == 2) {
+                return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
+                    if (exists) {
+                        UUID id = UUID.fromString(args[1]);
+                        AtomicBoolean en = new AtomicBoolean(false); //This has got to be tested...
+                        return DatabaseManager.getAnnouncement(id, settings.getGuildID())
+                            .doOnNext(a -> a.setEnabled(!a.isEnabled()))
+                            .doOnNext(a -> en.set(a.isEnabled()))
+                            .flatMap(DatabaseManager::updateAnnouncement)
+                            .map(i -> Messages.getMessage("Announcement.Enable.Success", "%value%", en.get() + "", settings))
+                            .flatMap(msg -> Messages.sendMessage(msg, event));
+                    } else {
+                        return Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                    }
+                });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Announcement.Enable.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleInfoOnly(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Announcement.InfoOnly.Creator", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else if (args.length == 2) {
+                return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
+                    if (exists) {
+                        UUID id = UUID.fromString(args[1]);
+                        AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
+                        return DatabaseManager.getAnnouncement(id, settings.getGuildID())
+                            .doOnNext(a -> a.setInfoOnly(!a.isInfoOnly()))
+                            .doOnNext(a -> io.set(a.isInfoOnly()))
+                            .flatMap(DatabaseManager::updateAnnouncement)
+                            .map(i -> Messages.getMessage("Announcement.InfoOnly.Success", "%value%", io.get() + "", settings))
+                            .flatMap(msg -> Messages.sendMessage(msg, event));
+                    } else {
+                        return Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                    }
+                });
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Announcement.InfoOnly.Specify", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (args.length == 2) {
+                    return ChannelUtils.channelExists(args[1], event).flatMap(exists -> {
+                        if (exists) {
+                            return ChannelUtils.getChannelFromNameOrId(args[1], event)
+                                .doOnNext(c -> a.setAnnouncementChannelId(c.getId().asString()))
+                                .then(Mono.when(deleteUserMessage, deleteCreatorMessage))
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(e -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Channel.Success.New", settings), e, event))
+                                .doOnNext(a::setCreatorMessage);
+                        } else {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.CannotFind.Channel", settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    });
+                } else {
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Channel.Specify", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                    if (args.length == 2) {
+                        if (EventColor.exists(args[1])) {
+                            a.setEventColor(EventColor.fromNameOrHexOrID(args[1]));
+
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Color.Success.New", settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        } else {
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                                .flatMap(em -> Messages.sendMessage(
+                                    Messages.getMessage("Creator.Announcement.Color.Specify", settings), em, event))
+                                .doOnNext(a::setCreatorMessage);
+                        }
+                    } else {
+                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                            .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                            .flatMap(em -> Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.Color.Specify", settings), em, event))
+                            .doOnNext(a::setCreatorMessage);
+                    }
+                } else {
+                    //type is not color, can't set color
+                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                        .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                        .flatMap(em -> Messages.sendMessage(
+                            Messages.getMessage("Creator.Announcement.Color.Failure.Type", settings), em, event))
+                        .doOnNext(a::setCreatorMessage);
+                }
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
+    }
+
+    private Mono<Void> moduleCopy(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                if (AnnouncementUtils.announcementExists(value, settings.getGuildID())) {
-                    Announcement a = AnnouncementCreator.getCreator().init(event, value, settings);
-
-                    if (a.getCreatorMessage() == null) {
-                        MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Copy.Success", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings), event);
-                    }
+                if (args.length == 2) {
+                    return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
+                        if (exists) {
+                            return AnnouncementCreator.getCreator().init(event, args[1], settings);
+                        } else {
+                            return Messages.sendMessage(
+                                Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                        }
+                    });
                 } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
+                    return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Copy.Specify", settings), event);
                 }
             } else {
-                if (AnnouncementCreator.getCreator().hasCreatorMessage(settings.getGuildID())) {
-                    MessageManager.deleteMessage(AnnouncementCreator.getCreator().getCreatorMessage(settings.getGuildID()));
-                    MessageManager.deleteMessage(event);
-                    AnnouncementCreator.getCreator().setCreatorMessage(MessageManager.sendMessageSync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), AnnouncementMessageFormatter.getFormatAnnouncementEmbed(AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID()), settings), event));
-                } else {
-                    MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.AlreadyInit", settings), event);
-                }
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(
+                        Messages.getMessage("Creator.Announcement.AlreadyInit", settings), em, event))
+                    .doOnNext(a::setCreatorMessage);
             }
-        } else {
-            MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Announcement.Copy.Specify", settings), event);
-        }
+        }).then();
     }
 }
