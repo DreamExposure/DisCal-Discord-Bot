@@ -22,16 +22,16 @@ public class ReadyEventListener {
     public static Mono<Void> handle(ReadyEvent event) {
         return event.getClient().getApplicationInfo()
             .doOnNext(info -> GlobalConst.iconUrl = info.getIconUrl(Image.Format.PNG).get())
-            .doOnNext(info -> Messages.reloadLangs())
-                .doOnNext(info ->
-                        LogFeed.log(LogObject.forDebug("[ReadyEvent]",
-                                "Connection success! Session ID: " + event.getSessionId()))
-                )
-                .doOnNext(info -> LogFeed.log(LogObject.forStatus("Ready Event Success!")))
-                .onErrorResume(e -> {
-                    LogFeed.log(LogObject.forException("BAD!!!!!1!!", e, ReadyEventListener.class));
-                    return Mono.empty();
-                })
-                .then();
+            .doOnNext(info ->
+                LogFeed.log(LogObject.forDebug("[ReadyEvent]",
+                    "Connection success! Session ID: " + event.getSessionId()))
+            )
+            .doOnNext(info -> LogFeed.log(LogObject.forStatus("Ready Event Success!")))
+            .then(Messages.reloadLangs())
+            .onErrorResume(e -> {
+                LogFeed.log(LogObject.forException("BAD!!!!!1!!", e, ReadyEventListener.class));
+                return Mono.empty();
+            })
+            .then();
     }
 }

@@ -67,7 +67,7 @@ public class DisCalClient {
         Authorization.getAuth().init();
 
         //Load lang files
-        Messages.reloadLangs();
+        Messages.reloadLangs().subscribe();
 
         //Register commands
         CommandExecutor.registerCommand(new HelpCommand());
