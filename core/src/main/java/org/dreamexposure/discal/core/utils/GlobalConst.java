@@ -1,10 +1,10 @@
 package org.dreamexposure.discal.core.utils;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.awt.Color;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 
 import discord4j.rest.util.Snowflake;
@@ -15,10 +15,9 @@ public class GlobalConst {
         String version1;
         String d4jVersion1;
 
-        ClassPathResource resource = new ClassPathResource("application.properties");
-        Properties p = new Properties();
-        try (InputStream inputStream = resource.getInputStream()) {
-            p.load(inputStream);
+        try {
+            ClassPathResource resource = new ClassPathResource("/application.properties");
+            Properties p = PropertiesLoaderUtils.loadProperties(resource);
 
             version1 = p.getProperty("application.version");
             d4jVersion1 = "Discord4J v" + p.getProperty("library.discord4j.version");
