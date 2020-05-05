@@ -48,7 +48,8 @@ public class UserUtils {
     }
 
     private static Mono<Member> getUserFromID(String id, Guild guild) {
-        return guild.getMemberById(Snowflake.of(Long.parseUnsignedLong(id)));
+        return guild.getMemberById(Snowflake.of(Long.parseUnsignedLong(id)))
+            .onErrorResume(e -> Mono.empty());
     }
 
     public static Mono<List<Member>> getUsers(ArrayList<String> userIds, Guild guild) {
