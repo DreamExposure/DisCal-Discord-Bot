@@ -44,6 +44,9 @@ public class GlobalConst {
     public static final String supportInviteLink = "https://discord.gg/2TFqyuy";
     public static final String discalDashboardLink = "https://www.discalbot.com/dashboard";
 
+    public static final String discordApiUrl = "https://www.discord.com/api/v6";
+    public static final String discordCdnUrl = "https://cdn.discordapp.com";
+
     public static final long oneMinuteMs = 60000;
     public static final long oneHourMs = 3600000;
     public static final long oneDayMs = 86400000;

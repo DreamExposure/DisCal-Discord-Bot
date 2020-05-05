@@ -66,14 +66,14 @@ public class DiscordLoginHandler {
             if (info.has("access_token")) {
                 //GET request for user info...
                 Request userDataRequest = new Request.Builder()
-                        .url("https://discordapp.com/api/v6/users/@me")
+                    .url(GlobalConst.discordApiUrl + "/users/@me")
                         .header("Authorization", "Bearer " + info.getString("access_token"))
                         .build();
 
                 Response userDataResponse = client.newCall(userDataRequest).execute();
 
                 Request userGuildsRequest = new Request.Builder()
-                        .url("https://discordapp.com/api/v6/users/@me/guilds")
+                    .url(GlobalConst.discordApiUrl + "/users/@me/guilds")
                         .header("Authorization", "Bearer " + info.getString("access_token"))
                         .build();
 
@@ -106,11 +106,11 @@ public class DiscordLoginHandler {
                 m.put("username", userInfo.getString("username"));
                 m.put("discrim", userInfo.getString("discriminator"));
                 if (userInfo.has("avatar") && !userInfo.isNull("avatar")) {
-                    m.put("pfp", "https://cdn.discordapp.com/avatars/"
-                            + userInfo.getString("id")
-                            + "/"
-                            + userInfo.getString("avatar")
-                            + ".png");
+                    m.put("pfp", GlobalConst.discordCdnUrl + "/avatars/"
+                        + userInfo.getString("id")
+                        + "/"
+                        + userInfo.getString("avatar")
+                        + ".png");
                 } else {
                     m.put("pfp", "/assets/img/default/pfp.png");
                 }
@@ -124,11 +124,11 @@ public class DiscordLoginHandler {
                     String name = jGuild.getString("name");
                     String icon;
                     if (jGuild.has("icon") && !jGuild.isNull("icon")) {
-                        icon = "https://cdn.discordapp.com/icons/"
-                                + id
-                                + "/"
-                                + jGuild.getString("icon")
-                                + ".png";
+                        icon = GlobalConst.discordCdnUrl + "/icons/"
+                            + id
+                            + "/"
+                            + jGuild.getString("icon")
+                            + ".png";
                     } else {
                         icon = "/assets/img/default/guild-icon.png";
                     }
