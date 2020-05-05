@@ -52,4 +52,6 @@ public class GlobalConst {
     public static final long oneDayMs = 86400000;
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    public static final String NOT_EMPTY = "Not empty"; //Used for returning in mono's that we don't want to be empty.
 }
