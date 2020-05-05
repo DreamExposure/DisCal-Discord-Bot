@@ -26,7 +26,7 @@ public class CalendarMessageFormatter {
     }
 
     public static String getCalendarLink(Snowflake guildId, int calNumber) {
-        return "https://www.discalbot.com/embed/calendar" + guildId + "/" + calNumber;
+        return "https://www.discalbot.com/embed/calendar" + guildId.asString() + "/" + calNumber;
     }
 
     @Deprecated

@@ -114,6 +114,7 @@ public class DevCommand implements Command {
             .then();
     }
 
+    //TODO: maybe make internal API for invalidating caches?
     private Mono<Void> modulePatron(String[] args, MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
@@ -132,6 +133,7 @@ public class DevCommand implements Command {
         }).then();
     }
 
+    //TODO: maybe make internal API for invalidating caches?
     private Mono<Void> moduleDevGuild(String[] args, MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
