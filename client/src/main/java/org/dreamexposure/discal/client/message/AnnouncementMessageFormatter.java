@@ -13,6 +13,8 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.RoleUtils;
+import org.dreamexposure.discal.core.utils.UserUtils;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
@@ -375,7 +377,7 @@ public class AnnouncementMessageFormatter {
 
             //User mentions...
             Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
-                .flatMap(s -> guild.getMemberById(Snowflake.of(s)))
+                .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .doOnNext(m -> mentions.append(m.getDisplayName()).append(" "))
                 .then();
 
@@ -389,7 +391,7 @@ public class AnnouncementMessageFormatter {
                         mentions.append("here").append(" ");
                         return Mono.empty();
                     } else {
-                        return guild.getRoleById(Snowflake.of(s))
+                        return RoleUtils.getRoleFromID(s, guild)
                             .doOnNext(r -> mentions.append(r.getName()).append(" "));
                     }
                 }).then();
@@ -407,7 +409,7 @@ public class AnnouncementMessageFormatter {
 
             //User mentions...
             Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
-                .flatMap(s -> guild.getMemberById(Snowflake.of(s)))
+                .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .doOnNext(m -> mentions.append(m.getMention()).append(" "))
                 .then();
 
@@ -421,7 +423,7 @@ public class AnnouncementMessageFormatter {
                         mentions.append("@here").append(" ");
                         return Mono.empty();
                     } else {
-                        return guild.getRoleById(Snowflake.of(s))
+                        return RoleUtils.getRoleFromID(s, guild)
                             .doOnNext(r -> mentions.append(r.getMention()).append(" "));
                     }
                 }).then();

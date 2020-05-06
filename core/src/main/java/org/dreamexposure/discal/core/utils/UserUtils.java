@@ -27,6 +27,9 @@ public class UserUtils {
     }
 
     public static Mono<Member> getUser(String toLookFor, Guild guild) {
+        if (toLookFor.isEmpty())
+            return Mono.empty();
+
         toLookFor = GeneralUtils.trim(toLookFor);
         final String lower = toLookFor.toLowerCase();
         if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
@@ -47,9 +50,12 @@ public class UserUtils {
             .onErrorResume(e -> Mono.empty()); //User not found, we don't care about the error in this case.
     }
 
-    private static Mono<Member> getUserFromID(String id, Guild guild) {
-        return guild.getMemberById(Snowflake.of(id))
-            .onErrorResume(e -> Mono.empty());
+    public static Mono<Member> getUserFromID(String id, Guild guild) {
+        return Mono.just(id)
+            .filter(s -> !s.isEmpty())
+            .filter(s -> s.matches("[0-9]+"))
+            .flatMap(s -> guild.getMemberById(Snowflake.of(s))
+                .onErrorResume(e -> Mono.empty()));
     }
 
     public static Mono<List<Member>> getUsers(ArrayList<String> userIds, Guild guild) {

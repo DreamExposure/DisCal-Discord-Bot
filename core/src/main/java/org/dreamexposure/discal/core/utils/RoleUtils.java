@@ -21,6 +21,14 @@ public class RoleUtils {
             .next();
     }
 
+    public static Mono<Role> getRoleFromID(String id, Guild guild) {
+        return Mono.just(id)
+            .filter(s -> !s.isEmpty())
+            .filter(s -> s.matches("[0-9]+"))
+            .flatMap(s -> guild.getRoleById(Snowflake.of(id))
+                .onErrorResume(e -> Mono.empty()));
+    }
+
     public static Mono<Boolean> roleExists(String id, MessageCreateEvent event) {
         return getRoleFromID(id, event).hasElement();
     }
