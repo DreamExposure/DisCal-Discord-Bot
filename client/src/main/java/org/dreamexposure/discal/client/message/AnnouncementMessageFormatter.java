@@ -378,7 +378,10 @@ public class AnnouncementMessageFormatter {
             //User mentions...
             Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
-                .doOnNext(m -> mentions.append(m.getDisplayName()).append(" "))
+                .map(m -> {
+                    mentions.append(m.getDisplayName()).append(" ");
+                    return m;
+                })
                 .then();
 
             //Role and everyone/here mentions
@@ -392,7 +395,11 @@ public class AnnouncementMessageFormatter {
                         return Mono.empty();
                     } else {
                         return RoleUtils.getRoleFromID(s, guild)
-                            .doOnNext(r -> mentions.append(r.getName()).append(" "));
+                            .map(r -> {
+                                mentions.append(r.getName()).append(" ");
+                                return r;
+                            })
+                            .then();
                     }
                 }).then();
 
@@ -410,9 +417,11 @@ public class AnnouncementMessageFormatter {
             //User mentions...
             Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
-                .doOnNext(m -> mentions.append(m.getMention()).append(" "))
+                .map(m -> {
+                    mentions.append(m.getMention()).append(" ");
+                    return m;
+                })
                 .then();
-
             //Role and everyone/here mentions
             Mono<Void> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
                 .flatMap(s -> {
@@ -424,7 +433,10 @@ public class AnnouncementMessageFormatter {
                         return Mono.empty();
                     } else {
                         return RoleUtils.getRoleFromID(s, guild)
-                            .doOnNext(r -> mentions.append(r.getMention()).append(" "));
+                            .map(r -> {
+                                mentions.append(r.getMention()).append(" ");
+                                return r;
+                            });
                     }
                 }).then();
 
