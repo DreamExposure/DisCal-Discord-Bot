@@ -18,9 +18,13 @@ import org.dreamexposure.discal.core.utils.UserUtils;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
@@ -30,7 +34,6 @@ import discord4j.rest.util.Snowflake;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.function.TupleUtils;
 
 /**
@@ -372,78 +375,76 @@ public class AnnouncementMessageFormatter {
     }
 
     public static Mono<String> getSubscriberNames(Announcement a, Guild guild) {
-        return Mono.just(new StringBuilder()).flatMap(mentions -> {
-            mentions.append("Subscribers: ");
-
-            //User mentions...
-            Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
+        return Mono.defer(() -> {
+            Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
-                .map(m -> {
-                    mentions.append(m.getDisplayName()).append(" ");
-                    return m;
-                })
-                .then();
+                .map(Member::getDisplayName)
+                .collectList()
+                .defaultIfEmpty(new ArrayList<>());
 
-            //Role and everyone/here mentions
-            Mono<Void> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
+            Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
                 .flatMap(s -> {
-                    if (s.equalsIgnoreCase("everyone")) {
-                        mentions.append("everyone").append(" ");
-                        return Mono.empty();
-                    } else if (s.equalsIgnoreCase("here")) {
-                        mentions.append("here").append(" ");
-                        return Mono.empty();
-                    } else {
-                        return RoleUtils.getRoleFromID(s, guild)
-                            .map(r -> {
-                                mentions.append(r.getName()).append(" ");
-                                return r;
-                            })
-                            .then();
-                    }
-                }).then();
+                    if (s.equalsIgnoreCase("everyone"))
+                        return Mono.just("everyone");
+                    else if (s.equalsIgnoreCase("here"))
+                        return Mono.just("here");
+                    else
+                        return RoleUtils.getRoleFromID(s, guild).map(Role::getName);
+                }).collectList()
+                .defaultIfEmpty(new ArrayList<>());
 
-            //Return the mentions string once fully built...
-            return userMentions.then(roleMentions)
-                .thenReturn(mentions.toString().replaceAll("@", "@\\u200B"))
-                .subscribeOn(Schedulers.single());
+            return Mono.zip(userMentions, roleMentions).map(TupleUtils.function((users, roles) -> {
+                StringBuilder mentions = new StringBuilder();
+
+                mentions.append("Subscribers: ");
+
+                for (String s : users) {
+                    mentions.append(s).append(" ");
+                }
+
+                for (String s : roles) {
+                    mentions.append(s).append(" ");
+                }
+
+                return mentions.toString().replaceAll("@", "@\\u200B");
+            }));
         });
     }
 
     private static Mono<String> getSubscriberMentions(Announcement a, Guild guild) {
-        return Mono.just(new StringBuilder()).flatMap(mentions -> {
-            mentions.append("Subscribers: ");
-
-            //User mentions...
-            Mono<Void> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
+        return Mono.defer(() -> {
+            Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
-                .map(m -> {
-                    mentions.append(m.getMention()).append(" ");
-                    return m;
-                })
-                .then();
-            //Role and everyone/here mentions
-            Mono<Void> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
-                .flatMap(s -> {
-                    if (s.equalsIgnoreCase("everyone")) {
-                        mentions.append("@everyone").append(" ");
-                        return Mono.empty();
-                    } else if (s.equalsIgnoreCase("here")) {
-                        mentions.append("@here").append(" ");
-                        return Mono.empty();
-                    } else {
-                        return RoleUtils.getRoleFromID(s, guild)
-                            .map(r -> {
-                                mentions.append(r.getMention()).append(" ");
-                                return r;
-                            });
-                    }
-                }).then();
+                .map(Member::getNicknameMention)
+                .collectList()
+                .defaultIfEmpty(new ArrayList<>());
 
-            //Return the mentions string once fully built...
-            return userMentions.then(roleMentions)
-                .thenReturn(mentions.toString())
-                .subscribeOn(Schedulers.single());
+            Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
+                .flatMap(s -> {
+                    if (s.equalsIgnoreCase("everyone"))
+                        return Mono.just("@everyone");
+                    else if (s.equalsIgnoreCase("here"))
+                        return Mono.just("@here");
+                    else
+                        return RoleUtils.getRoleFromID(s, guild).map(Role::getMention);
+                }).collectList()
+                .defaultIfEmpty(new ArrayList<>());
+
+            return Mono.zip(userMentions, roleMentions).map(TupleUtils.function((users, roles) -> {
+                StringBuilder mentions = new StringBuilder();
+
+                mentions.append("Subscribers: ");
+
+                for (String s : users) {
+                    mentions.append(s).append(" ");
+                }
+
+                for (String s : roles) {
+                    mentions.append(s).append(" ");
+                }
+
+                return mentions.toString();
+            }));
         });
     }
 }
