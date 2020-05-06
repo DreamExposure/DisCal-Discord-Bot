@@ -80,10 +80,12 @@ public class AddCalendarCommand implements Command {
                             .hasElement()
                             .flatMap(hasCal -> {
                                 if (hasCal) {
-                                    return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                                    return Messages.sendMessage(
+                                        Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
                                 } else {
-                                    GoogleExternalAuth.getAuth().requestCode(event, settings);
-                                    return Messages.sendMessage(Messages.getMessage("AddCalendar.Start", settings), event);
+                                    return GoogleExternalAuth.getAuth().requestCode(event, settings)
+                                        .then(Messages.sendMessage(
+                                            Messages.getMessage("AddCalendar.Start", settings), event));
                                 }
                             });
                     } else if (args.length == 1) {

@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.network.google;
 
-import discord4j.core.object.entity.Guild;
+import org.dreamexposure.discal.core.object.GuildSettings;
+
 import discord4j.core.object.entity.User;
 
 /**
@@ -10,16 +11,16 @@ import discord4j.core.object.entity.User;
  */
 public class Poll {
     private final User user;
-    private final Guild guild;
+    private final GuildSettings settings;
 
     private int interval;
     private int expires_in;
     private int remainingSeconds;
     private String device_code;
 
-    public Poll(User _user, Guild _guild) {
-        user = _user;
-        guild = _guild;
+    public Poll(User user, GuildSettings settings) {
+        this.user = user;
+        this.settings = settings;
     }
 
     //Getters
@@ -27,8 +28,8 @@ public class Poll {
         return user;
     }
 
-    public Guild getGuild() {
-        return guild;
+    public GuildSettings getSettings() {
+        return settings;
     }
 
     public int getInterval() {

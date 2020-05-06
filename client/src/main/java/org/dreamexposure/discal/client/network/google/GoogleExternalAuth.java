@@ -2,7 +2,6 @@ package org.dreamexposure.discal.client.network.google;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.CalendarScopes;
-import com.google.api.services.calendar.model.CalendarListEntry;
 
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.AESEncryption;
@@ -16,17 +15,16 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
 import discord4j.core.spec.EmbedCreateSpec;
 import okhttp3.FormBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * @author NovaFox161
@@ -38,20 +36,21 @@ import okhttp3.Response;
  */
 @SuppressWarnings({"ConstantConditions", "OptionalGetWithoutIsPresent"})
 public class GoogleExternalAuth {
-    private static GoogleExternalAuth auth;
+    static {
+        auth = new GoogleExternalAuth();
+    }
+
+    private final static GoogleExternalAuth auth;
 
     private GoogleExternalAuth() {
     }
 
     public static GoogleExternalAuth getAuth() {
-        if (auth == null)
-            auth = new GoogleExternalAuth();
-
         return auth;
     }
 
-    public void requestCode(MessageCreateEvent event, GuildSettings settings) {
-        try {
+    public Mono<Void> requestCode(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
             RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
                 .addEncoded("scope", CalendarScopes.CALENDAR)
@@ -63,65 +62,65 @@ public class GoogleExternalAuth {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
 
-            Response response = Authorization.getAuth().getClient().newCall(httpRequest).execute();
 
-            if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                JSONObject codeResponse = new JSONObject(response.body().string());
+            return Mono.fromCallable(() -> Authorization.getAuth().getClient().newCall(httpRequest).execute())
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(response -> Mono.fromCallable(() -> response.body().string()).flatMap(responseBody -> {
+                    if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
+                        JSONObject codeResponse = new JSONObject(responseBody);
 
-                //Send DM to user with code.
-                Consumer<EmbedCreateSpec> embed = spec -> {
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                    spec.setTitle(Messages.getMessage("Embed.AddCalendar.Code.Title", settings));
-                    spec.addField(Messages.getMessage("Embed.AddCalendar.Code.Code", settings), codeResponse.getString("user_code"), true);
-                    spec.setFooter(Messages.getMessage("Embed.AddCalendar.Code.Footer", settings), null);
+                        //Send DM to user with code.
+                        Consumer<EmbedCreateSpec> embed = spec -> {
+                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            spec.setTitle(Messages.getMessage("Embed.AddCalendar.Code.Title", settings));
 
-                    spec.setUrl(codeResponse.getString("verification_url"));
-                    spec.setColor(GlobalConst.discalColor);
-                };
+                            spec.addField(
+                                Messages.getMessage("Embed.AddCalendar.Code.Code", settings),
+                                codeResponse.getString("user_code"),
+                                true);
+                            spec.setFooter(Messages.getMessage("Embed.AddCalendar.Code.Footer", settings), null);
 
+                            spec.setUrl(codeResponse.getString("verification_url"));
+                            spec.setColor(GlobalConst.discalColor);
+                        };
 
-                User user = event.getMember().get();
-                Messages
-                    .sendDirectMessage(Messages
-                        .getMessage("AddCalendar.Auth.Code.Request.Success", settings), embed, user)
-                    .subscribe();
+                        return event.getMessage().getAuthorAsMember().flatMap(user -> {
+                            //Start timer to poll Google Cal for auth
+                            Poll poll = new Poll(user, settings);
 
-                //Start timer to poll Google Cal for auth
-                Poll poll = new Poll(user, event.getGuild().block());
+                            poll.setDevice_code(codeResponse.getString("device_code"));
+                            poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
+                            poll.setExpires_in(codeResponse.getInt("expires_in"));
+                            poll.setInterval(codeResponse.getInt("interval"));
 
-                poll.setDevice_code(codeResponse.getString("device_code"));
-                poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
-                poll.setExpires_in(codeResponse.getInt("expires_in"));
-                poll.setInterval(codeResponse.getInt("interval"));
-                pollForAuth(poll);
-            } else {
-                Messages
-                    .sendDirectMessage(Messages
-                            .getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings),
-                        event.getMember().get())
-                    .subscribe();
+                            return pollForAuth(poll).then(Messages.sendDirectMessage(Messages
+                                .getMessage("AddCalendar.Auth.Code.Request.Success", settings), embed, user));
+                        });
+                    } else {
+                        LogFeed.log(LogObject
+                            .forDebug("Error request access token", "Status code: " + response.code() +
+                                " | " + response.message() +
+                                " | " + responseBody));
 
-                LogFeed.log(LogObject
-                    .forDebug("Error request access token", "Status code: " + response.code() +
-                        " | " + response.message() +
-                        " | " + response.body().string()));
-            }
-        } catch (Exception e) {
-            //Failed, report issue to dev.
-            LogFeed.log(LogObject
-                .forException("Failed to request google access code", e, this.getClass()));
+                        return event.getMessage().getAuthorAsMember()
+                            .flatMap(m -> Messages.sendDirectMessage(
+                                Messages.getMessage("AddCalendar.Auth.Code.Request.Failure.NotOkay", settings), m));
+                    }
+                }));
+        })
+            .onErrorResume(e -> {
+                //Failed, report issue to dev.
+                LogFeed.log(LogObject.forException("Failed to request google access code", e, this.getClass()));
 
-            Member u = event.getMember().get();
-            Messages
-                .sendDirectMessage(Messages
-                    .getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), u)
-                .subscribe();
-        }
+                return event.getMessage().getAuthorAsMember()
+                    .flatMap(m -> Messages.sendDirectMessage(
+                        Messages.getMessage("AddCalendar.Auth.Code.Request.Failure.Unknown", settings), m));
+            })
+            .then();
     }
 
-    void pollForAuth(Poll poll) {
-        GuildSettings settings = DatabaseManager.getSettings(poll.getGuild().getId()).block();
-        try {
+    Mono<Void> pollForAuth(Poll poll) {
+        return Mono.defer(() -> {
             RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
                 .addEncoded("client_secret", Authorization.getAuth().getClientData().getClientSecret())
@@ -135,121 +134,100 @@ public class GoogleExternalAuth {
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
 
-            //Execute
-            Response response = Authorization.getAuth().getClient().newCall(httpRequest).execute();
+            return Mono.fromCallable(() -> Authorization.getAuth().getClient().newCall(httpRequest).execute())
+                .subscribeOn(Schedulers.boundedElastic())
+                .flatMap(response -> Mono.fromCallable(() -> response.body().string()).flatMap(responseBody -> {
+                    if (response.code() == 403) {
+                        //Handle access denied
+                        return Messages.sendDirectMessage(Messages.getMessage("AddCalendar.Auth.Poll.Failure.Deny",
+                            poll.getSettings()), poll.getUser());
+                    } else if (response.code() == 400 || response.code() == 428) {
+                        //See if auth is pending, if so, just reschedule.
+                        JSONObject aprError = new JSONObject(responseBody);
 
-
-            //Handle response.
-            if (response.code() == 403) {
-                //Handle access denied
-                Messages
-                    .sendDirectMessage(Messages.getMessage("AddCalendar.Auth.Poll.Failure.Deny",
-                        settings), poll.getUser())
-                    .subscribe();
-            } else if (response.code() == 400 || response.code() == 428) {
-                try {
-                    //See if auth is pending, if so, just reschedule.
-                    JSONObject aprError = new JSONObject(response.body().string());
-
-                    if (aprError.getString("error").equalsIgnoreCase("authorization_pending")) {
-                        //Response pending
-                        PollManager.getManager().scheduleNextPoll(poll);
-                    } else if (aprError.getString("error").equalsIgnoreCase("expired_token")) {
-                        Messages
-                            .sendDirectMessage(Messages
-                                    .getMessage("AddCalendar.Auth.Poll.Failure.Expired", settings),
-                                poll.getUser())
-                            .subscribe();
-                    } else {
-                        Messages
-                            .sendDirectMessage(Messages
-                                .getMessage("Notification.Error.Network", settings), poll.getUser())
-                            .subscribe();
-                        LogFeed.log(LogObject
-                            .forDebug("Poll Failure!", "Status code: " + response.code() +
+                        if (aprError.getString("error").equalsIgnoreCase("authorization_pending")) {
+                            //Response pending
+                            PollManager.getManager().scheduleNextPoll(poll);
+                            return Mono.empty();
+                        } else if (aprError.getString("error").equalsIgnoreCase("expired_token")) {
+                            return Messages.sendDirectMessage(
+                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.Expired", poll.getSettings()),
+                                poll.getUser());
+                        } else {
+                            LogFeed.log(LogObject.forDebug("Poll Failure!", "Status code: " + response.code() +
                                 " | " + response.message() +
-                                " | " + response.body().string()));
-                    }
-                } catch (Exception e) {
-                    //Auth is not pending, error occurred.
-                    LogFeed.log(LogObject
-                        .forException("Failed to poll for authorization to google account.", e,
-                            this.getClass()));
-                    LogFeed.log(LogObject
-                        .forDebug("More info on failure", "Status code: " + response.code() +
-                            " | " + response.message() +
-                            " | " + response.body().string()));
+                                " | " + responseBody));
 
-                    Messages
-                        .sendDirectMessage(Messages.getMessage("Notification.Error.Network",
-                            settings), poll.getUser())
-                        .subscribe();
-                }
-            } else if (response.code() == 429) {
-                //We got rate limited... oops. Let's just poll half as often.
-                poll.setInterval(poll.getInterval() * 2);
-                PollManager.getManager().scheduleNextPoll(poll);
-            } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                //Access granted
-                JSONObject aprGrant = new JSONObject(response.body().string());
-
-                //Save credentials securely.
-                GuildSettings gs = DatabaseManager.getSettings(poll.getGuild().getId()).block();
-                AESEncryption encryption = new AESEncryption(gs);
-                gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
-                gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
-                gs.setUseExternalCalendar(true);
-                DatabaseManager.updateSettings(gs).subscribe();
-
-                List<CalendarListEntry> items = CalendarWrapper.getUsersExternalCalendars(settings).block();
-
-                if (items == null) {
-                    Messages
-                        .sendDirectMessage(Messages
-                                .getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", settings),
-                            poll.getUser())
-                        .subscribe();
-                } else {
-                    Messages.sendDirectMessage(Messages
-                        .getMessage("AddCalendar.Auth.Poll.Success", settings), poll.getUser())
-                        .subscribe();
-                    for (CalendarListEntry i : items) {
-                        if (!i.isDeleted()) {
-                            Consumer<EmbedCreateSpec> embed = spec -> {
-                                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                                spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", settings));
-                                spec.addField(Messages.getMessage("Embed.AddCalendar.List.Name", settings), i.getSummary(), false);
-                                spec.addField(Messages.getMessage("Embed.AddCalendar.List.TimeZone", settings), i.getTimeZone(), false);
-                                spec.addField(Messages.getMessage("Embed.AddCalendar.List.ID", settings), i.getId(), false);
-                                spec.setColor(GlobalConst.discalColor);
-                            };
-
-                            Messages.sendDirectMessage(embed, poll.getUser()).subscribe();
+                            return Messages.sendDirectMessage(
+                                Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser());
                         }
-                    }
-                    //Response will be handled in guild, and will check. We already saved the tokens anyway.
-                }
-            } else {
-                //Unknown network error...
-                Messages
-                    .sendDirectMessage(Messages.getMessage("Notification.Error.Network", settings),
-                        poll.getUser())
-                    .subscribe();
+                    } else if (response.code() == 429) {
+                        //We got rate limited... oops. Let's just poll half as often.
+                        poll.setInterval(poll.getInterval() * 2);
+                        PollManager.getManager().scheduleNextPoll(poll);
 
-                LogFeed.log(LogObject
-                    .forDebug("Network error; poll failure", "Status code: " + response.code()
-                        + " | " + response.message() + " | " + response.body().string()));
-            }
-        } catch (Exception e) {
-            //Handle exception.
-            LogFeed.log(LogObject
-                .forException("Failed to poll for authorization to google account", e,
+                        return Mono.empty();
+                    } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
+                        //Access granted
+                        JSONObject aprGrant = new JSONObject(responseBody);
+
+                        //Save credentials securely.
+                        return DatabaseManager.getSettings(poll.getSettings().getGuildID()).map(gs -> {
+                            AESEncryption encryption = new AESEncryption(gs);
+
+                            gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
+                            gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
+                            gs.setUseExternalCalendar(true);
+
+                            return DatabaseManager.updateSettings(gs)
+                                .then(CalendarWrapper.getUsersExternalCalendars(poll.getSettings()))
+                                .flatMapMany(Flux::fromIterable)
+                                .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
+                                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+
+                                    spec.setTitle(
+                                        Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()));
+
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.Name", poll.getSettings()),
+                                        i.getSummary(),
+                                        false);
+
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.getSettings()),
+                                        i.getTimeZone(),
+                                        false);
+
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.ID", poll.getSettings()),
+                                        i.getId(),
+                                        false);
+
+                                    spec.setColor(GlobalConst.discalColor);
+                                })
+                                .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
+                                .switchIfEmpty(Messages.sendDirectMessage(
+                                    Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars",
+                                        poll.getSettings()), poll.getUser()));
+                        });
+                    } else {
+                        //Unknown network error...
+                        LogFeed.log(LogObject.forDebug("Network error; poll failure", "Status code: " + response.code()
+                            + " | " + response.message() + " | " + responseBody));
+
+                        //Unknown network error...
+                        return Messages.sendDirectMessage(
+                            Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser());
+                    }
+                }));
+        })
+            .onErrorResume(e -> {
+                LogFeed.log(LogObject.forException("Failed to poll for authorization to google account", e,
                     this.getClass()));
 
-            Messages
-                .sendDirectMessage(Messages.getMessage("Notification.Error.Unknown", settings),
-                    poll.getUser())
-                .subscribe();
-        }
+                return Messages.sendDirectMessage(
+                    Messages.getMessage("Notification.Error.Unknown", poll.getSettings()), poll.getUser());
+            })
+            .then();
     }
 }

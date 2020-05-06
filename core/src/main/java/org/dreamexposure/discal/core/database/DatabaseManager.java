@@ -519,6 +519,7 @@ public class DatabaseManager {
             return set;
         }))
             .next()
+            .defaultIfEmpty(new GuildSettings(guildId))
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get guild settings", e, DatabaseManager.class));
                 return Mono.just(new GuildSettings(guildId));
