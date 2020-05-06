@@ -671,7 +671,7 @@ public class DatabaseManager {
             String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
-                .bind(0, announcementId)
+                .bind(0, announcementId.toString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             Announcement a = new Announcement(announcementId, guildId);
