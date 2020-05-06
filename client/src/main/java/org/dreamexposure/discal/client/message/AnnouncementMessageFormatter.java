@@ -379,6 +379,7 @@ public class AnnouncementMessageFormatter {
             Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .map(Member::getDisplayName)
+                .onErrorReturn("")
                 .collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
@@ -388,8 +389,11 @@ public class AnnouncementMessageFormatter {
                         return Mono.just("everyone");
                     else if (s.equalsIgnoreCase("here"))
                         return Mono.just("here");
-                    else
-                        return RoleUtils.getRoleFromID(s, guild).map(Role::getName);
+                    else {
+                        return RoleUtils.getRoleFromID(s, guild)
+                            .map(Role::getName)
+                            .onErrorReturn("");
+                    }
                 }).collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
@@ -416,6 +420,7 @@ public class AnnouncementMessageFormatter {
             Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .map(Member::getNicknameMention)
+                .onErrorReturn("")
                 .collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
@@ -425,8 +430,11 @@ public class AnnouncementMessageFormatter {
                         return Mono.just("@everyone");
                     else if (s.equalsIgnoreCase("here"))
                         return Mono.just("@here");
-                    else
-                        return RoleUtils.getRoleFromID(s, guild).map(Role::getMention);
+                    else {
+                        return RoleUtils.getRoleFromID(s, guild)
+                            .map(Role::getMention)
+                            .onErrorReturn("");
+                    }
                 }).collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
