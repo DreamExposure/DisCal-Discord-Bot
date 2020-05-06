@@ -48,13 +48,16 @@ public class UserUtils {
     }
 
     private static Mono<Member> getUserFromID(String id, Guild guild) {
-        return guild.getMemberById(Snowflake.of(Long.parseUnsignedLong(id)))
+        return guild.getMemberById(Snowflake.of(id))
             .onErrorResume(e -> Mono.empty());
     }
 
     public static Mono<List<Member>> getUsers(ArrayList<String> userIds, Guild guild) {
         return Flux.fromIterable(userIds)
-            .flatMap(s -> getUserFromID(s, guild))
+            .filter(s -> !s.isEmpty())
+            .filter(s -> s.matches("[0-9]+"))
+            .flatMap(s -> getUserFromID(s, guild)
+                .onErrorResume(e -> Mono.empty()))
             .collectList();
     }
 }
