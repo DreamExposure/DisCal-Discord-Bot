@@ -3,6 +3,8 @@ package org.dreamexposure.discal.client.announcement;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
@@ -81,8 +83,13 @@ public class AnnouncementCreator {
                         .flatMap(em ->
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Edit.Init", settings), em, e))
                         .doOnNext(a::setCreatorMessage)
-                        .thenReturn(a);
-                }).defaultIfEmpty(getAnnouncement(settings.getGuildID()));
+                        .thenReturn(a)
+                        .onErrorResume(err -> {
+                            LogFeed.log(LogObject.forException("Failed to init editor", err, this.getClass()));
+
+                            return Mono.empty();
+                        });
+                });
         } else {
             return Mono.justOrEmpty(getAnnouncement(settings.getGuildID()));
         }
