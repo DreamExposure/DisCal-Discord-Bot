@@ -6,6 +6,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
@@ -93,8 +94,10 @@ public class GoogleExternalAuth {
                             poll.setExpires_in(codeResponse.getInt("expires_in"));
                             poll.setInterval(codeResponse.getInt("interval"));
 
-                            return pollForAuth(poll).then(Messages.sendDirectMessage(Messages
-                                .getMessage("AddCalendar.Auth.Code.Request.Success", settings), embed, user));
+                            PollManager.getManager().scheduleNextPoll(poll);
+
+                            return Messages.sendDirectMessage(
+                                Messages.getMessage("AddCalendar.Auth.Code.Request.Success", settings), embed, user);
                         });
                     } else {
                         LogFeed.log(LogObject
@@ -140,31 +143,34 @@ public class GoogleExternalAuth {
                     if (response.code() == 403) {
                         //Handle access denied
                         return Messages.sendDirectMessage(Messages.getMessage("AddCalendar.Auth.Poll.Failure.Deny",
-                            poll.getSettings()), poll.getUser());
+                            poll.getSettings()), poll.getUser())
+                            .then(Mono.error(new GoogleAuthCancelException()));
                     } else if (response.code() == 400 || response.code() == 428) {
                         //See if auth is pending, if so, just reschedule.
                         JSONObject aprError = new JSONObject(responseBody);
 
                         if (aprError.getString("error").equalsIgnoreCase("authorization_pending")) {
                             //Response pending
-                            PollManager.getManager().scheduleNextPoll(poll);
                             return Mono.empty();
                         } else if (aprError.getString("error").equalsIgnoreCase("expired_token")) {
+                            //Token expired, auth is cancelled
                             return Messages.sendDirectMessage(
                                 Messages.getMessage("AddCalendar.Auth.Poll.Failure.Expired", poll.getSettings()),
-                                poll.getUser());
+                                poll.getUser())
+                                .then(Mono.error(new GoogleAuthCancelException()));
                         } else {
                             LogFeed.log(LogObject.forDebug("Poll Failure!", "Status code: " + response.code() +
                                 " | " + response.message() +
                                 " | " + responseBody));
 
                             return Messages.sendDirectMessage(
-                                Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser());
+                                Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser())
+                                .then(Mono.error(new GoogleAuthCancelException()));
                         }
                     } else if (response.code() == 429) {
                         //We got rate limited... oops. Let's just poll half as often.
                         poll.setInterval(poll.getInterval() * 2);
-                        PollManager.getManager().scheduleNextPoll(poll);
+                        //PollManager.getManager().scheduleNextPoll(poll);
 
                         return Mono.empty();
                     } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
@@ -210,7 +216,8 @@ public class GoogleExternalAuth {
                                     ))
                                 .switchIfEmpty(Messages.sendDirectMessage(
                                     Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
-                                    , poll.getUser()).then(Mono.empty()));
+                                    , poll.getUser()).then(Mono.empty()))
+                                .then(Mono.error(new GoogleAuthCancelException()));
                         });
                     } else {
                         //Unknown network error...
@@ -219,7 +226,8 @@ public class GoogleExternalAuth {
 
                         //Unknown network error...
                         return Messages.sendDirectMessage(
-                            Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser());
+                            Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser())
+                            .then(Mono.error(new GoogleAuthCancelException()));
                     }
                 }));
         })
@@ -228,7 +236,8 @@ public class GoogleExternalAuth {
                     this.getClass()));
 
                 return Messages.sendDirectMessage(
-                    Messages.getMessage("Notification.Error.Unknown", poll.getSettings()), poll.getUser());
+                    Messages.getMessage("Notification.Error.Unknown", poll.getSettings()), poll.getUser())
+                    .then(Mono.error(new GoogleAuthCancelException()));
             })
             .then();
     }
