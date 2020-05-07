@@ -5,6 +5,8 @@ import org.dreamexposure.discal.core.object.network.google.Poll;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import reactor.core.scheduler.Schedulers;
+
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
@@ -36,7 +38,9 @@ public class PollManager {
             @Override
             public void run() {
                 poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
-                GoogleExternalAuth.getAuth().pollForAuth(poll).subscribe();
+                GoogleExternalAuth.getAuth().pollForAuth(poll)
+                    .subscribeOn(Schedulers.immediate())
+                    .subscribe();
             }
         }, 1000 * poll.getInterval());
     }

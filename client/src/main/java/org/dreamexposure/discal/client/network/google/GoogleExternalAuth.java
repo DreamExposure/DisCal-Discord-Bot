@@ -180,26 +180,26 @@ public class GoogleExternalAuth {
                             gs.setUseExternalCalendar(true);
 
                             return DatabaseManager.updateSettings(gs)
-                                .then(CalendarWrapper.getUsersExternalCalendars(poll.getSettings()))
+                                .then(CalendarWrapper.getUsersExternalCalendars(gs))
                                 .flatMapMany(Flux::fromIterable)
                                 .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
                                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
                                     spec.setTitle(
-                                        Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()));
+                                        Messages.getMessage("Embed.AddCalendar.List.Title", gs));
 
                                     spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.Name", poll.getSettings()),
+                                        Messages.getMessage("Embed.AddCalendar.List.Name", gs),
                                         i.getSummary(),
                                         false);
 
                                     spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.getSettings()),
+                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
                                         i.getTimeZone(),
                                         false);
 
                                     spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.ID", poll.getSettings()),
+                                        Messages.getMessage("Embed.AddCalendar.List.ID", gs),
                                         i.getId(),
                                         false);
 
@@ -208,7 +208,7 @@ public class GoogleExternalAuth {
                                 .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                                 .switchIfEmpty(Messages.sendDirectMessage(
                                     Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars",
-                                        poll.getSettings()), poll.getUser()));
+                                        gs), poll.getUser()));
                         });
                     } else {
                         //Unknown network error...
