@@ -180,35 +180,37 @@ public class GoogleExternalAuth {
                             gs.setUseExternalCalendar(true);
 
                             return DatabaseManager.updateSettings(gs)
-                                .then(CalendarWrapper.getUsersExternalCalendars(gs))
-                                .flatMapMany(Flux::fromIterable)
-                                .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
-                                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                                .then(CalendarWrapper.getUsersExternalCalendars(gs)
+                                    .flatMap(cals -> Flux.fromIterable(cals)
+                                        .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
+                                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-                                    spec.setTitle(
-                                        Messages.getMessage("Embed.AddCalendar.List.Title", gs));
+                                            spec.setTitle(
+                                                Messages.getMessage("Embed.AddCalendar.List.Title", gs));
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.Name", gs),
-                                        i.getSummary(),
-                                        false);
+                                            spec.addField(
+                                                Messages.getMessage("Embed.AddCalendar.List.Name", gs),
+                                                i.getSummary(),
+                                                false);
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
-                                        i.getTimeZone(),
-                                        false);
+                                            spec.addField(
+                                                Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
+                                                i.getTimeZone(),
+                                                false);
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.ID", gs),
-                                        i.getId(),
-                                        false);
+                                            spec.addField(
+                                                Messages.getMessage("Embed.AddCalendar.List.ID", gs),
+                                                i.getId(),
+                                                false);
 
-                                    spec.setColor(GlobalConst.discalColor);
-                                })
-                                .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
+                                            spec.setColor(GlobalConst.discalColor);
+                                        })
+                                        .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
+                                        .then(Mono.just(GlobalConst.NOT_EMPTY))
+                                    ))
                                 .switchIfEmpty(Messages.sendDirectMessage(
-                                    Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars",
-                                        gs), poll.getUser()));
+                                    Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
+                                    , poll.getUser()).then(Mono.empty()));
                         });
                     } else {
                         //Unknown network error...
