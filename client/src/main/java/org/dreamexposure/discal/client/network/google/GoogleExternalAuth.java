@@ -231,7 +231,7 @@ public class GoogleExternalAuth {
                     }
                 }));
         })
-            .onErrorResume(e -> {
+            .onErrorResume(e -> !(e instanceof GoogleAuthCancelException), e -> {
                 LogFeed.log(LogObject.forException("Failed to poll for authorization to google account", e,
                     this.getClass()));
 
