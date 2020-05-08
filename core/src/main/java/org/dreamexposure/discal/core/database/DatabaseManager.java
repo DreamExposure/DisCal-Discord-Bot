@@ -238,7 +238,10 @@ public class DatabaseManager {
             }).onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to update guild settings", e, DatabaseManager.class));
                 return Mono.just(false);
-            });
+            }).switchIfEmpty(Mono.defer(() -> {
+                LogFeed.log(LogObject.forDebug("Update Settings: Empty?????"));
+                return Mono.empty();
+            }));
     }
 
     public static Mono<Boolean> updateCalendar(CalendarData calData) {
