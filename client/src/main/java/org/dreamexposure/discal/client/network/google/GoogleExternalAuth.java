@@ -187,6 +187,8 @@ public class GoogleExternalAuth {
                             gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
                             gs.setUseExternalCalendar(true);
 
+                            LogFeed.log(LogObject.forDebug("Auth 200: 2.0"));
+
                             return DatabaseManager.updateSettings(gs)
                                 .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.1")))
                                 .then(CalendarWrapper.getUsersExternalCalendars(gs)

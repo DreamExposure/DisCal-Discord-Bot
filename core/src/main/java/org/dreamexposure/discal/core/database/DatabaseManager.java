@@ -155,6 +155,7 @@ public class DatabaseManager {
     }
 
     public static Mono<Boolean> updateSettings(GuildSettings set) {
+        LogFeed.log(LogObject.forDebug("Update Settings: 1"));
         guildSettingsCache.remove(set.getGuildID());
         guildSettingsCache.put(set.getGuildID(), set);
 
@@ -169,8 +170,9 @@ public class DatabaseManager {
             return Mono.from(c.createStatement(query)
                 .bind(0, set.getGuildID().asString())
                 .execute());
-        }).flatMapMany(res -> res.map((row, rowMetadata) -> row))
-            .hasElements()
+        }).flatMapMany(res -> res.map((row, rowMetadata) -> row != null))
+            .next()
+            .doOnNext(s -> LogFeed.log(LogObject.forDebug("Update Settings: 2")))
             .flatMap(exists -> {
                 if (exists) {
                     String update = "UPDATE " + table
@@ -200,6 +202,7 @@ public class DatabaseManager {
                         .bind(15, set.getGuildID().asString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
+                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Update Settings: 3")))
                         .hasElement()
                         .thenReturn(true);
                 } else {
