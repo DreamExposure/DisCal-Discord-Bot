@@ -188,8 +188,11 @@ public class GoogleExternalAuth {
                             gs.setUseExternalCalendar(true);
 
                             return DatabaseManager.updateSettings(gs)
+                                .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.1")))
                                 .then(CalendarWrapper.getUsersExternalCalendars(gs)
+                                    .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.2")))
                                     .flatMap(cals -> Flux.fromIterable(cals)
+                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.3")))
                                         .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
                                             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
@@ -215,6 +218,7 @@ public class GoogleExternalAuth {
                                         })
                                         .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3")))
                                         .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
+                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3.1")))
                                         .then(Mono.just(GlobalConst.NOT_EMPTY))
                                     ))
                                 .switchIfEmpty(Messages.sendDirectMessage(
