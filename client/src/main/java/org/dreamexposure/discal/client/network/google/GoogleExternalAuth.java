@@ -222,13 +222,19 @@ public class GoogleExternalAuth {
                                         .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                                         .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3.1")))
                                         .then(Mono.just(GlobalConst.NOT_EMPTY))
-                                    ))
+                                    ).doOnNext(i -> LogFeed.log(LogObject.forDebug("Auth 200: 3.2"))))
                                 .switchIfEmpty(Messages.sendDirectMessage(
                                     Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
                                     , poll.getUser()).then(Mono.empty()))
                                 .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 4")))
                                 .then(Mono.error(new GoogleAuthCancelException()));
-                        });
+                        })
+                            .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 5")))
+                            .switchIfEmpty(Mono.defer(() -> {
+                                LogFeed.log(LogObject.forDebug("Auth 200: Empty????"));
+
+                                return Mono.empty(); //For now, so we aren't breaking things more...
+                            }));
                     } else {
                         //Unknown network error...
                         LogFeed.log(LogObject.forDebug("Network error; poll failure", "Status code: " + response.code()

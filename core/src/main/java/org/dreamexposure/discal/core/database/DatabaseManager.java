@@ -232,6 +232,7 @@ public class DatabaseManager {
                         .bind(15, set.isBranded())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
+                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Insert Settings: 3")))
                         .hasElement()
                         .thenReturn(true);
                 }
@@ -240,7 +241,7 @@ public class DatabaseManager {
                 return Mono.just(false);
             }).switchIfEmpty(Mono.defer(() -> {
                 LogFeed.log(LogObject.forDebug("Update Settings: Empty?????"));
-                return Mono.empty();
+                return Mono.empty(); //So we aren't breaking anything even more yet
             }));
     }
 
