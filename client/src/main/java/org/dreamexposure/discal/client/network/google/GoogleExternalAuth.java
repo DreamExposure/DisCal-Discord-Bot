@@ -174,11 +174,13 @@ public class GoogleExternalAuth {
 
                         return Mono.empty();
                     } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
+                        LogFeed.log(LogObject.forDebug("Auth 200: 1"));
                         //Access granted
                         JSONObject aprGrant = new JSONObject(responseBody);
 
                         //Save credentials securely.
                         return DatabaseManager.getSettings(poll.getSettings().getGuildID()).map(gs -> {
+                            LogFeed.log(LogObject.forDebug("Auth 200: 2"));
                             AESEncryption encryption = new AESEncryption(gs);
 
                             gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
@@ -211,6 +213,7 @@ public class GoogleExternalAuth {
 
                                             spec.setColor(GlobalConst.discalColor);
                                         })
+                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3")))
                                         .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                                         .then(Mono.just(GlobalConst.NOT_EMPTY))
                                     ))
