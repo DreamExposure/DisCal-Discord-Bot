@@ -224,6 +224,7 @@ public class GoogleExternalAuth {
                                 .switchIfEmpty(Messages.sendDirectMessage(
                                     Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
                                     , poll.getUser()).then(Mono.empty()))
+                                .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 4")))
                                 .then(Mono.error(new GoogleAuthCancelException()));
                         });
                     } else {
