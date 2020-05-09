@@ -174,67 +174,49 @@ public class GoogleExternalAuth {
 
                         return Mono.empty();
                     } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                        LogFeed.log(LogObject.forDebug("Auth 200: 1"));
                         //Access granted
                         JSONObject aprGrant = new JSONObject(responseBody);
 
                         //Save credentials securely.
-                        return DatabaseManager.getSettings(poll.getSettings().getGuildID()).map(gs -> {
-                            LogFeed.log(LogObject.forDebug("Auth 200: 2"));
-                            AESEncryption encryption = new AESEncryption(gs);
+                        GuildSettings gs = poll.getSettings();
 
-                            gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
-                            gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
-                            gs.setUseExternalCalendar(true);
+                        AESEncryption encryption = new AESEncryption(gs);
+                        gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
+                        gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
+                        gs.setUseExternalCalendar(true);
 
-                            LogFeed.log(LogObject.forDebug("Auth 200: 2.0"));
+                        //Update settings and then we will list the calendars for the user
+                        return DatabaseManager.updateSettings(gs)
+                            .then(CalendarWrapper.getUsersExternalCalendars(gs))
+                            .flatMap(cals -> Flux.fromIterable(cals)
+                                .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
+                                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-                            return DatabaseManager.updateSettings(gs)
-                                .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.1")))
-                                .then(CalendarWrapper.getUsersExternalCalendars(gs)
-                                    .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.2")))
-                                    .flatMap(cals -> Flux.fromIterable(cals)
-                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 2.3")))
-                                        .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
-                                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                                    spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", gs));
 
-                                            spec.setTitle(
-                                                Messages.getMessage("Embed.AddCalendar.List.Title", gs));
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.Name", gs),
+                                        i.getSummary(),
+                                        false);
 
-                                            spec.addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.Name", gs),
-                                                i.getSummary(),
-                                                false);
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
+                                        i.getTimeZone(),
+                                        false);
 
-                                            spec.addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
-                                                i.getTimeZone(),
-                                                false);
+                                    spec.addField(
+                                        Messages.getMessage("Embed.AddCalendar.List.ID", gs),
+                                        i.getId(),
+                                        false);
 
-                                            spec.addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.ID", gs),
-                                                i.getId(),
-                                                false);
-
-                                            spec.setColor(GlobalConst.discalColor);
-                                        })
-                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3")))
-                                        .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
-                                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 3.1")))
-                                        .then(Mono.just(GlobalConst.NOT_EMPTY))
-                                    ).doOnNext(i -> LogFeed.log(LogObject.forDebug("Auth 200: 3.2"))))
-                                .switchIfEmpty(Messages.sendDirectMessage(
-                                    Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
-                                    , poll.getUser()).then(Mono.empty()))
-                                .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 4")))
-                                .then(Mono.error(new GoogleAuthCancelException()));
-                        })
-                            .doOnNext(s -> LogFeed.log(LogObject.forDebug("Auth 200: 5")))
-                            .switchIfEmpty(Mono.defer(() -> {
-                                LogFeed.log(LogObject.forDebug("Auth 200: Empty????"));
-
-                                return Mono.empty(); //For now, so we aren't breaking things more...
-                            }));
+                                    spec.setColor(GlobalConst.discalColor);
+                                })
+                                .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
+                                .then(Mono.just(GlobalConst.NOT_EMPTY)))
+                            .switchIfEmpty(Messages.sendDirectMessage(
+                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
+                                , poll.getUser()).then(Mono.empty()))
+                            .then(Mono.error(new GoogleAuthCancelException()));
                     } else {
                         //Unknown network error...
                         LogFeed.log(LogObject.forDebug("Network error; poll failure", "Status code: " + response.code()
