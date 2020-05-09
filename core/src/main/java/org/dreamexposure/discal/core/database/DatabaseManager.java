@@ -172,7 +172,6 @@ public class DatabaseManager {
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> row != null))
             .next()
-            .doOnNext(s -> LogFeed.log(LogObject.forDebug("Update Settings: 2")))
             .flatMap(exists -> {
                 if (exists) {
                     String update = "UPDATE " + table
@@ -202,7 +201,6 @@ public class DatabaseManager {
                         .bind(15, set.getGuildID().asString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
-                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Update Settings: 3")))
                         .hasElement()
                         .thenReturn(true);
                 } else {
@@ -232,17 +230,13 @@ public class DatabaseManager {
                         .bind(15, set.isBranded())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
-                        .doOnNext(s -> LogFeed.log(LogObject.forDebug("Insert Settings: 3")))
                         .hasElement()
                         .thenReturn(true);
                 }
             }).onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to update guild settings", e, DatabaseManager.class));
                 return Mono.just(false);
-            }).switchIfEmpty(Mono.defer(() -> {
-                LogFeed.log(LogObject.forDebug("Update Settings: Empty?????"));
-                return Mono.empty(); //So we aren't breaking anything even more yet
-            }));
+            });
     }
 
     public static Mono<Boolean> updateCalendar(CalendarData calData) {

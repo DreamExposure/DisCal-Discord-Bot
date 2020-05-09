@@ -188,34 +188,32 @@ public class GoogleExternalAuth {
                         //Update settings and then we will list the calendars for the user
                         return DatabaseManager.updateSettings(gs)
                             .then(CalendarWrapper.getUsersExternalCalendars(gs))
-                            .flatMap(cals -> Flux.fromIterable(cals)
-                                .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
-                                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            .flatMapMany(Flux::fromIterable)
+                            .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
+                                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-                                    spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", gs));
+                                spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", gs));
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.Name", gs),
-                                        i.getSummary(),
-                                        false);
+                                spec.addField(
+                                    Messages.getMessage("Embed.AddCalendar.List.Name", gs),
+                                    i.getSummary(),
+                                    false);
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
-                                        i.getTimeZone(),
-                                        false);
+                                spec.addField(
+                                    Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
+                                    i.getTimeZone(),
+                                    false);
 
-                                    spec.addField(
-                                        Messages.getMessage("Embed.AddCalendar.List.ID", gs),
-                                        i.getId(),
-                                        false);
+                                spec.addField(
+                                    Messages.getMessage("Embed.AddCalendar.List.ID", gs),
+                                    i.getId(),
+                                    false);
 
-                                    spec.setColor(GlobalConst.discalColor);
-                                })
-                                .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
-                                .then(Mono.just(GlobalConst.NOT_EMPTY)))
+                                spec.setColor(GlobalConst.discalColor);
+                            })
+                            .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                             .switchIfEmpty(Messages.sendDirectMessage(
-                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs)
-                                , poll.getUser()).then(Mono.empty()))
+                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs), poll.getUser()))
                             .then(Mono.error(new GoogleAuthCancelException()));
                     } else {
                         //Unknown network error...

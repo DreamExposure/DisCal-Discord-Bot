@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
@@ -89,40 +90,39 @@ public class AddCalendarCommand implements Command {
                                 }
                             });
                     } else if (args.length == 1) {
-                        return DatabaseManager.getMainCalendar(settings.getGuildID())
-                            .hasElement()
-                            .flatMap(hasCal -> {
-                                if (hasCal) {
-                                    return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                                } else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a")
-                                    && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
-                                    return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
-                                } else {
-                                    return CalendarWrapper.getUsersExternalCalendars(settings)
-                                        .flatMapMany(Flux::fromIterable)
-                                        .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
-                                        .flatMap(valid -> {
-                                            if (valid) {
-                                                CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
-                                                    args[0], args[0], true);
+                        return DatabaseManager.getMainCalendar(settings.getGuildID()).hasElement().flatMap(hasCal -> {
+                            if (hasCal) {
+                                return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                            } else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a")
+                                && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
+                                return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
+                            } else {
+                                return CalendarWrapper.getUsersExternalCalendars(settings)
+                                    .flatMapMany(Flux::fromIterable)
+                                    .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
+                                    .flatMap(valid -> {
+                                        if (valid) {
+                                            CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
+                                                args[0], args[0], true);
 
-                                                //update guild settings to reflect changes...
-                                                settings.setUseExternalCalendar(true);
+                                            //update guild settings to reflect changes...
+                                            settings.setUseExternalCalendar(true);
 
-                                                //combine db calls and message send to be executed together async
-                                                Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
-                                                Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
-                                                Mono<Message> sendMsg = Messages.sendMessage(
-                                                    Messages.getMessage("AddCalendar.Select.Success", settings), event);
+                                            //combine db calls and message send to be executed together async
+                                            Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
+                                            Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
+                                            Mono<Message> sendMsg = Messages.sendMessage(
+                                                Messages.getMessage("AddCalendar.Select.Success", settings), event);
 
-                                                return Mono.when(calInsert, settingsUpdate, sendMsg);
-                                            } else {
-                                                return Messages.sendMessage(Messages
-                                                    .getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
-                                            }
-                                        });
-                                }
-                            });
+                                            return Mono.when(calInsert, settingsUpdate, sendMsg)
+                                                .thenReturn(GlobalConst.NOT_EMPTY);
+                                        } else {
+                                            return Messages.sendMessage(Messages
+                                                .getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
+                                        }
+                                    });
+                            }
+                        });
                     } else {
                         //Invalid argument count...
                         return Messages.sendMessage(Messages.getMessage("AddCalendar.Specify", settings), event);
