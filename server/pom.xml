@@ -58,13 +58,6 @@
         <directory>../target</directory>
         <finalName>DisCal-Server</finalName>
 
-        <resources>
-            <resource>
-                <directory>resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

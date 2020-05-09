@@ -42,13 +42,6 @@
         <directory>../target</directory>
         <finalName>DisCal-Web</finalName>
 
-        <resources>
-            <resource>
-                <directory>resources</directory>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
