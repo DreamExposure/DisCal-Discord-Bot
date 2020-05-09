@@ -155,7 +155,6 @@ public class DatabaseManager {
     }
 
     public static Mono<Boolean> updateSettings(GuildSettings set) {
-        LogFeed.log(LogObject.forDebug("Update Settings: 1"));
         guildSettingsCache.remove(set.getGuildID());
         guildSettingsCache.put(set.getGuildID(), set);
 
