@@ -48,9 +48,10 @@ public class CalendarCreator {
 
                         return CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings)
                             .flatMap(embed -> Messages.sendMessage(
-                                Messages.getMessage("Creator.Calendar.Edit.Init", settings),
+                                Messages.getMessage("Creator.Calendar.Create.Init", settings),
                                 embed, e)
                                 .doOnNext(calendar::setCreatorMessage)
+                                .then(Messages.deleteMessage(e))
                                 .thenReturn(calendar));
                     }
                 );
@@ -75,6 +76,7 @@ public class CalendarCreator {
                                 Messages.getMessage("Creator.Calendar.Edit.Init", settings),
                                 embed, event)
                                 .doOnNext(preCalendar::setCreatorMessage)
+                                .then(Messages.deleteMessage(event))
                                 .thenReturn(preCalendar));
                     })
             );
@@ -98,6 +100,7 @@ public class CalendarCreator {
                                 Messages.getMessage("Creator.Calendar.Edit.Init", settings),
                                 embed, event)
                                 .doOnNext(preCalendar::setCreatorMessage)
+                                .then(Messages.deleteMessage(event))
                                 .thenReturn(preCalendar));
                     })
             );

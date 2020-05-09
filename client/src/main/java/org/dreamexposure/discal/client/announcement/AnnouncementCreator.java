@@ -48,6 +48,7 @@ public class AnnouncementCreator {
                     .flatMap(em ->
                         Messages.sendMessage(Messages.getMessage("Creator.Announcement.Create.Init", settings), em, e))
                     .doOnNext(a::setCreatorMessage)
+                    .then(Messages.deleteMessage(e))
                     .thenReturn(a);
             });
         }
@@ -65,6 +66,7 @@ public class AnnouncementCreator {
                         .flatMap(em ->
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Copy.Success", settings), em, e))
                         .doOnNext(a::setCreatorMessage)
+                        .then(Messages.deleteMessage(e))
                         .thenReturn(a);
                 }).defaultIfEmpty(getAnnouncement(settings.getGuildID()));
         }
@@ -83,6 +85,7 @@ public class AnnouncementCreator {
                         .flatMap(em ->
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Edit.Init", settings), em, e))
                         .doOnNext(a::setCreatorMessage)
+                        .then(Messages.deleteMessage(e))
                         .thenReturn(a)
                         .onErrorResume(err -> {
                             LogFeed.log(LogObject.forException("Failed to init editor", err, this.getClass()));

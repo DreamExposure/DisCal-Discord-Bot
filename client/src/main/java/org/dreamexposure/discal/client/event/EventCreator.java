@@ -53,8 +53,9 @@ public class EventCreator {
                         .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
                         .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                         .flatMap(embed -> Messages.sendMessage(
-                            Messages.getMessage("Creator.Event.Copy.Init", settings), embed, e))
+                            Messages.getMessage("Creator.Event.Create.Init", settings), embed, e))
                         .doOnNext(event::setCreatorMessage)
+                        .then(Messages.deleteMessage(e))
                         .thenReturn(event);
                 });
         }
@@ -76,6 +77,7 @@ public class EventCreator {
                         .flatMap(embed -> Messages.sendMessage(
                             Messages.getMessage("Creator.Event.Create.Init", settings), embed, e))
                         .doOnNext(event::setCreatorMessage)
+                        .then(Messages.deleteMessage(e))
                         .thenReturn(event);
                 });
         }
@@ -98,6 +100,7 @@ public class EventCreator {
                             .flatMap(embed -> Messages.sendMessage(
                                 Messages.getMessage("Creator.Event.Copy.Init", settings), embed, e))
                             .doOnNext(event::setCreatorMessage)
+                            .then(Messages.deleteMessage(e))
                             .thenReturn(event);
                     }));
         }
@@ -120,6 +123,7 @@ public class EventCreator {
                             .flatMap(embed -> Messages.sendMessage(
                                 Messages.getMessage("Creator.Event.Edit.Init", settings), embed, e))
                             .doOnNext(event::setCreatorMessage)
+                            .then(Messages.deleteMessage(e))
                             .thenReturn(event);
                     }));
         }
