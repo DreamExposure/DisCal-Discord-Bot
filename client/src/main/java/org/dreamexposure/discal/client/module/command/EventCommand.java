@@ -493,8 +493,7 @@ public class EventCommand implements Command {
                                 DateTime dateTimeV = new DateTime(dateObjV);
                                 EventDateTime eventDateTimeV = new EventDateTime();
                                 eventDateTimeV.setDateTime(dateTimeV);
-                                eventDateTimeV.setTimeZone(pre.getTimeZone());
-                                pre.setViewableStartDate(eventDateTimeV);
+                                pre.setViewableStartDate(eventDateTime);
 
                                 //To streamline, check if event end is null, if so, apply 1 hour duration!
                                 if (pre.getEndDateTime() == null) {
