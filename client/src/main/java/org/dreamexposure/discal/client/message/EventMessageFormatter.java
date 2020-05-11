@@ -283,10 +283,10 @@ public class EventMessageFormatter {
     public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(PreEvent event, int calNum,
                                                                    GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<String> sDate = getHumanReadableDate(event.getViewableStartDate(), calNum, false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getViewableStartDate(), calNum, false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getViewableEndDate(), calNum, false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getViewableEndDate(), calNum, false, settings);
+        Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), calNum, false, settings);
+        Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), calNum, false, settings);
+        Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), calNum, false, settings);
+        Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), calNum, false, settings);
         Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
@@ -354,10 +354,10 @@ public class EventMessageFormatter {
     public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(PreEvent event,
                                                                    GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<String> sDate = getHumanReadableDate(event.getViewableStartDate(), false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getViewableStartDate(), false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getViewableEndDate(), false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getViewableEndDate(), false, settings);
+        Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), false, settings);
+        Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), false, settings);
+        Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), false, settings);
+        Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), false, settings);
         Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);

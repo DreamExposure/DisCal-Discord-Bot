@@ -39,7 +39,6 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("Duplicates")
 public class EventCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
@@ -478,22 +477,6 @@ public class EventCommand implements Command {
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 pre.setStartDateTime(eventDateTime);
 
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV;
-                                try {
-                                    dateObjV = sdfV.parse(dateRaw);
-                                } catch (ParseException e) {
-                                    return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
-                                        .flatMap(em -> Messages.sendMessage(
-                                            Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
-                                        .doOnNext(pre::setCreatorMessage);
-                                }
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                pre.setViewableStartDate(eventDateTime);
 
                                 //To streamline, check if event end is null, if so, apply 1 hour duration!
                                 if (pre.getEndDateTime() == null) {
@@ -503,14 +486,6 @@ public class EventCommand implements Command {
                                     end.setDateTime(new DateTime(endLong));
 
                                     pre.setEndDateTime(end);
-
-                                    //Viewable date
-                                    EventDateTime endV = pre.getViewableStartDate().clone();
-                                    long endVLong = endV.getDateTime().getValue() + 3600000; //Add an hour
-
-                                    endV.setDateTime(new DateTime(endVLong));
-
-                                    pre.setViewableEndDate(endV);
                                 }
 
                                 //Okay, all done, now time send back the creator message..
@@ -585,19 +560,6 @@ public class EventCommand implements Command {
                             if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.endBeforeStart(dateRaw, tz, pre)) {
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 pre.setEndDateTime(eventDateTime);
-
-                                //Apply viewable date/times...
-                                SimpleDateFormat sdfV = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                                Date dateObjV;
-                                try {
-                                    dateObjV = sdfV.parse(dateRaw);
-                                } catch (ParseException e) {
-                                    return Mono.error(e);
-                                }
-                                DateTime dateTimeV = new DateTime(dateObjV);
-                                EventDateTime eventDateTimeV = new EventDateTime();
-                                eventDateTimeV.setDateTime(dateTimeV);
-                                pre.setViewableEndDate(eventDateTimeV);
 
                                 //Okay, all done, now time send back the creator message..
                                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
