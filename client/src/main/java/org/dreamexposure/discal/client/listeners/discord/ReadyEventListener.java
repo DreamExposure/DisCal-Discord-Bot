@@ -33,5 +33,6 @@ public class ReadyEventListener {
                 return Mono.empty();
             })
             .then();
+
     }
 }

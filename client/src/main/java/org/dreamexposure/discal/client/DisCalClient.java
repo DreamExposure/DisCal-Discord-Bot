@@ -83,8 +83,6 @@ public class DisCalClient {
         CommandExecutor.registerCommand(new DevCommand());
 
         //Start some of the daemon threads
-        AnnouncementThreader.getThreader().init();
-
         KeepAliveHandler.startKeepAlive(60);
 
         TimeManager.getManager().init();
@@ -108,7 +106,6 @@ public class DisCalClient {
             LogFeed.log(LogObject.forStatus("Shutting down Shard", "Shard shutting down"));
 
             TimeManager.getManager().shutdown();
-            AnnouncementThreader.getThreader().shutdown();
             DatabaseManager.disconnectFromMySQL();
 
             client.logout().subscribe();
@@ -140,7 +137,11 @@ public class DisCalClient {
                         .flatMap(MessageCreateListener::handle)
                         .then();
 
-                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand);
+                    Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
+                        .next()
+                        .flatMap(ignore -> AnnouncementThreader.getThreader().init());
+
+                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
                 }).block();
     }
 
