@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.enums.event;
 
-import java.awt.Color;
+import discord4j.rest.util.Color;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -54,7 +54,7 @@ public enum EventColor {
     }
 
     public Color asColor() {
-        return new Color(r, g, b);
+        return Color.of(r, g, b);
     }
 
     public String getName() {
@@ -68,7 +68,7 @@ public enum EventColor {
                 return true;
             } else {
                 try {
-                    int i = Integer.valueOf(nameOrHexOrId);
+                    int i = Integer.parseInt(nameOrHexOrId);
                     if (c.getId() == i)
                         return true;
                 } catch (NumberFormatException e) {

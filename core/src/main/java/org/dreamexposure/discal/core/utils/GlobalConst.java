@@ -3,10 +3,10 @@ package org.dreamexposure.discal.core.utils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.Properties;
 
+import discord4j.rest.util.Color;
 import discord4j.rest.util.Snowflake;
 import okhttp3.MediaType;
 
@@ -39,7 +39,7 @@ public class GlobalConst {
     public static final Snowflake calId = Snowflake.of(142107863307780097L);
     public static final Snowflake dreamId = Snowflake.of(142107863307780097L);
 
-    public static final Color discalColor = new Color(56, 138, 237);
+    public static final Color discalColor = Color.of(56, 138, 237);
     public static final String discalSite = "https://www.discalbot.com";
     public static final String supportInviteLink = "https://discord.gg/2TFqyuy";
     public static final String discalDashboardLink = "https://www.discalbot.com/dashboard";
