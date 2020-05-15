@@ -9,6 +9,8 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -22,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.function.TupleUtils;
 
 @SuppressWarnings({"WeakerAccess", "Duplicates"})
@@ -41,6 +42,8 @@ public class AnnouncementThread {
 
     public Mono<Void> run() {
         return Mono.defer(() -> {
+            LogFeed.log(LogObject.forDebug("Announcement system: 1"));
+
             if (DisCalClient.getClient() == null)
                 return Mono.empty();
 
@@ -48,12 +51,15 @@ public class AnnouncementThread {
                 .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
                     .flatMapMany(Flux::fromIterable)
                     .flatMap(a -> {
+                        LogFeed.log(LogObject.forDebug("Announcement system: 2"));
+
                         Mono<GuildSettings> s = getSettings(a);
                         Mono<CalendarData> cd = getCalendarData(a);
                         Mono<Calendar> se = s.flatMap(this::getService);
 
                         return Mono.zip(s, cd, se)
                             .map(TupleUtils.function((settings, calData, service) -> {
+                                LogFeed.log(LogObject.forDebug("Announcement system: 3"));
                                 switch (a.getAnnouncementType()) {
                                     case SPECIFIC:
                                         return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
@@ -96,14 +102,18 @@ public class AnnouncementThread {
                                         return Mono.empty();
                                 }
                             }));
-                    }).onErrorResume(e -> Mono.empty())
-                ).onErrorResume(e -> Mono.empty())
+                    })
+                    .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
+                    .onErrorResume(e -> Mono.empty())
+                )
+                .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
+                .onErrorResume(e -> Mono.empty())
                 .doFinally(ignore -> {
                     allSettings.clear();
                     calendars.clear();
                     customServices.clear();
                     allEvents.clear();
-                }).subscribeOn(Schedulers.immediate())
+                })
                 .then();
         });
     }
