@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
 import java.util.List;
@@ -55,45 +56,63 @@ public class AnnouncementThread {
                             switch (a.getAnnouncementType()) {
                                 case SPECIFIC:
                                     return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
-                                        .filter(identity -> identity)
-                                        .switchIfEmpty(
-                                            DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
-                                                .then(Mono.empty()))
-                                        .flatMap(ignored -> EventWrapper.getEvent(calData, settings, a.getEventId()))
-                                        .filter(event -> inRange(a, event))
-                                        .switchIfEmpty(
-                                            DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
-                                                .then(Mono.empty()))
-                                        .flatMap(e ->
-                                            AnnouncementMessageFormatter.sendAnnouncementMessage(guild, a, e, calData, settings)
-                                                .then(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
-                                        );
+                                        .flatMap(exists -> {
+                                            if (exists) {
+                                                return EventWrapper.getEvent(calData, settings, a.getEventId())
+                                                    .switchIfEmpty(
+                                                        DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                                                            .then(Mono.empty()))
+                                                    .flatMap(e -> inRange(a, e)
+                                                        .flatMap(inRange -> {
+                                                            if (inRange)
+                                                                return AnnouncementMessageFormatter
+                                                                    .sendAnnouncementMessage(guild, a, e, calData, settings)
+                                                                    .then(DatabaseManager
+                                                                        .deleteAnnouncement(a.getAnnouncementId().toString()));
+                                                            else
+                                                                return Mono.empty();
+                                                        }));
+                                            } else {
+                                                return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString());
+                                            }
+                                        });
                                 case UNIVERSAL:
                                     return getEvents(settings, calData, service)
                                         .flatMapMany(Flux::fromIterable)
-                                        .filter(e -> inRange(a, e))
-                                        .flatMap(e ->
-                                            AnnouncementMessageFormatter
-                                                .sendAnnouncementMessage(guild, a, e, calData, settings)
-                                        );
+                                        .flatMap(e -> inRange(a, e)
+                                            .flatMap(inRange -> {
+                                                if (inRange)
+                                                    return AnnouncementMessageFormatter
+                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
+                                                else
+                                                    return Mono.empty();
+                                            }));
                                 case COLOR:
                                     return getEvents(settings, calData, service)
                                         .flatMapMany(Flux::fromIterable)
                                         .filter(e -> e.getColorId() != null
                                             && a.getEventColor().equals(EventColor.fromNameOrHexOrID(e.getColorId()))
                                         )
-                                        .filter(e -> inRange(a, e))
-                                        .flatMap(e ->
-                                            AnnouncementMessageFormatter
-                                                .sendAnnouncementMessage(guild, a, e, calData, settings));
+                                        .flatMap(e -> inRange(a, e)
+                                            .flatMap(inRange -> {
+                                                if (inRange)
+                                                    return AnnouncementMessageFormatter
+                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
+                                                else
+                                                    return Mono.empty();
+                                            }));
                                 case RECUR:
                                     return getEvents(settings, calData, service)
                                         .flatMapMany(Flux::fromIterable)
                                         .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
-                                        .filter(e -> inRange(a, e))
-                                        .flatMap(e ->
-                                            AnnouncementMessageFormatter
-                                                .sendAnnouncementMessage(guild, a, e, calData, settings));
+                                        .flatMap(e -> inRange(a, e)
+                                            .flatMap(inRange -> {
+                                                if (inRange)
+                                                    return AnnouncementMessageFormatter
+                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
+                                                else
+                                                    return Mono.empty();
+                                            }));
                                 default:
                                     return Mono.empty();
                             }
@@ -113,23 +132,26 @@ public class AnnouncementThread {
             .then();
     }
 
-    private boolean inRange(Announcement a, Event e) {
-        long maxDifferenceMs = 5 * 60 * 1000; //5 minutes
+    private Mono<Boolean> inRange(Announcement a, Event e) {
+        return Mono.defer(() -> {
+            long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
-        long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
-        long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
+            long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+            long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
 
-        long difference = timeUntilEvent - announcementTimeMs;
+            long difference = timeUntilEvent - announcementTimeMs;
 
-        if (difference < 0) {
-            //Event past, we can delete announcement depending on the type
-            if (a.getAnnouncementType() == AnnouncementType.SPECIFIC)
-                DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()).subscribe();
+            if (difference < 0) {
+                //Event past, we can delete announcement depending on the type
+                if (a.getAnnouncementType() == AnnouncementType.SPECIFIC)
+                    return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                        .thenReturn(false);
 
-            return false;
-        } else {
-            return difference <= maxDifferenceMs;
-        }
+                return Mono.just(false);
+            } else {
+                return Mono.just(difference <= maxDifferenceMs);
+            }
+        });
     }
 
     private long getEventStartMs(Event e) {
