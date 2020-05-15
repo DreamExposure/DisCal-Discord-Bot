@@ -123,7 +123,7 @@ public class EventListCommand implements Command {
                                     } else {
                                         return Messages.sendMessage(Messages.getMessage("Event.List.Found.Many", "%amount%",
                                             events.size() + "", settings), event).then(Flux.fromIterable(events)
-                                            .flatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e,
+                                            .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e,
                                                 data.getCalendarNumber(), settings).flatMap(embed ->
                                                 Messages.sendMessage(embed, event)))
                                             .then()).thenReturn(GlobalConst.NOT_EMPTY);
@@ -161,8 +161,8 @@ public class EventListCommand implements Command {
                                             Messages.getMessage("Event.List.Found.One", settings), embed, event));
                             } else {
                                 return Messages.sendMessage(Messages.getMessage("Event.List.Found.Many", "%amount%",
-                                    events.size() + "", settings), event).then(Flux.fromIterable(events).flatMap(e ->
-                                    EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
+                                    events.size() + "", settings), event).then(Flux.fromIterable(events)
+                                    .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
                                         .flatMap(embed -> Messages.sendMessage(embed, event))).then())
                                     .thenReturn(GlobalConst.NOT_EMPTY);
                             }
