@@ -127,6 +127,14 @@ public class DisCalClient {
                     .flatMap(ReadyEventListener::handle)
                     .then();
 
+                Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
+                    .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Ready event hit in announcement start")))
+                    .next()
+                    .flatMapMany(ignore -> Flux.interval(Duration.ofMinutes(5)))
+                    .onBackpressureBuffer()
+                    .flatMap(i -> new AnnouncementThread(client).run())
+                    .then();
+
                 Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
                     .flatMap(ChannelDeleteListener::handle)
                     .then();
@@ -139,23 +147,8 @@ public class DisCalClient {
                     .flatMap(MessageCreateListener::handle)
                     .then();
 
-                Mono<Void> startAnnouncement = Flux.interval(Duration.ZERO)
-                    .onBackpressureBuffer()
-                    .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Tick")))
-                    .flatMap(ignore -> new AnnouncementThread(client).run())
-                    .then();
-
-                    /*
-                    client.on(ReadyEvent.class)
-                    .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Ready event hit in announcement start")))
-                    .next()
-                    .flatMapMany(ignore -> Flux.interval(Duration.ZERO))
-                    .onBackpressureBuffer()
-                    .flatMap(i -> new AnnouncementThread(client).run())
-                    .then();
-                     */
-
-                return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
+                //TODO: Wait for Quantic to figure this one out. Its weird race condition non-sense
+                return Mono.when(onReady, startAnnouncement, onTextChannelDelete, onRoleDelete, onCommand);
             }).block();
     }
 
