@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
 public class AnnouncementThread {
-
     private final GatewayDiscordClient client;
     private final Mono<Calendar> discalService;
 
@@ -46,7 +45,6 @@ public class AnnouncementThread {
             .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(a -> {
-                    LogFeed.log(LogObject.forDebug("Announcement system: 2"));
 
                     Mono<GuildSettings> s = getSettings(a);
                     Mono<CalendarData> cd = getCalendarData(a);
@@ -54,7 +52,6 @@ public class AnnouncementThread {
 
                     return Mono.zip(s, cd, se)
                         .map(TupleUtils.function((settings, calData, service) -> {
-                            LogFeed.log(LogObject.forDebug("Announcement system: 3"));
                             switch (a.getAnnouncementType()) {
                                 case SPECIFIC:
                                     return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
@@ -98,10 +95,10 @@ public class AnnouncementThread {
                             }
                         }));
                 })
-                .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
+                .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error", e, AnnouncementThread.class)))
                 .onErrorResume(e -> Mono.empty())
             )
-            .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
+            .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error", e, AnnouncementThread.class)))
             .onErrorResume(e -> Mono.empty())
             .doFinally(ignore -> {
                 allSettings.clear();
