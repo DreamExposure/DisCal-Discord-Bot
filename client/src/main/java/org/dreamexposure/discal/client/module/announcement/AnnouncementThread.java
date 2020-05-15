@@ -56,10 +56,14 @@ public class AnnouncementThread {
                                 case SPECIFIC:
                                     return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
                                         .filter(identity -> identity)
-                                        .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
-                                            .then(Mono.empty()))
+                                        .switchIfEmpty(
+                                            DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                                                .then(Mono.empty()))
                                         .flatMap(ignored -> EventWrapper.getEvent(calData, settings, a.getEventId()))
                                         .filter(event -> inRange(a, event))
+                                        .switchIfEmpty(
+                                            DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                                                .then(Mono.empty()))
                                         .flatMap(e ->
                                             AnnouncementMessageFormatter.sendAnnouncementMessage(guild, a, e, calData, settings)
                                                 .then(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
