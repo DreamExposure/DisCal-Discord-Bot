@@ -139,13 +139,21 @@ public class DisCalClient {
                     .flatMap(MessageCreateListener::handle)
                     .then();
 
-                Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
+                Mono<Void> startAnnouncement = Flux.interval(Duration.ZERO)
+                    .onBackpressureBuffer()
+                    .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Tick")))
+                    .flatMap(ignore -> new AnnouncementThread(client).run())
+                    .then();
+
+                    /*
+                    client.on(ReadyEvent.class)
                     .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Ready event hit in announcement start")))
                     .next()
                     .flatMapMany(ignore -> Flux.interval(Duration.ZERO))
                     .onBackpressureBuffer()
                     .flatMap(i -> new AnnouncementThread(client).run())
                     .then();
+                     */
 
                 return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
             }).block();
