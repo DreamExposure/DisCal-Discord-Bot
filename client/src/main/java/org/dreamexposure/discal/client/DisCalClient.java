@@ -142,7 +142,7 @@ public class DisCalClient {
                 Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
                     .doOnNext(ignore -> LogFeed.log(LogObject.forDebug("Ready event hit in announcement start")))
                     .next()
-                    .flatMapMany(ignore -> Flux.interval(Duration.ofMinutes(5)))
+                    .flatMapMany(ignore -> Flux.interval(Duration.ZERO))
                     .onBackpressureBuffer()
                     .flatMap(i -> new AnnouncementThread(client).run())
                     .then();
