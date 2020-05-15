@@ -26,7 +26,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
-@SuppressWarnings({"WeakerAccess", "Duplicates"})
 public class AnnouncementThread {
 
     private final Mono<Calendar> discalService;

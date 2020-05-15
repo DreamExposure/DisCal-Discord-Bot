@@ -5,7 +5,7 @@ import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener;
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener;
 import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener;
 import org.dreamexposure.discal.client.message.Messages;
-import org.dreamexposure.discal.client.module.announcement.AnnouncementThreader;
+import org.dreamexposure.discal.client.module.announcement.AnnouncementThread;
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand;
 import org.dreamexposure.discal.client.module.command.AnnouncementCommand;
 import org.dreamexposure.discal.client.module.command.CalendarCommand;
@@ -32,6 +32,7 @@ import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
 
 import discord4j.core.DiscordClientBuilder;
@@ -51,6 +52,7 @@ import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.redis.RedisStoreService;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
@@ -96,8 +98,8 @@ public class DisCalClient {
             } catch (Exception e) {
                 e.printStackTrace();
                 LogFeed.log(LogObject
-                        .forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
-                                DisCalClient.class));
+                    .forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
+                        DisCalClient.class));
             }
         }
 
@@ -113,59 +115,62 @@ public class DisCalClient {
 
         //Login
         DiscordClientBuilder.create(BotSettings.TOKEN.get())
-                .build().gateway()
-                .setSharding(getStrategy())
-                .setStoreService(getStores())
-                .setInitialStatus(shard -> Presence.online(Activity.playing("Booting Up!")))
-                .withGateway(client -> {
-                    DisCalClient.client = client;
+            .build().gateway()
+            .setSharding(getStrategy())
+            .setStoreService(getStores())
+            .setInitialStatus(shard -> Presence.online(Activity.playing("Booting Up!")))
+            .withGateway(client -> {
+                DisCalClient.client = client;
 
-                    //Register listeners
-                    Mono<Void> onReady = client.on(ReadyEvent.class)
-                        .flatMap(ReadyEventListener::handle)
-                        .then();
+                //Register listeners
+                Mono<Void> onReady = client.on(ReadyEvent.class)
+                    .flatMap(ReadyEventListener::handle)
+                    .then();
 
-                    Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
-                        .flatMap(ChannelDeleteListener::handle)
-                        .then();
+                Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
+                    .flatMap(ChannelDeleteListener::handle)
+                    .then();
 
-                    Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
-                        .flatMap(RoleDeleteListener::handle)
-                        .then();
+                Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
+                    .flatMap(RoleDeleteListener::handle)
+                    .then();
 
-                    Mono<Void> onCommand = client.on(MessageCreateEvent.class)
-                        .flatMap(MessageCreateListener::handle)
-                        .then();
+                Mono<Void> onCommand = client.on(MessageCreateEvent.class)
+                    .flatMap(MessageCreateListener::handle)
+                    .then();
 
-                    Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
-                        .next()
-                        .flatMap(ignore -> AnnouncementThreader.getThreader().init());
+                Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
+                    .next()
+                    .flatMap(ignore -> Flux.interval(Duration.ofMinutes(5))
+                        .onBackpressureBuffer()
+                        .flatMap(i -> new AnnouncementThread().run())
+                        .then());
 
-                    return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
-                }).block();
+                return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
+            }).block();
     }
 
     private static ShardingStrategy getStrategy() {
         return ShardingStrategy.builder()
-                .count(Integer.parseInt(BotSettings.SHARD_COUNT.get()))
-                .indices(Integer.parseInt(BotSettings.SHARD_INDEX.get()))
-                .build();
+            .count(Integer.parseInt(BotSettings.SHARD_COUNT.get()))
+            .indices(Integer.parseInt(BotSettings.SHARD_INDEX.get()))
+            .build();
     }
 
     private static StoreService getStores() {
         if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
             RedisURI uri = RedisURI.Builder
-                    .redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
-                    .withPassword(BotSettings.REDIS_PASSWORD.get())
-                    .build();
+                .redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
+                .withPassword(BotSettings.REDIS_PASSWORD.get())
+                .build();
 
             RedisStoreService rss = new RedisStoreService.Builder()
-                    .redisClient(RedisClient.create(uri))
-                    .build();
+                .redisClient(RedisClient.create(uri))
+                .build();
 
             return MappingStoreService.create()
-                    .setMappings(rss, GuildData.class, MessageData.class)
-                    .setFallback(new JdkStoreService());
+                .setMappings(rss, GuildData.class, MessageData.class)
+                .setFallback(new JdkStoreService());
         } else {
             return new JdkStoreService();
         }
