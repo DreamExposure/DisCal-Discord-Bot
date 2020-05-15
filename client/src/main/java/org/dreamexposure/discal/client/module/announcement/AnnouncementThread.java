@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.module.announcement;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
-import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import discord4j.core.GatewayDiscordClient;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,6 +28,7 @@ import reactor.function.TupleUtils;
 
 public class AnnouncementThread {
 
+    private final GatewayDiscordClient client;
     private final Mono<Calendar> discalService;
 
     private final Map<Snowflake, Mono<GuildSettings>> allSettings = new ConcurrentHashMap<>();
@@ -35,86 +36,80 @@ public class AnnouncementThread {
     private final Map<Snowflake, Mono<Calendar>> customServices = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<List<Event>>> allEvents = new ConcurrentHashMap<>();
 
-    public AnnouncementThread() {
-        discalService = CalendarAuth.getCalendarService(null).cache();
+    public AnnouncementThread(GatewayDiscordClient client) {
+        this.client = client;
+        this.discalService = CalendarAuth.getCalendarService(null).cache();
     }
 
     public Mono<Void> run() {
-        return Mono.defer(() -> {
-            LogFeed.log(LogObject.forDebug("Announcement system: 1"));
+        return client.getGuilds()
+            .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
+                .flatMapMany(Flux::fromIterable)
+                .flatMap(a -> {
+                    LogFeed.log(LogObject.forDebug("Announcement system: 2"));
 
-            if (DisCalClient.getClient() == null)
-                return Mono.empty();
+                    Mono<GuildSettings> s = getSettings(a);
+                    Mono<CalendarData> cd = getCalendarData(a);
+                    Mono<Calendar> se = s.flatMap(this::getService);
 
-            return DisCalClient.getClient().getGuilds()
-                .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
-                    .flatMapMany(Flux::fromIterable)
-                    .flatMap(a -> {
-                        LogFeed.log(LogObject.forDebug("Announcement system: 2"));
-
-                        Mono<GuildSettings> s = getSettings(a);
-                        Mono<CalendarData> cd = getCalendarData(a);
-                        Mono<Calendar> se = s.flatMap(this::getService);
-
-                        return Mono.zip(s, cd, se)
-                            .map(TupleUtils.function((settings, calData, service) -> {
-                                LogFeed.log(LogObject.forDebug("Announcement system: 3"));
-                                switch (a.getAnnouncementType()) {
-                                    case SPECIFIC:
-                                        return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
-                                            .filter(identity -> identity)
-                                            .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
-                                                .then(Mono.empty()))
-                                            .flatMap(ignored -> EventWrapper.getEvent(calData, settings, a.getEventId()))
-                                            .filter(event -> inRange(a, event))
-                                            .flatMap(e ->
-                                                AnnouncementMessageFormatter.sendAnnouncementMessage(guild, a, e, calData, settings)
-                                                    .then(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
-                                            );
-                                    case UNIVERSAL:
-                                        return getEvents(settings, calData, service)
-                                            .flatMapMany(Flux::fromIterable)
-                                            .filter(e -> inRange(a, e))
-                                            .flatMap(e ->
-                                                AnnouncementMessageFormatter
-                                                    .sendAnnouncementMessage(guild, a, e, calData, settings)
-                                            );
-                                    case COLOR:
-                                        return getEvents(settings, calData, service)
-                                            .flatMapMany(Flux::fromIterable)
-                                            .filter(e -> e.getColorId() != null
-                                                && a.getEventColor().equals(EventColor.fromNameOrHexOrID(e.getColorId()))
-                                            )
-                                            .filter(e -> inRange(a, e))
-                                            .flatMap(e ->
-                                                AnnouncementMessageFormatter
-                                                    .sendAnnouncementMessage(guild, a, e, calData, settings));
-                                    case RECUR:
-                                        return getEvents(settings, calData, service)
-                                            .flatMapMany(Flux::fromIterable)
-                                            .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
-                                            .filter(e -> inRange(a, e))
-                                            .flatMap(e ->
-                                                AnnouncementMessageFormatter
-                                                    .sendAnnouncementMessage(guild, a, e, calData, settings));
-                                    default:
-                                        return Mono.empty();
-                                }
-                            }));
-                    })
-                    .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
-                    .onErrorResume(e -> Mono.empty())
-                )
+                    return Mono.zip(s, cd, se)
+                        .map(TupleUtils.function((settings, calData, service) -> {
+                            LogFeed.log(LogObject.forDebug("Announcement system: 3"));
+                            switch (a.getAnnouncementType()) {
+                                case SPECIFIC:
+                                    return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
+                                        .filter(identity -> identity)
+                                        .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                                            .then(Mono.empty()))
+                                        .flatMap(ignored -> EventWrapper.getEvent(calData, settings, a.getEventId()))
+                                        .filter(event -> inRange(a, event))
+                                        .flatMap(e ->
+                                            AnnouncementMessageFormatter.sendAnnouncementMessage(guild, a, e, calData, settings)
+                                                .then(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
+                                        );
+                                case UNIVERSAL:
+                                    return getEvents(settings, calData, service)
+                                        .flatMapMany(Flux::fromIterable)
+                                        .filter(e -> inRange(a, e))
+                                        .flatMap(e ->
+                                            AnnouncementMessageFormatter
+                                                .sendAnnouncementMessage(guild, a, e, calData, settings)
+                                        );
+                                case COLOR:
+                                    return getEvents(settings, calData, service)
+                                        .flatMapMany(Flux::fromIterable)
+                                        .filter(e -> e.getColorId() != null
+                                            && a.getEventColor().equals(EventColor.fromNameOrHexOrID(e.getColorId()))
+                                        )
+                                        .filter(e -> inRange(a, e))
+                                        .flatMap(e ->
+                                            AnnouncementMessageFormatter
+                                                .sendAnnouncementMessage(guild, a, e, calData, settings));
+                                case RECUR:
+                                    return getEvents(settings, calData, service)
+                                        .flatMapMany(Flux::fromIterable)
+                                        .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
+                                        .filter(e -> inRange(a, e))
+                                        .flatMap(e ->
+                                            AnnouncementMessageFormatter
+                                                .sendAnnouncementMessage(guild, a, e, calData, settings));
+                                default:
+                                    return Mono.empty();
+                            }
+                        }));
+                })
                 .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
                 .onErrorResume(e -> Mono.empty())
-                .doFinally(ignore -> {
-                    allSettings.clear();
-                    calendars.clear();
-                    customServices.clear();
-                    allEvents.clear();
-                })
-                .then();
-        });
+            )
+            .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error 1", e, AnnouncementThread.class)))
+            .onErrorResume(e -> Mono.empty())
+            .doFinally(ignore -> {
+                allSettings.clear();
+                calendars.clear();
+                customServices.clear();
+                allEvents.clear();
+            })
+            .then();
     }
 
     private boolean inRange(Announcement a, Event e) {
