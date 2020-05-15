@@ -141,9 +141,9 @@ public class DisCalClient {
 
                 Mono<Void> startAnnouncement = client.on(ReadyEvent.class)
                     .next()
-                    .flatMapMany(ignore -> Flux.interval(Duration.ofMinutes(5))
-                        .onBackpressureBuffer()
-                        .flatMap(i -> new AnnouncementThread(client).run()))
+                    .flatMapMany(ignore -> Flux.interval(Duration.ofMinutes(5)))
+                    .onBackpressureBuffer()
+                    .flatMap(i -> new AnnouncementThread(client).run())
                     .then();
 
                 return Mono.when(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement);
