@@ -4,7 +4,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 
 import java.util.UUID;
 
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**

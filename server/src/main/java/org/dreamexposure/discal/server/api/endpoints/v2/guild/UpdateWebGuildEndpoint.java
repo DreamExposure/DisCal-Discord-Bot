@@ -18,9 +18,9 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ImmutableNicknameModifyData;
 import discord4j.rest.entity.RestGuild;
-import discord4j.rest.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/guild/")

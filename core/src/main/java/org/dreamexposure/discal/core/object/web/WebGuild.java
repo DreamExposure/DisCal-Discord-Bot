@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -19,7 +20,6 @@ import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestGuild;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 

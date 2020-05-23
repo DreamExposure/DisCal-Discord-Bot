@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.object.event;
 
 import org.json.JSONObject;
 
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

@@ -9,9 +9,9 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.function.Consumer;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**

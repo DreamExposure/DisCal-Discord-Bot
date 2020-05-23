@@ -12,8 +12,8 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
-import discord4j.rest.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.

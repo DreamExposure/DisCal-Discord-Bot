@@ -2,8 +2,8 @@ package org.dreamexposure.discal.client.listeners.discord;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
-import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class RoleDeleteListener {

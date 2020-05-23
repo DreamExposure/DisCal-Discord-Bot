@@ -15,8 +15,8 @@ import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
 import java.util.ArrayList;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**

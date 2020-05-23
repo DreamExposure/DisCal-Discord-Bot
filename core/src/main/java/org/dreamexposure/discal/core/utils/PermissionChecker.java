@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 
 import java.util.function.Predicate;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
@@ -16,7 +17,6 @@ import discord4j.rest.entity.RestGuild;
 import discord4j.rest.entity.RestMember;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

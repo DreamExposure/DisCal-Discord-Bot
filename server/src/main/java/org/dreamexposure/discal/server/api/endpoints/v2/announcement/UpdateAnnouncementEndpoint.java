@@ -23,7 +23,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/announcement")

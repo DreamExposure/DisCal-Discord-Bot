@@ -6,8 +6,8 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import java.io.IOException;
 import java.util.Properties;
 
+import discord4j.common.util.Snowflake;
 import discord4j.rest.util.Color;
-import discord4j.rest.util.Snowflake;
 import okhttp3.MediaType;
 
 public class GlobalConst {
