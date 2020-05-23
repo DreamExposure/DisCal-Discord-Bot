@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.object.announcement;
 
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.json.JSONArray;
@@ -27,6 +28,7 @@ public class Announcement {
 
     private String announcementChannelId;
     private AnnouncementType type;
+    private AnnouncementModifier modifier;
     private String eventId;
     private EventColor eventColor;
     private int hoursBefore;
@@ -53,6 +55,7 @@ public class Announcement {
         eventId = "N/a";
         eventColor = EventColor.RED;
         type = AnnouncementType.UNIVERSAL;
+        modifier = AnnouncementModifier.BEFORE;
         hoursBefore = 0;
         minutesBefore = 0;
         info = "None";
@@ -75,6 +78,7 @@ public class Announcement {
         eventId = "N/a";
         eventColor = EventColor.RED;
         type = AnnouncementType.UNIVERSAL;
+        modifier = AnnouncementModifier.BEFORE;
         hoursBefore = 0;
         minutesBefore = 0;
         info = "None";
@@ -93,6 +97,7 @@ public class Announcement {
         eventId = from.getEventId();
         eventColor = from.getEventColor();
         type = from.getAnnouncementType();
+        modifier = from.getModifier();
         hoursBefore = from.getHoursBefore();
         minutesBefore = from.getMinutesBefore();
         info = from.getInfo();
@@ -117,6 +122,7 @@ public class Announcement {
         eventId = from.getEventId();
         eventColor = from.getEventColor();
         type = from.getAnnouncementType();
+        modifier = from.getModifier();
         hoursBefore = from.getHoursBefore();
         minutesBefore = from.getMinutesBefore();
         info = from.getInfo();
@@ -227,6 +233,10 @@ public class Announcement {
             return AnnouncementType.UNIVERSAL;
     }
 
+    public AnnouncementModifier getModifier() {
+        return this.modifier;
+    }
+
     /**
      * Gets the Event ID linked to the announcement, if any.
      *
@@ -305,6 +315,10 @@ public class Announcement {
      */
     public void setAnnouncementType(AnnouncementType _type) {
         type = _type;
+    }
+
+    public void setModifier(AnnouncementModifier modifier) {
+        this.modifier = modifier;
     }
 
     /**
@@ -412,9 +426,10 @@ public class Announcement {
         data.put("subscriber_users", users);
 
         data.put("channel_id", announcementChannelId);
-        data.put("type", type.getName());
+        data.put("type", type.name());
+        data.put("modifier", modifier.name());
         data.put("event_id", eventId);
-        data.put("event_color", eventColor.getName());
+        data.put("event_color", eventColor.name());
         data.put("hours", hoursBefore);
         data.put("minutes", minutesBefore);
         data.put("info", info);
@@ -440,6 +455,7 @@ public class Announcement {
 
         announcementChannelId = data.getString("channel_id");
         type = AnnouncementType.fromValue(data.getString("type"));
+        modifier = AnnouncementModifier.fromValue(data.getString("modifier"));
         eventId = data.getString("event_id");
         eventColor = EventColor.valueOf(data.getString("event_color"));
         hoursBefore = data.getInt("hours");

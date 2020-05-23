@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -58,6 +59,8 @@ public class UpdateAnnouncementEndpoint {
                     a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
                 if (body.has("type"))
                     a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+                if (body.has("modifier"))
+                    a.setModifier(AnnouncementModifier.fromValue(body.getString("modifier")));
                 if (body.has("hours"))
                     a.setHoursBefore(body.getInt("hours"));
                 if (body.has("minutes"))

@@ -6,14 +6,12 @@ import com.google.api.services.calendar.model.Event;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
@@ -22,10 +20,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
+
+import static org.dreamexposure.discal.core.enums.announcement.AnnouncementType.SPECIFIC;
+import static reactor.function.TupleUtils.function;
 
 public class AnnouncementThread {
     private final GatewayDiscordClient client;
@@ -52,67 +53,14 @@ public class AnnouncementThread {
                     Mono<Calendar> se = s.flatMap(this::getService);
 
                     return Mono.zip(s, cd, se)
-                        .map(TupleUtils.function((settings, calData, service) -> {
-                            switch (a.getAnnouncementType()) {
-                                case SPECIFIC:
-                                    return EventUtils.eventExists(settings, calData.getCalendarNumber(), a.getEventId())
-                                        .flatMap(exists -> {
-                                            if (exists) {
-                                                return EventWrapper.getEvent(calData, settings, a.getEventId())
-                                                    .switchIfEmpty(
-                                                        DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
-                                                            .then(Mono.empty()))
-                                                    .flatMap(e -> inRange(a, e)
-                                                        .flatMap(inRange -> {
-                                                            if (inRange)
-                                                                return AnnouncementMessageFormatter
-                                                                    .sendAnnouncementMessage(guild, a, e, calData, settings)
-                                                                    .then(DatabaseManager
-                                                                        .deleteAnnouncement(a.getAnnouncementId().toString()));
-                                                            else
-                                                                return Mono.empty();
-                                                        }));
-                                            } else {
-                                                return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString());
-                                            }
-                                        });
-                                case UNIVERSAL:
-                                    return getEvents(settings, calData, service)
-                                        .flatMapMany(Flux::fromIterable)
-                                        .flatMap(e -> inRange(a, e)
-                                            .flatMap(inRange -> {
-                                                if (inRange)
-                                                    return AnnouncementMessageFormatter
-                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
-                                                else
-                                                    return Mono.empty();
-                                            }));
-                                case COLOR:
-                                    return getEvents(settings, calData, service)
-                                        .flatMapMany(Flux::fromIterable)
-                                        .filter(e -> e.getColorId() != null
-                                            && a.getEventColor().equals(EventColor.fromNameOrHexOrID(e.getColorId()))
-                                        )
-                                        .flatMap(e -> inRange(a, e)
-                                            .flatMap(inRange -> {
-                                                if (inRange)
-                                                    return AnnouncementMessageFormatter
-                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
-                                                else
-                                                    return Mono.empty();
-                                            }));
-                                case RECUR:
-                                    return getEvents(settings, calData, service)
-                                        .flatMapMany(Flux::fromIterable)
-                                        .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
-                                        .flatMap(e -> inRange(a, e)
-                                            .flatMap(inRange -> {
-                                                if (inRange)
-                                                    return AnnouncementMessageFormatter
-                                                        .sendAnnouncementMessage(guild, a, e, calData, settings);
-                                                else
-                                                    return Mono.empty();
-                                            }));
+                        .flatMap(function((settings, calData, service) -> {
+                            switch (a.getModifier()) {
+                                case BEFORE:
+                                    return handleBeforeModifier(guild, a, settings, calData, service);
+                                case DURING:
+                                    return handleDuringModifier(guild, a, settings, calData, service);
+                                case END:
+                                    return handleEndModifier(guild, a, settings, calData, service);
                                 default:
                                     return Mono.empty();
                             }
@@ -132,7 +80,88 @@ public class AnnouncementThread {
             .then();
     }
 
-    private Mono<Boolean> inRange(Announcement a, Event e) {
+    //Modifier handling
+    private Mono<Void> handleBeforeModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                            Calendar service) {
+        switch (a.getAnnouncementType()) {
+            case SPECIFIC:
+                return EventWrapper.getEvent(calData, settings, a.getEventId())
+                    .flatMap(e -> inRangeSpecific(a, e)
+                        .flatMap(inRange -> {
+                            if (inRange) {
+                                return AnnouncementMessageFormatter
+                                    .sendAnnouncementMessage(guild, a, e, calData, settings)
+                                    .then(DatabaseManager
+                                        .deleteAnnouncement(a.getAnnouncementId().toString())
+                                    );
+                            } else {
+                                return Mono.empty(); //Not in range, but still valid.
+                            }
+                        }))
+                    .switchIfEmpty(DatabaseManager
+                        .deleteAnnouncement(a.getAnnouncementId().toString()))
+                    .then();
+            case UNIVERSAL:
+                return getEvents(settings, calData, service)
+                    .flatMapMany(Flux::fromIterable)
+                    .filter(e -> inRange(a, e))
+                    .flatMap(e -> AnnouncementMessageFormatter
+                        .sendAnnouncementMessage(guild, a, e, calData, settings))
+                    .then();
+            case COLOR:
+                return getEvents(settings, calData, service)
+                    .flatMapMany(Flux::fromIterable)
+                    .filter(e -> e.getColorId() != null
+                        && a.getEventColor().equals(EventColor
+                        .fromNameOrHexOrID(e.getColorId())))
+                    .filter(e -> inRange(a, e))
+                    .flatMap(e -> AnnouncementMessageFormatter
+                        .sendAnnouncementMessage(guild, a, e, calData, settings))
+                    .then();
+
+            case RECUR:
+                return getEvents(settings, calData, service)
+                    .flatMapMany(Flux::fromIterable)
+                    .filter(e -> e.getId().contains("_")
+                        && e.getId().split("_")[0].equals(a.getEventId()))
+                    .filter(e -> inRange(a, e))
+                    .flatMap(e -> AnnouncementMessageFormatter
+                        .sendAnnouncementMessage(guild, a, e, calData, settings))
+                    .then();
+            default:
+                return Mono.empty();
+        }
+    }
+
+    //TODO: Actually support this.
+    private Mono<Void> handleDuringModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                            Calendar service) {
+        switch (a.getAnnouncementType()) {
+            case SPECIFIC:
+            case UNIVERSAL:
+            case COLOR:
+            case RECUR:
+            default:
+                return Mono.empty();
+        }
+    }
+
+    //TODO: Actually support this too
+    private Mono<Void> handleEndModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                         Calendar service) {
+        switch (a.getAnnouncementType()) {
+            case SPECIFIC:
+            case UNIVERSAL:
+            case COLOR:
+            case RECUR:
+            default:
+                return Mono.empty();
+        }
+    }
+
+
+    //Utility
+    private Mono<Boolean> inRangeSpecific(Announcement a, Event e) {
         return Mono.defer(() -> {
             long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
@@ -143,7 +172,7 @@ public class AnnouncementThread {
 
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
-                if (a.getAnnouncementType() == AnnouncementType.SPECIFIC)
+                if (a.getAnnouncementType() == SPECIFIC)
                     return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
                         .thenReturn(false);
 
@@ -152,6 +181,25 @@ public class AnnouncementThread {
                 return Mono.just(difference <= maxDifferenceMs);
             }
         });
+    }
+
+    private boolean inRange(Announcement a, Event e) {
+        long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
+
+        long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+        long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
+
+        long difference = timeUntilEvent - announcementTimeMs;
+
+        if (difference < 0) {
+            //Event past, we can delete announcement depending on the type
+            if (a.getAnnouncementType() == SPECIFIC)
+                return false; //Shouldn't even be used for specific types...
+
+            return false;
+        } else {
+            return difference <= maxDifferenceMs;
+        }
     }
 
     private long getEventStartMs(Event e) {

@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.database;
 
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -303,7 +304,7 @@ public class DatabaseManager {
                 if (exists) {
                     String update = "UPDATE " + table
                         + " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
-                        + " ANNOUNCEMENT_TYPE = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
+                        + " ANNOUNCEMENT_TYPE = ?, MODIFIER = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
                         + " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
                         + " INFO = ?, ENABLED = ?, INFO_ONLY = ?"
                         + " WHERE ANNOUNCEMENT_ID = ?";
@@ -313,23 +314,24 @@ public class DatabaseManager {
                         .bind(1, announcement.getSubscriberUserIdString())
                         .bind(2, announcement.getAnnouncementChannelId())
                         .bind(3, announcement.getAnnouncementType().name())
-                        .bind(4, announcement.getEventId())
-                        .bind(5, announcement.getEventColor().name())
-                        .bind(6, announcement.getHoursBefore())
-                        .bind(7, announcement.getMinutesBefore())
-                        .bind(8, announcement.getInfo())
-                        .bind(9, announcement.isEnabled())
-                        .bind(10, announcement.isInfoOnly())
-                        .bind(11, announcement.getAnnouncementId().toString())
+                        .bind(4, announcement.getModifier().name())
+                        .bind(5, announcement.getEventId())
+                        .bind(6, announcement.getEventColor().name())
+                        .bind(7, announcement.getHoursBefore())
+                        .bind(8, announcement.getMinutesBefore())
+                        .bind(9, announcement.getInfo())
+                        .bind(10, announcement.isEnabled())
+                        .bind(11, announcement.isInfoOnly())
+                        .bind(12, announcement.getAnnouncementId().toString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
                     String insertCommand = "INSERT INTO " + table +
                         "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, " +
-                        "CHANNEL_ID, ANNOUNCEMENT_TYPE, EVENT_ID, EVENT_COLOR, " +
+                        "CHANNEL_ID, ANNOUNCEMENT_TYPE, MODIFIER, EVENT_ID, EVENT_COLOR, " +
                         "HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY)" +
-                        " VALUE (?,     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, announcement.getAnnouncementId().toString())
@@ -338,13 +340,14 @@ public class DatabaseManager {
                         .bind(3, announcement.getSubscriberUserIdString())
                         .bind(4, announcement.getAnnouncementChannelId())
                         .bind(5, announcement.getAnnouncementType().name())
-                        .bind(6, announcement.getEventId())
-                        .bind(7, announcement.getEventColor().name())
-                        .bind(8, announcement.getHoursBefore())
-                        .bind(9, announcement.getMinutesBefore())
-                        .bind(10, announcement.getInfo())
-                        .bind(11, announcement.isEnabled())
-                        .bind(12, announcement.isInfoOnly())
+                        .bind(6, announcement.getModifier().name())
+                        .bind(7, announcement.getEventId())
+                        .bind(8, announcement.getEventColor().name())
+                        .bind(9, announcement.getHoursBefore())
+                        .bind(10, announcement.getMinutesBefore())
+                        .bind(11, announcement.getInfo())
+                        .bind(12, announcement.isEnabled())
+                        .bind(13, announcement.isInfoOnly())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
@@ -680,13 +683,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -717,13 +717,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -755,13 +752,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -795,13 +789,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -833,13 +824,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -873,13 +861,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
@@ -912,13 +897,10 @@ public class DatabaseManager {
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType
-                .valueOf(row.get("ANNOUNCEMENT_TYPE", String.class))
-            );
+            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor
-                .fromNameOrHexOrID(row.get("EVENT_COLOR", String.class))
-            );
+            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
