@@ -48,7 +48,7 @@ public class GetWebGuildEndpoint {
             if (g != null) {
                 WebGuild wg = WebGuild.fromGuild(g);
 
-                RestMember m = g.member(userId.asLong());
+                RestMember m = g.member(userId);
 
                 if (m != null) { //Assume false if we can't get the user...
                     wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).block());

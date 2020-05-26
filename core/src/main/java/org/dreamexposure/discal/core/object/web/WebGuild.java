@@ -37,23 +37,23 @@ public class WebGuild {
         String name = data.name();
         String iconUrl = data.icon().orElse("");
 
-        Mono<String> botNick = g.member(Long.parseLong(BotSettings.ID.get()))
-                .getData()
-                .map(MemberData::nick)
-                .map(Possible::flatOpt)
-                .flatMap(Mono::justOrEmpty)
-                .defaultIfEmpty("DisCal");
+        Mono<String> botNick = g.member(Snowflake.of(BotSettings.ID.get()))
+            .getData()
+            .map(MemberData::nick)
+            .map(Possible::flatOpt)
+            .flatMap(Mono::justOrEmpty)
+            .defaultIfEmpty("DisCal");
 
         Mono<GuildSettings> settings = DatabaseManager.getSettings(id).cache();
 
         Mono<List<WebRole>> roles = settings.flatMapMany(s ->
-                g.getRoles().map(role -> WebRole.fromRole(role, s)))
-                .collectList();
+            g.getRoles().map(role -> WebRole.fromRole(role, s)))
+            .collectList();
 
         Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
-                g.getChannels()
-                        .ofType(TextChannel.class)
-                        .map(channel -> WebChannel.fromChannel(channel, s)))
+            g.getChannels()
+                .ofType(TextChannel.class)
+                .map(channel -> WebChannel.fromChannel(channel, s)))
                 .collectList();
 
         Mono<List<Announcement>> announcements = DatabaseManager.getAnnouncements(id);
