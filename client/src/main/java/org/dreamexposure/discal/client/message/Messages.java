@@ -8,8 +8,8 @@ import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -47,7 +47,7 @@ public class Messages {
     @SuppressWarnings("unchecked")
     public static List<String> getLangs() {
 
-        return new ArrayList<String>(langs.keySet());
+        return new CopyOnWriteArrayList<String>(langs.keySet());
     }
 
     public static boolean isSupported(String _value) {

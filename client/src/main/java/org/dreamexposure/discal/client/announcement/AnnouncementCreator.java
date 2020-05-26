@@ -9,8 +9,9 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -27,7 +28,7 @@ public class AnnouncementCreator {
     }
 
     private static final AnnouncementCreator instance;
-    private final ArrayList<Announcement> announcements = new ArrayList<>();
+    private final List<Announcement> announcements = new CopyOnWriteArrayList<>();
 
     private AnnouncementCreator() {
     } //Prevent initialization
@@ -130,7 +131,7 @@ public class AnnouncementCreator {
         return null;
     }
 
-    public ArrayList<Announcement> getAllAnnouncements() {
+    public List<Announcement> getAllAnnouncements() {
         return announcements;
     }
 

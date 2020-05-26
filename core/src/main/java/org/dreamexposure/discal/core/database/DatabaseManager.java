@@ -16,10 +16,10 @@ import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import discord4j.common.util.Snowflake;
@@ -47,7 +47,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"UnusedReturnValue", "Duplicates", "unused", "ConstantConditions", "SqlResolve"})
+@SuppressWarnings({"UnusedReturnValue", "unused", "ConstantConditions", "SqlResolve"})
 public class DatabaseManager {
     private final static DatabaseSettings settings;
 
@@ -55,7 +55,7 @@ public class DatabaseManager {
 
     private final static ConnectionPool slave;
 
-    private static final Map<Snowflake, GuildSettings> guildSettingsCache = new HashMap<>();
+    private static final Map<Snowflake, GuildSettings> guildSettingsCache = new ConcurrentHashMap<>();
 
     static {
         settings = new DatabaseSettings("", "", BotSettings.SQL_DB.get(),

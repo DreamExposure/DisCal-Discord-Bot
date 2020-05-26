@@ -14,8 +14,9 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -32,7 +33,7 @@ public class EventCreator {
     }
 
     private static final EventCreator instance;
-    private final ArrayList<PreEvent> events = new ArrayList<>();
+    private final List<PreEvent> events = new CopyOnWriteArrayList<>();
 
     private EventCreator() {
     } //Prevent initialization.
@@ -218,7 +219,7 @@ public class EventCreator {
         return null;
     }
 
-    public ArrayList<PreEvent> getAllPreEvents() {
+    public List<PreEvent> getAllPreEvents() {
         return events;
     }
 

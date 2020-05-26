@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimerTask;
 
 /**
@@ -24,9 +25,9 @@ public class CreatorCleaner extends TimerTask {
         try {
             long target = 60 * 1000 * 60; //60 minutes
 
-            ArrayList<PreCalendar> cals = new ArrayList<>();
-            ArrayList<PreEvent> events = new ArrayList<>();
-            ArrayList<Announcement> ans = new ArrayList<>();
+            List<PreCalendar> cals = new ArrayList<>();
+            List<PreEvent> events = new ArrayList<>();
+            List<Announcement> ans = new ArrayList<>();
 
             //Run through calendar creator
             for (PreCalendar cal : CalendarCreator.getCreator().getAllPreCalendars()) {

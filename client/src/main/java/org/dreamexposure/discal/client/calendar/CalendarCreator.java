@@ -13,7 +13,8 @@ import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -30,7 +31,7 @@ public class CalendarCreator {
     }
 
     private final static CalendarCreator instance;
-    private final ArrayList<PreCalendar> calendars = new ArrayList<>();
+    private final List<PreCalendar> calendars = new CopyOnWriteArrayList<>();
 
     private CalendarCreator() {
     } //Prevent initialization
@@ -176,7 +177,7 @@ public class CalendarCreator {
         return null;
     }
 
-    public ArrayList<PreCalendar> getAllPreCalendars() {
+    public List<PreCalendar> getAllPreCalendars() {
         return calendars;
     }
 

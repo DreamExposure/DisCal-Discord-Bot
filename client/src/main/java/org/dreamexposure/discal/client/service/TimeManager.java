@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.service;
 import org.dreamexposure.discal.client.module.misc.StatusChanger;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Timer;
 public class TimeManager {
     private static TimeManager instance;
 
-    private final ArrayList<Timer> timers = new ArrayList<>();
+    private final List<Timer> timers = new ArrayList<>();
 
     private TimeManager() {
     } //Prevent initialization
