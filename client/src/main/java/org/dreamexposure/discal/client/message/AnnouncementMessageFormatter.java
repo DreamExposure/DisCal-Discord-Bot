@@ -331,7 +331,7 @@ public class AnnouncementMessageFormatter {
         Mono<String> mentions = guild.flatMap(g -> getSubscriberMentions(a, g));
 
         return Mono.zip(guild, embed, mentions)
-            .map(TupleUtils.function((g, em, men) ->
+            .flatMap(TupleUtils.function((g, em, men) ->
                 g.getChannelById(Snowflake.of(a.getAnnouncementChannelId()))
                     .ofType(TextChannel.class)
                     .onErrorResume(ClientException.class, e ->
@@ -349,7 +349,7 @@ public class AnnouncementMessageFormatter {
         Mono<String> mentions = getSubscriberMentions(a, guild);
 
         return Mono.zip(embed, mentions)
-            .map(TupleUtils.function((em, men) ->
+            .flatMap(TupleUtils.function((em, men) ->
                 guild.getChannelById(Snowflake.of(a.getAnnouncementChannelId()))
                     .ofType(TextChannel.class)
                     .onErrorResume(ClientException.class, e ->

@@ -142,7 +142,7 @@ public class CalendarCreator {
                                 DatabaseManager.updateCalendar(data),
                                 AclRuleWrapper.insertRule(rule, data.getCalendarId(), settings)
                             )
-                                .doOnNext(a -> terminate(settings.getGuildID()))
+                                .then(Mono.fromRunnable(() -> terminate(settings.getGuildID())))
                                 .thenReturn(response);
                         }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), false));
                 } else {
