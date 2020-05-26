@@ -22,11 +22,11 @@ import reactor.core.publisher.Mono;
 public class CalendarMessageFormatter {
     @Deprecated
     public static String getCalendarLink(Snowflake guildId) {
-        return "https://www.discalbot.com/embed/calendar/" + guildId.asString() + "/1";
+        return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/1";
     }
 
     public static String getCalendarLink(Snowflake guildId, int calNumber) {
-        return "https://www.discalbot.com/embed/calendar" + guildId.asString() + "/" + calNumber;
+        return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/" + calNumber;
     }
 
     @Deprecated

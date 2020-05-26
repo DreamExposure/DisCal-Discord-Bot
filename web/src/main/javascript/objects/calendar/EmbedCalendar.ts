@@ -26,14 +26,14 @@ export class EmbedCalendar implements TaskCallback {
     private calendarData: WebCalendar = new WebCalendar();
 
     constructor() {
-		this.guildId = window.location.pathname.split("/")[3];
-		this.calNumber = parseInt(window.location.pathname.split("/")[4]);
-		this.todaysDate = new Date();
-		this.selectedDate = new Date();
-		this.displays = [];
-		this.apiKey = "";
-		this.apiUrl = "";
-	}
+        this.guildId = window.location.pathname.split("/")[2];
+        this.calNumber = parseInt(window.location.pathname.split("/")[4]);
+        this.todaysDate = new Date();
+        this.selectedDate = new Date();
+        this.displays = [];
+        this.apiKey = "";
+        this.apiUrl = "";
+    }
 
     init(key: string, url: string) {
         this.apiKey = key;

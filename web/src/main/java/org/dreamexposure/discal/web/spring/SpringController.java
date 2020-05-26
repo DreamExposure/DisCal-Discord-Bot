@@ -207,10 +207,10 @@ public class SpringController {
     @RequestMapping("/embed/calendar/{id}")
     public String embedCalendar(Map<String, Object> model, HttpServletRequest req, @PathVariable String id) {
         //This is a deprecated URL, but we are just redirecting for backwards compat.
-        return "redirect:/embed/calendar/" + id + "/1";
+        return "redirect:/embed/" + id + "/calendar/1";
     }
 
-    @RequestMapping("/embed/calendar/{id}/{num}")
+    @RequestMapping("/embed/{id}/calendar/{num}")
     public String embedCalendarWithNum(Map<String, Object> model, HttpServletRequest req, @PathVariable String id, @PathVariable String num) {
         model.clear();
         model.putAll(DiscordAccountHandler.getHandler().getEmbedAccount(req));
