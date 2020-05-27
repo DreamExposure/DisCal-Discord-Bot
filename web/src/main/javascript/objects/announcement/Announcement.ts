@@ -1,25 +1,27 @@
-import {AnnouncementType} from "@/enums/AnnouncementType";
 import {EventColor} from "@/enums/EventColor";
+import {AnnouncementType} from "@/enums/AnnouncementType";
+import {AnnouncementModifier} from "@/enums/AnnouncementModifier";
 
 export class Announcement {
-	private readonly _guildId: string = "";
-	private _announcementId: string = "";
+    private readonly _guildId: string = "";
+    private _announcementId: string = "";
 
-	private readonly _subscriberRoleIds: string[];
-	private readonly _subscriberUserIds: string[];
+    private readonly _subscriberRoleIds: string[];
+    private readonly _subscriberUserIds: string[];
 
-	private _announcementChannelId: number = 0;
-	private _announcementType: AnnouncementType = AnnouncementType.SPECIFIC;
-	private _eventId: string = "";
-	private _eventColor: EventColor = EventColor.NONE;
-	private _hoursBefore: number = 0;
-	private _minutesBefore: number = 0;
-	private _info: string = "N/a";
+    private _announcementChannelId: number = 0;
+    private _announcementType: AnnouncementType = AnnouncementType.SPECIFIC;
+    private _modifier: AnnouncementModifier = AnnouncementModifier.BEFORE;
+    private _eventId: string = "";
+    private _eventColor: EventColor = EventColor.NONE;
+    private _hoursBefore: number = 0;
+    private _minutesBefore: number = 0;
+    private _info: string = "N/a";
 
-	private _enabled: boolean = false;
-	private _infoOnly: boolean = false;
+    private _enabled: boolean = false;
+    private _infoOnly: boolean = false;
 
-	constructor(guildId: string) {
+    constructor(guildId: string) {
 		this._guildId = guildId;
 
 		this._subscriberRoleIds = [];
@@ -61,6 +63,14 @@ export class Announcement {
 
     set announcementType(type) {
         this._announcementType = type;
+    }
+
+    get modifier() {
+        return this._modifier;
+    }
+
+    set modifier(mod) {
+        this._modifier = mod;
     }
 
     get eventId() {
@@ -126,6 +136,7 @@ export class Announcement {
             "id": this.announcementId,
             "channel_id": this.announcementChannelId,
             "type": AnnouncementType[this.announcementType],
+            "modifier": AnnouncementModifier[this.modifier],
             "event_id": this.eventId,
             "event_color": EventColor[this.eventColor],
             "hours": this.hoursBefore,
@@ -161,6 +172,7 @@ export class Announcement {
 
         this.announcementChannelId = json.channel_id;
         this.announcementType = (<any>AnnouncementType)[json.type];
+        this.modifier = (<any>AnnouncementModifier)[json.modifier];
         this.eventId = json.event_id;
         this.eventColor = (<any>EventColor)[json.event_color];
         this.hoursBefore = json.hours;
