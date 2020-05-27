@@ -9,198 +9,205 @@ import {GuildSettingsUpdateRequest} from "@/network/guild/settings/GuildSettings
 import {WebGuildUpdateRequest} from "@/network/guild/WebGuildUpdateRequest";
 
 export class DashboardGuildRunner implements TaskCallback {
-	guild: WebGuild = new WebGuild("");
+    guild: WebGuild = new WebGuild("");
 
-	apiUrl: string;
-	apiKey: string;
+    apiUrl: string;
+    apiKey: string;
 
-	guildId: string;
-	userId: string;
+    guildId: string;
+    userId: string;
 
-	constructor(apiKey: string, apiUrl: string, userId: string) {
-		this.apiKey = apiKey;
-		this.apiUrl = apiUrl;
-		this.userId = userId;
+    constructor(apiKey: string, apiUrl: string, userId: string) {
+        this.apiKey = apiKey;
+        this.apiUrl = apiUrl;
+        this.userId = userId;
 
-		this.guildId = window.location.pathname.split("/")[2];
-	}
+        this.guildId = window.location.pathname.split("/")[2];
+    }
 
-	start() {
-		//First thing we need to do is load the web guild data so we can display it for editing.
-		let wgr = new WebGuildGetRequest(this.guildId, this.userId, this);
-		wgr.provideApiDetails(this.apiKey, this.apiUrl);
+    start() {
+        //First thing we need to do is load the web guild data so we can display it for editing.
+        let wgr = new WebGuildGetRequest(this.guildId, this.userId, this);
+        wgr.provideApiDetails(this.apiKey, this.apiUrl);
 
-		wgr.execute();
-	}
+        wgr.execute();
+    }
 
-	private handleWebGuildGet(status: NetworkCallStatus) {
-		this.guild = new WebGuild(this.guildId).fromJson(status.body);
+    private handleWebGuildGet(status: NetworkCallStatus) {
+        this.guild = new WebGuild(this.guildId).fromJson(status.body);
 
-		//load in settings data
-		(<HTMLInputElement>document.getElementById("nickname-input")).value = this.guild.botNick;
-		document.getElementById("nick-update-btn")!.onclick = function () {
-			this.updateBotNick();
-		}.bind(this);
+        if (!this.guild.settings.isDevGuild || !this.guild.settings.isPatronGuild) {
+            ElementUtil.hideLoader();
+            document.getElementById("not-patron-guild")!.hidden = false;
+            Snackbar.showSnackbar("Guild is not a patron guild!");
+            return;
+        }
 
-		(<HTMLInputElement>document.getElementById("prefix-input")).value = this.guild.settings.prefix;
-		document.getElementById("prefix-update-btn")!.onclick = function () {
-			this.updatePrefix();
-		}.bind(this);
+        //load in settings data
+        (<HTMLInputElement>document.getElementById("nickname-input")).value = this.guild.botNick;
+        document.getElementById("nick-update-btn")!.onclick = function () {
+            this.updateBotNick();
+        }.bind(this);
 
-		let controlRoleSelect = document.getElementById("control-role-select")!;
-		for (let i = 0; i < this.guild.roles.length; i++) {
-			let role = this.guild.roles[i];
-			let opt = document.createElement("option");
+        (<HTMLInputElement>document.getElementById("prefix-input")).value = this.guild.settings.prefix;
+        document.getElementById("prefix-update-btn")!.onclick = function () {
+            this.updatePrefix();
+        }.bind(this);
 
-			opt.innerHTML = role.name;
-			opt.value = role.id.toString();
-			opt.selected = role.id.toString() == this.guild.settings.controlRole;
+        let controlRoleSelect = document.getElementById("control-role-select")!;
+        for (let i = 0; i < this.guild.roles.length; i++) {
+            let role = this.guild.roles[i];
+            let opt = document.createElement("option");
 
-			controlRoleSelect.appendChild(opt);
-		}
-		document.getElementById("control-role-update-btn")!.onclick = function () {
-			this.updateControlRole();
-		}.bind(this);
+            opt.innerHTML = role.name;
+            opt.value = role.id.toString();
+            opt.selected = role.id.toString() == this.guild.settings.controlRole;
 
-		let chanSelect = document.getElementById("discal-chan-select")!;
-		for (let i = 0; i < this.guild.channels.length; i++) {
-			let chan = this.guild.channels[i];
-			let opt = document.createElement("option");
+            controlRoleSelect.appendChild(opt);
+        }
+        document.getElementById("control-role-update-btn")!.onclick = function () {
+            this.updateControlRole();
+        }.bind(this);
 
-			opt.innerHTML = chan.name;
-			opt.value = chan.id.toString();
-			if (chan.id == "0" && this.guild.settings.disCalChannel === "all") {
-				opt.selected = true;
-			} else {
-				opt.selected = chan.id.toString() == this.guild.settings.disCalChannel;
-			}
-			chanSelect.appendChild(opt);
-		}
-		document.getElementById("discal-chan-update-btn")!.onclick = function () {
-			this.updateDiscalChannel();
-		}.bind(this);
+        let chanSelect = document.getElementById("discal-chan-select")!;
+        for (let i = 0; i < this.guild.channels.length; i++) {
+            let chan = this.guild.channels[i];
+            let opt = document.createElement("option");
 
-		let langSelect = document.getElementById("discal-lang-select")!;
-		for (let i = 0; i < this.guild.availableLangs.length; i++) {
-			let lang = this.guild.availableLangs[i];
-			let opt = document.createElement("option");
+            opt.innerHTML = chan.name;
+            opt.value = chan.id.toString();
+            if (chan.id == "0" && this.guild.settings.disCalChannel === "all") {
+                opt.selected = true;
+            } else {
+                opt.selected = chan.id.toString() == this.guild.settings.disCalChannel;
+            }
+            chanSelect.appendChild(opt);
+        }
+        document.getElementById("discal-chan-update-btn")!.onclick = function () {
+            this.updateDiscalChannel();
+        }.bind(this);
 
-			opt.innerHTML = lang.toUpperCase();
-			opt.value = lang.toUpperCase();
+        let langSelect = document.getElementById("discal-lang-select")!;
+        for (let i = 0; i < this.guild.availableLangs.length; i++) {
+            let lang = this.guild.availableLangs[i];
+            let opt = document.createElement("option");
 
-			opt.selected = lang.toUpperCase() == this.guild.settings.lang.toUpperCase();
-			langSelect.appendChild(opt);
-		}
-		document.getElementById("discal-lang-update-btn")!.onclick = function () {
-			this.updateLang();
-		}.bind(this);
+            opt.innerHTML = lang.toUpperCase();
+            opt.value = lang.toUpperCase();
 
-
-		//load data that cannot be edited
-		(<HTMLParagraphElement>document.getElementById("shard-display")).innerHTML = "Shard: " + this.guild.shard;
-
-		if (this.guild.settings.isPatronGuild) {
-			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is a patron guild";
-		} else {
-			(<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is NOT a patron guild";
-		}
-		if (this.guild.settings.isDevGuild) {
-			(<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is a dev guild";
-		} else {
-			(<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is NOT a dev guild";
-		}
-		//display what shard the server is on when we support that...
+            opt.selected = lang.toUpperCase() == this.guild.settings.lang.toUpperCase();
+            langSelect.appendChild(opt);
+        }
+        document.getElementById("discal-lang-update-btn")!.onclick = function () {
+            this.updateLang();
+        }.bind(this);
 
 
-		//Hide loader and show the data container...
-		ElementUtil.hideLoader();
-		document.getElementById("guild-settings")!.hidden = false;
-		document.getElementById("guild-data")!.hidden = false;
-	}
+        //load data that cannot be edited
+        (<HTMLParagraphElement>document.getElementById("shard-display")).innerHTML = "Shard: " + this.guild.shard;
 
-	private updateBotNick() {
-		let request = new WebGuildUpdateRequest(this.guildId, this);
-		request.provideApiDetails(this.apiKey, this.apiUrl);
+        if (this.guild.settings.isPatronGuild) {
+            (<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is a patron guild";
+        } else {
+            (<HTMLParagraphElement>document.getElementById("patron-display")).innerHTML = "This guild is NOT a patron guild";
+        }
+        if (this.guild.settings.isDevGuild) {
+            (<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is a dev guild";
+        } else {
+            (<HTMLParagraphElement>document.getElementById("dev-display")).innerHTML = "This guild is NOT a dev guild";
+        }
+        //display what shard the server is on when we support that...
 
-		request.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
-		this.guild.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
 
-		request.execute();
-	}
+        //Hide loader and show the data container...
+        ElementUtil.hideLoader();
+        document.getElementById("guild-settings")!.hidden = false;
+        document.getElementById("guild-data")!.hidden = false;
+    }
 
-	private updatePrefix() {
-		let request = new GuildSettingsUpdateRequest(this.guildId, this);
-		request.provideApiDetails(this.apiKey, this.apiUrl);
+    private updateBotNick() {
+        let request = new WebGuildUpdateRequest(this.guildId, this);
+        request.provideApiDetails(this.apiKey, this.apiUrl);
 
-		request.prefix = (<HTMLInputElement>document.getElementById("prefix-input")).value;
-		this.guild.settings.prefix = request.prefix;
+        request.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
+        this.guild.botNick = (<HTMLInputElement>document.getElementById("nickname-input")).value;
 
-		request.execute();
-	}
+        request.execute();
+    }
 
-	private updateControlRole() {
-		let request = new GuildSettingsUpdateRequest(this.guildId, this);
-		request.provideApiDetails(this.apiKey, this.apiUrl);
+    private updatePrefix() {
+        let request = new GuildSettingsUpdateRequest(this.guildId, this);
+        request.provideApiDetails(this.apiKey, this.apiUrl);
 
-		let select = <HTMLSelectElement>document.getElementById("control-role-select");
-		request.controlRole = select.selectedOptions[0].value;
-		this.guild.settings.controlRole = request.controlRole;
+        request.prefix = (<HTMLInputElement>document.getElementById("prefix-input")).value;
+        this.guild.settings.prefix = request.prefix;
 
-		request.execute();
-	}
+        request.execute();
+    }
 
-	private updateDiscalChannel() {
-		let request = new GuildSettingsUpdateRequest(this.guildId, this);
-		request.provideApiDetails(this.apiKey, this.apiUrl);
+    private updateControlRole() {
+        let request = new GuildSettingsUpdateRequest(this.guildId, this);
+        request.provideApiDetails(this.apiKey, this.apiUrl);
 
-		let select = <HTMLSelectElement>document.getElementById("discal-chan-select");
-		request.discalChannel = select.selectedOptions[0].value;
-		this.guild.settings.disCalChannel = request.discalChannel;
+        let select = <HTMLSelectElement>document.getElementById("control-role-select");
+        request.controlRole = select.selectedOptions[0].value;
+        this.guild.settings.controlRole = request.controlRole;
 
-		request.execute();
-	}
+        request.execute();
+    }
 
-	private updateLang() {
-		let request = new GuildSettingsUpdateRequest(this.guildId, this);
-		request.provideApiDetails(this.apiKey, this.apiUrl);
+    private updateDiscalChannel() {
+        let request = new GuildSettingsUpdateRequest(this.guildId, this);
+        request.provideApiDetails(this.apiKey, this.apiUrl);
 
-		let select = <HTMLSelectElement>document.getElementById("discal-lang-select");
-		request.lang = select.selectedOptions[0].value;
-		this.guild.settings.lang = request.lang;
+        let select = <HTMLSelectElement>document.getElementById("discal-chan-select");
+        request.discalChannel = select.selectedOptions[0].value;
+        this.guild.settings.disCalChannel = request.discalChannel;
 
-		request.execute();
-	}
+        request.execute();
+    }
 
-	onCallback(status: NetworkCallStatus): void {
-		if (status.isSuccess) {
-			switch (status.type) {
-				case TaskType.WEB_GUILD_GET:
-					this.handleWebGuildGet(status);
-					break;
-				case TaskType.GUILD_SETTINGS_UPDATE:
-					Snackbar.showSnackbar(status.message);
-					break;
-				case TaskType.WEB_GUILD_UPDATE:
-					Snackbar.showSnackbar(status.message);
-					break;
-				default:
-					break;
-			}
-		} else {
-			switch (status.type) {
-				case TaskType.WEB_GUILD_GET:
-					if (status.code == 404) {
-						ElementUtil.hideLoader();
-						document.getElementById("not-connected")!.hidden = false;
-						Snackbar.showSnackbar("Guild not Found");
-					} else {
-						Snackbar.showSnackbar("[ERROR] " + status.message);
-					}
-					break;
-				default:
-					Snackbar.showSnackbar("[ERROR] " + status.message);
-					break;
-			}
-		}
-	}
+    private updateLang() {
+        let request = new GuildSettingsUpdateRequest(this.guildId, this);
+        request.provideApiDetails(this.apiKey, this.apiUrl);
+
+        let select = <HTMLSelectElement>document.getElementById("discal-lang-select");
+        request.lang = select.selectedOptions[0].value;
+        this.guild.settings.lang = request.lang;
+
+        request.execute();
+    }
+
+    onCallback(status: NetworkCallStatus): void {
+        if (status.isSuccess) {
+            switch (status.type) {
+                case TaskType.WEB_GUILD_GET:
+                    this.handleWebGuildGet(status);
+                    break;
+                case TaskType.GUILD_SETTINGS_UPDATE:
+                    Snackbar.showSnackbar(status.message);
+                    break;
+                case TaskType.WEB_GUILD_UPDATE:
+                    Snackbar.showSnackbar(status.message);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            switch (status.type) {
+                case TaskType.WEB_GUILD_GET:
+                    if (status.code == 404) {
+                        ElementUtil.hideLoader();
+                        document.getElementById("not-connected")!.hidden = false;
+                        Snackbar.showSnackbar("Guild not Found");
+                    } else {
+                        Snackbar.showSnackbar("[ERROR] " + status.message);
+                    }
+                    break;
+                default:
+                    Snackbar.showSnackbar("[ERROR] " + status.message);
+                    break;
+            }
+        }
+    }
 }
