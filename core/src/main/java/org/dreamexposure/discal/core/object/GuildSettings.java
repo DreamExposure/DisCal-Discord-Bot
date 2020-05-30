@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.core.object;
 
+import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 import discord4j.common.util.Snowflake;
 
@@ -18,6 +20,8 @@ public class GuildSettings {
 
     private boolean externalCalendar;
     private String privateKey;
+
+    private int credentialsId;
 
     private String encryptedAccessToken;
     private String encryptedRefreshToken;
@@ -43,6 +47,8 @@ public class GuildSettings {
 
         externalCalendar = false;
         privateKey = "N/a";
+
+        credentialsId = new Random().nextInt(CalendarAuth.credentialsCount());
 
         encryptedAccessToken = "N/a";
         encryptedRefreshToken = "N/a";
@@ -72,6 +78,10 @@ public class GuildSettings {
 
     public String getPrivateKey() {
         return privateKey;
+    }
+
+    public int getCredentialsId() {
+        return credentialsId;
     }
 
     public String getEncryptedAccessToken() {
@@ -150,6 +160,10 @@ public class GuildSettings {
         privateKey = _privateKey;
     }
 
+    public void setCredentialsId(int credentialsId) {
+        this.credentialsId = credentialsId;
+    }
+
     public void setEncryptedAccessToken(String _access) {
         encryptedAccessToken = _access;
     }
@@ -209,6 +223,7 @@ public class GuildSettings {
         data.put("guild_id", guildID.asString());
         data.put("external_calendar", externalCalendar);
         data.put("private_key", privateKey);
+        data.put("credentials_id", credentialsId);
         data.put("access_token", encryptedAccessToken);
         data.put("refresh_token", encryptedRefreshToken);
         data.put("control_role", controlRole);
@@ -248,6 +263,7 @@ public class GuildSettings {
         guildID = Snowflake.of(data.getString("guild_id"));
         externalCalendar = data.getBoolean("external_calendar");
         privateKey = data.getString("private_key");
+        credentialsId = data.getInt("credentials_id");
         encryptedAccessToken = data.getString("access_token");
         encryptedRefreshToken = data.getString("refresh_token");
         controlRole = data.getString("control_role");
@@ -267,6 +283,7 @@ public class GuildSettings {
     public GuildSettings fromJsonSecure(JSONObject data) {
         guildID = Snowflake.of(data.getString("guild_id"));
         externalCalendar = data.getBoolean("external_calendar");
+        //credentialsId = data.getInt("credentials_id");
         //privateKey = data.getString("PrivateKey");
         //encryptedAccessToken = data.getString("AccessToken");
         //encryptedRefreshToken = data.getString("RefreshToken");

@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,16 +31,20 @@ import static reactor.function.TupleUtils.function;
 
 public class AnnouncementThread {
     private final GatewayDiscordClient client;
-    private final Mono<Calendar> discalService;
 
     private final Map<Snowflake, Mono<GuildSettings>> allSettings = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<CalendarData>> calendars = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<Calendar>> customServices = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<List<Event>>> allEvents = new ConcurrentHashMap<>();
 
+    private final Map<Integer, Mono<Calendar>> discalServices = new HashMap<>();
+
     public AnnouncementThread(GatewayDiscordClient client) {
         this.client = client;
-        this.discalService = CalendarAuth.getCalendarService(null).cache();
+
+        for (int i = 0; i < CalendarAuth.credentialsCount(); i++) {
+            this.discalServices.put(i, CalendarAuth.getCalendarService(i).cache());
+        }
     }
 
     public Mono<Void> run() {
@@ -232,7 +237,7 @@ public class AnnouncementThread {
 
             return customServices.get(gs.getGuildID());
         }
-        return discalService;
+        return discalServices.get(gs.getCredentialsId());
     }
 
     private Mono<List<Event>> getEvents(GuildSettings gs, CalendarData cd, Calendar service) {

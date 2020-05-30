@@ -17,14 +17,19 @@ import com.google.api.services.calendar.CalendarScopes;
 
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.network.google.Authorization;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -43,16 +48,6 @@ public class CalendarAuth {
     private static final String APPLICATION_NAME = "DisCal";
 
     /**
-     * Directory to store user credentials for this application.
-     */
-    private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"), ".credentials/DisCal");
-
-    /**
-     * Global instance of the {@link FileDataStoreFactory}.
-     */
-    private static FileDataStoreFactory DATA_STORE_FACTORY;
-
-    /**
      * Global instance of the JSON factory.
      */
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -60,7 +55,7 @@ public class CalendarAuth {
     /**
      * Global instance of the HTTP transport.
      */
-    private static HttpTransport HTTP_TRANSPORT;
+    private final static HttpTransport HTTP_TRANSPORT;
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -70,13 +65,23 @@ public class CalendarAuth {
      */
     private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR);
 
+    private static final Map<Integer, FileDataStoreFactory> DATA_STORE_FACTORIES;
+
     static {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+
+            Map<Integer, FileDataStoreFactory> dataStoreFactories = new HashMap<>();
+            int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
+            for (int i = 0; i < credCount; i++) {
+                dataStoreFactories.put(i, new FileDataStoreFactory(getCredentialsFolder(i)));
+            }
+
+            DATA_STORE_FACTORIES = Collections.unmodifiableMap(dataStoreFactories);
         } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
+            throw new RuntimeException(t); //Never reached, makes compiler happy :)
         }
     }
 
@@ -85,15 +90,19 @@ public class CalendarAuth {
      *
      * @return an authorized Credential object.
      */
-    private static Mono<Credential> authorize() {
+    private static Mono<Credential> authorize(int credentialId) {
         return Mono.fromCallable(() -> {
             // Load client secrets.
-            //InputStream in = CalendarAuth.class.getResourceAsStream("/client_secret.json"); <- in case it breaks, this is still here
             InputStream in = new FileInputStream(new File("client_secret.json"));
             GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
             // Build flow and trigger user authorization request.
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES).setDataStoreFactory(DATA_STORE_FACTORY).setAccessType("offline").build();
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
+                .Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(DATA_STORE_FACTORIES.get(credentialId))
+                .setAccessType("offline")
+                .build();
+
             Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 
             //Try to close input stream since I don't think it was ever closed?
@@ -118,15 +127,8 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    public static Mono<Calendar> getCalendarService(GuildSettings g) {
+    public static Mono<Calendar> getCalendarService(@NotNull GuildSettings g) {
         return Mono.fromCallable(() -> {
-            if (g == null) {
-                return authorize().map(cred ->
-                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
-                        .setApplicationName(APPLICATION_NAME)
-                        .build());
-            }
-
             if (g.useExternalCalendar()) {
                 return authorize(g).map(cred ->
                     new Calendar.
@@ -134,11 +136,25 @@ public class CalendarAuth {
                         .setApplicationName(APPLICATION_NAME)
                         .build());
             } else {
-                return authorize().map(cred ->
+                return authorize(g.getCredentialsId()).map(cred ->
                     new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
                         .setApplicationName(APPLICATION_NAME)
                         .build());
             }
         }).flatMap(Function.identity());
+    }
+
+    public static Mono<Calendar> getCalendarService(int credentialId) {
+        return authorize(credentialId).map(cred -> new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
+            .setApplicationName(APPLICATION_NAME)
+            .build());
+    }
+
+    private static File getCredentialsFolder(int credentialId) {
+        return new File(BotSettings.CREDENTIAL_FOLDER.get() + "/" + credentialId);
+    }
+
+    public static int credentialsCount() {
+        return DATA_STORE_FACTORIES.size();
     }
 }

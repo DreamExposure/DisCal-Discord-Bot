@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server;
 
+import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -38,6 +39,14 @@ public class DisCalServer {
         Properties p = new Properties();
         p.load(new FileReader(new File("settings.properties")));
         BotSettings.init(p);
+
+        if (args.length > 1 && args[0].equalsIgnoreCase("-forceNewAuth")) {
+            //Forcefully start a browser for google account authorization.
+            CalendarAuth.getCalendarService(Integer.parseInt(args[1])).block(); //Block until auth completes...
+
+            //Kill the running instance as this is only meant for generating new credentials... Illegal State basically.
+            System.exit(100);
+        }
 
         //Handle database migrations
         handleMigrations(args.length > 0 && args[0].equalsIgnoreCase("--repair"));

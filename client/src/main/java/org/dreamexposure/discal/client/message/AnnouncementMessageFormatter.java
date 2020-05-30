@@ -410,7 +410,7 @@ public class AnnouncementMessageFormatter {
                     mentions.append(s).append(" ");
                 }
 
-                return mentions.toString().replaceAll("@", "@\\u200B");
+                return mentions.toString().replaceAll("@", "@\u200B");
             }));
         });
     }

@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.web;
 
+import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
@@ -22,6 +23,14 @@ public class DisCalWeb {
         p.load(new FileReader(new File("settings.properties")));
         BotSettings.init(p);
 
+        if (args.length > 1 && args[0].equalsIgnoreCase("-forceNewAuth")) {
+            //Forcefully start a browser for google account authorization.
+            CalendarAuth.getCalendarService(Integer.parseInt(args[1])).block(); //Block until auth completes...
+
+            //Kill the running instance as this is only meant for generating new credentials... Illegal State basically.
+            System.exit(100);
+        }
+
         //Start Google authorization daemon
         Authorization.getAuth().init();
 
@@ -33,8 +42,7 @@ public class DisCalWeb {
             app.run(args);
         } catch (Exception e) {
             e.printStackTrace();
-            LogFeed.log(LogObject
-                    .forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
+            LogFeed.log(LogObject.forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
             System.exit(4);
         }
 
