@@ -18,13 +18,16 @@
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <thymeleaf-layout-dialect.version>2.3.0</thymeleaf-layout-dialect.version>
 
-        <spring.version>2.1.5.RELEASE</spring.version>
-        <spring.security.version>5.1.5.RELEASE</spring.security.version>
-        <spring.maven-plugin.version>2.2.7.RELEASE</spring.maven-plugin.version>
+        <spring.version>2.3.1.RELEASE</spring.version>
+        <spring.security.version>5.3.3.RELEASE</spring.security.version>
+        <spring.session.version>2.3.0.RELEASE</spring.session.version>
+        <spring.maven-plugin.version>2.3.1.RELEASE</spring.maven-plugin.version>
 
         <discord4j.version>3.1.0-SNAPSHOT</discord4j.version>
 
-        <google.client-api.version>1.28.0</google.client-api.version>
+        <google.client-api.core.version>1.30.9</google.client-api.core.version>
+        <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
+        <google.client-api.oauth.version>1.30.6</google.client-api.oauth.version>
 
         <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
         <r2dbc.pool.version>0.8.2.RELEASE</r2dbc.pool.version>
@@ -32,6 +35,12 @@
         <netty.version.forced>4.1.44.Final</netty.version.forced>
 
         <reactor.version.bom>Dysprosium-SR7</reactor.version.bom>
+
+        <maven.plugin.deploy.version>3.0.0-M1</maven.plugin.deploy.version>
+        <maven.plugin.compiler.version>3.8.1</maven.plugin.compiler.version>
+        <maven.plugin.shade.version>3.2.4</maven.plugin.shade.version>
+        <maven.plugin.jar.version>3.2.0</maven.plugin.jar.version>
+        <maven.plugin.exec.version>3.0.0</maven.plugin.exec.version>
 
         <revision>3.1.0-SNAPSHOT</revision>
     </properties>
@@ -111,7 +120,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>17.0.0</version>
+            <version>19.0.0</version>
         </dependency>
         <!--  *dies*  forced due to stores-redis:lettuce-core giving 4.1.38 -->
         <dependency>
@@ -146,20 +155,20 @@
         <dependency>
             <groupId>com.google.api-client</groupId>
             <artifactId>google-api-client</artifactId>
-            <version>${google.client-api.version}</version>
+            <version>${google.client-api.core.version}</version>
             <optional>false</optional>
         </dependency>
         <!--Google Calendar API-->
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-calendar</artifactId>
-            <version>v3-rev371-1.25.0</version>
+            <version>${google.client-api.calendar.version}</version>
         </dependency>
         <!--Google oauth client API-->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client-jetty</artifactId>
-            <version>${google.client-api.version}</version>
+            <version>${google.client-api.oauth.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.mortbay.jetty</groupId>
@@ -193,25 +202,25 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180813</version>
+            <version>20200518</version>
         </dependency>
         <!--Joda Time-->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.10.1</version>
+            <version>2.10.6</version>
         </dependency>
         <!--OkHTTP API-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.14.0</version>
+            <version>4.7.2</version>
         </dependency>
         <!--Discord Webhook Library-->
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>discord-webhooks</artifactId>
-            <version>0.1.7</version>
+            <version>0.3.1</version>
         </dependency>
         <!--Thymeleaf-->
         <dependency>
@@ -251,7 +260,7 @@
         <dependency>
             <groupId>org.springframework.session</groupId>
             <artifactId>spring-session-data-redis</artifactId>
-            <version>${spring.version}</version>
+            <version>${spring.session.version}</version>
         </dependency>
         <!--Spring Security Core-->
         <dependency>
@@ -273,7 +282,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>${maven.plugin.compiler.version}</version>
                 <configuration>
                     <source>8</source>
                     <target>8</target>
@@ -282,7 +291,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.7</version>
+                <version>${maven.plugin.deploy.version}</version>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
