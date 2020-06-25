@@ -30,7 +30,7 @@
         <google.client-api.oauth.version>1.30.6</google.client-api.oauth.version>
 
         <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
-        <r2dbc.pool.version>0.8.2.RELEASE</r2dbc.pool.version>
+        <r2dbc.pool.version>0.8.3.RELEASE</r2dbc.pool.version>
 
         <netty.version.forced>4.1.44.Final</netty.version.forced>
 
