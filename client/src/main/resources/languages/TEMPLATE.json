@@ -1,7 +1,8 @@
 {
   "Language": "ENGLISH",
-
-  "Creator.Notif.MANAGE_MESSAGES": "DisCal does not have \"Manage Messages\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator/Editor after permissions are added!)",
+  # First line, just figuring out how this fork thing works.
+  # Not sure if in this part → [the new creators] "creators" is actually meant to be in plural or not.
+  "Creator.Notif.MANAGE_MESSAGES": "DisCal no tiene el permiso \"Gestionar mensajes\" en este canal! Para usar [el nuevo creador/los nuevos creadores] DisCal debe tener estos permisos! (PISTA: Reinicia el Creator/Editor después de haber añadido los permisos!)",
   "Creator.Calendar.Create.Init": "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`",
   "Creator.Calendar.Edit.Init": "Calendar Editor initialized! Edit the values and confirm with `!calendar confirm`",
   "Creator.Calendar.Create.Name": "Please specify a name for the calendar!",
