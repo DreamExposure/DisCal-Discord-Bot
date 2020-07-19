@@ -69,7 +69,7 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, false);
                 }
                 if (event.getDescription() != null) {
                     String description = event.getDescription();
@@ -77,7 +77,7 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, false);
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartDate", settings), startDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
@@ -88,9 +88,9 @@ public class EventMessageFormatter {
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
                 //TODO: Add info on recurrence here.
@@ -140,7 +140,7 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, false);
                 }
                 if (event.getDescription() != null) {
                     String description = event.getDescription();
@@ -148,7 +148,7 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, false);
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartDate", settings), startDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
@@ -159,9 +159,9 @@ public class EventMessageFormatter {
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
                 //TODO: Add info on recurrence here.
@@ -184,12 +184,13 @@ public class EventMessageFormatter {
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
         Mono<String> date = getHumanReadableDate(event.getStart(), false, settings);
+        Mono<String> time = getHumanReadableTime(event.getStart(), false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
-        return Mono.zip(guild, data, date, img)
-            .map(TupleUtils.function((g, ed, start, hasImg) -> spec -> {
+        return Mono.zip(guild, data, time, date, img)
+            .map(TupleUtils.function((g, ed, startDate, startTime, hasImg) -> spec -> {
 
                 if (settings.isBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -206,15 +207,16 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, false);
                 }
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), start, true);
+                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startDate, true);
+                spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
@@ -235,12 +237,13 @@ public class EventMessageFormatter {
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
         Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
+        Mono<String> time = getHumanReadableTime(event.getOriginalStartTime(), 1, false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
-        return Mono.zip(guild, data, date, img)
-            .map(TupleUtils.function((g, ed, start, hasImg) -> spec -> {
+        return Mono.zip(guild, data, date, time, img)
+            .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> spec -> {
 
                 if (settings.isBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -257,15 +260,16 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, false);
                 }
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), start, true);
+                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startData, true);
+                spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
@@ -309,7 +313,7 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
                 }
@@ -319,7 +323,7 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
                 }
@@ -337,9 +341,9 @@ public class EventMessageFormatter {
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
@@ -380,7 +384,7 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
                 }
@@ -390,7 +394,7 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, true);
+                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
                 }
@@ -408,9 +412,9 @@ public class EventMessageFormatter {
                 if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
                     if (event.getLocation().length() > 300) {
                         String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
+                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
