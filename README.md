@@ -1,69 +1,85 @@
-# About DisCal
+# DisCal Discord Bot
 
-[Official Website](https://www.discalbot.com)
-	
-[Trello Board](https://trello.com/b/2Xx3Galz)
+[![Discord](https://img.shields.io/discord/375357265198317579?label=DreamExposure&style=flat-square)](https://discord.gg/2TFqyuy)
+[![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.dreamexposure.org%2Fview%2FDiscord-Bots%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/)
+[![Jenkins tests](https://img.shields.io/jenkins/tests?compact_message&jobUrl=https%3A%2F%2Fjenkins.dreamexposure.org%2Fview%2FDiscord-Bots%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/tests)
 
-[![Build Status](https://jenkins.dreamexposure.org/job/DisCal/badge/icon)](https://jenkins.dreamexposure.org/job/DisCal/)
+DisCal is a discord bot that connects Discord and Google Calendar as seamlessly as possible with a wide feature set for calendar management and information.
 
-DisCal is a full featured discord bot that manages a calendar and allows users to create, list, modify, delete, and announce events. 
-<br> <br>
-It was built to be powerful yet easy to use! 
-Discord lacks a built in calendar, so we took the chance to make one for you! With DisCal, you can bring your Guild closer together by scheduling events and activities and having DisCal handle all of the hard work! 
-<br> <br>
-DisCal is perfect for every guild! Whether you are an RP Guild, Gaming Guild, or community Guild, DisCal was built to be versatile and unique! With DisCal no longer will you need to do any complex scheduling, DisCal handles all of that hard work for you!
+# Core Features
 
-DisCal is developed and maintained by NovaFox161 with help from xaanit.
+* Powerful in-server integration of google calendar
+* Custom Calendar creation and editing
+* Event creation, editing, and deletion
+* Automated announcement system to remind users of events
+* Customizable prefix and mentionable commands
+* Versatile and built for all communities
+* Web dashboard for bot and calendar management
 
-*WIP means "Work in Progress" or is a feature actively in development but not released yet. Features marked as WIP will be available in upcoming updates very soon!
+## Planned Features & Work in Progress Changes
 
-## Core Features
+* Multiple calendars per server (WIP)
+* Advanced announcement configuration (WIP)
+* Complex recurring event configuration (WIP)
+* Proper patreon integration for automated setup.
+* Better translation support (Right now using the JSON files is really messy and hard to maintain)
+* And so much more!
 
-* Create/edit custom calendar.
-* Create/edit/delete/announce complex events.
-* Create/edit/delete custom announcements.
-* Recurring events
-* Easy to learn and use!
-* Simple commands, prefix "!" OR @DisCal
-* Versatile and built for all types of Guilds 
-* Super responsive.
-* And much more coming soon!
+# Quick Links
 
-### Additional Features
+* [Website](https://www.discalbot.com)
+* [Discord](https://discord.gg/2TFqyuy)
+* [Trello](https://trello.com/b/2Xx3Galz)
 
-* DisCal will automatically post an error report in the official DisCal guild! This way the DisCal development team will be alerted of an issue immediately and can fix it ASAP!!
-* Customizable prefixes.
-* Ability to limit who can control DisCal.
-* Ability to limit what channels DisCal can be used in.
-* Can accept and handle infinite announcements, calendars, and events.
-* Announcements sent to DMs per user per guild.
+# Technologies
 
+DisCal is primarily written in Java with a TypeScript powered web-frontend.
+We use the following technologies throughout the project:
+* [Discord4J](https://github.com/Discord4J/Discord4J) API wrapper
+* Project Reactor for fully reactive code
+* SpringBoot web backend
+* MySQL with Redis caching
 
-## Planned Features
-* Multiple calendars (WIP)
-* More advanced announcements and notification support.
-* And so much more!!!!!
+# Developer RESTful API
 
-Don't see something you want?? Request it today!! Contact any of the developers or support members and we will happily see what we can do to further improve DisCal!
+DisCal was written for the community, and to aid in that goal, DisCal has a fully functioning REST API to allow developers to bring their applications to DisCal.
 
-## Contributing
+Current API Version: v2
+
+To get an API token, please contact the development team.
+* [API Docs](https://www.discalbot.com/docs/api/overview)
+
+# Contributing
+
+DisCal is an open source project and is maintained in our free time. We always welcome and love contributions.
+
+## Code
 
 1. Fork this repo and make changes in your own copy
-2. Add a test if applicable and run the existing tests with `mvn clean test` to make sure they pass
-3. Commit your changes and push to your fork `git push origin master`
-4. Create a new pull request and submit it back to us!
+2. Write your code and add any new tests if applicable
+3. Run the new and/or existing tests with `mvn clean test` to make sure they pass
+4. Commit your changes and push to your fork `git push origin master`
+5. Create a new pull request and submit it back to us!
 
 ## Translations
 
-As a calendar bot, DisCal reaches global use, and because of this, DisCal now allows users to select the language they wish to use, however, all of the languages and translations are manually made. So we, this DisCal Development Team, are looking for translators!!
-<br> <br>
-If you are interested in translating DisCal, just follow the format provided in the [TEMPLATE LANGUAGE JSON File.](https://github.com/Drea,Exposure/DisCal-Discord-Bot/blob/master/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
+As a calendar bot, DisCal reaches global use, and because of this , Discal allows users to select the language they wish to use.
 
-### Guidelines
+If you are able to speak two languages (English and another language) we welcome you to translate the bot to that language!
+
+For instructions on how to translate DisCal, continue reading below.
+
+Do note however, that we are planning on making the translation system much more powerful and easier to maintain and contribute to in the future.
+
+### Translation Instructions
+
+Follow the format provided in the [TEMPLATE LANGUAGE JSON File.](client/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
+
+### Translation Guidelines
 
 We very much appreciate all of the translations we can get, but please follow the guidelines below so that we may ensure that we have high quality translations.
 
-1. Please be fluent in the language you are translating to. We will ***NOT*** accept any translations that are made through Google Translate.
+1. Please be fluent in the language you are translating to. We will ***NOT*** accept any translations that are made through Google Translate as it cannot tell statement context and we want to maintain high standards for the bot.
 2. The general JSON format is `"key": "value"`, which means that the "key" must remain the same in all files, so ***DO NOT*** change the key, only the values.
 3. In many files `%value%` or something similar is seen. These are replacement variables and will never be seen by the user. ***DO NOT CHANGE THE REPLACERS!*** 
 4. At the beginning of the file, you will see `"Language: "LANG_NAME_HERE"` Please change `LANG_NAME_HERE` to the language you are translating the file to!
