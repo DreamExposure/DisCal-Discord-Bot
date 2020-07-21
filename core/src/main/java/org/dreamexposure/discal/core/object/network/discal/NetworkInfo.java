@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.object.network.discal;
 
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONArray;
@@ -88,6 +89,10 @@ public class NetworkInfo {
 
     public int getClientCount() {
         return clients.size();
+    }
+
+    public int getExpectedClientCount() {
+        return Integer.parseInt(BotSettings.SHARD_COUNT.get());
     }
 
     public int getCalendarCount() {
