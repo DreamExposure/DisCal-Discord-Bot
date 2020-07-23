@@ -32,7 +32,10 @@ public class GetStatusEndpoint {
         try {
             response.setContentType("application/json");
             response.setStatus(200);
-            return DisCalServer.getNetworkInfo().toJson().toString();
+
+            return DisCalServer.getNetworkInfo().update()
+                .thenReturn(DisCalServer.getNetworkInfo().toJson().toString())
+                .block();
         } catch (JSONException e) {
             e.printStackTrace();
 

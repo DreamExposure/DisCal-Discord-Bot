@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -12,6 +13,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.List;
+
+import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -31,6 +34,15 @@ public class NetworkInfo {
 
     private String uptime;
     private String pid;
+
+
+    public Mono<Void> update() {
+        return DatabaseManager.getCalendarCount()
+            .doOnNext(i -> calCount = i)
+            .then(DatabaseManager.getAnnouncementCount())
+            .doOnNext(i -> announcementCount = i)
+            .then();
+    }
 
     //Getters
     public List<ConnectedClient> getClients() {
@@ -123,7 +135,6 @@ public class NetworkInfo {
     }
 
     //Setters
-
     public void setCalCount(int calCount) {
         this.calCount = calCount;
     }
