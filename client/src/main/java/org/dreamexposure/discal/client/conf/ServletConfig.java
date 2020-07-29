@@ -15,21 +15,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableAutoConfiguration
 public class ServletConfig implements
-	WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+        WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
-	public void customize(ConfigurableServletWebServerFactory factory) {
-		factory.setPort(Integer.valueOf(BotSettings.PORT.get()));
-		factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/"));
-	}
+    public void customize(ConfigurableServletWebServerFactory factory) {
+        factory.setPort(Integer.parseInt(BotSettings.PORT.get()));
+        factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/"));
+    }
 
-	@Bean
-	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				CorsRegistration reg = registry.addMapping("/api/**");
-				reg.allowedOrigins("*");
-			}
-		};
-	}
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                CorsRegistration reg = registry.addMapping("/api/**");
+                reg.allowedOrigins("*");
+            }
+        };
+    }
 }

@@ -1,8 +1,11 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.object.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.announcement.Announcement;
+
+import java.util.UUID;
+
+import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -10,18 +13,16 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
  * For Project: DisCal-Discord-Bot
  */
 public class AnnouncementUtils {
-	/**
-	 * Checks if the announcement exists.
-	 *
-	 * @param value The announcement ID.
-	 * @return <code>true</code> if the announcement exists, else <code>false</code>.
-	 */
-	public static Boolean announcementExists(String value, Snowflake guildId) {
-		for (Announcement a : DatabaseManager.getManager().getAnnouncements(guildId)) {
-			if (a.getAnnouncementId().toString().equals(value))
-				return true;
-
-		}
-		return false;
-	}
+    /**
+     * Checks if the announcement exists.
+     *
+     * @param value The announcement ID.
+     * @return <code>true</code> if the announcement exists, else <code>false</code>.
+     */
+    public static Mono<Boolean> announcementExists(String value, Snowflake guildId) {
+        return Mono.just(UUID.fromString(value))
+            .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId)
+                .hasElement())
+            .onErrorReturn(false); //If there's an error because of a bad value
+    }
 }

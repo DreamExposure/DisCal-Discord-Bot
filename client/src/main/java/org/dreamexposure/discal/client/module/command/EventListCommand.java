@@ -1,212 +1,176 @@
 package org.dreamexposure.discal.client.module.command;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
 import java.util.ArrayList;
-import java.util.List;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
-public class EventListCommand implements ICommand {
-	/**
-	 * Gets the command this Object is responsible for.
-	 *
-	 * @return The command this Object is responsible for.
-	 */
-	@Override
-	public String getCommand() {
-		return "events";
-	}
+public class EventListCommand implements Command {
+    /**
+     * Gets the command this Object is responsible for.
+     *
+     * @return The command this Object is responsible for.
+     */
+    @Override
+    public String getCommand() {
+        return "events";
+    }
 
-	/**
-	 * Gets the short aliases of the command this object is responsible for.
-	 * </br>
-	 * This will return an empty ArrayList if none are present
-	 *
-	 * @return The aliases of the command.
-	 */
-	@Override
-	public ArrayList<String> getAliases() {
-		return new ArrayList<>();
-	}
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        return new ArrayList<>();
+    }
 
-	/**
-	 * Gets the info on the command (not sub command) to be used in help menus.
-	 *
-	 * @return The command info.
-	 */
-	@Override
-	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("events");
-		info.setDescription("Lists the specified amount of events from the guild calendar.");
-		info.setExample("!events (number or function) (other args if applicable)");
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        CommandInfo info = new CommandInfo(
+            "events",
+            "Lists the specified amount of events from the guild calendar.",
+            "!events (number or function) (other args if applicable)"
+        );
 
-		info.getSubCommands().put("search", "Searches for events based on specific criteria rather than just the next upcoming events");
-		return info;
-	}
+        info.getSubCommands().put("search", "Searches for events based on specific criteria rather than just the next upcoming events");
+        info.getSubCommands().put("today", "Lists events occurring today (max. 20)");
+        return info;
+    }
 
-	/**
-	 * Issues the command this Object is responsible for.
-	 *
-	 * @param args  The command arguments.
-	 * @param event The event received.
-	 * @return <code>true</code> if successful, else <code>false</code>.
-	 */
-	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		//Get events from calendar
-		if (args.length < 1) {
-			moduleSimpleList(args, event, settings);
-		} else {
-			switch (args[0].toLowerCase()) {
-				case "search":
-					if (settings.isDevGuild())
-						moduleSearch(args, event, settings);
-					else
-						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Disabled", settings), event);
-					break;
-				case "today":
-					if (settings.isDevGuild())
-						moduleDay(args, event, settings);
-					else
-						MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Disabled", settings), event);
-					break;
-				default:
-					moduleSimpleList(args, event, settings);
-					break;
-			}
-		}
-		return false;
-	}
+    /**
+     * Issues the command this Object is responsible for.
+     *
+     * @param args  The command arguments.
+     * @param event The event received.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
+    @Override
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length < 1) {
+                return moduleSimpleList(args, event, settings);
+            } else {
+                switch (args[0].toLowerCase()) {
+                    case "search":
+                        if (settings.isDevGuild())
+                            return moduleSearch(args, event, settings);
+                        else
+                            return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
+                    case "today":
+                        return moduleDay(args, event, settings);
+                    default:
+                        return moduleSimpleList(args, event, settings);
+                }
+            }
+        }).then();
+    }
 
-	@SuppressWarnings("Duplicates")
-	private void moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (args.length == 0) {
-			try {
-				Calendar service = CalendarAuth.getCalendarService(settings);
+    private Mono<Void> moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 0) {
+                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
+                    .flatMap(data -> EventWrapper.getEvents(data, settings, 1, System.currentTimeMillis())
+                        .flatMap(events -> {
+                            if (events.size() == 0) {
+                                return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
+                            } else { //It will always be one here, so just use an else, there is no way it can be higher
+                                return EventMessageFormatter
+                                    .getEventEmbed(events.get(0), data.getCalendarNumber(), settings).flatMap(embed ->
+                                        Messages.sendMessage(
+                                            Messages.getMessage("Event.List.Found.One", settings), embed, event));
+                            }
+                        })
+                    ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
+            } else if (args.length == 1) {
+                return Mono.just(Integer.parseInt(args[0])).flatMap(count -> {
+                    if (count > 15) {
+                        return Messages.sendMessage(Messages.getMessage("Event.List.Amount.Over", settings), event);
+                    } else if (count < 1) {
+                        return Messages.sendMessage(Messages.getMessage("Event.List.Amount.Under", settings), event);
+                    } else {
+                        return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
+                            .flatMap(data -> EventWrapper.getEvents(data, settings, count, System.currentTimeMillis())
+                                .flatMap(events -> {
+                                    if (events.size() == 0) {
+                                        return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
+                                    } else if (events.size() == 1) {
+                                        return EventMessageFormatter.getEventEmbed(events.get(0),
+                                            data.getCalendarNumber(), settings).flatMap(embed -> Messages.sendMessage(
+                                            Messages.getMessage("Event.List.Found.One", settings), embed, event));
+                                    } else {
+                                        return Messages.sendMessage(Messages.getMessage("Event.List.Found.Many", "%amount%",
+                                            events.size() + "", settings), event).then(Flux.fromIterable(events)
+                                            .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e,
+                                                data.getCalendarNumber(), settings).flatMap(embed ->
+                                                Messages.sendMessage(embed, event)))
+                                            .then()).thenReturn(GlobalConst.NOT_EMPTY);
+                                    }
+                                })
+                            ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
+                    }
+                }).onErrorResume(NumberFormatException.class, e ->
+                    Messages.sendMessage(Messages.getMessage("Notification.Args.Value.Integer", settings), event));
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Event.List.Args.Many", settings), event);
+            }
+        }).then();
+    }
 
-				DateTime now = new DateTime(System.currentTimeMillis());
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
-				Events events = service.events().list(calendarData.getCalendarAddress())
-						.setMaxResults(1)
-						.setTimeMin(now)
-						.setOrderBy("startTime")
-						.setSingleEvents(true)
-						.setShowDeleted(false)
-						.execute();
-				List<Event> items = events.getItems();
-				if (items.size() == 0) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.None", settings), event);
-				} else if (items.size() == 1) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.One", settings), EventMessageFormatter.getEventEmbed(items.get(0), settings), event);
-				}
-			} catch (Exception e) {
-				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-				e.printStackTrace();
-			}
-		} else if (args.length == 1) {
-			try {
-				Integer eventNum = Integer.valueOf(args[0]);
-				if (eventNum > 15) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Amount.Over", settings), event);
-					return;
-				}
-				if (eventNum < 1) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Amount.Under", settings), event);
-					return;
-				}
-				try {
-					Calendar service = CalendarAuth.getCalendarService(settings);
+    private Mono<Void> moduleSearch(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.empty(); //TODO: Actually make this...
+    }
 
-					DateTime now = new DateTime(System.currentTimeMillis());
-					CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
-					Events events = service.events().list(calendarData.getCalendarAddress())
-							.setMaxResults(eventNum)
-							.setTimeMin(now)
-							.setOrderBy("startTime")
-							.setSingleEvents(true)
-							.execute();
-					List<Event> items = events.getItems();
-					if (items.size() == 0) {
-						MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.None", settings), event);
-					} else if (items.size() == 1) {
-						MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.One", settings), EventMessageFormatter.getEventEmbed(items.get(0), settings), event);
-					} else {
-						//List events by Id only.
-						MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
-						for (Event e: items) {
-							MessageManager.sendMessageAsync(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
-						}
-					}
-				} catch (Exception e) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-					Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-					e.printStackTrace();
-				}
-			} catch (NumberFormatException e) {
-				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Args.Value.Integer", settings), event);
-			}
-		} else {
-			MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Args.Many", settings), event);
-		}
-	}
+    private Mono<Void> moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 1) {
+                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
+                    .flatMap(data -> {
+                        long now = System.currentTimeMillis();
+                        long end = now + GlobalConst.oneDayMs;
 
-	private void moduleSearch(String[] args, MessageCreateEvent event, GuildSettings settings) {
-
-	}
-
-	@SuppressWarnings("Duplicates")
-	private void moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		if (args.length == 1) {
-			//Get the upcoming events in the next 24 hours.
-			try {
-				Calendar service = CalendarAuth.getCalendarService(settings);
-
-				DateTime now = new DateTime(System.currentTimeMillis());
-				DateTime twentyFourHoursFromNow = new DateTime(now.getValue() + 86400000L);
-				CalendarData calendarData = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
-				Events events = service.events().list(calendarData.getCalendarAddress())
-						.setMaxResults(20)
-						.setTimeMin(now)
-						.setTimeMax(twentyFourHoursFromNow)
-						.setOrderBy("startTime")
-						.setSingleEvents(true)
-						.setShowDeleted(false)
-						.execute();
-				List<Event> items = events.getItems();
-				if (items.size() == 0) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.None", settings), event);
-				} else if (items.size() == 1) {
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.One", settings), EventMessageFormatter.getEventEmbed(items.get(0), settings), event);
-				} else {
-					//List events by Id only.
-					MessageManager.sendMessageAsync(MessageManager.getMessage("Event.List.Found.Many", "%amount%", items.size() + "", settings), event);
-					for (Event e: items) {
-						MessageManager.sendMessageAsync(EventMessageFormatter.getCondensedEventEmbed(e, settings), event);
-					}
-				}
-			} catch (Exception e) {
-				MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-				Logger.getLogger().exception(event.getMember().get(), "Failed to list events.", e, true, this.getClass());
-				e.printStackTrace();
-			}
-		}
-	}
+                        return EventWrapper.getEvents(data, settings, 20, now, end).flatMap(events -> {
+                            if (events.size() == 0) {
+                                return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
+                            } else if (events.size() == 1) {
+                                return EventMessageFormatter
+                                    .getEventEmbed(events.get(0), data.getCalendarNumber(), settings).flatMap(embed ->
+                                        Messages.sendMessage(
+                                            Messages.getMessage("Event.List.Found.One", settings), embed, event));
+                            } else {
+                                return Messages.sendMessage(Messages.getMessage("Event.List.Found.Many", "%amount%",
+                                    events.size() + "", settings), event).then(Flux.fromIterable(events)
+                                    .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
+                                        .flatMap(embed -> Messages.sendMessage(embed, event))).then())
+                                    .thenReturn(GlobalConst.NOT_EMPTY);
+                            }
+                        });
+                    }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Event.List.Args.Many", settings), event);
+            }
+        }).then();
+    }
 }

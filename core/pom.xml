@@ -1,63 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<packaging>jar</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>jar</packaging>
 
-	<parent>
-		<groupId>org.dreamexposure</groupId>
-		<artifactId>DisCal</artifactId>
-		<version>3.0.0</version>
-	</parent>
+    <parent>
+        <groupId>org.dreamexposure</groupId>
+        <artifactId>DisCal</artifactId>
+        <version>${revision}</version>
+    </parent>
 
-	<groupId>org.dreamexposure.discal</groupId>
-	<artifactId>core</artifactId>
-	<version>3.0.0</version>
+    <groupId>org.dreamexposure.discal</groupId>
+    <artifactId>core</artifactId>
+    <version>${revision}</version>
 
-	<dependencies>
-		<!--Discord4J API-->
-		<dependency>
-			<groupId>com.discord4j</groupId>
-			<artifactId>discord4j-core</artifactId>
-			<version>${discord4j.version}</version>
-		</dependency>
-		<!--Discord4J Redis Stores-->
-		<dependency>
-			<groupId>com.discord4j</groupId>
-			<artifactId>stores-redis</artifactId>
-			<version>${discord4j.stores.version}</version>
-		</dependency>
-	</dependencies>
+    <dependencies>
+        <!--Discord4J API-->
+        <dependency>
+            <groupId>com.discord4j</groupId>
+            <artifactId>discord4j-core</artifactId>
+            <version>${discord4j.version}</version>
+        </dependency>
+        <!--Discord4J Redis Stores-->
+        <dependency>
+            <groupId>com.discord4j</groupId>
+            <artifactId>stores-redis</artifactId>
+            <version>${discord4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<finalName>DisCal-Core</finalName>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.1.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addClasspath>true</addClasspath>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <finalName>DisCal-Core</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven.plugin.shade.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.plugin.jar.version}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

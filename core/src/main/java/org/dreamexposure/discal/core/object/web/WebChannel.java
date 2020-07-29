@@ -1,8 +1,9 @@
 package org.dreamexposure.discal.core.object.web;
 
-import discord4j.core.object.entity.TextChannel;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
+
+import discord4j.core.object.entity.channel.TextChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -10,62 +11,59 @@ import org.json.JSONObject;
  * For Project: DisCal-Discord-Bot
  */
 public class WebChannel {
-	private long id;
-	private String name;
 
-	private boolean discalChannel;
 
-	//Getters
-	public long getId() {
-		return id;
-	}
+    public static WebChannel fromChannel(TextChannel c, GuildSettings settings) {
+        boolean dc = settings.getDiscalChannel().equalsIgnoreCase(c.getId().asString());
 
-	public String getName() {
-		return name;
-	}
+        return new WebChannel(c.getId().asLong(), c.getName(), dc);
+    }
 
-	public boolean isDiscalChannel() {
-		return discalChannel;
-	}
+    public static WebChannel fromJson(JSONObject json) {
+        long id = Long.parseLong(json.getString("id"));
+        String name = json.getString("name");
+        boolean discalChannel = json.getBoolean("discal_channel");
 
-	//Setters
-	public void setId(long _id) {
-		id = _id;
-	}
+        return new WebChannel(id, name, discalChannel);
+    }
 
-	public void setName(String _name) {
-		name = _name;
-	}
+    public static WebChannel all(GuildSettings settings) {
+        boolean dc = settings.getDiscalChannel().equalsIgnoreCase("all");
 
-	public void setDiscalChannel(boolean _dc) {
-		discalChannel = _dc;
-	}
+        return new WebChannel(0, "All Channels", dc);
+    }
 
-	//Functions
-	public WebChannel fromChannel(TextChannel c, GuildSettings settings) {
-		id = c.getId().asLong();
-		name = c.getName();
+    private final long id;
+    private final String name;
 
-		discalChannel = settings.getDiscalChannel().equalsIgnoreCase(String.valueOf(id));
+    private final boolean discalChannel;
 
-		return this;
-	}
+    private WebChannel(long id, String name, boolean discalChannel) {
+        this.id = id;
+        this.name = name;
+        this.discalChannel = discalChannel;
+    }
 
-	public JSONObject toJson() {
-		JSONObject data = new JSONObject();
+    //Getters
+    public long getId() {
+        return id;
+    }
 
-		data.put("Id", id);
-		data.put("Name", name);
-		data.put("DisCalChannel", discalChannel);
+    public String getName() {
+        return name;
+    }
 
-		return data;
-	}
+    public boolean isDiscalChannel() {
+        return discalChannel;
+    }
 
-	public WebChannel fromJson(JSONObject data) {
-		id = data.getLong("Id");
-		name = data.getString("Name");
-		discalChannel = data.getBoolean("DisCalChannel");
+    public JSONObject toJson() {
+        JSONObject data = new JSONObject();
 
-		return this;
-	}
+        data.put("id", String.valueOf(id));
+        data.put("name", name);
+        data.put("discal_channel", discalChannel);
+
+        return data;
+    }
 }

@@ -1,122 +1,111 @@
 package org.dreamexposure.discal.client.module.command;
 
-import com.google.api.services.calendar.model.Calendar;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Image;
-import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
-import org.dreamexposure.discal.client.message.MessageManager;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
+import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
 import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.rest.util.Image;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 6/16/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
-public class TimeCommand implements ICommand {
+public class TimeCommand implements Command {
 
-	/**
-	 * Gets the command this Object is responsible for.
-	 *
-	 * @return The command this Object is responsible for.
-	 */
-	@Override
-	public String getCommand() {
-		return "time";
-	}
+    /**
+     * Gets the command this Object is responsible for.
+     *
+     * @return The command this Object is responsible for.
+     */
+    @Override
+    public String getCommand() {
+        return "time";
+    }
 
-	/**
-	 * Gets the short aliases of the command this object is responsible for.
-	 * </br>
-	 * This will return an empty ArrayList if none are present
-	 *
-	 * @return The aliases of the command.
-	 */
-	@Override
-	public ArrayList<String> getAliases() {
-		return new ArrayList<>();
-	}
+    /**
+     * Gets the short aliases of the command this object is responsible for.
+     * </br>
+     * This will return an empty ArrayList if none are present
+     *
+     * @return The aliases of the command.
+     */
+    @Override
+    public ArrayList<String> getAliases() {
+        return new ArrayList<>();
+    }
 
-	/**
-	 * Gets the info on the command (not sub command) to be used in help menus.
-	 *
-	 * @return The command info.
-	 */
-	@Override
-	public CommandInfo getCommandInfo() {
-		CommandInfo info = new CommandInfo("time");
-		info.setDescription("Displays the current time for the calendar in its respective TimeZone.");
-		info.setExample("!time");
-		return info;
-	}
+    /**
+     * Gets the info on the command (not sub command) to be used in help menus.
+     *
+     * @return The command info.
+     */
+    @Override
+    public CommandInfo getCommandInfo() {
+        return new CommandInfo(
+            "time",
+            "Displays the current time for the calendar in its respective TimeZone.",
+            "!time"
+        );
+    }
 
-	/**
-	 * Issues the command this Object is responsible for.
-	 *
-	 * @param args     The command arguments.
-	 * @param event    The event received.
-	 * @param settings The guild settings.
-	 * @return <code>true</code> if successful, else <code>false</code>.
-	 */
-	@Override
-	public boolean issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-		calendarTime(event, settings);
-		return false;
-	}
+    /**
+     * Issues the command this Object is responsible for.
+     *
+     * @param args     The command arguments.
+     * @param event    The event received.
+     * @param settings The guild settings.
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
+    @Override
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return calendarTime(event, settings);
+    }
 
-	private void calendarTime(MessageCreateEvent event, GuildSettings settings) {
-		try {
-			//TODO: Handle multiple calendars...
-			CalendarData data = DatabaseManager.getManager().getMainCalendar(event.getGuild().block().getId());
+    //TODO: Support multiple calendars
+    private Mono<Void> calendarTime(MessageCreateEvent event, GuildSettings settings) {
+        return DatabaseManager.getMainCalendar(settings.getGuildID())
+            .flatMap(calData ->
+                CalendarWrapper.getCalendar(calData, settings).flatMap(cal -> {
+                    LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
+                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+                    String correctTime = fmt.format(ldt);
 
-			if (data.getCalendarAddress().equalsIgnoreCase("primary")) {
-				//Does not have a calendar.
-				MessageManager.sendMessageAsync(MessageManager.getMessage("Creator.Calendar.NoCalendar", settings), event);
-			} else {
-				Calendar cal = CalendarAuth.getCalendarService(settings).calendars().get(data.getCalendarAddress()).execute();
+                    return event.getGuild().flatMap(guild ->
+                        Messages.sendMessage(embed -> {
+                            if (settings.isBranded()) {
+                                embed.setAuthor(guild.getName(), GlobalConst.discalSite,
+                                    guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                            } else {
+                                embed.setAuthor("DisCal", GlobalConst.discalSite,
+                                    GlobalConst.iconUrl);
+                            }
 
-				LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
+                            embed.setTitle(Messages.getMessage("Embed.Time.Title", settings));
 
-				//Okay... format and then we can go from there...
-				DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
-				String thisIsTheCorrectTime = format.format(ldt);
+                            embed.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false);
 
-				//Build embed and send.
-				Consumer<EmbedCreateSpec> embed = spec -> {
-					Guild guild = event.getGuild().block();
+                            embed.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
-					if (settings.isBranded() && guild != null)
-						spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
-					else
-						spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            embed.setFooter(Messages.getMessage("Embed.Time.Footer", settings), null);
+                            embed.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calData.getCalendarNumber()));
 
-					spec.setTitle(MessageManager.getMessage("Embed.Time.Title", settings));
-					spec.addField(MessageManager.getMessage("Embed.Time.Time", settings), thisIsTheCorrectTime, false);
-					spec.addField(MessageManager.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
-
-					spec.setFooter(MessageManager.getMessage("Embed.Time.Footer", settings), null);
-					spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
-					spec.setColor(GlobalConst.discalColor);
-				};
-				MessageManager.sendMessageAsync(embed, event);
-			}
-		} catch (Exception e) {
-			Logger.getLogger().exception(event.getMember().get(), "Failed to connect to Google Cal.", e, true, this.getClass());
-			MessageManager.sendMessageAsync(MessageManager.getMessage("Notification.Error.Unknown", settings), event);
-		}
-	}
+                            embed.setColor(GlobalConst.discalColor);
+                        }, event));
+                }))
+            .switchIfEmpty(Messages.sendMessage(
+                Messages.getMessage("Creator.Calendar.NoCalendar", settings), event))
+            .then();
+    }
 }

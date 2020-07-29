@@ -2,7 +2,8 @@ package org.dreamexposure.discal.core.utils;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -11,84 +12,42 @@ import discord4j.core.object.entity.TextChannel;
  */
 @SuppressWarnings("ConstantConditions")
 public class ChannelUtils {
-	/**
-	 * Checks if the specified channel exists.
-	 *
-	 * @param nameOrId The channel name or ID.
-	 * @param event    The event received.
-	 * @return <code>true</code> if exists, else <code>false</code>.
-	 */
-	public static boolean channelExists(String nameOrId, MessageCreateEvent event) {
-		if (nameOrId.contains("#"))
-			nameOrId = nameOrId.replace("#", "");
+    public static Mono<Boolean> channelExists(String nameOrId, MessageCreateEvent event) {
+        final String name = nameOrId.replace("#", "");
+        return event.getGuild()
+            .flatMapMany(Guild::getChannels)
+            .ofType(TextChannel.class)
+            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .hasElements();
+    }
 
-		for (TextChannel c : event.getGuild().block().getChannels().ofType(TextChannel.class).toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
-				return true;
-		}
-		return false;
-	}
+    public static Mono<Boolean> channelExists(String nameOrId, Guild guild) {
+        final String name = nameOrId.replace("#", "");
+        return guild.getChannels()
+            .ofType(TextChannel.class)
+            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .hasElements();
+    }
 
-	public static boolean channelExists(String nameOrId, Guild guild) {
-		if (nameOrId.contains("#"))
-			nameOrId = nameOrId.replace("#", "");
+    public static Mono<TextChannel> getChannelFromNameOrId(String nameOrId, MessageCreateEvent event) {
+        final String name = nameOrId.replace("#", "");
+        return event.getGuild()
+            .flatMapMany(Guild::getChannels)
+            .ofType(TextChannel.class)
+            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .next();
+    }
 
-		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
-				return true;
-		}
-		return false;
-	}
+    public static Mono<TextChannel> getChannelFromNameOrId(String nameOrId, Guild guild) {
+        final String name = nameOrId.replace("#", "");
+        return guild.getChannels()
+            .ofType(TextChannel.class)
+            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .next();
+    }
 
-	/**
-	 * Gets the IChannel from its name.
-	 *
-	 * @param nameOrId The channel name or ID.
-	 * @param event    The event received.
-	 * @return the IChannel if successful, else <code>null</code>.
-	 */
-	public static TextChannel getChannelFromNameOrId(String nameOrId, MessageCreateEvent event) {
-		if (nameOrId.contains("#"))
-			nameOrId = nameOrId.replace("#", "");
-
-		for (TextChannel c : event.getGuild().block().getChannels().ofType(TextChannel.class).toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
-				return c;
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the IChannel from its name.
-	 *
-	 * @param nameOrId The channel name or ID.
-	 * @return the IChannel if successful, else <code>null</code>.
-	 */
-	public static TextChannel getChannelFromNameOrId(String nameOrId, Guild guild) {
-		if (nameOrId.contains("#"))
-			nameOrId = nameOrId.replace("#", "");
-
-		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
-				return c;
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the IChannel from its name.
-	 *
-	 * @param nameOrId The channel name or ID.
-	 * @return the IChannel if successful, else <code>null</code>.
-	 */
-	public static String getChannelNameFromNameOrId(String nameOrId, Guild guild) {
-		if (nameOrId.contains("#"))
-			nameOrId = nameOrId.replace("#", "");
-
-		for (TextChannel c : guild.getChannels().ofType(TextChannel.class).toIterable()) {
-			if (c.getName().equalsIgnoreCase(nameOrId) || c.getId().asString().equals(nameOrId))
-				return c.getName();
-		}
-		return "ERROR";
-	}
+    public static Mono<String> getChannelNameFromNameOrId(String nameOrId, Guild guild) {
+        return getChannelFromNameOrId(nameOrId, guild)
+            .map(TextChannel::getName);
+    }
 }

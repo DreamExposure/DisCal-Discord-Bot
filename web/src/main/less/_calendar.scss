@@ -1,0 +1,26 @@
+@import "variables";
+
+.cal-date {
+  width: 80px;
+  height: 80px;
+}
+
+.cal-date:hover {
+  background-color: $discal-red;
+}
+
+.cal-date.today {
+  background-color: $discord-blurple;
+}
+
+.cal-date.selected {
+  background-color: $discord-greyple;
+}
+
+.cal-nav {
+  text-align: center;
+}
+
+.event-view-btn {
+  margin: 0 auto;
+}

@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.core.object.event;
 
-import discord4j.core.object.util.Snowflake;
+import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+import discord4j.common.util.Snowflake;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -10,48 +10,66 @@ import javax.annotation.Nullable;
  * For Project: DisCal-Discord-Bot
  */
 public class EventData {
-	private final Snowflake guildId;
+    public static EventData fromJson(JSONObject json) {
+        return new EventData(
+                Snowflake.of(json.getString("guild_id")),
+                json.getString("event_id"),
+                json.getLong("event_end"),
+                json.getString("image_link")
+        );
+    }
 
-	private String eventId;
-	private long eventEnd;
-	private String imageLink;
+    public static EventData fromImage(Snowflake guildId, String eventId, long eventEnd,
+                                      String imageLink) {
+        return new EventData(guildId, eventId, eventEnd, imageLink);
+    }
 
-	public EventData(Snowflake _guildId) {
-		guildId = _guildId;
-	}
+    public static EventData empty() {
+        return new EventData(Snowflake.of(0), "", 0, "");
+    }
 
-	//Getters
-	public Snowflake getGuildId() {
-		return guildId;
-	}
+    private final Snowflake guildId;
+    private final String eventId;
+    private final long eventEnd;
+    private final String imageLink;
 
-	public String getEventId() {
-		return eventId;
-	}
+    private EventData(Snowflake guildId, String eventId, long eventEnd, String imageLink) {
+        this.guildId = guildId;
+        this.eventId = eventId;
+        this.eventEnd = eventEnd;
+        this.imageLink = imageLink;
+    }
 
-	public long getEventEnd() {
-		return eventEnd;
-	}
+    //Getters
+    public Snowflake getGuildId() {
+        return guildId;
+    }
 
-	public String getImageLink() {
-		return imageLink;
-	}
+    public String getEventId() {
+        return eventId;
+    }
 
-	//Setters
-	public void setEventId(String _eventId) {
-		eventId = _eventId;
-	}
+    public long getEventEnd() {
+        return eventEnd;
+    }
 
-	public void setEventEnd(long _eventEnd) {
-		eventEnd = _eventEnd;
-	}
+    public String getImageLink() {
+        return imageLink;
+    }
 
-	public void setImageLink(@Nullable String _link) {
-		imageLink = _link;
-	}
+    //Boolean/Checkers
+    public boolean shouldBeSaved() {
+        return !imageLink.isEmpty();
+    }
 
-	//Boolean/Checkers
-	public boolean shouldBeSaved() {
-		return imageLink != null;
-	}
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+
+        json.put("guild_id", guildId.asString());
+        json.put("event_id", eventId);
+        json.put("event_end", eventEnd);
+        json.put("image_link", imageLink);
+
+        return json;
+    }
 }

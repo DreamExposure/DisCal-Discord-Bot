@@ -13,31 +13,31 @@ import java.util.TimerTask;
  * For Project: DisCal-Discord-Bot
  */
 public class UpdateDisBotData {
-	private static DiscordBotListAPI api;
-	private static Timer timer;
+    private static DiscordBotListAPI api;
+    private static Timer timer;
 
-	public static void init() {
-		if (BotSettings.UPDATE_SITES.get().equalsIgnoreCase("true")) {
+    public static void init() {
+        if (BotSettings.UPDATE_SITES.get().equalsIgnoreCase("true")) {
 
-			api = new DiscordBotListAPI.Builder().token(BotSettings.DBO_TOKEN.get()).build();
+            api = new DiscordBotListAPI.Builder().token(BotSettings.DBO_TOKEN.get()).build();
 
-			timer = new Timer(true);
-			timer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					updateStats();
-				}
-			}, 60 * 60 * 1000);
-		}
-	}
+            timer = new Timer(true);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    updateStats();
+                }
+            }, 60 * 60 * 1000);
+        }
+    }
 
-	public static void shutdown() {
-		if (timer != null)
-			timer.cancel();
-	}
+    public static void shutdown() {
+        if (timer != null)
+            timer.cancel();
+    }
 
-	private static void updateStats() {
-		if (api != null)
-			api.setStats(BotSettings.ID.get(), DisCalServer.getNetworkInfo().getTotalGuildCount());
-	}
+    private static void updateStats() {
+        if (api != null)
+            api.setStats(BotSettings.ID.get(), DisCalServer.getNetworkInfo().getTotalGuildCount());
+    }
 }

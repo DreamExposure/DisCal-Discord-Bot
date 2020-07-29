@@ -1,13 +1,14 @@
 package org.dreamexposure.discal.core.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Nova Fox on 3/29/2017.
@@ -17,59 +18,52 @@ import java.util.List;
 @SuppressWarnings("ConstantConditions")
 public class UserUtils {
 
-	public static Snowflake getUser(String toLookFor, Message m) {
-		return getUser(toLookFor, m.getGuild().block());
-	}
+    public static Mono<Snowflake> getUserId(String toLookFor, Message m) {
+        return m.getGuild().flatMap(g -> getUserId(toLookFor, g));
+    }
 
-	/**
-	 * Grabs a user from a string
-	 *
-	 * @param toLookFor The String to look with
-	 * @param guild     The guild
-	 * @return The user if found, null otherwise
-	 */
-	public static Snowflake getUser(String toLookFor, Guild guild) {
-		toLookFor = GeneralUtils.trim(toLookFor);
-		final String lower = toLookFor.toLowerCase();
-		if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
-			Member exists = guild.getMemberById(Snowflake.of(Long.parseLong(toLookFor.replaceAll("[<@!>]", "")))).onErrorResume(e -> Mono.empty()).block();
-			if (exists != null)
-				return exists.getId();
-		}
+    public static Mono<Snowflake> getUserId(String toLookFor, Guild guild) {
+        return getUser(toLookFor, guild).map(Member::getId);
+    }
 
+    public static Mono<Member> getUser(String toLookFor, Guild guild) {
+        if (toLookFor.isEmpty())
+            return Mono.empty();
 
-		List<Member> users = new ArrayList<>();
+        toLookFor = GeneralUtils.trim(toLookFor);
+        final String lower = toLookFor.toLowerCase();
+        if (lower.matches("@!?[0-9]+") || lower.matches("[0-9]+")) {
+            return guild.getMemberById(Snowflake.of(Long.parseLong(lower.replaceAll("[<@!>]", ""))))
+                .onErrorResume(e -> Mono.empty()); //User not found, we don't care about the error in this case.
+        }
 
-		users.addAll(guild.getMembers().filter(m -> m.getUsername().equalsIgnoreCase(lower)).collectList().block());
-		users.addAll(guild.getMembers().filter(m -> m.getUsername().toLowerCase().contains(lower)).collectList().block());
-		users.addAll(guild.getMembers().filter(m -> (m.getUsername() + "#" + m.getDiscriminator()).equalsIgnoreCase(lower)).collectList().block());
-		users.addAll(guild.getMembers().filter(m -> m.getDiscriminator().equalsIgnoreCase(lower)).collectList().block());
-		users.addAll(guild.getMembers().filter(m -> m.getDisplayName().equalsIgnoreCase(lower)).collectList().block());
-		users.addAll(guild.getMembers().filter(m -> m.getDisplayName().toLowerCase().contains(lower)).collectList().block());
+        return guild.getMembers()
+            .filter(m ->
+                m.getUsername().equalsIgnoreCase(lower)
+                    || m.getUsername().toLowerCase().contains(lower)
+                    || (m.getUsername() + "#" + m.getDiscriminator()).equalsIgnoreCase(lower)
+                    || m.getDiscriminator().equalsIgnoreCase(lower)
+                    || m.getDisplayName().equalsIgnoreCase(lower)
+                    || m.getDisplayName().toLowerCase().contains(lower)
+            )
+            .next()
+            .onErrorResume(e -> Mono.empty()); //User not found, we don't care about the error in this case.
+    }
 
+    public static Mono<Member> getUserFromID(String id, Guild guild) {
+        return Mono.just(id)
+            .filter(s -> !s.isEmpty())
+            .filter(s -> s.matches("[0-9]+"))
+            .flatMap(s -> guild.getMemberById(Snowflake.of(s))
+                .onErrorResume(e -> Mono.empty()));
+    }
 
-		if (!users.isEmpty())
-			return users.get(0).getId();
-
-		return null;
-	}
-
-	private static Member getUserFromID(String id, Guild guild) {
-		try {
-			return guild.getMemberById(Snowflake.of(Long.parseUnsignedLong(id))).block();
-		} catch (Exception e) {
-			//Ignore. Probably invalid ID.
-			return null;
-		}
-	}
-
-	public static ArrayList<Member> getUsers(ArrayList<String> userIds, Guild guild) {
-		ArrayList<Member> users = new ArrayList<>();
-		for (String u : userIds) {
-			Member user = getUserFromID(u, guild);
-			if (user != null)
-				users.add(user);
-		}
-		return users;
-	}
+    public static Mono<List<Member>> getUsers(ArrayList<String> userIds, Guild guild) {
+        return Flux.fromIterable(userIds)
+            .filter(s -> !s.isEmpty())
+            .filter(s -> s.matches("[0-9]+"))
+            .flatMap(s -> getUserFromID(s, guild)
+                .onErrorResume(e -> Mono.empty()))
+            .collectList();
+    }
 }

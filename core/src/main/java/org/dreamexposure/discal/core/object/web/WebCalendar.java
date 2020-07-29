@@ -1,10 +1,12 @@
 package org.dreamexposure.discal.core.object.web;
 
 import com.google.api.services.calendar.model.Calendar;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
-import org.dreamexposure.discal.core.logger.Logger;
+
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
 
 /**
@@ -13,127 +15,109 @@ import org.json.JSONObject;
  * For Project: DisCal-Discord-Bot
  */
 public class WebCalendar {
-	private String id;
-	private String address;
-	private String link;
-	private String name;
-	private String description;
-	private String timezone;
 
-	private boolean external;
+    public static WebCalendar fromCalendar(CalendarData cd, GuildSettings gs) {
+        if (cd.getCalendarAddress().equalsIgnoreCase("primary")) {
+            return new WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false);
+        } else {
+            String id = cd.getCalendarId();
+            String address = cd.getCalendarAddress();
+            String link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
 
-	//Getters
-	public String getId() {
-		return id;
-	}
+            String name;
+            String description;
+            String timezone;
+            try {
+                Calendar cal = CalendarWrapper.getCalendar(cd, gs).block();
+                name = cal.getSummary();
+                description = cal.getDescription();
+                timezone = cal.getTimeZone().replaceAll("/", "___");
+            } catch (Exception e) {
+                LogFeed.log(LogObject.
+                        forException("[WEB] Failed to get calendar!", e, WebCalendar.class));
+                name = "ERROR!";
+                description = "ERROR";
+                timezone = "ERROR";
+            }
+            return new WebCalendar(id, address, link, name, description, timezone, cd.isExternal());
+        }
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public static WebCalendar fromJson(JSONObject data) {
+        String id = data.getString("id");
+        String address = data.getString("address");
+        String link = data.getString("link");
+        String name = data.getString("name");
+        String description = "";
+        if (data.has("description"))
+            description = data.getString("description");
+        String timezone = data.getString("timezone");
+        boolean external = data.getBoolean("external");
 
-	public String getLink() {
-		return link;
-	}
+        return new WebCalendar(id, address, link, name, description, timezone, external);
+    }
 
-	public String getName() {
-		return name;
-	}
+    private final String id;
+    private final String address;
+    private final String link;
+    private final String name;
+    private final String description;
+    private final String timezone;
+    private final boolean external;
 
-	public String getDescription() {
-		return description;
-	}
+    private WebCalendar(String id, String address, String link, String name, String description,
+                        String timezone, boolean external) {
+        this.id = id;
+        this.address = address;
+        this.link = link;
+        this.name = name;
+        this.description = description;
+        this.timezone = timezone;
+        this.external = external;
+    }
 
-	public String getTimezone() {
-		return timezone;
-	}
+    //Getters
+    public String getId() {
+        return id;
+    }
 
-	public boolean isExternal() {
-		return external;
-	}
+    public String getAddress() {
+        return address;
+    }
 
-	//Setters
-	public void setId(String _id) {
-		id = _id;
-	}
+    public String getLink() {
+        return link;
+    }
 
-	public void setAddress(String _address) {
-		address = _address;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setLink(String _link) {
-		link = _link;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setName(String _name) {
-		name = _name;
-	}
+    public String getTimezone() {
+        return timezone;
+    }
 
-	public void setDescription(String _desc) {
-		description = _desc;
-	}
+    public boolean isExternal() {
+        return external;
+    }
 
-	public void setTimezone(String _tz) {
-		timezone = _tz;
-	}
+    //Functions
+    public JSONObject toJson() {
+        JSONObject data = new JSONObject();
 
-	public void setExternal(boolean _ext) {
-		external = _ext;
-	}
+        data.put("id", id);
+        data.put("address", address);
+        data.put("link", link);
+        data.put("name", name);
+        if (description != null)
+            data.put("description", description);
+        data.put("timezone", timezone);
+        data.put("external", external);
 
-	//Functions
-	public WebCalendar fromCalendar(CalendarData cd, GuildSettings gs) {
-		if (cd.getCalendarAddress().equalsIgnoreCase("primary")) {
-			id = "primary";
-			address = "primary";
-			link = "N/a";
-			name = "N/a";
-			description = "N/a";
-			timezone = "N/a";
-		} else {
-			id = cd.getCalendarId();
-			address = cd.getCalendarAddress();
-			link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
-			external = cd.isExternal();
-			try {
-				Calendar cal = CalendarAuth.getCalendarService(gs).calendars().get(id).execute();
-				name = cal.getSummary();
-				description = cal.getDescription();
-				timezone = cal.getTimeZone().replaceAll("/", "___");
-			} catch (Exception e) {
-				Logger.getLogger().exception(null, "[WEB] Failed to get calendar!", e, true, this.getClass());
-				name = "ERROR!";
-				description = "ERROR";
-				timezone = "ERROR";
-			}
-		}
-		return this;
-	}
-
-	public JSONObject toJson() {
-		JSONObject data = new JSONObject();
-
-		data.put("Id", id);
-		data.put("Address", address);
-		data.put("Link", link);
-		data.put("Name", name);
-		if (description != null)
-			data.put("Description", description);
-		data.put("Timezone", timezone);
-		data.put("External", external);
-
-		return data;
-	}
-
-	public WebCalendar fromJson(JSONObject data) {
-		id = data.getString("Id");
-		address = data.getString("Address");
-		link = data.getString("Link");
-		name = data.getString("Name");
-		if (data.has("Description"))
-			description = data.getString("Description");
-		timezone = data.getString("Timezone");
-		external = data.getBoolean("External");
-
-		return this;
-	}
+        return data;
+    }
 }

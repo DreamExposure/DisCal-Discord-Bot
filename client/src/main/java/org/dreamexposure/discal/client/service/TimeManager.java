@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.service;
 import org.dreamexposure.discal.client.module.misc.StatusChanger;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 
 /**
@@ -11,48 +12,48 @@ import java.util.Timer;
  * For Project: DisCal
  */
 public class TimeManager {
-	private static TimeManager instance;
+    private static TimeManager instance;
 
-	private final ArrayList<Timer> timers = new ArrayList<>();
+    private final List<Timer> timers = new ArrayList<>();
 
-	private TimeManager() {
-	} //Prevent initialization
+    private TimeManager() {
+    } //Prevent initialization
 
-	/**
-	 * Gets the instance of the TimeManager that is loaded.
-	 *
-	 * @return The instance of the TimeManager.
-	 */
-	public static TimeManager getManager() {
-		if (instance == null)
-			instance = new TimeManager();
+    /**
+     * Gets the instance of the TimeManager that is loaded.
+     *
+     * @return The instance of the TimeManager.
+     */
+    public static TimeManager getManager() {
+        if (instance == null)
+            instance = new TimeManager();
 
-		return instance;
-	}
+        return instance;
+    }
 
-	/**
-	 * Initializes the TimeManager and schedules the appropriate Timers.
-	 */
-	public void init() {
-		Timer timer = new Timer(true);
-		timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-		timers.add(timer);
+    /**
+     * Initializes the TimeManager and schedules the appropriate Timers.
+     */
+    public void init() {
+        Timer timer = new Timer(true);
+        timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
+        timers.add(timer);
 
-		//Timer at = new Timer(true);
-		//at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
-		//timers.add(at);
+        //Timer at = new Timer(true);
+        //at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
+        //timers.add(at);
 
-		Timer cc = new Timer(true);
-		cc.schedule(new CreatorCleaner(), 60 * 1000 * 60, 60 * 1000 * 60);
-		timers.add(cc);
-	}
+        Timer cc = new Timer(true);
+        cc.schedule(new CreatorCleaner(), 60 * 1000 * 60, 60 * 1000 * 60);
+        timers.add(cc);
+    }
 
-	/**
-	 * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
-	 */
-	void shutdown() {
-		for (Timer t: timers) {
-			t.cancel();
-		}
-	}
+    /**
+     * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
+     */
+    public void shutdown() {
+        for (Timer t : timers) {
+            t.cancel();
+        }
+    }
 }

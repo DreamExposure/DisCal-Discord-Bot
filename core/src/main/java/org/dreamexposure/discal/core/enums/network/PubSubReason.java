@@ -9,5 +9,5 @@ package org.dreamexposure.discal.core.enums.network;
  * Contact: nova@dreamexposure.org
  */
 public enum PubSubReason {
-	UPDATE, GET, CREATE, DELETE, RELOAD, HANDLE
+    UPDATE, GET, CREATE, DELETE, RELOAD, HANDLE
 }

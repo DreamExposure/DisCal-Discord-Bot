@@ -1,145 +1,163 @@
 package org.dreamexposure.discal.core.utils;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
-import discord4j.core.object.util.Permission;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.Logger;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
+
+import java.util.function.Predicate;
+
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/19/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings({"ConstantConditions", "OptionalGetWithoutIsPresent"})
 public class PermissionChecker {
-	/**
-	 * Checks if the user who sent the received message has the proper role to use a command.
-	 *
-	 * @param event The Event received to check for the user and guild.
-	 * @return <code>true</code> if the user has the proper role, otherwise <code>false</code>.
-	 */
-	public static boolean hasSufficientRole(MessageCreateEvent event) {
-		//TODO: Figure out exactly what is causing a NPE here...
-		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().block().getId());
-			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
-				User sender = event.getMessage().getAuthor().get();
-				String roleId = settings.getControlRole();
-				Role role = null;
+    public static Mono<Boolean> hasDisCalRole(MessageCreateEvent event, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
 
-				for (Role r : event.getMessage().getGuild().block().getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
-						role = r;
-						break;
-					}
-				}
+        Mono<Member> member = Mono.justOrEmpty(event.getMember());
 
-				if (role != null) {
-					for (Role r : event.getGuild().block().getMemberById(sender.getId()).block().getRoles().toIterable()) {
-						if (r.getId().asString().equals(role.getId().asString()) || r.getPosition().block() > role.getPosition().block())
-							return true;
+        //User doesn't need bot control role if they have admin permissions.
+        return member.flatMap(Member::getBasePermissions)
+                .map(perms ->
+                        perms.contains(Permission.ADMINISTRATOR)
+                                || perms.contains(Permission.MANAGE_GUILD)
+                ).flatMap(hasAdmin -> {
+                    if (hasAdmin) {
+                        return Mono.just(true);
+                    } else {
+                        return member.flatMapMany(Member::getRoles)
+                                .map(Role::getId)
+                                .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+                    }
+                });
+    }
 
-					}
-					return false;
-				} else {
-					//Role not found... reset Db...
-					settings.setControlRole("everyone");
-					DatabaseManager.getManager().updateSettings(settings);
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			//Something broke so we will harmlessly allow access and alert the dev.
-			Logger.getLogger().exception(event.getMessage().getAuthor().get(), "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
-			return true;
-		}
-		return true;
-	}
+    public static Mono<Boolean> hasDisCalRole(Member member, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
 
-	public static boolean hasSufficientRole(Guild guild, User user) {
-		//TODO: Figure out exactly what is causing a NPE here...
-		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(guild.getId());
-			if (!settings.getControlRole().equalsIgnoreCase("everyone")) {
-				String roleId = settings.getControlRole();
-				Role role = null;
+        //User doesn't need bot control role if they have admin permissions.
+        Mono<Boolean> hasAdmin = Mono.just(member).flatMap(Member::getBasePermissions).map(perms ->
+                perms.contains(Permission.ADMINISTRATOR) || perms.contains(Permission.MANAGE_GUILD));
 
-				for (Role r : guild.getRoles().toIterable()) {
-					if (r.getId().asString().equals(roleId)) {
-						role = r;
-						break;
-					}
-				}
+        return hasAdmin.flatMap(has -> {
+            if (has) {
+                return Mono.just(true);
+            } else {
+                return Mono.just(member).flatMapMany(Member::getRoles)
+                        .map(Role::getId)
+                        .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+            }
+        });
+    }
 
-				if (role != null) {
-					for (Role r : guild.getMemberById(user.getId()).block().getRoles().toIterable()) {
-						if (r.getId().equals(role.getId()) || r.getPosition().block() > role.getPosition().block())
-							return true;
+    @Deprecated
+    public static Mono<Boolean> hasSufficientRole(MessageCreateEvent event, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
 
-					}
-					return false;
-				} else {
-					//Role not found... reset Db...
-					settings.setControlRole("everyone");
-					DatabaseManager.getManager().updateSettings(settings);
-					return true;
-				}
-			}
-		} catch (Exception e) {
-			//Something broke so we will harmlessly allow access and notify the dev team
-			Logger.getLogger().exception(user, "Failed to check for sufficient control role.", e, true, PermissionChecker.class);
-			return true;
-		}
-		return true;
-	}
+        return Mono.justOrEmpty(event.getMember())
+                .flatMapMany(Member::getRoles)
+                .map(Role::getId)
+                .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())));
+    }
 
-	public static boolean hasManageServerRole(MessageCreateEvent event) {
-		return event.getMessage().getAuthor().get().asMember(event.getGuildId().get()).block().getBasePermissions().block().contains(Permission.MANAGE_GUILD);
-	}
+    @Deprecated
+    public static Mono<Boolean> hasSufficientRole(Member member, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
 
-	public static boolean hasManageServerRole(Member m) {
-		return m.getBasePermissions().block().contains(Permission.MANAGE_GUILD);
-	}
+        return Mono.from(member.getRoles()
+                .map(Role::getId)
+                .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())))
+        );
+    }
 
-	/**
-	 * Checks if the user sent the command in a DisCal channel (if set).
-	 *
-	 * @param event The event received to check for the correct channel.
-	 * @return <code>true</code> if in correct channel, otherwise <code>false</code>.
-	 */
-	public static boolean isCorrectChannel(MessageCreateEvent event) {
-		try {
-			GuildSettings settings = DatabaseManager.getManager().getSettings(event.getGuild().block().getId());
-			if (settings.getDiscalChannel().equalsIgnoreCase("all"))
-				return true;
+    public static Mono<Boolean> hasSufficientRole(RestMember member, GuildSettings settings) {
+        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+            return Mono.just(true);
+        if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
+            return Mono.just(true);
 
+        return member.getData()
+                .map(MemberData::roles)
+                .map(roles -> roles.contains(settings.getControlRole()));
+    }
 
-			GuildChannel channel = null;
-			for (GuildChannel c : event.getMessage().getGuild().block().getChannels().toIterable()) {
-				if (c.getId().asString().equals(settings.getDiscalChannel())) {
-					channel = c;
-					break;
-				}
-			}
+    public static Mono<Boolean> hasManageServerRole(MessageCreateEvent event) {
+        return Mono.justOrEmpty(event.getMember())
+                .flatMap(Member::getBasePermissions)
+                .map(perms -> perms.contains(Permission.MANAGE_GUILD)
+                        || perms.contains(Permission.ADMINISTRATOR))
+                .defaultIfEmpty(false);
+    }
 
-			if (channel != null)
-				return event.getMessage().getChannel().block().getId().equals(channel.getId());
+    public static Mono<Boolean> hasManageServerRole(Member m) {
+        return m.getBasePermissions()
+                .map(perms -> perms.contains(Permission.MANAGE_GUILD)
+                        || perms.contains(Permission.ADMINISTRATOR)
+                );
+    }
 
+    public static Mono<Boolean> hasManageServerRole(RestMember m, RestGuild g) {
+        return hasPermissions(m, g, permissions ->
+                permissions.contains(Permission.MANAGE_GUILD)
+                        || permissions.contains(Permission.ADMINISTRATOR));
+    }
 
-			//If we got here, the channel no longer exists, reset data and return true.
-			settings.setDiscalChannel("all");
-			DatabaseManager.getManager().updateSettings(settings);
-			return true;
-		} catch (Exception e) {
-			//Catch any errors so that the bot always responds...
-			Logger.getLogger().exception(event.getMember().get(), "Failed to check for discal channel.", e, true, PermissionChecker.class);
-			return true;
-		}
-	}
+    public static Mono<Boolean> hasPermissions(RestMember m, RestGuild g,
+                                               Predicate<PermissionSet> pred) {
+        return m.getData().flatMap(memberData ->
+                g.getData().map(GuildUpdateData::roles)
+                        .flatMapMany(Flux::fromIterable)
+                        .filter(roleData -> memberData.roles().contains(roleData.id()))
+                        .map(RoleData::permissions)
+                        .reduce(0L, (perm, accumulator) -> accumulator | perm)
+                        .map(PermissionSet::of)
+                        .map(pred::test)
+        );
+    }
 
-	public static boolean botHasMessageManagePerms(MessageCreateEvent event) {
-		return event.getGuild().flatMap(guild -> guild.getMemberById(event.getClient().getSelfId().get())).block().getBasePermissions().block().contains(Permission.MANAGE_MESSAGES);
-	}
+    public static Mono<Boolean> isCorrectChannel(MessageCreateEvent event, GuildSettings settings) {
+        if (settings.getDiscalChannel().equalsIgnoreCase("all"))
+            return Mono.just(true);
+
+        return Mono.from(event.getMessage().getChannel()
+                .map(Channel::getId)
+                .map(snowflake -> snowflake.equals(Snowflake.of(settings.getDiscalChannel())))
+                .onErrorResume(e -> Mono.just(true)) //If channel not found, allow.
+        );
+    }
+
+    public static Mono<Boolean> botHasMessageManagePerms(MessageCreateEvent event) {
+        return event.getGuild()
+                .flatMap(guild -> guild.getMemberById(Snowflake.of(BotSettings.ID.get()))
+                        .flatMap(Member::getBasePermissions)
+                        .map(perms -> perms.contains(Permission.MANAGE_MESSAGES))
+                );
+    }
 }

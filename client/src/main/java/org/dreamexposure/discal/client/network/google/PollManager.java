@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.client.network.google;
 
+import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException;
 import org.dreamexposure.discal.core.object.network.google.Poll;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.time.Duration;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -11,31 +13,29 @@ import java.util.TimerTask;
  * For Project: DisCal-Discord-Bot
  */
 public class PollManager {
-	private static PollManager instance;
+    static {
+        instance = new PollManager();
+    }
 
-	private Timer timer;
+    private final static PollManager instance;
 
-	//Prevent initialization.
-	private PollManager() {
-		//Use daemon because this is a util timer and there is no reason to keep the program running when this is polling Google, just assume it timed out and re-auth if all else fails.
-		timer = new Timer(true);
-	}
+    //Prevent initialization.
+    private PollManager() {
+    }
 
-	public static PollManager getManager() {
-		if (instance == null)
-			instance = new PollManager();
+    public static PollManager getManager() {
+        return instance;
+    }
 
-		return instance;
-	}
-
-	//Timer methods.
-	void scheduleNextPoll(Poll poll) {
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
-				GoogleExternalAuth.getAuth().pollForAuth(poll);
-			}
-		}, 1000 * poll.getInterval());
-	}
+    //Timer methods.
+    public void scheduleNextPoll(Poll poll) {
+        Mono.defer(() -> {
+            poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
+            return GoogleExternalAuth.getAuth().pollForAuth(poll);
+        }).then(Mono.defer(() -> Mono.delay(Duration.ofSeconds(poll.getInterval()))))
+            .repeat()
+            .then()
+            .onErrorResume(GoogleAuthCancelException.class, e -> Mono.empty())
+            .subscribe();
+    }
 }

@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -12,64 +14,129 @@ import java.util.Date;
  * Contact: nova@dreamexposure.org
  */
 public class ConnectedClient {
-	private final int clientIndex;
+    private int clientIndex;
 
-	private int connectedServers;
-	private long lastKeepAlive;
-	private String uptime;
-	private double memUsed;
+    private int connectedServers;
+    private long lastKeepAlive;
+    private String uptime;
+    private double memUsed;
 
-	public ConnectedClient(int _clientIndex) {
-		clientIndex = _clientIndex;
+    //This stuff doesn't get published
+    private String ipForRestart;
+    private int portForRestart;
+    private String pid;
 
-		connectedServers = 0;
-		lastKeepAlive = System.currentTimeMillis();
+    public ConnectedClient() {
+        clientIndex = -1;
 
-		uptime = "ERROR";
-		memUsed = 0;
-	}
+        connectedServers = 0;
+        lastKeepAlive = System.currentTimeMillis();
 
-	//Getters
-	public int getClientIndex() {
-		return clientIndex;
-	}
+        uptime = "ERROR";
+        memUsed = 0;
+    }
 
-	public int getConnectedServers() {
-		return connectedServers;
-	}
+    public ConnectedClient(int _clientIndex) {
+        clientIndex = _clientIndex;
 
-	public long getLastKeepAlive() {
-		return lastKeepAlive;
-	}
+        connectedServers = 0;
+        lastKeepAlive = System.currentTimeMillis();
 
-	public String getLastKeepAliveHumanReadable() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        uptime = "ERROR";
+        memUsed = 0;
+    }
 
-		return sdf.format(new Date(lastKeepAlive));
-	}
+    //Getters
+    public int getClientIndex() {
+        return clientIndex;
+    }
 
-	public String getUptime() {
-		return uptime;
-	}
+    public int getConnectedServers() {
+        return connectedServers;
+    }
 
-	public double getMemUsed() {
-		return memUsed;
-	}
+    public long getLastKeepAlive() {
+        return lastKeepAlive;
+    }
 
-	//Setters
-	public void setConnectedServers(int _connectedServers) {
-		connectedServers = _connectedServers;
-	}
+    public String getLastKeepAliveHumanReadable() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-	public void setLastKeepAlive(long _lastKeepAlive) {
-		lastKeepAlive = _lastKeepAlive;
-	}
+        return sdf.format(new Date(lastKeepAlive));
+    }
 
-	public void setUptime(String _uptime) {
-		uptime = _uptime;
-	}
+    public String getUptime() {
+        return uptime;
+    }
 
-	public void setMemUsed(double _mem) {
-		memUsed = _mem;
-	}
+    public double getMemUsed() {
+        return memUsed;
+    }
+
+    public String getIpForRestart() {
+        return ipForRestart;
+    }
+
+    public int getPortForRestart() {
+        return portForRestart;
+    }
+
+    public String getPid() {
+        return pid;
+    }
+
+    //Setters
+    public void setClientIndex(int clientIndex) {
+        this.clientIndex = clientIndex;
+    }
+
+    public void setConnectedServers(int _connectedServers) {
+        connectedServers = _connectedServers;
+    }
+
+    public void setLastKeepAlive(long _lastKeepAlive) {
+        lastKeepAlive = _lastKeepAlive;
+    }
+
+    public void setUptime(String _uptime) {
+        uptime = _uptime;
+    }
+
+    public void setMemUsed(double _mem) {
+        memUsed = _mem;
+    }
+
+    public void setIpForRestart(String _ip) {
+        ipForRestart = _ip;
+    }
+
+    public void setPortForRestart(int portForRestart) {
+        this.portForRestart = portForRestart;
+    }
+
+    public void setPid(String _pid) {
+        pid = _pid;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+
+        json.put("index", clientIndex);
+        json.put("guilds", connectedServers);
+        json.put("keep_alive", lastKeepAlive);
+        json.put("uptime", uptime);
+        json.put("memory", memUsed);
+
+        return json;
+    }
+
+    public ConnectedClient fromJson(JSONObject json) {
+        clientIndex = json.getInt("index");
+        connectedServers = json.getInt("guilds");
+        lastKeepAlive = json.getLong("keep_alive");
+        uptime = json.getString("uptime");
+        memUsed = json.getDouble("memory");
+
+        return this;
+    }
 }

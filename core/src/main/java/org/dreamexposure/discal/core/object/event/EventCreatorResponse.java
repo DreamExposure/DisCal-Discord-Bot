@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.event;
 
 import com.google.api.services.calendar.model.Event;
+
 import discord4j.core.object.entity.Message;
 
 /**
@@ -9,77 +10,44 @@ import discord4j.core.object.entity.Message;
  * For Project: DisCal-Discord-Bot
  */
 public class EventCreatorResponse {
-	private final boolean successful;
+    private final boolean successful;
+    private final Event event;
+    private final Message creatorMessage;
+    private final boolean edited;
 
-	private Message creatorMessage;
+    public EventCreatorResponse(boolean successful, Event event, Message creatorMessage,
+                                boolean edited) {
+        this.successful = successful;
+        this.event = event;
+        this.creatorMessage = creatorMessage;
+        this.edited = edited;
+    }
 
-	private Event event;
-	private boolean edited;
+    //Getters
 
-	/**
-	 * Creates a new Response.
-	 *
-	 * @param _successful Whether or not the Creator was successful.
-	 */
-	public EventCreatorResponse(boolean _successful) {
-		successful = _successful;
-	}
+    /**
+     * Whether or not the creator was successful.
+     *
+     * @return <code>true</code> if successful, else <code>false</code>.
+     */
+    public boolean isSuccessful() {
+        return successful;
+    }
 
-	/**
-	 * Creates a new Response.
-	 *
-	 * @param _successful Whether or not the Creator was successful.
-	 * @param _event      The Event that was created.
-	 */
-	public EventCreatorResponse(boolean _successful, Event _event) {
-		successful = _successful;
-		event = _event;
-		edited = false;
-	}
+    public Message getCreatorMessage() {
+        return creatorMessage;
+    }
 
-	//Getters
+    public boolean isEdited() {
+        return edited;
+    }
 
-	/**
-	 * Whether or not the creator was successful.
-	 *
-	 * @return <code>true</code> if successful, else <code>false</code>.
-	 */
-	public boolean isSuccessful() {
-		return successful;
-	}
-
-	public Message getCreatorMessage() {
-		return creatorMessage;
-	}
-
-	public boolean isEdited() {
-		return edited;
-	}
-
-	/**
-	 * Gets the event that was created.
-	 *
-	 * @return The event that was created.
-	 */
-	public Event getEvent() {
-		return event;
-	}
-
-	//Setters
-	public void setCreatorMessage(Message _creatorMessage) {
-		creatorMessage = _creatorMessage;
-	}
-
-	/**
-	 * Sets the event that was created.
-	 *
-	 * @param _event The event that was created.
-	 */
-	public void setEvent(Event _event) {
-		event = _event;
-	}
-
-	public void setEdited(boolean _edited) {
-		edited = _edited;
-	}
+    /**
+     * Gets the event that was created.
+     *
+     * @return The event that was created.
+     */
+    public Event getEvent() {
+        return event;
+    }
 }
