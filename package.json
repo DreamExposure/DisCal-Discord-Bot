@@ -35,7 +35,7 @@
     "typescript": "^3.8.3",
     "chart.js": "2.8.0",
     "datatables.net-bs4": "1.10.19",
-    "jquery": "3.4.1",
+    "jquery": "3.5.0",
     "jquery.easing": "1.4.1",
     "what-input": "5.2.3"
   }
