@@ -25,7 +25,7 @@
         <spring.session.version>2.3.0.RELEASE</spring.session.version>
         <spring.maven-plugin.version>2.3.1.RELEASE</spring.maven-plugin.version>
 
-        <discord4j.version>3.1.0-SNAPSHOT</discord4j.version>
+        <discord4j.version>3.1.0</discord4j.version>
 
         <google.client-api.core.version>1.30.9</google.client-api.core.version>
         <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
