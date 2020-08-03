@@ -65,6 +65,11 @@ public class NetworkMediator {
     }
 
     private String issueRestart(final ConnectedClient c) {
+        if (!"true".equalsIgnoreCase(BotSettings.USE_RESTART_SERVICE.get())) {
+            DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart service not active!");
+            return "INACTIVE";
+        }
+
         try {
             final Session session = this.createSession(c.getIpForRestart(), c.getPortForRestart());
             session.connect();
