@@ -20,27 +20,28 @@ import reactor.core.scheduler.Schedulers;
  * For Project: DisCal-Discord-Bot
  */
 public class ReadFile {
+    @SuppressWarnings({"resource", "IOResourceOpenedButNotSafelyClosed"})
     public static Mono<JSONObject> readAllLangFiles() {
         return Mono.fromCallable(() -> {
-            JSONObject langs = new JSONObject();
+            final JSONObject langs = new JSONObject();
 
             try {
-                File langDir = new File(BotSettings.LANG_PATH.get());
+                final File langDir = new File(BotSettings.LANG_FOLDER.get());
 
-                for (File f : langDir.listFiles()) {
+                for (final File file : langDir.listFiles()) {
                     // Open the file
-                    FileReader fr = new FileReader(f);
+                    final FileReader fr = new FileReader(file);
 
-                    byte[] encoded = Files.readAllBytes(Paths.get(f.getAbsolutePath()));
-                    String contents = new String(encoded, StandardCharsets.UTF_8);
+                    final byte[] encoded = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+                    final String contents = new String(encoded, StandardCharsets.UTF_8);
 
-                    JSONObject json = new JSONObject(contents);
+                    final JSONObject json = new JSONObject(contents);
 
                     langs.put(json.getString("Language"), json);
 
                     fr.close();
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LogFeed.log(LogObject.forException("Failed to load lang files", e, ReadFile.class));
             }
             return langs;
