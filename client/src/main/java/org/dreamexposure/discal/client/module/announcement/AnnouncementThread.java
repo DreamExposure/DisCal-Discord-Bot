@@ -39,7 +39,7 @@ public class AnnouncementThread {
 
     private final Map<Integer, Mono<Calendar>> discalServices = new HashMap<>();
 
-    public AnnouncementThread(GatewayDiscordClient client) {
+    public AnnouncementThread(final GatewayDiscordClient client) {
         this.client = client;
 
         for (int i = 0; i < CalendarAuth.credentialsCount(); i++) {
@@ -48,24 +48,24 @@ public class AnnouncementThread {
     }
 
     public Mono<Void> run() {
-        return client.getGuilds()
+        return this.client.getGuilds()
             .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(a -> {
 
-                    Mono<GuildSettings> s = getSettings(a);
-                    Mono<CalendarData> cd = getCalendarData(a);
-                    Mono<Calendar> se = s.flatMap(this::getService);
+                    final Mono<GuildSettings> s = this.getSettings(a);
+                    final Mono<CalendarData> cd = this.getCalendarData(a);
+                    final Mono<Calendar> se = s.flatMap(this::getService);
 
                     return Mono.zip(s, cd, se)
                         .flatMap(function((settings, calData, service) -> {
                             switch (a.getModifier()) {
                                 case BEFORE:
-                                    return handleBeforeModifier(guild, a, settings, calData, service);
+                                    return this.handleBeforeModifier(guild, a, settings, calData, service);
                                 case DURING:
-                                    return handleDuringModifier(guild, a, settings, calData, service);
+                                    return this.handleDuringModifier(guild, a, settings, calData, service);
                                 case END:
-                                    return handleEndModifier(guild, a, settings, calData, service);
+                                    return this.handleEndModifier(guild, a, settings, calData, service);
                                 default:
                                     return Mono.empty();
                             }
@@ -77,21 +77,21 @@ public class AnnouncementThread {
             .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error", e, AnnouncementThread.class)))
             .onErrorResume(e -> Mono.empty())
             .doFinally(ignore -> {
-                allSettings.clear();
-                calendars.clear();
-                customServices.clear();
-                allEvents.clear();
+                this.allSettings.clear();
+                this.calendars.clear();
+                this.customServices.clear();
+                this.allEvents.clear();
             })
             .then();
     }
 
     //Modifier handling
-    private Mono<Void> handleBeforeModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
-                                            Calendar service) {
+    private Mono<Void> handleBeforeModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
+                                            final Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
                 return EventWrapper.getEvent(calData, settings, a.getEventId())
-                    .flatMap(e -> inRangeSpecific(a, e)
+                    .flatMap(e -> this.inRangeSpecific(a, e)
                         .flatMap(inRange -> {
                             if (inRange) {
                                 return AnnouncementMessageFormatter
@@ -107,29 +107,29 @@ public class AnnouncementThread {
                         .deleteAnnouncement(a.getAnnouncementId().toString()))
                     .then();
             case UNIVERSAL:
-                return getEvents(settings, calData, service)
+                return this.getEvents(settings, calData, service)
                     .flatMapMany(Flux::fromIterable)
-                    .filter(e -> inRange(a, e))
+                    .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
                     .then();
             case COLOR:
-                return getEvents(settings, calData, service)
+                return this.getEvents(settings, calData, service)
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> e.getColorId() != null
                         && a.getEventColor().equals(EventColor
                         .fromNameOrHexOrID(e.getColorId())))
-                    .filter(e -> inRange(a, e))
+                    .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
                     .then();
 
             case RECUR:
-                return getEvents(settings, calData, service)
+                return this.getEvents(settings, calData, service)
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> e.getId().contains("_")
                         && e.getId().split("_")[0].equals(a.getEventId()))
-                    .filter(e -> inRange(a, e))
+                    .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
                     .then();
@@ -139,8 +139,8 @@ public class AnnouncementThread {
     }
 
     //TODO: Actually support this.
-    private Mono<Void> handleDuringModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
-                                            Calendar service) {
+    private Mono<Void> handleDuringModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
+                                            final Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
             case UNIVERSAL:
@@ -152,8 +152,8 @@ public class AnnouncementThread {
     }
 
     //TODO: Actually support this too
-    private Mono<Void> handleEndModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
-                                         Calendar service) {
+    private Mono<Void> handleEndModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
+                                         final Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
             case UNIVERSAL:
@@ -166,14 +166,14 @@ public class AnnouncementThread {
 
 
     //Utility
-    private Mono<Boolean> inRangeSpecific(Announcement a, Event e) {
+    private Mono<Boolean> inRangeSpecific(final Announcement a, final Event e) {
         return Mono.defer(() -> {
-            long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
+            final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
-            long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
-            long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
+            final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+            final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
-            long difference = timeUntilEvent - announcementTimeMs;
+            final long difference = timeUntilEvent - announcementTimeMs;
 
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
@@ -188,13 +188,13 @@ public class AnnouncementThread {
         });
     }
 
-    private boolean inRange(Announcement a, Event e) {
-        long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
+    private boolean isInRange(final Announcement a, final Event e) {
+        final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
-        long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
-        long timeUntilEvent = getEventStartMs(e) - System.currentTimeMillis();
+        final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+        final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
-        long difference = timeUntilEvent - announcementTimeMs;
+        final long difference = timeUntilEvent - announcementTimeMs;
 
         if (difference < 0) {
             //Event past, we can delete announcement depending on the type
@@ -207,7 +207,7 @@ public class AnnouncementThread {
         }
     }
 
-    private long getEventStartMs(Event e) {
+    private long getEventStartMs(final Event e) {
         if (e.getStart().getDateTime() != null)
             return e.getStart().getDateTime().getValue();
         else
@@ -215,36 +215,36 @@ public class AnnouncementThread {
 
     }
 
-    private Mono<GuildSettings> getSettings(Announcement a) {
-        if (!allSettings.containsKey(a.getGuildId()))
-            allSettings.put(a.getGuildId(), DatabaseManager.getSettings(a.getGuildId()).cache());
+    private Mono<GuildSettings> getSettings(final Announcement a) {
+        if (!this.allSettings.containsKey(a.getGuildId()))
+            this.allSettings.put(a.getGuildId(), DatabaseManager.getSettings(a.getGuildId()).cache());
 
-        return allSettings.get(a.getGuildId());
+        return this.allSettings.get(a.getGuildId());
     }
 
     //TODO: Allow multiple calendar support
-    private Mono<CalendarData> getCalendarData(Announcement a) {
-        if (!calendars.containsKey(a.getGuildId()))
-            calendars.put(a.getGuildId(), DatabaseManager.getMainCalendar(a.getGuildId()).cache());
+    private Mono<CalendarData> getCalendarData(final Announcement a) {
+        if (!this.calendars.containsKey(a.getGuildId()))
+            this.calendars.put(a.getGuildId(), DatabaseManager.getMainCalendar(a.getGuildId()).cache());
 
-        return calendars.get(a.getGuildId());
+        return this.calendars.get(a.getGuildId());
     }
 
-    private Mono<Calendar> getService(GuildSettings gs) {
+    private Mono<Calendar> getService(final GuildSettings gs) {
         if (gs.useExternalCalendar()) {
-            if (!customServices.containsKey(gs.getGuildID()))
-                customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs).cache());
+            if (!this.customServices.containsKey(gs.getGuildID()))
+                this.customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs).cache());
 
-            return customServices.get(gs.getGuildID());
+            return this.customServices.get(gs.getGuildID());
         }
-        return discalServices.get(gs.getCredentialsId());
+        return this.discalServices.get(gs.getCredentialsId());
     }
 
-    private Mono<List<Event>> getEvents(GuildSettings gs, CalendarData cd, Calendar service) {
-        if (!allEvents.containsKey(gs.getGuildID())) {
-            Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
-            allEvents.put(gs.getGuildID(), events);
+    private Mono<List<Event>> getEvents(final GuildSettings gs, final CalendarData cd, final Calendar service) {
+        if (!this.allEvents.containsKey(gs.getGuildID())) {
+            final Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
+            this.allEvents.put(gs.getGuildID(), events);
         }
-        return allEvents.get(gs.getGuildID());
+        return this.allEvents.get(gs.getGuildID());
     }
 }

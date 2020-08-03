@@ -1,9 +1,10 @@
 package org.dreamexposure.discal.client.service;
 
 import org.dreamexposure.discal.client.module.misc.StatusChanger;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Timer;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Timer;
 public class TimeManager {
     private static TimeManager instance;
 
-    private final List<Timer> timers = new ArrayList<>();
+    private final Collection<Timer> timers = new ArrayList<>();
 
     private TimeManager() {
     } //Prevent initialization
@@ -35,24 +36,24 @@ public class TimeManager {
      * Initializes the TimeManager and schedules the appropriate Timers.
      */
     public void init() {
-        Timer timer = new Timer(true);
+        final Timer timer = new Timer(true);
         timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-        timers.add(timer);
+        this.timers.add(timer);
 
         //Timer at = new Timer(true);
         //at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
         //timers.add(at);
 
-        Timer cc = new Timer(true);
-        cc.schedule(new CreatorCleaner(), 60 * 1000 * 60, 60 * 1000 * 60);
-        timers.add(cc);
+        final Timer cc = new Timer(true);
+        cc.schedule(new CreatorCleaner(), GlobalConst.oneHourMs, GlobalConst.oneHourMs);
+        this.timers.add(cc);
     }
 
     /**
      * Gracefully shuts down the TimeManager and exits all timer threads preventing errors.
      */
     public void shutdown() {
-        for (Timer t : timers) {
+        for (final Timer t : this.timers) {
             t.cancel();
         }
     }

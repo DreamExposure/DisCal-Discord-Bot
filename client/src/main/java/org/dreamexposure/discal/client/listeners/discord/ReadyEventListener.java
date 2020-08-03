@@ -17,9 +17,9 @@ import reactor.core.publisher.Mono;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ReadyEventListener {
-    public static Mono<Void> handle(ReadyEvent event) {
+    public static Mono<Void> handle(final ReadyEvent event) {
         return event.getClient().getApplicationInfo()
             .doOnNext(info -> GlobalConst.iconUrl = info.getIconUrl(Image.Format.PNG).get())
             .doOnNext(info ->

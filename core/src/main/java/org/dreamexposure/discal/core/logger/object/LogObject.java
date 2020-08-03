@@ -8,27 +8,27 @@ import javax.annotation.Nullable;
 
 public class LogObject {
     //static initializers
-    public static LogObject forException(String message, Throwable exception, Class<?> clazz) {
+    public static LogObject forException(final String message, final Throwable exception, final Class<?> clazz) {
         return new LogObject(LogType.EXCEPTION, message, null, clazz, exception);
     }
 
-    public static LogObject forException(String message, String info, Throwable e, Class<?> clazz) {
+    public static LogObject forException(final String message, final String info, final Throwable e, final Class<?> clazz) {
         return new LogObject(LogType.EXCEPTION, message, info, clazz, e);
     }
 
-    public static LogObject forDebug(String message) {
+    public static LogObject forDebug(final String message) {
         return new LogObject(LogType.DEBUG, message, null, null, null);
     }
 
-    public static LogObject forDebug(String message, String info) {
+    public static LogObject forDebug(final String message, final String info) {
         return new LogObject(LogType.DEBUG, message, info, null, null);
     }
 
-    public static LogObject forStatus(String message) {
+    public static LogObject forStatus(final String message) {
         return new LogObject(LogType.STATUS, message, null, null, null);
     }
 
-    public static LogObject forStatus(String message, String info) {
+    public static LogObject forStatus(final String message, final String info) {
         return new LogObject(LogType.STATUS, message, info, null, null);
     }
 
@@ -46,8 +46,8 @@ public class LogObject {
     private final Throwable exception;
 
 
-    private LogObject(LogType type, String message, @Nullable String info, @Nullable Class<?> clazz,
-                      @Nullable Throwable exception) {
+    private LogObject(final LogType type, final String message, @Nullable final String info, @Nullable final Class<?> clazz,
+                      @Nullable final Throwable exception) {
         this.type = type;
         this.message = message;
         this.time = System.currentTimeMillis();
@@ -59,33 +59,33 @@ public class LogObject {
 
     //Getters
     public LogType getType() {
-        return type;
+        return this.type;
     }
 
     public String getMessage() {
-        return message;
+        return this.message;
     }
 
     public long getTime() {
-        return time;
+        return this.time;
     }
 
     @Nullable
     public String getInfo() {
-        return info;
+        return this.info;
     }
 
     @Nullable
     public Class<?> getClazz() {
-        return clazz;
+        return this.clazz;
     }
 
     @Nullable
     public Throwable getException() {
-        return exception;
+        return this.exception;
     }
 
     public String getTimestamp() {
-        return new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss").format(time);
+        return new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss").format(this.time);
     }
 }

@@ -30,29 +30,29 @@ public class PreCalendar {
      * @param _guildId The ID of the guild.
      * @param _summary The summary/name of the calendar.
      */
-    public PreCalendar(Snowflake _guildId, String _summary) {
-        guildId = _guildId;
-        summary = _summary;
+    public PreCalendar(final Snowflake _guildId, final String _summary) {
+        this.guildId = _guildId;
+        this.summary = _summary;
 
-        editing = false;
+        this.editing = false;
 
-        lastEdit = System.currentTimeMillis();
+        this.lastEdit = System.currentTimeMillis();
     }
 
-    public PreCalendar(Snowflake _guildId, Calendar calendar) {
-        guildId = _guildId;
-        summary = calendar.getSummary();
+    public PreCalendar(final Snowflake _guildId, final Calendar calendar) {
+        this.guildId = _guildId;
+        this.summary = calendar.getSummary();
 
         if (calendar.getDescription() != null)
-            description = calendar.getDescription();
+            this.description = calendar.getDescription();
 
         if (calendar.getTimeZone() != null)
-            timezone = calendar.getTimeZone();
+            this.timezone = calendar.getTimeZone();
 
 
-        editing = false;
+        this.editing = false;
 
-        lastEdit = System.currentTimeMillis();
+        this.lastEdit = System.currentTimeMillis();
     }
 
     //Getters
@@ -63,7 +63,7 @@ public class PreCalendar {
      * @return The ID of the guild this PreCalendar belongs to.
      */
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     /**
@@ -72,7 +72,7 @@ public class PreCalendar {
      * @return The summary or name of the calendar.
      */
     public String getSummary() {
-        return summary;
+        return this.summary;
     }
 
     /**
@@ -81,7 +81,7 @@ public class PreCalendar {
      * @return The description of the calendar.
      */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -90,23 +90,23 @@ public class PreCalendar {
      * @return The Timezone of the calendar.
      */
     public String getTimezone() {
-        return timezone;
+        return this.timezone;
     }
 
     public boolean isEditing() {
-        return editing;
+        return this.editing;
     }
 
     public String getCalendarId() {
-        return calendarId;
+        return this.calendarId;
     }
 
     public Message getCreatorMessage() {
-        return creatorMessage;
+        return this.creatorMessage;
     }
 
     public long getLastEdit() {
-        return lastEdit;
+        return this.lastEdit;
     }
 
     //Setters
@@ -116,8 +116,8 @@ public class PreCalendar {
      *
      * @param _summary The summary/name of the calendar.
      */
-    public void setSummary(String _summary) {
-        summary = _summary;
+    public void setSummary(final String _summary) {
+        this.summary = _summary;
     }
 
     /**
@@ -125,8 +125,8 @@ public class PreCalendar {
      *
      * @param _description The description of the calendar.
      */
-    public void setDescription(String _description) {
-        description = _description;
+    public void setDescription(final String _description) {
+        this.description = _description;
     }
 
     /**
@@ -134,24 +134,24 @@ public class PreCalendar {
      *
      * @param _timezone The timezone of the calendar.
      */
-    public void setTimezone(String _timezone) {
-        timezone = _timezone;
+    public void setTimezone(final String _timezone) {
+        this.timezone = _timezone;
     }
 
-    public void setEditing(boolean _editing) {
-        editing = _editing;
+    public void setEditing(final boolean _editing) {
+        this.editing = _editing;
     }
 
-    public void setCalendarId(String _id) {
-        calendarId = _id;
+    public void setCalendarId(final String _id) {
+        this.calendarId = _id;
     }
 
-    public void setCreatorMessage(Message _message) {
-        creatorMessage = _message;
+    public void setCreatorMessage(final Message _message) {
+        this.creatorMessage = _message;
     }
 
-    public void setLastEdit(long _lastEdit) {
-        lastEdit = _lastEdit;
+    public void setLastEdit(final long _lastEdit) {
+        this.lastEdit = _lastEdit;
     }
 
     //Booleans/Checkers
@@ -159,9 +159,9 @@ public class PreCalendar {
     /**
      * Checks if the calendar has all required data in order to be created.
      *
-     * @return <code>true</code> if required data set, otherwise <code>false</code>.
+     * @return {@code true} if required data set, otherwise {@code false}.
      */
     public boolean hasRequiredValues() {
-        return summary != null && timezone != null;
+        return this.summary != null && this.timezone != null;
     }
 }

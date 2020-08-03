@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -22,26 +23,26 @@ import javax.servlet.http.HttpServletResponse;
 public class KeepAliveEndpoint {
 
     @PostMapping(value = "/keep-alive", produces = "application/json")
-    public String keepAlive(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String keepAlive(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (!authState.isFromDiscalNetwork()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Only official DisCal clients can use this Endpoint");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject body = new JSONObject(rBody);
-            int index = body.getInt("index");
-            if (DisCalServer.getNetworkInfo().clientExists(index)) {
+            final JSONObject body = new JSONObject(rBody);
+            final int index = body.getInt("index");
+            if (DisCalServer.getNetworkInfo().doesClientExist(index)) {
                 //In network, update info...
-                ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(index);
+                final ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(index);
 
                 cc.setLastKeepAlive(System.currentTimeMillis());
                 cc.setConnectedServers(body.getInt("guilds"));
@@ -59,7 +60,7 @@ public class KeepAliveEndpoint {
                 }
             } else {
                 //Not in network, add info...
-                ConnectedClient cc = new ConnectedClient(index);
+                final ConnectedClient cc = new ConnectedClient(index);
 
                 cc.setLastKeepAlive(System.currentTimeMillis());
                 cc.setConnectedServers(body.getInt("guilds"));
@@ -75,19 +76,19 @@ public class KeepAliveEndpoint {
             }
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return JsonUtils.getJsonResponseMessage("Success!");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("[API-v2]", "keep alive err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

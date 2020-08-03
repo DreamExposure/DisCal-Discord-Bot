@@ -25,44 +25,44 @@ public class RsvpData {
     private final ArrayList<String> notGoing = new ArrayList<>();
     private final ArrayList<String> undecided = new ArrayList<>();
 
-    public RsvpData(Snowflake guildId, String eventId) {
+    public RsvpData(final Snowflake guildId, final String eventId) {
         this.guildId = guildId;
         this.eventId = eventId;
     }
 
     //Getters
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     public String getEventId() {
-        return eventId;
+        return this.eventId;
     }
 
     public long getEventEnd() {
-        return eventEnd;
+        return this.eventEnd;
     }
 
     public ArrayList<String> getGoingOnTime() {
-        return goingOnTime;
+        return this.goingOnTime;
     }
 
     public ArrayList<String> getGoingLate() {
-        return goingLate;
+        return this.goingLate;
     }
 
     public ArrayList<String> getNotGoing() {
-        return notGoing;
+        return this.notGoing;
     }
 
     public ArrayList<String> getUndecided() {
-        return undecided;
+        return this.undecided;
     }
 
     public String getGoingOnTimeString() {
         StringBuilder goingString = new StringBuilder();
         int i = 0;
-        for (String u : goingOnTime) {
+        for (final String u : this.goingOnTime) {
             if (i == 0) {
                 goingString = new StringBuilder(u);
             } else {
@@ -76,7 +76,7 @@ public class RsvpData {
     public String getGoingLateString() {
         StringBuilder goingString = new StringBuilder();
         int i = 0;
-        for (String u : goingLate) {
+        for (final String u : this.goingLate) {
             if (i == 0) {
                 goingString = new StringBuilder(u);
             } else {
@@ -90,7 +90,7 @@ public class RsvpData {
     public String getNotGoingString() {
         StringBuilder going = new StringBuilder();
         int i = 0;
-        for (String u : notGoing) {
+        for (final String u : this.notGoing) {
             if (i == 0) {
                 going = new StringBuilder(u);
             } else {
@@ -104,7 +104,7 @@ public class RsvpData {
     public String getUndecidedString() {
         StringBuilder going = new StringBuilder();
         int i = 0;
-        for (String u : undecided) {
+        for (final String u : this.undecided) {
             if (i == 0) {
                 going = new StringBuilder(u);
             } else {
@@ -116,104 +116,107 @@ public class RsvpData {
     }
 
     //Setters
-    public void setEventId(String _eventId) {
-        eventId = _eventId;
+    public void setEventId(final String _eventId) {
+        this.eventId = _eventId;
     }
 
-    public void setEventEnd(long _eventEnd) {
-        eventEnd = _eventEnd;
+    public void setEventEnd(final long _eventEnd) {
+        this.eventEnd = _eventEnd;
     }
 
-    public void setGoingOnTimeFromString(String goingList) {
+    public void setGoingOnTimeFromString(final String goingList) {
         if (goingList != null) {
-            String[] subs = goingList.split(",");
-            Collections.addAll(goingOnTime, subs);
+            final String[] subs = goingList.split(",");
+            Collections.addAll(this.goingOnTime, subs);
         }
     }
 
-    public void setGoingLateFromString(String goingList) {
+    public void setGoingLateFromString(final String goingList) {
         if (goingList != null) {
-            String[] subs = goingList.split(",");
-            Collections.addAll(goingLate, subs);
+            final String[] subs = goingList.split(",");
+            Collections.addAll(this.goingLate, subs);
         }
     }
 
-    public void setNotGoingFromString(String goingList) {
+    public void setNotGoingFromString(final String goingList) {
         if (goingList != null) {
-            String[] subs = goingList.split(",");
-            Collections.addAll(notGoing, subs);
+            final String[] subs = goingList.split(",");
+            Collections.addAll(this.notGoing, subs);
         }
     }
 
-    public void setUndecidedFromString(String goingList) {
+    public void setUndecidedFromString(final String goingList) {
         if (goingList != null) {
-            String[] subs = goingList.split(",");
-            Collections.addAll(undecided, subs);
+            final String[] subs = goingList.split(",");
+            Collections.addAll(this.undecided, subs);
         }
     }
 
     //Functions
-    public void removeCompletely(String userId) {
-        goingOnTime.remove(userId);
-        goingLate.remove(userId);
-        notGoing.remove(userId);
-        undecided.remove(userId);
+    public void removeCompletely(final String userId) {
+        this.goingOnTime.remove(userId);
+        this.goingLate.remove(userId);
+        this.notGoing.remove(userId);
+        this.undecided.remove(userId);
     }
 
     //Boolean/Checkers
     public boolean shouldBeSaved() {
-        return goingOnTime.size() > 0 || goingLate.size() > 0 || notGoing.size() > 0 || undecided.size() > 0;
+        return !this.goingOnTime.isEmpty()
+            || !this.goingLate.isEmpty()
+            || !this.notGoing.isEmpty()
+            || !this.undecided.isEmpty();
     }
 
     public JSONObject toJson() {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
 
-        json.put("guild_id", guildId.asString());
-        json.put("event_id", eventId);
-        json.put("event_end", eventEnd);
+        json.put("guild_id", this.guildId.asString());
+        json.put("event_id", this.eventId);
+        json.put("event_end", this.eventEnd);
 
-        JSONArray jOnTime = new JSONArray();
-        for (String s : goingOnTime)
+        final JSONArray jOnTime = new JSONArray();
+        for (final String s : this.goingOnTime)
             jOnTime.put(s);
         json.put("on_time", jOnTime);
 
-        JSONArray jLate = new JSONArray();
-        for (String s : goingLate)
+        final JSONArray jLate = new JSONArray();
+        for (final String s : this.goingLate)
             jLate.put(s);
         json.put("late", jLate);
 
-        JSONArray jNot = new JSONArray();
-        for (String s : notGoing)
+        final JSONArray jNot = new JSONArray();
+        for (final String s : this.notGoing)
             jNot.put(s);
         json.put("not_going", jNot);
 
-        JSONArray jUndecided = new JSONArray();
-        for (String s : undecided)
+        final JSONArray jUndecided = new JSONArray();
+        for (final String s : this.undecided)
             jUndecided.put(s);
         json.put("undecided", jUndecided);
 
         return json;
     }
 
-    public RsvpData fromJson(JSONObject json) {
-        eventId = json.getString("event_id");
-        eventEnd = json.getLong("event_end");
+    public RsvpData fromJson(final JSONObject json) {
+        this.eventId = json.getString("event_id");
+        this.eventEnd = json.getLong("event_end");
 
-        JSONArray jOnTime = json.getJSONArray("on_time");
+        final JSONArray jOnTime = json.getJSONArray("on_time");
         for (int i = 0; i < jOnTime.length(); i++)
-            goingOnTime.add(jOnTime.getString(i));
+            this.goingOnTime.add(jOnTime.getString(i));
 
-        JSONArray jLate = json.getJSONArray("late");
+        final JSONArray jLate = json.getJSONArray("late");
         for (int i = 0; i < jLate.length(); i++)
-            goingLate.add(jLate.getString(i));
+            this.goingLate.add(jLate.getString(i));
 
-        JSONArray jNot = json.getJSONArray("not_going");
+        final JSONArray jNot = json.getJSONArray("not_going");
         for (int i = 0; i < jNot.length(); i++)
-            notGoing.add(jNot.getString(i));
+            this.notGoing.add(jNot.getString(i));
 
-        JSONArray jUndecided = json.getJSONArray("undecided");
+        final JSONArray jUndecided = json.getJSONArray("undecided");
         for (int i = 0; i < jUndecided.length(); i++)
-            undecided.add(jUndecided.getString(i));
+            this.undecided.add(jUndecided.getString(i));
 
         return this;
     }

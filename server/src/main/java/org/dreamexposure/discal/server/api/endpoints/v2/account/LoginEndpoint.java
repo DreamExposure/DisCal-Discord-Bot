@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -19,45 +20,45 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping("/v2/account")
 public class LoginEndpoint {
     @PostMapping(value = "/login", produces = "application/json")
-    public String loginForKey(HttpServletRequest request, HttpServletResponse response) {
+    public String loginForKey(final HttpServletRequest request, final HttpServletResponse response) {
         //Check auth, must be from within DisCal network, as this is generating an API key...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (!authState.isFromDiscalNetwork()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Unauthorized to use this Endpoint.");
         }
 
         try {
             //Generate temporary API key. This key should only be valid for 48 hours unless refreshed..
-            String key = KeyGenerator.csRandomAlphaNumericString(64);
+            final String key = KeyGenerator.csRandomAlphaNumericString(64);
 
             //Save key to memory... so it can be used for authentication just like the others
             Authentication.saveTempKey(key);
 
             //Return key to web....
-            JSONObject responseBody = new JSONObject();
+            final JSONObject responseBody = new JSONObject();
             responseBody.put("key", key);
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return responseBody.toString();
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "login for key err", e, this.getClass()));
+                .forException("[API-v2]", "login for key err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

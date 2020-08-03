@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -24,52 +25,54 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/announcement")
 public class DeleteAnnouncementEndpoint {
     @PostMapping(value = "/delete", produces = "application/json")
-    public String deleteAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public String deleteAnnouncement(final HttpServletRequest request, final HttpServletResponse response,
+                                     @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject body = new JSONObject(requestBody);
-            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
-            UUID announcementId = UUID.fromString(body.getString("announcement_id"));
+            final JSONObject body = new JSONObject(requestBody);
+            final Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+            final UUID announcementId = UUID.fromString(body.getString("announcement_id"));
 
             if (DatabaseManager.getAnnouncement(announcementId, guildId).block() != null) {
+                //noinspection ConstantConditions
                 if (DatabaseManager.deleteAnnouncement(announcementId.toString()).block()) {
                     response.setContentType("application/json");
-                    response.setStatus(200);
+                    response.setStatus(GlobalConst.STATUS_SUCCESS);
                     return JsonUtils.getJsonResponseMessage("Announcement successfully deleted");
                 }
             } else {
                 response.setContentType("application/json");
-                response.setStatus(404);
+                response.setStatus(GlobalConst.STATUS_NOT_FOUND);
                 return JsonUtils.getJsonResponseMessage("Announcement not Found");
             }
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "Delete announcement err", e, this.getClass()));
+                .forException("[API-v2]", "Delete announcement err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

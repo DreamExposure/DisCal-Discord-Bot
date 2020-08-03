@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import club.minnced.discord.webhook.WebhookClient;
 
-@SuppressWarnings("Duplicates")
+@SuppressWarnings({"Duplicates", "resource", "IOResourceOpenedButNotSafelyClosed"})
 public class LogFeed {
     private final static String exceptionsFile;
     private final static String debugFile;
@@ -29,44 +29,44 @@ public class LogFeed {
         fileQueue = new LinkedBlockingQueue<>();
         discordQueue = new LinkedBlockingQueue<>();
 
-        useWebhooks = BotSettings.USE_WEBHOOKS.get().equalsIgnoreCase("true");
+        useWebhooks = "true".equalsIgnoreCase(BotSettings.USE_WEBHOOKS.get());
 
-        Thread fileLogThread;
+        final Thread fileLogThread;
         Thread discordLogThread = null;
 
         //Create webhook clients.
         if (useWebhooks) {
-            WebhookClient debug = WebhookClient.withUrl(BotSettings.DEBUG_WEBHOOK.get());
-            WebhookClient exception = WebhookClient.withUrl(BotSettings.ERROR_WEBHOOK.get());
-            WebhookClient status = WebhookClient.withUrl(BotSettings.STATUS_WEBHOOK.get());
+            final WebhookClient debug = WebhookClient.withUrl(BotSettings.DEBUG_WEBHOOK.get());
+            final WebhookClient exception = WebhookClient.withUrl(BotSettings.ERROR_WEBHOOK.get());
+            final WebhookClient status = WebhookClient.withUrl(BotSettings.STATUS_WEBHOOK.get());
 
-            Logger discordLogger = new DiscordLogger(debug, exception, status);
+            final Logger discordLogger = new DiscordLogger(debug, exception, status);
             discordLogThread = new Thread(new LoggerThread(discordQueue, discordLogger));
         }
 
         //Create files for file logger.
-        String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss")
-                .format(System.currentTimeMillis());
+        final String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss")
+            .format(System.currentTimeMillis());
 
         exceptionsFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-exceptions.log";
         debugFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-debug.log";
 
         try {
             //Write to files to init
-            PrintWriter exceptions = new PrintWriter(exceptionsFile, "UTF-8");
+            final PrintWriter exceptions = new PrintWriter(exceptionsFile, "UTF-8");
             exceptions.println("INIT --- " + timestamp + " ---");
             exceptions.close();
 
-            PrintWriter debug = new PrintWriter(debugFile, "UTF-8");
+            final PrintWriter debug = new PrintWriter(debugFile, "UTF-8");
             debug.println("INIT --- " + timestamp + " ---");
             debug.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             e.printStackTrace();
             System.exit(4);
         }
 
         //Create file logger and thread
-        Logger fileLogger = new FileLogger(exceptionsFile, debugFile);
+        final Logger fileLogger = new FileLogger(exceptionsFile, debugFile);
         fileLogThread = new Thread(new LoggerThread(fileQueue, fileLogger));
 
         //Set threads as daemons
@@ -80,7 +80,7 @@ public class LogFeed {
             discordLogThread.start();
     }
 
-    public static void log(LogObject log) {
+    public static void log(final LogObject log) {
         fileQueue.offer(log);
         if (useWebhooks)
             discordQueue.offer(log);

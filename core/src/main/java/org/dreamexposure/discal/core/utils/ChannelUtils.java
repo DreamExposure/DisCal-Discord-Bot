@@ -10,43 +10,42 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("ConstantConditions")
 public class ChannelUtils {
-    public static Mono<Boolean> channelExists(String nameOrId, MessageCreateEvent event) {
+    public static Mono<Boolean> channelExists(final String nameOrId, final MessageCreateEvent event) {
         final String name = nameOrId.replace("#", "");
         return event.getGuild()
             .flatMapMany(Guild::getChannels)
             .ofType(TextChannel.class)
-            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .hasElements();
     }
 
-    public static Mono<Boolean> channelExists(String nameOrId, Guild guild) {
+    public static Mono<Boolean> channelExists(final String nameOrId, final Guild guild) {
         final String name = nameOrId.replace("#", "");
         return guild.getChannels()
             .ofType(TextChannel.class)
-            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .hasElements();
     }
 
-    public static Mono<TextChannel> getChannelFromNameOrId(String nameOrId, MessageCreateEvent event) {
+    public static Mono<TextChannel> getChannelFromNameOrId(final String nameOrId, final MessageCreateEvent event) {
         final String name = nameOrId.replace("#", "");
         return event.getGuild()
             .flatMapMany(Guild::getChannels)
             .ofType(TextChannel.class)
-            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .next();
     }
 
-    public static Mono<TextChannel> getChannelFromNameOrId(String nameOrId, Guild guild) {
+    public static Mono<TextChannel> getChannelFromNameOrId(final String nameOrId, final Guild guild) {
         final String name = nameOrId.replace("#", "");
         return guild.getChannels()
             .ofType(TextChannel.class)
-            .filter(c -> c.getName().equalsIgnoreCase(name) || c.getId().asString().equals(name))
+            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .next();
     }
 
-    public static Mono<String> getChannelNameFromNameOrId(String nameOrId, Guild guild) {
+    public static Mono<String> getChannelNameFromNameOrId(final String nameOrId, final Guild guild) {
         return getChannelFromNameOrId(nameOrId, guild)
             .map(TextChannel::getName);
     }

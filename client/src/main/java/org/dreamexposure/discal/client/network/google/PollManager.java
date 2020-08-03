@@ -28,7 +28,7 @@ public class PollManager {
     }
 
     //Timer methods.
-    public void scheduleNextPoll(Poll poll) {
+    void scheduleNextPoll(final Poll poll) {
         Mono.defer(() -> {
             poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
             return GoogleExternalAuth.getAuth().pollForAuth(poll);

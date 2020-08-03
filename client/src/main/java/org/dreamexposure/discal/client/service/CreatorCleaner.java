@@ -23,15 +23,15 @@ public class CreatorCleaner extends TimerTask {
     @Override
     public void run() {
         try {
-            long target = 60 * 1000 * 60; //60 minutes
+            final long target = 60 * 1000 * 60; //60 minutes
 
-            List<PreCalendar> cals = new ArrayList<>();
-            List<PreEvent> events = new ArrayList<>();
-            List<Announcement> ans = new ArrayList<>();
+            final List<PreCalendar> cals = new ArrayList<>();
+            final List<PreEvent> events = new ArrayList<>();
+            final List<Announcement> ans = new ArrayList<>();
 
             //Run through calendar creator
-            for (PreCalendar cal : CalendarCreator.getCreator().getAllPreCalendars()) {
-                long difference = System.currentTimeMillis() - cal.getLastEdit();
+            for (final PreCalendar cal : CalendarCreator.getCreator().getAllPreCalendars()) {
+                final long difference = System.currentTimeMillis() - cal.getLastEdit();
 
                 if (difference <= target) {
                     //Last edited 60+ minutes ago, delete from creator and free up RAM.
@@ -40,8 +40,8 @@ public class CreatorCleaner extends TimerTask {
             }
 
             //Run through event creator
-            for (PreEvent event : EventCreator.getCreator().getAllPreEvents()) {
-                long difference = System.currentTimeMillis() - event.getLastEdit();
+            for (final PreEvent event : EventCreator.getCreator().getAllPreEvents()) {
+                final long difference = System.currentTimeMillis() - event.getLastEdit();
 
                 if (difference <= target) {
                     //Last edited 60+ minutes ago, delete from creator and free up RAM.
@@ -50,8 +50,8 @@ public class CreatorCleaner extends TimerTask {
             }
 
             //Run through announcement creator
-            for (Announcement an : AnnouncementCreator.getCreator().getAllAnnouncements()) {
-                long difference = System.currentTimeMillis() - an.getLastEdit();
+            for (final Announcement an : AnnouncementCreator.getCreator().getAllAnnouncements()) {
+                final long difference = System.currentTimeMillis() - an.getLastEdit();
 
                 if (difference <= target) {
                     //Last edited 60+ minutes ago, delete from creator and free up RAM.
@@ -60,16 +60,16 @@ public class CreatorCleaner extends TimerTask {
             }
 
             //Okay, actually go through it all and delete
-            for (PreCalendar c : cals) {
+            for (final PreCalendar c : cals) {
                 CalendarCreator.getCreator().terminate(c.getGuildId());
             }
-            for (PreEvent e : events) {
+            for (final PreEvent e : events) {
                 EventCreator.getCreator().terminate(e.getGuildId());
             }
-            for (Announcement a : ans) {
+            for (final Announcement a : ans) {
                 AnnouncementCreator.getCreator().terminate(a.getGuildId());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("Error in cleaner", e, this.getClass()));
         }
     }

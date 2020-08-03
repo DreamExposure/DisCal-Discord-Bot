@@ -35,14 +35,14 @@ public class AddCalendarCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
      */
     @Override
     public ArrayList<String> getAliases() {
-        ArrayList<String> aliases = new ArrayList<>();
+        final ArrayList<String> aliases = new ArrayList<>();
         aliases.add("addcal");
 
         return aliases;
@@ -67,10 +67,10 @@ public class AddCalendarCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings)
             .filter(s -> s.isDevGuild() || s.isPatronGuild())
             .flatMap(s -> PermissionChecker.hasManageServerRole(event)
@@ -93,8 +93,8 @@ public class AddCalendarCommand implements Command {
                         return DatabaseManager.getMainCalendar(settings.getGuildID()).hasElement().flatMap(hasCal -> {
                             if (hasCal) {
                                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                            } else if (settings.getEncryptedAccessToken().equalsIgnoreCase("N/a")
-                                && settings.getEncryptedRefreshToken().equalsIgnoreCase("N/a")) {
+                            } else if ("N/a".equalsIgnoreCase(settings.getEncryptedAccessToken())
+                                && "N/a".equalsIgnoreCase(settings.getEncryptedRefreshToken())) {
                                 return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
                             } else {
                                 return CalendarWrapper.getUsersExternalCalendars(settings)
@@ -102,16 +102,16 @@ public class AddCalendarCommand implements Command {
                                     .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
                                     .flatMap(valid -> {
                                         if (valid) {
-                                            CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
+                                            final CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
                                                 args[0], args[0], true);
 
                                             //update guild settings to reflect changes...
                                             settings.setUseExternalCalendar(true);
 
                                             //combine db calls and message send to be executed together async
-                                            Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
-                                            Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
-                                            Mono<Message> sendMsg = Messages.sendMessage(
+                                            final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
+                                            final Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
+                                            final Mono<Message> sendMsg = Messages.sendMessage(
                                                 Messages.getMessage("AddCalendar.Select.Success", settings), event);
 
                                             return Mono.when(calInsert, settingsUpdate, sendMsg)

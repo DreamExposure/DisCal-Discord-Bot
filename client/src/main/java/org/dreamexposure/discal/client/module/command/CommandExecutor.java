@@ -28,14 +28,14 @@ public class CommandExecutor {
      *
      * @param _command The command to register.
      */
-    public static void registerCommand(Command _command) {
+    public static void registerCommand(final Command _command) {
         commands.add(_command);
     }
 
-    public static Mono<Void> issueCommand(String cmd, List<String> argsOr, MessageCreateEvent event, GuildSettings settings) {
-        String[] args;
-        if (argsOr.size() > 0) {
-            String toParse = GeneralUtils.getContent(argsOr, 0);
+    public static Mono<Void> issueCommand(final String cmd, final List<String> argsOr, final MessageCreateEvent event, final GuildSettings settings) {
+        final String[] args;
+        if (!argsOr.isEmpty()) {
+            final String toParse = GeneralUtils.getContent(argsOr, 0);
             args = GeneralUtils.overkillParser(toParse).split(" ");
         } else {
             args = new String[0];
@@ -51,8 +51,8 @@ public class CommandExecutor {
      * @return An ArrayList of all valid commands.
      */
     public static ArrayList<String> getAllCommands() {
-        ArrayList<String> cmds = new ArrayList<>();
-        for (Command c : commands) {
+        final ArrayList<String> cmds = new ArrayList<>();
+        for (final Command c : commands) {
             if (!cmds.contains(c.getCommand()))
                 cmds.add(c.getCommand());
         }
@@ -63,7 +63,7 @@ public class CommandExecutor {
         return commands;
     }
 
-    public static Mono<Command> getCommand(String cmdNameOrAlias) {
+    public static Mono<Command> getCommand(final String cmdNameOrAlias) {
         return Flux.fromIterable(commands)
             .filter(c ->
                 c.getCommand().equalsIgnoreCase(cmdNameOrAlias)

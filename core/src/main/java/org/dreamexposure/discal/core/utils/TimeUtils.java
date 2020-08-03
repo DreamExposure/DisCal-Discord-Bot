@@ -22,20 +22,20 @@ import reactor.core.publisher.Mono;
  * For Project: DisCal-Discord-Bot
  */
 public class TimeUtils {
-    public static boolean inPast(String dateRaw, TimeZone timezone) {
+    public static boolean isInPast(final String dateRaw, final TimeZone timezone) {
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
             sdf.setTimeZone(timezone);
-            Date dateObj = sdf.parse(dateRaw);
-            Date now = new Date(System.currentTimeMillis());
+            final Date dateObj = sdf.parse(dateRaw);
+            final Date now = new Date(System.currentTimeMillis());
 
             return dateObj.before(now);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             return true;
         }
     }
 
-    private static boolean inPast(Event event) {
+    private static boolean isInPast(final Event event) {
         if (event.getStart().getDateTime() != null)
             return event.getStart().getDateTime().getValue() <= System.currentTimeMillis();
         else
@@ -43,62 +43,62 @@ public class TimeUtils {
     }
 
     @Deprecated
-    public static Mono<Boolean> inPast(String eventId, GuildSettings settings) {
+    public static Mono<Boolean> isInPast(final String eventId, final GuildSettings settings) {
         return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data ->
             EventWrapper.getEvent(data, settings, eventId)
-                .map(TimeUtils::inPast)
+                .map(TimeUtils::isInPast)
         );
     }
 
-    public static Mono<Boolean> inPast(String eventId, int calNumber, GuildSettings settings) {
+    public static Mono<Boolean> isInPast(final String eventId, final int calNumber, final GuildSettings settings) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
             EventWrapper.getEvent(data, settings, eventId)
-                .map(TimeUtils::inPast)
+                .map(TimeUtils::isInPast)
         );
     }
 
-    public static Mono<Boolean> inPast(String eventId, CalendarData data, GuildSettings settings) {
-        return EventWrapper.getEvent(data, settings, eventId).map(TimeUtils::inPast);
+    public static Mono<Boolean> isInPast(final String eventId, final CalendarData data, final GuildSettings settings) {
+        return EventWrapper.getEvent(data, settings, eventId).map(TimeUtils::isInPast);
     }
 
 
-    public static boolean endBeforeStart(String endRaw, TimeZone timezone, PreEvent event) {
+    public static boolean hasEndBeforeStart(final String endRaw, final TimeZone timezone, final PreEvent event) {
         if (event.getStartDateTime() != null) {
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
-                Date endDate = sdf.parse(endRaw);
-                Date startDate = new Date(event.getStartDateTime().getDateTime().getValue());
+                final Date endDate = sdf.parse(endRaw);
+                final Date startDate = new Date(event.getStartDateTime().getDateTime().getValue());
 
                 return endDate.before(startDate);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean startAfterEnd(String startRaw, TimeZone timezone, PreEvent event) {
+    public static boolean hasStartAfterEnd(final String startRaw, final TimeZone timezone, final PreEvent event) {
         if (event.getEndDateTime() != null) {
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
-                Date startDate = sdf.parse(startRaw);
-                Date endDate = new Date(event.getEndDateTime().getDateTime().getValue());
+                final Date startDate = sdf.parse(startRaw);
+                final Date endDate = new Date(event.getEndDateTime().getDateTime().getValue());
 
                 return startDate.after(endDate);
-            } catch (ParseException e) {
+            } catch (final ParseException e) {
                 return true;
             }
         }
         return false;
     }
 
-    public static long applyTimeZoneOffset(long epochTime, String timezone) {
-        long timeZoneOffset = TimeZone.getTimeZone(ZoneId.of(timezone)).getRawOffset();
-        long chicagoOffset = TimeZone.getTimeZone(ZoneId.of("UTC")).getRawOffset();
+    public static long applyTimeZoneOffset(final long epochTime, final String timezone) {
+        final long timeZoneOffset = TimeZone.getTimeZone(ZoneId.of(timezone)).getRawOffset();
+        final long chicagoOffset = TimeZone.getTimeZone(ZoneId.of("UTC")).getRawOffset();
 
-        long toAdd = timeZoneOffset - chicagoOffset;
+        final long toAdd = timeZoneOffset - chicagoOffset;
 
         return epochTime + toAdd;
     }

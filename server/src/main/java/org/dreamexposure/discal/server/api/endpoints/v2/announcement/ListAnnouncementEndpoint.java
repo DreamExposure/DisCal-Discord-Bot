@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONArray;
@@ -24,9 +25,9 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/announcement")
 public class ListAnnouncementEndpoint {
     @PostMapping(value = "/list", produces = "application/json")
-    public String listAnnouncements(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public String listAnnouncements(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
@@ -35,17 +36,17 @@ public class ListAnnouncementEndpoint {
 
         //Okay, now handle actual request.
         try {
-            JSONObject body = new JSONObject(requestBody);
-            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
-            int amount = body.getInt("amount");
+            final JSONObject body = new JSONObject(requestBody);
+            final Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+            final int amount = body.getInt("amount");
 
-            JSONArray jAnnouncements = new JSONArray();
+            final JSONArray jAnnouncements = new JSONArray();
             if (amount < 1) {
-                for (Announcement a : DatabaseManager.getAnnouncements(guildId).block())
+                for (final Announcement a : DatabaseManager.getAnnouncements(guildId).block())
                     jAnnouncements.put(a.toJson());
             } else {
                 int i = 0;
-                for (Announcement a : DatabaseManager.getAnnouncements(guildId).block()) {
+                for (final Announcement a : DatabaseManager.getAnnouncements(guildId).block()) {
                     if (i < amount) {
                         jAnnouncements.put(a.toJson());
                         i++;
@@ -54,25 +55,25 @@ public class ListAnnouncementEndpoint {
                 }
             }
 
-            JSONObject responseBody = new JSONObject();
+            final JSONObject responseBody = new JSONObject();
             responseBody.put("message", "Listed announcements successfully");
             responseBody.put("announcements", jAnnouncements);
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return responseBody.toString();
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "List announcements err", e, this.getClass()));
+                .forException("[API-v2]", "List announcements err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

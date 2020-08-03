@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.object.web;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
 
-import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.entity.channel.GuildChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -13,22 +13,22 @@ import discord4j.core.object.entity.channel.TextChannel;
 public class WebChannel {
 
 
-    public static WebChannel fromChannel(TextChannel c, GuildSettings settings) {
-        boolean dc = settings.getDiscalChannel().equalsIgnoreCase(c.getId().asString());
+    public static WebChannel fromChannel(final GuildChannel channel, final GuildSettings settings) {
+        final boolean dc = settings.getDiscalChannel().equalsIgnoreCase(channel.getId().asString());
 
-        return new WebChannel(c.getId().asLong(), c.getName(), dc);
+        return new WebChannel(channel.getId().asLong(), channel.getName(), dc);
     }
 
-    public static WebChannel fromJson(JSONObject json) {
-        long id = Long.parseLong(json.getString("id"));
-        String name = json.getString("name");
-        boolean discalChannel = json.getBoolean("discal_channel");
+    public static WebChannel fromJson(final JSONObject json) {
+        final long id = Long.parseLong(json.getString("id"));
+        final String name = json.getString("name");
+        final boolean discalChannel = json.getBoolean("discal_channel");
 
         return new WebChannel(id, name, discalChannel);
     }
 
-    public static WebChannel all(GuildSettings settings) {
-        boolean dc = settings.getDiscalChannel().equalsIgnoreCase("all");
+    public static WebChannel all(final GuildSettings settings) {
+        final boolean dc = "all".equalsIgnoreCase(settings.getDiscalChannel());
 
         return new WebChannel(0, "All Channels", dc);
     }
@@ -38,7 +38,7 @@ public class WebChannel {
 
     private final boolean discalChannel;
 
-    private WebChannel(long id, String name, boolean discalChannel) {
+    private WebChannel(final long id, final String name, final boolean discalChannel) {
         this.id = id;
         this.name = name;
         this.discalChannel = discalChannel;
@@ -46,23 +46,23 @@ public class WebChannel {
 
     //Getters
     public long getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public boolean isDiscalChannel() {
-        return discalChannel;
+        return this.discalChannel;
     }
 
     public JSONObject toJson() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("id", String.valueOf(id));
-        data.put("name", name);
-        data.put("discal_channel", discalChannel);
+        data.put("id", String.valueOf(this.id));
+        data.put("name", this.name);
+        data.put("discal_channel", this.discalChannel);
 
         return data;
     }

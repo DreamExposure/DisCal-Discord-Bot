@@ -10,19 +10,19 @@ import discord4j.common.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarData {
-    public static CalendarData fromJson(JSONObject json) {
-        Snowflake guildId = Snowflake.of(json.getString("guild_id"));
-        int calendarNumber = json.getInt("calendar_number");
+    public static CalendarData fromJson(final JSONObject json) {
+        final Snowflake guildId = Snowflake.of(json.getString("guild_id"));
+        final int calendarNumber = json.getInt("calendar_number");
 
-        String calendarId = json.getString("calendar_id");
-        String calendarAddress = json.getString("calendar_address");
-        boolean external = json.getBoolean("external");
+        final String calendarId = json.getString("calendar_id");
+        final String calendarAddress = json.getString("calendar_address");
+        final boolean external = json.getBoolean("external");
 
         return new CalendarData(guildId, calendarNumber, calendarId, calendarAddress, external);
     }
 
-    public static CalendarData fromData(Snowflake gId, int calNum, String calId,
-                                        String calAddr, boolean ext) {
+    public static CalendarData fromData(final Snowflake gId, final int calNum, final String calId,
+                                        final String calAddr, final boolean ext) {
         return new CalendarData(gId, calNum, calId, calAddr, ext);
     }
 
@@ -38,8 +38,8 @@ public class CalendarData {
 
     private final boolean external;
 
-    private CalendarData(Snowflake guildId, int calendarNumber, String calendarId,
-                         String calendarAddress, boolean external) {
+    private CalendarData(final Snowflake guildId, final int calendarNumber, final String calendarId,
+                         final String calendarAddress, final boolean external) {
         this.guildId = guildId;
         this.calendarNumber = calendarNumber;
         this.calendarId = calendarId;
@@ -49,33 +49,33 @@ public class CalendarData {
 
     //Getters
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     public int getCalendarNumber() {
-        return calendarNumber;
+        return this.calendarNumber;
     }
 
     public String getCalendarId() {
-        return calendarId;
+        return this.calendarId;
     }
 
     public String getCalendarAddress() {
-        return calendarAddress;
+        return this.calendarAddress;
     }
 
     public boolean isExternal() {
-        return external;
+        return this.external;
     }
 
     public JSONObject toJson() {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
 
-        json.put("guild_id", guildId.asString());
-        json.put("calendar_number", calendarNumber);
-        json.put("calendar_id", calendarId);
-        json.put("calendar_address", calendarAddress);
-        json.put("external", external);
+        json.put("guild_id", this.guildId.asString());
+        json.put("calendar_number", this.calendarNumber);
+        json.put("calendar_id", this.calendarId);
+        json.put("calendar_address", this.calendarAddress);
+        json.put("external", this.external);
 
         return json;
     }

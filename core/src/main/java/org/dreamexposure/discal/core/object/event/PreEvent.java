@@ -52,72 +52,72 @@ public class PreEvent {
      *
      * @param _guildId The ID of the guild.
      */
-    public PreEvent(Snowflake _guildId) {
-        guildId = _guildId;
-        eventId = "N/a";
+    public PreEvent(final Snowflake _guildId) {
+        this.guildId = _guildId;
+        this.eventId = "N/a";
 
-        timeZone = "Unknown";
+        this.timeZone = "Unknown";
 
-        color = EventColor.NONE;
+        this.color = EventColor.NONE;
 
-        recur = false;
-        recurrence = new Recurrence();
+        this.recur = false;
+        this.recurrence = new Recurrence();
 
-        eventData = EventData.empty();
+        this.eventData = EventData.empty();
 
-        editing = false;
-        lastEdit = System.currentTimeMillis();
+        this.editing = false;
+        this.lastEdit = System.currentTimeMillis();
     }
 
-    public PreEvent(Snowflake _guildId, Event e) {
-        guildId = _guildId;
-        eventId = e.getId();
+    public PreEvent(final Snowflake _guildId, final Event e) {
+        this.guildId = _guildId;
+        this.eventId = e.getId();
 
-        color = EventColor.fromNameOrHexOrID(e.getColorId());
+        this.color = EventColor.fromNameOrHexOrID(e.getColorId());
 
-        recurrence = new Recurrence();
+        this.recurrence = new Recurrence();
 
-        if (e.getRecurrence() != null && e.getRecurrence().size() > 0) {
-            recur = true;
-            recurrence.fromRRule(e.getRecurrence().get(0));
+        if (e.getRecurrence() != null && !e.getRecurrence().isEmpty()) {
+            this.recur = true;
+            this.recurrence.fromRRule(e.getRecurrence().get(0));
         }
 
         if (e.getSummary() != null)
-            summary = e.getSummary();
+            this.summary = e.getSummary();
 
         if (e.getDescription() != null)
-            description = e.getDescription();
+            this.description = e.getDescription();
 
         if (e.getLocation() != null)
-            location = e.getLocation();
+            this.location = e.getLocation();
 
 
-        startDateTime = e.getStart();
-        endDateTime = e.getEnd();
+        this.startDateTime = e.getStart();
+        this.endDateTime = e.getEnd();
 
         //Here is where I need to fix the display times
-        GuildSettings settings = DatabaseManager.getSettings(guildId).block();
+        final GuildSettings settings = DatabaseManager.getSettings(this.guildId).block();
         //TODO: Support multiple calendars
-        CalendarData data = DatabaseManager.getMainCalendar(guildId).block();
+        final CalendarData data = DatabaseManager.getMainCalendar(this.guildId).block();
 
         Calendar cal = null;
         try {
             cal = CalendarWrapper.getCalendar(data, settings).block();
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             LogFeed.log(LogObject
-                    .forException("Failed to get proper data time for event!", ex, this.getClass()));
+                .forException("Failed to get proper data time for event!", ex, this.getClass()));
         }
 
         if (cal != null) {
-            timeZone = cal.getTimeZone();
+            this.timeZone = cal.getTimeZone();
         } else {
-            timeZone = "ERROR/Unknown";
+            this.timeZone = "ERROR/Unknown";
         }
 
-        eventData = DatabaseManager.getEventData(guildId, e.getId()).block();
+        this.eventData = DatabaseManager.getEventData(this.guildId, e.getId()).block();
 
-        editing = false;
-        lastEdit = System.currentTimeMillis();
+        this.editing = false;
+        this.lastEdit = System.currentTimeMillis();
     }
 
     //Getters
@@ -128,11 +128,11 @@ public class PreEvent {
      * @return The ID of the guild who owns this PreEvent.
      */
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     public String getEventId() {
-        return eventId;
+        return this.eventId;
     }
 
     /**
@@ -141,7 +141,7 @@ public class PreEvent {
      * @return The event summary.
      */
     public String getSummary() {
-        return summary;
+        return this.summary;
     }
 
     /**
@@ -150,7 +150,7 @@ public class PreEvent {
      * @return The description.
      */
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     /**
@@ -159,7 +159,7 @@ public class PreEvent {
      * @return The start date and time.
      */
     public EventDateTime getStartDateTime() {
-        return startDateTime;
+        return this.startDateTime;
     }
 
     /**
@@ -168,7 +168,7 @@ public class PreEvent {
      * @return The end date and time.
      */
     public EventDateTime getEndDateTime() {
-        return endDateTime;
+        return this.endDateTime;
     }
 
     /**
@@ -177,7 +177,7 @@ public class PreEvent {
      * @return The timezone of the event.
      */
     public String getTimeZone() {
-        return timeZone;
+        return this.timeZone;
     }
 
     /**
@@ -186,20 +186,20 @@ public class PreEvent {
      * @return The valid color for this event.
      */
     public EventColor getColor() {
-        return color;
+        return this.color;
     }
 
     public String getLocation() {
-        return location;
+        return this.location;
     }
 
     /**
      * Gets whether or not the vent should recur.
      *
-     * @return <code>true</code> if recurring, otherwise <code>false</code>.
+     * @return {@code true} if recurring, otherwise {@code false}.
      */
     public boolean shouldRecur() {
-        return recur;
+        return this.recur;
     }
 
     /**
@@ -208,23 +208,23 @@ public class PreEvent {
      * @return The recurrence rules and info for the event.
      */
     public Recurrence getRecurrence() {
-        return recurrence;
+        return this.recurrence;
     }
 
     public EventData getEventData() {
-        return eventData;
+        return this.eventData;
     }
 
     public boolean isEditing() {
-        return editing;
+        return this.editing;
     }
 
     public Message getCreatorMessage() {
-        return creatorMessage;
+        return this.creatorMessage;
     }
 
     public long getLastEdit() {
-        return lastEdit;
+        return this.lastEdit;
     }
 
     //Setters
@@ -234,8 +234,8 @@ public class PreEvent {
      *
      * @param _summary The summary of the vent.
      */
-    public void setSummary(String _summary) {
-        summary = _summary;
+    public void setSummary(final String _summary) {
+        this.summary = _summary;
     }
 
     /**
@@ -243,8 +243,8 @@ public class PreEvent {
      *
      * @param _description The description of the event.
      */
-    public void setDescription(String _description) {
-        description = _description;
+    public void setDescription(final String _description) {
+        this.description = _description;
     }
 
     /**
@@ -252,8 +252,8 @@ public class PreEvent {
      *
      * @param _startDateTime The start date and time of the event.
      */
-    public void setStartDateTime(EventDateTime _startDateTime) {
-        startDateTime = _startDateTime;
+    public void setStartDateTime(final EventDateTime _startDateTime) {
+        this.startDateTime = _startDateTime;
     }
 
     /**
@@ -261,8 +261,8 @@ public class PreEvent {
      *
      * @param _endDateTime The end date and time of the event.
      */
-    public void setEndDateTime(EventDateTime _endDateTime) {
-        endDateTime = _endDateTime;
+    public void setEndDateTime(final EventDateTime _endDateTime) {
+        this.endDateTime = _endDateTime;
     }
 
     /**
@@ -270,8 +270,8 @@ public class PreEvent {
      *
      * @param _timeZone The timezone of the event.
      */
-    public void setTimeZone(String _timeZone) {
-        timeZone = _timeZone;
+    public void setTimeZone(final String _timeZone) {
+        this.timeZone = _timeZone;
     }
 
     /**
@@ -279,12 +279,12 @@ public class PreEvent {
      *
      * @param _color The valid color for this event.
      */
-    public void setColor(EventColor _color) {
-        color = _color;
+    public void setColor(final EventColor _color) {
+        this.color = _color;
     }
 
-    public void setLocation(String _location) {
-        location = _location;
+    public void setLocation(final String _location) {
+        this.location = _location;
     }
 
     /**
@@ -292,24 +292,24 @@ public class PreEvent {
      *
      * @param _recur Whether or not the event should recur.
      */
-    public void setShouldRecur(boolean _recur) {
-        recur = _recur;
+    public void setShouldRecur(final boolean _recur) {
+        this.recur = _recur;
     }
 
-    public void setEventData(EventData _data) {
-        eventData = _data;
+    public void setEventData(final EventData _data) {
+        this.eventData = _data;
     }
 
-    public void setEditing(boolean _editing) {
-        editing = _editing;
+    public void setEditing(final boolean _editing) {
+        this.editing = _editing;
     }
 
-    public void setCreatorMessage(Message _creatorMessage) {
-        creatorMessage = _creatorMessage;
+    public void setCreatorMessage(final Message _creatorMessage) {
+        this.creatorMessage = _creatorMessage;
     }
 
-    public void setLastEdit(long _lastEdit) {
-        lastEdit = _lastEdit;
+    public void setLastEdit(final long _lastEdit) {
+        this.lastEdit = _lastEdit;
     }
 
     //Booleans/Checkers
@@ -317,9 +317,9 @@ public class PreEvent {
     /**
      * Whether or not the event has all required values to be created.
      *
-     * @return <code>true</code> if required values set, otherwise <code>false</code>.
+     * @return {@code true} if required values set, otherwise {@code false}.
      */
     public boolean hasRequiredValues() {
-        return startDateTime != null && endDateTime != null;
+        return this.startDateTime != null && this.endDateTime != null;
     }
 }

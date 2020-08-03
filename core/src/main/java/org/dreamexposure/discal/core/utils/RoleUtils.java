@@ -12,16 +12,15 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("ConstantConditions")
 public class RoleUtils {
-    public static Mono<Role> getRoleFromID(String id, MessageCreateEvent event) {
+    public static Mono<Role> getRoleFromID(final String id, final MessageCreateEvent event) {
         return event.getGuild()
             .flatMapMany(Guild::getRoles)
             .filter(r -> id.equals(r.getId().asString()) || id.equalsIgnoreCase(r.getName()))
             .next();
     }
 
-    public static Mono<Role> getRoleFromID(String id, Guild guild) {
+    public static Mono<Role> getRoleFromID(final String id, final Guild guild) {
         return Mono.just(id)
             .filter(s -> !s.isEmpty())
             .filter(s -> s.matches("[0-9]+"))
@@ -29,19 +28,19 @@ public class RoleUtils {
                 .onErrorResume(e -> Mono.empty()));
     }
 
-    public static Mono<Boolean> roleExists(String id, MessageCreateEvent event) {
+    public static Mono<Boolean> roleExists(final String id, final MessageCreateEvent event) {
         return getRoleFromID(id, event).hasElement();
     }
 
-    public static Mono<String> getRoleNameFromID(String id, MessageCreateEvent event) {
+    public static Mono<String> getRoleNameFromID(final String id, final MessageCreateEvent event) {
         return getRoleFromID(id, event).map(Role::getName);
     }
 
-    public static Mono<Snowflake> getRoleId(String toLookFor, Message m) {
-        return m.getGuild().flatMap(g -> getRoleId(toLookFor, g));
+    public static Mono<Snowflake> getRoleId(final String toLookFor, final Message message) {
+        return message.getGuild().flatMap(g -> getRoleId(toLookFor, g));
     }
 
-    public static Mono<Snowflake> getRoleId(String toLookFor, Guild guild) {
+    public static Mono<Snowflake> getRoleId(String toLookFor, final Guild guild) {
         toLookFor = GeneralUtils.trim(toLookFor);
         final String lower = toLookFor.toLowerCase();
         if (lower.matches("@&[0-9]+") || lower.matches("[0-9]+")) {
@@ -60,11 +59,11 @@ public class RoleUtils {
             .map(Role::getId);
     }
 
-    public static Mono<Role> getRole(String toLookFor, Message m) {
-        return m.getGuild().flatMap(g -> getRole(toLookFor, g));
+    public static Mono<Role> getRole(final String toLookFor, final Message message) {
+        return message.getGuild().flatMap(g -> getRole(toLookFor, g));
     }
 
-    public static Mono<Role> getRole(String toLookFor, Guild guild) {
+    public static Mono<Role> getRole(String toLookFor, final Guild guild) {
         toLookFor = GeneralUtils.trim(toLookFor);
         final String lower = toLookFor.toLowerCase();
         if (lower.matches("@&[0-9]+") || lower.matches("[0-9]+")) {

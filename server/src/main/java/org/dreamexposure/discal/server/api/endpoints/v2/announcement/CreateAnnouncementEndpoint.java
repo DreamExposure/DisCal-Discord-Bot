@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -26,25 +27,25 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/announcement")
 public class CreateAnnouncementEndpoint {
     @PostMapping(value = "/create", produces = "application/json")
-    public String createAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public String createAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject body = new JSONObject(requestBody);
-            Snowflake guildId = Snowflake.of(body.getString("guild_id"));
+            final JSONObject body = new JSONObject(requestBody);
+            final Snowflake guildId = Snowflake.of(body.getString("guild_id"));
 
-            Announcement a = new Announcement(guildId);
+            final Announcement a = new Announcement(guildId);
 
             a.setAnnouncementChannelId(body.getString("channel"));
             a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
@@ -70,30 +71,30 @@ public class CreateAnnouncementEndpoint {
                 a.setInfoOnly(body.getBoolean("info_only"));
 
             if (DatabaseManager.updateAnnouncement(a).block()) {
-                JSONObject responseBody = new JSONObject();
+                final JSONObject responseBody = new JSONObject();
                 responseBody.put("message", "Announcement successfully created");
                 responseBody.put("announcement_id", a.getAnnouncementId().toString());
 
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
                 return responseBody.toString();
             }
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "create announcement err", e, this.getClass()));
+                .forException("[API-v2]", "create announcement err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

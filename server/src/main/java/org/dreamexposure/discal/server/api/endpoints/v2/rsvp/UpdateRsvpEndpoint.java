@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONArray;
@@ -23,49 +24,51 @@ import discord4j.common.util.Snowflake;
 @RestController
 @RequestMapping("/v2/rsvp")
 public class UpdateRsvpEndpoint {
+    @SuppressWarnings("ConstantConditions")
     @PostMapping(value = "/update", produces = "application/json")
-    public String updateRsvp(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String updateRsvp(final HttpServletRequest request, final HttpServletResponse response,
+                             @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject requestBody = new JSONObject(rBody);
+            final JSONObject requestBody = new JSONObject(rBody);
 
-            String guildId = requestBody.getString("guild_id");
-            String eventId = requestBody.getString("event_id");
+            final String guildId = requestBody.getString("guild_id");
+            final String eventId = requestBody.getString("event_id");
 
-            RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
+            final RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
             //Handle additions...
             if (requestBody.has("to_add")) {
-                JSONObject jToAdd = requestBody.getJSONObject("to_add");
+                final JSONObject jToAdd = requestBody.getJSONObject("to_add");
                 if (jToAdd.has("on_time")) {
-                    JSONArray ar = jToAdd.getJSONArray("on_time");
+                    final JSONArray ar = jToAdd.getJSONArray("on_time");
                     for (int i = 0; i < jToAdd.length(); i++)
                         rsvp.getGoingOnTime().add(ar.getString(i));
                 }
                 if (jToAdd.has("late")) {
-                    JSONArray ar = jToAdd.getJSONArray("late");
+                    final JSONArray ar = jToAdd.getJSONArray("late");
                     for (int i = 0; i < jToAdd.length(); i++)
                         rsvp.getGoingLate().add(ar.getString(i));
                 }
                 if (jToAdd.has("not_going")) {
-                    JSONArray ar = jToAdd.getJSONArray("not_going");
+                    final JSONArray ar = jToAdd.getJSONArray("not_going");
                     for (int i = 0; i < jToAdd.length(); i++)
                         rsvp.getNotGoing().add(ar.getString(i));
                 }
                 if (jToAdd.has("undecided")) {
-                    JSONArray ar = jToAdd.getJSONArray("undecided");
+                    final JSONArray ar = jToAdd.getJSONArray("undecided");
                     for (int i = 0; i < jToAdd.length(); i++)
                         rsvp.getUndecided().add(ar.getString(i));
                 }
@@ -73,24 +76,24 @@ public class UpdateRsvpEndpoint {
 
             //handle removals...
             if (requestBody.has("to_remove")) {
-                JSONObject jToRemove = requestBody.getJSONObject("to_remove");
+                final JSONObject jToRemove = requestBody.getJSONObject("to_remove");
                 if (jToRemove.has("on_time")) {
-                    JSONArray ar = jToRemove.getJSONArray("on_time");
+                    final JSONArray ar = jToRemove.getJSONArray("on_time");
                     for (int i = 0; i < jToRemove.length(); i++)
                         rsvp.getGoingOnTime().remove(ar.getString(i));
                 }
                 if (jToRemove.has("late")) {
-                    JSONArray ar = jToRemove.getJSONArray("late");
+                    final JSONArray ar = jToRemove.getJSONArray("late");
                     for (int i = 0; i < jToRemove.length(); i++)
                         rsvp.getGoingLate().remove(ar.getString(i));
                 }
                 if (jToRemove.has("not_going")) {
-                    JSONArray ar = jToRemove.getJSONArray("not_going");
+                    final JSONArray ar = jToRemove.getJSONArray("not_going");
                     for (int i = 0; i < jToRemove.length(); i++)
                         rsvp.getNotGoing().remove(ar.getString(i));
                 }
                 if (jToRemove.has("undecided")) {
-                    JSONArray ar = jToRemove.getJSONArray("undecided");
+                    final JSONArray ar = jToRemove.getJSONArray("undecided");
                     for (int i = 0; i < jToRemove.length(); i++)
                         rsvp.getUndecided().remove(ar.getString(i));
                 }
@@ -98,29 +101,29 @@ public class UpdateRsvpEndpoint {
 
             if (DatabaseManager.updateRsvpData(rsvp).block()) {
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
 
                 return JsonUtils.getJsonResponseMessage("RSVP successfully updated");
             }
 
             //Shouldn't get here, but if we did, the update probably failed...
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
 
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
 
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "Failed to get RSVP", e, this.getClass()));
+                .forException("[API-v2]", "Failed to get RSVP", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
 
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }

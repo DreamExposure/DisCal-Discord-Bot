@@ -36,7 +36,7 @@ public class TimeCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -66,21 +66,21 @@ public class TimeCommand implements Command {
      * @param args     The command arguments.
      * @param event    The event received.
      * @param settings The guild settings.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        return calendarTime(event, settings);
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+        return this.calendarTime(event, settings);
     }
 
     //TODO: Support multiple calendars
-    private Mono<Void> calendarTime(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> calendarTime(final MessageCreateEvent event, final GuildSettings settings) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(calData ->
                 CalendarWrapper.getCalendar(calData, settings).flatMap(cal -> {
-                    LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
-                    DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
-                    String correctTime = fmt.format(ldt);
+                    final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
+                    final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+                    final String correctTime = fmt.format(ldt);
 
                     return event.getGuild().flatMap(guild ->
                         Messages.sendMessage(embed -> {

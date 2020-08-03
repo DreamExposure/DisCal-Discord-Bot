@@ -8,35 +8,35 @@ public class UserAPIAccount {
 
     //Getters
     public String getUserId() {
-        return userId;
+        return this.userId;
     }
 
     public String getAPIKey() {
-        return APIKey;
+        return this.APIKey;
     }
 
     public boolean isBlocked() {
-        return blocked;
+        return this.blocked;
     }
 
     public long getTimeIssued() {
-        return timeIssued;
+        return this.timeIssued;
     }
 
     //Setters
-    public void setUserId(String _userId) {
-        userId = _userId;
+    public void setUserId(final String _userId) {
+        this.userId = _userId;
     }
 
-    public void setAPIKey(String _apiKey) {
-        APIKey = _apiKey;
+    public void setAPIKey(final String _apiKey) {
+        this.APIKey = _apiKey;
     }
 
-    public void setBlocked(boolean _blocked) {
-        blocked = _blocked;
+    public void setBlocked(final boolean _blocked) {
+        this.blocked = _blocked;
     }
 
-    public void setTimeIssued(long _time) {
-        timeIssued = _time;
+    public void setTimeIssued(final long _time) {
+        this.timeIssued = _time;
     }
 }

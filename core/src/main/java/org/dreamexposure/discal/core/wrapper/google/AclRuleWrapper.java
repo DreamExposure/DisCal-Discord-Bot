@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 public class AclRuleWrapper {
-    public static Mono<AclRule> insertRule(AclRule rule, String calendarId, GuildSettings settings) {
+    public static Mono<AclRule> insertRule(final AclRule rule, final String calendarId, final GuildSettings settings) {
         return CalendarAuth.getCalendarService(settings)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.acl()

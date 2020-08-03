@@ -30,14 +30,14 @@ public class LinkCalendarCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
      */
     @Override
     public ArrayList<String> getAliases() {
-        ArrayList<String> aliases = new ArrayList<>();
+        final ArrayList<String> aliases = new ArrayList<>();
         aliases.add("linkcal");
         aliases.add("calendarlink");
         aliases.add("callink");
@@ -64,10 +64,10 @@ public class LinkCalendarCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         //TODO: Support multiple calendars...
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(calData -> CalendarWrapper.getCalendar(calData, settings)

@@ -3,12 +3,12 @@ package org.dreamexposure.discal.core.enums.announcement;
 public enum AnnouncementModifier {
     BEFORE, DURING, END;
 
-    public static Boolean isValid(String _value) {
-        return _value.equalsIgnoreCase("BEFORE") || _value.equalsIgnoreCase("B4") || _value.equalsIgnoreCase("DURING")
-            || _value.equalsIgnoreCase("END");
+    public static boolean isValid(final String _value) {
+        return "BEFORE".equalsIgnoreCase(_value) || "B4".equalsIgnoreCase(_value) || "DURING".equalsIgnoreCase(_value)
+            || "END".equalsIgnoreCase(_value);
     }
 
-    public static AnnouncementModifier fromValue(String value) {
+    public static AnnouncementModifier fromValue(final String value) {
         switch (value.toUpperCase()) {
             case "DURING":
                 return DURING;

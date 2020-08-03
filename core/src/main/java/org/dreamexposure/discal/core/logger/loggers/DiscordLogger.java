@@ -14,80 +14,81 @@ import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 
+@SuppressWarnings("MagicNumber")
 public class DiscordLogger implements Logger {
     private final WebhookClient debugClient;
     private final WebhookClient exceptionClient;
     private final WebhookClient statusClient;
 
-    public DiscordLogger(WebhookClient debug, WebhookClient exception, WebhookClient status) {
+    public DiscordLogger(final WebhookClient debug, final WebhookClient exception, final WebhookClient status) {
         this.debugClient = debug;
         this.exceptionClient = exception;
         this.statusClient = status;
     }
 
     @Override
-    public void write(LogObject log) {
+    public void write(final LogObject log) {
         switch (log.getType()) {
             case STATUS:
-                writeStatus(log);
+                this.writeStatus(log);
                 break;
             case DEBUG:
-                writeDebug(log);
+                this.writeDebug(log);
                 break;
             case EXCEPTION:
-                writeException(log);
+                this.writeException(log);
                 break;
             default:
                 break;
         }
     }
 
-    private void writeStatus(LogObject log) {
-        WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-                .setTitle(new WebhookEmbed.EmbedTitle("Status", null))
-                .addField(new WebhookEmbed
-                        .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-                .addField(new WebhookEmbed
-                        .EmbedField(false, "Time", log.getTimestamp()))
-                .setDescription(log.getMessage())
-                .setColor(GlobalConst.discalColor.getRGB())
-                .setTimestamp(Instant.now());
+    private void writeStatus(final LogObject log) {
+        final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+            .setTitle(new WebhookEmbed.EmbedTitle("Status", null))
+            .addField(new WebhookEmbed
+                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+            .addField(new WebhookEmbed
+                .EmbedField(false, "Time", log.getTimestamp()))
+            .setDescription(log.getMessage())
+            .setColor(GlobalConst.discalColor.getRGB())
+            .setTimestamp(Instant.now());
 
         if (log.getInfo() != null) {
             builder.addField(new WebhookEmbed
-                    .EmbedField(false, "Info", log.getInfo()));
+                .EmbedField(false, "Info", log.getInfo()));
         }
 
-        statusClient.send(builder.build());
+        this.statusClient.send(builder.build());
     }
 
-    private void writeDebug(LogObject log) {
-        WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-                .setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
-                .addField(new WebhookEmbed
-                        .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-                .addField(new WebhookEmbed
-                        .EmbedField(false, "Time", log.getTimestamp()))
-                .setDescription(log.getMessage())
-                .setColor(GlobalConst.discalColor.getRGB())
-                .setTimestamp(Instant.now());
+    private void writeDebug(final LogObject log) {
+        final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+            .setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
+            .addField(new WebhookEmbed
+                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+            .addField(new WebhookEmbed
+                .EmbedField(false, "Time", log.getTimestamp()))
+            .setDescription(log.getMessage())
+            .setColor(GlobalConst.discalColor.getRGB())
+            .setTimestamp(Instant.now());
 
         if (log.getInfo() != null) {
             builder.addField(new WebhookEmbed.EmbedField(false, "Info", log.getInfo()));
         }
 
-        debugClient.send(builder.build());
+        this.debugClient.send(builder.build());
     }
 
-    private void writeException(LogObject log) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+    private void writeException(final LogObject log) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw);
         log.getException().printStackTrace(pw);
         String error = sw.toString(); // stack trace as a string
         pw.close();
         try {
             sw.close();
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             //Can ignore silently...
         }
 
@@ -95,23 +96,23 @@ public class DiscordLogger implements Logger {
         if (error.length() > 1500)
             error = error.substring(0, 1500);
 
-        WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
-                .setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
-                .addField(new WebhookEmbed
-                        .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
-                .addField(new WebhookEmbed
-                        .EmbedField(false, "Class", log.getClazz().getName()))
-                .addField(new WebhookEmbed
-                        .EmbedField(false, "Time", log.getTimestamp()))
-                .addField(new WebhookEmbed
-                        .EmbedField(false, "Message", log.getMessage()))
-                .setDescription(error)
-                .setColor(GlobalConst.discalColor.getRGB())
-                .setTimestamp(Instant.now());
+        final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
+            .setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
+            .addField(new WebhookEmbed
+                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+            .addField(new WebhookEmbed
+                .EmbedField(false, "Class", log.getClazz().getName()))
+            .addField(new WebhookEmbed
+                .EmbedField(false, "Time", log.getTimestamp()))
+            .addField(new WebhookEmbed
+                .EmbedField(false, "Message", log.getMessage()))
+            .setDescription(error)
+            .setColor(GlobalConst.discalColor.getRGB())
+            .setTimestamp(Instant.now());
         if (log.getInfo() != null) {
             builder.addField(new WebhookEmbed.EmbedField(false, "Info", log.getInfo()));
         }
 
-        exceptionClient.send(builder.build());
+        this.exceptionClient.send(builder.build());
     }
 }

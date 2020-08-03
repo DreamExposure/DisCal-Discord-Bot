@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
  */
 //TODO: Basically rewrite this whole class in order to support multi-cal!!!!!
 public class CalendarCommand implements Command {
-    private final String TIME_ZONE_DB = "http://www.joda.org/joda-time/timezones.html";
+    private static final String TIME_ZONE_DB = "http://www.joda.org/joda-time/timezones.html";
 
     /**
      * Gets the command this Object is responsible for.
@@ -39,14 +39,14 @@ public class CalendarCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
      */
     @Override
     public ArrayList<String> getAliases() {
-        ArrayList<String> aliases = new ArrayList<>();
+        final ArrayList<String> aliases = new ArrayList<>();
         aliases.add("cal");
         aliases.add("callador");
         return aliases;
@@ -59,7 +59,7 @@ public class CalendarCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
+        final CommandInfo info = new CommandInfo(
             "calendar",
             "Used for direct interaction with your DisCal Calendar.",
             "!calendar <subCommand> (value)"
@@ -86,10 +86,10 @@ public class CalendarCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length < 1) {
                 return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
@@ -102,7 +102,7 @@ public class CalendarCommand implements Command {
                                 return PermissionChecker.hasDisCalRole(event, settings)
                                     .flatMap(has -> {
                                         if (has)
-                                            return moduleCreate(args, event, calData, settings);
+                                            return this.moduleCreate(args, event, calData, settings);
                                         else
                                             return Messages.sendMessage(
                                                 Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -111,19 +111,19 @@ public class CalendarCommand implements Command {
                                 return PermissionChecker.hasDisCalRole(event, settings)
                                     .flatMap(has -> {
                                         if (has)
-                                            return moduleCancel(event, calData, settings);
+                                            return this.moduleCancel(event, calData, settings);
                                         else
                                             return Messages.sendMessage(
                                                 Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                     });
                             case "view":
                             case "review":
-                                return moduleView(event, calData, settings);
+                                return this.moduleView(event, calData, settings);
                             case "confirm":
                                 return PermissionChecker.hasDisCalRole(event, settings)
                                     .flatMap(has -> {
                                         if (has)
-                                            return moduleConfirm(event, calData, settings);
+                                            return this.moduleConfirm(event, calData, settings);
                                         else
                                             return Messages.sendMessage(
                                                 Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -133,23 +133,23 @@ public class CalendarCommand implements Command {
                                 return PermissionChecker.hasDisCalRole(event, settings)
                                     .flatMap(has -> {
                                         if (has)
-                                            return moduleDelete(event, calData, settings);
+                                            return this.moduleDelete(event, calData, settings);
                                         else
                                             return Messages.sendMessage(
                                                 Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                     });
                             case "name":
                             case "summary":
-                                return moduleSummary(args, event, calData, settings);
+                                return this.moduleSummary(args, event, calData, settings);
                             case "description":
-                                return moduleDescription(args, event, calData, settings);
+                                return this.moduleDescription(args, event, calData, settings);
                             case "timezone":
-                                return moduleTimezone(args, event, calData, settings);
+                                return this.moduleTimezone(args, event, calData, settings);
                             case "edit":
                                 return PermissionChecker.hasDisCalRole(event, settings)
                                     .flatMap(has -> {
                                         if (has)
-                                            return moduleEdit(event, calData, settings);
+                                            return this.moduleEdit(event, calData, settings);
                                         else
                                             return Messages.sendMessage(
                                                 Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -162,21 +162,21 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCreate(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleCreate(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))
                     .flatMap(embed -> Messages.sendMessage(Messages.getMessage("Creator.Calendar.AlreadyInit", settings), embed, event))
                     .doOnNext(preCal::setCreatorMessage);
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 if (args.length > 1) {
-                    String name = GeneralUtils.getContent(args, 1);
+                    final String name = GeneralUtils.getContent(args, 1);
 
                     return CalendarCreator.getCreator().init(event, name, settings)
                         .then(Messages.deleteMessage(event));
@@ -190,15 +190,15 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCancel(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleCancel(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
                 CalendarCreator.getCreator().terminate(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(Mono.just(preCal.isEditing()))
@@ -207,7 +207,7 @@ public class CalendarCommand implements Command {
                         Messages.sendMessage(Messages.getMessage("Creator.Calendar.Cancel.Success", settings), event)
                     ).switchIfEmpty(Messages.sendMessage(
                         Messages.getMessage("Creator.Calendar.Cancel.Edit.Success", settings), event));
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NotInit", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -215,20 +215,20 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleView(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleView(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Calendar.Review", settings), em, event))
                     .doOnNext(preCal::setCreatorMessage);
 
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -236,34 +236,34 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleConfirm(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleConfirm(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
                 return CalendarCreator.getCreator().confirmCalendar(settings).flatMap(response -> {
                     if (response.isSuccessful()) {
-                        String msg;
+                        final String msg;
                         if (response.isEdited())
                             msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Success", settings);
                         else
                             msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Success", settings);
 
-                        Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                        Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
+                        final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                        final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings))
                             .flatMap(embed -> Messages.sendMessage(msg, embed, event));
                     } else {
                         //Failed, post failure message
-                        PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
-                        String msg;
+                        final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                        final String msg;
                         if (response.isEdited())
                             msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Failure", settings);
                         else
                             msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Failure", settings);
 
-                        Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                        Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
+                        final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                        final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
 
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
@@ -272,7 +272,7 @@ public class CalendarCommand implements Command {
                             .doOnNext(preCal::setCreatorMessage);
                     }
                 });
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -280,21 +280,21 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDelete(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleDelete(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
                 //In creator, can't delete
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))
                     .flatMap(em -> Messages.sendMessage(
                         Messages.getMessage("Creator.Calendar.Delete.Failure.InCreator", settings), em, event))
                     .doOnNext(preCal::setCreatorMessage);
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //No calendar to delete
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.Delete.Failure.NoCalendar", settings), event);
             } else {
@@ -316,13 +316,13 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSummary(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleSummary(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
                 if (args.length > 1) {
                     preCal.setSummary(GeneralUtils.getContent(args, 1));
 
@@ -338,7 +338,7 @@ public class CalendarCommand implements Command {
                             Messages.getMessage("Creator.Calendar.Summary.Specify", settings), em, event))
                         .doOnNext(preCal::setCreatorMessage);
                 }
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -346,13 +346,13 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDescription(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleDescription(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
                 if (args.length > 1) {
                     preCal.setDescription(GeneralUtils.getContent(args, 1));
 
@@ -369,7 +369,7 @@ public class CalendarCommand implements Command {
                             Messages.getMessage("Creator.Calendar.Description.Specify", settings), em, event))
                         .doOnNext(preCal::setCreatorMessage);
                 }
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -377,15 +377,15 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleTimezone(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleTimezone(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCalendarMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCalendarMessage = Messages.deleteMessage(preCal.getCreatorMessage());
                 if (args.length == 2) {
-                    String value = args[1];
+                    final String value = args[1];
 
                     if (TimeZoneUtils.isValid(value)) {
                         preCal.setTimezone(value);
@@ -410,7 +410,7 @@ public class CalendarCommand implements Command {
                             Messages.getMessage("Creator.Calendar.TimeZone.Specify", settings) + TIME_ZONE_DB, em, event))
                         .doOnNext(preCal::setCreatorMessage);
                 }
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -418,20 +418,20 @@ public class CalendarCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEdit(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleEdit(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (!CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+                if (!"primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                     return CalendarCreator.getCreator().edit(event, settings)
                         .then(Messages.deleteMessage(event));
                 } else {
                     return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
                 }
             } else {
-                PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))

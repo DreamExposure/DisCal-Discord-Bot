@@ -48,21 +48,21 @@ public class Announcement {
      *
      * @param _guildId The ID of the Guild this announcement belongs to.
      */
-    public Announcement(Snowflake _guildId) {
-        guildId = _guildId;
-        announcementId = UUID.randomUUID();
-        announcementChannelId = "N/a";
-        eventId = "N/a";
-        eventColor = EventColor.RED;
-        type = AnnouncementType.UNIVERSAL;
-        modifier = AnnouncementModifier.BEFORE;
-        hoursBefore = 0;
-        minutesBefore = 0;
-        info = "None";
-        enabled = true;
-        infoOnly = false;
+    public Announcement(final Snowflake _guildId) {
+        this.guildId = _guildId;
+        this.announcementId = UUID.randomUUID();
+        this.announcementChannelId = "N/a";
+        this.eventId = "N/a";
+        this.eventColor = EventColor.RED;
+        this.type = AnnouncementType.UNIVERSAL;
+        this.modifier = AnnouncementModifier.BEFORE;
+        this.hoursBefore = 0;
+        this.minutesBefore = 0;
+        this.info = "None";
+        this.enabled = true;
+        this.infoOnly = false;
 
-        lastEdit = System.currentTimeMillis();
+        this.lastEdit = System.currentTimeMillis();
     }
 
     /**
@@ -71,69 +71,69 @@ public class Announcement {
      * @param _announcementId The ID of the announcement object.
      * @param _guildId        The ID of the guild the announcement belongs to.
      */
-    public Announcement(UUID _announcementId, Snowflake _guildId) {
-        announcementId = _announcementId;
-        guildId = _guildId;
-        announcementChannelId = "N/a";
-        eventId = "N/a";
-        eventColor = EventColor.RED;
-        type = AnnouncementType.UNIVERSAL;
-        modifier = AnnouncementModifier.BEFORE;
-        hoursBefore = 0;
-        minutesBefore = 0;
-        info = "None";
-        enabled = true;
-        infoOnly = false;
+    public Announcement(final UUID _announcementId, final Snowflake _guildId) {
+        this.announcementId = _announcementId;
+        this.guildId = _guildId;
+        this.announcementChannelId = "N/a";
+        this.eventId = "N/a";
+        this.eventColor = EventColor.RED;
+        this.type = AnnouncementType.UNIVERSAL;
+        this.modifier = AnnouncementModifier.BEFORE;
+        this.hoursBefore = 0;
+        this.minutesBefore = 0;
+        this.info = "None";
+        this.enabled = true;
+        this.infoOnly = false;
 
-        editing = false;
-        lastEdit = System.currentTimeMillis();
+        this.editing = false;
+        this.lastEdit = System.currentTimeMillis();
     }
 
     @SuppressWarnings("CopyConstructorMissesField")
-    public Announcement(Announcement from) {
-        guildId = from.getGuildId();
-        announcementId = UUID.randomUUID();
-        announcementChannelId = from.getAnnouncementChannelId();
-        eventId = from.getEventId();
-        eventColor = from.getEventColor();
-        type = from.getAnnouncementType();
-        modifier = from.getModifier();
-        hoursBefore = from.getHoursBefore();
-        minutesBefore = from.getMinutesBefore();
-        info = from.getInfo();
-        enabled = from.isEnabled();
-        infoOnly = from.isInfoOnly();
+    public Announcement(final Announcement from) {
+        this.guildId = from.getGuildId();
+        this.announcementId = UUID.randomUUID();
+        this.announcementChannelId = from.getAnnouncementChannelId();
+        this.eventId = from.getEventId();
+        this.eventColor = from.getEventColor();
+        this.type = from.getAnnouncementType();
+        this.modifier = from.getModifier();
+        this.hoursBefore = from.getHoursBefore();
+        this.minutesBefore = from.getMinutesBefore();
+        this.info = from.getInfo();
+        this.enabled = from.isEnabled();
+        this.infoOnly = from.isInfoOnly();
 
-        setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
-        setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
+        this.setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
+        this.setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
 
-        editing = false;
-        lastEdit = System.currentTimeMillis();
+        this.editing = false;
+        this.lastEdit = System.currentTimeMillis();
     }
 
-    public Announcement(Announcement from, boolean copyId) {
-        guildId = from.getGuildId();
+    public Announcement(final Announcement from, final boolean copyId) {
+        this.guildId = from.getGuildId();
         if (copyId) {
-            announcementId = from.getAnnouncementId();
+            this.announcementId = from.getAnnouncementId();
         } else {
-            announcementId = UUID.randomUUID();
+            this.announcementId = UUID.randomUUID();
         }
-        announcementChannelId = from.getAnnouncementChannelId();
-        eventId = from.getEventId();
-        eventColor = from.getEventColor();
-        type = from.getAnnouncementType();
-        modifier = from.getModifier();
-        hoursBefore = from.getHoursBefore();
-        minutesBefore = from.getMinutesBefore();
-        info = from.getInfo();
-        enabled = from.isEnabled();
-        infoOnly = from.isInfoOnly();
+        this.announcementChannelId = from.getAnnouncementChannelId();
+        this.eventId = from.getEventId();
+        this.eventColor = from.getEventColor();
+        this.type = from.getAnnouncementType();
+        this.modifier = from.getModifier();
+        this.hoursBefore = from.getHoursBefore();
+        this.minutesBefore = from.getMinutesBefore();
+        this.info = from.getInfo();
+        this.enabled = from.isEnabled();
+        this.infoOnly = from.isInfoOnly();
 
-        setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
-        setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
+        this.setSubscriberRoleIdsFromString(from.getSubscriberRoleIdString());
+        this.setSubscriberUserIdsFromString(from.getSubscriberUserIdString());
 
-        editing = false;
-        lastEdit = System.currentTimeMillis();
+        this.editing = false;
+        this.lastEdit = System.currentTimeMillis();
     }
 
     //Getters
@@ -144,7 +144,7 @@ public class Announcement {
      * @return The ID of the announcement.
      */
     public UUID getAnnouncementId() {
-        return announcementId;
+        return this.announcementId;
     }
 
     /**
@@ -153,7 +153,7 @@ public class Announcement {
      * @return The Guild ID the announcement belongs to.
      */
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     /**
@@ -162,7 +162,7 @@ public class Announcement {
      * @return The ID of the channel the announcement is to be broadcast in.
      */
     public String getAnnouncementChannelId() {
-        return announcementChannelId;
+        return this.announcementChannelId;
     }
 
     /**
@@ -171,7 +171,7 @@ public class Announcement {
      * @return The IDs fo the Roles that are subscribed to the announcement.
      */
     public ArrayList<String> getSubscriberRoleIds() {
-        return subscriberRoleIds;
+        return this.subscriberRoleIds;
     }
 
     /**
@@ -180,7 +180,7 @@ public class Announcement {
      * @return The IDs of the Users that are subscribed to the announcement.
      */
     public ArrayList<String> getSubscriberUserIds() {
-        return subscriberUserIds;
+        return this.subscriberUserIds;
     }
 
     /**
@@ -191,7 +191,7 @@ public class Announcement {
     public String getSubscriberRoleIdString() {
         StringBuilder subs = new StringBuilder();
         int i = 0;
-        for (String sub : subscriberRoleIds) {
+        for (final String sub : this.subscriberRoleIds) {
             if (i == 0) {
                 subs = new StringBuilder(sub);
             } else {
@@ -210,7 +210,7 @@ public class Announcement {
     public String getSubscriberUserIdString() {
         StringBuilder subs = new StringBuilder();
         int i = 0;
-        for (String sub : subscriberUserIds) {
+        for (final String sub : this.subscriberUserIds) {
             if (i == 0) {
                 subs = new StringBuilder(sub);
             } else {
@@ -227,8 +227,8 @@ public class Announcement {
      * @return The type of announcement this is.
      */
     public AnnouncementType getAnnouncementType() {
-        if (type != null)
-            return type;
+        if (this.type != null)
+            return this.type;
         else
             return AnnouncementType.UNIVERSAL;
     }
@@ -243,11 +243,11 @@ public class Announcement {
      * @return The Event ID linked to the announcement.
      */
     public String getEventId() {
-        return eventId;
+        return this.eventId;
     }
 
     public EventColor getEventColor() {
-        return eventColor;
+        return this.eventColor;
     }
 
     /**
@@ -256,7 +256,7 @@ public class Announcement {
      * @return The amount of hours before the event to announce.
      */
     public int getHoursBefore() {
-        return hoursBefore;
+        return this.hoursBefore;
     }
 
     /**
@@ -265,7 +265,7 @@ public class Announcement {
      * @return The amount of minutes before the event to announce.
      */
     public int getMinutesBefore() {
-        return minutesBefore;
+        return this.minutesBefore;
     }
 
     /**
@@ -274,27 +274,27 @@ public class Announcement {
      * @return Extra info for the announcement.
      */
     public String getInfo() {
-        return info;
+        return this.info;
     }
 
     public boolean isEnabled() {
-        return enabled;
+        return this.enabled;
     }
 
     public boolean isInfoOnly() {
-        return infoOnly;
+        return this.infoOnly;
     }
 
     public Message getCreatorMessage() {
-        return creatorMessage;
+        return this.creatorMessage;
     }
 
     public boolean isEditing() {
-        return editing;
+        return this.editing;
     }
 
     public long getLastEdit() {
-        return lastEdit;
+        return this.lastEdit;
     }
 
     //Setters
@@ -304,8 +304,8 @@ public class Announcement {
      *
      * @param _announcementChannelId The ID of the channel to announce in.
      */
-    public void setAnnouncementChannelId(String _announcementChannelId) {
-        announcementChannelId = _announcementChannelId;
+    public void setAnnouncementChannelId(final String _announcementChannelId) {
+        this.announcementChannelId = _announcementChannelId;
     }
 
     /**
@@ -313,11 +313,11 @@ public class Announcement {
      *
      * @param _type The type of the announcement this is.
      */
-    public void setAnnouncementType(AnnouncementType _type) {
-        type = _type;
+    public void setAnnouncementType(final AnnouncementType _type) {
+        this.type = _type;
     }
 
-    public void setModifier(AnnouncementModifier modifier) {
+    public void setModifier(final AnnouncementModifier modifier) {
         this.modifier = modifier;
     }
 
@@ -326,12 +326,12 @@ public class Announcement {
      *
      * @param _eventId The ID of the event to announce for.
      */
-    public void setEventId(String _eventId) {
-        eventId = _eventId;
+    public void setEventId(final String _eventId) {
+        this.eventId = _eventId;
     }
 
-    public void setEventColor(EventColor _eventColor) {
-        eventColor = _eventColor;
+    public void setEventColor(final EventColor _eventColor) {
+        this.eventColor = _eventColor;
     }
 
     /**
@@ -339,8 +339,8 @@ public class Announcement {
      *
      * @param _hoursBefore The hours before the event to announce for.
      */
-    public void setHoursBefore(Integer _hoursBefore) {
-        hoursBefore = _hoursBefore;
+    public void setHoursBefore(final Integer _hoursBefore) {
+        this.hoursBefore = _hoursBefore;
     }
 
     /**
@@ -348,20 +348,20 @@ public class Announcement {
      *
      * @param _minutesBefore The minutes before the event to announce for.
      */
-    public void setMinutesBefore(int _minutesBefore) {
-        minutesBefore = _minutesBefore;
+    public void setMinutesBefore(final int _minutesBefore) {
+        this.minutesBefore = _minutesBefore;
     }
 
-    public void setInfo(String _info) {
-        info = _info;
+    public void setInfo(final String _info) {
+        this.info = _info;
     }
 
-    public void setEnabled(boolean _enabled) {
-        enabled = _enabled;
+    public void setEnabled(final boolean _enabled) {
+        this.enabled = _enabled;
     }
 
-    public void setInfoOnly(boolean _infoOnly) {
-        infoOnly = _infoOnly;
+    public void setInfoOnly(final boolean _infoOnly) {
+        this.infoOnly = _infoOnly;
     }
 
     /**
@@ -369,9 +369,9 @@ public class Announcement {
      *
      * @param subList String value of subscribing roles.
      */
-    public void setSubscriberRoleIdsFromString(String subList) {
-        String[] subs = subList.split(",");
-        Collections.addAll(subscriberRoleIds, subs);
+    public void setSubscriberRoleIdsFromString(final String subList) {
+        final String[] subs = subList.split(",");
+        Collections.addAll(this.subscriberRoleIds, subs);
     }
 
     /**
@@ -379,21 +379,21 @@ public class Announcement {
      *
      * @param subList String value of subscribing users.
      */
-    public void setSubscriberUserIdsFromString(String subList) {
-        String[] subs = subList.split(",");
-        Collections.addAll(subscriberUserIds, subs);
+    public void setSubscriberUserIdsFromString(final String subList) {
+        final String[] subs = subList.split(",");
+        Collections.addAll(this.subscriberUserIds, subs);
     }
 
-    public void setCreatorMessage(Message _message) {
-        creatorMessage = _message;
+    public void setCreatorMessage(final Message _message) {
+        this.creatorMessage = _message;
     }
 
-    public void setEditing(boolean _editing) {
-        editing = _editing;
+    public void setEditing(final boolean _editing) {
+        this.editing = _editing;
     }
 
-    public void setLastEdit(long _lastEdit) {
-        lastEdit = _lastEdit;
+    public void setLastEdit(final long _lastEdit) {
+        this.lastEdit = _lastEdit;
     }
 
     //Booleans/Checkers
@@ -401,68 +401,70 @@ public class Announcement {
     /**
      * Checks if the announcement has all required values to be entered into a database.
      *
-     * @return <code>true</code> if all values are present, else <code>false</code>.
+     * @return {@code true} if all values are present, else {@code false}.
      */
     public Boolean hasRequiredValues() {
-        return (minutesBefore != 0 || hoursBefore != 0) && !(type.equals(AnnouncementType.SPECIFIC) && eventId.equalsIgnoreCase("N/a")) && !announcementChannelId.equalsIgnoreCase("N/a");
+        return (this.minutesBefore != 0 || this.hoursBefore != 0)
+            && !(this.type.equals(AnnouncementType.SPECIFIC) && "N/a".equalsIgnoreCase(this.eventId))
+            && !"N/a".equalsIgnoreCase(this.announcementChannelId);
     }
 
     public JSONObject toJson() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("guild_id", guildId.asString());
-        data.put("id", announcementId.toString());
+        data.put("guild_id", this.guildId.asString());
+        data.put("id", this.announcementId.toString());
 
-        JSONArray roles = new JSONArray();
-        for (String s : subscriberRoleIds) {
+        final JSONArray roles = new JSONArray();
+        for (final String s : this.subscriberRoleIds) {
             roles.put(s);
         }
         data.put("subscriber_roles", roles);
 
-        JSONArray users = new JSONArray();
-        for (String s : subscriberUserIds) {
+        final JSONArray users = new JSONArray();
+        for (final String s : this.subscriberUserIds) {
             users.put(s);
         }
         data.put("subscriber_users", users);
 
-        data.put("channel_id", announcementChannelId);
-        data.put("type", type.name());
-        data.put("modifier", modifier.name());
-        data.put("event_id", eventId);
-        data.put("event_color", eventColor.name());
-        data.put("hours", hoursBefore);
-        data.put("minutes", minutesBefore);
-        data.put("info", info);
-        data.put("enabled", enabled);
-        data.put("info_only", infoOnly);
+        data.put("channel_id", this.announcementChannelId);
+        data.put("type", this.type.name());
+        data.put("modifier", this.modifier.name());
+        data.put("event_id", this.eventId);
+        data.put("event_color", this.eventColor.name());
+        data.put("hours", this.hoursBefore);
+        data.put("minutes", this.minutesBefore);
+        data.put("info", this.info);
+        data.put("enabled", this.enabled);
+        data.put("info_only", this.infoOnly);
 
         return data;
     }
 
-    public Announcement fromJson(JSONObject data) {
-        guildId = Snowflake.of(data.getString("guild_id"));
-        announcementId = UUID.fromString(data.getString("id"));
+    public Announcement fromJson(final JSONObject data) {
+        this.guildId = Snowflake.of(data.getString("guild_id"));
+        this.announcementId = UUID.fromString(data.getString("id"));
 
-        JSONArray roles = data.getJSONArray("subscriber_roles");
+        final JSONArray roles = data.getJSONArray("subscriber_roles");
         for (int i = 0; i < roles.length(); i++) {
-            subscriberRoleIds.add(roles.getString(i));
+            this.subscriberRoleIds.add(roles.getString(i));
         }
 
-        JSONArray users = data.getJSONArray("subscriber_users");
+        final JSONArray users = data.getJSONArray("subscriber_users");
         for (int i = 0; i < users.length(); i++) {
-            subscriberUserIds.add(users.getString(i));
+            this.subscriberUserIds.add(users.getString(i));
         }
 
-        announcementChannelId = data.getString("channel_id");
-        type = AnnouncementType.fromValue(data.getString("type"));
-        modifier = AnnouncementModifier.fromValue(data.getString("modifier"));
-        eventId = data.getString("event_id");
-        eventColor = EventColor.valueOf(data.getString("event_color"));
-        hoursBefore = data.getInt("hours");
-        minutesBefore = data.getInt("minutes");
-        info = data.getString("info");
-        enabled = data.getBoolean("enabled");
-        infoOnly = data.getBoolean("info_only");
+        this.announcementChannelId = data.getString("channel_id");
+        this.type = AnnouncementType.fromValue(data.getString("type"));
+        this.modifier = AnnouncementModifier.fromValue(data.getString("modifier"));
+        this.eventId = data.getString("event_id");
+        this.eventColor = EventColor.valueOf(data.getString("event_color"));
+        this.hoursBefore = data.getInt("hours");
+        this.minutesBefore = data.getInt("minutes");
+        this.info = data.getString("info");
+        this.enabled = data.getBoolean("enabled");
+        this.infoOnly = data.getBoolean("info_only");
 
         return this;
     }

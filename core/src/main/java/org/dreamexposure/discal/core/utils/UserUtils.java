@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.utils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import discord4j.common.util.Snowflake;
@@ -15,18 +14,17 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
-@SuppressWarnings("ConstantConditions")
 public class UserUtils {
 
-    public static Mono<Snowflake> getUserId(String toLookFor, Message m) {
-        return m.getGuild().flatMap(g -> getUserId(toLookFor, g));
+    public static Mono<Snowflake> getUserId(final String toLookFor, final Message message) {
+        return message.getGuild().flatMap(g -> getUserId(toLookFor, g));
     }
 
-    public static Mono<Snowflake> getUserId(String toLookFor, Guild guild) {
+    public static Mono<Snowflake> getUserId(final String toLookFor, final Guild guild) {
         return getUser(toLookFor, guild).map(Member::getId);
     }
 
-    public static Mono<Member> getUser(String toLookFor, Guild guild) {
+    public static Mono<Member> getUser(String toLookFor, final Guild guild) {
         if (toLookFor.isEmpty())
             return Mono.empty();
 
@@ -38,19 +36,19 @@ public class UserUtils {
         }
 
         return guild.getMembers()
-            .filter(m ->
-                m.getUsername().equalsIgnoreCase(lower)
-                    || m.getUsername().toLowerCase().contains(lower)
-                    || (m.getUsername() + "#" + m.getDiscriminator()).equalsIgnoreCase(lower)
-                    || m.getDiscriminator().equalsIgnoreCase(lower)
-                    || m.getDisplayName().equalsIgnoreCase(lower)
-                    || m.getDisplayName().toLowerCase().contains(lower)
+            .filter(member ->
+                member.getUsername().equalsIgnoreCase(lower)
+                    || member.getUsername().toLowerCase().contains(lower)
+                    || (member.getUsername() + "#" + member.getDiscriminator()).equalsIgnoreCase(lower)
+                    || member.getDiscriminator().equalsIgnoreCase(lower)
+                    || member.getDisplayName().equalsIgnoreCase(lower)
+                    || member.getDisplayName().toLowerCase().contains(lower)
             )
             .next()
             .onErrorResume(e -> Mono.empty()); //User not found, we don't care about the error in this case.
     }
 
-    public static Mono<Member> getUserFromID(String id, Guild guild) {
+    public static Mono<Member> getUserFromID(final String id, final Guild guild) {
         return Mono.just(id)
             .filter(s -> !s.isEmpty())
             .filter(s -> s.matches("[0-9]+"))
@@ -58,7 +56,7 @@ public class UserUtils {
                 .onErrorResume(e -> Mono.empty()));
     }
 
-    public static Mono<List<Member>> getUsers(ArrayList<String> userIds, Guild guild) {
+    public static Mono<List<Member>> getUsers(final List<String> userIds, final Guild guild) {
         return Flux.fromIterable(userIds)
             .filter(s -> !s.isEmpty())
             .filter(s -> s.matches("[0-9]+"))

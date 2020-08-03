@@ -60,7 +60,7 @@ public class AnnouncementCommand implements Command {
      */
     @Override
     public ArrayList<String> getAliases() {
-        ArrayList<String> aliases = new ArrayList<>();
+        final ArrayList<String> aliases = new ArrayList<>();
         aliases.add("announcements");
         aliases.add("announce");
         aliases.add("alert");
@@ -77,7 +77,7 @@ public class AnnouncementCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
+        final CommandInfo info = new CommandInfo(
             "announcement",
             "Used for all announcement functions.",
             "!announcement <function> (value(s))"
@@ -117,7 +117,7 @@ public class AnnouncementCommand implements Command {
      * @param event The event received.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length < 1) {
                 return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
@@ -126,7 +126,7 @@ public class AnnouncementCommand implements Command {
                     case "create":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleCreate(event, settings);
+                                return this.moduleCreate(event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -134,7 +134,7 @@ public class AnnouncementCommand implements Command {
                     case "confirm":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleConfirm(event, settings);
+                                return this.moduleConfirm(event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -142,7 +142,7 @@ public class AnnouncementCommand implements Command {
                     case "cancel":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleCancel(event, settings);
+                                return this.moduleCancel(event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -150,48 +150,48 @@ public class AnnouncementCommand implements Command {
                     case "delete":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleDelete(args, event, settings);
+                                return this.moduleDelete(args, event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                         });
                     case "view":
                     case "review":
-                        return moduleView(args, event, settings);
+                        return this.moduleView(args, event, settings);
                     case "subscribe":
                     case "sub":
-                        return moduleSubscribeRewrite(args, event, settings);
+                        return this.moduleSubscribeRewrite(args, event, settings);
                     case "unsubscribe":
                     case "unsub":
-                        return moduleUnsubscribeRewrite(args, event, settings);
+                        return this.moduleUnsubscribeRewrite(args, event, settings);
                     case "type":
-                        return moduleType(args, event, settings);
+                        return this.moduleType(args, event, settings);
                     case "hours":
-                        return moduleHours(args, event, settings);
+                        return this.moduleHours(args, event, settings);
                     case "minutes":
-                        return moduleMinutes(args, event, settings);
+                        return this.moduleMinutes(args, event, settings);
                     case "list":
-                        return moduleList(args, event, settings);
+                        return this.moduleList(args, event, settings);
                     case "event":
-                        return moduleEvent(args, event, settings);
+                        return this.moduleEvent(args, event, settings);
                     case "info":
-                        return moduleInfo(args, event, settings);
+                        return this.moduleInfo(args, event, settings);
                     case "enable":
                     case "enabled":
                     case "disable":
                     case "disabled":
-                        return moduleEnable(args, event, settings);
+                        return this.moduleEnable(args, event, settings);
                     case "infoonly":
-                        return moduleInfoOnly(args, event, settings);
+                        return this.moduleInfoOnly(args, event, settings);
                     case "channel":
-                        return moduleChannel(args, event, settings);
+                        return this.moduleChannel(args, event, settings);
                     case "color":
                     case "colour":
-                        return moduleColor(args, event, settings);
+                        return this.moduleColor(args, event, settings);
                     case "copy":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleCopy(args, event, settings);
+                                return this.moduleCopy(args, event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -199,7 +199,7 @@ public class AnnouncementCommand implements Command {
                     case "edit":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
-                                return moduleEdit(args, event, settings);
+                                return this.moduleEdit(args, event, settings);
                             else
                                 return Messages.sendMessage(
                                     Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
@@ -212,13 +212,13 @@ public class AnnouncementCommand implements Command {
     }
 
 
-    private Mono<Void> moduleCreate(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleCreate(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -232,13 +232,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEdit(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleEdit(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -266,19 +266,19 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleConfirm(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleConfirm(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementCreator.getCreator().confirmAnnouncement(settings.getGuildID()))
                     .flatMap(acr -> {
                         if (acr.isSuccessful()) {
-                            String msg;
+                            final String msg;
                             if (a.isEditing())
                                 msg = Messages.getMessage("Creator.Announcement.Confirm.Edit.Success", settings);
                             else
@@ -299,14 +299,14 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCancel(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleCancel(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
-                Mono<Message> sendMsg = Messages.sendMessage(Messages.getMessage("Creator.Announcement.Cancel.Success", settings), event);
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Message> sendMsg = Messages.sendMessage(Messages.getMessage("Creator.Announcement.Cancel.Success", settings), event);
 
                 AnnouncementCreator.getCreator().terminate(settings.getGuildID());
 
@@ -317,13 +317,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDelete(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDelete(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -354,13 +354,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleView(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleView(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -368,17 +368,17 @@ public class AnnouncementCommand implements Command {
                     .doOnNext(a::setCreatorMessage);
             } else {
                 if (args.length == 2) {
-                    UUID id;
+                    final UUID id;
                     try {
                         id = UUID.fromString(args[1]);
-                    } catch (IllegalArgumentException e) {
+                    } catch (final IllegalArgumentException e) {
                         return Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
                     }
 
                     return DatabaseManager.getAnnouncement(id, settings.getGuildID()).flatMap(a -> {
-                        Mono<String> subNamesMono = event.getGuild()
+                        final Mono<String> subNamesMono = event.getGuild()
                             .flatMap(g -> AnnouncementMessageFormatter.getSubscriberNames(a, g));
-                        Mono<Consumer<EmbedCreateSpec>> emMono = AnnouncementMessageFormatter
+                        final Mono<Consumer<EmbedCreateSpec>> emMono = AnnouncementMessageFormatter
                             .getFormatAnnouncementEmbed(a, settings);
 
                         return Mono.zip(subNamesMono, emMono)
@@ -393,13 +393,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSubscribeRewriteArgsOne(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return event.getMessage().getAuthorAsMember()
                     .flatMap(user -> {
@@ -427,17 +427,17 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSubscribeRewriteArgsTwo(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
-            String value = args[1];
+            final String value = args[1];
             if (value.length() <= 32) {
                 if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                    Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                    final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                    Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                    Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                    final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                    final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
-                    if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
+                    if ("everyone".equalsIgnoreCase(value) || "here".equalsIgnoreCase(value)) {
                         if (!a.getSubscriberRoleIds().contains(value.toLowerCase().trim())) {
                             a.getSubscriberRoleIds().add(value.toLowerCase().trim());
 
@@ -526,46 +526,46 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSubscribeRewriteArgsThree(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return event.getGuild().flatMap(guild -> {
             //First we check if the first arg is an announcement ID, because we don't want to stop people from subbing,
             //while a staff member is creating an announcement.
             if (args[1].length() > 32) {
                 return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
                     //We have the announcement, now lets handle subscribing all of those users/roles...
-                    List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
+                    final List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
 
-                    Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                    final Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
                         .flatMap(str -> UserUtils.getUser(str, guild))
                         .collectList()
                         .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                    Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                    final Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
                         .flatMap(str -> RoleUtils.getRole(str, guild))
                         .collectList()
                         .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
                     return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
-                        List<String> subbedMembers = new ArrayList<>();
-                        List<String> subbedRoles = new ArrayList<>();
+                        final List<String> subbedMembers = new ArrayList<>();
+                        final List<String> subbedRoles = new ArrayList<>();
 
-                        for (Member m : members) {
+                        for (final Member m : members) {
                             if (!a.getSubscriberUserIds().contains(m.getId().asString())) {
                                 a.getSubscriberUserIds().add(m.getId().asString());
                                 subbedMembers.add(m.getDisplayName());
                             }
                         }
 
-                        for (Role r : roles) {
+                        for (final Role r : roles) {
                             if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
                                 a.getSubscriberRoleIds().add(r.getId().asString());
                                 subbedRoles.add(r.getName());
                             }
                         }
 
-                        String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
-                        String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                        Consumer<EmbedCreateSpec> embed = spec -> {
+                        final String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                        final String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                        final Consumer<EmbedCreateSpec> embed = spec -> {
                             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                             spec.setColor(GlobalConst.discalColor);
 
@@ -591,45 +591,45 @@ public class AnnouncementCommand implements Command {
                         Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement",
                             settings), event));
             } else if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 //Okay, now lets just go about subscribing all of the users/roles...
-                List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
+                final List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
 
-                Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                final Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
                     .flatMap(str -> UserUtils.getUser(str, guild))
                     .collectList()
                     .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                final Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
                     .flatMap(str -> RoleUtils.getRole(str, guild))
                     .collectList()
                     .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
                 return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
-                    List<String> subbedMembers = new ArrayList<>();
-                    List<String> subbedRoles = new ArrayList<>();
+                    final List<String> subbedMembers = new ArrayList<>();
+                    final List<String> subbedRoles = new ArrayList<>();
 
-                    for (Member m : members) {
+                    for (final Member m : members) {
                         if (!a.getSubscriberUserIds().contains(m.getId().asString())) {
                             a.getSubscriberUserIds().add(m.getId().asString());
                             subbedMembers.add(m.getDisplayName());
                         }
                     }
 
-                    for (Role r : roles) {
+                    for (final Role r : roles) {
                         if (!a.getSubscriberRoleIds().contains(r.getId().asString())) {
                             a.getSubscriberRoleIds().add(r.getId().asString());
                             subbedRoles.add(r.getName());
                         }
                     }
 
-                    String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
-                    String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                    Consumer<EmbedCreateSpec> embed = spec -> {
+                    final String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                    final String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                    final Consumer<EmbedCreateSpec> embed = spec -> {
                         spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                         spec.setColor(GlobalConst.discalColor);
 
@@ -656,24 +656,24 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSubscribeRewrite(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1)
-                return moduleSubscribeRewriteArgsOne(event, settings);
+                return this.moduleSubscribeRewriteArgsOne(event, settings);
             else if (args.length == 2)
-                return moduleSubscribeRewriteArgsTwo(args, event, settings);
+                return this.moduleSubscribeRewriteArgsTwo(args, event, settings);
             else
-                return moduleSubscribeRewriteArgsThree(args, event, settings);
+                return this.moduleSubscribeRewriteArgsThree(args, event, settings);
         });
     }
 
-    private Mono<Void> moduleUnsubscribeRewriteArgsOne(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleUnsubscribeRewriteArgsOne(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return event.getMessage().getAuthorAsMember()
                     .flatMap(user -> {
@@ -701,17 +701,17 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleUnsubscribeRewriteArgsTwo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleUnsubscribeRewriteArgsTwo(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
-            String value = args[1];
+            final String value = args[1];
             if (value.length() <= 32) {
                 if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                    Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                    final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                    Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                    Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                    final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                    final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
-                    if (value.equalsIgnoreCase("everyone") || value.equalsIgnoreCase("here")) {
+                    if ("everyone".equalsIgnoreCase(value) || "here".equalsIgnoreCase(value)) {
                         if (a.getSubscriberRoleIds().contains(value.toLowerCase().trim())) {
                             a.getSubscriberRoleIds().remove(value.toLowerCase().trim());
 
@@ -798,46 +798,46 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleUnsubscribeRewriteArgsThree(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleUnsubscribeRewriteArgsThree(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return event.getGuild().flatMap(guild -> {
             //First we check if the first arg is an announcement ID, because we don't want to stop people from unsubbing,
             //while a staff member is creating an announcement.
             if (args[1].length() > 32) {
                 return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
                     //We have the announcement, now lets handle subscribing all of those users/roles...
-                    List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
+                    final List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
 
-                    Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                    final Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
                         .flatMap(str -> UserUtils.getUser(str, guild))
                         .collectList()
                         .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                    Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                    final Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
                         .flatMap(str -> RoleUtils.getRole(str, guild))
                         .collectList()
                         .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
                     return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
-                        List<String> subbedMembers = new ArrayList<>();
-                        List<String> subbedRoles = new ArrayList<>();
+                        final List<String> subbedMembers = new ArrayList<>();
+                        final List<String> subbedRoles = new ArrayList<>();
 
-                        for (Member m : members) {
+                        for (final Member m : members) {
                             if (a.getSubscriberUserIds().contains(m.getId().asString())) {
                                 a.getSubscriberUserIds().remove(m.getId().asString());
                                 subbedMembers.add(m.getDisplayName());
                             }
                         }
 
-                        for (Role r : roles) {
+                        for (final Role r : roles) {
                             if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
                                 a.getSubscriberRoleIds().remove(r.getId().asString());
                                 subbedRoles.add(r.getName());
                             }
                         }
 
-                        String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
-                        String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                        Consumer<EmbedCreateSpec> embed = spec -> {
+                        final String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                        final String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                        final Consumer<EmbedCreateSpec> embed = spec -> {
                             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                             spec.setColor(GlobalConst.discalColor);
 
@@ -863,45 +863,45 @@ public class AnnouncementCommand implements Command {
                         Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement",
                             settings), event));
             } else if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 //Okay, now lets just go about subscribing all of the users/roles...
-                List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
+                final List<String> toLookFor = Arrays.asList(args).subList(1, args.length);
 
-                Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
+                final Mono<List<Member>> membersMono = Flux.fromIterable(toLookFor)
                     .flatMap(str -> UserUtils.getUser(str, guild))
                     .collectList()
                     .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
-                Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
+                final Mono<List<Role>> rolesMono = Flux.fromIterable(toLookFor)
                     .flatMap(str -> RoleUtils.getRole(str, guild))
                     .collectList()
                     .defaultIfEmpty(new ArrayList<>()); //So the zip doesn't fail..
 
                 return Mono.zip(membersMono, rolesMono).flatMap(TupleUtils.function((members, roles) -> {
-                    List<String> subbedMembers = new ArrayList<>();
-                    List<String> subbedRoles = new ArrayList<>();
+                    final List<String> subbedMembers = new ArrayList<>();
+                    final List<String> subbedRoles = new ArrayList<>();
 
-                    for (Member m : members) {
+                    for (final Member m : members) {
                         if (a.getSubscriberUserIds().contains(m.getId().asString())) {
                             a.getSubscriberUserIds().remove(m.getId().asString());
                             subbedMembers.add(m.getDisplayName());
                         }
                     }
 
-                    for (Role r : roles) {
+                    for (final Role r : roles) {
                         if (a.getSubscriberRoleIds().contains(r.getId().asString())) {
                             a.getSubscriberRoleIds().remove(r.getId().asString());
                             subbedRoles.add(r.getName());
                         }
                     }
 
-                    String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
-                    String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                    Consumer<EmbedCreateSpec> embed = spec -> {
+                    final String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
+                    final String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
+                    final Consumer<EmbedCreateSpec> embed = spec -> {
                         spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                         spec.setColor(GlobalConst.discalColor);
 
@@ -928,32 +928,32 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleUnsubscribeRewrite(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleUnsubscribeRewrite(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1)
-                return moduleUnsubscribeRewriteArgsOne(event, settings);
+                return this.moduleUnsubscribeRewriteArgsOne(event, settings);
             else if (args.length == 2)
-                return moduleUnsubscribeRewriteArgsTwo(args, event, settings);
+                return this.moduleUnsubscribeRewriteArgsTwo(args, event, settings);
             else
-                return moduleUnsubscribeRewriteArgsThree(args, event, settings);
+                return this.moduleUnsubscribeRewriteArgsThree(args, event, settings);
         });
     }
 
-    private Mono<Void> moduleType(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleType(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (AnnouncementType.isValid(args[1])) {
-                        AnnouncementType type = AnnouncementType.fromValue(args[1]);
+                        final AnnouncementType type = AnnouncementType.fromValue(args[1]);
                         a.setAnnouncementType(type);
 
                         //Get the correct message to send depending on the type...
-                        String msg;
+                        final String msg;
                         switch (type) {
                             case SPECIFIC:
                                 msg = Messages.getMessage("Creator.Announcement.Type.Success.Specific", settings);
@@ -998,19 +998,19 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleHours(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleHours(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
-                    int hours;
+                    final int hours;
                     try {
                         hours = Math.abs(Integer.parseInt(args[1]));
-                    } catch (NumberFormatException ignore) {
+                    } catch (final NumberFormatException ignore) {
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
                             .flatMap(em -> Messages.sendMessage(
@@ -1037,19 +1037,19 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleMinutes(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleMinutes(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
-                    int minutes;
+                    final int minutes;
                     try {
                         minutes = Math.abs(Integer.parseInt(args[1]));
-                    } catch (NumberFormatException ignore) {
+                    } catch (final NumberFormatException ignore) {
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
                             .flatMap(em -> Messages.sendMessage(
@@ -1076,13 +1076,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -1090,7 +1090,7 @@ public class AnnouncementCommand implements Command {
                         Messages.getMessage("Creator.Announcement.List.InCreator", settings), em, event))
                     .doOnNext(a::setCreatorMessage);
             } else if (args.length == 2) {
-                if (args[1].equalsIgnoreCase("all")) {
+                if ("all".equalsIgnoreCase(args[1])) {
                     return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(announcements ->
                         Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.All", "%amount%",
                             announcements.size() + "", settings), event)
@@ -1100,16 +1100,16 @@ public class AnnouncementCommand implements Command {
                                 .then()));
                 } else {
                     //List specific amount of announcements...
-                    int amount;
+                    final int amount;
                     try {
                         amount = Integer.parseInt(args[1]);
-                    } catch (NumberFormatException ignore) {
+                    } catch (final NumberFormatException ignore) {
                         return Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.NotInt", settings),
                             event);
                     }
 
                     return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(allAnnouncements -> {
-                        List<Announcement> toPost; //We only post the amount listed...
+                        final List<Announcement> toPost; //We only post the amount listed...
                         if (allAnnouncements.size() > amount)
                             toPost = allAnnouncements.subList(0, amount);
                         else
@@ -1129,13 +1129,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEvent(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleEvent(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
@@ -1202,13 +1202,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleInfo(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleInfo(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length >= 2) {
                     a.setInfo(GeneralUtils.getContent(args, 1));
@@ -1231,13 +1231,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEnable(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleEnable(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -1247,8 +1247,8 @@ public class AnnouncementCommand implements Command {
             } else if (args.length == 2) {
                 return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
                     if (exists) {
-                        UUID id = UUID.fromString(args[1]);
-                        AtomicBoolean en = new AtomicBoolean(false); //This has got to be tested...
+                        final UUID id = UUID.fromString(args[1]);
+                        final AtomicBoolean en = new AtomicBoolean(false); //This has got to be tested...
                         return DatabaseManager.getAnnouncement(id, settings.getGuildID())
                             .doOnNext(a -> a.setEnabled(!a.isEnabled()))
                             .doOnNext(a -> en.set(a.isEnabled()))
@@ -1266,13 +1266,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleInfoOnly(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleInfoOnly(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
@@ -1282,8 +1282,8 @@ public class AnnouncementCommand implements Command {
             } else if (args.length == 2) {
                 return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
                     if (exists) {
-                        UUID id = UUID.fromString(args[1]);
-                        AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
+                        final UUID id = UUID.fromString(args[1]);
+                        final AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
                         return DatabaseManager.getAnnouncement(id, settings.getGuildID())
                             .doOnNext(a -> a.setInfoOnly(!a.isInfoOnly()))
                             .doOnNext(a -> io.set(a.isInfoOnly()))
@@ -1301,13 +1301,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleChannel(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
                     return ChannelUtils.channelExists(args[1], event).flatMap(exists -> {
@@ -1340,13 +1340,13 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleColor(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
                     if (args.length == 2) {
@@ -1386,7 +1386,7 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCopy(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleCopy(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (!AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
                 if (args.length == 2) {
@@ -1402,10 +1402,10 @@ public class AnnouncementCommand implements Command {
                     return Messages.sendMessage(Messages.getMessage("Creator.Announcement.Copy.Specify", settings), event);
                 }
             } else {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
+                final Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))

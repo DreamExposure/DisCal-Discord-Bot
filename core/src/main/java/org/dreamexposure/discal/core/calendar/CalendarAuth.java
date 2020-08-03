@@ -71,14 +71,14 @@ public class CalendarAuth {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
-            Map<Integer, FileDataStoreFactory> dataStoreFactories = new HashMap<>();
-            int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
+            final Map<Integer, FileDataStoreFactory> dataStoreFactories = new HashMap<>();
+            final int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
             for (int i = 0; i < credCount; i++) {
                 dataStoreFactories.put(i, new FileDataStoreFactory(getCredentialsFolder(i)));
             }
 
             DATA_STORE_FACTORIES = Collections.unmodifiableMap(dataStoreFactories);
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             t.printStackTrace();
             System.exit(1);
             throw new RuntimeException(t); //Never reached, makes compiler happy :)
@@ -90,20 +90,20 @@ public class CalendarAuth {
      *
      * @return an authorized Credential object.
      */
-    private static Mono<Credential> authorize(int credentialId) {
+    private static Mono<Credential> authorize(final int credentialId) {
         return Mono.fromCallable(() -> {
             // Load client secrets.
-            InputStream in = new FileInputStream(new File("client_secret.json"));
-            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+            final InputStream in = new FileInputStream(new File("client_secret.json"));
+            final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
             // Build flow and trigger user authorization request.
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
+            final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
                 .Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
                 .setDataStoreFactory(DATA_STORE_FACTORIES.get(credentialId))
                 .setAccessType("offline")
                 .build();
 
-            Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+            final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
 
             //Try to close input stream since I don't think it was ever closed?
             in.close();
@@ -112,22 +112,21 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
-    private static Mono<Credential> authorize(GuildSettings g) {
+    private static Mono<Credential> authorize(final GuildSettings g) {
         return Mono.fromCallable(() -> {
-            if (g.getEncryptedAccessToken().equalsIgnoreCase("N/a"))
+            if ("N/a".equalsIgnoreCase(g.getEncryptedAccessToken()))
                 return null;
 
-            AESEncryption encryption = new AESEncryption(g);
-            String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
+            final AESEncryption encryption = new AESEncryption(g);
+            final String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
 
-            Credential credential = new GoogleCredential();
+            final Credential credential = new GoogleCredential();
             credential.setAccessToken(accessToken);
             return credential;
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    public static Mono<Calendar> getCalendarService(@NotNull GuildSettings g) {
+    public static Mono<Calendar> getCalendarService(@NotNull final GuildSettings g) {
         return Mono.fromCallable(() -> {
             if (g.useExternalCalendar()) {
                 return authorize(g).map(cred ->
@@ -144,13 +143,13 @@ public class CalendarAuth {
         }).flatMap(Function.identity());
     }
 
-    public static Mono<Calendar> getCalendarService(int credentialId) {
+    public static Mono<Calendar> getCalendarService(final int credentialId) {
         return authorize(credentialId).map(cred -> new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
             .setApplicationName(APPLICATION_NAME)
             .build());
     }
 
-    private static File getCredentialsFolder(int credentialId) {
+    private static File getCredentialsFolder(final int credentialId) {
         return new File(BotSettings.CREDENTIAL_FOLDER.get() + "/" + credentialId);
     }
 

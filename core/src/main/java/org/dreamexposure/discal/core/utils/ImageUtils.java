@@ -22,10 +22,13 @@ import reactor.core.scheduler.Schedulers;
  * For Project: DisCal-Discord-Bot
  */
 public class ImageUtils {
+
+    public static final int THREE_SECOND_TIMEOUT = 3000;
+
     //TODO: Also, find a better working solution for validating images since this fails too much
-    public static Mono<Boolean> validate(String url, boolean allowGif) {
+    public static Mono<Boolean> validate(final String url, final boolean allowGif) {
         return Mono.fromCallable(() -> {
-            Image image = ImageIO.read(new URL(url));
+            final Image image = ImageIO.read(new URL(url));
             return image != null;
         })
             .subscribeOn(Schedulers.boundedElastic())
@@ -38,35 +41,34 @@ public class ImageUtils {
     }
 
     @SuppressWarnings("BlockingMethodInNonBlockingContext")
-    private static Mono<Boolean> validateGif(String url) {
+    private static Mono<Boolean> validateGif(final String url) {
         return Mono.fromCallable(() -> {
-            URLConnection connection = new URL(url).openConnection();
-            connection.setConnectTimeout(3000);
-            connection.setReadTimeout(3000);
-            InputStream in = connection.getInputStream();
+            final URLConnection connection = new URL(url).openConnection();
+            connection.setConnectTimeout(THREE_SECOND_TIMEOUT);
+            connection.setReadTimeout(THREE_SECOND_TIMEOUT);
+            final InputStream in = connection.getInputStream();
 
             return readGif(in);
         })
             .subscribeOn(Schedulers.boundedElastic())
             .flatMap(Function.identity())
-            .map(s -> s.equalsIgnoreCase("gif"));
+            .map("gif"::equalsIgnoreCase);
     }
 
-    @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
-    private static Mono<String> readGif(InputStream input) {
+    private static Mono<String> readGif(final InputStream input) {
         return Mono.fromCallable(() -> {
-            ImageInputStream stream = ImageIO.createImageInputStream(input);
-            Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
+            final ImageInputStream stream = ImageIO.createImageInputStream(input);
+            final Iterator<ImageReader> iter = ImageIO.getImageReaders(stream);
             if (!iter.hasNext()) {
                 return null;
             }
             ImageReader reader = null;
             try {
                 reader = iter.next();
-                ImageReadParam param = reader.getDefaultReadParam();
+                final ImageReadParam param = reader.getDefaultReadParam();
                 reader.setInput(stream, true, true);
                 reader.read(0, param);
-            } catch (IOException | NullPointerException ignore) {
+            } catch (final IOException | NullPointerException ignore) {
             } finally {
                 if (reader != null)
                     reader.dispose();

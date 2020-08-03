@@ -30,7 +30,7 @@ public class HelpCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -57,18 +57,18 @@ public class HelpCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(args).flatMap(ignore -> {
             if (args.length < 1) {
-                Consumer<EmbedCreateSpec> embed = spec -> {
+                final Consumer<EmbedCreateSpec> embed = spec -> {
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                     spec.setTitle("DisCal Command Help");
-                    for (Command c : CommandExecutor.getCommands()) {
-                        if (c.getAliases().size() > 0) {
-                            String al = c.getAliases().toString();
+                    for (final Command c : CommandExecutor.getCommands()) {
+                        if (!c.getAliases().isEmpty()) {
+                            final String al = c.getAliases().toString();
                             spec.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
                         } else {
                             spec.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
@@ -81,11 +81,11 @@ public class HelpCommand implements Command {
                 return Messages.sendMessage(embed, event);
             } else if (args.length == 1) {
                 return CommandExecutor.getCommand(args[0])
-                    .flatMap(cmd -> Messages.sendMessage(getCommandInfoEmbed(cmd), event));
+                    .flatMap(cmd -> Messages.sendMessage(this.getCommandInfoEmbed(cmd), event));
             } else if (args.length == 2) {
                 return CommandExecutor.getCommand(args[0])
-                    .filter(c -> c.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
-                    .flatMap(c -> Messages.sendMessage(getSubCommandEmbed(c, args[1].toLowerCase()), event))
+                    .filter(command -> command.getCommandInfo().getSubCommands().containsKey(args[1].toLowerCase()))
+                    .flatMap(command -> Messages.sendMessage(this.getSubCommandEmbed(command, args[1].toLowerCase()), event))
                     .switchIfEmpty(Messages.sendMessage(
                         Messages.getMessage("Notifications.Args.InvalidSubCommand", settings), event)
                     );
@@ -96,7 +96,7 @@ public class HelpCommand implements Command {
     }
 
     //Embed formatters
-    private Consumer<EmbedCreateSpec> getCommandInfoEmbed(Command cmd) {
+    private Consumer<EmbedCreateSpec> getCommandInfoEmbed(final Command cmd) {
         return spec -> {
             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
             spec.addField("Command", cmd.getCommand(), true);
@@ -104,7 +104,7 @@ public class HelpCommand implements Command {
             spec.addField("Example", cmd.getCommandInfo().getExample(), true);
 
             //Loop through sub commands
-            if (cmd.getCommandInfo().getSubCommands().size() > 0) {
+            if (!cmd.getCommandInfo().getSubCommands().isEmpty()) {
                 String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
                 subs = subs.replace("[", "").replace("]", "");
                 spec.addField("Sub-Commands", subs, false);
@@ -119,7 +119,7 @@ public class HelpCommand implements Command {
         };
     }
 
-    private Consumer<EmbedCreateSpec> getSubCommandEmbed(Command cmd, String subCommand) {
+    private Consumer<EmbedCreateSpec> getSubCommandEmbed(final Command cmd, final String subCommand) {
         return spec -> {
             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
             spec.addField("Command", cmd.getCommand(), true);

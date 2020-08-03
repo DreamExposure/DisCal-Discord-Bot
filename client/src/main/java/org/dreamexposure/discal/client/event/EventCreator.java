@@ -43,12 +43,12 @@ public class EventCreator {
     }
 
     //Functional
-    public Mono<PreEvent> init(MessageCreateEvent e, GuildSettings settings) {
-        if (!hasPreEvent(settings.getGuildID())) {
+    public Mono<PreEvent> init(final MessageCreateEvent e, final GuildSettings settings) {
+        if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
-                    PreEvent event = new PreEvent(settings.getGuildID());
-                    events.add(event);
+                    final PreEvent event = new PreEvent(settings.getGuildID());
+                    this.events.add(event);
 
                     return CalendarWrapper.getCalendar(calData, settings)
                         .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
@@ -60,17 +60,17 @@ public class EventCreator {
                         .thenReturn(event);
                 });
         }
-        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()));
     }
 
-    public Mono<PreEvent> init(MessageCreateEvent e, GuildSettings settings, String summary) {
-        if (!hasPreEvent(settings.getGuildID())) {
+    public Mono<PreEvent> init(final MessageCreateEvent e, final GuildSettings settings, final String summary) {
+        if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
-                    PreEvent event = new PreEvent(settings.getGuildID());
+                    final PreEvent event = new PreEvent(settings.getGuildID());
                     event.setSummary(summary);
 
-                    events.add(event);
+                    this.events.add(event);
 
                     return CalendarWrapper.getCalendar(calData, settings)
                         .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
@@ -82,18 +82,18 @@ public class EventCreator {
                         .thenReturn(event);
                 });
         }
-        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()));
     }
 
     //Copy event
-    public Mono<PreEvent> init(MessageCreateEvent e, String eventId, GuildSettings settings) {
-        if (!hasPreEvent(settings.getGuildID())) {
+    public Mono<PreEvent> init(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
+        if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, settings, eventId)
                     .flatMap(toCopy -> {
-                        PreEvent event = new PreEvent(settings.getGuildID(), toCopy);
+                        final PreEvent event = new PreEvent(settings.getGuildID(), toCopy);
 
-                        events.add(event);
+                        this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData, settings)
                             .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
@@ -105,18 +105,18 @@ public class EventCreator {
                             .thenReturn(event);
                     }));
         }
-        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()));
     }
 
-    public Mono<PreEvent> edit(MessageCreateEvent e, String eventId, GuildSettings settings) {
-        if (!hasPreEvent(settings.getGuildID())) {
+    public Mono<PreEvent> edit(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
+        if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, settings, eventId)
                     .flatMap(toEdit -> {
-                        PreEvent event = new PreEvent(settings.getGuildID(), toEdit);
+                        final PreEvent event = new PreEvent(settings.getGuildID(), toEdit);
                         event.setEditing(true);
 
-                        events.add(event);
+                        this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData, settings)
                             .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
@@ -128,20 +128,20 @@ public class EventCreator {
                             .thenReturn(event);
                     }));
         }
-        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()));
     }
 
-    public void terminate(Snowflake guildId) {
-        events.remove(getPreEvent(guildId));
+    public void terminate(final Snowflake guildId) {
+        this.events.remove(this.getPreEvent(guildId));
     }
 
-    public Mono<EventCreatorResponse> confirmEvent(GuildSettings settings) {
-        return Mono.justOrEmpty(getPreEvent(settings.getGuildID()))
+    public Mono<EventCreatorResponse> confirmEvent(final GuildSettings settings) {
+        return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()))
             .filter(PreEvent::hasRequiredValues)
             .flatMap(pre ->
                 DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: Add multi-cal support
                     .flatMap(calData -> {
-                        Event event = new Event();
+                        final Event event = new Event();
                         event.setSummary(pre.getSummary());
                         event.setDescription(pre.getDescription());
                         event.setStart(pre.getStartDateTime().setTimeZone(pre.getTimeZone()));
@@ -150,12 +150,12 @@ public class EventCreator {
                         if (!pre.getColor().equals(EventColor.NONE))
                             event.setColorId(String.valueOf(pre.getColor().getId()));
 
-                        if (pre.getLocation() != null && !pre.getLocation().equalsIgnoreCase(""))
+                        if (pre.getLocation() != null && !"".equalsIgnoreCase(pre.getLocation()))
                             event.setLocation(pre.getLocation());
 
                         //Set recurrence
                         if (pre.shouldRecur()) {
-                            String[] recurrence = new String[]{pre.getRecurrence().toRRule()};
+                            final String[] recurrence = {pre.getRecurrence().toRRule()};
                             event.setRecurrence(Arrays.asList(recurrence));
                         }
 
@@ -164,17 +164,17 @@ public class EventCreator {
 
                             return EventWrapper.createEvent(calData, event, settings)
                                 .flatMap(confirmed -> {
-                                    EventCreatorResponse response = new EventCreatorResponse(true,
+                                    final EventCreatorResponse response = new EventCreatorResponse(true,
                                         confirmed, pre.getCreatorMessage(), false);
 
-                                    EventData eventData = EventData.fromImage(
+                                    final EventData eventData = EventData.fromImage(
                                         settings.getGuildID(),
                                         confirmed.getId(),
                                         confirmed.getEnd().getDateTime().getValue(),
                                         pre.getEventData().getImageLink()
                                     );
 
-                                    terminate(settings.getGuildID());
+                                    this.terminate(settings.getGuildID());
 
                                     return Mono.just(eventData)
                                         .filter(EventData::shouldBeSaved)
@@ -185,17 +185,17 @@ public class EventCreator {
                         } else {
                             return EventWrapper.updateEvent(calData, event, settings)
                                 .flatMap(confirmed -> {
-                                    EventCreatorResponse response = new EventCreatorResponse(true,
+                                    final EventCreatorResponse response = new EventCreatorResponse(true,
                                         confirmed, pre.getCreatorMessage(), true);
 
-                                    EventData eventData = EventData.fromImage(
+                                    final EventData eventData = EventData.fromImage(
                                         settings.getGuildID(),
                                         confirmed.getId(),
                                         confirmed.getEnd().getDateTime().getValue(),
                                         pre.getEventData().getImageLink()
                                     );
 
-                                    terminate(settings.getGuildID());
+                                    this.terminate(settings.getGuildID());
 
                                     return Mono.just(eventData)
                                         .filter(EventData::shouldBeSaved)
@@ -209,8 +209,8 @@ public class EventCreator {
     }
 
     //Getters
-    public PreEvent getPreEvent(Snowflake guildId) {
-        for (PreEvent e : events) {
+    public PreEvent getPreEvent(final Snowflake guildId) {
+        for (final PreEvent e : this.events) {
             if (e.getGuildId().equals(guildId)) {
                 e.setLastEdit(System.currentTimeMillis());
                 return e;
@@ -220,12 +220,12 @@ public class EventCreator {
     }
 
     public List<PreEvent> getAllPreEvents() {
-        return events;
+        return this.events;
     }
 
     //Booleans/Checkers
-    public boolean hasPreEvent(Snowflake guildId) {
-        for (PreEvent e : events) {
+    public boolean hasPreEvent(final Snowflake guildId) {
+        for (final PreEvent e : this.events) {
             if (e.getGuildId().equals(guildId))
                 return true;
         }

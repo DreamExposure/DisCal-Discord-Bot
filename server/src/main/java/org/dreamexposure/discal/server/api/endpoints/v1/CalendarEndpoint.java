@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -26,15 +28,15 @@ import discord4j.common.util.Snowflake;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"Duplicates"})
+@SuppressWarnings("Duplicates")
 @RestController
 @RequestMapping("/api/v1/calendar")
 public class CalendarEndpoint {
 
     @PostMapping(value = "/get", produces = "application/json")
-    public static String getCalendar(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public static String getCalendar(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
@@ -43,47 +45,47 @@ public class CalendarEndpoint {
 
         //Okay, now handle actual request.
         try {
-            JSONObject jsonMain = new JSONObject(requestBody);
-            long guildId = jsonMain.getLong("guild_id");
-            int calNumber = jsonMain.getInt("number");
+            final JSONObject jsonMain = new JSONObject(requestBody);
+            final long guildId = jsonMain.getLong("guild_id");
+            final int calNumber = jsonMain.getInt("number");
 
-            CalendarData calendar = DatabaseManager.getCalendar(Snowflake.of(guildId), calNumber).block();
+            final CalendarData calendar = DatabaseManager.getCalendar(Snowflake.of(guildId), calNumber).block();
 
-            if (!calendar.getCalendarAddress().equalsIgnoreCase("primary")) {
+            if (!"primary".equalsIgnoreCase(calendar.getCalendarAddress())) {
 
-                JSONObject body = new JSONObject();
+                final JSONObject body = new JSONObject();
                 body.put("external", calendar.isExternal());
                 body.put("id", calendar.getCalendarId());
                 body.put("address", calendar.getCalendarAddress());
 
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
                 return body.toString();
             } else {
                 response.setContentType("application/json");
-                response.setStatus(404);
+                response.setStatus(GlobalConst.STATUS_NOT_FOUND);
                 return JsonUtils.getJsonResponseMessage("Calendar not found");
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[WEB-API-v1]", "get calendar err", e, CalendarEndpoint.class));
+                .forException("[WEB-API-v1]", "get calendar err", e, CalendarEndpoint.class));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }
 
     @PostMapping(value = "/list", produces = "application/json")
-    public static String listCalendars(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public static String listCalendars(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
@@ -92,13 +94,13 @@ public class CalendarEndpoint {
 
         //Okay, now handle actual request.
         try {
-            JSONObject jsonMain = new JSONObject(requestBody);
-            long guildId = jsonMain.getLong("guild_id");
+            final JSONObject jsonMain = new JSONObject(requestBody);
+            final long guildId = jsonMain.getLong("guild_id");
 
-            ArrayList<JSONObject> cals = new ArrayList<>();
-            for (CalendarData cal : DatabaseManager.getAllCalendars(Snowflake.of(guildId)).block()) {
-                if (!cal.getCalendarAddress().equalsIgnoreCase("primary")) {
-                    JSONObject body = new JSONObject();
+            final List<JSONObject> cals = new ArrayList<>();
+            for (final CalendarData cal : DatabaseManager.getAllCalendars(Snowflake.of(guildId)).block()) {
+                if (!"primary".equalsIgnoreCase(cal.getCalendarAddress())) {
+                    final JSONObject body = new JSONObject();
                     body.put("number", cal.getCalendarNumber());
                     body.put("external", cal.isExternal());
                     body.put("id", cal.getCalendarId());
@@ -108,25 +110,25 @@ public class CalendarEndpoint {
                 }
             }
 
-            JSONObject body = new JSONObject();
+            final JSONObject body = new JSONObject();
             body.put("count", cals.size());
             body.put("calendars", cals);
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return body.toString();
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[WEB-API-v1]", "List calendars err", e, CalendarEndpoint.class));
+                .forException("[WEB-API-v1]", "List calendars err", e, CalendarEndpoint.class));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

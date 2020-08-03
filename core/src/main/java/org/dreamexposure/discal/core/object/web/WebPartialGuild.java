@@ -5,7 +5,7 @@ public class WebPartialGuild {
     private final String name;
     private final String iconUrl;
 
-    public WebPartialGuild(long id, String name, String iconUrl) {
+    public WebPartialGuild(final long id, final String name, final String iconUrl) {
         this.id = id;
         this.name = name;
         this.iconUrl = iconUrl;
@@ -13,14 +13,14 @@ public class WebPartialGuild {
 
     //Getters
     public long getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
-    public String getIcon() {
-        return iconUrl;
+    public String getIconUrl() {
+        return this.iconUrl;
     }
 }

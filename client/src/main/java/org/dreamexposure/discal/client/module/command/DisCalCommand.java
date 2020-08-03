@@ -39,7 +39,7 @@ public class DisCalCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -56,7 +56,7 @@ public class DisCalCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
+        final CommandInfo info = new CommandInfo(
             "event",
             "Used to configure DisCal",
             "!DisCal (function) (value)"
@@ -83,39 +83,39 @@ public class DisCalCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length < 1) {
-                return moduleDisCalInfo(event, settings);
+                return this.moduleDisCalInfo(event, settings);
             } else {
                 switch (args[0].toLowerCase()) {
                     case "discal":
-                        return moduleDisCalInfo(event, settings);
+                        return this.moduleDisCalInfo(event, settings);
                     case "settings":
-                        return moduleSettings(event, settings);
+                        return this.moduleSettings(event, settings);
                     case "role":
-                        return moduleControlRole(args, event, settings);
+                        return this.moduleControlRole(args, event, settings);
                     case "channel":
-                        return moduleDisCalChannel(args, event, settings);
+                        return this.moduleDisCalChannel(args, event, settings);
                     case "simpleannouncement":
-                        return moduleSimpleAnnouncement(event, settings);
+                        return this.moduleSimpleAnnouncement(event, settings);
                     case "dmannouncement":
                     case "dmannouncements":
-                        return moduleDmAnnouncements(event, settings);
+                        return this.moduleDmAnnouncements(event, settings);
                     case "language":
                     case "lang":
-                        return moduleLanguage(args, event, settings);
+                        return this.moduleLanguage(args, event, settings);
                     case "prefix":
-                        return modulePrefix(args, event, settings);
+                        return this.modulePrefix(args, event, settings);
                     case "invite":
-                        return moduleInvite(event, settings);
+                        return this.moduleInvite(event, settings);
                     case "dashboard":
-                        return moduleDashboard(event, settings);
+                        return this.moduleDashboard(event, settings);
                     case "brand":
-                        return moduleBrand(event, settings);
+                        return this.moduleBrand(event, settings);
                     default:
                         return Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
                 }
@@ -123,13 +123,13 @@ public class DisCalCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDisCalInfo(MessageCreateEvent event, GuildSettings settings) {
-        Mono<Guild> guildMono = event.getGuild();
-        Mono<String> guildCountMono = event.getClient().getGuilds().count().map(i -> i + "");
-        Mono<String> calCountMono = DatabaseManager.getCalendarCount().map(i -> i + "");
-        Mono<String> annCountMono = DatabaseManager.getAnnouncementCount().map(i -> i + "");
+    private Mono<Void> moduleDisCalInfo(final MessageCreateEvent event, final GuildSettings settings) {
+        final Mono<Guild> guildMono = event.getGuild();
+        final Mono<String> guildCountMono = event.getClient().getGuilds().count().map(i -> i + "");
+        final Mono<String> calCountMono = DatabaseManager.getCalendarCount().map(i -> i + "");
+        final Mono<String> annCountMono = DatabaseManager.getAnnouncementCount().map(i -> i + "");
 
-        Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
+        final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
             .map(TupleUtils.function((guild, guilds, calendars, announcements) -> (EmbedCreateSpec spec) -> {
                 if (settings.isBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -152,13 +152,13 @@ public class DisCalCommand implements Command {
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
 
-    private Mono<Void> moduleControlRole(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleControlRole(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
             .flatMap(ignore -> {
                 if (args.length == 2) {
-                    String roleName = args[1];
-                    if (roleName.equalsIgnoreCase("everyone")) {
+                    final String roleName = args[1];
+                    if ("everyone".equalsIgnoreCase(roleName)) {
                         settings.setControlRole("everyone");
                         return DatabaseManager.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Reset", settings), event));
@@ -179,13 +179,13 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleDisCalChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDisCalChannel(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
             .flatMap(ignore -> {
                 if (args.length == 2) {
-                    String channelName = args[1];
-                    if (channelName.equalsIgnoreCase("all")) {
+                    final String channelName = args[1];
+                    if ("all".equalsIgnoreCase(channelName)) {
                         settings.setDiscalChannel("all");
                         return DatabaseManager.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.Channel.All", settings), event));
@@ -206,7 +206,7 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleSimpleAnnouncement(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSimpleAnnouncement(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings)
             .doOnNext(s -> s.setSimpleAnnouncements(!s.usingSimpleAnnouncements()))
             .flatMap(DatabaseManager::updateSettings)
@@ -216,13 +216,13 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleSettings(MessageCreateEvent event, GuildSettings settings) {
-        Mono<Guild> guildMono = event.getGuild().cache();
-        Mono<String> dRoleMono = RoleUtils.getRoleNameFromID(settings.getControlRole(), event).defaultIfEmpty("everyone");
-        Mono<String> dChanMono = guildMono.flatMap(g ->
+    private Mono<Void> moduleSettings(final MessageCreateEvent event, final GuildSettings settings) {
+        final Mono<Guild> guildMono = event.getGuild().cache();
+        final Mono<String> dRoleMono = RoleUtils.getRoleNameFromID(settings.getControlRole(), event).defaultIfEmpty("everyone");
+        final Mono<String> dChanMono = guildMono.flatMap(g ->
             ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), g)).defaultIfEmpty("All Channels");
 
-        Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
+        final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
             .map(TupleUtils.function((guild, dRole, dChannel) -> spec -> {
                 if (settings.isBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -249,7 +249,7 @@ public class DisCalCommand implements Command {
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
 
-    private Mono<Void> moduleDmAnnouncements(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDmAnnouncements(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings.isDevGuild())
             .filter(identity -> identity)
             .flatMap(b -> event.getMessage().getAuthorAsMember())
@@ -268,12 +268,12 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> modulePrefix(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> modulePrefix(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
             .flatMap(ignore -> {
                 if (args.length == 2) {
-                    String prefix = args[1];
+                    final String prefix = args[1];
                     settings.setPrefix(prefix);
 
                     return DatabaseManager.updateSettings(settings).then(Messages
@@ -286,25 +286,25 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleLanguage(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleLanguage(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
             .flatMap(ignore -> {
                 if (args.length == 2) {
-                    String value = args[1];
+                    final String value = args[1];
                     if (Messages.isSupported(value)) {
-                        String valid = Messages.getValidLang(value);
+                        final String valid = Messages.getValidLang(value);
                         settings.setLang(valid);
 
                         return DatabaseManager.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.Lang.Success", settings), event));
                     } else {
-                        String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
+                        final String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
                         return Messages.sendMessage(
                             Messages.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
                     }
                 } else {
-                    String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
+                    final String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
                     return Messages.sendMessage(
                         Messages.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
                 }
@@ -313,12 +313,12 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleInvite(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleInvite(final MessageCreateEvent event, final GuildSettings settings) {
         return Messages.sendMessage(Messages.getMessage("DisCal.InviteLink", "%link%",
             GlobalConst.supportInviteLink, settings), event).then();
     }
 
-    private Mono<Void> moduleBrand(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleBrand(final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasDisCalRole(event, settings)
             .filter(identity -> identity)
             .map(b -> settings.isPatronGuild())
@@ -337,7 +337,7 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleDashboard(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDashboard(final MessageCreateEvent event, final GuildSettings settings) {
         return Messages.sendMessage(Messages.getMessage("DisCal.DashboardLink", "%link%",
             GlobalConst.discalDashboardLink, settings), event).then();
     }

@@ -26,18 +26,17 @@ public class AESEncryption {
     /**
      * Constructor for AESEncryption.
      * This class it to be used for encrypting/decrypting data.
-     *
-     * @throws Exception if something fails
      */
-    public AESEncryption(GuildSettings gs) {
-        String SECRET_KEY_2 = gs.getPrivateKey();
-        ivParameterSpec = new IvParameterSpec(SECRET_KEY_1.getBytes(StandardCharsets.UTF_8));
-        secretKeySpec = new SecretKeySpec(SECRET_KEY_2.getBytes(StandardCharsets.UTF_8), "AES");
+    @SuppressWarnings("AssignmentToNull")
+    public AESEncryption(final GuildSettings gs) {
+        final String SECRET_KEY_2 = gs.getPrivateKey();
+        this.ivParameterSpec = new IvParameterSpec(SECRET_KEY_1.getBytes(StandardCharsets.UTF_8));
+        this.secretKeySpec = new SecretKeySpec(SECRET_KEY_2.getBytes(StandardCharsets.UTF_8), "AES");
 
         try {
-            cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-        } catch (Exception e) {
-            cipher = null;
+            this.cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+        } catch (final Exception e) {
+            this.cipher = null;
         }
     }
 
@@ -48,12 +47,12 @@ public class AESEncryption {
      * @param data The data to encrypt.
      * @return The encrypted, unreadable data.
      */
-    public String encrypt(String data) {
+    public String encrypt(final String data) {
         try {
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
-            byte[] encrypted = cipher.doFinal(data.getBytes());
+            this.cipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec);
+            final byte[] encrypted = this.cipher.doFinal(data.getBytes());
             return Base64.encodeBase64String(encrypted);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return "FAILURE";
         }
     }
@@ -66,12 +65,12 @@ public class AESEncryption {
      * @param encryptedData The data to decrypt.
      * @return The data, decrypted.
      */
-    public String decrypt(String encryptedData) {
+    public String decrypt(final String encryptedData) {
         try {
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
-            byte[] decryptedBytes = cipher.doFinal(Base64.decodeBase64(encryptedData));
+            this.cipher.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec);
+            final byte[] decryptedBytes = this.cipher.doFinal(Base64.decodeBase64(encryptedData));
             return new String(decryptedBytes);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return "FAILURE";
         }
     }

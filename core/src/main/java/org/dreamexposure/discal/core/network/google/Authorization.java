@@ -39,39 +39,39 @@ public class Authorization {
     }
 
     public void init() {
-        clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
-        client = new OkHttpClient();
+        this.clientData = new ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get());
+        this.client = new OkHttpClient();
     }
 
     //Getters
     public ClientData getClientData() {
-        return clientData;
+        return this.clientData;
     }
 
     public OkHttpClient getClient() {
-        return client;
+        return this.client;
     }
 
 
-    public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
+    public String requestNewAccessToken(final GuildSettings settings, final AESEncryption encryption) {
         try {
-            RequestBody body = new FormBody.Builder()
-                    .addEncoded("client_id", clientData.getClientId())
-                    .addEncoded("client_secret", clientData.getClientSecret())
-                    .addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
-                    .addEncoded("grant_type", "refresh_token")
-                    .build();
+            final RequestBody body = new FormBody.Builder()
+                .addEncoded("client_id", this.clientData.getClientId())
+                .addEncoded("client_secret", this.clientData.getClientSecret())
+                .addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
+                .addEncoded("grant_type", "refresh_token")
+                .build();
 
-            Request httpRequest = new okhttp3.Request.Builder()
-                    .url("https://www.googleapis.com/oauth2/v4/token")
-                    .post(body)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .build();
+            final Request httpRequest = new okhttp3.Request.Builder()
+                .url("https://www.googleapis.com/oauth2/v4/token")
+                .post(body)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
 
-            Response httpResponse = client.newCall(httpRequest).execute();
+            final Response httpResponse = this.client.newCall(httpRequest).execute();
 
             if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
+                final JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
                 //Update Db data.
                 settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
@@ -82,15 +82,15 @@ public class Authorization {
             } else {
                 //Failed to get OK. Send debug info.
                 LogFeed.log(LogObject.forDebug("Error requesting new access token.",
-                        "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
-                                " | " + httpResponse.body().string()));
+                    "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+                        " | " + httpResponse.body().string()));
                 return null;
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             //Error occurred, lets just log it and return null.
             LogFeed.log(LogObject
-                    .forException("Failed to request new access token.", e, this.getClass()));
+                .forException("Failed to request new access token.", e, this.getClass()));
             return null;
         }
     }

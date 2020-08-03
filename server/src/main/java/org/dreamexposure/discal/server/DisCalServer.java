@@ -34,13 +34,13 @@ public class DisCalServer {
     private static final NetworkInfo networkInfo = new NetworkInfo();
     private static DiscordClient client;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         //Get settings
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.load(new FileReader(new File("settings.properties")));
         BotSettings.init(p);
 
-        if (args.length > 1 && args[0].equalsIgnoreCase("-forceNewAuth")) {
+        if (args.length > 1 && "-forceNewAuth".equalsIgnoreCase(args[0])) {
             //Forcefully start a browser for google account authorization.
             CalendarAuth.getCalendarService(Integer.parseInt(args[1])).block(); //Block until auth completes...
 
@@ -49,7 +49,7 @@ public class DisCalServer {
         }
 
         //Handle database migrations
-        handleMigrations(args.length > 0 && args[0].equalsIgnoreCase("--repair"));
+        handleMigrations(args.length > 0 && "--repair".equalsIgnoreCase(args[0]));
 
         //Start Google authorization daemon
         Authorization.getAuth().init();
@@ -58,13 +58,13 @@ public class DisCalServer {
 
         //Start Spring
         try {
-            SpringApplication app = new SpringApplication(DisCalServer.class);
+            final SpringApplication app = new SpringApplication(DisCalServer.class);
             app.setAdditionalProfiles(BotSettings.PROFILE.get());
             app.run(args);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             LogFeed.log(LogObject
-                    .forException("SPRING ERROR", "by 'PANIC! At The API'", e, DisCalServer.class));
+                .forException("SPRING ERROR", "by 'PANIC! At The API'", e, DisCalServer.class));
         }
 
         //Start network monitoring
@@ -99,29 +99,29 @@ public class DisCalServer {
         return networkInfo;
     }
 
-    private static void handleMigrations(boolean repair) {
-        Map<String, String> placeholders = new HashMap<>();
+    private static void handleMigrations(final boolean repair) {
+        final Map<String, String> placeholders = new HashMap<>();
         placeholders.put("prefix", BotSettings.SQL_PREFIX.get());
 
-        DatabaseSettings settings = new DatabaseSettings(
-                BotSettings.SQL_MASTER_HOST.get(),
-                BotSettings.SQL_MASTER_PORT.get(),
-                BotSettings.SQL_DB.get(),
-                BotSettings.SQL_MASTER_USER.get(),
-                BotSettings.SQL_MASTER_PASS.get(),
-                BotSettings.SQL_PREFIX.get()
+        final DatabaseSettings settings = new DatabaseSettings(
+            BotSettings.SQL_MASTER_HOST.get(),
+            BotSettings.SQL_MASTER_PORT.get(),
+            BotSettings.SQL_DB.get(),
+            BotSettings.SQL_MASTER_USER.get(),
+            BotSettings.SQL_MASTER_PASS.get(),
+            BotSettings.SQL_PREFIX.get()
         );
-        DatabaseInfo info = org.dreamexposure.novautils.database.DatabaseManager
-                .connectToMySQL(settings);
+        final DatabaseInfo info = org.dreamexposure.novautils.database.DatabaseManager
+            .connectToMySQL(settings);
 
         try {
-            Flyway flyway = Flyway.configure()
-                    .dataSource(info.getSource())
-                    .cleanDisabled(true)
-                    .baselineOnMigrate(true)
-                    .table(BotSettings.SQL_PREFIX.get() + "schema_history")
-                    .placeholders(placeholders)
-                    .load();
+            final Flyway flyway = Flyway.configure()
+                .dataSource(info.getSource())
+                .cleanDisabled(true)
+                .baselineOnMigrate(true)
+                .table(BotSettings.SQL_PREFIX.get() + "schema_history")
+                .placeholders(placeholders)
+                .load();
 
             int sm = 0;
             if (repair)
@@ -132,7 +132,7 @@ public class DisCalServer {
 
             org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
             LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
             System.exit(2);
         }

@@ -47,7 +47,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"UnusedReturnValue", "unused", "ConstantConditions", "SqlResolve"})
+@SuppressWarnings({"UnusedReturnValue", "unused", "ConstantConditions", "SqlResolve", "MagicNumber"})
 public class DatabaseManager {
     private final static DatabaseSettings settings;
 
@@ -61,7 +61,7 @@ public class DatabaseManager {
         settings = new DatabaseSettings("", "", BotSettings.SQL_DB.get(),
             "", "", BotSettings.SQL_PREFIX.get());
 
-        ConnectionFactory masterFact = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+        final ConnectionFactory masterFact = ConnectionFactories.get(ConnectionFactoryOptions.builder()
             .option(DRIVER, "pool")
             .option(PROTOCOL, "mysql")
             .option(HOST, BotSettings.SQL_MASTER_HOST.get())
@@ -71,11 +71,11 @@ public class DatabaseManager {
             .option(DATABASE, settings.getDatabase())
             .option(SSL, false)
             .build());
-        ConnectionPoolConfiguration masterConf = ConnectionPoolConfiguration.builder(masterFact)
+        final ConnectionPoolConfiguration masterConf = ConnectionPoolConfiguration.builder(masterFact)
             .build();
         master = new ConnectionPool(masterConf);
 
-        ConnectionFactory slaveFact = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+        final ConnectionFactory slaveFact = ConnectionFactories.get(ConnectionFactoryOptions.builder()
             .option(DRIVER, "pool")
             .option(PROTOCOL, "mysql")
             .option(HOST, BotSettings.SQL_SLAVE_HOST.get())
@@ -85,13 +85,13 @@ public class DatabaseManager {
             .option(DATABASE, settings.getDatabase())
             .option(SSL, false)
             .build());
-        ConnectionPoolConfiguration slaveConf = ConnectionPoolConfiguration.builder(slaveFact)
+        final ConnectionPoolConfiguration slaveConf = ConnectionPoolConfiguration.builder(slaveFact)
             .build();
         slave = new ConnectionPool(slaveConf);
     }
 
-    private static <T> Mono<T> connect(ConnectionPool connectionPool,
-                                       Function<Connection, Mono<T>> connection) {
+    private static <T> Mono<T> connect(final ConnectionPool connectionPool,
+                                       final Function<Connection, Mono<T>> connection) {
         return connectionPool.create().flatMap(c -> connection.apply(c)
             .flatMap(item -> Mono.from(c.validate(ValidationDepth.LOCAL))
                 .flatMap(validate -> {
@@ -111,11 +111,11 @@ public class DatabaseManager {
         slave.dispose();
     }
 
-    public static Mono<Boolean> updateAPIAccount(UserAPIAccount acc) {
-        String table = String.format("%sapi", settings.getPrefix());
+    public static Mono<Boolean> updateAPIAccount(final UserAPIAccount acc) {
+        final String table = String.format("%sapi", settings.getPrefix());
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE API_KEY = ?";
+            final String query = "SELECT * FROM " + table + " WHERE API_KEY = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, acc.getAPIKey())
@@ -124,7 +124,7 @@ public class DatabaseManager {
             .hasElements()
             .flatMap(exists -> {
                 if (exists) {
-                    String updateCommand = "UPDATE " + table
+                    final String updateCommand = "UPDATE " + table
                         + " SET USER_ID = ?, BLOCKED = ?,"
                         + " WHERE API_KEY = ?";
 
@@ -136,7 +136,7 @@ public class DatabaseManager {
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table +
+                    final String insertCommand = "INSERT INTO " + table +
                         "(USER_ID, API_KEY, BLOCKED, TIME_ISSUED)" +
                         " VALUES (?, ?, ?, ?)";
 
@@ -155,17 +155,17 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> updateSettings(GuildSettings set) {
+    public static Mono<Boolean> updateSettings(final GuildSettings set) {
         guildSettingsCache.remove(set.getGuildID());
         guildSettingsCache.put(set.getGuildID(), set);
 
-        if (set.getPrivateKey().equalsIgnoreCase("N/a"))
+        if ("N/a".equalsIgnoreCase(set.getPrivateKey()))
             set.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
 
-        String table = String.format("%sguild_settings", settings.getPrefix());
+        final String table = String.format("%sguild_settings", settings.getPrefix());
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE GUILD_ID = ?";
+            final String query = "SELECT * FROM " + table + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, set.getGuildID().asString())
@@ -174,7 +174,7 @@ public class DatabaseManager {
             .next()
             .flatMap(exists -> {
                 if (exists) {
-                    String update = "UPDATE " + table
+                    final String update = "UPDATE " + table
                         + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?, CREDENTIALS_ID = ?,"
                         + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
                         + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
@@ -205,7 +205,7 @@ public class DatabaseManager {
                         .hasElement()
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table + "(GUILD_ID, " +
+                    final String insertCommand = "INSERT INTO " + table + "(GUILD_ID, " +
                         "EXTERNAL_CALENDAR, PRIVATE_KEY, CREDENTIALS_ID, ACCESS_TOKEN, REFRESH_TOKEN, " +
                         "CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, " +
                         "PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, " +
@@ -241,11 +241,11 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> updateCalendar(CalendarData calData) {
-        String table = String.format("%scalendars", settings.getPrefix());
+    public static Mono<Boolean> updateCalendar(final CalendarData calData) {
+        final String table = String.format("%scalendars", settings.getPrefix());
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE GUILD_ID = ?";
+            final String query = "SELECT * FROM " + table + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, calData.getGuildId().asString())
@@ -254,7 +254,7 @@ public class DatabaseManager {
             .hasElements()
             .flatMap(exists -> {
                 if (exists) {
-                    String update = "UPDATE " + table
+                    final String update = "UPDATE " + table
                         + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
                         + " CALENDAR_ADDRESS = ?, EXTERNAL = ?"
                         + " WHERE GUILD_ID = ?";
@@ -270,7 +270,7 @@ public class DatabaseManager {
                         .hasElement()
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table
+                    final String insertCommand = "INSERT INTO " + table
                         + "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, " +
                         "CALENDAR_ADDRESS, EXTERNAL)" + " VALUES (?, ?, ?, ?, ?)";
 
@@ -291,11 +291,11 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> updateAnnouncement(Announcement announcement) {
-        String table = String.format("%sannouncements", settings.getPrefix());
+    public static Mono<Boolean> updateAnnouncement(final Announcement announcement) {
+        final String table = String.format("%sannouncements", settings.getPrefix());
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE ANNOUNCEMENT_ID = ?";
+            final String query = "SELECT * FROM " + table + " WHERE ANNOUNCEMENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, announcement.getAnnouncementId().toString())
@@ -304,7 +304,7 @@ public class DatabaseManager {
             .hasElements()
             .flatMap(exists -> {
                 if (exists) {
-                    String update = "UPDATE " + table
+                    final String update = "UPDATE " + table
                         + " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
                         + " ANNOUNCEMENT_TYPE = ?, MODIFIER = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
                         + " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
@@ -329,7 +329,7 @@ public class DatabaseManager {
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table +
+                    final String insertCommand = "INSERT INTO " + table +
                         "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, " +
                         "CHANNEL_ID, ANNOUNCEMENT_TYPE, MODIFIER, EVENT_ID, EVENT_COLOR, " +
                         "HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY)" +
@@ -360,16 +360,16 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> updateEventData(EventData data) {
-        String table = String.format("%sevents", settings.getPrefix());
+    public static Mono<Boolean> updateEventData(final EventData data) {
+        final String table = String.format("%sevents", settings.getPrefix());
         String id = data.getEventId();
         if (data.getEventId().contains("_")) {
             id = data.getEventId().split("_")[0];
         }
-        String idToUse = id;
+        final String idToUse = id;
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE EVENT_ID = ?";
+            final String query = "SELECT * FROM " + table + " WHERE EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, idToUse)
@@ -378,7 +378,7 @@ public class DatabaseManager {
             .hasElements()
             .flatMap(exists -> {
                 if (exists) {
-                    String updateCommand = "UPDATE " + table
+                    final String updateCommand = "UPDATE " + table
                         + " SET IMAGE_LINK = ?, EVENT_END = ?"
                         + " WHERE EVENT_ID = ?";
 
@@ -390,7 +390,7 @@ public class DatabaseManager {
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table +
+                    final String insertCommand = "INSERT INTO " + table +
                         "(GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)" +
                         " VALUES (?, ?, ?, ?)";
 
@@ -409,11 +409,11 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> updateRsvpData(RsvpData data) {
-        String table = String.format("%srsvp", settings.getPrefix());
+    public static Mono<Boolean> updateRsvpData(final RsvpData data) {
+        final String table = String.format("%srsvp", settings.getPrefix());
 
         return connect(slave, c -> {
-            String query = "SELECT * FROM " + table + " WHERE EVENT_ID = ?";
+            final String query = "SELECT * FROM " + table + " WHERE EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, data.getEventId())
@@ -422,7 +422,7 @@ public class DatabaseManager {
             .hasElements()
             .flatMap(exists -> {
                 if (exists) {
-                    String update = "UPDATE " + table
+                    final String update = "UPDATE " + table
                         + " SET EVENT_END = ?,"
                         + " GOING_ON_TIME = ?,"
                         + " GOING_LATE = ?,"
@@ -441,7 +441,7 @@ public class DatabaseManager {
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
-                    String insertCommand = "INSERT INTO " + table +
+                    final String insertCommand = "INSERT INTO " + table +
                         "(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, " +
                         "NOT_GOING, UNDECIDED)" +
                         " VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -464,16 +464,16 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<UserAPIAccount> getAPIAccount(String APIKey) {
+    public static Mono<UserAPIAccount> getAPIAccount(final String APIKey) {
         return connect(slave, c -> {
-            String dataTableName = String.format("%sapi", settings.getPrefix());
-            String query = "SELECT * FROM " + dataTableName + " WHERE API_KEY = ?";
+            final String dataTableName = String.format("%sapi", settings.getPrefix());
+            final String query = "SELECT * FROM " + dataTableName + " WHERE API_KEY = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, APIKey)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UserAPIAccount account = new UserAPIAccount();
+            final UserAPIAccount account = new UserAPIAccount();
             account.setAPIKey(APIKey);
             account.setUserId(row.get("USER_ID", String.class));
             account.setBlocked(row.get("BLOCKED", Boolean.class));
@@ -488,19 +488,19 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<GuildSettings> getSettings(Snowflake guildId) {
+    public static Mono<GuildSettings> getSettings(final Snowflake guildId) {
         if (guildSettingsCache.containsKey(guildId))
             return Mono.just(guildSettingsCache.get(guildId));
 
         return connect(slave, c -> {
-            String dataTableName = String.format("%sguild_settings", settings.getPrefix());
-            String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = ?";
+            final String dataTableName = String.format("%sguild_settings", settings.getPrefix());
+            final String query = "SELECT * FROM " + dataTableName + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            GuildSettings set = new GuildSettings(guildId);
+            final GuildSettings set = new GuildSettings(guildId);
 
             set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
             set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
@@ -533,10 +533,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<CalendarData> getMainCalendar(Snowflake guildId) {
+    public static Mono<CalendarData> getMainCalendar(final Snowflake guildId) {
         return connect(slave, c -> {
-            String calendarTableName = String.format("%scalendars", settings.getPrefix());
-            String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? " +
+            final String calendarTableName = String.format("%scalendars", settings.getPrefix());
+            final String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? " +
                 "AND CALENDAR_NUMBER = ?";
 
             return Mono.from(c.createStatement(query)
@@ -544,9 +544,9 @@ public class DatabaseManager {
                 .bind(1, 1)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            String calId = row.get("CALENDAR_ID", String.class);
-            String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-            boolean external = row.get("EXTERNAL", Boolean.class);
+            final String calId = row.get("CALENDAR_ID", String.class);
+            final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final boolean external = row.get("EXTERNAL", Boolean.class);
             return CalendarData.fromData(guildId, 1, calId, calAddr, external);
         }))
             .next()
@@ -556,10 +556,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<CalendarData> getCalendar(Snowflake guildId, int calendarNumber) {
+    public static Mono<CalendarData> getCalendar(final Snowflake guildId, final int calendarNumber) {
         return connect(slave, c -> {
-            String calendarTableName = String.format("%scalendars", settings.getPrefix());
-            String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? AND " +
+            final String calendarTableName = String.format("%scalendars", settings.getPrefix());
+            final String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? AND " +
                 "CALENDAR_NUMBER = ?";
 
             return Mono.from(c.createStatement(query)
@@ -567,9 +567,9 @@ public class DatabaseManager {
                 .bind(1, calendarNumber)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            String calId = row.get("CALENDAR_ID", String.class);
-            String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-            boolean external = row.get("EXTERNAL", Boolean.class);
+            final String calId = row.get("CALENDAR_ID", String.class);
+            final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final boolean external = row.get("EXTERNAL", Boolean.class);
             return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external);
         }))
             .next()
@@ -579,18 +579,18 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<List<CalendarData>> getAllCalendars(Snowflake guildId) {
+    public static Mono<List<CalendarData>> getAllCalendars(final Snowflake guildId) {
         return connect(slave, c -> {
-            String calendarTableName = String.format("%scalendars", settings.getPrefix());
-            String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
+            final String calendarTableName = String.format("%scalendars", settings.getPrefix());
+            final String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            String calId = row.get("CALENDAR_ID", String.class);
-            String calAddr = row.get("CALENDAR_ADDRESS", String.class);
-            boolean external = row.get("EXTERNAL", Boolean.class);
+            final String calId = row.get("CALENDAR_ID", String.class);
+            final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final boolean external = row.get("EXTERNAL", Boolean.class);
 
             return CalendarData.fromData(guildId, 1, calId, calAddr, external);
         }))
@@ -603,12 +603,12 @@ public class DatabaseManager {
 
     public static Mono<Integer> getCalendarCount() {
         return connect(slave, c -> {
-            String calendarTableName = String.format("%scalendars", settings.getPrefix());
-            String query = "SELECT COUNT(*) FROM " + calendarTableName + ";";
+            final String calendarTableName = String.format("%scalendars", settings.getPrefix());
+            final String query = "SELECT COUNT(*) FROM " + calendarTableName + ";";
 
             return Mono.from(c.createStatement(query).execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            Long calendars = row.get(0, Long.class);
+            final Long calendars = row.get(0, Long.class);
 
             return calendars == null ? 0 : calendars.intValue();
         }))
@@ -619,23 +619,23 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<EventData> getEventData(Snowflake guildId, String eventId) {
+    public static Mono<EventData> getEventData(final Snowflake guildId, final String eventId) {
         return connect(slave, c -> {
             String copiedEventId = eventId;
             if (copiedEventId.contains("_"))
                 copiedEventId = copiedEventId.split("_")[0];
 
-            String rsvpTableName = String.format("%srsvp", settings.getPrefix());
-            String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
+            final String rsvpTableName = String.format("%srsvp", settings.getPrefix());
+            final String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .bind(1, copiedEventId)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            String id = row.get("EVENT_ID", String.class);
-            long end = row.get("EVENT_END", Long.class);
-            String img = row.get("IMAGE_LINK", String.class);
+            final String id = row.get("EVENT_ID", String.class);
+            final long end = row.get("EVENT_END", Long.class);
+            final String img = row.get("IMAGE_LINK", String.class);
 
             return EventData.fromImage(guildId, id, end, img);
         }))
@@ -646,17 +646,17 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<RsvpData> getRsvpData(Snowflake guildId, String eventId) {
+    public static Mono<RsvpData> getRsvpData(final Snowflake guildId, final String eventId) {
         return connect(slave, c -> {
-            String rsvpTableName = String.format("%srsvp", settings.getPrefix());
-            String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
+            final String rsvpTableName = String.format("%srsvp", settings.getPrefix());
+            final String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .bind(1, eventId)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            RsvpData data = new RsvpData(guildId, eventId);
+            final RsvpData data = new RsvpData(guildId, eventId);
             data.setEventEnd(row.get("EVENT_END", Long.class));
             data.setGoingOnTimeFromString(row.get("GOING_ON_TIME", String.class));
             data.setGoingLateFromString(row.get("GOING_LATE", String.class));
@@ -673,16 +673,16 @@ public class DatabaseManager {
             .defaultIfEmpty(new RsvpData(guildId, eventId));
     }
 
-    public static Mono<Announcement> getAnnouncement(UUID announcementId, Snowflake guildId) {
+    public static Mono<Announcement> getAnnouncement(final UUID announcementId, final Snowflake guildId) {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, announcementId.toString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -705,18 +705,18 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<List<Announcement>> getAnnouncements(Snowflake guildId) {
+    public static Mono<List<Announcement>> getAnnouncements(final Snowflake guildId) {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = ?";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -742,16 +742,16 @@ public class DatabaseManager {
 
     public static Mono<List<Announcement>> getAnnouncements() {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName + ";";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName + ";";
 
             return Mono.from(c.createStatement(query)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
-            Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -775,20 +775,20 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<List<Announcement>> getAnnouncements(AnnouncementType type) {
+    public static Mono<List<Announcement>> getAnnouncements(final AnnouncementType type) {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName
                 + " WHERE ANNOUNCEMENT_TYPE = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, type.name())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
-            Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -814,16 +814,16 @@ public class DatabaseManager {
 
     public static Mono<List<Announcement>> getEnabledAnnouncements() {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName + " WHERE ENABLED = 1";
 
             return Mono.from(c.createStatement(query)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
-            Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -847,20 +847,20 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<List<Announcement>> getEnabledAnnouncements(AnnouncementType type) {
+    public static Mono<List<Announcement>> getEnabledAnnouncements(final AnnouncementType type) {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName
                 + " WHERE ENABLED = 1 AND ANNOUNCEMENT_TYPE = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, type.name())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
-            Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -884,19 +884,19 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<List<Announcement>> getEnabledAnnouncements(Snowflake guildId) {
+    public static Mono<List<Announcement>> getEnabledAnnouncements(final Snowflake guildId) {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT * FROM " + announcementTableName
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT * FROM " + announcementTableName
                 + " WHERE ENABLED = 1 AND GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
+            final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-            Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(announcementId, guildId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
@@ -922,12 +922,12 @@ public class DatabaseManager {
 
     public static Mono<Integer> getAnnouncementCount() {
         return connect(slave, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "SELECT COUNT(*) FROM " + announcementTableName + ";";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "SELECT COUNT(*) FROM " + announcementTableName + ";";
 
             return Mono.from(c.createStatement(query).execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            Long announcements = row.get(0, Long.class);
+            final Long announcements = row.get(0, Long.class);
             return announcements == null ? 0 : announcements.intValue();
         }))
             .next()
@@ -937,10 +937,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteAnnouncement(String announcementId) {
+    public static Mono<Boolean> deleteAnnouncement(final String announcementId) {
         return connect(master, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "DELETE FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "DELETE FROM " + announcementTableName + " WHERE ANNOUNCEMENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, announcementId)
@@ -953,10 +953,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteAnnouncementsForEvent(Snowflake guildId, String eventId) {
+    public static Mono<Boolean> deleteAnnouncementsForEvent(final Snowflake guildId, final String eventId) {
         return connect(master, c -> {
-            String announcementTableName = String.format("%sannouncements", settings.getPrefix());
-            String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND " +
+            final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
+            final String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND " +
                 "GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
 
             return Mono.from(c.createStatement(query)
@@ -972,13 +972,13 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteEventData(String eventId) {
+    public static Mono<Boolean> deleteEventData(final String eventId) {
         return connect(master, c -> {
-            String eventTable = String.format("%sevents", settings.getPrefix());
+            final String eventTable = String.format("%sevents", settings.getPrefix());
             //Check if recurring...
             if (eventId.contains("_"))
                 return Mono.empty(); //Don't delete if child event of recurring event.
-            String query = "DELETE FROM " + eventTable + " WHERE EVENT_ID = ?";
+            final String query = "DELETE FROM " + eventTable + " WHERE EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, eventId)
@@ -991,10 +991,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteAllEventData(Snowflake guildId) {
+    public static Mono<Boolean> deleteAllEventData(final Snowflake guildId) {
         return connect(master, c -> {
-            String eventTable = String.format("%sevents", settings.getPrefix());
-            String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
+            final String eventTable = String.format("%sevents", settings.getPrefix());
+            final String query = "DELETE FROM " + eventTable + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
@@ -1008,10 +1008,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteAllAnnouncementData(Snowflake guildId) {
+    public static Mono<Boolean> deleteAllAnnouncementData(final Snowflake guildId) {
         return connect(master, c -> {
-            String announcementTable = String.format("%sannouncements", settings.getPrefix());
-            String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
+            final String announcementTable = String.format("%sannouncements", settings.getPrefix());
+            final String query = "DELETE FROM " + announcementTable + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
@@ -1024,10 +1024,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteAllRSVPData(Snowflake guildId) {
+    public static Mono<Boolean> deleteAllRSVPData(final Snowflake guildId) {
         return connect(master, c -> {
-            String rsvpTable = String.format("%srsvp", settings.getPrefix());
-            String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
+            final String rsvpTable = String.format("%srsvp", settings.getPrefix());
+            final String query = "DELETE FROM " + rsvpTable + " WHERE GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
@@ -1040,10 +1040,10 @@ public class DatabaseManager {
             });
     }
 
-    public static Mono<Boolean> deleteCalendar(CalendarData data) {
+    public static Mono<Boolean> deleteCalendar(final CalendarData data) {
         return connect(master, c -> {
-            String calendarTable = String.format("%scalendars", settings.getPrefix());
-            String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND " +
+            final String calendarTable = String.format("%scalendars", settings.getPrefix());
+            final String query = "DELETE FROM " + calendarTable + " WHERE GUILD_ID = ? AND " +
                 "CALENDAR_ADDRESS = ?";
 
             return Mono.from(c.createStatement(query)

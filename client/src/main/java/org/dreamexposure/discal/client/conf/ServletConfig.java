@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.client.conf;
 
 import org.dreamexposure.discal.core.object.BotSettings;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -17,7 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class ServletConfig implements
         WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
-    public void customize(ConfigurableServletWebServerFactory factory) {
+    public void customize(final ConfigurableServletWebServerFactory factory) {
         factory.setPort(Integer.parseInt(BotSettings.PORT.get()));
         factory.addErrorPages(new ErrorPage(HttpStatus.NOT_FOUND, "/"));
     }
@@ -26,8 +27,8 @@ public class ServletConfig implements
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                CorsRegistration reg = registry.addMapping("/api/**");
+            public void addCorsMappings(final @NotNull CorsRegistry registry) {
+                final CorsRegistration reg = registry.addMapping("/api/**");
                 reg.allowedOrigins("*");
             }
         };

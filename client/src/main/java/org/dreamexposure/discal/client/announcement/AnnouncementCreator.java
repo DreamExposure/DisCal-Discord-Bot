@@ -38,12 +38,12 @@ public class AnnouncementCreator {
     }
 
     //Functional
-    public Mono<Announcement> init(MessageCreateEvent e, GuildSettings settings) {
-        if (!hasAnnouncement(settings.getGuildID())) {
+    public Mono<Announcement> init(final MessageCreateEvent e, final GuildSettings settings) {
+        if (!this.hasAnnouncement(settings.getGuildID())) {
             return e.getMessage().getChannel().flatMap(channel -> {
-                Announcement a = new Announcement(settings.getGuildID());
+                final Announcement a = new Announcement(settings.getGuildID());
                 a.setAnnouncementChannelId(channel.getId().asString());
-                announcements.add(a);
+                this.announcements.add(a);
 
                 return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
                     .flatMap(em ->
@@ -53,15 +53,15 @@ public class AnnouncementCreator {
                     .thenReturn(a);
             });
         }
-        return Mono.justOrEmpty(getAnnouncement(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getAnnouncement(settings.getGuildID()));
     }
 
-    public Mono<Announcement> init(MessageCreateEvent e, String announcementId, GuildSettings settings) {
-        if (!hasAnnouncement(settings.getGuildID())) {
+    public Mono<Announcement> init(final MessageCreateEvent e, final String announcementId, final GuildSettings settings) {
+        if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(toCopy -> {
-                    Announcement a = new Announcement(toCopy);
-                    announcements.add(a);
+                    final Announcement a = new Announcement(toCopy);
+                    this.announcements.add(a);
 
                     return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
                         .flatMap(em ->
@@ -69,18 +69,18 @@ public class AnnouncementCreator {
                         .doOnNext(a::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
                         .thenReturn(a);
-                }).defaultIfEmpty(getAnnouncement(settings.getGuildID()));
+                }).defaultIfEmpty(this.getAnnouncement(settings.getGuildID()));
         }
-        return Mono.justOrEmpty(getAnnouncement(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getAnnouncement(settings.getGuildID()));
     }
 
-    public Mono<Announcement> edit(MessageCreateEvent e, String announcementId, GuildSettings settings) {
-        if (!hasAnnouncement(settings.getGuildID())) {
+    public Mono<Announcement> edit(final MessageCreateEvent e, final String announcementId, final GuildSettings settings) {
+        if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(edit -> {
-                    Announcement a = new Announcement(edit, true);
+                    final Announcement a = new Announcement(edit, true);
                     a.setEditing(true);
-                    announcements.add(a);
+                    this.announcements.add(a);
 
                     return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
                         .flatMap(em ->
@@ -95,22 +95,22 @@ public class AnnouncementCreator {
                         });
                 });
         } else {
-            return Mono.justOrEmpty(getAnnouncement(settings.getGuildID()));
+            return Mono.justOrEmpty(this.getAnnouncement(settings.getGuildID()));
         }
     }
 
-    public void terminate(Snowflake guildId) {
-        if (hasAnnouncement(guildId))
-            announcements.remove(getAnnouncement(guildId));
+    public void terminate(final Snowflake guildId) {
+        if (this.hasAnnouncement(guildId))
+            this.announcements.remove(this.getAnnouncement(guildId));
     }
 
-    public Mono<AnnouncementCreatorResponse> confirmAnnouncement(Snowflake guildId) {
-        return Mono.justOrEmpty(getAnnouncement(guildId))
+    public Mono<AnnouncementCreatorResponse> confirmAnnouncement(final Snowflake guildId) {
+        return Mono.justOrEmpty(this.getAnnouncement(guildId))
             .filter(Announcement::hasRequiredValues)
             .flatMap(a ->
                 DatabaseManager.updateAnnouncement(a).map(success -> {
                     if (success) {
-                        terminate(guildId);
+                        this.terminate(guildId);
                         return new AnnouncementCreatorResponse(true, a);
                     } else {
                         return new AnnouncementCreatorResponse(false, null);
@@ -121,8 +121,8 @@ public class AnnouncementCreator {
     }
 
     //Getters
-    public Announcement getAnnouncement(Snowflake guildId) {
-        for (Announcement a : announcements) {
+    public Announcement getAnnouncement(final Snowflake guildId) {
+        for (final Announcement a : this.announcements) {
             if (a.getGuildId().equals(guildId)) {
                 a.setLastEdit(System.currentTimeMillis());
                 return a;
@@ -132,12 +132,12 @@ public class AnnouncementCreator {
     }
 
     public List<Announcement> getAllAnnouncements() {
-        return announcements;
+        return this.announcements;
     }
 
     //Booleans/Checkers
-    public boolean hasAnnouncement(Snowflake guildId) {
-        for (Announcement a : announcements) {
+    public boolean hasAnnouncement(final Snowflake guildId) {
+        for (final Announcement a : this.announcements) {
             if (a.getGuildId().equals(guildId))
                 return true;
         }

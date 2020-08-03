@@ -10,17 +10,17 @@ import discord4j.common.util.Snowflake;
  * For Project: DisCal-Discord-Bot
  */
 public class EventData {
-    public static EventData fromJson(JSONObject json) {
+    public static EventData fromJson(final JSONObject json) {
         return new EventData(
-                Snowflake.of(json.getString("guild_id")),
-                json.getString("event_id"),
-                json.getLong("event_end"),
-                json.getString("image_link")
+            Snowflake.of(json.getString("guild_id")),
+            json.getString("event_id"),
+            json.getLong("event_end"),
+            json.getString("image_link")
         );
     }
 
-    public static EventData fromImage(Snowflake guildId, String eventId, long eventEnd,
-                                      String imageLink) {
+    public static EventData fromImage(final Snowflake guildId, final String eventId, final long eventEnd,
+                                      final String imageLink) {
         return new EventData(guildId, eventId, eventEnd, imageLink);
     }
 
@@ -33,7 +33,7 @@ public class EventData {
     private final long eventEnd;
     private final String imageLink;
 
-    private EventData(Snowflake guildId, String eventId, long eventEnd, String imageLink) {
+    private EventData(final Snowflake guildId, final String eventId, final long eventEnd, final String imageLink) {
         this.guildId = guildId;
         this.eventId = eventId;
         this.eventEnd = eventEnd;
@@ -42,33 +42,33 @@ public class EventData {
 
     //Getters
     public Snowflake getGuildId() {
-        return guildId;
+        return this.guildId;
     }
 
     public String getEventId() {
-        return eventId;
+        return this.eventId;
     }
 
     public long getEventEnd() {
-        return eventEnd;
+        return this.eventEnd;
     }
 
     public String getImageLink() {
-        return imageLink;
+        return this.imageLink;
     }
 
     //Boolean/Checkers
     public boolean shouldBeSaved() {
-        return !imageLink.isEmpty();
+        return !this.imageLink.isEmpty();
     }
 
     public JSONObject toJson() {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
 
-        json.put("guild_id", guildId.asString());
-        json.put("event_id", eventId);
-        json.put("event_end", eventEnd);
-        json.put("image_link", imageLink);
+        json.put("guild_id", this.guildId.asString());
+        json.put("event_id", this.eventId);
+        json.put("event_end", this.eventEnd);
+        json.put("image_link", this.imageLink);
 
         return json;
     }

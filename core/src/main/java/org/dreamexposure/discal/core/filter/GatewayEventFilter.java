@@ -12,7 +12,7 @@ import ch.qos.logback.core.spi.FilterReply;
 import discord4j.discordjson.json.gateway.Opcode;
 import discord4j.gateway.json.GatewayPayload;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "MethodWithMoreThanThreeNegations", "OverlyNestedMethod"})
 public class GatewayEventFilter extends TurboFilter {
 
     private String include;
@@ -21,18 +21,19 @@ public class GatewayEventFilter extends TurboFilter {
     private List<String> excludedEvents;
 
     @Override
-    public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
+    public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format,
+                              final Object[] params, final Throwable t) {
         if (params != null && logger.getName().startsWith("discord4j.gateway.inbound")) {
-            for (Object param : params) {
+            for (final Object param : params) {
                 if (param instanceof GatewayPayload) {
-                    GatewayPayload<?> payload = (GatewayPayload<?>) param;
+                    final GatewayPayload<?> payload = (GatewayPayload<?>) param;
                     if (Opcode.DISPATCH.equals(payload.getOp())) {
-                        if (excludedEvents != null) {
-                            if (excludedEvents.contains(payload.getType())) {
+                        if (this.excludedEvents != null) {
+                            if (this.excludedEvents.contains(payload.getType())) {
                                 return FilterReply.DENY;
                             }
-                        } else if (includedEvents != null) {
-                            if (!includedEvents.contains(payload.getType())) {
+                        } else if (this.includedEvents != null) {
+                            if (!this.includedEvents.contains(payload.getType())) {
                                 return FilterReply.DENY;
                             }
                         }
@@ -43,21 +44,21 @@ public class GatewayEventFilter extends TurboFilter {
         return FilterReply.NEUTRAL;
     }
 
-    public void setInclude(String include) {
+    public void setInclude(final String include) {
         this.include = include;
     }
 
-    public void setExclude(String exclude) {
+    public void setExclude(final String exclude) {
         this.exclude = exclude;
     }
 
     @Override
     public void start() {
-        if (exclude != null && exclude.trim().length() > 0) {
-            excludedEvents = Arrays.asList(exclude.split("[;,]"));
+        if (this.exclude != null && !this.exclude.trim().isEmpty()) {
+            this.excludedEvents = Arrays.asList(this.exclude.split("[;,]"));
             super.start();
-        } else if (include != null && include.trim().length() > 0) {
-            includedEvents = Arrays.asList(include.split("[;,]"));
+        } else if (this.include != null && !this.include.trim().isEmpty()) {
+            this.includedEvents = Arrays.asList(this.include.split("[;,]"));
             super.start();
         }
     }

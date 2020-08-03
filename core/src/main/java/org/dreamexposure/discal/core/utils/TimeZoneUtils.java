@@ -9,20 +9,20 @@ import org.joda.time.DateTimeZone;
  * For Project: DisCal
  */
 public class TimeZoneUtils {
-    public static boolean isValid(String value) {
+    public static boolean isValid(final String value) {
         try {
-            DateTimeZone tz = DateTimeZone.forID(value);
+            final DateTimeZone tz = DateTimeZone.forID(value);
             return tz != null && !isBadTz(value);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return false;
         }
     }
 
-    private static boolean isBadTz(String value) {
+    private static boolean isBadTz(final String value) {
         try {
             BadTimezone.valueOf(value.replaceAll("/", "_"));
             return true;
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             return false;
         }
     }

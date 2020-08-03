@@ -29,12 +29,13 @@ import okhttp3.RequestBody;
  */
 @SuppressWarnings("Duplicates")
 public class KeepAliveHandler {
+    @SuppressWarnings("MagicNumber")
     public static void startKeepAlive(final int seconds) {
         new Timer(true).scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 try {
-                    JSONObject data = new JSONObject();
+                    final JSONObject data = new JSONObject();
                     data.put("index", Integer.parseInt(BotSettings.SHARD_INDEX.get()));
 
                     if (DisCalClient.getClient() != null)
@@ -50,37 +51,37 @@ public class KeepAliveHandler {
                     data.put("ip", BotSettings.RESTART_IP.get());
                     data.put("port", Integer.parseInt(BotSettings.RESTART_PORT.get()));
 
-                    OkHttpClient client = new OkHttpClient();
+                    final OkHttpClient client = new OkHttpClient();
 
-                    RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
-                    Request request = new Request.Builder()
-                            .url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/keep-alive")
-                            .post(body)
-                            .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                            .header("Content-Type", "application/json")
-                            .build();
+                    final RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
+                    final Request request = new Request.Builder()
+                        .url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/keep-alive")
+                        .post(body)
+                        .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                        .header("Content-Type", "application/json")
+                        .build();
 
                     client.newCall(request).execute().close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LogFeed.log(LogObject
-                            .forException("[Heart Beat]", "Failed to send keep-alive", e,
-                                    this.getClass()));
+                        .forException("[Heart Beat]", "Failed to send keep-alive", e,
+                            this.getClass()));
                 }
             }
-        }, seconds * 1000, seconds * 1000);
+        }, seconds * 1000L, seconds * 1000L);
     }
 
     private static double usedMemory() {
-        long totalMemory = Runtime.getRuntime().totalMemory();
-        long freeMemory = Runtime.getRuntime().freeMemory();
-        double a = (totalMemory - freeMemory) / (double) (1024 * 1024);
+        final long totalMemory = Runtime.getRuntime().totalMemory();
+        final long freeMemory = Runtime.getRuntime().freeMemory();
+        final double a = (totalMemory - freeMemory) / (double) (1024 * 1024);
         return (double) Math.round(a * 100) / 100;
     }
 
     private static String humanReadableUptime() {
-        RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
-        Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
-        Period period = interval.toPeriod();
+        final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
+        final Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
+        final Period period = interval.toPeriod();
 
         return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
     }

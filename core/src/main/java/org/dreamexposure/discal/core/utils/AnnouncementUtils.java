@@ -17,9 +17,9 @@ public class AnnouncementUtils {
      * Checks if the announcement exists.
      *
      * @param value The announcement ID.
-     * @return <code>true</code> if the announcement exists, else <code>false</code>.
+     * @return {@code true} if the announcement exists, else {@code false}.
      */
-    public static Mono<Boolean> announcementExists(String value, Snowflake guildId) {
+    public static Mono<Boolean> announcementExists(final String value, final Snowflake guildId) {
         return Mono.just(UUID.fromString(value))
             .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId)
                 .hasElement())

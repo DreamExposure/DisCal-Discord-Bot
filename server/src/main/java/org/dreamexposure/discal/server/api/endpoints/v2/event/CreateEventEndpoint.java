@@ -16,6 +16,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -37,42 +38,42 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/events")
 public class CreateEventEndpoint {
     @PostMapping(value = "/create", produces = "application/json")
-    public String createEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String createEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject requestBody = new JSONObject(rBody);
+            final JSONObject requestBody = new JSONObject(rBody);
 
-            String guildId = requestBody.getString("guild_id");
-            int calNumber = requestBody.getInt("calendar_number");
+            final String guildId = requestBody.getString("guild_id");
+            final int calNumber = requestBody.getInt("calendar_number");
 
 
             //okay, lets actually create the event
-            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
-            CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            final CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
-            Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
+            final com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
+            final Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
-            Event event = new Event();
+            final Event event = new Event();
             event.setId(KeyGenerator.generateEventId());
             event.setVisibility("public");
 
-            EventDateTime start = new EventDateTime();
+            final EventDateTime start = new EventDateTime();
             start.setDateTime(new DateTime(requestBody.getLong("epoch_start")));
             event.setStart(start.setTimeZone(cal.getTimeZone()));
-            EventDateTime end = new EventDateTime();
+            final EventDateTime end = new EventDateTime();
             end.setDateTime(new DateTime(requestBody.getLong("epoch_end")));
             event.setEnd(end.setTimeZone(cal.getTimeZone()));
 
@@ -85,10 +86,10 @@ public class CreateEventEndpoint {
             if (requestBody.has("location"))
                 event.setLocation(requestBody.getString("location"));
             if (requestBody.has("recur") && requestBody.getBoolean("recur")) {
-                JSONObject recur = requestBody.getJSONObject("recurrence");
+                final JSONObject recur = requestBody.getJSONObject("recurrence");
 
-                Recurrence recurrence = new Recurrence().fromJson(recur);
-                String[] rr = new String[]{recurrence.toRRule()};
+                final Recurrence recurrence = new Recurrence().fromJson(recur);
+                final String[] rr = {recurrence.toRRule()};
 
                 event.setRecurrence(Arrays.asList(rr));
             }
@@ -107,28 +108,28 @@ public class CreateEventEndpoint {
                 }
             }
             //Everything supported is now checked for, lets create this on google's end now.
-            Event confirmed = service.events().insert(cal.getId(), event).execute();
+            final Event confirmed = service.events().insert(cal.getId(), event).execute();
             if (eventData.shouldBeSaved())
                 DatabaseManager.updateEventData(eventData).subscribe();
 
             //If we get here, nothing errored, and everything should be created correctly...
-            JSONObject responseBody = new JSONObject();
+            final JSONObject responseBody = new JSONObject();
             responseBody.put("message", "Event Successfully Created");
             responseBody.put("event_id", confirmed.getId());
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return responseBody.toString();
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("[API-v2]", "update event err", e, this.getClass()));
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

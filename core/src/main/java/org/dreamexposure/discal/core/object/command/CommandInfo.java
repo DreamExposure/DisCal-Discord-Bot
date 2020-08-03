@@ -14,7 +14,7 @@ public class CommandInfo {
 
     private final HashMap<String, String> subCommands = new HashMap<>();
 
-    public CommandInfo(String name, String description, String example) {
+    public CommandInfo(final String name, final String description, final String example) {
         this.name = name;
         this.description = description;
         this.example = example;
@@ -22,18 +22,18 @@ public class CommandInfo {
 
     //Getters
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getExample() {
-        return example;
+        return this.example;
     }
 
     public HashMap<String, String> getSubCommands() {
-        return subCommands;
+        return this.subCommands;
     }
 }

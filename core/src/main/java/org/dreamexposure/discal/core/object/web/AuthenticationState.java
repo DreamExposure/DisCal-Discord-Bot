@@ -13,60 +13,60 @@ public class AuthenticationState {
 
     private String keyUsed;
 
-    public AuthenticationState(boolean _success) {
-        success = _success;
+    public AuthenticationState(final boolean _success) {
+        this.success = _success;
     }
 
     public boolean isSuccess() {
-        return success;
+        return this.success;
     }
 
     public int getStatus() {
-        return status;
+        return this.status;
     }
 
     public String getReason() {
-        return reason;
+        return this.reason;
     }
 
     public String getKeyUsed() {
-        return keyUsed;
+        return this.keyUsed;
     }
 
     public boolean isFromDiscalNetwork() {
-        return fromDiscalNetwork;
+        return this.fromDiscalNetwork;
     }
 
     public boolean isReadOnly() {
-        return readOnly;
+        return this.readOnly;
     }
 
-    public AuthenticationState setStatus(int _status) {
-        status = _status;
+    public AuthenticationState setStatus(final int _status) {
+        this.status = _status;
         return this;
     }
 
-    public AuthenticationState setReason(String _reason) {
-        reason = _reason;
+    public AuthenticationState setReason(final String _reason) {
+        this.reason = _reason;
         return this;
     }
 
-    public AuthenticationState setKeyUsed(String _key) {
-        keyUsed = _key;
+    public AuthenticationState setKeyUsed(final String _key) {
+        this.keyUsed = _key;
         return this;
     }
 
-    public AuthenticationState setFromDisCalNetwork(boolean _fromDisCal) {
-        fromDiscalNetwork = _fromDisCal;
+    public AuthenticationState setFromDisCalNetwork(final boolean _fromDisCal) {
+        this.fromDiscalNetwork = _fromDisCal;
         return this;
     }
 
-    public AuthenticationState setIsReadOnly(boolean _readOnly) {
-        readOnly = _readOnly;
+    public AuthenticationState setIsReadOnly(final boolean _readOnly) {
+        this.readOnly = _readOnly;
         return this;
     }
 
     public String toJson() {
-        return "{\"message\": \"" + reason + "\"}";
+        return "{\"message\": \"" + this.reason + "\"}";
     }
 }

@@ -15,8 +15,8 @@ public class CalendarCreatorResponse {
     private final Message creatorMessage;
     private final Calendar calendar;
 
-    public CalendarCreatorResponse(boolean successful, Calendar calendar, Message message,
-                                   boolean edited) {
+    public CalendarCreatorResponse(final boolean successful, final Calendar calendar, final Message message,
+                                   final boolean edited) {
         this.successful = successful;
         this.calendar = calendar;
         this.creatorMessage = message;
@@ -28,10 +28,10 @@ public class CalendarCreatorResponse {
     /**
      * Whether or not the creation was successful.
      *
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     public boolean isSuccessful() {
-        return successful;
+        return this.successful;
     }
 
     /**
@@ -40,14 +40,14 @@ public class CalendarCreatorResponse {
      * @return The calendar involved, may be null.
      */
     public Calendar getCalendar() {
-        return calendar;
+        return this.calendar;
     }
 
     public boolean isEdited() {
-        return edited;
+        return this.edited;
     }
 
     public Message getCreatorMessage() {
-        return creatorMessage;
+        return this.creatorMessage;
     }
 }

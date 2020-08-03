@@ -16,25 +16,25 @@ import org.json.JSONObject;
  */
 public class WebCalendar {
 
-    public static WebCalendar fromCalendar(CalendarData cd, GuildSettings gs) {
-        if (cd.getCalendarAddress().equalsIgnoreCase("primary")) {
+    public static WebCalendar fromCalendar(final CalendarData cd, final GuildSettings gs) {
+        if ("primary".equalsIgnoreCase(cd.getCalendarAddress())) {
             return new WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false);
         } else {
-            String id = cd.getCalendarId();
-            String address = cd.getCalendarAddress();
-            String link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
+            final String id = cd.getCalendarId();
+            final String address = cd.getCalendarAddress();
+            final String link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
 
             String name;
             String description;
             String timezone;
             try {
-                Calendar cal = CalendarWrapper.getCalendar(cd, gs).block();
+                final Calendar cal = CalendarWrapper.getCalendar(cd, gs).block();
                 name = cal.getSummary();
                 description = cal.getDescription();
                 timezone = cal.getTimeZone().replaceAll("/", "___");
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LogFeed.log(LogObject.
-                        forException("[WEB] Failed to get calendar!", e, WebCalendar.class));
+                    forException("[WEB] Failed to get calendar!", e, WebCalendar.class));
                 name = "ERROR!";
                 description = "ERROR";
                 timezone = "ERROR";
@@ -43,16 +43,16 @@ public class WebCalendar {
         }
     }
 
-    public static WebCalendar fromJson(JSONObject data) {
-        String id = data.getString("id");
-        String address = data.getString("address");
-        String link = data.getString("link");
-        String name = data.getString("name");
+    public static WebCalendar fromJson(final JSONObject data) {
+        final String id = data.getString("id");
+        final String address = data.getString("address");
+        final String link = data.getString("link");
+        final String name = data.getString("name");
         String description = "";
         if (data.has("description"))
             description = data.getString("description");
-        String timezone = data.getString("timezone");
-        boolean external = data.getBoolean("external");
+        final String timezone = data.getString("timezone");
+        final boolean external = data.getBoolean("external");
 
         return new WebCalendar(id, address, link, name, description, timezone, external);
     }
@@ -65,8 +65,8 @@ public class WebCalendar {
     private final String timezone;
     private final boolean external;
 
-    private WebCalendar(String id, String address, String link, String name, String description,
-                        String timezone, boolean external) {
+    private WebCalendar(final String id, final String address, final String link, final String name, final String description,
+                        final String timezone, final boolean external) {
         this.id = id;
         this.address = address;
         this.link = link;
@@ -78,45 +78,45 @@ public class WebCalendar {
 
     //Getters
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public String getLink() {
-        return link;
+        return this.link;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getTimezone() {
-        return timezone;
+        return this.timezone;
     }
 
     public boolean isExternal() {
-        return external;
+        return this.external;
     }
 
     //Functions
     public JSONObject toJson() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("id", id);
-        data.put("address", address);
-        data.put("link", link);
-        data.put("name", name);
-        if (description != null)
-            data.put("description", description);
-        data.put("timezone", timezone);
-        data.put("external", external);
+        data.put("id", this.id);
+        data.put("address", this.address);
+        data.put("link", this.link);
+        data.put("name", this.name);
+        if (this.description != null)
+            data.put("description", this.description);
+        data.put("timezone", this.timezone);
+        data.put("external", this.external);
 
         return data;
     }

@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  */
 public class CalendarUtils {
     //TODO: Make sure this supports multi calendar support
-    public static Mono<Boolean> deleteCalendar(CalendarData data, GuildSettings settings) {
+    public static Mono<Boolean> deleteCalendar(final CalendarData data, final GuildSettings settings) {
         return CalendarWrapper.deleteCalendar(data, settings)
             .then(Mono.just(settings)
                 .doOnNext(s -> s.setUseExternalCalendar(false))
@@ -37,11 +37,11 @@ public class CalendarUtils {
     }
 
     //TODO: Make sure this supports multi calendar support!!
-    public static Mono<Boolean> calendarExists(CalendarData data, GuildSettings settings) {
+    public static Mono<Boolean> calendarExists(final CalendarData data, final GuildSettings settings) {
         return CalendarWrapper.getCalendar(data, settings)
             .hasElement()
             .onErrorResume(GoogleJsonResponseException.class, ge -> {
-                if (ge.getStatusCode() == 410 || ge.getStatusCode() == 404) {
+                if (ge.getStatusCode() == GlobalConst.STATUS_GONE || ge.getStatusCode() == GlobalConst.STATUS_NOT_FOUND) {
                     //Calendar does not exist... remove from db...
                     settings.setUseExternalCalendar(false);
                     settings.setEncryptedRefreshToken("N/a");

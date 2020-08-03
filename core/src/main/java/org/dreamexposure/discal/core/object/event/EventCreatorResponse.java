@@ -15,8 +15,8 @@ public class EventCreatorResponse {
     private final Message creatorMessage;
     private final boolean edited;
 
-    public EventCreatorResponse(boolean successful, Event event, Message creatorMessage,
-                                boolean edited) {
+    public EventCreatorResponse(final boolean successful, final Event event, final Message creatorMessage,
+                                final boolean edited) {
         this.successful = successful;
         this.event = event;
         this.creatorMessage = creatorMessage;
@@ -28,18 +28,18 @@ public class EventCreatorResponse {
     /**
      * Whether or not the creator was successful.
      *
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     public boolean isSuccessful() {
-        return successful;
+        return this.successful;
     }
 
     public Message getCreatorMessage() {
-        return creatorMessage;
+        return this.creatorMessage;
     }
 
     public boolean isEdited() {
-        return edited;
+        return this.edited;
     }
 
     /**
@@ -48,6 +48,6 @@ public class EventCreatorResponse {
      * @return The event that was created.
      */
     public Event getEvent() {
-        return event;
+        return this.event;
     }
 }

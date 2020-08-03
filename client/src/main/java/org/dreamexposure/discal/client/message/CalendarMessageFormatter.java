@@ -21,16 +21,16 @@ import reactor.core.publisher.Mono;
  */
 public class CalendarMessageFormatter {
     @Deprecated
-    public static String getCalendarLink(Snowflake guildId) {
+    public static String getCalendarLink(final Snowflake guildId) {
         return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/1";
     }
 
-    public static String getCalendarLink(Snowflake guildId, int calNumber) {
+    public static String getCalendarLink(final Snowflake guildId, final int calNumber) {
         return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/" + calNumber;
     }
 
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(Calendar cal, GuildSettings settings) {
+    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.isBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -52,7 +52,7 @@ public class CalendarMessageFormatter {
         });
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(Calendar cal, int calNum, GuildSettings settings) {
+    public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final int calNum, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.isBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
@@ -74,7 +74,7 @@ public class CalendarMessageFormatter {
         });
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getPreCalendarEmbed(PreCalendar calendar, GuildSettings settings) {
+    public static Mono<Consumer<EmbedCreateSpec>> getPreCalendarEmbed(final PreCalendar calendar, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.isBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));

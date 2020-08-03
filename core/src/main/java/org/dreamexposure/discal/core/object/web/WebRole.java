@@ -12,9 +12,9 @@ import discord4j.discordjson.json.RoleData;
  * For Project: DisCal-Discord-Bot
  */
 public class WebRole {
-    public static WebRole fromRole(Role r, GuildSettings settings) {
-        boolean controlRole;
-        if (r.isEveryone() && settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static WebRole fromRole(final Role r, final GuildSettings settings) {
+        final boolean controlRole;
+        if (r.isEveryone() && "everyone".equalsIgnoreCase(settings.getControlRole()))
             controlRole = true;
         else
             controlRole = settings.getControlRole().equalsIgnoreCase(r.getId().asString());
@@ -23,10 +23,10 @@ public class WebRole {
         return new WebRole(r.getId().asLong(), r.getName(), r.isManaged(), controlRole, r.isEveryone());
     }
 
-    public static WebRole fromRole(RoleData r, GuildSettings settings) {
-        boolean controlRole;
-        boolean everyone = r.id().equals(settings.getGuildID().asString());
-        if (everyone && settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static WebRole fromRole(final RoleData r, final GuildSettings settings) {
+        final boolean controlRole;
+        final boolean everyone = r.id().equals(settings.getGuildID().asString());
+        if (everyone && "everyone".equalsIgnoreCase(settings.getControlRole()))
             controlRole = true;
         else
             controlRole = settings.getControlRole().equalsIgnoreCase(r.id());
@@ -35,12 +35,12 @@ public class WebRole {
         return new WebRole(Long.parseLong(r.id()), r.name(), r.managed(), controlRole, everyone);
     }
 
-    public static WebRole fromJson(JSONObject data) {
-        long id = Long.parseLong(data.getString("id"));
-        String name = data.getString("name");
-        boolean managed = data.getBoolean("managed");
-        boolean controlRole = data.getBoolean("control_role");
-        boolean everyone = data.getBoolean("everyone");
+    public static WebRole fromJson(final JSONObject data) {
+        final long id = Long.parseLong(data.getString("id"));
+        final String name = data.getString("name");
+        final boolean managed = data.getBoolean("managed");
+        final boolean controlRole = data.getBoolean("control_role");
+        final boolean everyone = data.getBoolean("everyone");
 
         return new WebRole(id, name, managed, controlRole, everyone);
     }
@@ -54,7 +54,8 @@ public class WebRole {
 
     private final boolean everyone;
 
-    private WebRole(long id, String name, boolean managed, boolean controlRole, boolean everyone) {
+    private WebRole(final long id, final String name, final boolean managed, final boolean controlRole,
+                    final boolean everyone) {
         this.id = id;
         this.name = name;
         this.managed = managed;
@@ -64,34 +65,34 @@ public class WebRole {
 
     //Getters
     public long getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public boolean isManaged() {
-        return managed;
+        return this.managed;
     }
 
     public boolean isControlRole() {
-        return controlRole;
+        return this.controlRole;
     }
 
     public boolean isEveryone() {
-        return everyone;
+        return this.everyone;
     }
 
     //functions
     public JSONObject toJson() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("id", String.valueOf(id));
-        data.put("name", name);
-        data.put("managed", managed);
-        data.put("control_role", controlRole);
-        data.put("everyone", everyone);
+        data.put("id", String.valueOf(this.id));
+        data.put("name", this.name);
+        data.put("managed", this.managed);
+        data.put("control_role", this.controlRole);
+        data.put("everyone", this.everyone);
 
         return data;
     }

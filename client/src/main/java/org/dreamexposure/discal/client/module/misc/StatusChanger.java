@@ -24,25 +24,25 @@ public class StatusChanger extends TimerTask {
      * Creates the StatusChanger and its Statuses list.
      */
     public StatusChanger() {
-        statuses.add("Discord Calendar");
-        statuses.add("!help for help");
-        statuses.add("!DisCal for info");
-        statuses.add("Powered by DreamExposure");
-        statuses.add("Ultimate calendar bot!");
-        statuses.add("%guCount% guilds on shard!");
-        statuses.add("%calCount% calendars!");
-        statuses.add("%annCount% announcements!");
-        statuses.add("%shards% shards!");
-        statuses.add("Version " + GlobalConst.version);
-        statuses.add("DisCal is on Patreon!");
-        index = 0;
+        this.statuses.add("Discord Calendar");
+        this.statuses.add("!help for help");
+        this.statuses.add("!DisCal for info");
+        this.statuses.add("Powered by DreamExposure");
+        this.statuses.add("Ultimate calendar bot!");
+        this.statuses.add("%guCount% guilds on shard!");
+        this.statuses.add("%calCount% calendars!");
+        this.statuses.add("%annCount% announcements!");
+        this.statuses.add("%shards% shards!");
+        this.statuses.add("Version " + GlobalConst.version);
+        this.statuses.add("DisCal is on Patreon!");
+        this.index = 0;
     }
 
     @Override
     public void run() {
         if (DisCalClient.getClient() != null) {
 
-            String status = statuses.get(index);
+            String status = this.statuses.get(this.index);
             status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().count().block() + "");
             status = status.replace("%calCount%", DatabaseManager.getCalendarCount().block() + "");
             status = status.replace("%annCount%", DatabaseManager.getAnnouncementCount().block() + "");
@@ -50,10 +50,10 @@ public class StatusChanger extends TimerTask {
 
             DisCalClient.getClient().updatePresence(Presence.online(Activity.playing(status))).subscribe();
             //Set new index.
-            if (index + 1 >= statuses.size())
-                index = 0;
+            if (this.index + 1 >= this.statuses.size())
+                this.index = 0;
             else
-                index++;
+                this.index++;
         }
     }
 }

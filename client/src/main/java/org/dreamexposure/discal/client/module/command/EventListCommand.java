@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("MagicNumber")
 public class EventListCommand implements Command {
     /**
      * Gets the command this Object is responsible for.
@@ -32,7 +33,7 @@ public class EventListCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -49,7 +50,7 @@ public class EventListCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
+        final CommandInfo info = new CommandInfo(
             "events",
             "Lists the specified amount of events from the guild calendar.",
             "!events (number or function) (other args if applicable)"
@@ -65,36 +66,36 @@ public class EventListCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length < 1) {
-                return moduleSimpleList(args, event, settings);
+                return this.moduleSimpleList(args, event, settings);
             } else {
                 switch (args[0].toLowerCase()) {
                     case "search":
                         if (settings.isDevGuild())
-                            return moduleSearch(args, event, settings);
+                            return this.moduleSearch(args, event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
                     case "today":
-                        return moduleDay(args, event, settings);
+                        return this.moduleDay(args, event, settings);
                     default:
-                        return moduleSimpleList(args, event, settings);
+                        return this.moduleSimpleList(args, event, settings);
                 }
             }
         }).then();
     }
 
-    private Mono<Void> moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSimpleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 0) {
                 return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
                     .flatMap(data -> EventWrapper.getEvents(data, settings, 1, System.currentTimeMillis())
                         .flatMap(events -> {
-                            if (events.size() == 0) {
+                            if (events.isEmpty()) {
                                 return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
                             } else { //It will always be one here, so just use an else, there is no way it can be higher
                                 return EventMessageFormatter
@@ -114,7 +115,7 @@ public class EventListCommand implements Command {
                         return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
                             .flatMap(data -> EventWrapper.getEvents(data, settings, count, System.currentTimeMillis())
                                 .flatMap(events -> {
-                                    if (events.size() == 0) {
+                                    if (events.isEmpty()) {
                                         return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
                                     } else if (events.size() == 1) {
                                         return EventMessageFormatter.getEventEmbed(events.get(0),
@@ -139,20 +140,20 @@ public class EventListCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSearch(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSearch(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.empty(); //TODO: Actually make this...
     }
 
-    private Mono<Void> moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDay(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1) {
                 return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
                     .flatMap(data -> {
-                        long now = System.currentTimeMillis();
-                        long end = now + GlobalConst.oneDayMs;
+                        final long now = System.currentTimeMillis();
+                        final long end = now + GlobalConst.oneDayMs;
 
                         return EventWrapper.getEvents(data, settings, 20, now, end).flatMap(events -> {
-                            if (events.size() == 0) {
+                            if (events.isEmpty()) {
                                 return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
                             } else if (events.size() == 1) {
                                 return EventMessageFormatter

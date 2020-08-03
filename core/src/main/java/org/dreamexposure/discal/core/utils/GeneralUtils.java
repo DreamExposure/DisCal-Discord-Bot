@@ -16,8 +16,8 @@ public class GeneralUtils {
      * @param offset The offset in the string.
      * @return The contents of the message at a set offset.
      */
-    public static String getContent(List<String> args, int offset) {
-        StringBuilder content = new StringBuilder();
+    public static String getContent(final List<String> args, final int offset) {
+        final StringBuilder content = new StringBuilder();
         for (int i = offset; i < args.size(); i++) {
             content.append(args.get(i)).append(" ");
         }
@@ -31,8 +31,8 @@ public class GeneralUtils {
      * @param offset The offset in the string.
      * @return The contents of the message at a set offset.
      */
-    public static String getContent(String[] args, int offset) {
-        StringBuilder content = new StringBuilder();
+    public static String getContent(final String[] args, final int offset) {
+        final StringBuilder content = new StringBuilder();
         for (int i = offset; i < args.length; i++) {
             content.append(args[i]).append(" ");
         }
@@ -60,11 +60,12 @@ public class GeneralUtils {
      * @param str The string to parse.
      * @return The string, but without the user errors.
      */
-    public static String overkillParser(String str) {
-        Random random = new Random(str.length() * 2 >>> 4 & 3);
-        StringBuilder leftFace = new StringBuilder();
-        StringBuilder rightFace = new StringBuilder();
-        String alphabet = "abcdefghijklmnopqrstuvwxyz";
+    @SuppressWarnings("MagicNumber")
+    public static String overkillParser(final String str) {
+        final Random random = new Random(str.length() * 2L >>> 4 & 3);
+        final StringBuilder leftFace = new StringBuilder();
+        final StringBuilder rightFace = new StringBuilder();
+        final String alphabet = "abcdefghijklmnopqrstuvwxyz";
         for (int i = 0; i < 30; i++) {
             leftFace.append(alphabet.charAt(random.nextInt(alphabet.length())));
             rightFace.append(alphabet.charAt(random.nextInt(alphabet.length())));

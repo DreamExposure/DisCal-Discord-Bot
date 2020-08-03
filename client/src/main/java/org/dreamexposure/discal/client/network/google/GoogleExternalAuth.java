@@ -35,7 +35,7 @@ import reactor.core.scheduler.Schedulers;
  * Company Website: https://www.dreamexposure.org
  * Contact: nova@dreamexposure.org
  */
-@SuppressWarnings({"ConstantConditions", "OptionalGetWithoutIsPresent"})
+@SuppressWarnings("ConstantConditions")
 public class GoogleExternalAuth {
     static {
         auth = new GoogleExternalAuth();
@@ -50,14 +50,14 @@ public class GoogleExternalAuth {
         return auth;
     }
 
-    public Mono<Void> requestCode(MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> requestCode(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
-            RequestBody body = new FormBody.Builder()
+            final RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
                 .addEncoded("scope", CalendarScopes.CALENDAR)
                 .build();
 
-            Request httpRequest = new okhttp3.Request.Builder()
+            final Request httpRequest = new okhttp3.Request.Builder()
                 .url("https://accounts.google.com/o/oauth2/device/code")
                 .post(body)
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -68,10 +68,10 @@ public class GoogleExternalAuth {
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(response -> Mono.fromCallable(() -> response.body().string()).flatMap(responseBody -> {
                     if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                        JSONObject codeResponse = new JSONObject(responseBody);
+                        final JSONObject codeResponse = new JSONObject(responseBody);
 
                         //Send DM to user with code.
-                        Consumer<EmbedCreateSpec> embed = spec -> {
+                        final Consumer<EmbedCreateSpec> embed = spec -> {
                             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
                             spec.setTitle(Messages.getMessage("Embed.AddCalendar.Code.Title", settings));
 
@@ -87,7 +87,7 @@ public class GoogleExternalAuth {
 
                         return event.getMessage().getAuthorAsMember().flatMap(user -> {
                             //Start timer to poll Google Cal for auth
-                            Poll poll = new Poll(user, settings);
+                            final Poll poll = new Poll(user, settings);
 
                             poll.setDevice_code(codeResponse.getString("device_code"));
                             poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
@@ -122,16 +122,16 @@ public class GoogleExternalAuth {
             .then();
     }
 
-    Mono<Void> pollForAuth(Poll poll) {
+    Mono<Void> pollForAuth(final Poll poll) {
         return Mono.defer(() -> {
-            RequestBody body = new FormBody.Builder()
+            final RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
                 .addEncoded("client_secret", Authorization.getAuth().getClientData().getClientSecret())
                 .addEncoded("code", poll.getDevice_code())
                 .addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
                 .build();
 
-            Request httpRequest = new okhttp3.Request.Builder()
+            final Request httpRequest = new okhttp3.Request.Builder()
                 .url("https://www.googleapis.com/oauth2/v4/token")
                 .post(body)
                 .header("Content-Type", "application/x-www-form-urlencoded")
@@ -140,19 +140,20 @@ public class GoogleExternalAuth {
             return Mono.fromCallable(() -> Authorization.getAuth().getClient().newCall(httpRequest).execute())
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(response -> Mono.fromCallable(() -> response.body().string()).flatMap(responseBody -> {
-                    if (response.code() == 403) {
+                    if (response.code() == GlobalConst.STATUS_FORBIDDEN) {
                         //Handle access denied
                         return Messages.sendDirectMessage(Messages.getMessage("AddCalendar.Auth.Poll.Failure.Deny",
                             poll.getSettings()), poll.getUser())
                             .then(Mono.error(new GoogleAuthCancelException()));
-                    } else if (response.code() == 400 || response.code() == 428) {
+                    } else if (response.code() == GlobalConst.STATUS_BAD_REQUEST
+                        || response.code() == GlobalConst.STATUS_PRECONDITION_REQUIRED) {
                         //See if auth is pending, if so, just reschedule.
-                        JSONObject aprError = new JSONObject(responseBody);
+                        final JSONObject aprError = new JSONObject(responseBody);
 
-                        if (aprError.getString("error").equalsIgnoreCase("authorization_pending")) {
+                        if ("authorization_pending".equalsIgnoreCase(aprError.getString("error"))) {
                             //Response pending
                             return Mono.empty();
-                        } else if (aprError.getString("error").equalsIgnoreCase("expired_token")) {
+                        } else if ("expired_token".equalsIgnoreCase(aprError.getString("error"))) {
                             //Token expired, auth is cancelled
                             return Messages.sendDirectMessage(
                                 Messages.getMessage("AddCalendar.Auth.Poll.Failure.Expired", poll.getSettings()),
@@ -167,7 +168,7 @@ public class GoogleExternalAuth {
                                 Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser())
                                 .then(Mono.error(new GoogleAuthCancelException()));
                         }
-                    } else if (response.code() == 429) {
+                    } else if (response.code() == GlobalConst.STATUS_RATE_LIMITED) {
                         //We got rate limited... oops. Let's just poll half as often.
                         poll.setInterval(poll.getInterval() * 2);
                         //PollManager.getManager().scheduleNextPoll(poll);
@@ -175,12 +176,12 @@ public class GoogleExternalAuth {
                         return Mono.empty();
                     } else if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
                         //Access granted
-                        JSONObject aprGrant = new JSONObject(responseBody);
+                        final JSONObject aprGrant = new JSONObject(responseBody);
 
                         //Save credentials securely.
-                        GuildSettings gs = poll.getSettings();
+                        final GuildSettings gs = poll.getSettings();
 
-                        AESEncryption encryption = new AESEncryption(gs);
+                        final AESEncryption encryption = new AESEncryption(gs);
                         gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
                         gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
                         gs.setUseExternalCalendar(true);

@@ -12,10 +12,11 @@ public enum EventFrequency {
      * Checks if the value is a valid enum value.
      *
      * @param value The value to check.
-     * @return <code>true</code> if valid, else <code>false</code>.
+     * @return {@code true} if valid, else {@code false}.
      */
-    public static boolean isValid(String value) {
-        return value.equalsIgnoreCase("DAILY") || value.equalsIgnoreCase("WEEKLY") || value.equalsIgnoreCase("MONTHLY") || value.equalsIgnoreCase("YEARLY");
+    public static boolean isValid(final String value) {
+        return "DAILY".equalsIgnoreCase(value) || "WEEKLY".equalsIgnoreCase(value) || "MONTHLY".equalsIgnoreCase(value)
+            || "YEARLY".equalsIgnoreCase(value);
     }
 
     /**
@@ -24,7 +25,7 @@ public enum EventFrequency {
      * @param value The value to get from.
      * @return The enum value.
      */
-    public static EventFrequency fromValue(String value) {
+    public static EventFrequency fromValue(final String value) {
         switch (value.toUpperCase()) {
             case "WEEKLY":
                 return WEEKLY;

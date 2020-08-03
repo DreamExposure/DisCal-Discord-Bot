@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class EventUtils {
 
     @Deprecated
-    public static Mono<Boolean> deleteEvent(GuildSettings settings, String eventId) {
+    public static Mono<Boolean> deleteEvent(final GuildSettings settings, final String eventId) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(data ->
                 EventWrapper.deleteEvent(data, settings, eventId)
@@ -31,7 +31,7 @@ public class EventUtils {
             ).defaultIfEmpty(false);
     }
 
-    public static Mono<Boolean> deleteEvent(GuildSettings settings, int calNumber, String eventId) {
+    public static Mono<Boolean> deleteEvent(final GuildSettings settings, final int calNumber, final String eventId) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
             .flatMap(data ->
                 EventWrapper.deleteEvent(data, settings, eventId)
@@ -43,7 +43,7 @@ public class EventUtils {
     }
 
     @Deprecated
-    public static Mono<Boolean> eventExists(GuildSettings settings, String eventId) {
+    public static Mono<Boolean> eventExists(final GuildSettings settings, final String eventId) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(data ->
                 EventWrapper.getEvent(data, settings, eventId)
@@ -51,7 +51,7 @@ public class EventUtils {
             ).switchIfEmpty(Mono.just(false));
     }
 
-    public static Mono<Boolean> eventExists(GuildSettings settings, int calNumber, String eventId) {
+    public static Mono<Boolean> eventExists(final GuildSettings settings, final int calNumber, final String eventId) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
             .flatMap(data ->
                 EventWrapper.getEvent(data, settings, eventId)
@@ -59,7 +59,7 @@ public class EventUtils {
             ).switchIfEmpty(Mono.just(false));
     }
 
-    public static Mono<PreEvent> copyEvent(Snowflake guildId, Event event) {
+    public static Mono<PreEvent> copyEvent(final Snowflake guildId, final Event event) {
         return DatabaseManager.getEventData(guildId, event.getId())
             .flatMap(data -> Mono.just(new PreEvent(guildId))
                 .doOnNext(p -> p.setEventData(data))

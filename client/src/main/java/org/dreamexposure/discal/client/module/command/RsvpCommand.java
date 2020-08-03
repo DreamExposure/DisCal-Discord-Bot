@@ -41,7 +41,7 @@ public class RsvpCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -58,7 +58,7 @@ public class RsvpCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
+        final CommandInfo info = new CommandInfo(
             "rsvp",
             "Confirms attendance to an event",
             "!rsvp <subCommand> <eventId>"
@@ -79,25 +79,25 @@ public class RsvpCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length > 0) {
                 switch (args[0].toLowerCase()) {
                     case "ontime":
-                        return moduleGoing(args, event, settings);
+                        return this.moduleGoing(args, event, settings);
                     case "late":
-                        return moduleGoingLate(args, event, settings);
+                        return this.moduleGoingLate(args, event, settings);
                     case "not":
-                        return moduleNotGoing(args, event, settings);
+                        return this.moduleNotGoing(args, event, settings);
                     case "unsure":
-                        return moduleUnsure(args, event, settings);
+                        return this.moduleUnsure(args, event, settings);
                     case "remove":
-                        return moduleRemove(args, event, settings);
+                        return this.moduleRemove(args, event, settings);
                     case "list":
-                        return moduleList(args, event, settings);
+                        return this.moduleList(args, event, settings);
                     default:
                         return Messages.sendMessage(Messages.getMessage("Notification.Args.InvalidSubCmd", settings), event);
                 }
@@ -107,20 +107,20 @@ public class RsvpCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleGoing(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.justOrEmpty(event.getMember())
             .flatMap(mem -> {
                 if (args.length == 2) {
                     return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                         .flatMap(exists -> {
                             if (exists) {
-                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getGoingOnTime().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
-                                                .then(getRsvpEmbed(data, settings))
+                                                .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.going.success", settings), embed, event))
                                             );
@@ -141,20 +141,20 @@ public class RsvpCommand implements Command {
             }).then();
     }
 
-    private Mono<Void> moduleGoingLate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleGoingLate(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.justOrEmpty(event.getMember())
             .flatMap(mem -> {
                 if (args.length == 2) {
                     return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                         .flatMap(exists -> {
                             if (exists) {
-                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getGoingLate().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
-                                                .then(getRsvpEmbed(data, settings))
+                                                .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.late.success", settings), embed, event))
                                             );
@@ -175,20 +175,20 @@ public class RsvpCommand implements Command {
             }).then();
     }
 
-    private Mono<Void> moduleNotGoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleNotGoing(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.justOrEmpty(event.getMember())
             .flatMap(mem -> {
                 if (args.length == 2) {
                     return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                         .flatMap(exists -> {
                             if (exists) {
-                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getNotGoing().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
-                                                .then(getRsvpEmbed(data, settings))
+                                                .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.not.success", settings), embed, event))
                                             );
@@ -209,19 +209,19 @@ public class RsvpCommand implements Command {
             }).then();
     }
 
-    private Mono<Void> moduleRemove(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleRemove(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.justOrEmpty(event.getMember())
             .flatMap(mem -> {
                 if (args.length == 2) {
                     return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                         .flatMap(exists -> {
                             if (exists) {
-                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
-                                                .then(getRsvpEmbed(data, settings))
+                                                .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.remove.success", settings), embed, event))
                                             );
@@ -242,20 +242,20 @@ public class RsvpCommand implements Command {
             }).then();
     }
 
-    private Mono<Void> moduleUnsure(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleUnsure(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.justOrEmpty(event.getMember())
             .flatMap(mem -> {
                 if (args.length == 2) {
                     return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                         .flatMap(exists -> {
                             if (exists) {
-                                return TimeUtils.inPast(eventId, settings).flatMap(inPast -> {
+                                return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getUndecided().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
-                                                .then(getRsvpEmbed(data, settings))
+                                                .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.unsure.success", settings), embed, event))
                                             );
@@ -277,14 +277,14 @@ public class RsvpCommand implements Command {
     }
 
 
-    private Mono<Void> moduleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 2) {
                 return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                     .flatMap(exists -> {
                         if (exists) {
                             return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
-                                .flatMap(data -> getRsvpEmbed(data, settings))
+                                .flatMap(data -> this.getRsvpEmbed(data, settings))
                                 .flatMap(embed -> Messages.sendMessage(embed, event));
                         } else {
                             return Messages
@@ -298,13 +298,13 @@ public class RsvpCommand implements Command {
     }
 
 
-    private Mono<Consumer<EmbedCreateSpec>> getRsvpEmbed(RsvpData data, GuildSettings settings) {
-        Mono<Guild> guildMono = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
+    private Mono<Consumer<EmbedCreateSpec>> getRsvpEmbed(final RsvpData data, final GuildSettings settings) {
+        final Mono<Guild> guildMono = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
-        Mono<List<Member>> onTimeMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingOnTime(), g));
-        Mono<List<Member>> lateMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingLate(), g));
-        Mono<List<Member>> undecidedMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getUndecided(), g));
-        Mono<List<Member>> notGoingMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getNotGoing(), g));
+        final Mono<List<Member>> onTimeMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingOnTime(), g));
+        final Mono<List<Member>> lateMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingLate(), g));
+        final Mono<List<Member>> undecidedMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getUndecided(), g));
+        final Mono<List<Member>> notGoingMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getNotGoing(), g));
 
         return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono)
             .map(TupleUtils.function((guild, onTime, late, undecided, notGoing) -> spec -> {
@@ -316,23 +316,23 @@ public class RsvpCommand implements Command {
                 spec.setTitle(Messages.getMessage("Embed.RSVP.List.Title", settings));
                 spec.addField("Event ID", data.getEventId(), false);
 
-                StringBuilder onTimeBuilder = new StringBuilder();
-                for (Member u : onTime) {
+                final StringBuilder onTimeBuilder = new StringBuilder();
+                for (final Member u : onTime) {
                     onTimeBuilder.append(u.getDisplayName()).append(", ");
                 }
 
-                StringBuilder lateBuilder = new StringBuilder();
-                for (Member u : late) {
+                final StringBuilder lateBuilder = new StringBuilder();
+                for (final Member u : late) {
                     lateBuilder.append(u.getDisplayName()).append(", ");
                 }
 
-                StringBuilder unsureBuilder = new StringBuilder();
-                for (Member u : undecided) {
+                final StringBuilder unsureBuilder = new StringBuilder();
+                for (final Member u : undecided) {
                     unsureBuilder.append(u.getDisplayName()).append(", ");
                 }
 
-                StringBuilder notGoingBuilder = new StringBuilder();
-                for (Member u : notGoing) {
+                final StringBuilder notGoingBuilder = new StringBuilder();
+                for (final Member u : notGoing) {
                     notGoingBuilder.append(u.getDisplayName()).append(", ");
                 }
 

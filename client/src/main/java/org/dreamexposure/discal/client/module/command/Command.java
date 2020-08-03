@@ -23,7 +23,7 @@ public interface Command {
     }
 
     default List<String> getAliases() {
-        List<String> aliases = new ArrayList<>();
+        final List<String> aliases = new ArrayList<>();
 
         aliases.add("ALIAS");
 
@@ -31,10 +31,10 @@ public interface Command {
     }
 
     default CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo(
-                "COMMAND_NAME",
-                "COMMAND_DESCRIPTION",
-                "!command <sub> (sub2)"
+        final CommandInfo info = new CommandInfo(
+            "COMMAND_NAME",
+            "COMMAND_DESCRIPTION",
+            "!command <sub> (sub2)"
         );
 
         info.getSubCommands().put("a", "b");

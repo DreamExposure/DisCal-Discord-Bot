@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.api.endpoints.v2.guild;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -26,9 +27,9 @@ import discord4j.rest.entity.RestGuild;
 @RequestMapping("/v2/guild/")
 public class UpdateWebGuildEndpoint {
     @PostMapping(value = "/update", produces = "application/json")
-    public String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public String getSettings(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
@@ -37,10 +38,10 @@ public class UpdateWebGuildEndpoint {
 
         //Okay, now handle actual request.
         try {
-            JSONObject jsonMain = new JSONObject(requestBody);
-            Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
+            final JSONObject jsonMain = new JSONObject(requestBody);
+            final Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
-            RestGuild g = DisCalServer.getClient().getGuildById(guildId);
+            final RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
             if (g != null) {
                 //Handle the changes now that we have confirmed the guild exists..
@@ -48,29 +49,29 @@ public class UpdateWebGuildEndpoint {
                 //Right now its just the nickname, but more may be added eventually
                 if (jsonMain.has("bot_nick")) {
                     g.modifyOwnNickname(ImmutableNicknameModifyData
-                            .of(Optional.ofNullable(jsonMain.getString("bot_nick")))
+                        .of(Optional.ofNullable(jsonMain.getString("bot_nick")))
                     ).subscribe();
                 }
 
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
                 return JsonUtils.getJsonResponseMessage("Successfully updated guild!");
             }
             response.setContentType("application/json");
-            response.setStatus(404);
+            response.setStatus(GlobalConst.STATUS_NOT_FOUND);
             return JsonUtils.getJsonResponseMessage("Guild not connected to DisCal");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "get guild settings err", e, this.getClass()));
+                .forException("[API-v2]", "get guild settings err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

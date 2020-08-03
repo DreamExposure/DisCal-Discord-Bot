@@ -11,21 +11,25 @@ public enum AnnouncementType {
     /**
      * Checks if the specified value is a valid AnnouncementType.
      *
-     * @param _value The value to check.
-     * @return <code>true</code> if value, otherwise <code>false</code>.
+     * @param value The value to check.
+     * @return {@code true} if value, otherwise {@code false}.
      */
-    public static Boolean isValid(String _value) {
-        return _value.equalsIgnoreCase("UNIVERSAL") || _value.equalsIgnoreCase("SPECIFIC") || _value.equalsIgnoreCase("COLOR") || _value.equalsIgnoreCase("COLOUR") || _value.equalsIgnoreCase("RECUR");
+    public static boolean isValid(final String value) {
+        return "UNIVERSAL".equalsIgnoreCase(value)
+            || "SPECIFIC".equalsIgnoreCase(value)
+            || "COLOR".equalsIgnoreCase(value)
+            || "COLOUR".equalsIgnoreCase(value)
+            || "RECUR".equalsIgnoreCase(value);
     }
 
     /**
      * Gets the AnnouncementType from the value.
      *
-     * @param _value The value to check.
+     * @param value The value to check.
      * @return The AnnouncementType.
      */
-    public static AnnouncementType fromValue(String _value) {
-        switch (_value.toUpperCase()) {
+    public static AnnouncementType fromValue(final String value) {
+        switch (value.toUpperCase()) {
             case "SPECIFIC":
                 return SPECIFIC;
             case "COLOR":

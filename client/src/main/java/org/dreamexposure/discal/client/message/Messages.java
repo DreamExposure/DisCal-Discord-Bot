@@ -50,8 +50,8 @@ public class Messages {
         return new CopyOnWriteArrayList<String>(langs.keySet());
     }
 
-    public static boolean isSupported(String _value) {
-        JSONArray names = langs.names();
+    public static boolean isSupported(final String _value) {
+        final JSONArray names = langs.names();
         for (int i = 0; i < names.length(); i++) {
             if (_value.equalsIgnoreCase(names.getString(i)))
                 return true;
@@ -59,8 +59,8 @@ public class Messages {
         return false;
     }
 
-    public static String getValidLang(String _value) {
-        JSONArray names = langs.names();
+    public static String getValidLang(final String _value) {
+        final JSONArray names = langs.names();
         for (int i = 0; i < names.length(); i++) {
             if (_value.equalsIgnoreCase(names.getString(i)))
                 return names.getString(i);
@@ -68,8 +68,8 @@ public class Messages {
         return "ENGLISH";
     }
 
-    public static String getMessage(String key, GuildSettings settings) {
-        JSONObject messages;
+    public static String getMessage(final String key, final GuildSettings settings) {
+        final JSONObject messages;
 
         if (settings.getLang() != null && langs.has(settings.getLang()))
             messages = langs.getJSONObject(settings.getLang());
@@ -82,8 +82,8 @@ public class Messages {
             return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
     }
 
-    public static String getMessage(String key, String var, String replace, GuildSettings settings) {
-        JSONObject messages;
+    public static String getMessage(final String key, final String var, final String replace, final GuildSettings settings) {
+        final JSONObject messages;
 
         if (settings.getLang() != null && langs.has(settings.getLang()))
             messages = langs.getJSONObject(settings.getLang());
@@ -97,83 +97,83 @@ public class Messages {
     }
 
     //Message sending
-    public static Mono<Message> sendMessage(String message, MessageCreateEvent event) {
+    public static Mono<Message> sendMessage(final String message, final MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message)));
     }
 
-    public static Mono<Message> sendMessage(Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
+    public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed,
+                                            final MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)));
     }
 
-    public static Mono<Message> sendMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
+    public static Mono<Message> sendMessage(final String message, final Consumer<EmbedCreateSpec> embed,
+                                            final MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)));
     }
 
-    public static Mono<Message> sendMessage(String message, TextChannel channel) {
+    public static Mono<Message> sendMessage(final String message, final TextChannel channel) {
         return channel.createMessage(spec -> spec.setContent(message));
     }
 
-    public static Mono<Message> sendMessage(Consumer<EmbedCreateSpec> embed, TextChannel channel) {
+    public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed, final TextChannel channel) {
         return channel.createMessage(spec -> spec.setEmbed(embed));
     }
 
-    public static Mono<Message> sendMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            TextChannel channel) {
+    public static Mono<Message> sendMessage(final String message, final Consumer<EmbedCreateSpec> embed,
+                                            final TextChannel channel) {
         return channel.createMessage(spec -> spec.setContent(message).setEmbed(embed));
     }
 
     //Direct message sending
-    public static Mono<Message> sendDirectMessage(String message, User user) {
+    public static Mono<Message> sendDirectMessage(final String message, final User user) {
         return user.getPrivateChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message)));
     }
 
-    public static Mono<Message> sendDirectMessage(Consumer<EmbedCreateSpec> embed, User user) {
+    public static Mono<Message> sendDirectMessage(final Consumer<EmbedCreateSpec> embed, final User user) {
         return user.getPrivateChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)));
     }
 
-    public static Mono<Message> sendDirectMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                                  User user) {
+    public static Mono<Message> sendDirectMessage(final String message, final Consumer<EmbedCreateSpec> embed,
+                                                  final User user) {
         return user.getPrivateChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)));
     }
 
     //Message editing
-    public static Mono<Message> editMessage(String message, Message original) {
+    public static Mono<Message> editMessage(final String message, final Message original) {
         return original
             .edit(spec -> spec.setContent(message));
     }
 
-    public static Mono<Message> editMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            Message original) {
+    public static Mono<Message> editMessage(final String message, final Consumer<EmbedCreateSpec> embed,
+                                            final Message original) {
         return original
             .edit(spec -> spec.setContent(message).setEmbed(embed));
     }
 
-    public static Mono<Message> editMessage(String message, MessageCreateEvent event) {
+    public static Mono<Message> editMessage(final String message, final MessageCreateEvent event) {
         return event.getMessage()
             .edit(spec -> spec.setContent(message));
     }
 
-    public static Mono<Message> editMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
+    public static Mono<Message> editMessage(final String message, final Consumer<EmbedCreateSpec> embed,
+                                            final MessageCreateEvent event) {
         return event.getMessage()
             .edit(spec -> spec.setContent(message).setEmbed(embed));
     }
 
     //Message deleting
-    public static Mono<Void> deleteMessage(Message message) {
+    public static Mono<Void> deleteMessage(final Message message) {
         return message.delete()
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Void> deleteMessage(MessageCreateEvent event) {
+    public static Mono<Void> deleteMessage(final MessageCreateEvent event) {
         return deleteMessage(event.getMessage());
     }
 }

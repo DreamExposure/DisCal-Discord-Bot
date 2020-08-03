@@ -18,50 +18,50 @@ public class Poll {
     private int remainingSeconds;
     private String device_code;
 
-    public Poll(User user, GuildSettings settings) {
+    public Poll(final User user, final GuildSettings settings) {
         this.user = user;
         this.settings = settings;
     }
 
     //Getters
     public User getUser() {
-        return user;
+        return this.user;
     }
 
     public GuildSettings getSettings() {
-        return settings;
+        return this.settings;
     }
 
     public int getInterval() {
-        return interval;
+        return this.interval;
     }
 
     public int getExpires_in() {
-        return expires_in;
+        return this.expires_in;
     }
 
     public int getRemainingSeconds() {
-        return remainingSeconds;
+        return this.remainingSeconds;
     }
 
     public String getDevice_code() {
-        return device_code;
+        return this.device_code;
     }
 
     //Setters
-    public void setInterval(int _interval) {
-        interval = _interval;
+    public void setInterval(final int _interval) {
+        this.interval = _interval;
     }
 
-    public void setExpires_in(int _expiresIn) {
-        expires_in = _expiresIn;
+    public void setExpires_in(final int _expiresIn) {
+        this.expires_in = _expiresIn;
     }
 
-    public void setRemainingSeconds(int _remainingSeconds) {
-        remainingSeconds = _remainingSeconds;
+    public void setRemainingSeconds(final int _remainingSeconds) {
+        this.remainingSeconds = _remainingSeconds;
     }
 
-    public void setDevice_code(String _deviceCode) {
-        device_code = _deviceCode;
+    public void setDevice_code(final String _deviceCode) {
+        this.device_code = _deviceCode;
     }
 }

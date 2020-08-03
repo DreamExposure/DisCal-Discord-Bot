@@ -16,10 +16,10 @@ public class KeyGenerator {
 
     // cs = cryptographically secure
     @SuppressWarnings("SameParameterValue")
-    public static String csRandomAlphaNumericString(int numChars) {
-        SecureRandom secRand = new SecureRandom();
-        Random rand = new Random();
-        char[] buff = new char[numChars];
+    public static String csRandomAlphaNumericString(final int numChars) {
+        final SecureRandom secRand = new SecureRandom();
+        final Random rand = new Random();
+        final char[] buff = new char[numChars];
 
         for (int i = 0; i < numChars; ++i) {
             // reseed rand once you've used up all available entropy bits
@@ -32,9 +32,9 @@ public class KeyGenerator {
     }
 
     public static String generateEventId() {
-        SecureRandom secRand = new SecureRandom();
-        Random rand = new Random();
-        char[] buff = new char[9];
+        final SecureRandom secRand = new SecureRandom();
+        final Random rand = new Random();
+        final char[] buff = new char[9];
 
         for (int i = 0; i < 9; ++i) {
             // reseed rand once you've used up all available entropy bits
@@ -47,9 +47,9 @@ public class KeyGenerator {
     }
 
     public static String generateAnnouncementId() {
-        SecureRandom secRand = new SecureRandom();
-        Random rand = new Random();
-        char[] buff = new char[9];
+        final SecureRandom secRand = new SecureRandom();
+        final Random rand = new Random();
+        final char[] buff = new char[9];
 
         for (int i = 0; i < 9; ++i) {
             // reseed rand once you've used up all available entropy bits

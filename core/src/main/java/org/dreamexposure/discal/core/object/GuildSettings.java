@@ -42,105 +42,105 @@ public class GuildSettings {
 
     private final ArrayList<String> dmAnnouncements = new ArrayList<>();
 
-    public GuildSettings(Snowflake _guildId) {
-        guildID = _guildId;
+    public GuildSettings(final Snowflake _guildId) {
+        this.guildID = _guildId;
 
-        externalCalendar = false;
-        privateKey = "N/a";
+        this.externalCalendar = false;
+        this.privateKey = "N/a";
 
-        credentialsId = new Random().nextInt(CalendarAuth.credentialsCount());
+        this.credentialsId = new Random().nextInt(CalendarAuth.credentialsCount());
 
-        encryptedAccessToken = "N/a";
-        encryptedRefreshToken = "N/a";
+        this.encryptedAccessToken = "N/a";
+        this.encryptedRefreshToken = "N/a";
 
-        controlRole = "everyone";
-        discalChannel = "all";
+        this.controlRole = "everyone";
+        this.discalChannel = "all";
 
-        simpleAnnouncements = false;
-        lang = "ENGLISH";
-        prefix = "!";
+        this.simpleAnnouncements = false;
+        this.lang = "ENGLISH";
+        this.prefix = "!";
 
-        patronGuild = false;
-        devGuild = false;
-        maxCalendars = 1;
+        this.patronGuild = false;
+        this.devGuild = false;
+        this.maxCalendars = 1;
 
-        twelveHour = true;
+        this.twelveHour = true;
     }
 
     //Getters
     public Snowflake getGuildID() {
-        return guildID;
+        return this.guildID;
     }
 
     public boolean useExternalCalendar() {
-        return externalCalendar;
+        return this.externalCalendar;
     }
 
     public String getPrivateKey() {
-        return privateKey;
+        return this.privateKey;
     }
 
     public int getCredentialsId() {
-        return credentialsId;
+        return this.credentialsId;
     }
 
     public String getEncryptedAccessToken() {
-        return encryptedAccessToken;
+        return this.encryptedAccessToken;
     }
 
     public String getEncryptedRefreshToken() {
-        return encryptedRefreshToken;
+        return this.encryptedRefreshToken;
     }
 
     public String getControlRole() {
-        return controlRole;
+        return this.controlRole;
     }
 
     public String getDiscalChannel() {
-        return discalChannel;
+        return this.discalChannel;
     }
 
     public boolean usingSimpleAnnouncements() {
-        return simpleAnnouncements;
+        return this.simpleAnnouncements;
     }
 
     public String getLang() {
-        return lang;
+        return this.lang;
     }
 
     public String getPrefix() {
-        return prefix;
+        return this.prefix;
     }
 
     public boolean isPatronGuild() {
-        return patronGuild;
+        return this.patronGuild;
     }
 
     public boolean isDevGuild() {
-        return devGuild;
+        return this.devGuild;
     }
 
     public int getMaxCalendars() {
-        return maxCalendars;
+        return this.maxCalendars;
     }
 
     public boolean useTwelveHour() {
-        return twelveHour;
+        return this.twelveHour;
     }
 
     public boolean isBranded() {
-        return branded;
+        return this.branded;
     }
 
     public ArrayList<String> getDmAnnouncements() {
-        return dmAnnouncements;
+        return this.dmAnnouncements;
     }
 
     @SuppressWarnings("Duplicates")
     public String getDmAnnouncementsString() {
         StringBuilder users = new StringBuilder();
         int i = 0;
-        for (String sub : dmAnnouncements) {
+        for (final String sub : this.dmAnnouncements) {
             if (i == 0) {
                 users = new StringBuilder(sub);
             } else {
@@ -152,151 +152,151 @@ public class GuildSettings {
     }
 
     //Setters
-    public void setUseExternalCalendar(boolean _useExternal) {
-        externalCalendar = _useExternal;
+    public void setUseExternalCalendar(final boolean _useExternal) {
+        this.externalCalendar = _useExternal;
     }
 
-    public void setPrivateKey(String _privateKey) {
-        privateKey = _privateKey;
+    public void setPrivateKey(final String _privateKey) {
+        this.privateKey = _privateKey;
     }
 
-    public void setCredentialsId(int credentialsId) {
+    public void setCredentialsId(final int credentialsId) {
         this.credentialsId = credentialsId;
     }
 
-    public void setEncryptedAccessToken(String _access) {
-        encryptedAccessToken = _access;
+    public void setEncryptedAccessToken(final String _access) {
+        this.encryptedAccessToken = _access;
     }
 
-    public void setEncryptedRefreshToken(String _refresh) {
-        encryptedRefreshToken = _refresh;
+    public void setEncryptedRefreshToken(final String _refresh) {
+        this.encryptedRefreshToken = _refresh;
     }
 
-    public void setControlRole(String _controlRole) {
-        controlRole = _controlRole;
+    public void setControlRole(final String _controlRole) {
+        this.controlRole = _controlRole;
     }
 
-    public void setDiscalChannel(String _discalChannel) {
-        discalChannel = _discalChannel;
+    public void setDiscalChannel(final String _discalChannel) {
+        this.discalChannel = _discalChannel;
     }
 
-    public void setSimpleAnnouncements(boolean _simpleAnnouncements) {
-        simpleAnnouncements = _simpleAnnouncements;
+    public void setSimpleAnnouncements(final boolean _simpleAnnouncements) {
+        this.simpleAnnouncements = _simpleAnnouncements;
     }
 
-    public void setLang(String _lang) {
-        lang = _lang;
+    public void setLang(final String _lang) {
+        this.lang = _lang;
     }
 
-    public void setPrefix(String _prefix) {
-        prefix = _prefix;
+    public void setPrefix(final String _prefix) {
+        this.prefix = _prefix;
     }
 
-    public void setPatronGuild(boolean _patronGuild) {
-        patronGuild = _patronGuild;
+    public void setPatronGuild(final boolean _patronGuild) {
+        this.patronGuild = _patronGuild;
     }
 
-    public void setDevGuild(boolean _devGuild) {
-        devGuild = _devGuild;
+    public void setDevGuild(final boolean _devGuild) {
+        this.devGuild = _devGuild;
     }
 
-    public void setMaxCalendars(Integer _maxCalendars) {
-        maxCalendars = _maxCalendars;
+    public void setMaxCalendars(final Integer _maxCalendars) {
+        this.maxCalendars = _maxCalendars;
     }
 
-    public void setTwelveHour(boolean _twelveHour) {
-        twelveHour = _twelveHour;
+    public void setTwelveHour(final boolean _twelveHour) {
+        this.twelveHour = _twelveHour;
     }
 
-    public void setBranded(boolean _branded) {
-        branded = _branded;
+    public void setBranded(final boolean _branded) {
+        this.branded = _branded;
     }
 
-    public void setDmAnnouncementsFromString(String userList) {
-        String[] subs = userList.split(",");
-        Collections.addAll(dmAnnouncements, subs);
+    public void setDmAnnouncementsFromString(final String userList) {
+        final String[] subs = userList.split(",");
+        Collections.addAll(this.dmAnnouncements, subs);
     }
 
     public JSONObject toJson() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("guild_id", guildID.asString());
-        data.put("external_calendar", externalCalendar);
-        data.put("private_key", privateKey);
-        data.put("credentials_id", credentialsId);
-        data.put("access_token", encryptedAccessToken);
-        data.put("refresh_token", encryptedRefreshToken);
-        data.put("control_role", controlRole);
-        data.put("discal_channel", discalChannel);
-        data.put("simple_announcements", simpleAnnouncements);
-        data.put("lang", lang);
-        data.put("prefix", prefix);
-        data.put("patron_guild", patronGuild);
-        data.put("dev_guild", devGuild);
-        data.put("max_calendars", maxCalendars);
-        data.put("twelve_hour", twelveHour);
-        data.put("branded", branded);
+        data.put("guild_id", this.guildID.asString());
+        data.put("external_calendar", this.externalCalendar);
+        data.put("private_key", this.privateKey);
+        data.put("credentials_id", this.credentialsId);
+        data.put("access_token", this.encryptedAccessToken);
+        data.put("refresh_token", this.encryptedRefreshToken);
+        data.put("control_role", this.controlRole);
+        data.put("discal_channel", this.discalChannel);
+        data.put("simple_announcements", this.simpleAnnouncements);
+        data.put("lang", this.lang);
+        data.put("prefix", this.prefix);
+        data.put("patron_guild", this.patronGuild);
+        data.put("dev_guild", this.devGuild);
+        data.put("max_calendars", this.maxCalendars);
+        data.put("twelve_hour", this.twelveHour);
+        data.put("branded", this.branded);
 
         return data;
     }
 
     public JSONObject toJsonSecure() {
-        JSONObject data = new JSONObject();
+        final JSONObject data = new JSONObject();
 
-        data.put("guild_id", guildID.asString());
-        data.put("external_calendar", externalCalendar);
-        data.put("control_role", controlRole);
-        data.put("discal_channel", discalChannel);
-        data.put("simple_announcement", simpleAnnouncements);
-        data.put("lang", lang);
-        data.put("prefix", prefix);
-        data.put("patron_guild", patronGuild);
-        data.put("dev_guild", devGuild);
-        data.put("max_calendars", maxCalendars);
-        data.put("twelve_hour", twelveHour);
-        data.put("branded", branded);
+        data.put("guild_id", this.guildID.asString());
+        data.put("external_calendar", this.externalCalendar);
+        data.put("control_role", this.controlRole);
+        data.put("discal_channel", this.discalChannel);
+        data.put("simple_announcement", this.simpleAnnouncements);
+        data.put("lang", this.lang);
+        data.put("prefix", this.prefix);
+        data.put("patron_guild", this.patronGuild);
+        data.put("dev_guild", this.devGuild);
+        data.put("max_calendars", this.maxCalendars);
+        data.put("twelve_hour", this.twelveHour);
+        data.put("branded", this.branded);
 
         return data;
     }
 
-    public GuildSettings fromJson(JSONObject data) {
-        guildID = Snowflake.of(data.getString("guild_id"));
-        externalCalendar = data.getBoolean("external_calendar");
-        privateKey = data.getString("private_key");
-        credentialsId = data.getInt("credentials_id");
-        encryptedAccessToken = data.getString("access_token");
-        encryptedRefreshToken = data.getString("refresh_token");
-        controlRole = data.getString("control_role");
-        discalChannel = data.getString("discal_channel");
-        simpleAnnouncements = data.getBoolean("simple_announcement");
-        lang = data.getString("lang");
-        prefix = data.getString("prefix");
-        patronGuild = data.getBoolean("patron_guild");
-        devGuild = data.getBoolean("dev_guild");
-        maxCalendars = data.getInt("max_calendars");
-        twelveHour = data.getBoolean("twelve_hour");
-        branded = data.getBoolean("branded");
+    public GuildSettings fromJson(final JSONObject data) {
+        this.guildID = Snowflake.of(data.getString("guild_id"));
+        this.externalCalendar = data.getBoolean("external_calendar");
+        this.privateKey = data.getString("private_key");
+        this.credentialsId = data.getInt("credentials_id");
+        this.encryptedAccessToken = data.getString("access_token");
+        this.encryptedRefreshToken = data.getString("refresh_token");
+        this.controlRole = data.getString("control_role");
+        this.discalChannel = data.getString("discal_channel");
+        this.simpleAnnouncements = data.getBoolean("simple_announcement");
+        this.lang = data.getString("lang");
+        this.prefix = data.getString("prefix");
+        this.patronGuild = data.getBoolean("patron_guild");
+        this.devGuild = data.getBoolean("dev_guild");
+        this.maxCalendars = data.getInt("max_calendars");
+        this.twelveHour = data.getBoolean("twelve_hour");
+        this.branded = data.getBoolean("branded");
 
         return this;
     }
 
-    public GuildSettings fromJsonSecure(JSONObject data) {
-        guildID = Snowflake.of(data.getString("guild_id"));
-        externalCalendar = data.getBoolean("external_calendar");
+    public GuildSettings fromJsonSecure(final JSONObject data) {
+        this.guildID = Snowflake.of(data.getString("guild_id"));
+        this.externalCalendar = data.getBoolean("external_calendar");
         //credentialsId = data.getInt("credentials_id");
         //privateKey = data.getString("PrivateKey");
         //encryptedAccessToken = data.getString("AccessToken");
         //encryptedRefreshToken = data.getString("RefreshToken");
-        controlRole = data.getString("control_role");
-        discalChannel = data.getString("discal_channel");
-        simpleAnnouncements = data.getBoolean("simple_announcement");
-        lang = data.getString("lang");
-        prefix = data.getString("prefix");
-        patronGuild = data.getBoolean("patron_guild");
-        devGuild = data.getBoolean("dev_guild");
-        maxCalendars = data.getInt("max_calendars");
-        twelveHour = data.getBoolean("twelve_hours");
-        branded = data.getBoolean("branded");
+        this.controlRole = data.getString("control_role");
+        this.discalChannel = data.getString("discal_channel");
+        this.simpleAnnouncements = data.getBoolean("simple_announcement");
+        this.lang = data.getString("lang");
+        this.prefix = data.getString("prefix");
+        this.patronGuild = data.getBoolean("patron_guild");
+        this.devGuild = data.getBoolean("dev_guild");
+        this.maxCalendars = data.getInt("max_calendars");
+        this.twelveHour = data.getBoolean("twelve_hours");
+        this.branded = data.getBoolean("branded");
 
         return this;
     }

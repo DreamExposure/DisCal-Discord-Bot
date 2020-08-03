@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -23,63 +24,64 @@ import discord4j.common.util.Snowflake;
 @RestController
 @RequestMapping("/v2/events")
 public class DeleteEventEndpoint {
+    @SuppressWarnings("ConstantConditions")
     @PostMapping(value = "/delete", produces = "application/json")
-    public String deleteEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String deleteEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject requestBody = new JSONObject(rBody);
+            final JSONObject requestBody = new JSONObject(rBody);
 
-            String guildId = requestBody.getString("guild_id");
-            int calNumber = requestBody.getInt("calendar_number");
-            String eventId = requestBody.getString("event_id");
+            final String guildId = requestBody.getString("guild_id");
+            final int calNumber = requestBody.getInt("calendar_number");
+            final String eventId = requestBody.getString("event_id");
 
 
             //okay, lets actually delete the event
-            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
             if (EventUtils.eventExists(settings, calNumber, eventId).block()) {
                 if (EventUtils.deleteEvent(settings, calNumber, eventId).block()) {
                     response.setContentType("application/json");
-                    response.setStatus(200);
+                    response.setStatus(GlobalConst.STATUS_SUCCESS);
                     return JsonUtils.getJsonResponseMessage("Event successfully deleted");
                 }
 
 
                 //Something went wrong, but didn't error.... this should never happen...
                 response.setContentType("application/json");
-                response.setStatus(500);
+                response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
 
                 return JsonUtils.getJsonResponseMessage("Internal Server Error");
             } else {
                 response.setContentType("application/json");
-                response.setStatus(404);
+                response.setStatus(GlobalConst.STATUS_NOT_FOUND);
 
                 return JsonUtils.getJsonResponseMessage("Event Not Found");
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
 
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("[API-v2]", "update event err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
 
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }

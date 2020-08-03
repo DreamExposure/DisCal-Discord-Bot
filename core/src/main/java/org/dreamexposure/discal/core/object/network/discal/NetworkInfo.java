@@ -38,69 +38,69 @@ public class NetworkInfo {
 
     public Mono<Void> update() {
         return DatabaseManager.getCalendarCount()
-            .doOnNext(i -> calCount = i)
+            .doOnNext(i -> this.calCount = i)
             .then(DatabaseManager.getAnnouncementCount())
-            .doOnNext(i -> announcementCount = i)
+            .doOnNext(i -> this.announcementCount = i)
             .then();
     }
 
     //Getters
     public List<ConnectedClient> getClients() {
-        return new ArrayList<>(clients);
+        return new ArrayList<>(this.clients);
     }
 
-    public boolean clientExists(int clientIndex) {
-        for (ConnectedClient cc : clients) {
+    public boolean doesClientExist(final int clientIndex) {
+        for (final ConnectedClient cc : this.clients) {
             if (cc.getClientIndex() == clientIndex)
                 return true;
         }
         return false;
     }
 
-    public ConnectedClient getClient(int clientIndex) {
-        for (ConnectedClient cc : clients) {
+    public ConnectedClient getClient(final int clientIndex) {
+        for (final ConnectedClient cc : this.clients) {
             if (cc.getClientIndex() == clientIndex)
                 return cc;
         }
         return null;
     }
 
-    public void addClient(ConnectedClient client) {
-        clients.add(client);
+    public void addClient(final ConnectedClient client) {
+        this.clients.add(client);
         LogFeed.log(LogObject
-                .forStatus("Client Connected to Network",
-                        "Shard index of connected client: " + client.getClientIndex()));
+            .forStatus("Client Connected to Network",
+                "Shard index of connected client: " + client.getClientIndex()));
     }
 
-    public void removeClient(int clientIndex) {
-        if (clientExists(clientIndex)) {
-            clients.remove(getClient(clientIndex));
+    public void removeClient(final int clientIndex) {
+        if (this.doesClientExist(clientIndex)) {
+            this.clients.remove(this.getClient(clientIndex));
             LogFeed.log(LogObject
-                    .forStatus("Client Disconnected from Network",
-                            "Shard Index of Disconnected Client: " + clientIndex));
+                .forStatus("Client Disconnected from Network",
+                    "Shard Index of Disconnected Client: " + clientIndex));
         }
     }
 
-    public void removeClient(int clientIndex, String reason) {
-        if (clientExists(clientIndex)) {
-            clients.remove(getClient(clientIndex));
+    public void removeClient(final int clientIndex, final String reason) {
+        if (this.doesClientExist(clientIndex)) {
+            this.clients.remove(this.getClient(clientIndex));
             LogFeed.log(LogObject
-                    .forStatus("Client Disconnected from Network | Index: " + clientIndex, reason));
+                .forStatus("Client Disconnected from Network | Index: " + clientIndex, reason));
         }
     }
 
     public int getTotalGuildCount() {
         int count = 0;
-        for (ConnectedClient cc : clients) {
+        for (final ConnectedClient cc : this.clients) {
             count += cc.getConnectedServers();
         }
 
-        guildCount = count;
-        return guildCount;
+        this.guildCount = count;
+        return this.guildCount;
     }
 
     public int getClientCount() {
-        return clients.size();
+        return this.clients.size();
     }
 
     public int getExpectedClientCount() {
@@ -116,48 +116,48 @@ public class NetworkInfo {
     }
 
     public String getUptimeLatest() {
-        RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
-        Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
-        Period period = interval.toPeriod();
+        final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
+        final Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
+        final Period period = interval.toPeriod();
 
 
-        uptime = String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+        this.uptime = String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
 
-        return uptime;
+        return this.uptime;
     }
 
     public String getUptime() {
-        return uptime;
+        return this.uptime;
     }
 
     public String getPid() {
-        return pid;
+        return this.pid;
     }
 
     //Setters
-    public void setCalCount(int calCount) {
+    public void setCalCount(final int calCount) {
         this.calCount = calCount;
     }
 
-    public void setAnnouncementCount(int announcementCount) {
+    public void setAnnouncementCount(final int announcementCount) {
         this.announcementCount = announcementCount;
     }
 
-    public void setPid(String pid) {
+    public void setPid(final String pid) {
         this.pid = pid;
     }
 
     public JSONObject toJson() {
-        JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject();
 
-        json.put("api_uptime", getUptimeLatest());
-        json.put("api_pid", getPid());
-        json.put("announcements", getAnnouncementCount());
-        json.put("total_guilds", getTotalGuildCount());
-        json.put("calendars", getCalendarCount());
+        json.put("api_uptime", this.getUptimeLatest());
+        json.put("api_pid", this.getPid());
+        json.put("announcements", this.getAnnouncementCount());
+        json.put("total_guilds", this.getTotalGuildCount());
+        json.put("calendars", this.getCalendarCount());
 
-        JSONArray jClients = new JSONArray();
-        for (ConnectedClient c : clients)
+        final JSONArray jClients = new JSONArray();
+        for (final ConnectedClient c : this.clients)
             jClients.put(c.toJson());
 
         json.put("clients", jClients);
@@ -165,16 +165,16 @@ public class NetworkInfo {
         return json;
     }
 
-    public NetworkInfo fromJson(JSONObject json) {
-        uptime = json.getString("api_uptime");
-        pid = json.getString("api_pid");
-        announcementCount = json.getInt("announcements");
-        guildCount = json.getInt("total_guilds");
-        calCount = json.getInt("calendars");
+    public NetworkInfo fromJson(final JSONObject json) {
+        this.uptime = json.getString("api_uptime");
+        this.pid = json.getString("api_pid");
+        this.announcementCount = json.getInt("announcements");
+        this.guildCount = json.getInt("total_guilds");
+        this.calCount = json.getInt("calendars");
 
-        JSONArray jClients = json.getJSONArray("clients");
+        final JSONArray jClients = json.getJSONArray("clients");
         for (int i = 0; i < jClients.length(); i++)
-            clients.add(new ConnectedClient().fromJson(jClients.getJSONObject(i)));
+            this.clients.add(new ConnectedClient().fromJson(jClients.getJSONObject(i)));
 
         return this;
     }

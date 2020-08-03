@@ -10,13 +10,13 @@ import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.json.JSONObject;
 
 public class JsonUtils {
-    public static String getJsonResponseMessage(String msg) {
+    public static String getJsonResponseMessage(final String msg) {
         return "{\"message\": \"" + msg + "\"}";
     }
 
     //TODO: rewrite to non-blocking
-    public static JSONObject convertEventToJson(Event event, GuildSettings settings) {
-        JSONObject json = new JSONObject();
+    public static JSONObject convertEventToJson(final Event event, final GuildSettings settings) {
+        final JSONObject json = new JSONObject();
 
         json.put("event_id", event.getId());
         json.put("epoch_start", event.getStart().getDateTime().getValue());
@@ -34,11 +34,11 @@ public class JsonUtils {
 
         json.put("color", EventColor.fromNameOrHexOrID(event.getColorId()).name());
 
-        if (event.getRecurrence() != null && event.getRecurrence().size() > 0) {
+        if (event.getRecurrence() != null && !event.getRecurrence().isEmpty()) {
             json.put("recur", true);
-            Recurrence r = new Recurrence().fromRRule(event.getRecurrence().get(0));
+            final Recurrence r = new Recurrence().fromRRule(event.getRecurrence().get(0));
 
-            JSONObject recurrence = new JSONObject();
+            final JSONObject recurrence = new JSONObject();
             recurrence.put("frequency", r.getFrequency().name());
             recurrence.put("count", r.getCount());
             recurrence.put("interval", r.getInterval());
@@ -47,7 +47,7 @@ public class JsonUtils {
         } else
             json.put("recur", false);
 
-        EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
+        final EventData ed = DatabaseManager.getEventData(settings.getGuildID(), event.getId()).block();
 
         //Event image is also optional
         if (ed != null && ed.getImageLink() != null)

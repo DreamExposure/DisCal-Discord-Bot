@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.utils;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.io.IOException;
@@ -16,12 +17,12 @@ public class GlobalConst {
         String d4jVersion1;
 
         try {
-            ClassPathResource resource = new ClassPathResource("/application.properties");
-            Properties p = PropertiesLoaderUtils.loadProperties(resource);
+            final Resource resource = new ClassPathResource("/application.properties");
+            final Properties p = PropertiesLoaderUtils.loadProperties(resource);
 
             version1 = p.getProperty("application.version");
             d4jVersion1 = "Discord4J v" + p.getProperty("library.discord4j.version");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             version1 = "Unknown";
             d4jVersion1 = "Unknown";
         }
@@ -54,4 +55,17 @@ public class GlobalConst {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
     public static final String NOT_EMPTY = "Not empty"; //Used for returning in mono's that we don't want to be empty.
+
+    //Http status codes we use
+    public static final int STATUS_SUCCESS = 200;
+    public static final int STATUS_BAD_REQUEST = 400;
+    public static final int STATUS_NOT_FOUND = 404;
+    public static final int STATUS_NOT_ALLOWED = 405;
+    public static final int STATUS_AUTHORIZATION_DENIED = 401;
+    public static final int STATUS_FORBIDDEN = 403;
+    public static final int STATUS_GONE = 410;
+    public static final int STATUS_TEAPOT = 418;
+    public static final int STATUS_PRECONDITION_REQUIRED = 428;
+    public static final int STATUS_RATE_LIMITED = 429;
+    public static final int STATUS_INTERNAL_ERROR = 500;
 }

@@ -41,11 +41,11 @@ public class CalendarCreator {
     }
 
     //Functional
-    public Mono<PreCalendar> init(MessageCreateEvent e, String calendarName, GuildSettings settings) {
-        if (!hasPreCalendar(settings.getGuildID())) {
+    public Mono<PreCalendar> init(final MessageCreateEvent e, final String calendarName, final GuildSettings settings) {
+        if (!this.hasPreCalendar(settings.getGuildID())) {
             return Mono.just(new PreCalendar(settings.getGuildID(), calendarName))
                 .flatMap(calendar -> {
-                        calendars.add(calendar);
+                        this.calendars.add(calendar);
 
                         return CalendarMessageFormatter.getPreCalendarEmbed(calendar, settings)
                             .flatMap(embed -> Messages.sendMessage(
@@ -57,20 +57,20 @@ public class CalendarCreator {
                     }
                 );
         }
-        return Mono.justOrEmpty(getPreCalendar(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreCalendar(settings.getGuildID()));
     }
 
     @Deprecated
-    public Mono<PreCalendar> edit(MessageCreateEvent event, GuildSettings settings) {
-        if (!hasPreCalendar(settings.getGuildID())) {
+    public Mono<PreCalendar> edit(final MessageCreateEvent event, final GuildSettings settings) {
+        if (!this.hasPreCalendar(settings.getGuildID())) {
             return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data ->
                 CalendarWrapper.getCalendar(data, settings)
                     .flatMap(calendar -> {
-                        PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
+                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
                         preCalendar.setEditing(true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
 
-                        calendars.add(preCalendar);
+                        this.calendars.add(preCalendar);
 
                         return CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings)
                             .flatMap(embed -> Messages.sendMessage(
@@ -82,19 +82,19 @@ public class CalendarCreator {
                     })
             );
         }
-        return Mono.justOrEmpty(getPreCalendar(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreCalendar(settings.getGuildID()));
     }
 
-    public Mono<PreCalendar> edit(int calNumber, MessageCreateEvent event, GuildSettings settings) {
-        if (!hasPreCalendar(settings.getGuildID())) {
+    public Mono<PreCalendar> edit(final int calNumber, final MessageCreateEvent event, final GuildSettings settings) {
+        if (!this.hasPreCalendar(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
                 CalendarWrapper.getCalendar(data, settings)
                     .flatMap(calendar -> {
-                        PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
+                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
                         preCalendar.setEditing(true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
 
-                        calendars.add(preCalendar);
+                        this.calendars.add(preCalendar);
 
                         return CalendarMessageFormatter.getPreCalendarEmbed(preCalendar, settings)
                             .flatMap(embed -> Messages.sendMessage(
@@ -106,18 +106,18 @@ public class CalendarCreator {
                     })
             );
         }
-        return Mono.justOrEmpty(getPreCalendar(settings.getGuildID()));
+        return Mono.justOrEmpty(this.getPreCalendar(settings.getGuildID()));
     }
 
-    public void terminate(Snowflake guildId) {
-        calendars.remove(getPreCalendar(guildId));
+    public void terminate(final Snowflake guildId) {
+        this.calendars.remove(this.getPreCalendar(guildId));
     }
 
-    public Mono<CalendarCreatorResponse> confirmCalendar(GuildSettings settings) {
-        return Mono.justOrEmpty(getPreCalendar(settings.getGuildID()))
+    public Mono<CalendarCreatorResponse> confirmCalendar(final GuildSettings settings) {
+        return Mono.justOrEmpty(this.getPreCalendar(settings.getGuildID()))
             .filter(PreCalendar::hasRequiredValues)
             .flatMap(pre -> {
-                Calendar calendar = new Calendar();
+                final Calendar calendar = new Calendar();
                 calendar.setSummary(pre.getSummary());
                 calendar.setDescription(pre.getDescription());
                 calendar.setTimeZone(pre.getTimezone());
@@ -125,25 +125,25 @@ public class CalendarCreator {
                 if (!pre.isEditing()) {
                     return CalendarWrapper.createCalendar(calendar, settings)
                         .flatMap(confirmed -> {
-                            CalendarData data = CalendarData.fromData(
+                            final CalendarData data = CalendarData.fromData(
                                 settings.getGuildID(),
                                 1, //TODO: Support multi-calendar
                                 confirmed.getId(),
                                 confirmed.getId(),
                                 false);
 
-                            AclRule rule = new AclRule()
+                            final AclRule rule = new AclRule()
                                 .setScope(new AclRule.Scope().setType("default"))
                                 .setRole("reader");
 
-                            CalendarCreatorResponse response = new CalendarCreatorResponse(true,
+                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true,
                                 confirmed, pre.getCreatorMessage(), false);
 
                             return Mono.when(
                                 DatabaseManager.updateCalendar(data),
                                 AclRuleWrapper.insertRule(rule, data.getCalendarId(), settings)
                             )
-                                .then(Mono.fromRunnable(() -> terminate(settings.getGuildID())))
+                                .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
                                 .thenReturn(response);
                         }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), false));
                 } else {
@@ -151,15 +151,15 @@ public class CalendarCreator {
                     calendar.setId(pre.getCalendarId());
                     return CalendarWrapper.updateCalendar(calendar, settings)
                         .flatMap(confirmed -> {
-                            AclRule rule = new AclRule()
+                            final AclRule rule = new AclRule()
                                 .setScope(new AclRule.Scope().setType("default"))
                                 .setRole("reader");
 
-                            CalendarCreatorResponse response = new CalendarCreatorResponse(true,
+                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true,
                                 confirmed, pre.getCreatorMessage(), true);
 
                             return AclRuleWrapper.insertRule(rule, confirmed.getId(), settings)
-                                .doOnNext(a -> terminate(settings.getGuildID()))
+                                .doOnNext(a -> this.terminate(settings.getGuildID()))
                                 .thenReturn(response);
                         }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), true));
                 }
@@ -167,8 +167,8 @@ public class CalendarCreator {
     }
 
     //Getters
-    public PreCalendar getPreCalendar(Snowflake guildId) {
-        for (PreCalendar c : calendars) {
+    public PreCalendar getPreCalendar(final Snowflake guildId) {
+        for (final PreCalendar c : this.calendars) {
             if (c.getGuildId().equals(guildId)) {
                 c.setLastEdit(System.currentTimeMillis());
                 return c;
@@ -178,12 +178,12 @@ public class CalendarCreator {
     }
 
     public List<PreCalendar> getAllPreCalendars() {
-        return calendars;
+        return this.calendars;
     }
 
     //Booleans/Checkers
-    public boolean hasPreCalendar(Snowflake guildId) {
-        for (PreCalendar c : calendars) {
+    public boolean hasPreCalendar(final Snowflake guildId) {
+        for (final PreCalendar c : this.calendars) {
             if (c.getGuildId().equals(guildId))
                 return true;
         }

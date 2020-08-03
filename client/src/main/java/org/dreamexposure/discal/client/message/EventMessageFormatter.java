@@ -33,21 +33,22 @@ import reactor.function.TupleUtils;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@SuppressWarnings("MagicNumber")
 public class EventMessageFormatter {
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getEventEmbed(Event event, GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getEventEmbed(final Event event, final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> sDate = getHumanReadableDate(event.getStart(), false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getStart(), false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getEnd(), false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getEnd(), false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> sDate = getHumanReadableDate(event.getStart(), false, settings);
+        final Mono<String> sTime = getHumanReadableTime(event.getStart(), false, settings);
+        final Mono<String> eDate = getHumanReadableDate(event.getEnd(), false, settings);
+        final Mono<String> eTime = getHumanReadableTime(event.getEnd(), false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
-        Mono<String> timezone = DatabaseManager.getMainCalendar(settings.getGuildID())
+        final Mono<String> timezone = DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(d -> CalendarWrapper.getCalendar(d, settings))
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("Error/Unknown");
@@ -85,9 +86,9 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Info.EndTime", settings), endTime, true);
 
                 spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -98,7 +99,7 @@ public class EventMessageFormatter {
                 spec.setFooter(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
 
                 if (event.getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -106,19 +107,19 @@ public class EventMessageFormatter {
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getEventEmbed(Event event, int calNum, GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getEventEmbed(final Event event, final int calNum, final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> sDate = getHumanReadableDate(event.getStart(), calNum, false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getStart(), calNum, false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getEnd(), calNum, false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> sDate = getHumanReadableDate(event.getStart(), calNum, false, settings);
+        final Mono<String> sTime = getHumanReadableTime(event.getStart(), calNum, false, settings);
+        final Mono<String> eDate = getHumanReadableDate(event.getEnd(), calNum, false, settings);
+        final Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
-        Mono<String> timezone = DatabaseManager.getCalendar(settings.getGuildID(), calNum)
+        final Mono<String> timezone = DatabaseManager.getCalendar(settings.getGuildID(), calNum)
             .flatMap(d -> CalendarWrapper.getCalendar(d, settings))
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("Error/Unknown");
@@ -156,9 +157,9 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Info.EndTime", settings), endTime, true);
 
                 spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -169,7 +170,7 @@ public class EventMessageFormatter {
                 spec.setFooter(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
 
                 if (event.getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -178,14 +179,14 @@ public class EventMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getCondensedEventEmbed(Event event, GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getCondensedEventEmbed(final Event event, final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> date = getHumanReadableDate(event.getStart(), false, settings);
-        Mono<String> time = getHumanReadableTime(event.getStart(), false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> date = getHumanReadableDate(event.getStart(), false, settings);
+        final Mono<String> time = getHumanReadableTime(event.getStart(), false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -211,9 +212,9 @@ public class EventMessageFormatter {
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -223,7 +224,7 @@ public class EventMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -231,14 +232,14 @@ public class EventMessageFormatter {
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getCondensedEventEmbed(Event event, int calNum, GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getCondensedEventEmbed(final Event event, final int calNum, final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
-        Mono<String> time = getHumanReadableTime(event.getOriginalStartTime(), 1, false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
+        final Mono<String> time = getHumanReadableTime(event.getOriginalStartTime(), 1, false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -264,9 +265,9 @@ public class EventMessageFormatter {
                 }
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startData, true);
                 spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -276,7 +277,7 @@ public class EventMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -284,14 +285,14 @@ public class EventMessageFormatter {
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(PreEvent event, int calNum,
-                                                                   GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), calNum, false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), calNum, false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), calNum, false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), calNum, false, settings);
-        Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
+    public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(final PreEvent event, final int calNum,
+                                                                   final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), calNum, false, settings);
+        final Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), calNum, false, settings);
+        final Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), calNum, false, settings);
+        final Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), calNum, false, settings);
+        final Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -338,9 +339,9 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -355,14 +356,14 @@ public class EventMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(PreEvent event,
-                                                                   GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), false, settings);
-        Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), false, settings);
-        Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), false, settings);
-        Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), false, settings);
-        Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
+    public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(final PreEvent event,
+                                                                   final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), false, settings);
+        final Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), false, settings);
+        final Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), false, settings);
+        final Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), false, settings);
+        final Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -409,9 +410,9 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
 
-                if (event.getLocation() != null && !event.getLocation().equalsIgnoreCase("")) {
+                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
-                        String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
@@ -426,15 +427,15 @@ public class EventMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getEventConfirmationEmbed(EventCreatorResponse ecr,
-                                                                            GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getEventConfirmationEmbed(final EventCreatorResponse ecr,
+                                                                            final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), ecr.getEvent().getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), false, settings);
-        Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), false, settings);
+        final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -455,9 +456,9 @@ public class EventMessageFormatter {
                     ecr.getEvent().getId(), false);
                 spec.addField(Messages.getMessage("Embed.Event.Confirm.Date", settings),
                     d, false);
-                if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
+                if (ecr.getEvent().getLocation() != null && !"".equalsIgnoreCase(ecr.getEvent().getLocation())) {
                     if (ecr.getEvent().getLocation().length() > 300) {
-                        String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), true);
@@ -467,7 +468,7 @@ public class EventMessageFormatter {
                 spec.setUrl(ecr.getEvent().getHtmlLink());
 
                 if (ecr.getEvent().getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -475,16 +476,16 @@ public class EventMessageFormatter {
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getEventConfirmationEmbed(EventCreatorResponse ecr,
-                                                                            int calNum,
-                                                                            GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager
+    public static Mono<Consumer<EmbedCreateSpec>> getEventConfirmationEmbed(final EventCreatorResponse ecr,
+                                                                            final int calNum,
+                                                                            final GuildSettings settings) {
+        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+        final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), ecr.getEvent().getId())
             .defaultIfEmpty(EventData.empty()).cache();
-        Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), calNum, false, settings);
-        Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), calNum, false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
+        final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), calNum, false, settings);
+        final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), calNum, false, settings);
+        final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -506,9 +507,9 @@ public class EventMessageFormatter {
                     ecr.getEvent().getId(), false);
                 spec.addField(Messages.getMessage("Embed.Event.Confirm.Date", settings),
                     d, false);
-                if (ecr.getEvent().getLocation() != null && !ecr.getEvent().getLocation().equalsIgnoreCase("")) {
+                if (ecr.getEvent().getLocation() != null && !"".equalsIgnoreCase(ecr.getEvent().getLocation())) {
                     if (ecr.getEvent().getLocation().length() > 300) {
-                        String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                        final String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
                     } else {
                         spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), ecr.getEvent().getLocation(), true);
@@ -518,7 +519,7 @@ public class EventMessageFormatter {
                 spec.setUrl(ecr.getEvent().getHtmlLink());
 
                 if (ecr.getEvent().getColorId() != null) {
-                    EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
+                    final EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -527,8 +528,8 @@ public class EventMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<String> getHumanReadableDate(@Nullable EventDateTime eventDateTime,
-                                                    boolean preEvent, GuildSettings settings) {
+    public static Mono<String> getHumanReadableDate(@Nullable final EventDateTime eventDateTime,
+                                                    final boolean preEvent, final GuildSettings settings) {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getMainCalendar(settings.getGuildID())
@@ -540,23 +541,23 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+                final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
                 if (eventDateTime.getDateTime() != null) {
-                    long dateTime = eventDateTime.getDateTime().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDateTime().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
 
                     return format.format(ldt);
                 } else {
-                    long dateTime = eventDateTime.getDate().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDate().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
                     return format.format(ldt);
                 }
             }).defaultIfEmpty("NOT SET");
     }
 
-    public static Mono<String> getHumanReadableDate(@Nullable EventDateTime eventDateTime,
-                                                    int calNum, boolean preEvent,
-                                                    GuildSettings settings) {
+    public static Mono<String> getHumanReadableDate(@Nullable final EventDateTime eventDateTime,
+                                                    final int calNum, final boolean preEvent,
+                                                    final GuildSettings settings) {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getCalendar(settings.getGuildID(), calNum)
@@ -568,23 +569,23 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+                final DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy/MM/dd");
                 if (eventDateTime.getDateTime() != null) {
-                    long dateTime = eventDateTime.getDateTime().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDateTime().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
 
                     return format.format(ldt);
                 } else {
-                    long dateTime = eventDateTime.getDate().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDate().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
                     return format.format(ldt);
                 }
             }).defaultIfEmpty("NOT SET");
     }
 
     @Deprecated
-    public static Mono<String> getHumanReadableTime(@Nullable EventDateTime eventDateTime,
-                                                    boolean preEvent, GuildSettings settings) {
+    public static Mono<String> getHumanReadableTime(@Nullable final EventDateTime eventDateTime,
+                                                    final boolean preEvent, final GuildSettings settings) {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getMainCalendar(settings.getGuildID())
@@ -596,23 +597,23 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                final DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
                 if (eventDateTime.getDateTime() != null) {
-                    long dateTime = eventDateTime.getDateTime().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDateTime().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
 
                     return format.format(ldt);
                 } else {
-                    long dateTime = eventDateTime.getDate().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDate().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
                     return format.format(ldt);
                 }
             }).defaultIfEmpty("NOT SET");
     }
 
-    public static Mono<String> getHumanReadableTime(@Nullable EventDateTime eventDateTime,
-                                                    int calNum, boolean preEvent,
-                                                    GuildSettings settings) {
+    public static Mono<String> getHumanReadableTime(@Nullable final EventDateTime eventDateTime,
+                                                    final int calNum, final boolean preEvent,
+                                                    final GuildSettings settings) {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getCalendar(settings.getGuildID(), calNum)
@@ -624,15 +625,15 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                final DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
                 if (eventDateTime.getDateTime() != null) {
-                    long dateTime = eventDateTime.getDateTime().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDateTime().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
 
                     return format.format(ldt);
                 } else {
-                    long dateTime = eventDateTime.getDate().getValue();
-                    LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
+                    final long dateTime = eventDateTime.getDate().getValue();
+                    final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
                     return format.format(ldt);
                 }
             }).defaultIfEmpty("NOT SET");

@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -23,9 +24,9 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/rsvp")
 public class GetRsvpEndpoint {
     @PostMapping(value = "/get", produces = "application/json")
-    public String getRsvp(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String getRsvp(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
@@ -34,30 +35,30 @@ public class GetRsvpEndpoint {
 
         //Okay, now handle actual request.
         try {
-            JSONObject requestBody = new JSONObject(rBody);
+            final JSONObject requestBody = new JSONObject(rBody);
 
-            String guildId = requestBody.getString("guild_id");
-            String eventId = requestBody.getString("event_id");
+            final String guildId = requestBody.getString("guild_id");
+            final String eventId = requestBody.getString("event_id");
 
-            RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
+            final RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
 
             return rsvp.toJson().toString();
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
 
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "Failed to get RSVP", e, this.getClass()));
+                .forException("[API-v2]", "Failed to get RSVP", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
 
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }

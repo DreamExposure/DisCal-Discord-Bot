@@ -52,14 +52,14 @@ public class EventCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
      */
     @Override
     public ArrayList<String> getAliases() {
-        ArrayList<String> a = new ArrayList<>();
+        final ArrayList<String> a = new ArrayList<>();
         a.add("e");
 
         return a;
@@ -72,7 +72,7 @@ public class EventCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo info = new CommandInfo("event",
+        final CommandInfo info = new CommandInfo("event",
             "User for all event related functions",
             "!event <function> (value(s))"
         );
@@ -112,10 +112,10 @@ public class EventCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         //TODO: Add multi-cal handling
         return DatabaseManager.getMainCalendar(settings.getGuildID()).defaultIfEmpty(CalendarData.empty())
             .flatMap(calData -> {
@@ -127,7 +127,7 @@ public class EventCommand implements Command {
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleCreate(args, event, calData, settings);
+                                        return this.moduleCreate(args, event, calData, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
@@ -135,7 +135,7 @@ public class EventCommand implements Command {
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleCopy(args, event, calData, settings);
+                                        return this.moduleCopy(args, event, calData, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
@@ -143,7 +143,7 @@ public class EventCommand implements Command {
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleEdit(args, event, calData, settings);
+                                        return this.moduleEdit(args, event, calData, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
@@ -151,7 +151,7 @@ public class EventCommand implements Command {
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleCancel(event, settings);
+                                        return this.moduleCancel(event, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
@@ -159,55 +159,55 @@ public class EventCommand implements Command {
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleDelete(args, event, calData, settings);
+                                        return this.moduleDelete(args, event, calData, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
                         case "view":
                         case "review":
-                            return moduleView(args, event, calData, settings);
+                            return this.moduleView(args, event, calData, settings);
                         case "confirm":
                             return PermissionChecker.hasDisCalRole(event, settings)
                                 .flatMap(has -> {
                                     if (has)
-                                        return moduleConfirm(event, calData, settings);
+                                        return this.moduleConfirm(event, calData, settings);
                                     else
                                         return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                                 });
                         case "startdate":
                         case "start":
-                            return moduleStartDate(args, event, settings);
+                            return this.moduleStartDate(args, event, settings);
                         case "enddate":
                         case "end":
-                            return moduleEndDate(args, event, settings);
+                            return this.moduleEndDate(args, event, settings);
                         case "summary":
-                            return moduleSummary(args, event, settings);
+                            return this.moduleSummary(args, event, settings);
                         case "description":
-                            return moduleDescription(args, event, settings);
+                            return this.moduleDescription(args, event, settings);
                         case "color":
                         case "colour":
-                            return moduleColor(args, event, settings);
+                            return this.moduleColor(args, event, settings);
                         case "location":
                         case "loc":
-                            return moduleLocation(args, event, settings);
+                            return this.moduleLocation(args, event, settings);
                         case "image":
                         case "attachment":
-                            return moduleAttachment(args, event, settings);
+                            return this.moduleAttachment(args, event, settings);
                         case "recur":
-                            return moduleRecur(args, event, settings);
+                            return this.moduleRecur(args, event, settings);
                         case "frequency":
                         case "freq":
-                            return moduleFrequency(args, event, settings);
+                            return this.moduleFrequency(args, event, settings);
                         case "count":
-                            return moduleCount(args, event, settings);
+                            return this.moduleCount(args, event, settings);
                         case "interval":
-                            return moduleInterval(args, event, settings);
+                            return this.moduleInterval(args, event, settings);
                         default:
                             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                     .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -223,19 +223,19 @@ public class EventCommand implements Command {
     }
 
 
-    private Mono<Void> moduleCreate(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleCreate(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
-            } else if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if (!"primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 if (args.length == 1)
                     return EventCreator.getCreator().init(event, settings);
                 else
@@ -246,23 +246,23 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCopy(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleCopy(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
                 //Already in creator/editor
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
-            } else if (!calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if (!"primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //Has calendar, not in creator/editor, start it.
                 if (args.length == 2) {
-                    String eventId = args[1];
+                    final String eventId = args[1];
                     return EventUtils.eventExists(settings, calendarData.getCalendarNumber(), eventId)
                         .flatMap(exists -> {
                             if (exists) {
@@ -280,26 +280,26 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEdit(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleEdit(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
                 //Already in creator
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //Does not have calendar
                 return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             } else {
                 //Not in creator, start editor
                 if (args.length == 2) {
-                    String eventId = args[1];
+                    final String eventId = args[1];
 
                     return EventUtils.eventExists(settings, calendarData.getCalendarNumber(), eventId)
                         .flatMap(exists -> {
@@ -316,13 +316,13 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCancel(MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleCancel(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 EventCreator.getCreator().terminate(settings.getGuildID());
 
@@ -334,21 +334,21 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDelete(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleDelete(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
                 //In creator/editor, cannot delete
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
                     .flatMap(em -> Messages.sendMessage(Messages
                         .getMessage("Creator.Event.Delete.Failure.Creator", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //Does not have calendar..
                 return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             } else {
@@ -368,20 +368,20 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleView(String[] args, MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleView(final String[] args, final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
                 // In editor, show that
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Event.View.Creator.Confirm", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //Does not have calendar...
                 return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             } else {
@@ -398,17 +398,17 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleConfirm(MessageCreateEvent event, CalendarData calendarData, GuildSettings settings) {
+    private Mono<Void> moduleConfirm(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
                 if (pre.hasRequiredValues()) {
                     return EventCreator.getCreator().confirmEvent(settings).flatMap(response -> {
                         if (response.isSuccessful()) {
-                            String msg;
+                            final String msg;
                             if (response.isEdited())
                                 msg = Messages.getMessage("Creator.Event.Confirm.Edit", settings);
                             else
@@ -434,7 +434,7 @@ public class EventCommand implements Command {
                         .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.NoRequired", settings), em, event))
                         .doOnNext(pre::setCreatorMessage);
                 }
-            } else if (calendarData.getCalendarAddress().equalsIgnoreCase("primary")) {
+            } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 //No calendar...
                 return Messages.sendMessage(Messages.getMessage("Creator.Event.NoCalendar", settings), event);
             } else {
@@ -443,45 +443,45 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleStartDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleStartDate(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (args[1].trim().length() > 10) {
                         return Mono.just(args[1].trim()).flatMap(dateRaw -> {
                             //Do a lot of date shuffling to get to proper formats and shit like that.
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
                             sdf.setTimeZone(tz);
-                            Date dateObj;
+                            final Date dateObj;
                             try {
                                 dateObj = sdf.parse(dateRaw);
-                            } catch (ParseException e) {
+                            } catch (final ParseException e) {
                                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                     .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                                     .flatMap(em -> Messages.sendMessage(
                                         Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
                                     .doOnNext(pre::setCreatorMessage);
                             }
-                            DateTime dateTime = new DateTime(dateObj);
-                            EventDateTime eventDateTime = new EventDateTime();
+                            final DateTime dateTime = new DateTime(dateObj);
+                            final EventDateTime eventDateTime = new EventDateTime();
                             eventDateTime.setDateTime(dateTime);
 
                             //Wait! Lets check now if its in the future and not the past!
-                            if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.startAfterEnd(dateRaw, tz, pre)) {
+                            if (!TimeUtils.isInPast(dateRaw, tz) && !TimeUtils.hasStartAfterEnd(dateRaw, tz, pre)) {
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 pre.setStartDateTime(eventDateTime);
 
 
                                 //To streamline, check if event end is null, if so, apply 1 hour duration!
                                 if (pre.getEndDateTime() == null) {
-                                    EventDateTime end = pre.getStartDateTime().clone();
-                                    long endLong = end.getDateTime().getValue() + 3600000; //Add an hour
+                                    final EventDateTime end = pre.getStartDateTime().clone();
+                                    final long endLong = end.getDateTime().getValue() + 3600000; //Add an hour
 
                                     end.setDateTime(new DateTime(endLong));
 
@@ -527,37 +527,37 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleEndDate(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleEndDate(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (args[1].trim().length() > 10) {
                         return Mono.just(args[1].trim()).flatMap(dateRaw -> {
                             //Do a lot of date shuffling to get to proper formats and shit like that.
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
+                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
                             sdf.setTimeZone(tz);
-                            Date dateObj;
+                            final Date dateObj;
                             try {
                                 dateObj = sdf.parse(dateRaw);
-                            } catch (ParseException e) {
+                            } catch (final ParseException e) {
                                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                     .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                                     .flatMap(em -> Messages.sendMessage(
                                         Messages.getMessage("Creator.Event.Time.InvalidFormat", settings), em, event))
                                     .doOnNext(pre::setCreatorMessage);
                             }
-                            DateTime dateTime = new DateTime(dateObj);
-                            EventDateTime eventDateTime = new EventDateTime();
+                            final DateTime dateTime = new DateTime(dateObj);
+                            final EventDateTime eventDateTime = new EventDateTime();
                             eventDateTime.setDateTime(dateTime);
 
                             //Wait! Lets check now if its in the future and not the past!
-                            if (!TimeUtils.inPast(dateRaw, tz) && !TimeUtils.endBeforeStart(dateRaw, tz, pre)) {
+                            if (!TimeUtils.isInPast(dateRaw, tz) && !TimeUtils.hasEndBeforeStart(dateRaw, tz, pre)) {
                                 //Date shuffling done, now actually apply all that damn stuff here.
                                 pre.setEndDateTime(eventDateTime);
 
@@ -600,13 +600,13 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSummary(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleSummary(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length > 1) {
                     pre.setSummary(GeneralUtils.getContent(args, 1));
@@ -629,13 +629,13 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleDescription(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleDescription(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length > 1) {
                     pre.setDescription(GeneralUtils.getContent(args, 1));
@@ -658,19 +658,19 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleColor(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleColor(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    String value = args[1];
-                    if (value.equalsIgnoreCase("list") || value.equalsIgnoreCase("colors")
-                        || value.equalsIgnoreCase("colours")) {
-                        Consumer<EmbedCreateSpec> embed = spec -> {
+                    final String value = args[1];
+                    if ("list".equalsIgnoreCase(value) || "colors".equalsIgnoreCase(value)
+                        || "colours".equalsIgnoreCase(value)) {
+                        final Consumer<EmbedCreateSpec> embed = spec -> {
                             spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
                             spec.setTitle("Available Colors");
@@ -678,7 +678,7 @@ public class EventCommand implements Command {
                             spec.setColor(GlobalConst.discalColor);
                             spec.setFooter("Click Title for previews of the colors!", null);
 
-                            for (EventColor ec : EventColor.values()) {
+                            for (final EventColor ec : EventColor.values()) {
                                 spec.addField(ec.name(), ec.getId() + "", true);
                             }
                         };
@@ -714,7 +714,7 @@ public class EventCommand implements Command {
                 }
             } else {
                 //Not in creator/editor, just default to listing the supported colors.
-                Consumer<EmbedCreateSpec> embed = spec -> {
+                final Consumer<EmbedCreateSpec> embed = spec -> {
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
                     spec.setTitle("Available Colors");
@@ -722,7 +722,7 @@ public class EventCommand implements Command {
                     spec.setColor(GlobalConst.discalColor);
                     spec.setFooter("Click Title for previews of the colors!", null);
 
-                    for (EventColor ec : EventColor.values()) {
+                    for (final EventColor ec : EventColor.values()) {
                         spec.addField(ec.name(), ec.getId() + "", true);
                     }
                 };
@@ -732,16 +732,16 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleLocation(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleLocation(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length > 1) {
-                    if (args[1].equalsIgnoreCase("clear")) {
+                    if ("clear".equalsIgnoreCase(args[1])) {
                         pre.setLocation(null);
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
@@ -771,18 +771,18 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleAttachment(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleAttachment(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    String value = args[1].trim();
-                    if (value.equalsIgnoreCase("delete") || value.equalsIgnoreCase("remove")
-                        || value.equalsIgnoreCase("clear")) {
+                    final String value = args[1].trim();
+                    if ("delete".equalsIgnoreCase(value) || "remove".equalsIgnoreCase(value)
+                        || "clear".equalsIgnoreCase(value)) {
                         pre.setEventData(EventData.empty());
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
@@ -793,9 +793,9 @@ public class EventCommand implements Command {
                     } else {
                         return ImageUtils.validate(value, settings.isPatronGuild()).flatMap(valid -> {
                             if (valid) {
-                                PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                                final PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                                EventData eventData = EventData.fromImage(
+                                final EventData eventData = EventData.fromImage(
                                     settings.getGuildID(),
                                     preEvent.getEventId(),
                                     preEvent.getEndDateTime().getDateTime().getValue(),
@@ -831,16 +831,16 @@ public class EventCommand implements Command {
     }
 
     //Event recurrence settings
-    private Mono<Void> moduleRecur(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleRecur(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    String valueString = args[1];
+                    final String valueString = args[1];
                     if (pre.isEditing() && pre.getEventId().contains("_")) {
                         //This event is a child of a recurring parent. we can't edit it's recurrence
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
@@ -851,7 +851,7 @@ public class EventCommand implements Command {
                             .doOnNext(pre::setCreatorMessage);
                     }
 
-                    boolean shouldRecur = Boolean.parseBoolean(valueString);
+                    final boolean shouldRecur = Boolean.parseBoolean(valueString);
                     pre.setShouldRecur(shouldRecur);
 
                     if (shouldRecur) {
@@ -881,13 +881,13 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleFrequency(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleFrequency(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (pre.shouldRecur()) {
@@ -900,7 +900,7 @@ public class EventCommand implements Command {
                                     Messages.getMessage("Creator.Event.Frequency.Success.New", settings), em, event))
                                 .doOnNext(pre::setCreatorMessage);
                         } else {
-                            String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+                            final String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
 
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -917,7 +917,7 @@ public class EventCommand implements Command {
                             .doOnNext(pre::setCreatorMessage);
                     }
                 } else {
-                    String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
+                    final String values = Arrays.toString(EventFrequency.values()).replace("[", "").replace("]", "");
 
                     return Mono.when(deleteUserMessage, deleteCreatorMessage)
                         .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -932,21 +932,21 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleCount(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleCount(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (pre.shouldRecur()) {
-                        int amount = 0;
+                        final int amount = 0;
 
                         try {
                             Integer.parseInt(args[1]);
-                        } catch (NumberFormatException e) {
+                        } catch (final NumberFormatException e) {
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                                 .flatMap(em -> Messages.sendMessage(
@@ -981,21 +981,21 @@ public class EventCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleInterval(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    private Mono<Void> moduleInterval(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (EventCreator.getCreator().hasPreEvent(settings.getGuildID())) {
-                PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
+                final PreEvent pre = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
+                final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
                     if (pre.shouldRecur()) {
-                        int amount = 1;
+                        final int amount = 1;
 
                         try {
                             Integer.parseInt(args[1]);
-                        } catch (NumberFormatException e) {
+                        } catch (final NumberFormatException e) {
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                                 .flatMap(em -> Messages.sendMessage(

@@ -34,7 +34,7 @@ public class DevCommand implements Command {
 
     /**
      * Gets the short aliases of the command this object is responsible for.
-     * </br>
+     * <br>
      * This will return an empty ArrayList if none are present
      *
      * @return The aliases of the command.
@@ -51,7 +51,7 @@ public class DevCommand implements Command {
      */
     @Override
     public CommandInfo getCommandInfo() {
-        CommandInfo ci = new CommandInfo(
+        final CommandInfo ci = new CommandInfo(
             "dev",
             "Used for developer commands. Only able to be used by registered developers",
             "!dev <function> (value)"
@@ -75,10 +75,10 @@ public class DevCommand implements Command {
      *
      * @param args  The command arguments.
      * @param event The event received.
-     * @return <code>true</code> if successful, else <code>false</code>.
+     * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
+    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return event.getMessage().getAuthorAsMember()
             .map(Member::getId)
             .filter(id ->
@@ -93,17 +93,17 @@ public class DevCommand implements Command {
                 } else {
                     switch (args[0].toLowerCase()) {
                         case "reloadlangs":
-                            return moduleReloadLangs(event);
+                            return this.moduleReloadLangs(event);
                         case "patron":
-                            return modulePatron(args, event);
+                            return this.modulePatron(args, event);
                         case "dev":
-                            return moduleDevGuild(args, event);
+                            return this.moduleDevGuild(args, event);
                         case "api-register":
-                            return registerApiKey(args, event);
+                            return this.registerApiKey(args, event);
                         case "api-block":
-                            return blockAPIKey(args, event);
+                            return this.blockAPIKey(args, event);
                         case "settings":
-                            return moduleCheckSettings(args, event);
+                            return this.moduleCheckSettings(args, event);
                         default:
                             return Messages.sendMessage("Invalid sub command! Use `!help dev` to view valid sub commands!", event);
                     }
@@ -115,13 +115,13 @@ public class DevCommand implements Command {
     }
 
     //TODO: maybe make internal API for invalidating caches?
-    private Mono<Void> modulePatron(String[] args, MessageCreateEvent event) {
+    private Mono<Void> modulePatron(final String[] args, final MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
                     .flatMap(DatabaseManager::getSettings)
-                    .doOnNext(s -> s.setPatronGuild(!s.isPatronGuild()))
+                    .doOnNext(settings -> settings.setPatronGuild(!settings.isPatronGuild()))
                     .flatMap(DatabaseManager::updateSettings)
                     .then(Messages.sendMessage("isPatronGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->
@@ -134,13 +134,13 @@ public class DevCommand implements Command {
     }
 
     //TODO: maybe make internal API for invalidating caches?
-    private Mono<Void> moduleDevGuild(String[] args, MessageCreateEvent event) {
+    private Mono<Void> moduleDevGuild(final String[] args, final MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
                     .flatMap(DatabaseManager::getSettings)
-                    .doOnNext(s -> s.setDevGuild(!s.isDevGuild()))
+                    .doOnNext(settings -> settings.setDevGuild(!settings.isDevGuild()))
                     .flatMap(DatabaseManager::updateSettings)
                     .then(Messages.sendMessage("isDevGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->
@@ -157,12 +157,12 @@ public class DevCommand implements Command {
         return Messages.sendMessage("This needs to get rewritten later", event).then();
     }
 
-    private Mono<Void> registerApiKey(String[] args, MessageCreateEvent event) {
+    private Mono<Void> registerApiKey(final String[] args, final MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
-                String userId = args[1];
+                final String userId = args[1];
 
-                UserAPIAccount acc = new UserAPIAccount();
+                final UserAPIAccount acc = new UserAPIAccount();
                 acc.setUserId(userId);
                 acc.setAPIKey(KeyGenerator.csRandomAlphaNumericString(64));
                 acc.setTimeIssued(System.currentTimeMillis());
@@ -170,9 +170,9 @@ public class DevCommand implements Command {
                 return DatabaseManager.updateAPIAccount(acc)
                     .flatMap(success -> {
                         if (success) {
-                            Mono<Message> confirm = Messages.sendMessage("Check your DMs for the new API key!", event);
-                            Mono<Message> dm = event.getMessage().getAuthorAsMember()
-                                .flatMap(m -> Messages.sendDirectMessage(acc.getAPIKey(), m));
+                            final Mono<Message> confirm = Messages.sendMessage("Check your DMs for the new API key!", event);
+                            final Mono<Message> dm = event.getMessage().getAuthorAsMember()
+                                .flatMap(member -> Messages.sendDirectMessage(acc.getAPIKey(), member));
 
                             return Mono.when(confirm, dm);
                         } else {
@@ -185,10 +185,10 @@ public class DevCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> blockAPIKey(String[] args, MessageCreateEvent event) {
+    private Mono<Void> blockAPIKey(final String[] args, final MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
-                String key = args[1];
+                final String key = args[1];
 
                 return Messages.sendMessage("Blocking API key...", event)
                     .then(DatabaseManager.getAPIAccount(key))
@@ -208,7 +208,7 @@ public class DevCommand implements Command {
     }
 
     //TODO: Figure this shit out because it would be a life saver for helping with debugging for users
-    private Mono<Void> moduleCheckSettings(String[] args, MessageCreateEvent event) {
+    private Mono<Void> moduleCheckSettings(final String[] args, final MessageCreateEvent event) {
         return Mono.defer(() -> {
             if (args.length == 2) {
                 //String id = args[1];

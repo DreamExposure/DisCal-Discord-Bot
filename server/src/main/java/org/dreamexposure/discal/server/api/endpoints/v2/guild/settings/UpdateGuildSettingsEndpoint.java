@@ -32,32 +32,32 @@ import okhttp3.Request;
 @RequestMapping("/v2/guild/settings")
 public class UpdateGuildSettingsEndpoint {
     @PostMapping(value = "/update", produces = "application/json")
-    public String updateSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
+    public String updateSettings(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject body = new JSONObject(requestBody);
-            String guildId = body.getString("guild_id");
+            final JSONObject body = new JSONObject(requestBody);
+            final String guildId = body.getString("guild_id");
 
-            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
             //Handle various things that are allowed to change.
             if (body.has("control_role"))
                 settings.setControlRole(body.getString("control_role"));
             if (body.has("discal_channel")) {
-                String id = body.getString("discal_channel");
-                if (id.equalsIgnoreCase("0") || id.equalsIgnoreCase("all"))
+                final String id = body.getString("discal_channel");
+                if ("0".equalsIgnoreCase(id) || "all".equalsIgnoreCase(id))
                     settings.setDiscalChannel("all");
                 else
                     settings.setDiscalChannel(id);
@@ -65,7 +65,7 @@ public class UpdateGuildSettingsEndpoint {
             if (body.has("simple_announcements"))
                 settings.setSimpleAnnouncements(body.getBoolean("simple_announcements"));
             if (body.has("lang")) {
-                String lang = body.getString("lang");
+                final String lang = body.getString("lang");
                 //noinspection unchecked
                 if (new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet()).contains(lang.toUpperCase()))
                     settings.setLang(body.getString("lang"));
@@ -87,29 +87,29 @@ public class UpdateGuildSettingsEndpoint {
 
             if (DatabaseManager.updateSettings(settings).block()) {
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
 
                 //Invalidate the cache on the shard this guild is on...
-                Thread thread = new Thread(() -> {
+                final Thread thread = new Thread(() -> {
                     try {
-                        JSONObject requestJson = new JSONObject();
+                        final JSONObject requestJson = new JSONObject();
 
                         requestJson.put("realm", DisCalRealm.BOT_INVALIDATE_CACHES.name());
 
-                        int shardIndex = GuildUtils.findShard(Snowflake.of(guildId));
+                        final int shardIndex = GuildUtils.findShard(Snowflake.of(guildId));
 
-                        OkHttpClient client = new OkHttpClient();
-                        okhttp3.RequestBody cacheRequestBody = okhttp3.RequestBody.create(GlobalConst.JSON, requestJson.toString());
-                        Request cacheRequest = new Request.Builder()
-                                .url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
-                                .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                                .post(cacheRequestBody)
-                                .build();
+                        final OkHttpClient client = new OkHttpClient();
+                        final okhttp3.RequestBody cacheRequestBody = okhttp3.RequestBody.create(GlobalConst.JSON, requestJson.toString());
+                        final Request cacheRequest = new Request.Builder()
+                            .url(BotSettings.COM_SUB_DOMAIN.get() + shardIndex + ".discalbot.com/api/v1/com/bot/action/handle")
+                            .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                            .post(cacheRequestBody)
+                            .build();
                         //If this fails, its not a huge deal, the cache will just be out of date for up to an hour max...
                         client.newCall(cacheRequest).execute();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         LogFeed.log(LogObject
-                                .forException("[API-v2]", "cache invalidate fail", e, this.getClass()));
+                            .forException("[API-v2]", "cache invalidate fail", e, this.getClass()));
                     }
                 });
                 thread.setDaemon(true);
@@ -118,21 +118,21 @@ public class UpdateGuildSettingsEndpoint {
                 return JsonUtils.getJsonResponseMessage("Successfully updated guild settings!");
             } else {
                 response.setContentType("application/json");
-                response.setStatus(500);
+                response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
                 return JsonUtils.getJsonResponseMessage("Internal Server Error");
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "Update guild settings err", e, this.getClass()));
+                .forException("[API-v2]", "Update guild settings err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

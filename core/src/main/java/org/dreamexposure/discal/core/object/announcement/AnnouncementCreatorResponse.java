@@ -9,7 +9,7 @@ public class AnnouncementCreatorResponse {
     private final boolean successful;
     private final Announcement announcement;
 
-    public AnnouncementCreatorResponse(boolean successful, Announcement announcement) {
+    public AnnouncementCreatorResponse(final boolean successful, final Announcement announcement) {
         this.successful = successful;
         this.announcement = announcement;
     }
@@ -22,7 +22,7 @@ public class AnnouncementCreatorResponse {
      * @return Whether or not the creator was successful.
      */
     public boolean isSuccessful() {
-        return successful;
+        return this.successful;
     }
 
     /**
@@ -31,6 +31,6 @@ public class AnnouncementCreatorResponse {
      * @return The Announcement involved.
      */
     public Announcement getAnnouncement() {
-        return announcement;
+        return this.announcement;
     }
 }

@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.api.endpoints.v2.account;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -16,16 +17,16 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/v2/account")
 public class LogoutEndpoint {
-    @GetMapping(value = "/logout")
-    public String logoutOfAccount(HttpServletRequest request, HttpServletResponse response) {
+    @GetMapping("/logout")
+    public String logoutOfAccount(final HttpServletRequest request, final HttpServletResponse response) {
         //Check auth
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
@@ -35,20 +36,20 @@ public class LogoutEndpoint {
             Authentication.removeTempKey(authState.getKeyUsed());
 
             response.setContentType("application/json");
-            response.setStatus(200);
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
             return JsonUtils.getJsonResponseMessage("Logged Out");
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[API-v2]", "logout of acc err", e, this.getClass()));
+                .forException("[API-v2]", "logout of acc err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

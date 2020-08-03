@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -36,44 +37,44 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/events")
 public class UpdateEventEndpoint {
     @PostMapping(value = "/update", produces = "application/json")
-    public String updateEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
+    public String updateEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
-        AuthenticationState authState = Authentication.authenticate(request);
+        final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
             return authState.toJson();
         } else if (authState.isReadOnly()) {
-            response.setStatus(401);
+            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
         }
 
         //Okay, now handle actual request.
         try {
-            JSONObject requestBody = new JSONObject(rBody);
+            final JSONObject requestBody = new JSONObject(rBody);
 
-            String guildId = requestBody.getString("guild_id");
-            int calNumber = requestBody.getInt("calendar_number");
-            String eventId = requestBody.getString("event_id");
+            final String guildId = requestBody.getString("guild_id");
+            final int calNumber = requestBody.getInt("calendar_number");
+            final String eventId = requestBody.getString("event_id");
 
             //Handle actually updating the event
-            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
-            CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            final CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-            com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
-            Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
+            final com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
+            final Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
-            Event event = service.events().get(calData.getCalendarId(), eventId).execute();
+            final Event event = service.events().get(calData.getCalendarId(), eventId).execute();
 
             if (event != null) {
                 if (requestBody.has("epoch_start")) {
-                    EventDateTime start = new EventDateTime();
+                    final EventDateTime start = new EventDateTime();
                     start.setDateTime(new DateTime(requestBody.getLong("epoch_start")));
                     event.setStart(start.setTimeZone(cal.getTimeZone()));
                 }
                 if (requestBody.has("epoch_end")) {
-                    EventDateTime end = new EventDateTime();
+                    final EventDateTime end = new EventDateTime();
                     end.setDateTime(new DateTime(requestBody.getLong("epoch_end")));
                     event.setEnd(end.setTimeZone(cal.getTimeZone()));
                 }
@@ -86,17 +87,17 @@ public class UpdateEventEndpoint {
                 if (requestBody.has("location"))
                     event.setLocation(requestBody.getString("location"));
                 if (requestBody.has("recur") && requestBody.getBoolean("recur")) {
-                    JSONObject recur = requestBody.getJSONObject("recurrence");
+                    final JSONObject recur = requestBody.getJSONObject("recurrence");
 
-                    Recurrence recurrence = new Recurrence().fromJson(recur);
-                    String[] rr = new String[]{recurrence.toRRule()};
+                    final Recurrence recurrence = new Recurrence().fromJson(recur);
+                    final String[] rr = {recurrence.toRRule()};
 
                     event.setRecurrence(Arrays.asList(rr));
                 }
                 if (requestBody.has("image")) {
                     if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild()).block()) {
                         //Link is good...
-                        EventData ed = EventData.fromImage(
+                        final EventData ed = EventData.fromImage(
                             Snowflake.of(guildId),
                             event.getId(),
                             event.getEnd().getDateTime().getValue(),
@@ -111,24 +112,24 @@ public class UpdateEventEndpoint {
 
                 //If we get here, nothing errored, and everything should be updated correctly...
                 response.setContentType("application/json");
-                response.setStatus(200);
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
                 return JsonUtils.getJsonResponseMessage("Event updated Successfully");
             } else {
                 response.setContentType("application/json");
-                response.setStatus(404);
+                response.setStatus(GlobalConst.STATUS_NOT_FOUND);
                 return JsonUtils.getJsonResponseMessage("Event not found");
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             e.printStackTrace();
 
             response.setContentType("application/json");
-            response.setStatus(400);
+            response.setStatus(GlobalConst.STATUS_BAD_REQUEST);
             return JsonUtils.getJsonResponseMessage("Bad Request");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject.forException("[API-v2]", "Update event err", e, this.getClass()));
 
             response.setContentType("application/json");
-            response.setStatus(500);
+            response.setStatus(GlobalConst.STATUS_INTERNAL_ERROR);
             return JsonUtils.getJsonResponseMessage("Internal Server Error");
         }
     }

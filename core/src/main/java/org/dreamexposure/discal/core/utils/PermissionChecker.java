@@ -26,138 +26,138 @@ import reactor.core.publisher.Mono;
  * For Project: DisCal
  */
 public class PermissionChecker {
-    public static Mono<Boolean> hasDisCalRole(MessageCreateEvent event, GuildSettings settings) {
-        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static Mono<Boolean> hasDisCalRole(final MessageCreateEvent event, final GuildSettings settings) {
+        if ("everyone".equalsIgnoreCase(settings.getControlRole()))
             return Mono.just(true);
         if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
-        Mono<Member> member = Mono.justOrEmpty(event.getMember());
+        final Mono<Member> member = Mono.justOrEmpty(event.getMember());
 
         //User doesn't need bot control role if they have admin permissions.
         return member.flatMap(Member::getBasePermissions)
-                .map(perms ->
-                        perms.contains(Permission.ADMINISTRATOR)
-                                || perms.contains(Permission.MANAGE_GUILD)
-                ).flatMap(hasAdmin -> {
-                    if (hasAdmin) {
-                        return Mono.just(true);
-                    } else {
-                        return member.flatMapMany(Member::getRoles)
-                                .map(Role::getId)
-                                .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
-                    }
-                });
+            .map(perms ->
+                perms.contains(Permission.ADMINISTRATOR)
+                    || perms.contains(Permission.MANAGE_GUILD)
+            ).flatMap(hasAdmin -> {
+                if (hasAdmin) {
+                    return Mono.just(true);
+                } else {
+                    return member.flatMapMany(Member::getRoles)
+                        .map(Role::getId)
+                        .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+                }
+            });
     }
 
-    public static Mono<Boolean> hasDisCalRole(Member member, GuildSettings settings) {
-        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static Mono<Boolean> hasDisCalRole(final Member member, final GuildSettings settings) {
+        if ("everyone".equalsIgnoreCase(settings.getControlRole()))
             return Mono.just(true);
         if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         //User doesn't need bot control role if they have admin permissions.
-        Mono<Boolean> hasAdmin = Mono.just(member).flatMap(Member::getBasePermissions).map(perms ->
-                perms.contains(Permission.ADMINISTRATOR) || perms.contains(Permission.MANAGE_GUILD));
+        final Mono<Boolean> hasAdmin = Mono.just(member).flatMap(Member::getBasePermissions).map(perms ->
+            perms.contains(Permission.ADMINISTRATOR) || perms.contains(Permission.MANAGE_GUILD));
 
         return hasAdmin.flatMap(has -> {
             if (has) {
                 return Mono.just(true);
             } else {
                 return Mono.just(member).flatMapMany(Member::getRoles)
-                        .map(Role::getId)
-                        .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
+                    .map(Role::getId)
+                    .any(id -> id.equals(Snowflake.of(settings.getControlRole())));
             }
         });
     }
 
     @Deprecated
-    public static Mono<Boolean> hasSufficientRole(MessageCreateEvent event, GuildSettings settings) {
-        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static Mono<Boolean> hasSufficientRole(final MessageCreateEvent event, final GuildSettings settings) {
+        if ("everyone".equalsIgnoreCase(settings.getControlRole()))
             return Mono.just(true);
         if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return Mono.justOrEmpty(event.getMember())
-                .flatMapMany(Member::getRoles)
-                .map(Role::getId)
-                .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())));
+            .flatMapMany(Member::getRoles)
+            .map(Role::getId)
+            .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())));
     }
 
     @Deprecated
-    public static Mono<Boolean> hasSufficientRole(Member member, GuildSettings settings) {
-        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static Mono<Boolean> hasSufficientRole(final Member member, final GuildSettings settings) {
+        if ("everyone".equalsIgnoreCase(settings.getControlRole()))
             return Mono.just(true);
         if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return Mono.from(member.getRoles()
-                .map(Role::getId)
-                .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())))
+            .map(Role::getId)
+            .any(snowflake -> snowflake.equals(Snowflake.of(settings.getControlRole())))
         );
     }
 
-    public static Mono<Boolean> hasSufficientRole(RestMember member, GuildSettings settings) {
-        if (settings.getControlRole().equalsIgnoreCase("everyone"))
+    public static Mono<Boolean> hasSufficientRole(final RestMember member, final GuildSettings settings) {
+        if ("everyone".equalsIgnoreCase(settings.getControlRole()))
             return Mono.just(true);
         if (Snowflake.of(settings.getControlRole()).equals(settings.getGuildID())) //also everyone
             return Mono.just(true);
 
         return member.getData()
-                .map(MemberData::roles)
-                .map(roles -> roles.contains(settings.getControlRole()));
+            .map(MemberData::roles)
+            .map(roles -> roles.contains(settings.getControlRole()));
     }
 
-    public static Mono<Boolean> hasManageServerRole(MessageCreateEvent event) {
+    public static Mono<Boolean> hasManageServerRole(final MessageCreateEvent event) {
         return Mono.justOrEmpty(event.getMember())
-                .flatMap(Member::getBasePermissions)
-                .map(perms -> perms.contains(Permission.MANAGE_GUILD)
-                        || perms.contains(Permission.ADMINISTRATOR))
-                .defaultIfEmpty(false);
+            .flatMap(Member::getBasePermissions)
+            .map(perms -> perms.contains(Permission.MANAGE_GUILD)
+                || perms.contains(Permission.ADMINISTRATOR))
+            .defaultIfEmpty(false);
     }
 
-    public static Mono<Boolean> hasManageServerRole(Member m) {
+    public static Mono<Boolean> hasManageServerRole(final Member m) {
         return m.getBasePermissions()
-                .map(perms -> perms.contains(Permission.MANAGE_GUILD)
-                        || perms.contains(Permission.ADMINISTRATOR)
-                );
+            .map(perms -> perms.contains(Permission.MANAGE_GUILD)
+                || perms.contains(Permission.ADMINISTRATOR)
+            );
     }
 
-    public static Mono<Boolean> hasManageServerRole(RestMember m, RestGuild g) {
+    public static Mono<Boolean> hasManageServerRole(final RestMember m, final RestGuild g) {
         return hasPermissions(m, g, permissions ->
-                permissions.contains(Permission.MANAGE_GUILD)
-                        || permissions.contains(Permission.ADMINISTRATOR));
+            permissions.contains(Permission.MANAGE_GUILD)
+                || permissions.contains(Permission.ADMINISTRATOR));
     }
 
-    public static Mono<Boolean> hasPermissions(RestMember m, RestGuild g,
-                                               Predicate<PermissionSet> pred) {
+    public static Mono<Boolean> hasPermissions(final RestMember m, final RestGuild g,
+                                               final Predicate<PermissionSet> pred) {
         return m.getData().flatMap(memberData ->
-                g.getData().map(GuildUpdateData::roles)
-                        .flatMapMany(Flux::fromIterable)
-                        .filter(roleData -> memberData.roles().contains(roleData.id()))
-                        .map(RoleData::permissions)
-                        .reduce(0L, (perm, accumulator) -> accumulator | perm)
-                        .map(PermissionSet::of)
-                        .map(pred::test)
+            g.getData().map(GuildUpdateData::roles)
+                .flatMapMany(Flux::fromIterable)
+                .filter(roleData -> memberData.roles().contains(roleData.id()))
+                .map(RoleData::permissions)
+                .reduce(0L, (perm, accumulator) -> accumulator | perm)
+                .map(PermissionSet::of)
+                .map(pred::test)
         );
     }
 
-    public static Mono<Boolean> isCorrectChannel(MessageCreateEvent event, GuildSettings settings) {
-        if (settings.getDiscalChannel().equalsIgnoreCase("all"))
+    public static Mono<Boolean> isCorrectChannel(final MessageCreateEvent event, final GuildSettings settings) {
+        if ("all".equalsIgnoreCase(settings.getDiscalChannel()))
             return Mono.just(true);
 
         return Mono.from(event.getMessage().getChannel()
-                .map(Channel::getId)
-                .map(snowflake -> snowflake.equals(Snowflake.of(settings.getDiscalChannel())))
-                .onErrorResume(e -> Mono.just(true)) //If channel not found, allow.
+            .map(Channel::getId)
+            .map(snowflake -> snowflake.equals(Snowflake.of(settings.getDiscalChannel())))
+            .onErrorResume(e -> Mono.just(true)) //If channel not found, allow.
         );
     }
 
-    public static Mono<Boolean> botHasMessageManagePerms(MessageCreateEvent event) {
+    public static Mono<Boolean> botHasMessageManagePerms(final MessageCreateEvent event) {
         return event.getGuild()
-                .flatMap(guild -> guild.getMemberById(Snowflake.of(BotSettings.ID.get()))
-                        .flatMap(Member::getBasePermissions)
-                        .map(perms -> perms.contains(Permission.MANAGE_MESSAGES))
-                );
+            .flatMap(guild -> guild.getMemberById(Snowflake.of(BotSettings.ID.get()))
+                .flatMap(Member::getBasePermissions)
+                .map(perms -> perms.contains(Permission.MANAGE_MESSAGES))
+            );
     }
 }

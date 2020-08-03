@@ -39,86 +39,86 @@ public class NetworkMediator {
     }
 
     public void init() {
-        timer = new Timer(true);
+        this.timer = new Timer(true);
 
-        timer.schedule(new TimerTask() {
+        this.timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                List<ConnectedClient> downShards = new ArrayList<>();
+                final List<ConnectedClient> downShards = new ArrayList<>();
 
-                for (ConnectedClient c : DisCalServer.getNetworkInfo().getClients()) {
+                for (final ConnectedClient c : DisCalServer.getNetworkInfo().getClients()) {
                     if (System.currentTimeMillis() > c.getLastKeepAlive() + (5 * GlobalConst.oneMinuteMs))
                         downShards.add(c); //Missed last 5+ heartbeats...
                 }
 
                 //Now we issue the restarts for the shards...
-                for (ConnectedClient c : downShards)
-                    issueRestart(c);
+                for (final ConnectedClient c : downShards)
+                    NetworkMediator.this.issueRestart(c);
 
             }
-        }, 60 * 1000, 60 * 1000);
+        }, GlobalConst.oneMinuteMs, GlobalConst.oneMinuteMs);
     }
 
     public void shutdown() {
-        if (timer != null)
-            timer.cancel();
+        if (this.timer != null)
+            this.timer.cancel();
     }
 
-    public String issueRestart(ConnectedClient c) {
+    private String issueRestart(final ConnectedClient c) {
         try {
-            Session session = createSession(c.getIpForRestart(), c.getPortForRestart());
+            final Session session = this.createSession(c.getIpForRestart(), c.getPortForRestart());
             session.connect();
 
-            ChannelExec channel = (ChannelExec) session.openChannel("exec");
+            final ChannelExec channel = (ChannelExec) session.openChannel("exec");
 
             try {
                 channel.setCommand(BotSettings.RESTART_CMD.get().replace("%index%", c.getClientIndex() + ""));
                 channel.setInputStream(null);
-                InputStream output = channel.getInputStream();
+                final InputStream output = channel.getInputStream();
                 channel.connect();
 
                 //noinspection UnstableApiUsage
                 return CharStreams.toString(new InputStreamReader(output));
-            } catch (JSchException | IOException e) {
+            } catch (final JSchException | IOException e) {
                 LogFeed.log(LogObject
-                        .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s2"
-                                , e, this.getClass()));
-                closeConnection(channel, session);
+                    .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s2"
+                        , e, this.getClass()));
+                this.closeConnection(channel, session);
             } finally {
-                closeConnection(channel, session);
+                this.closeConnection(channel, session);
             }
 
             //Tell network manager to remove this client until it restarts.
             DisCalServer.getNetworkInfo().removeClient(c.getClientIndex(), "Restart issued by mediator for missed heartbeats");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LogFeed.log(LogObject
-                    .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s1"
-                            , e, this.getClass()));
+                .forException("[NETWORK] Shard restart failure", c.getClientIndex() + " s1"
+                    , e, this.getClass()));
         }
 
         return "ERROR";
     }
 
-    private Session createSession(String ip, int port) throws JSchException {
+    private Session createSession(final String ip, final int port) throws JSchException {
         //Handle config
-        Properties config = new Properties();
+        final Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
 
         //Handle identity
-        JSch jSch = new JSch();
+        final JSch jSch = new JSch();
         jSch.addIdentity(BotSettings.RESTART_SSH_KEY.get());
 
         //Actual session
-        Session session = jSch.getSession(BotSettings.RESTART_USER.get(), ip, port);
+        final Session session = jSch.getSession(BotSettings.RESTART_USER.get(), ip, port);
         session.setConfig(config);
 
         return session;
     }
 
-    private void closeConnection(ChannelExec channel, Session session) {
+    private void closeConnection(final ChannelExec channel, final Session session) {
         try {
             channel.disconnect();
-        } catch (Exception ignored) {
+        } catch (final Exception ignored) {
         }
         session.disconnect();
     }

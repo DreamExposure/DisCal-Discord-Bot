@@ -23,51 +23,51 @@ public enum EventColor {
     private final Integer g;
     private final Integer b;
 
-    EventColor(Integer _id, String _hex, Integer _r, Integer _g, Integer _b) {
-        id = _id;
-        hex = _hex;
+    EventColor(final Integer _id, final String _hex, final Integer _r, final Integer _g, final Integer _b) {
+        this.id = _id;
+        this.hex = _hex;
 
-        r = _r;
-        b = _b;
-        g = _g;
+        this.r = _r;
+        this.b = _b;
+        this.g = _g;
     }
 
 
     public int getId() {
-        return id;
+        return this.id;
     }
 
     public String getHex() {
-        return hex;
+        return this.hex;
     }
 
     public int getR() {
-        return r;
+        return this.r;
     }
 
     public int getG() {
-        return g;
+        return this.g;
     }
 
     public int getB() {
-        return b;
+        return this.b;
     }
 
     public Color asColor() {
-        return Color.of(r, g, b);
+        return Color.of(this.r, this.g, this.b);
     }
 
     //Static methods
-    public static boolean exists(String nameOrHexOrId) {
-        for (EventColor c : values()) {
+    public static boolean exists(final String nameOrHexOrId) {
+        for (final EventColor c : values()) {
             if (c.name().equalsIgnoreCase(nameOrHexOrId) || c.getHex().equals(nameOrHexOrId)) {
                 return true;
             } else {
                 try {
-                    int i = Integer.parseInt(nameOrHexOrId);
+                    final int i = Integer.parseInt(nameOrHexOrId);
                     if (c.getId() == i)
                         return true;
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     //Not number, just ignore.
                 }
             }
@@ -75,24 +75,24 @@ public enum EventColor {
         return false;
     }
 
-    public static boolean exists(Integer id) {
-        for (EventColor c : values()) {
+    public static boolean exists(final Integer id) {
+        for (final EventColor c : values()) {
             if (c.getId() == id)
                 return true;
         }
         return false;
     }
 
-    public static EventColor fromNameOrHexOrID(String nameOrHexOrID) {
-        for (EventColor c : values()) {
+    public static EventColor fromNameOrHexOrID(final String nameOrHexOrID) {
+        for (final EventColor c : values()) {
             if (c.name().equalsIgnoreCase(nameOrHexOrID) || c.getHex().equals(nameOrHexOrID)) {
                 return c;
             } else {
                 try {
-                    int i = Integer.parseInt(nameOrHexOrID);
+                    final int i = Integer.parseInt(nameOrHexOrID);
                     if (c.getId() == i)
                         return c;
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     //Not number, just ignore.
                 }
             }
@@ -100,8 +100,8 @@ public enum EventColor {
         return NONE;
     }
 
-    public static EventColor fromId(Integer id) {
-        for (EventColor c : values()) {
+    public static EventColor fromId(final Integer id) {
+        for (final EventColor c : values()) {
             if (c.getId() == id)
                 return c;
         }

@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.server.network.discordpw;
 
+import com.google.api.client.http.HttpStatusCodes;
+
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -24,14 +26,14 @@ public class UpdateDisPwData {
     private static Timer timer;
 
     public static void init() {
-        if (BotSettings.UPDATE_SITES.get().equalsIgnoreCase("true")) {
+        if ("true".equalsIgnoreCase(BotSettings.UPDATE_SITES.get())) {
             timer = new Timer(true);
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
                     updateSiteBotMeta();
                 }
-            }, 60 * 60 * 1000);
+            }, GlobalConst.oneHourMs);
         }
     }
 
@@ -43,27 +45,27 @@ public class UpdateDisPwData {
     private static void updateSiteBotMeta() {
         try {
 
-            JSONObject json = new JSONObject().put("server_count", DisCalServer.getNetworkInfo().getTotalGuildCount());
+            final JSONObject json = new JSONObject().put("server_count",
+                DisCalServer.getNetworkInfo().getTotalGuildCount());
 
-            OkHttpClient client = new OkHttpClient();
+            final OkHttpClient client = new OkHttpClient();
 
-            RequestBody body = RequestBody.create(GlobalConst.JSON, json.toString());
-            Request request = new Request.Builder()
-                    .url("https://bots.discord.pw/api/bots/265523588918935552/stats")
-                    .post(body)
-                    .header("Authorization", BotSettings.PW_TOKEN.get())
-                    .header("Content-Type", "application/json")
-                    .build();
+            final RequestBody body = RequestBody.create(GlobalConst.JSON, json.toString());
+            final Request request = new Request.Builder()
+                .url("https://bots.discord.pw/api/bots/265523588918935552/stats")
+                .post(body)
+                .header("Authorization", BotSettings.PW_TOKEN.get())
+                .header("Content-Type", "application/json")
+                .build();
 
-            Response response = client.newCall(request).execute();
+            final Response response = client.newCall(request).execute();
 
-            if (response.code() == 200)
+            if (response.code() == HttpStatusCodes.STATUS_CODE_OK)
                 LogFeed.log(LogObject.forDebug("Successfully updated Discord PW list"));
-        } catch (Exception e) {
+        } catch (final Exception e) {
             //Handle issue.
-            System.out.println("Failed to update Discord PW list metadata!");
             LogFeed.log(LogObject
-                    .forException("Failed to update Discord PW list", e, UpdateDisPwData.class));
+                .forException("Failed to update Discord PW list", e, UpdateDisPwData.class));
             e.printStackTrace();
         }
     }
