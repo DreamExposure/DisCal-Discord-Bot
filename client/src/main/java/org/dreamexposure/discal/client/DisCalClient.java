@@ -60,13 +60,13 @@ import reactor.core.publisher.Mono;
 public class DisCalClient {
     private static GatewayDiscordClient client;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         //Get settings
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.load(new FileReader(new File("settings.properties")));
         BotSettings.init(p);
 
-        if (args.length > 1 && args[0].equalsIgnoreCase("-forceNewAuth")) {
+        if (args.length > 1 && "-forceNewAuth".equalsIgnoreCase(args[0])) {
             //Forcefully start a browser for google account authorization.
             CalendarAuth.getCalendarService(Integer.parseInt(args[1])).block(); //Block until auth completes...
 
@@ -94,22 +94,21 @@ public class DisCalClient {
         CommandExecutor.registerCommand(new DevCommand());
 
         //Start some of the daemon threads
-        KeepAliveHandler.startKeepAlive(60);
+        //noinspection MagicNumber
+        KeepAliveHandler.startKeepAlive(60); //60 seconds
 
         TimeManager.getManager().init();
 
         //Start Spring
-        if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
-            try {
-                SpringApplication app = new SpringApplication(DisCalClient.class);
-                app.setAdditionalProfiles(BotSettings.PROFILE.get());
-                app.run(args);
-            } catch (Exception e) {
-                e.printStackTrace();
-                LogFeed.log(LogObject
-                    .forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
-                        DisCalClient.class));
-            }
+        try {
+            final SpringApplication app = new SpringApplication(DisCalClient.class);
+            app.setAdditionalProfiles(BotSettings.PROFILE.get());
+            app.run(args);
+        } catch (final Exception e) {
+            e.printStackTrace();
+            LogFeed.log(LogObject
+                .forException("Spring Error", "by 'PANIC! at the backend coms!'", e,
+                    DisCalClient.class));
         }
 
         //Add shutdown hooks...
@@ -132,25 +131,25 @@ public class DisCalClient {
                 DisCalClient.client = client;
 
                 //Register listeners
-                Mono<Void> onReady = client.on(ReadyEvent.class)
+                final Mono<Void> onReady = client.on(ReadyEvent.class)
                     .flatMap(ReadyEventListener::handle)
                     .then();
 
-                Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
+                final Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
                     .flatMap(ChannelDeleteListener::handle)
                     .then();
 
-                Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
+                final Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
                     .flatMap(RoleDeleteListener::handle)
                     .then();
 
-                Mono<Void> onCommand = client.on(MessageCreateEvent.class)
+                final Mono<Void> onCommand = client.on(MessageCreateEvent.class)
                     .flatMap(MessageCreateListener::handle)
                     .then();
 
-                Mono<Void> startAnnouncement = Flux.interval(Duration.ofMinutes(5))
+                final Mono<Void> startAnnouncement = Flux.interval(Duration.ofMinutes(5))
                     .onBackpressureBuffer()
-                    .flatMap(i -> new AnnouncementThread(client).run())
+                    .flatMap(ignore -> new AnnouncementThread(client).run())
                     .then();
 
 
@@ -166,13 +165,13 @@ public class DisCalClient {
     }
 
     private static StoreService getStores() {
-        if (BotSettings.USE_REDIS_STORES.get().equalsIgnoreCase("true")) {
-            RedisURI uri = RedisURI.Builder
+        if ("true".equalsIgnoreCase(BotSettings.USE_REDIS_STORES.get())) {
+            final RedisURI uri = RedisURI.Builder
                 .redis(BotSettings.REDIS_HOSTNAME.get(), Integer.parseInt(BotSettings.REDIS_PORT.get()))
                 .withPassword(BotSettings.REDIS_PASSWORD.get())
                 .build();
 
-            RedisStoreService rss = new RedisStoreService.Builder()
+            final RedisStoreService rss = new RedisStoreService.Builder()
                 .redisClient(RedisClient.create(uri))
                 .build();
 

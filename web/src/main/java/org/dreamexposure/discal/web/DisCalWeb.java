@@ -17,13 +17,13 @@ import java.util.Properties;
 
 @SpringBootApplication(exclude = SessionAutoConfiguration.class)
 public class DisCalWeb {
-    public static void main(String[] args) throws IOException {
+    public static void main(final String[] args) throws IOException {
         //Get settings
-        Properties p = new Properties();
+        final Properties p = new Properties();
         p.load(new FileReader(new File("settings.properties")));
         BotSettings.init(p);
 
-        if (args.length > 1 && args[0].equalsIgnoreCase("-forceNewAuth")) {
+        if (args.length > 1 && "-forceNewAuth".equalsIgnoreCase(args[0])) {
             //Forcefully start a browser for google account authorization.
             CalendarAuth.getCalendarService(Integer.parseInt(args[1])).block(); //Block until auth completes...
 
@@ -37,10 +37,10 @@ public class DisCalWeb {
         //Start Spring
         try {
             DiscordAccountHandler.getHandler().init();
-            SpringApplication app = new SpringApplication(DisCalWeb.class);
+            final SpringApplication app = new SpringApplication(DisCalWeb.class);
             app.setAdditionalProfiles(BotSettings.PROFILE.get());
             app.run(args);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             e.printStackTrace();
             LogFeed.log(LogObject.forException("'Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb.class));
             System.exit(4);

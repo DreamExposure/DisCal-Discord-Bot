@@ -41,7 +41,7 @@ public enum BotSettings {
 
     DEBUG_WEBHOOK, ERROR_WEBHOOK, STATUS_WEBHOOK,
 
-    USE_REDIS_STORES, USE_WEBHOOKS, UPDATE_SITES, RUN_API,
+    USE_REDIS_STORES, USE_WEBHOOKS, UPDATE_SITES,
 
     BOT_API_TOKEN,
 
@@ -52,20 +52,17 @@ public enum BotSettings {
 
     private String val;
 
-    BotSettings() {
-    }
-
-    public static void init(Properties properties) {
-        for (BotSettings s : values()) {
-            s.set(properties.getProperty(s.name()));
+    public static void init(final Properties properties) {
+        for (final BotSettings bs : values()) {
+            bs.set(properties.getProperty(bs.name()));
         }
     }
 
     public String get() {
-        return val;
+        return this.val;
     }
 
-    public void set(String _val) {
-        val = _val;
+    public void set(final String _val) {
+        this.val = _val;
     }
 }
