@@ -21,7 +21,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-@SuppressWarnings({"RedundantCast", "Duplicates", "WeakerAccess", "ConstantConditions"})
+@SuppressWarnings({"RedundantCast", "Duplicates", "ConstantConditions"})
 public class DiscordAccountHandler {
     private static DiscordAccountHandler instance;
     private static Timer timer;
@@ -40,15 +40,13 @@ public class DiscordAccountHandler {
     }
 
     public void init() {
-        if (BotSettings.RUN_API.get().equalsIgnoreCase("true")) {
-            timer = new Timer(true);
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    removeTimedOutAccounts();
-                }
-            }, 60 * 30 * 1000);
-        }
+        timer = new Timer(true);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                DiscordAccountHandler.this.removeTimedOutAccounts();
+            }
+        }, 60 * 30 * 1000);
     }
 
     public void shutdown() {
@@ -57,18 +55,18 @@ public class DiscordAccountHandler {
     }
 
     //Boolean/checkers
-    public boolean hasAccount(HttpServletRequest request) {
+    public boolean hasAccount(final HttpServletRequest request) {
         try {
-            return discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"));
-        } catch (Exception e) {
+            return this.discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"));
+        } catch (final Exception e) {
             return false;
         }
     }
 
     //Getters
-    public Map<String, Object> getAccount(HttpServletRequest request) {
-        if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
-            Map<String, Object> m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
+    public Map<String, Object> getAccount(final HttpServletRequest request) {
+        if ((String) request.getSession(true).getAttribute("account") != null && this.discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
+            final Map<String, Object> m = this.discordAccounts.get((String) request.getSession(true).getAttribute("account"));
             m.remove("last_use");
             m.put("last_use", System.currentTimeMillis());
 
@@ -79,7 +77,7 @@ public class DiscordAccountHandler {
 
         } else {
             //Not logged in...
-            Map<String, Object> m = new HashMap<>();
+            final Map<String, Object> m = new HashMap<>();
             m.put("logged_in", false);
             m.put("bot_id", BotSettings.ID.get());
             m.put("year", LocalDate.now().getYear());
@@ -92,36 +90,36 @@ public class DiscordAccountHandler {
         }
     }
 
-    public Map<String, Object> getEmbedAccount(HttpServletRequest request) {
-        if ((String) request.getSession(true).getAttribute("account") != null && discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
-            Map<String, Object> m = discordAccounts.get((String) request.getSession(true).getAttribute("account"));
+    public Map<String, Object> getEmbedAccount(final HttpServletRequest request) {
+        if ((String) request.getSession(true).getAttribute("account") != null && this.discordAccounts.containsKey((String) request.getSession(true).getAttribute("account"))) {
+            final Map<String, Object> m = this.discordAccounts.get((String) request.getSession(true).getAttribute("account"));
             m.remove("last_use");
             m.put("last_use", System.currentTimeMillis());
 
             if (!m.containsKey("embed_key")) {
                 //Get and add read-only API key for embed page. Only good for one hour.
                 try {
-                    OkHttpClient client = new OkHttpClient();
-                    RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
-                    Request keyGrantRequest = new Request.Builder()
-                            .url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
-                            .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                            .post(keyGrantRequestBody)
-                            .build();
-                    Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
+                    final OkHttpClient client = new OkHttpClient();
+                    final RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
+                    final Request keyGrantRequest = new Request.Builder()
+                        .url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
+                        .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                        .post(keyGrantRequestBody)
+                        .build();
+                    final Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
                     //Handle response...
                     if (keyGrantResponse.isSuccessful()) {
-                        JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
+                        final JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
                         //API key received, map....
                         m.put("embed_key", keyGrantResponseBody.getString("key"));
                     } else {
                         //Something didn't work... add invalid key that embed page is programmed to respond to.
                         LogFeed.log(LogObject
-                                .forDebug("Embed Key Fail: ", keyGrantResponse.body().string()));
+                            .forDebug("Embed Key Fail: ", keyGrantResponse.body().string()));
                         m.put("embed_key", "internal_error");
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     //Something didn't work... add invalid key that embed page is programmed to respond to.
                     LogFeed.log(LogObject.forException("Embed key get failure", e, this.getClass()));
                     m.put("embed_key", "internal_error");
@@ -132,7 +130,7 @@ public class DiscordAccountHandler {
 
         } else {
             //Not logged in...
-            Map<String, Object> m = new HashMap<>();
+            final Map<String, Object> m = new HashMap<>();
             m.put("logged_in", false);
             m.put("bot_id", BotSettings.ID.get());
             m.put("year", LocalDate.now().getYear());
@@ -143,27 +141,27 @@ public class DiscordAccountHandler {
 
             //Get and add read-only API key for embed page. Only good for one hour.
             try {
-                OkHttpClient client = new OkHttpClient();
-                RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
-                Request keyGrantRequest = new Request.Builder()
-                        .url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
-                        .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                        .post(keyGrantRequestBody)
-                        .build();
-                Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
+                final OkHttpClient client = new OkHttpClient();
+                final RequestBody keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "");
+                final Request keyGrantRequest = new Request.Builder()
+                    .url(BotSettings.API_URL_INTERNAL.get() + "/v2/account/key/readonly/get")
+                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                    .post(keyGrantRequestBody)
+                    .build();
+                final Response keyGrantResponse = client.newCall(keyGrantRequest).execute();
 
                 //Handle response...
                 if (keyGrantResponse.isSuccessful()) {
-                    JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
+                    final JSONObject keyGrantResponseBody = new JSONObject(keyGrantResponse.body().string());
                     //API key received, map....
                     m.put("embed_key", keyGrantResponseBody.getString("key"));
                 } else {
                     //Something didn't work... add invalid key that embed page is programmed to respond to.
                     LogFeed.log(LogObject.forDebug("Embed key fail",
-                            keyGrantResponse.body().string()));
+                        keyGrantResponse.body().string()));
                     m.put("embed_key", "internal_error");
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 //Something didn't work... add invalid key that embed page is programmed to respond to.
                 LogFeed.log(LogObject.forException("Embed key get failure", e, this.getClass()));
                 m.put("embed_key", "internal_error");
@@ -175,30 +173,30 @@ public class DiscordAccountHandler {
 
 
     //Functions
-    public void addAccount(Map<String, Object> m, HttpServletRequest request) {
-        discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
+    public void addAccount(final Map<String, Object> m, final HttpServletRequest request) {
+        this.discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
         m.remove("last_use");
         m.put("last_use", System.currentTimeMillis());
-        discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
+        this.discordAccounts.put((String) request.getSession(true).getAttribute("account"), m);
     }
 
-    public void removeAccount(HttpServletRequest request) {
-        if ((String) request.getSession(true).getAttribute("account") != null && hasAccount(request))
-            discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
+    public void removeAccount(final HttpServletRequest request) {
+        if ((String) request.getSession(true).getAttribute("account") != null && this.hasAccount(request))
+            this.discordAccounts.remove((String) request.getSession(true).getAttribute("account"));
     }
 
     private void removeTimedOutAccounts() {
-        long limit = Long.parseLong(BotSettings.TIME_OUT.get());
+        final long limit = Long.parseLong(BotSettings.TIME_OUT.get());
         final List<String> toRemove = new ArrayList<>();
-        for (String id : discordAccounts.keySet()) {
-            Map<String, Object> m = discordAccounts.get(id);
-            long lastUse = (long) m.get("last_use");
+        for (final String id : this.discordAccounts.keySet()) {
+            final Map<String, Object> m = this.discordAccounts.get(id);
+            final long lastUse = (long) m.get("last_use");
             if (System.currentTimeMillis() - lastUse > limit)
                 toRemove.remove(id); //Timed out, remove account info and require sign in.
         }
 
-        for (String id : toRemove) {
-            discordAccounts.remove(id);
+        for (final String id : toRemove) {
+            this.discordAccounts.remove(id);
         }
     }
 }
