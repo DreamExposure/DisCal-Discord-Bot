@@ -232,6 +232,14 @@
                 <h2 class="text-center text-discal-blue">Server</h2>
 
                 <p class="text-left text-discord-full-white"
+                   th:text="'Version: ' + ${status.version}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Discord4J Version: ' + ${status.d4JVersion}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
                    th:text="'Connected Clients: ' + ${status.clientCount}">
                 </p>
 
@@ -294,6 +302,14 @@
                     <div th:id="'client-' + ${client.clientIndex}">
                         <h3 class="text-left text-discord-full-white"
                             th:text="'Client Index: ' + ${client.clientIndex}"></h3>
+
+                        <p class="text-left text-discord-full-white"
+                           th:text="'Version: ' + ${client.version}">
+                        </p>
+
+                        <p class="text-left text-discord-full-white"
+                           th:text="'Discord4J Version: ' + ${client.d4JVersion}">
+                        </p>
 
                         <p class="text-left text-discord-full-white"
                            th:text="'Guilds: ' + ${client.connectedServers}">

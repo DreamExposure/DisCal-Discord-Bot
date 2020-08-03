@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -16,6 +17,9 @@ import java.util.Date;
 public class ConnectedClient {
     private int clientIndex;
 
+    private String version;
+    private String d4jVersion;
+
     private int connectedServers;
     private long lastKeepAlive;
     private String uptime;
@@ -29,6 +33,9 @@ public class ConnectedClient {
     ConnectedClient() {
         this.clientIndex = -1;
 
+        this.version = GlobalConst.version;
+        this.d4jVersion = GlobalConst.d4jVersion;
+
         this.connectedServers = 0;
         this.lastKeepAlive = System.currentTimeMillis();
 
@@ -38,6 +45,9 @@ public class ConnectedClient {
 
     public ConnectedClient(final int _clientIndex) {
         this.clientIndex = _clientIndex;
+
+        this.version = GlobalConst.version;
+        this.d4jVersion = GlobalConst.d4jVersion;
 
         this.connectedServers = 0;
         this.lastKeepAlive = System.currentTimeMillis();
@@ -49,6 +59,14 @@ public class ConnectedClient {
     //Getters
     public int getClientIndex() {
         return this.clientIndex;
+    }
+
+    public String getVersion() {
+        return this.version;
+    }
+
+    public String getD4JVersion() {
+        return this.d4jVersion;
     }
 
     public int getConnectedServers() {
@@ -90,6 +108,14 @@ public class ConnectedClient {
         this.clientIndex = clientIndex;
     }
 
+    public void setVersion(final String version) {
+        this.version = version;
+    }
+
+    public void setD4JVersion(final String d4jVersion) {
+        this.d4jVersion = d4jVersion;
+    }
+
     public void setConnectedServers(final int _connectedServers) {
         this.connectedServers = _connectedServers;
     }
@@ -122,6 +148,8 @@ public class ConnectedClient {
         final JSONObject json = new JSONObject();
 
         json.put("index", this.clientIndex);
+        json.put("version", this.version);
+        json.put("d4j_version", this.d4jVersion);
         json.put("guilds", this.connectedServers);
         json.put("keep_alive", this.lastKeepAlive);
         json.put("uptime", this.uptime);
@@ -132,6 +160,8 @@ public class ConnectedClient {
 
     public ConnectedClient fromJson(final JSONObject json) {
         this.clientIndex = json.getInt("index");
+        this.version = json.getString("version");
+        this.d4jVersion = json.getString("d4j_version");
         this.connectedServers = json.getInt("guilds");
         this.lastKeepAlive = json.getLong("keep_alive");
         this.uptime = json.getString("uptime");

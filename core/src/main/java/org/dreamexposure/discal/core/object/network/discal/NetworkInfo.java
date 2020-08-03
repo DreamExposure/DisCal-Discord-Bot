@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONArray;
@@ -89,6 +90,14 @@ public class NetworkInfo {
         }
     }
 
+    public String getVersion() {
+        return GlobalConst.version;
+    }
+
+    public String getD4JVersion() {
+        return GlobalConst.d4jVersion;
+    }
+
     public int getTotalGuildCount() {
         int count = 0;
         for (final ConnectedClient cc : this.clients) {
@@ -150,6 +159,8 @@ public class NetworkInfo {
     public JSONObject toJson() {
         final JSONObject json = new JSONObject();
 
+        json.put("api_version", this.getVersion());
+        json.put("d4j_version", this.getD4JVersion());
         json.put("api_uptime", this.getUptimeLatest());
         json.put("api_pid", this.getPid());
         json.put("announcements", this.getAnnouncementCount());
