@@ -81,6 +81,7 @@ public class EventListCommand implements Command {
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
                     case "today":
+                    case "day":
                         return this.moduleDay(args, event, settings);
                     default:
                         return this.moduleSimpleList(args, event, settings);
@@ -132,12 +133,14 @@ public class EventListCommand implements Command {
                                 })
                             ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
                     }
-                }).onErrorResume(NumberFormatException.class, e ->
-                    Messages.sendMessage(Messages.getMessage("Notification.Args.Value.Integer", settings), event));
+                });
             } else {
                 return Messages.sendMessage(Messages.getMessage("Event.List.Args.Many", settings), event);
             }
-        }).then();
+        })
+            .onErrorResume(NumberFormatException.class, e ->
+                Messages.sendMessage(Messages.getMessage("Notification.Args.Value.Integer", settings), event))
+            .then();
     }
 
     private Mono<Void> moduleSearch(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
