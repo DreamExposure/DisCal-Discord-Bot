@@ -1,21 +1,16 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.event.list;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.Events;
 
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtils;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import org.dreamexposure.discal.server.utils.Authentication;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -54,21 +50,14 @@ public class ListEventDateEndpoint {
             final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
             //okay, lets actually get the date's events.
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
+            final List<Event> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
+                .flatMap(calData -> EventWrapper.getEvents(calData, settings, startEpoch, endEpoch))
+                .block();
 
-            final CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
-            final Events events = service.events().list(calendarData.getCalendarAddress())
-                .setTimeMin(new DateTime(startEpoch))
-                .setTimeMax(new DateTime(endEpoch))
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .setShowDeleted(false)
-                .execute();
-            final List<Event> items = events.getItems();
-
-            final JSONArray jEvents = new JSONArray();
-            for (final Event e : items)
-                jEvents.put(JsonUtils.convertEventToJson(e, settings));
+            final List<JSONObject> jEvents = new ArrayList<>();
+            for (final Event e : events) {
+                jEvents.add(JsonUtils.convertEventToJson(e, settings));
+            }
 
             final JSONObject body = new JSONObject();
             body.put("events", jEvents);

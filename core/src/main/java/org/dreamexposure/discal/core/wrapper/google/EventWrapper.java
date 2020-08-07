@@ -44,7 +44,8 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty()); //Can ignore this, the event just doesn't exist.
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount, final long start) {
+    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount,
+                                              final long start) {
         return CalendarAuth.getCalendarService(settings).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
@@ -58,7 +59,8 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final Calendar service, final int amount, final long start) {
+    public static Mono<List<Event>> getEvents(final CalendarData data, final Calendar service, final int amount,
+                                              final long start) {
         return Mono.fromCallable(() ->
             service.events().list(data.getCalendarId())
                 .setMaxResults(amount)
@@ -71,12 +73,27 @@ public class EventWrapper {
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount, final long start,
-                                              final long end) {
+    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount,
+                                              final long start, final long end) {
         return CalendarAuth.getCalendarService(settings).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
                     .setMaxResults(amount)
+                    .setTimeMin(new DateTime(start))
+                    .setTimeMax(new DateTime(end))
+                    .setOrderBy("startTime")
+                    .setSingleEvents(true)
+                    .setShowDeleted(false)
+                    .execute().getItems()
+            ).subscribeOn(Schedulers.boundedElastic())
+        ).onErrorResume(e -> Mono.empty());
+    }
+
+    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final long start,
+                                              final long end) {
+        return CalendarAuth.getCalendarService(settings).flatMap(service ->
+            Mono.fromCallable(() ->
+                service.events().list(data.getCalendarId())
                     .setTimeMin(new DateTime(start))
                     .setTimeMax(new DateTime(end))
                     .setOrderBy("startTime")
