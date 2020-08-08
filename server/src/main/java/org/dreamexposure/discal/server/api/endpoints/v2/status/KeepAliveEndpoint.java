@@ -51,12 +51,14 @@ public class KeepAliveEndpoint {
                 cc.setIpForRestart(body.getString("ip"));
                 cc.setPortForRestart(body.getInt("port"));
 
+                cc.setVersion(body.optString("version", "Unknown"));
+                cc.setD4JVersion(body.optString("d4j_version", "Unknown"));
+
                 if (!cc.getPid().equals(body.getString("pid"))) {
                     //Was restarted at some point, so we are "re-adding" to network
                     cc.setPid(body.getString("pid"));
 
-                    LogFeed.log(LogObject
-                            .forStatus("Client pid changed", "Shard index: " + cc.getClientIndex()));
+                    LogFeed.log(LogObject.forStatus("Client pid changed", "Shard index: " + cc.getClientIndex()));
                 }
             } else {
                 //Not in network, add info...
@@ -66,8 +68,8 @@ public class KeepAliveEndpoint {
                 cc.setConnectedServers(body.getInt("guilds"));
                 cc.setMemUsed(body.getDouble("memory"));
                 cc.setUptime(body.getString("uptime"));
-                cc.setVersion(body.getString("version"));
-                cc.setD4JVersion(body.getString("d4j_version"));
+                cc.setVersion(body.optString("version", "Unknown"));
+                cc.setD4JVersion(body.optString("d4j_version", "Unknown"));
 
                 //Network handling stuffs
                 cc.setIpForRestart(body.getString("ip"));
