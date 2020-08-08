@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import reactor.core.publisher.Mono;
@@ -68,6 +69,8 @@ public class NetworkInfo {
 
     public void addClient(final ConnectedClient client) {
         this.clients.add(client);
+        this.clients.sort(Comparator.comparingInt(ConnectedClient::getClientIndex));
+
         LogFeed.log(LogObject
             .forStatus("Client Connected to Network",
                 "Shard index of connected client: " + client.getClientIndex()));
