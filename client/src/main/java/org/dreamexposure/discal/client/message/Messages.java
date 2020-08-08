@@ -169,7 +169,7 @@ public class Messages {
 
     //Message deleting
     public static Mono<Void> deleteMessage(final Message message) {
-        return message.delete()
+        return Mono.justOrEmpty(message).flatMap(Message::delete)
             .onErrorResume(e -> Mono.empty());
     }
 
