@@ -85,6 +85,7 @@ public class MessageCreateListener {
                 .log(LogObject.forException("Error Handling message event",
                     event.getMessage().getContent(), e, MessageCreateListener.class)
                 )
-            ).then();
+            ).onErrorResume(e -> Mono.empty())
+            .then();
     }
 }
