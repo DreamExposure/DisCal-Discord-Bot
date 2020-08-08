@@ -625,8 +625,8 @@ public class DatabaseManager {
             if (copiedEventId.contains("_"))
                 copiedEventId = copiedEventId.split("_")[0];
 
-            final String rsvpTableName = String.format("%srsvp", settings.getPrefix());
-            final String query = "SELECT * FROM " + rsvpTableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
+            final String tableName = String.format("%sevents", settings.getPrefix());
+            final String query = "SELECT * FROM " + tableName + " WHERE GUILD_ID= ? AND EVENT_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
