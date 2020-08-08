@@ -44,6 +44,8 @@ public class KeepAliveHandler {
                         data.put("guilds", 0);
                     data.put("memory", usedMemory());
                     data.put("uptime", humanReadableUptime());
+                    data.put("version", GlobalConst.version);
+                    data.put("d4j_version", GlobalConst.d4jVersion);
                     //TODO: Add announcement count!!!
 
                     //Network handling data

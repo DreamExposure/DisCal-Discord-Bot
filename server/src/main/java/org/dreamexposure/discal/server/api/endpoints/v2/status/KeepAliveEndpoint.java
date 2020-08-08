@@ -66,6 +66,8 @@ public class KeepAliveEndpoint {
                 cc.setConnectedServers(body.getInt("guilds"));
                 cc.setMemUsed(body.getDouble("memory"));
                 cc.setUptime(body.getString("uptime"));
+                cc.setVersion(body.getString("version"));
+                cc.setD4JVersion(body.getString("d4j_version"));
 
                 //Network handling stuffs
                 cc.setIpForRestart(body.getString("ip"));
