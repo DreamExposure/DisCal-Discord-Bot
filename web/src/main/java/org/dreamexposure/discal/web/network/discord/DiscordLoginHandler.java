@@ -41,6 +41,8 @@ public class DiscordLoginHandler {
     public String handleDiscordCode(final HttpServletRequest req, final HttpServletResponse res, @RequestParam("code") final String code) throws IOException {
         final OkHttpClient client = new OkHttpClient();
 
+        //TODO: remove once fixed
+        String userGuildsBody = "";
         try {
             //Handle getting discord account data....
             final RequestBody body = new FormBody.Builder()
@@ -77,9 +79,10 @@ public class DiscordLoginHandler {
                     .build();
 
                 final Response userGuildsResponse = client.newCall(userGuildsRequest).execute();
+                userGuildsBody = userGuildsResponse.body().string();
 
                 final JSONObject userInfo = new JSONObject(userDataResponse.body().string());
-                final JSONArray jGuilds = new JSONArray(userGuildsResponse.body().string());
+                final JSONArray jGuilds = new JSONArray(userGuildsBody);
 
                 //We have the data we need, now map it, and request an API token for this session.
 
@@ -172,8 +175,9 @@ public class DiscordLoginHandler {
                 return "redirect:/login";
             }
         } catch (final JSONException e) {
+            //TODO: remove once fixed
             LogFeed.log(LogObject
-                .forException("[LOGIN-Discord] JSON", "Discord login failed!", e, this.getClass()));
+                .forException("[LOGIN-Discord] JSON", "Discord login failed! Body: " + userGuildsBody, e, this.getClass()));
             res.sendRedirect("/dashboard");
             return "redirect:/dashboard";
         } catch (final Exception e) {
