@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.event.list;
 
-import com.google.api.services.calendar.model.Event;
-
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -18,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/v2/events/list")
@@ -51,17 +49,15 @@ public class ListEventMonthEndpoint {
             final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
             //okay, lets actually get the month's events.
-            final List<Event> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
+            final List<JSONObject> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
                 .flatMap(calData -> EventWrapper.getEvents(calData, settings, startEpoch, endEpoch))
+                .flatMapMany(Flux::fromIterable)
+                .map(e -> JsonUtils.convertEventToJson(e, settings))
+                .collectList()
                 .block();
 
-            final List<JSONObject> jEvents = new ArrayList<>();
-            for (final Event e : events) {
-                jEvents.add(JsonUtils.convertEventToJson(e, settings));
-            }
-
             final JSONObject body = new JSONObject();
-            body.put("events", jEvents);
+            body.put("events", events);
             body.put("message", "Events successfully listed.");
 
             response.setContentType("application/json");
