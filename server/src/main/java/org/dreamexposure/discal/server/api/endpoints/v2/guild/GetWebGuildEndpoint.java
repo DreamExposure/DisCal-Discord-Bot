@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.guild;
 
+import org.dreamexposure.discal.core.exceptions.BotNotInGuildException;
 import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -46,26 +47,26 @@ public class GetWebGuildEndpoint {
 
             final RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
-            if (g != null) {
-                final WebGuild wg = WebGuild.fromGuild(g);
+            final WebGuild wg = WebGuild.fromGuild(g);
 
-                final RestMember m = g.member(userId);
+            final RestMember m = g.member(userId);
 
-                if (m != null) { //Assume false if we can't get the user...
-                    wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).block());
-                    wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).block());
-                }
-
-                //Add available langs so that editing of langs can be done on the website
-                //noinspection unchecked
-                for (final String l : new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet())) {
-                    wg.getAvailableLangs().add(l);
-                }
-
-                response.setContentType("application/json");
-                response.setStatus(GlobalConst.STATUS_SUCCESS);
-                return wg.toJson(!authState.isFromDiscalNetwork()).toString();
+            if (m != null) { //Assume false if we can't get the user...
+                //TODO: Check logs for full stack trace here, something weird is up with it
+                wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).blockOptional().orElse(false));
+                wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
             }
+
+            //Add available langs so that editing of langs can be done on the website
+            //noinspection unchecked
+            for (final String l : new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet())) {
+                wg.getAvailableLangs().add(l);
+            }
+
+            response.setContentType("application/json");
+            response.setStatus(GlobalConst.STATUS_SUCCESS);
+            return wg.toJson(!authState.isFromDiscalNetwork()).toString();
+        } catch (final BotNotInGuildException e) {
             response.setContentType("application/json");
             response.setStatus(GlobalConst.STATUS_NOT_FOUND);
             return JsonUtils.getJsonResponseMessage("Guild not connected to DisCal");

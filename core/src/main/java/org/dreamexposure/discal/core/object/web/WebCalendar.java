@@ -1,13 +1,11 @@
 package org.dreamexposure.discal.core.object.web;
 
-import com.google.api.services.calendar.model.Calendar;
-
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
+
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/7/18.
@@ -16,30 +14,21 @@ import org.json.JSONObject;
  */
 public class WebCalendar {
 
-    public static WebCalendar fromCalendar(final CalendarData cd, final GuildSettings gs) {
+    //TODO: Make a reactive version of this method...
+    public static Mono<WebCalendar> fromCalendar(final CalendarData cd, final GuildSettings gs) {
         if ("primary".equalsIgnoreCase(cd.getCalendarAddress())) {
-            return new WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false);
+            return Mono.just(new WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false));
         } else {
             final String id = cd.getCalendarId();
             final String address = cd.getCalendarAddress();
             final String link = "https://www.discalbot.com/embed/calendar/" + gs.getGuildID().asString();
 
-            String name;
-            String description;
-            String timezone;
-            try {
-                final Calendar cal = CalendarWrapper.getCalendar(cd, gs).block();
-                name = cal.getSummary();
-                description = cal.getDescription();
-                timezone = cal.getTimeZone().replaceAll("/", "___");
-            } catch (final Exception e) {
-                LogFeed.log(LogObject.
-                    forException("[WEB] Failed to get calendar!", e, WebCalendar.class));
-                name = "ERROR!";
-                description = "ERROR";
-                timezone = "ERROR";
-            }
-            return new WebCalendar(id, address, link, name, description, timezone, cd.isExternal());
+            return CalendarWrapper.getCalendar(cd, gs)
+                .map(cal -> new WebCalendar(
+                        id, address, link, cal.getSummary(), cal.getDescription(),
+                        cal.getTimeZone().replace("/", "___"), cd.isExternal()
+                    )
+                ).onErrorReturn(new WebCalendar(id, address, link, "ERROR", "ERROR", "ERROR", cd.isExternal()));
         }
     }
 
@@ -65,8 +54,8 @@ public class WebCalendar {
     private final String timezone;
     private final boolean external;
 
-    private WebCalendar(final String id, final String address, final String link, final String name, final String description,
-                        final String timezone, final boolean external) {
+    private WebCalendar(final String id, final String address, final String link, final String name,
+                        final String description, final String timezone, final boolean external) {
         this.id = id;
         this.address = address;
         this.link = link;

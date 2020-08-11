@@ -36,7 +36,7 @@ export class DashboardGuildRunner implements TaskCallback {
     private handleWebGuildGet(status: NetworkCallStatus) {
         this.guild = new WebGuild(this.guildId).fromJson(status.body);
 
-        if (!this.guild.settings.isDevGuild || !this.guild.settings.isPatronGuild) {
+        if (!this.guild.settings.isPatronGuild && !this.guild.settings.isDevGuild) {
             ElementUtil.hideLoader();
             document.getElementById("not-patron-guild")!.hidden = false;
             Snackbar.showSnackbar("Guild is not a patron guild!");

@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.object.web;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.exceptions.BotNotInGuildException;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -30,8 +31,14 @@ import reactor.function.TupleUtils;
  */
 public class WebGuild {
 
-    public static WebGuild fromGuild(final RestGuild g) {
-        final GuildUpdateData data = g.getData().block();
+    public static WebGuild fromGuild(final RestGuild g) throws BotNotInGuildException {
+        final GuildUpdateData data;
+
+        try {
+            data = g.getData().block();
+        } catch (final Exception e) {
+            throw new BotNotInGuildException();
+        }
 
         final Snowflake id = Snowflake.of(data.id());
         final String name = data.name();
@@ -60,7 +67,7 @@ public class WebGuild {
 
         final Mono<WebCalendar> calendar = settings.flatMap(s ->
             DatabaseManager.getMainCalendar(id)
-                .flatMap(d -> Mono.just(WebCalendar.fromCalendar(d, s)))
+                .flatMap(d -> WebCalendar.fromCalendar(d, s))
         );
 
         return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
@@ -101,7 +108,7 @@ public class WebGuild {
 
         final Mono<WebCalendar> calendar = settings.flatMap(s ->
             DatabaseManager.getMainCalendar(Snowflake.of(id))
-                .flatMap(d -> Mono.just(WebCalendar.fromCalendar(d, s)))
+                .flatMap(d -> WebCalendar.fromCalendar(d, s))
         );
 
         return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
