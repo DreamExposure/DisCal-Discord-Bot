@@ -41,8 +41,6 @@ public class DiscordLoginHandler {
     public String handleDiscordCode(final HttpServletRequest req, final HttpServletResponse res, @RequestParam("code") final String code) throws IOException {
         final OkHttpClient client = new OkHttpClient();
 
-        //TODO: remove once fixed
-        String userGuildsBody = "";
         try {
             //Handle getting discord account data....
             final RequestBody body = new FormBody.Builder()
@@ -54,7 +52,7 @@ public class DiscordLoginHandler {
                 .build();
 
             final okhttp3.Request httpRequest = new okhttp3.Request.Builder()
-                .url("https://discordapp.com/api/v6/oauth2/token")
+                .url(GlobalConst.discordApiUrl + "/oauth2/token")
                 .post(body)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
@@ -62,27 +60,30 @@ public class DiscordLoginHandler {
             //POST request to discord for access...
             final okhttp3.Response httpResponse = client.newCall(httpRequest).execute();
 
-            @SuppressWarnings("ConstantConditions") final JSONObject info = new JSONObject(httpResponse.body().string());
+            final JSONObject info = new JSONObject(httpResponse.body().string());
 
             if (info.has("access_token")) {
                 //GET request for user info...
                 final Request userDataRequest = new Request.Builder()
+                    .get()
                     .url(GlobalConst.discordApiUrl + "/users/@me")
                     .header("Authorization", "Bearer " + info.getString("access_token"))
+                    .header("Content-Type", "application/x-www-form-urlencoded")
                     .build();
 
                 final Response userDataResponse = client.newCall(userDataRequest).execute();
 
                 final Request userGuildsRequest = new Request.Builder()
+                    .get()
                     .url(GlobalConst.discordApiUrl + "/users/@me/guilds")
                     .header("Authorization", "Bearer " + info.getString("access_token"))
+                    .header("Content-Type", "application/x-www-form-urlencoded")
                     .build();
 
                 final Response userGuildsResponse = client.newCall(userGuildsRequest).execute();
-                userGuildsBody = userGuildsResponse.body().string();
 
                 final JSONObject userInfo = new JSONObject(userDataResponse.body().string());
-                final JSONArray jGuilds = new JSONArray(userGuildsBody);
+                final JSONArray jGuilds = new JSONArray(userGuildsResponse.body().string());
 
                 //We have the data we need, now map it, and request an API token for this session.
 
@@ -175,14 +176,11 @@ public class DiscordLoginHandler {
                 return "redirect:/login";
             }
         } catch (final JSONException e) {
-            //TODO: remove once fixed
-            LogFeed.log(LogObject
-                .forException("[LOGIN-Discord] JSON", "Discord login failed! Body: " + userGuildsBody, e, this.getClass()));
+            LogFeed.log(LogObject.forException("[LOGIN-Discord] JSON", "Discord login failed!", e, this.getClass()));
             res.sendRedirect("/dashboard");
             return "redirect:/dashboard";
         } catch (final Exception e) {
-            LogFeed.log(LogObject
-                .forException("[LOGIN-Discord]", "Discord login failed!", e, this.getClass()));
+            LogFeed.log(LogObject.forException("[LOGIN-Discord]", "Discord login failed!", e, this.getClass()));
             res.sendRedirect("/dashboard");
             return "redirect:/dashboard";
         }
@@ -195,6 +193,12 @@ public class DiscordLoginHandler {
             final OkHttpClient client = new OkHttpClient();
 
             final Map<String, Object> map = DiscordAccountHandler.getHandler().getAccount(request);
+
+            if (!map.containsKey("key")) {
+                //User isn't logged in, just quietly redirect to home page
+                res.sendRedirect("/");
+                return "redirect:/";
+            }
 
             final RequestBody logoutRequestBody = RequestBody.create(GlobalConst.JSON, "");
 

@@ -40,7 +40,6 @@ import reactor.core.scheduler.Schedulers;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings("ArraysAsListWithZeroOrOneArgument")
 public class CalendarAuth {
     /**
      * Application name.
@@ -63,7 +62,7 @@ public class CalendarAuth {
      * If modifying these scopes, delete your previously saved credentials
      * at ~/.credentials/calendar-java-quickstart
      */
-    private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR);
+    private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS);
 
     private static final Map<Integer, FileDataStoreFactory> DATA_STORE_FACTORIES;
 

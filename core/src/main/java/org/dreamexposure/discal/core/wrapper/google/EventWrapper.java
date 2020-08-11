@@ -5,6 +5,8 @@ import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 
@@ -21,7 +23,10 @@ public class EventWrapper {
                     .insert(data.getCalendarId(), event)
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
-        ).onErrorResume(e -> Mono.empty());
+        )
+            .doOnError(e -> LogFeed.log(LogObject
+                .forException("Event create error; Cred Id: " + settings.getCredentialsId(), e, EventWrapper.class)))
+            .onErrorResume(e -> Mono.empty());
     }
 
     public static Mono<Event> updateEvent(final CalendarData data, final Event event, final GuildSettings settings) {
