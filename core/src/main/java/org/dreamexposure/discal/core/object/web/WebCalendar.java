@@ -14,6 +14,10 @@ import reactor.core.publisher.Mono;
  */
 public class WebCalendar {
 
+    public static WebCalendar empty() {
+        return new WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false);
+    }
+
     //TODO: Make a reactive version of this method...
     public static Mono<WebCalendar> fromCalendar(final CalendarData cd, final GuildSettings gs) {
         if ("primary".equalsIgnoreCase(cd.getCalendarAddress())) {

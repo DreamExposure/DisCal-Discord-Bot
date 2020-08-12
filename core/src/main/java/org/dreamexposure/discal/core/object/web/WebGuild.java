@@ -68,7 +68,8 @@ public class WebGuild {
         final Mono<WebCalendar> calendar = settings.flatMap(s ->
             DatabaseManager.getMainCalendar(id)
                 .flatMap(d -> WebCalendar.fromCalendar(d, s))
-        );
+        )
+            .defaultIfEmpty(WebCalendar.empty());
 
         return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
             .map(TupleUtils.function((bn, s, r, wc, a, c) -> {
