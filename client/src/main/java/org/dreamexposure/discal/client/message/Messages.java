@@ -17,6 +17,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.http.client.ClientException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -99,49 +100,58 @@ public class Messages {
     //Message sending
     public static Mono<Message> sendMessage(final String message, final MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)));
+            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed,
                                             final MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)));
+            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final String message, final Consumer<EmbedCreateSpec> embed,
                                             final MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)));
+            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final String message, final TextChannel channel) {
-        return channel.createMessage(spec -> spec.setContent(message));
+        return channel.createMessage(spec -> spec.setContent(message))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed, final TextChannel channel) {
-        return channel.createMessage(spec -> spec.setEmbed(embed));
+        return channel.createMessage(spec -> spec.setEmbed(embed))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final String message, final Consumer<EmbedCreateSpec> embed,
                                             final TextChannel channel) {
-        return channel.createMessage(spec -> spec.setContent(message).setEmbed(embed));
+        return channel.createMessage(spec -> spec.setContent(message).setEmbed(embed))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     //Direct message sending
     public static Mono<Message> sendDirectMessage(final String message, final User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)));
+            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendDirectMessage(final Consumer<EmbedCreateSpec> embed, final User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)));
+            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendDirectMessage(final String message, final Consumer<EmbedCreateSpec> embed,
                                                   final User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)));
+            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
+            .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     //Message editing
