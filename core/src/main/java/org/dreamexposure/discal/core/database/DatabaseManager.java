@@ -32,6 +32,7 @@ import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.ValidationDepth;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
 import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
@@ -482,6 +483,10 @@ public class DatabaseManager {
             return account;
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get API user data", e, DatabaseManager.class));
                 return Mono.empty();
@@ -526,6 +531,10 @@ public class DatabaseManager {
             return set;
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .defaultIfEmpty(new GuildSettings(guildId))
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get guild settings", e, DatabaseManager.class));
@@ -550,6 +559,10 @@ public class DatabaseManager {
             return CalendarData.fromData(guildId, 1, calId, calAddr, external);
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
                 return Mono.empty();
@@ -573,6 +586,10 @@ public class DatabaseManager {
             return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external);
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get calendar data", e, DatabaseManager.class));
                 return Mono.empty();
@@ -595,6 +612,10 @@ public class DatabaseManager {
             return CalendarData.fromData(guildId, 1, calId, calAddr, external);
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get all guild calendars", e, DatabaseManager.class));
                 return Mono.just(new ArrayList<>());
@@ -613,6 +634,10 @@ public class DatabaseManager {
             return calendars == null ? 0 : calendars.intValue();
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get calendar count", e, DatabaseManager.class));
                 return Mono.just(-1);
@@ -640,6 +665,10 @@ public class DatabaseManager {
             return EventData.fromImage(guildId, id, end, img);
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get event data", e, DatabaseManager.class));
                 return Mono.empty();
@@ -666,6 +695,10 @@ public class DatabaseManager {
             return data;
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get rsvp data", e, DatabaseManager.class));
                 return Mono.empty();
@@ -699,6 +732,10 @@ public class DatabaseManager {
             return a;
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get announcement", e, DatabaseManager.class));
                 return Mono.empty();
@@ -733,6 +770,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get all announcements for guild", e, DatabaseManager.class));
 
@@ -768,6 +809,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -805,6 +850,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -840,6 +889,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get enabled announcements", e, DatabaseManager.class));
 
@@ -877,6 +930,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get announcements by type", e, DatabaseManager.class));
 
@@ -913,6 +970,10 @@ public class DatabaseManager {
             return a;
         }))
             .collectList()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get enabled announcements for guild", e, DatabaseManager.class));
 
@@ -931,6 +992,10 @@ public class DatabaseManager {
             return announcements == null ? 0 : announcements.intValue();
         }))
             .next()
+            .retryWhen(Retry.max(3)
+                .filter(IllegalStateException.class::isInstance)
+                .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
+            )
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get announcement count", e, DatabaseManager.class));
                 return Mono.just(-1);
