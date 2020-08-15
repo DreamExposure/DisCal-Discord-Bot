@@ -65,18 +65,23 @@ public class CalendarAuth {
     private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS);
 
     private static final Map<Integer, FileDataStoreFactory> DATA_STORE_FACTORIES;
+    private static final Map<Integer, HttpTransport> HTTP_TRANSPORTS;
 
     static {
         try {
             HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 
             final Map<Integer, FileDataStoreFactory> dataStoreFactories = new HashMap<>();
+            final Map<Integer, HttpTransport> transports = new HashMap<>();
             final int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
             for (int i = 0; i < credCount; i++) {
                 dataStoreFactories.put(i, new FileDataStoreFactory(getCredentialsFolder(i)));
+                transports.put(i, GoogleNetHttpTransport.newTrustedTransport());
             }
 
             DATA_STORE_FACTORIES = Collections.unmodifiableMap(dataStoreFactories);
+            HTTP_TRANSPORTS = Collections.unmodifiableMap(transports);
+
         } catch (final Throwable t) {
             t.printStackTrace();
             System.exit(1);
@@ -135,7 +140,7 @@ public class CalendarAuth {
                         .build());
             } else {
                 return authorize(g.getCredentialsId()).map(cred ->
-                    new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
+                    new Calendar.Builder(HTTP_TRANSPORTS.get(g.getCredentialsId()), JSON_FACTORY, cred)
                         .setApplicationName(APPLICATION_NAME)
                         .build());
             }
@@ -143,7 +148,8 @@ public class CalendarAuth {
     }
 
     public static Mono<Calendar> getCalendarService(final int credentialId) {
-        return authorize(credentialId).map(cred -> new Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, cred)
+        return authorize(credentialId).map(cred -> new Calendar
+            .Builder(HTTP_TRANSPORTS.get(credentialId), JSON_FACTORY, cred)
             .setApplicationName(APPLICATION_NAME)
             .build());
     }

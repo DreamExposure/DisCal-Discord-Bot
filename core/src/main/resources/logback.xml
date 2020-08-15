@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
-	<logger name="org.springframework.web" level="INFO" />
-	<logger name="io.netty" level="INFO" />
-	<logger name="reactor" level="INFO" />
-	<logger name="proxy" level="INFO" />
-	<logger name="reactor.retry" level="DEBUG" />
-	<logger name="discord4j.core" level="DEBUG" />
-	<logger name="discord4j.gateway" level="INFO" />
-	<logger name="discord4j.gateway.client" level="DEBUG" />
-	<logger name="io.lettuce" level="INFO" />
-	<logger name="dev.miku.r2dbc.mysql" level="INFO" />
+    <logger name="org.springframework.web" level="INFO" />
+    <logger name="io.netty" level="INFO" />
+    <logger name="reactor" level="INFO" />
+    <logger name="proxy" level="INFO" />
+    <logger name="reactor.retry" level="DEBUG" />
+    <logger name="discord4j.core" level="DEBUG" />
+    <logger name="discord4j.gateway" level="INFO" />
+    <logger name="discord4j.gateway.client" level="INFO" />
+    <!--logger name="discord4j.rest.request.RequestStream" level="TRACE" /-->
+    <logger name="io.lettuce" level="INFO" />
+    <logger name="dev.miku.r2dbc.mysql" level="INFO" />
 
-	<turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">
-		<Exclude>PRESENCE_UPDATE,GUILD_CREATE,GUILD_MEMBERS_CHUNK</Exclude>
-	</turboFilter>
+    <turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">
+        <Exclude>PRESENCE_UPDATE,GUILD_CREATE,GUILD_MEMBERS_CHUNK</Exclude>
+    </turboFilter>
 
-	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-		</encoder>
-	</appender>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-	<root level="DEBUG">
-		<appender-ref ref="CONSOLE"/>
-	</root>
+    <root level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </root>
 </configuration>
