@@ -20,16 +20,16 @@ import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
@@ -37,24 +37,15 @@ import reactor.core.scheduler.Schedulers;
 
 /**
  * Created by Nova Fox on 11/10/17.
- * Website: www.cloudcraftgaming.com
+ * Website: https://www.dreamexposure.org
  * For Project: DisCal-Discord-Bot
  */
+@SuppressWarnings({"ConstantConditions", "ReturnOfNull"})
 public class CalendarAuth {
     /**
      * Application name.
      */
     private static final String APPLICATION_NAME = "DisCal";
-
-    /**
-     * Global instance of the JSON factory.
-     */
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-
-    /**
-     * Global instance of the HTTP transport.
-     */
-    private final static HttpTransport HTTP_TRANSPORT;
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -64,23 +55,21 @@ public class CalendarAuth {
      */
     private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS);
 
-    private static final Map<Integer, FileDataStoreFactory> DATA_STORE_FACTORIES;
-    private static final Map<Integer, HttpTransport> HTTP_TRANSPORTS;
+    private static final List<DisCalCredential> CREDENTIALS;
 
     static {
         try {
-            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            final List<DisCalCredential> credentials = new ArrayList<>();
 
-            final Map<Integer, FileDataStoreFactory> dataStoreFactories = new HashMap<>();
-            final Map<Integer, HttpTransport> transports = new HashMap<>();
             final int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
             for (int i = 0; i < credCount; i++) {
-                dataStoreFactories.put(i, new FileDataStoreFactory(getCredentialsFolder(i)));
-                transports.put(i, GoogleNetHttpTransport.newTrustedTransport());
+                credentials.add(new DisCalCredential(i,
+                    new FileDataStoreFactory(getCredentialsFolder(i)),
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    JacksonFactory.getDefaultInstance()));
             }
 
-            DATA_STORE_FACTORIES = Collections.unmodifiableMap(dataStoreFactories);
-            HTTP_TRANSPORTS = Collections.unmodifiableMap(transports);
+            CREDENTIALS = Collections.unmodifiableList(credentials);
 
         } catch (final Throwable t) {
             t.printStackTrace();
@@ -98,16 +87,20 @@ public class CalendarAuth {
         return Mono.fromCallable(() -> {
             // Load client secrets.
             final InputStream in = new FileInputStream(new File("client_secret.json"));
-            final GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
+            final GoogleClientSecrets clientSecrets = GoogleClientSecrets
+                .load(JacksonFactory.getDefaultInstance(), new InputStreamReader(in));
 
             // Build flow and trigger user authorization request.
+            final DisCalCredential cred = getCredential(credentialId);
+
             final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
-                .Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(DATA_STORE_FACTORIES.get(credentialId))
+                .Builder(cred.getTransport(), cred.getJsonFactory(), clientSecrets, SCOPES)
+                .setDataStoreFactory(cred.getStoreFactory())
                 .setAccessType("offline")
                 .build();
 
-            final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+            final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+                .authorize("user");
 
             //Try to close input stream since I don't think it was ever closed?
             in.close();
@@ -139,17 +132,16 @@ public class CalendarAuth {
                         .setApplicationName(APPLICATION_NAME)
                         .build());
             } else {
-                return authorize(g.getCredentialsId()).map(cred ->
-                    new Calendar.Builder(HTTP_TRANSPORTS.get(g.getCredentialsId()), JSON_FACTORY, cred)
-                        .setApplicationName(APPLICATION_NAME)
-                        .build());
+                return getCalendarService(g.getCredentialsId());
             }
         }).flatMap(Function.identity());
     }
 
     public static Mono<Calendar> getCalendarService(final int credentialId) {
+        final DisCalCredential disCalCredential = getCredential(credentialId);
+
         return authorize(credentialId).map(cred -> new Calendar
-            .Builder(HTTP_TRANSPORTS.get(credentialId), JSON_FACTORY, cred)
+            .Builder(disCalCredential.getTransport(), disCalCredential.getJsonFactory(), cred)
             .setApplicationName(APPLICATION_NAME)
             .build());
     }
@@ -158,7 +150,52 @@ public class CalendarAuth {
         return new File(BotSettings.CREDENTIAL_FOLDER.get() + "/" + credentialId);
     }
 
+    private static @Nullable DisCalCredential getCredential(final int id) {
+        for (final DisCalCredential c : CREDENTIALS) {
+            if (c.getCredentialId() == id) {
+                return c;
+            }
+        }
+
+        return null;
+    }
+
     public static int credentialsCount() {
-        return DATA_STORE_FACTORIES.size();
+        return CREDENTIALS.size();
+    }
+
+
+    private static class DisCalCredential {
+        private final int credentialId;
+
+        private final FileDataStoreFactory storeFactory;
+
+        private final HttpTransport transport;
+
+        private final JsonFactory jsonFactory;
+
+        DisCalCredential(final int id, final FileDataStoreFactory store, final HttpTransport transport,
+                         final JsonFactory jsonFactory) {
+            this.credentialId = id;
+            this.storeFactory = store;
+            this.transport = transport;
+            this.jsonFactory = jsonFactory;
+        }
+
+        public int getCredentialId() {
+            return this.credentialId;
+        }
+
+        public FileDataStoreFactory getStoreFactory() {
+            return this.storeFactory;
+        }
+
+        public HttpTransport getTransport() {
+            return this.transport;
+        }
+
+        public JsonFactory getJsonFactory() {
+            return this.jsonFactory;
+        }
     }
 }
