@@ -2,7 +2,7 @@
 name: Translation Request
 about: Request a translation to a certain language
 title: ''
-labels: 'enhancement, help wanted, Priority: Severe/High, Translation'
+labels: 'Priority: Severe/High, Translation, enhancement, help wanted'
 assignees: ''
 
 ---
