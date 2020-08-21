@@ -19,6 +19,7 @@ public class PreCalendar {
 
     private boolean editing;
     private String calendarId;
+    private CalendarData calendarData;
 
     private Message creatorMessage;
 
@@ -101,6 +102,10 @@ public class PreCalendar {
         return this.calendarId;
     }
 
+    public CalendarData getCalendarData() {
+        return this.calendarData;
+    }
+
     public Message getCreatorMessage() {
         return this.creatorMessage;
     }
@@ -144,6 +149,10 @@ public class PreCalendar {
 
     public void setCalendarId(final String _id) {
         this.calendarId = _id;
+    }
+
+    public void setCalendarData(final CalendarData calendarData) {
+        this.calendarData = calendarData;
     }
 
     public void setCreatorMessage(final Message _message) {

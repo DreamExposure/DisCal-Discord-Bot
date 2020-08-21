@@ -19,6 +19,7 @@ import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -109,6 +110,7 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
+    //TODO: This won't need guild settings eventually once we move the data to calendar data like it should be at
     private static Mono<Credential> authorize(final GuildSettings g) {
         return Mono.fromCallable(() -> {
             if ("N/a".equalsIgnoreCase(g.getEncryptedAccessToken()))
@@ -123,7 +125,9 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    public static Mono<Calendar> getCalendarService(@NotNull final GuildSettings g) {
+    //TODO: Remove need for guild settings once we move the relevant data to more appropriate classes
+    public static Mono<Calendar> getCalendarService(@NotNull final GuildSettings g,
+                                                    @NotNull final CalendarData calData) {
         return Mono.fromCallable(() -> {
             if (g.useExternalCalendar()) {
                 return authorize(g).map(cred ->
@@ -132,7 +136,7 @@ public class CalendarAuth {
                         .setApplicationName(APPLICATION_NAME)
                         .build());
             } else {
-                return getCalendarService(g.getCredentialsId());
+                return getCalendarService(calData.getCredentialId());
             }
         }).flatMap(Function.identity());
     }
@@ -144,6 +148,14 @@ public class CalendarAuth {
             .Builder(disCalCredential.getTransport(), disCalCredential.getJsonFactory(), cred)
             .setApplicationName(APPLICATION_NAME)
             .build());
+    }
+
+    public static Mono<Calendar> getExternalCalendarService(final GuildSettings settings) {
+        return authorize(settings).map(cred ->
+            new Calendar.
+                Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
+                .setApplicationName(APPLICATION_NAME)
+                .build());
     }
 
     private static File getCredentialsFolder(final int credentialId) {

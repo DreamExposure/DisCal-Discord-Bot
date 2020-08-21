@@ -176,7 +176,7 @@ public class DatabaseManager {
             .flatMap(exists -> {
                 if (exists) {
                     final String update = "UPDATE " + table
-                        + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?, CREDENTIALS_ID = ?,"
+                        + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
                         + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
                         + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
                         + " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
@@ -186,7 +186,36 @@ public class DatabaseManager {
                     return connect(master, c -> Mono.from(c.createStatement(update)
                         .bind(0, set.useExternalCalendar())
                         .bind(1, set.getPrivateKey())
-                        .bind(2, set.getCredentialsId())
+                        .bind(2, set.getEncryptedAccessToken())
+                        .bind(3, set.getEncryptedRefreshToken())
+                        .bind(4, set.getControlRole())
+                        .bind(5, set.getDiscalChannel())
+                        .bind(6, set.usingSimpleAnnouncements())
+                        .bind(7, set.getLang())
+                        .bind(8, set.getPrefix())
+                        .bind(9, set.isPatronGuild())
+                        .bind(10, set.isDevGuild())
+                        .bind(11, set.getMaxCalendars())
+                        .bind(12, set.getDmAnnouncementsString())
+                        .bind(13, set.useTwelveHour())
+                        .bind(14, set.isBranded())
+                        .bind(15, set.getGuildID().asString())
+                        .execute())
+                    ).flatMap(res -> Mono.from(res.getRowsUpdated()))
+                        .hasElement()
+                        .thenReturn(true);
+                } else {
+                    final String insertCommand = "INSERT INTO " + table + "(GUILD_ID, " +
+                        "EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, " +
+                        "CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, " +
+                        "PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, " +
+                        "DM_ANNOUNCEMENTS, 12_HOUR, BRANDED) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    return connect(master, c -> Mono.from(c.createStatement(insertCommand)
+                        .bind(0, set.getGuildID().asString())
+                        .bind(1, set.useExternalCalendar())
+                        .bind(2, set.getPrivateKey())
                         .bind(3, set.getEncryptedAccessToken())
                         .bind(4, set.getEncryptedRefreshToken())
                         .bind(5, set.getControlRole())
@@ -200,37 +229,6 @@ public class DatabaseManager {
                         .bind(13, set.getDmAnnouncementsString())
                         .bind(14, set.useTwelveHour())
                         .bind(15, set.isBranded())
-                        .bind(16, set.getGuildID().asString())
-                        .execute())
-                    ).flatMap(res -> Mono.from(res.getRowsUpdated()))
-                        .hasElement()
-                        .thenReturn(true);
-                } else {
-                    final String insertCommand = "INSERT INTO " + table + "(GUILD_ID, " +
-                        "EXTERNAL_CALENDAR, PRIVATE_KEY, CREDENTIALS_ID, ACCESS_TOKEN, REFRESH_TOKEN, " +
-                        "CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, " +
-                        "PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, " +
-                        "DM_ANNOUNCEMENTS, 12_HOUR, BRANDED) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-                    return connect(master, c -> Mono.from(c.createStatement(insertCommand)
-                        .bind(0, set.getGuildID().asString())
-                        .bind(1, set.useExternalCalendar())
-                        .bind(2, set.getPrivateKey())
-                        .bind(3, set.getCredentialsId())
-                        .bind(4, set.getEncryptedAccessToken())
-                        .bind(5, set.getEncryptedRefreshToken())
-                        .bind(6, set.getControlRole())
-                        .bind(7, set.getDiscalChannel())
-                        .bind(8, set.usingSimpleAnnouncements())
-                        .bind(9, set.getLang())
-                        .bind(10, set.getPrefix())
-                        .bind(11, set.isPatronGuild())
-                        .bind(12, set.isDevGuild())
-                        .bind(13, set.getMaxCalendars())
-                        .bind(14, set.getDmAnnouncementsString())
-                        .bind(15, set.useTwelveHour())
-                        .bind(16, set.isBranded())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -257,7 +255,7 @@ public class DatabaseManager {
                 if (exists) {
                     final String update = "UPDATE " + table
                         + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-                        + " CALENDAR_ADDRESS = ?, EXTERNAL = ?"
+                        + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?"
                         + " WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -265,7 +263,8 @@ public class DatabaseManager {
                         .bind(1, calData.getCalendarId())
                         .bind(2, calData.getCalendarAddress())
                         .bind(3, calData.isExternal())
-                        .bind(4, calData.getGuildId().asString())
+                        .bind(4, calData.getCredentialId())
+                        .bind(5, calData.getGuildId().asString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -273,7 +272,7 @@ public class DatabaseManager {
                 } else {
                     final String insertCommand = "INSERT INTO " + table
                         + "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, " +
-                        "CALENDAR_ADDRESS, EXTERNAL)" + " VALUES (?, ?, ?, ?, ?)";
+                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID)" + " VALUES (?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, calData.getGuildId().asString())
@@ -281,6 +280,7 @@ public class DatabaseManager {
                         .bind(2, calData.getCalendarId())
                         .bind(3, calData.getCalendarAddress())
                         .bind(4, calData.isExternal())
+                        .bind(5, calData.getCredentialId())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -509,7 +509,6 @@ public class DatabaseManager {
 
             set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
             set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
-            set.setCredentialsId(row.get("CREDENTIALS_ID", Integer.class));
             set.setEncryptedAccessToken(row.get("ACCESS_TOKEN", String.class));
             set.setEncryptedRefreshToken(row.get("REFRESH_TOKEN", String.class));
             set.setControlRole(row.get("CONTROL_ROLE", String.class));
@@ -556,7 +555,9 @@ public class DatabaseManager {
             final String calId = row.get("CALENDAR_ID", String.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
-            return CalendarData.fromData(guildId, 1, calId, calAddr, external);
+            final int credId = row.get("CREDENTIAL_ID", Integer.class);
+
+            return CalendarData.fromData(guildId, 1, calId, calAddr, external, credId);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -583,7 +584,9 @@ public class DatabaseManager {
             final String calId = row.get("CALENDAR_ID", String.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
-            return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external);
+            final int credId = row.get("CREDENTIAL_ID", Integer.class);
+
+            return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external, credId);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -608,8 +611,9 @@ public class DatabaseManager {
             final String calId = row.get("CALENDAR_ID", String.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
+            final int credId = row.get("CREDENTIAL_ID", Integer.class);
 
-            return CalendarData.fromData(guildId, 1, calId, calAddr, external);
+            return CalendarData.fromData(guildId, 1, calId, calAddr, external, credId);
         }))
             .collectList()
             .retryWhen(Retry.max(3)

@@ -17,17 +17,18 @@ public class CalendarData {
         final String calendarId = json.getString("calendar_id");
         final String calendarAddress = json.getString("calendar_address");
         final boolean external = json.getBoolean("external");
+        final int credentialId = json.optInt("credential_id", 0);
 
-        return new CalendarData(guildId, calendarNumber, calendarId, calendarAddress, external);
+        return new CalendarData(guildId, calendarNumber, calendarId, calendarAddress, external, credentialId);
     }
 
     public static CalendarData fromData(final Snowflake gId, final int calNum, final String calId,
-                                        final String calAddr, final boolean ext) {
-        return new CalendarData(gId, calNum, calId, calAddr, ext);
+                                        final String calAddr, final boolean ext, final int credId) {
+        return new CalendarData(gId, calNum, calId, calAddr, ext, credId);
     }
 
     public static CalendarData empty() {
-        return new CalendarData(Snowflake.of(0), 0, "primary", "primary", false);
+        return new CalendarData(Snowflake.of(0), 0, "primary", "primary", false, 0);
     }
 
     private final Snowflake guildId;
@@ -38,13 +39,16 @@ public class CalendarData {
 
     private final boolean external;
 
+    private final int credentialId;
+
     private CalendarData(final Snowflake guildId, final int calendarNumber, final String calendarId,
-                         final String calendarAddress, final boolean external) {
+                         final String calendarAddress, final boolean external, final int credentialId) {
         this.guildId = guildId;
         this.calendarNumber = calendarNumber;
         this.calendarId = calendarId;
         this.calendarAddress = calendarAddress;
         this.external = external;
+        this.credentialId = credentialId;
     }
 
     //Getters
@@ -68,6 +72,10 @@ public class CalendarData {
         return this.external;
     }
 
+    public int getCredentialId() {
+        return this.credentialId;
+    }
+
     public JSONObject toJson() {
         final JSONObject json = new JSONObject();
 
@@ -76,6 +84,7 @@ public class CalendarData {
         json.put("calendar_id", this.calendarId);
         json.put("calendar_address", this.calendarAddress);
         json.put("external", this.external);
+        json.put("credential_id", this.credentialId);
 
         return json;
     }

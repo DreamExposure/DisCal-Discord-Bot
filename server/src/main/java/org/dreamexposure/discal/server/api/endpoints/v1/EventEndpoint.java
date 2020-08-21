@@ -64,9 +64,9 @@ public class EventEndpoint {
 
         //okay, lets actually get the month's events.
         try {
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
-
             final CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
+
             final Events events = service.events().list(calendarData.getCalendarAddress())
                 .setTimeMin(new DateTime(startEpoch))
                 .setTimeMax(new DateTime(endEpoch))
@@ -122,9 +122,9 @@ public class EventEndpoint {
 
         //okay, lets actually get the month's events.
         try {
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
-
             final CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
+
             final Events events = service.events().list(calendarData.getCalendarAddress())
                 .setTimeMin(new DateTime(startEpoch))
                 .setTimeMax(new DateTime(endEpoch))
@@ -220,9 +220,9 @@ public class EventEndpoint {
 
         //Okay, time to update the event
         try {
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
-
             final CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
+
             final com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
             final Event event = new Event();
@@ -319,9 +319,10 @@ public class EventEndpoint {
 
         //Okay, time to create the event
         try {
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
-
             final CalendarData calendarData = DatabaseManager.getMainCalendar(settings.getGuildID()).block();
+
+            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
+
             final com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarData.getCalendarId()).execute();
 
             final Event event = new Event();
@@ -407,7 +408,8 @@ public class EventEndpoint {
     }
 
     @PostMapping(value = "/delete", produces = "application/json")
-    public static String deleteEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
+    public static String deleteEvent(final HttpServletRequest request, final HttpServletResponse response,
+                                     @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {

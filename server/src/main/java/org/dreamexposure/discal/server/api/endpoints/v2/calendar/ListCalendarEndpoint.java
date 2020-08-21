@@ -45,12 +45,13 @@ public class ListCalendarEndpoint {
             final Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
             final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
 
             final JSONArray jCals = new JSONArray();
             for (final CalendarData calData : DatabaseManager.getAllCalendars(guildId).block()) {
                 if (!"primary".equalsIgnoreCase(calData.getCalendarAddress())
                     && CalendarUtils.calendarExists(calData, settings).block()) {
+                    final Calendar service = CalendarAuth.getCalendarService(settings, calData).block();
+
                     final com.google.api.services.calendar.model.Calendar cal = service.calendars()
                         .get(calData.getCalendarAddress())
                         .execute();

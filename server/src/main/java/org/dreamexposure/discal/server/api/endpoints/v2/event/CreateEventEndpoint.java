@@ -63,7 +63,7 @@ public class CreateEventEndpoint {
             final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
             final CalendarData calData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
-            final com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings).block();
+            final com.google.api.services.calendar.Calendar service = CalendarAuth.getCalendarService(settings, calData).block();
             final Calendar cal = service.calendars().get(calData.getCalendarId()).execute();
 
             final Event event = new Event();

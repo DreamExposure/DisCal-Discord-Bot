@@ -46,11 +46,11 @@ public class GetEventEndpoint {
             final int calNumber = requestBody.getInt("calendar_number");
             final String eventId = requestBody.getString("event_id");
             final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            final CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
             //okay, get the calendar service and then the event
-            final Calendar service = CalendarAuth.getCalendarService(settings).block();
+            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
 
-            final CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
             final Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();
 
             response.setContentType("application/json");
