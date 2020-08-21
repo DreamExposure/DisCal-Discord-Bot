@@ -44,6 +44,7 @@ public class CalendarWrapper {
                     .get(data.getCalendarAddress())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic()))
+            .doOnError(e -> LogFeed.log(LogObject.forException("Get Cal Failure", e, CalendarWrapper.class)))
             .onErrorResume(e -> Mono.empty());
     }
 
