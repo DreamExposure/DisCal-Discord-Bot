@@ -53,9 +53,9 @@ public class AnnouncementThread {
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(a -> {
 
-                    final Mono<GuildSettings> s = this.getSettings(a);
-                    final Mono<CalendarData> cd = this.getCalendarData(a);
-                    final Mono<Calendar> se = s.flatMap(this::getService);
+                    final Mono<GuildSettings> s = this.getSettings(a).cache();
+                    final Mono<CalendarData> cd = this.getCalendarData(a).cache();
+                    final Mono<Calendar> se = cd.flatMap(calData -> s.flatMap(gs -> this.getService(gs, calData)));
 
                     return Mono.zip(s, cd, se)
                         .flatMap(function((settings, calData, service) -> {
@@ -230,14 +230,14 @@ public class AnnouncementThread {
         return this.calendars.get(a.getGuildId());
     }
 
-    private Mono<Calendar> getService(final GuildSettings gs) {
+    private Mono<Calendar> getService(final GuildSettings gs, CalendarData cd) {
         if (gs.useExternalCalendar()) {
             if (!this.customServices.containsKey(gs.getGuildID()))
-                this.customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs).cache());
+                this.customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs, cd).cache());
 
             return this.customServices.get(gs.getGuildID());
         }
-        return this.discalServices.get(gs.getCredentialsId());
+        return this.discalServices.get(cd.getCredentialId());
     }
 
     private Mono<List<Event>> getEvents(final GuildSettings gs, final CalendarData cd, final Calendar service) {

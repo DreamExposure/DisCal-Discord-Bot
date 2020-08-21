@@ -1,11 +1,9 @@
 package org.dreamexposure.discal.core.object;
 
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Random;
 
 import discord4j.common.util.Snowflake;
 
@@ -18,11 +16,11 @@ import discord4j.common.util.Snowflake;
 public class GuildSettings {
     private Snowflake guildID;
 
+    //TODO: Move this boolean to calendar data
     private boolean externalCalendar;
     private String privateKey;
 
-    private int credentialsId;
-
+    //TODO: Move these to calendar data class because if we allow mutlical this breaks down
     private String encryptedAccessToken;
     private String encryptedRefreshToken;
 
@@ -47,8 +45,6 @@ public class GuildSettings {
 
         this.externalCalendar = false;
         this.privateKey = "N/a";
-
-        this.credentialsId = new Random().nextInt(CalendarAuth.credentialsCount());
 
         this.encryptedAccessToken = "N/a";
         this.encryptedRefreshToken = "N/a";
@@ -78,10 +74,6 @@ public class GuildSettings {
 
     public String getPrivateKey() {
         return this.privateKey;
-    }
-
-    public int getCredentialsId() {
-        return this.credentialsId;
     }
 
     public String getEncryptedAccessToken() {
@@ -160,10 +152,6 @@ public class GuildSettings {
         this.privateKey = _privateKey;
     }
 
-    public void setCredentialsId(final int credentialsId) {
-        this.credentialsId = credentialsId;
-    }
-
     public void setEncryptedAccessToken(final String _access) {
         this.encryptedAccessToken = _access;
     }
@@ -223,7 +211,6 @@ public class GuildSettings {
         data.put("guild_id", this.guildID.asString());
         data.put("external_calendar", this.externalCalendar);
         data.put("private_key", this.privateKey);
-        data.put("credentials_id", this.credentialsId);
         data.put("access_token", this.encryptedAccessToken);
         data.put("refresh_token", this.encryptedRefreshToken);
         data.put("control_role", this.controlRole);
@@ -263,7 +250,6 @@ public class GuildSettings {
         this.guildID = Snowflake.of(data.getString("guild_id"));
         this.externalCalendar = data.getBoolean("external_calendar");
         this.privateKey = data.getString("private_key");
-        this.credentialsId = data.getInt("credentials_id");
         this.encryptedAccessToken = data.getString("access_token");
         this.encryptedRefreshToken = data.getString("refresh_token");
         this.controlRole = data.getString("control_role");
@@ -283,7 +269,6 @@ public class GuildSettings {
     public GuildSettings fromJsonSecure(final JSONObject data) {
         this.guildID = Snowflake.of(data.getString("guild_id"));
         this.externalCalendar = data.getBoolean("external_calendar");
-        //credentialsId = data.getInt("credentials_id");
         //privateKey = data.getString("PrivateKey");
         //encryptedAccessToken = data.getString("AccessToken");
         //encryptedRefreshToken = data.getString("RefreshToken");

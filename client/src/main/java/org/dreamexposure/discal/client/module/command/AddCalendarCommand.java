@@ -103,7 +103,7 @@ public class AddCalendarCommand implements Command {
                                     .flatMap(valid -> {
                                         if (valid) {
                                             final CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
-                                                args[0], args[0], true);
+                                                args[0], args[0], true, 0);
 
                                             //update guild settings to reflect changes...
                                             settings.setUseExternalCalendar(true);

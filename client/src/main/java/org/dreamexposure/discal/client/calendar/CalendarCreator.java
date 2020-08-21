@@ -5,6 +5,7 @@ import com.google.api.services.calendar.model.Calendar;
 
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
+import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarCreatorResponse;
@@ -14,6 +15,7 @@ import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import discord4j.common.util.Snowflake;
@@ -69,6 +71,7 @@ public class CalendarCreator {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
                         preCalendar.setEditing(true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
+                        preCalendar.setCalendarData(data);
 
                         this.calendars.add(preCalendar);
 
@@ -93,6 +96,7 @@ public class CalendarCreator {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
                         preCalendar.setEditing(true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
+                        preCalendar.setCalendarData(data);
 
                         this.calendars.add(preCalendar);
 
@@ -122,15 +126,20 @@ public class CalendarCreator {
                 calendar.setDescription(pre.getDescription());
                 calendar.setTimeZone(pre.getTimezone());
 
+                //Randomly determine what credentials account the calendar will be assigned to.
+                // If creation fails, and the user retries, it will pick another random credential to use.
+                final int credId = new Random().nextInt(CalendarAuth.credentialsCount());
+
                 if (!pre.isEditing()) {
-                    return CalendarWrapper.createCalendar(calendar, settings)
+                    return CalendarWrapper.createCalendar(calendar, credId)
                         .flatMap(confirmed -> {
                             final CalendarData data = CalendarData.fromData(
                                 settings.getGuildID(),
                                 1, //TODO: Support multi-calendar
                                 confirmed.getId(),
                                 confirmed.getId(),
-                                false);
+                                false,
+                                credId);
 
                             final AclRule rule = new AclRule()
                                 .setScope(new AclRule.Scope().setType("default"))
@@ -141,7 +150,7 @@ public class CalendarCreator {
 
                             return Mono.when(
                                 DatabaseManager.updateCalendar(data),
-                                AclRuleWrapper.insertRule(rule, data.getCalendarId(), settings)
+                                AclRuleWrapper.insertRule(rule, data, settings)
                             )
                                 .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
                                 .thenReturn(response);
@@ -149,7 +158,7 @@ public class CalendarCreator {
                 } else {
                     //Editing calendar...
                     calendar.setId(pre.getCalendarId());
-                    return CalendarWrapper.updateCalendar(calendar, settings)
+                    return CalendarWrapper.updateCalendar(calendar, settings, pre.getCalendarData())
                         .flatMap(confirmed -> {
                             final AclRule rule = new AclRule()
                                 .setScope(new AclRule.Scope().setType("default"))
@@ -158,7 +167,7 @@ public class CalendarCreator {
                             final CalendarCreatorResponse response = new CalendarCreatorResponse(true,
                                 confirmed, pre.getCreatorMessage(), true);
 
-                            return AclRuleWrapper.insertRule(rule, confirmed.getId(), settings)
+                            return AclRuleWrapper.insertRule(rule, pre.getCalendarData(), settings)
                                 .doOnNext(a -> this.terminate(settings.getGuildID()))
                                 .thenReturn(response);
                         }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), true));
