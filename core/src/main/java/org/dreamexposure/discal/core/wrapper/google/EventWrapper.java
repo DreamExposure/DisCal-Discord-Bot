@@ -29,7 +29,7 @@ public class EventWrapper {
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
             if (e.getStatusCode() == 404 ||
-                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
                 LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
 
@@ -57,7 +57,7 @@ public class EventWrapper {
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
             if (e.getStatusCode() == 404 ||
-                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
                 LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
 
@@ -153,14 +153,14 @@ public class EventWrapper {
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
             if (e.getStatusCode() == 404 ||
-                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
                 LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
-                                .flatMap(cd -> deleteEvent(cd, settings, id));
+                            .flatMap(cd -> deleteEvent(cd, settings, id));
                     } else {
                         return Mono.empty();
                     }
@@ -173,14 +173,19 @@ public class EventWrapper {
 
     private static Mono<Boolean> correctAssignedCredentialId(CalendarData data) {
         return Flux.range(0, CalendarAuth.credentialsCount()).flatMap(i ->
-            CalendarAuth.getCalendarService(i)
-                .flatMap(service ->
-                    Mono.fromCallable(() ->
-                        service.calendarList().get(data.getCalendarId()).execute()
-                    ).subscribeOn(Schedulers.boundedElastic())
-                ).filter(cal -> "owner".equalsIgnoreCase(cal.getAccessRole()))
-                .map(ignore -> i)
-                .defaultIfEmpty(-1)).filter(i -> i > -1)
+            CalendarAuth.getCalendarService(i).flatMap(service -> Mono.fromCallable(() ->
+                    service.calendarList().get(data.getCalendarId()).execute()
+                ).subscribeOn(Schedulers.boundedElastic())
+                .onErrorResume(GoogleJsonResponseException.class, e -> {
+                    if (e.getStatusCode() == 404 ||
+                        "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                        return Mono.empty();
+                    }
+
+                    return Mono.empty();
+                })
+            ).map(cal -> "owner".equalsIgnoreCase(cal.getAccessRole()) ? i : -1)
+            ).filter(i -> i > -1)
             .flatMap(correctCredential -> {
                 //Ayyyyy we found the correct one!! Lets go ahead and save that and bump this back to the calling method
                 CalendarData corrected = CalendarData.fromData(
