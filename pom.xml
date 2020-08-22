@@ -67,6 +67,13 @@
         </dependencies>
     </dependencyManagement>
 
+    <repositories>
+        <repository>
+            <id>nova-public</id>
+            <url>https://repo.novafox161.com/repository/nova-public/</url>
+        </repository>
+    </repositories>
+
 
     <dependencies>
         <!--For Annotations-->

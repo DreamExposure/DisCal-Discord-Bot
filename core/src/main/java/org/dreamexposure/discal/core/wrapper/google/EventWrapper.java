@@ -18,6 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+@SuppressWarnings("DuplicatedCode")
 public class EventWrapper {
     public static Mono<Event> createEvent(final CalendarData data, final Event event, final GuildSettings settings) {
         return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
@@ -27,7 +28,8 @@ public class EventWrapper {
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
-            if ("requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+            if (e.getStatusCode() == 404 ||
+                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
                 LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
 
@@ -54,14 +56,15 @@ public class EventWrapper {
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
-            if ("requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+            if (e.getStatusCode() == 404 ||
+                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
                 LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
-                            .flatMap(cd -> createEvent(cd, event, settings));
+                            .flatMap(cd -> updateEvent(cd, event, settings));
                     } else {
                         return Mono.empty();
                     }
@@ -148,7 +151,23 @@ public class EventWrapper {
                     .delete(data.getCalendarAddress(), id)
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
-        ).onErrorResume(e -> Mono.empty());
+        ).onErrorResume(GoogleJsonResponseException.class, e -> {
+            if (e.getStatusCode() == 404 ||
+                    "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                //This is caused by credentials issue. Lets fix it.
+                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
+
+                return correctAssignedCredentialId(data).flatMap(success -> {
+                    if (success) {
+                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                                .flatMap(cd -> deleteEvent(cd, settings, id));
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+            }
+            return Mono.empty();
+        }).onErrorResume(e -> Mono.empty());
     }
 
 
