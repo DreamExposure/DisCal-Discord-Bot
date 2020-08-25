@@ -2,7 +2,8 @@ package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
-
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.event.EventCreator;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
@@ -14,13 +15,9 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.utils.EventUtils;
-import org.dreamexposure.discal.core.utils.GeneralUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.ImageUtils;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.TimeUtils;
+import org.dreamexposure.discal.core.utils.*;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,10 +26,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -942,10 +935,10 @@ public class EventCommand implements Command {
 
                 if (args.length == 2) {
                     if (pre.shouldRecur()) {
-                        final int amount = 0;
+                        final int amount;
 
                         try {
-                            Integer.parseInt(args[1]);
+                            amount = Integer.parseInt(args[1]);
                         } catch (final NumberFormatException e) {
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -991,10 +984,10 @@ public class EventCommand implements Command {
 
                 if (args.length == 2) {
                     if (pre.shouldRecur()) {
-                        final int amount = 1;
+                        int amount;
 
                         try {
-                            Integer.parseInt(args[1]);
+                            amount = Integer.parseInt(args[1]);
                         } catch (final NumberFormatException e) {
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))

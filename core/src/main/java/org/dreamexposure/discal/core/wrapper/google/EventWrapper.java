@@ -4,19 +4,17 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
-
-import java.util.List;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
 
 @SuppressWarnings("DuplicatedCode")
 public class EventWrapper {
@@ -71,7 +69,8 @@ public class EventWrapper {
                 });
             }
             return Mono.empty();
-        }).onErrorResume(e -> Mono.empty());
+        }).doOnError(e -> LogFeed.log(LogObject.forException("Failed to edit event", e, EventWrapper.class))
+        ).onErrorResume(e -> Mono.empty());
     }
 
     public static Mono<Event> getEvent(final CalendarData data, final GuildSettings settings, final String id) {
