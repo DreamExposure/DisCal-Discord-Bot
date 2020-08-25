@@ -2,7 +2,9 @@ package org.dreamexposure.discal.client.module.announcement;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -14,17 +16,13 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import static org.dreamexposure.discal.core.enums.announcement.AnnouncementType.SPECIFIC;
 import static reactor.function.TupleUtils.function;
@@ -86,12 +84,14 @@ public class AnnouncementThread {
     }
 
     //Modifier handling
-    private Mono<Void> handleBeforeModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
-                                            final Calendar service) {
+    private Mono<Void> handleBeforeModifier(final Guild guild, final Announcement a, final GuildSettings settings,
+                                            final CalendarData calData, final Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
                 return EventWrapper.getEvent(calData, settings, a.getEventId())
-                    .flatMap(e -> this.inRangeSpecific(a, e)
+                    .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                        .then(Mono.empty())
+                    ).flatMap(e -> this.inRangeSpecific(a, e)
                         .flatMap(inRange -> {
                             if (inRange) {
                                 return AnnouncementMessageFormatter
@@ -103,8 +103,6 @@ public class AnnouncementThread {
                                 return Mono.empty(); //Not in range, but still valid.
                             }
                         }))
-                    .switchIfEmpty(DatabaseManager
-                        .deleteAnnouncement(a.getAnnouncementId().toString()))
                     .then();
             case UNIVERSAL:
                 return this.getEvents(settings, calData, service)
