@@ -1,8 +1,7 @@
 package org.dreamexposure.discal.client.event;
 
 import com.google.api.services.calendar.model.Event;
-import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
@@ -14,11 +13,14 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -179,6 +181,8 @@ public class EventCreator {
                                 }).defaultIfEmpty(new EventCreatorResponse(false, null,
                                     pre.getCreatorMessage(), false));
                         } else {
+                            event.setId(pre.getEventId());
+
                             return EventWrapper.updateEvent(calData, event, settings)
                                 .flatMap(confirmed -> {
                                     final EventCreatorResponse response = new EventCreatorResponse(true,
