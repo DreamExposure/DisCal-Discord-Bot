@@ -46,7 +46,7 @@ public class CalendarAuth {
     /**
      * Application name.
      */
-    private static final String APPLICATION_NAME = "DisCal";
+    private final static String APPLICATION_NAME = "DisCal";
 
     /**
      * Global instance of the scopes required by this quickstart.
@@ -54,15 +54,15 @@ public class CalendarAuth {
      * If modifying these scopes, delete your previously saved credentials
      * at ~/.credentials/calendar-java-quickstart
      */
-    private static final List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS);
+    private final static List<String> SCOPES = Arrays.asList(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS);
 
-    private static final List<DisCalCredential> CREDENTIALS;
+    private final static List<DisCalCredential> CREDENTIALS;
 
     static {
         try {
-            final List<DisCalCredential> credentials = new ArrayList<>();
+            List<DisCalCredential> credentials = new ArrayList<>();
 
-            final int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
+            int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
             for (int i = 0; i < credCount; i++) {
                 credentials.add(new DisCalCredential(i,
                     new FileDataStoreFactory(getCredentialsFolder(i)),
@@ -72,7 +72,7 @@ public class CalendarAuth {
 
             CREDENTIALS = Collections.unmodifiableList(credentials);
 
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
             System.exit(1);
             throw new RuntimeException(t); //Never reached, makes compiler happy :)
@@ -84,23 +84,23 @@ public class CalendarAuth {
      *
      * @return an authorized Credential object.
      */
-    private static Mono<Credential> authorize(final int credentialId) {
+    private static Mono<Credential> authorize(int credentialId) {
         return Mono.fromCallable(() -> {
             // Load client secrets.
-            final InputStream in = new FileInputStream(new File("client_secret.json"));
-            final GoogleClientSecrets clientSecrets = GoogleClientSecrets
+            InputStream in = new FileInputStream(new File("client_secret.json"));
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets
                 .load(JacksonFactory.getDefaultInstance(), new InputStreamReader(in));
 
             // Build flow and trigger user authorization request.
-            final DisCalCredential cred = getCredential(credentialId);
+            DisCalCredential cred = getCredential(credentialId);
 
-            final GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow
                 .Builder(cred.getTransport(), cred.getJsonFactory(), clientSecrets, SCOPES)
                 .setDataStoreFactory(cred.getStoreFactory())
                 .setAccessType("offline")
                 .build();
 
-            final Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+            Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
                 .authorize("user");
 
             //Try to close input stream since I don't think it was ever closed?
@@ -111,23 +111,23 @@ public class CalendarAuth {
     }
 
     //TODO: This won't need guild settings eventually once we move the data to calendar data like it should be at
-    private static Mono<Credential> authorize(final GuildSettings g) {
+    private static Mono<Credential> authorize(GuildSettings g) {
         return Mono.fromCallable(() -> {
             if ("N/a".equalsIgnoreCase(g.getEncryptedAccessToken()))
                 return null;
 
-            final AESEncryption encryption = new AESEncryption(g);
-            final String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
+            AESEncryption encryption = new AESEncryption(g);
+            String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
 
-            final Credential credential = new GoogleCredential();
+            Credential credential = new GoogleCredential();
             credential.setAccessToken(accessToken);
             return credential;
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
     //TODO: Remove need for guild settings once we move the relevant data to more appropriate classes
-    public static Mono<Calendar> getCalendarService(@NotNull final GuildSettings g,
-                                                    @NotNull final CalendarData calData) {
+    public static Mono<Calendar> getCalendarService(@NotNull GuildSettings g,
+                                                    @NotNull CalendarData calData) {
         return Mono.fromCallable(() -> {
             if (g.useExternalCalendar()) {
                 return authorize(g).map(cred ->
@@ -141,8 +141,8 @@ public class CalendarAuth {
         }).flatMap(Function.identity());
     }
 
-    public static Mono<Calendar> getCalendarService(final int credentialId) {
-        final DisCalCredential disCalCredential = getCredential(credentialId);
+    public static Mono<Calendar> getCalendarService(int credentialId) {
+        DisCalCredential disCalCredential = getCredential(credentialId);
 
         return authorize(credentialId).map(cred -> new Calendar
             .Builder(disCalCredential.getTransport(), disCalCredential.getJsonFactory(), cred)
@@ -150,7 +150,7 @@ public class CalendarAuth {
             .build());
     }
 
-    public static Mono<Calendar> getExternalCalendarService(final GuildSettings settings) {
+    public static Mono<Calendar> getExternalCalendarService(GuildSettings settings) {
         return authorize(settings).map(cred ->
             new Calendar.
                 Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
@@ -158,12 +158,12 @@ public class CalendarAuth {
                 .build());
     }
 
-    private static File getCredentialsFolder(final int credentialId) {
+    private static File getCredentialsFolder(int credentialId) {
         return new File(BotSettings.CREDENTIAL_FOLDER.get() + "/" + credentialId);
     }
 
-    private static @Nullable DisCalCredential getCredential(final int id) {
-        for (final DisCalCredential c : CREDENTIALS) {
+    private static @Nullable DisCalCredential getCredential(int id) {
+        for (DisCalCredential c : CREDENTIALS) {
             if (c.getCredentialId() == id) {
                 return c;
             }
@@ -186,8 +186,7 @@ public class CalendarAuth {
 
         private final JsonFactory jsonFactory;
 
-        DisCalCredential(final int id, final FileDataStoreFactory store, final HttpTransport transport,
-                         final JsonFactory jsonFactory) {
+        DisCalCredential(int id, FileDataStoreFactory store, HttpTransport transport, JsonFactory jsonFactory) {
             this.credentialId = id;
             this.storeFactory = store;
             this.transport = transport;
