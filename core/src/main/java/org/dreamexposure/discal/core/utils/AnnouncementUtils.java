@@ -21,8 +21,8 @@ public class AnnouncementUtils {
      */
     public static Mono<Boolean> announcementExists(final String value, final Snowflake guildId) {
         return Mono.just(UUID.fromString(value))
-            .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId)
-                .hasElement())
-            .onErrorReturn(false); //If there's an error because of a bad value
+            .onErrorResume(e -> Mono.empty())
+            .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId).hasElement())
+            .defaultIfEmpty(false);
     }
 }
