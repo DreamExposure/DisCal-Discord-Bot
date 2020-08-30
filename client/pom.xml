@@ -37,7 +37,7 @@
 
     <build>
         <directory>../target</directory>
-        <finalName>DisCal-Client</finalName>
+        <finalName>DisCal-Client-</finalName>
 
         <resources>
             <resource>

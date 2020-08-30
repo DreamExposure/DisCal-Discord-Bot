@@ -37,6 +37,10 @@
         <netty.version.forced>4.1.44.Final</netty.version.forced>
 
         <reactor.version.bom>Dysprosium-SR7</reactor.version.bom>
+
+        <discal.version.name>${revision}</discal.version.name>
+
+        <maven.build.timestamp.format>yyyy.MM.dd.HH.mm</maven.build.timestamp.format>
     </properties>
 
     <parent>
@@ -259,4 +263,30 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jenkinsBuildNumber</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <discal.version.name>${revision}.b${env.BUILD_NUMBER}</discal.version.name>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>developmentBuildNumber</id>
+            <activation>
+                <property>
+                    <name>!env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <discal.version.name>${revision}.d${maven.build.timestamp}</discal.version.name>
+            </properties>
+        </profile>
+    </profiles>
 </project>
