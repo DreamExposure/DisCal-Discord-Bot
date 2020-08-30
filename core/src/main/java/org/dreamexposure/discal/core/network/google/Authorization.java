@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.network.google;
 
-import com.google.api.client.http.HttpStatusCodes;
-
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -9,6 +7,8 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
+import org.dreamexposure.discal.core.utils.CalendarUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONObject;
 
 import okhttp3.FormBody;
@@ -53,25 +53,26 @@ public class Authorization {
     }
 
 
-    public String requestNewAccessToken(final GuildSettings settings, final AESEncryption encryption) {
+    //TODO: Rewrite this to be reactive
+    public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
         try {
-            final RequestBody body = new FormBody.Builder()
+            RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", this.clientData.getClientId())
                 .addEncoded("client_secret", this.clientData.getClientSecret())
                 .addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
                 .addEncoded("grant_type", "refresh_token")
                 .build();
 
-            final Request httpRequest = new okhttp3.Request.Builder()
+            Request httpRequest = new okhttp3.Request.Builder()
                 .url("https://www.googleapis.com/oauth2/v4/token")
                 .post(body)
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .build();
 
-            final Response httpResponse = this.client.newCall(httpRequest).execute();
+            Response httpResponse = this.client.newCall(httpRequest).execute();
 
-            if (httpResponse.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                final JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
+            if (httpResponse.code() == GlobalConst.STATUS_SUCCESS) {
+                JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
                 //Update Db data.
                 settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
@@ -79,6 +80,22 @@ public class Authorization {
 
                 //Okay, we can return the access token to be used when this method is called.
                 return autoRefreshResponse.getString("access_token");
+            } else if (httpResponse.code() == GlobalConst.STATUS_BAD_REQUEST) {
+                JSONObject errorBody = new JSONObject(httpResponse.body().string());
+
+                if ("invalid_grant".equalsIgnoreCase(errorBody.getString("error"))) {
+                    // User revoked access to the calendar, delete our reference to it since they need to re-auth anyway
+
+                    DatabaseManager.getCalendar(settings.getGuildID(), 1)
+                        .flatMap(cd -> CalendarUtils.deleteCalendar(cd, settings))
+                        .subscribe();
+                } else {
+                    LogFeed.log(LogObject.forDebug("Error requesting new access token.",
+                        "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+                            " | " + errorBody));
+                }
+
+                return null;
             } else {
                 //Failed to get OK. Send debug info.
                 LogFeed.log(LogObject.forDebug("Error requesting new access token.",
@@ -87,7 +104,7 @@ public class Authorization {
                 return null;
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             //Error occurred, lets just log it and return null.
             LogFeed.log(LogObject
                 .forException("Failed to request new access token.", e, this.getClass()));
