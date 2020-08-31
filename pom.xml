@@ -269,11 +269,11 @@
             <id>jenkinsBuildNumber</id>
             <activation>
                 <property>
-                    <name>env.BUILD_NUMBER</name>
+                    <name>JENKINS_BUILD_NUMBER</name>
                 </property>
             </activation>
             <properties>
-                <discal.version.name>${revision}.b${env.BUILD_NUMBER}</discal.version.name>
+                <discal.version.name>${revision}.b${JENKINS_BUILD_NUMBER}</discal.version.name>
             </properties>
         </profile>
 
@@ -281,7 +281,7 @@
             <id>developmentBuildNumber</id>
             <activation>
                 <property>
-                    <name>!env.BUILD_NUMBER</name>
+                    <name>!JENKINS_BUILD_NUMBER</name>
                 </property>
             </activation>
             <properties>
