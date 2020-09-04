@@ -54,7 +54,6 @@
     </dependencies>
 
     <build>
-        <directory>../target</directory>
         <finalName>DisCal-Server</finalName>
 
         <resources>

@@ -36,7 +36,6 @@
     </dependencies>
 
     <build>
-        <directory>../target</directory>
         <finalName>DisCal-Client</finalName>
 
         <resources>
