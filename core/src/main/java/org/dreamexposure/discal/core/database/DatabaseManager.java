@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.core.database;
 
+import discord4j.common.util.Snowflake;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.*;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -14,6 +18,8 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,26 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import discord4j.common.util.Snowflake;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
-import io.r2dbc.spi.Result;
-import io.r2dbc.spi.ValidationDepth;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
-import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
-import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.*;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -362,6 +349,8 @@ public class DatabaseManager {
     }
 
     public static Mono<Boolean> updateEventData(final EventData data) {
+        if (!data.shouldBeSaved()) return Mono.just(false);
+
         final String table = String.format("%sevents", settings.getPrefix());
         String id = data.getEventId();
         if (data.getEventId().contains("_")) {
