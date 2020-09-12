@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.announcement;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -68,8 +67,10 @@ public class AnnouncementCreator {
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Copy.Success", settings), em, e))
                         .doOnNext(a::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
-                        .thenReturn(a);
-                }).defaultIfEmpty(this.getAnnouncement(settings.getGuildID()));
+                        .thenReturn(a)
+                        .doOnError(err -> LogObject.forException("Failed to copy", err, this.getClass()))
+                        .onErrorResume(err -> Mono.empty());
+                });
         }
         return Mono.justOrEmpty(this.getAnnouncement(settings.getGuildID()));
     }
@@ -88,11 +89,8 @@ public class AnnouncementCreator {
                         .doOnNext(a::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
                         .thenReturn(a)
-                        .onErrorResume(err -> {
-                            LogFeed.log(LogObject.forException("Failed to init editor", err, this.getClass()));
-
-                            return Mono.empty();
-                        });
+                        .doOnError(err -> LogObject.forException("Failed to init editor", err, this.getClass()))
+                        .onErrorResume(err -> Mono.empty());
                 });
         } else {
             return Mono.justOrEmpty(this.getAnnouncement(settings.getGuildID()));

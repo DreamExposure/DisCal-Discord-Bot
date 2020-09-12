@@ -1392,7 +1392,10 @@ public class AnnouncementCommand implements Command {
                 if (args.length == 2) {
                     return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
                         if (exists) {
-                            return AnnouncementCreator.getCreator().init(event, args[1], settings);
+                            return AnnouncementCreator.getCreator().init(event, args[1], settings)
+                                .switchIfEmpty(Messages.sendMessage(
+                                    Messages.getMessage("Notification.Error.Unknown", settings), event)
+                                    .then(Mono.empty()));
                         } else {
                             return Messages.sendMessage(
                                 Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
