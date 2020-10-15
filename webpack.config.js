@@ -18,7 +18,7 @@ module.exports = {
 		}
 	},
 	output: {
-		path: path.resolve(__dirname, "web/src/main/resources/static/assets/js"),
-		filename: 'bundle.js'
-	},
+        path: path.resolve(__dirname, "web/src/main/html/static/assets/js"),
+        filename: 'bundle.js'
+    },
 };
