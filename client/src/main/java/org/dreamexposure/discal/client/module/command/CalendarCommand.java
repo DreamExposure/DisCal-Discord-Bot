@@ -239,39 +239,45 @@ public class CalendarCommand implements Command {
     private Mono<Void> moduleConfirm(final MessageCreateEvent event, final CalendarData calendarData, final GuildSettings settings) {
         return Mono.defer(() -> {
             if (CalendarCreator.getCreator().hasPreCalendar(settings.getGuildID())) {
-                return CalendarCreator.getCreator().confirmCalendar(settings).flatMap(response -> {
-                    if (response.isSuccessful()) {
-                        final String msg;
-                        if (response.isEdited())
-                            msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Success", settings);
-                        else
-                            msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Success", settings);
+                //TODO: Add translations
+                return Messages.sendMessage("Attempting calendar creation. " +
+                    "Please wait... (if this takes longer than 5 minutes, please alert the devs. " +
+                    "We are working on fixing it. Sorry.", event)
+                    .then(CalendarCreator.getCreator().confirmCalendar(settings).flatMap(response -> {
+                        if (response.isSuccessful()) {
+                            final String msg;
+                            if (response.isEdited())
+                                msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Success", settings);
+                            else
+                                msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Success", settings);
 
-                        final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                        final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
+                            final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                            final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
 
-                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                            .then(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings))
-                            .flatMap(embed -> Messages.sendMessage(msg, embed, event));
-                    } else {
-                        //Failed, post failure message
-                        final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
-                        final String msg;
-                        if (response.isEdited())
-                            msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Failure", settings);
-                        else
-                            msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Failure", settings);
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(CalendarMessageFormatter.getCalendarLinkEmbed(response.getCalendar(), settings))
+                                .flatMap(embed -> Messages.sendMessage(msg, embed, event));
+                        } else {
+                            //Failed, post failure message
+                            final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
+                            final String msg;
+                            if (response.isEdited())
+                                msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Failure", settings);
+                            else
+                                msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Failure", settings);
 
-                        final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                        final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
+                            final Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                            final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(response.getCreatorMessage());
 
 
-                        return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                            .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))
-                            .flatMap(embed -> Messages.sendMessage(msg, embed, event))
-                            .doOnNext(preCal::setCreatorMessage);
-                    }
-                });
+                            return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                                .then(CalendarMessageFormatter.getPreCalendarEmbed(preCal, settings))
+                                .flatMap(embed -> Messages.sendMessage(msg, embed, event))
+                                .doOnNext(preCal::setCreatorMessage);
+                        }
+                    }).switchIfEmpty(
+                        Messages.sendMessage("Something went wrong. The devs are working on the fix right now!", event)
+                    ));
             } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event);
             } else {

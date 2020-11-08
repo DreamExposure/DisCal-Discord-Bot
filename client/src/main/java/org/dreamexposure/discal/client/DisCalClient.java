@@ -137,19 +137,31 @@ public class DisCalClient {
 
                 final Mono<Void> onTextChannelDelete = client.on(TextChannelDeleteEvent.class)
                     .flatMap(ChannelDeleteListener::handle)
+                    .doOnError(e ->
+                        LogFeed.log(LogObject.forException("Channel delete listener error", e, DisCalClient.class)))
+                    .onErrorResume(e -> Mono.empty())
                     .then();
 
                 final Mono<Void> onRoleDelete = client.on(RoleDeleteEvent.class)
                     .flatMap(RoleDeleteListener::handle)
+                    .doOnError(e ->
+                        LogFeed.log(LogObject.forException("Role delete listener error", e, DisCalClient.class)))
+                    .onErrorResume(e -> Mono.empty())
                     .then();
 
                 final Mono<Void> onCommand = client.on(MessageCreateEvent.class)
                     .flatMap(MessageCreateListener::handle)
+                    .doOnError(e ->
+                        LogFeed.log(LogObject.forException("MessageCreate listener error", e, DisCalClient.class)))
+                    .onErrorResume(e -> Mono.empty())
                     .then();
 
                 final Mono<Void> startAnnouncement = Flux.interval(Duration.ofMinutes(5))
                     .onBackpressureBuffer()
                     .flatMap(ignore -> new AnnouncementThread(client).run())
+                    .doOnError(e ->
+                        LogFeed.log(LogObject.forException("announcement flux error", e, DisCalClient.class)))
+                    .onErrorResume(e -> Mono.empty())
                     .then();
 
 
