@@ -149,10 +149,10 @@ public class DisCalClient {
 
                 final Mono<Void> startAnnouncement = Flux.interval(Duration.ofMinutes(5))
                     .onBackpressureBuffer()
-                    .flatMap(ignore -> new AnnouncementThread(client).run())
-                    .doOnError(e ->
-                        LogFeed.log(LogObject.forException("announcement flux error", e, DisCalClient.class)))
-                    .onErrorResume(e -> Mono.empty())
+                    .flatMap(ignore -> new AnnouncementThread(client).run()
+                        .doOnError(e ->
+                            LogFeed.log(LogObject.forException("announcement flux error", e, DisCalClient.class)))
+                        .onErrorResume(e -> Mono.empty()))
                     .then();
 
 
