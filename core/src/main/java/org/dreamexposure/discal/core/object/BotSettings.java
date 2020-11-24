@@ -29,7 +29,7 @@ public enum BotSettings {
 
     LANG_FOLDER, LOG_FOLDER, CREDENTIAL_FOLDER,
 
-    PW_TOKEN, DBO_TOKEN,
+    PW_TOKEN, TOP_GG_TOKEN,
 
     TIME_OUT, PORT,
 

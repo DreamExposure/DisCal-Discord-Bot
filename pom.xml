@@ -109,12 +109,6 @@
             <version>1.0.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
-        <!--discordbots.net API library-->
-        <dependency>
-            <groupId>com.github.DiscordBotList</groupId>
-            <artifactId>Java-Wrapper</artifactId>
-            <version>v1.0</version>
-        </dependency>
         <!--Google Client API-->
         <dependency>
             <groupId>com.google.api-client</groupId>

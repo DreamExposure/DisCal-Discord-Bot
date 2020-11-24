@@ -8,8 +8,8 @@ import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
 import org.dreamexposure.discal.server.network.discal.NetworkMediator;
-import org.dreamexposure.discal.server.network.discordbots.UpdateDisBotData;
 import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
+import org.dreamexposure.discal.server.network.topgg.UpdateTopStats;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.dreamexposure.novautils.database.DatabaseInfo;
 import org.dreamexposure.novautils.database.DatabaseSettings;
@@ -71,7 +71,7 @@ public class DisCalServer {
         NetworkMediator.get().init();
 
         //Handle the rest of the bullshit
-        UpdateDisBotData.init();
+        UpdateTopStats.init();
         UpdateDisPwData.init();
         Authentication.init();
 
@@ -83,7 +83,7 @@ public class DisCalServer {
             LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."));
             Authentication.shutdown();
             NetworkMediator.get().shutdown();
-            UpdateDisBotData.shutdown();
+            UpdateTopStats.shutdown();
             UpdateDisPwData.shutdown();
             DatabaseManager.disconnectFromMySQL();
         }));
