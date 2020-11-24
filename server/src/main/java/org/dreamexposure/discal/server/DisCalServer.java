@@ -7,8 +7,8 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.network.discal.NetworkInfo;
+import org.dreamexposure.discal.server.network.dbotsgg.UpdateDBotsData;
 import org.dreamexposure.discal.server.network.discal.NetworkMediator;
-import org.dreamexposure.discal.server.network.discordpw.UpdateDisPwData;
 import org.dreamexposure.discal.server.network.topgg.UpdateTopStats;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.dreamexposure.novautils.database.DatabaseInfo;
@@ -72,7 +72,7 @@ public class DisCalServer {
 
         //Handle the rest of the bullshit
         UpdateTopStats.init();
-        UpdateDisPwData.init();
+        UpdateDBotsData.init();
         Authentication.init();
 
         //Save pid...
@@ -84,7 +84,7 @@ public class DisCalServer {
             Authentication.shutdown();
             NetworkMediator.get().shutdown();
             UpdateTopStats.shutdown();
-            UpdateDisPwData.shutdown();
+            UpdateDBotsData.shutdown();
             DatabaseManager.disconnectFromMySQL();
         }));
 
