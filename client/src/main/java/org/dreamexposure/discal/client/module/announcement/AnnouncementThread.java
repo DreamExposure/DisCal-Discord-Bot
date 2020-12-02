@@ -37,6 +37,8 @@ public class AnnouncementThread {
 
     private final Map<Integer, Mono<Calendar>> discalServices = new HashMap<>();
 
+    private final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
+
     public AnnouncementThread(final GatewayDiscordClient client) {
         this.client = client;
 
@@ -84,8 +86,8 @@ public class AnnouncementThread {
     }
 
     //Modifier handling
-    private Mono<Void> handleBeforeModifier(final Guild guild, final Announcement a, final GuildSettings settings,
-                                            final CalendarData calData, final Calendar service) {
+    private Mono<Void> handleBeforeModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                            Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
                 return EventWrapper.getEvent(calData, settings, a.getEventId())
@@ -125,8 +127,7 @@ public class AnnouncementThread {
             case RECUR:
                 return this.getEvents(settings, calData, service)
                     .flatMapMany(Flux::fromIterable)
-                    .filter(e -> e.getId().contains("_")
-                        && e.getId().split("_")[0].equals(a.getEventId()))
+                    .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
                     .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
@@ -137,8 +138,8 @@ public class AnnouncementThread {
     }
 
     //TODO: Actually support this.
-    private Mono<Void> handleDuringModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
-                                            final Calendar service) {
+    private Mono<Void> handleDuringModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                            Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
             case UNIVERSAL:
@@ -150,8 +151,8 @@ public class AnnouncementThread {
     }
 
     //TODO: Actually support this too
-    private Mono<Void> handleEndModifier(final Guild guild, final Announcement a, final GuildSettings settings, final CalendarData calData,
-                                         final Calendar service) {
+    private Mono<Void> handleEndModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
+                                         Calendar service) {
         switch (a.getAnnouncementType()) {
             case SPECIFIC:
             case UNIVERSAL:
@@ -166,8 +167,6 @@ public class AnnouncementThread {
     //Utility
     private Mono<Boolean> inRangeSpecific(final Announcement a, final Event e) {
         return Mono.defer(() -> {
-            final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
-
             final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
             final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
@@ -187,8 +186,6 @@ public class AnnouncementThread {
     }
 
     private boolean isInRange(final Announcement a, final Event e) {
-        final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
-
         final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
         final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
