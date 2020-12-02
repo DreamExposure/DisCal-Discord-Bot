@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
+import com.google.api.services.calendar.model.Event;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -7,12 +9,12 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-
-import java.util.ArrayList;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -69,17 +71,24 @@ public class EventListCommand implements Command {
      * @return {@code true} if successful, else {@code false}.
      */
     @Override
-    public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+    public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length < 1) {
                 return this.moduleSimpleList(args, event, settings);
             } else {
                 switch (args[0].toLowerCase()) {
                     case "search":
-                        if (settings.isDevGuild())
+                        if (settings.isDevGuild() || settings.isPatronGuild())
                             return this.moduleSearch(args, event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
+                    case "ongoing":
+                    case "now":
+                    case "current":
+                        if (settings.isDevGuild())
+                            return this.moduleOngoing(args, event, settings);
+                        else
+                            return Messages.sendMessage(Messages.getMessage("Notifications.Disabled", settings), event);
                     case "today":
                     case "day":
                         return this.moduleDay(args, event, settings);
@@ -90,7 +99,7 @@ public class EventListCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> moduleSimpleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+    private Mono<Void> moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 0) {
                 return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
@@ -143,11 +152,11 @@ public class EventListCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleSearch(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+    private Mono<Void> moduleSearch(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.empty(); //TODO: Actually make this...
     }
 
-    private Mono<Void> moduleDay(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+    private Mono<Void> moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1) {
                 return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
@@ -169,6 +178,49 @@ public class EventListCommand implements Command {
                                     .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
                                         .flatMap(embed -> Messages.sendMessage(embed, event))).then())
                                     .thenReturn(GlobalConst.NOT_EMPTY);
+                            }
+                        });
+                    }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Event.List.Args.Many", settings), event);
+            }
+        }).then();
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    private Mono<Void> moduleOngoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 1) {
+                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
+                    .flatMap(data -> {
+                        final long start = System.currentTimeMillis() - (GlobalConst.oneDayMs * 14); // 2 weeks ago
+                        final long now = System.currentTimeMillis() + GlobalConst.oneDayMs; // one day from now
+
+                        return EventWrapper.getEvents(data, settings, start, now).flatMap(events -> {
+                            if (events.isEmpty()) {
+                                return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
+                            } else {
+                                //Filter through and check if they are currently on-going.
+                                List<Event> ongoing = events.stream()
+                                    .filter(e -> e.getStart().getDateTime().getValue() < System.currentTimeMillis())
+                                    .filter(e -> e.getEnd().getDateTime().getValue() > System.currentTimeMillis())
+                                    .collect(Collectors.toList());
+
+                                //Filtered...
+                                if (ongoing.isEmpty()) {
+                                    return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
+                                } else if (ongoing.size() == 1) {
+                                    return EventMessageFormatter
+                                        .getEventEmbed(ongoing.get(0), data.getCalendarNumber(), settings).flatMap(embed ->
+                                            Messages.sendMessage(
+                                                Messages.getMessage("Event.List.Found.One", settings), embed, event));
+                                } else {
+                                    return Messages.sendMessage(Messages.getMessage("Event.List.Found.Many", "%amount%",
+                                        ongoing.size() + "", settings), event).then(Flux.fromIterable(ongoing)
+                                        .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
+                                            .flatMap(embed -> Messages.sendMessage(embed, event))).then())
+                                        .thenReturn(GlobalConst.NOT_EMPTY);
+                                }
                             }
                         });
                     }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
