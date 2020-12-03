@@ -60,6 +60,7 @@ public class EventListCommand implements Command {
 
         info.getSubCommands().put("search", "Searches for events based on specific criteria rather than just the next upcoming events");
         info.getSubCommands().put("today", "Lists events occurring today (max. 20)");
+        info.getSubCommands().put("now", "Lists events currently in progress");
         return info;
     }
 
@@ -78,14 +79,14 @@ public class EventListCommand implements Command {
             } else {
                 switch (args[0].toLowerCase()) {
                     case "search":
-                        if (settings.isDevGuild() || settings.isPatronGuild())
+                        if (settings.isDevGuild())
                             return this.moduleSearch(args, event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
                     case "ongoing":
                     case "now":
                     case "current":
-                        if (settings.isDevGuild())
+                        if (settings.isDevGuild() || settings.isPatronGuild())
                             return this.moduleOngoing(args, event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notifications.Disabled", settings), event);
