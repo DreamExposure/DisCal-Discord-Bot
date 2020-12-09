@@ -1,5 +1,10 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
@@ -9,14 +14,10 @@ import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.AnnouncementUtils;
-import org.dreamexposure.discal.core.utils.ChannelUtils;
-import org.dreamexposure.discal.core.utils.EventUtils;
-import org.dreamexposure.discal.core.utils.GeneralUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.RoleUtils;
-import org.dreamexposure.discal.core.utils.UserUtils;
+import org.dreamexposure.discal.core.utils.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,15 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -105,7 +97,8 @@ public class AnnouncementCommand implements Command {
         info.getSubCommands().put("info", "Sets an additional info.");
         info.getSubCommands().put("enable", "Enables or Disables the announcement (alias for `disable`)");
         info.getSubCommands().put("disable", "Enables or Disables the announcement (alias for `enable`)");
-        info.getSubCommands().put("infoOnly", "Allows for setting an announcement to ONLY display the ' extra info'");
+        info.getSubCommands().put("infoOnly", "Allows for setting an announcement to ONLY display the 'extra info'");
+        info.getSubCommands().put("publish", "Allows for the event to be published if posted in a news channel");
 
         return info;
     }
@@ -1299,6 +1292,12 @@ public class AnnouncementCommand implements Command {
                 return Messages.sendMessage(Messages.getMessage("Announcement.InfoOnly.Specify", settings), event);
             }
         }).then();
+    }
+
+    private Mono<Void> modulePublish(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
+        //TODO: Add code
+
+        return Mono.empty();
     }
 
     private Mono<Void> moduleChannel(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {

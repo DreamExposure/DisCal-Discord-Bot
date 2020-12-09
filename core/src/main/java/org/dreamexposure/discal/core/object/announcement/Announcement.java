@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.object.announcement;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -9,9 +11,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Message;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -37,6 +36,7 @@ public class Announcement {
 
     private boolean enabled;
     private boolean infoOnly;
+    private boolean publish;
 
     //Stuff for creator/editor wizards.
     private Message creatorMessage;
@@ -285,6 +285,10 @@ public class Announcement {
         return this.infoOnly;
     }
 
+    public boolean isPublishable() {
+        return this.publish;
+    }
+
     public Message getCreatorMessage() {
         return this.creatorMessage;
     }
@@ -364,6 +368,10 @@ public class Announcement {
         this.infoOnly = _infoOnly;
     }
 
+    public void setPublishable(final boolean publish) {
+        this.publish = publish;
+    }
+
     /**
      * Sets the subscribers of the announcement from a String.
      *
@@ -437,6 +445,7 @@ public class Announcement {
         data.put("info", this.info);
         data.put("enabled", this.enabled);
         data.put("info_only", this.infoOnly);
+        data.put("publish", this.publish);
 
         return data;
     }
@@ -465,6 +474,7 @@ public class Announcement {
         this.info = data.getString("info");
         this.enabled = data.getBoolean("enabled");
         this.infoOnly = data.getBoolean("info_only");
+        this.publish = data.getBoolean("publish");
 
         return this;
     }
