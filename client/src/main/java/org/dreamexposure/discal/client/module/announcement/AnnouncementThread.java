@@ -2,9 +2,7 @@ package org.dreamexposure.discal.client.module.announcement;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
+
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -16,13 +14,17 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import static org.dreamexposure.discal.core.enums.announcement.AnnouncementType.SPECIFIC;
 import static reactor.function.TupleUtils.function;
@@ -39,7 +41,7 @@ public class AnnouncementThread {
 
     private final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
-    public AnnouncementThread(final GatewayDiscordClient client) {
+    public AnnouncementThread(GatewayDiscordClient client) {
         this.client = client;
 
         for (int i = 0; i < CalendarAuth.credentialsCount(); i++) {
@@ -165,12 +167,12 @@ public class AnnouncementThread {
 
 
     //Utility
-    private Mono<Boolean> inRangeSpecific(final Announcement a, final Event e) {
+    private Mono<Boolean> inRangeSpecific(Announcement a, Event e) {
         return Mono.defer(() -> {
-            final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
-            final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
+            long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+            long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
-            final long difference = timeUntilEvent - announcementTimeMs;
+            long difference = timeUntilEvent - announcementTimeMs;
 
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
@@ -180,16 +182,16 @@ public class AnnouncementThread {
 
                 return Mono.just(false);
             } else {
-                return Mono.just(difference <= maxDifferenceMs);
+                return Mono.just(difference <= this.maxDifferenceMs);
             }
         });
     }
 
-    private boolean isInRange(final Announcement a, final Event e) {
-        final long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
-        final long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
+    private boolean isInRange(Announcement a, Event e) {
+        long announcementTimeMs = Integer.toUnsignedLong(a.getMinutesBefore() + (a.getHoursBefore() * 60)) * 60 * 1000;
+        long timeUntilEvent = this.getEventStartMs(e) - System.currentTimeMillis();
 
-        final long difference = timeUntilEvent - announcementTimeMs;
+        long difference = timeUntilEvent - announcementTimeMs;
 
         if (difference < 0) {
             //Event past, we can delete announcement depending on the type
@@ -198,11 +200,11 @@ public class AnnouncementThread {
 
             return false;
         } else {
-            return difference <= maxDifferenceMs;
+            return difference <= this.maxDifferenceMs;
         }
     }
 
-    private long getEventStartMs(final Event e) {
+    private long getEventStartMs(Event e) {
         if (e.getStart().getDateTime() != null)
             return e.getStart().getDateTime().getValue();
         else
@@ -210,7 +212,7 @@ public class AnnouncementThread {
 
     }
 
-    private Mono<GuildSettings> getSettings(final Announcement a) {
+    private Mono<GuildSettings> getSettings(Announcement a) {
         if (!this.allSettings.containsKey(a.getGuildId()))
             this.allSettings.put(a.getGuildId(), DatabaseManager.getSettings(a.getGuildId()).cache());
 
@@ -218,14 +220,14 @@ public class AnnouncementThread {
     }
 
     //TODO: Allow multiple calendar support
-    private Mono<CalendarData> getCalendarData(final Announcement a) {
+    private Mono<CalendarData> getCalendarData(Announcement a) {
         if (!this.calendars.containsKey(a.getGuildId()))
             this.calendars.put(a.getGuildId(), DatabaseManager.getMainCalendar(a.getGuildId()).cache());
 
         return this.calendars.get(a.getGuildId());
     }
 
-    private Mono<Calendar> getService(final GuildSettings gs, CalendarData cd) {
+    private Mono<Calendar> getService(GuildSettings gs, CalendarData cd) {
         if (gs.useExternalCalendar()) {
             if (!this.customServices.containsKey(gs.getGuildID()))
                 this.customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs, cd).cache());
@@ -235,9 +237,9 @@ public class AnnouncementThread {
         return this.discalServices.get(cd.getCredentialId());
     }
 
-    private Mono<List<Event>> getEvents(final GuildSettings gs, final CalendarData cd, final Calendar service) {
+    private Mono<List<Event>> getEvents(GuildSettings gs, CalendarData cd, Calendar service) {
         if (!this.allEvents.containsKey(gs.getGuildID())) {
-            final Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
+            Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
             this.allEvents.put(gs.getGuildID(), events);
         }
         return this.allEvents.get(gs.getGuildID());
