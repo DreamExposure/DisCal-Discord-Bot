@@ -1,5 +1,11 @@
 package org.dreamexposure.discal.client.message;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.http.client.ClientException;
 import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -7,18 +13,11 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.http.client.ClientException;
-import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -118,18 +117,18 @@ public class Messages {
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(final String message, final TextChannel channel) {
+    public static Mono<Message> sendMessage(final String message, final GuildMessageChannel channel) {
         return channel.createMessage(spec -> spec.setContent(message))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed, final TextChannel channel) {
+    public static Mono<Message> sendMessage(final Consumer<EmbedCreateSpec> embed, final GuildMessageChannel channel) {
         return channel.createMessage(spec -> spec.setEmbed(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(final String message, final Consumer<EmbedCreateSpec> embed,
-                                            final TextChannel channel) {
+                                            final GuildMessageChannel channel) {
         return channel.createMessage(spec -> spec.setContent(message).setEmbed(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }

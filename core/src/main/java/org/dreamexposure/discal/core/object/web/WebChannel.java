@@ -1,9 +1,8 @@
 package org.dreamexposure.discal.core.object.web;
 
+import discord4j.core.object.entity.channel.GuildMessageChannel;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.json.JSONObject;
-
-import discord4j.core.object.entity.channel.GuildChannel;
 
 /**
  * Created by Nova Fox on 1/6/18.
@@ -13,7 +12,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 public class WebChannel {
 
 
-    public static WebChannel fromChannel(final GuildChannel channel, final GuildSettings settings) {
+    public static WebChannel fromChannel(final GuildMessageChannel channel, final GuildSettings settings) {
         final boolean dc = settings.getDiscalChannel().equalsIgnoreCase(channel.getId().asString());
 
         return new WebChannel(channel.getId().asLong(), channel.getName(), dc);

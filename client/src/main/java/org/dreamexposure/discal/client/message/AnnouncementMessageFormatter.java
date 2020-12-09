@@ -1,7 +1,16 @@
 package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.http.client.ClientException;
+import discord4j.rest.util.Image;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -10,31 +19,16 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.EventData;
-import org.dreamexposure.discal.core.utils.ChannelUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.ImageUtils;
-import org.dreamexposure.discal.core.utils.RoleUtils;
-import org.dreamexposure.discal.core.utils.UserUtils;
+import org.dreamexposure.discal.core.utils.*;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.http.client.ClientException;
-import discord4j.rest.util.Image;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -333,7 +327,7 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(guild, embed, mentions)
             .flatMap(TupleUtils.function((g, em, men) ->
                 g.getChannelById(Snowflake.of(a.getAnnouncementChannelId()))
-                    .ofType(TextChannel.class)
+                    .ofType(GuildMessageChannel.class)
                     .onErrorResume(ClientException.class, e ->
                         Mono.just(e.getStatus())
                             .filter(HttpResponseStatus.NOT_FOUND::equals)
@@ -351,7 +345,7 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(embed, mentions)
             .flatMap(TupleUtils.function((em, men) ->
                 guild.getChannelById(Snowflake.of(a.getAnnouncementChannelId()))
-                    .ofType(TextChannel.class)
+                    .ofType(GuildMessageChannel.class)
                     .onErrorResume(ClientException.class, e ->
                         Mono.just(e.getStatus())
                             .filter(HttpResponseStatus.NOT_FOUND::equals)

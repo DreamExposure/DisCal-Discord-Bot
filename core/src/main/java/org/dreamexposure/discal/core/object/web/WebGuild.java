@@ -1,5 +1,14 @@
 package org.dreamexposure.discal.core.object.web;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.entity.RestGuild;
+import discord4j.rest.util.Image;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -8,21 +17,11 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.utils.GuildUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.GuildUpdateData;
-import discord4j.discordjson.json.MemberData;
-import discord4j.discordjson.possible.Possible;
-import discord4j.rest.entity.RestGuild;
-import discord4j.rest.util.Image;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -59,7 +58,7 @@ public class WebGuild {
 
         final Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
             g.getChannels()
-                .ofType(TextChannel.class)
+                .ofType(GuildMessageChannel.class)
                 .map(channel -> WebChannel.fromChannel(channel, s)))
             .collectList();
 
@@ -101,7 +100,7 @@ public class WebGuild {
 
         final Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
             g.getChannels()
-                .ofType(TextChannel.class)
+                .ofType(GuildMessageChannel.class)
                 .map(channel -> WebChannel.fromChannel(channel, s)))
             .collectList();
 
