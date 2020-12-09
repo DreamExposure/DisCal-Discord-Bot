@@ -1,6 +1,27 @@
 package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.model.Event;
+
+import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
+import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.announcement.Announcement;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.dreamexposure.discal.core.object.event.EventData;
+import org.dreamexposure.discal.core.utils.ChannelUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.RoleUtils;
+import org.dreamexposure.discal.core.utils.UserUtils;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -11,24 +32,9 @@ import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.util.Image;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
-import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.announcement.Announcement;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.dreamexposure.discal.core.object.event.EventData;
-import org.dreamexposure.discal.core.utils.*;
-import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
-import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -37,19 +43,19 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings({"Duplicates", "MagicNumber", "StringConcatenationMissingWhitespace"})
 public class AnnouncementMessageFormatter {
-    public static Mono<Consumer<EmbedCreateSpec>> getFormatAnnouncementEmbed(final Announcement a, final GuildSettings settings) {
-        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
+    public static Mono<Consumer<EmbedCreateSpec>> getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
+        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
-        final Mono<String> channelName = guild
+        Mono<String> channelName = guild
             .flatMap(g -> ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), g));
 
-        final Mono<EventData> eData = Mono.just(a)
+        Mono<EventData> eData = Mono.just(a)
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(EventData.empty()).cache();
 
-        final Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
+        Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -95,23 +101,23 @@ public class AnnouncementMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<Consumer<EmbedCreateSpec>> getCondensedAnnouncementEmbed(final Announcement a, final GuildSettings settings) {
-        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+    public static Mono<Consumer<EmbedCreateSpec>> getCondensedAnnouncementEmbed(Announcement a, GuildSettings settings) {
+        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
 
-        final Mono<Event> event = Mono.just(a)
+        Mono<Event> event = Mono.just(a)
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getMainCalendar(a.getGuildId()))
             .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
             .defaultIfEmpty(new Event());
 
-        final Mono<EventData> eData = Mono.just(a)
+        Mono<EventData> eData = Mono.just(a)
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(EventData.empty()).cache();
 
-        final Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
+        Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -158,24 +164,24 @@ public class AnnouncementMessageFormatter {
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getCondensedAnnouncementEmbed(final Announcement a, final int calNum,
-                                                                                final GuildSettings settings) {
-        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+    public static Mono<Consumer<EmbedCreateSpec>> getCondensedAnnouncementEmbed(Announcement a, int calNum,
+                                                                                GuildSettings settings) {
+        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
 
-        final Mono<Event> event = Mono.just(a)
+        Mono<Event> event = Mono.just(a)
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getCalendar(a.getGuildId(), calNum))
             .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
             .defaultIfEmpty(new Event());
 
-        final Mono<EventData> eData = Mono.just(a)
+        Mono<EventData> eData = Mono.just(a)
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(EventData.empty()).cache();
 
-        final Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
+        Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -222,25 +228,25 @@ public class AnnouncementMessageFormatter {
             }));
     }
 
-    private static Mono<Consumer<EmbedCreateSpec>> getRealAnnouncementEmbed(final Announcement a, final Event event, final CalendarData cd,
-                                                                            final GuildSettings settings) {
-        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
+    private static Mono<Consumer<EmbedCreateSpec>> getRealAnnouncementEmbed(Announcement a, Event event, CalendarData cd,
+                                                                            GuildSettings settings) {
+        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
 
-        final Mono<String> startDate = EventMessageFormatter
+        Mono<String> startDate = EventMessageFormatter
             .getHumanReadableDate(event.getStart(), cd.getCalendarNumber(), false, settings);
 
-        final Mono<String> startTime = EventMessageFormatter
+        Mono<String> startTime = EventMessageFormatter
             .getHumanReadableTime(event.getStart(), cd.getCalendarNumber(), false, settings);
 
-        final Mono<String> timezone = CalendarWrapper.getCalendar(cd, settings)
+        Mono<String> timezone = CalendarWrapper.getCalendar(cd, settings)
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("TZ Unknown/Error");
 
-        final Mono<EventData> eData = DatabaseManager.getEventData(settings.getGuildID(), event.getId())
+        Mono<EventData> eData = DatabaseManager.getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(EventData.empty())
             .cache();
 
-        final Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
+        Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
             .defaultIfEmpty(false);
 
@@ -258,9 +264,9 @@ public class AnnouncementMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 try {
-                    final EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+                    EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
                     spec.setColor(ec.asColor());
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     //I dunno, color probably null.
                     spec.setColor(GlobalConst.discalColor);
                 }
@@ -295,13 +301,13 @@ public class AnnouncementMessageFormatter {
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Time", settings), sTime, true);
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
                     } else {
-                        final String start = sDate + " at " + sTime + " " + tz;
+                        String start = sDate + " at " + sTime + " " + tz;
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Start", settings), start, false);
                     }
 
                     if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                         if (event.getLocation().length() > 300) {
-                            final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
+                            String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
                             spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, true);
                         } else {
                             spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), true);
@@ -317,12 +323,12 @@ public class AnnouncementMessageFormatter {
     }
 
     @Deprecated
-    public static Mono<Void> sendAnnouncementMessage(final Announcement a, final Event event, final CalendarData data,
-                                                     final GuildSettings settings) {
-        final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
+    public static Mono<Void> sendAnnouncementMessage(Announcement a, Event event, CalendarData data,
+                                                     GuildSettings settings) {
+        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
-        final Mono<Consumer<EmbedCreateSpec>> embed = getRealAnnouncementEmbed(a, event, data, settings);
-        final Mono<String> mentions = guild.flatMap(g -> getSubscriberMentions(a, g));
+        Mono<Consumer<EmbedCreateSpec>> embed = getRealAnnouncementEmbed(a, event, data, settings);
+        Mono<String> mentions = guild.flatMap(g -> getSubscriberMentions(a, g));
 
         return Mono.zip(guild, embed, mentions)
             .flatMap(TupleUtils.function((g, em, men) ->
@@ -337,10 +343,10 @@ public class AnnouncementMessageFormatter {
             )).then();
     }
 
-    public static Mono<Void> sendAnnouncementMessage(final Guild guild, final Announcement a, final Event event, final CalendarData data,
-                                                     final GuildSettings settings) {
-        final Mono<Consumer<EmbedCreateSpec>> embed = getRealAnnouncementEmbed(a, event, data, settings);
-        final Mono<String> mentions = getSubscriberMentions(a, guild);
+    public static Mono<Void> sendAnnouncementMessage(Guild guild, Announcement a, Event event, CalendarData data,
+                                                     GuildSettings settings) {
+        Mono<Consumer<EmbedCreateSpec>> embed = getRealAnnouncementEmbed(a, event, data, settings);
+        Mono<String> mentions = getSubscriberMentions(a, guild);
 
         return Mono.zip(embed, mentions)
             .flatMap(TupleUtils.function((em, men) ->
@@ -355,8 +361,8 @@ public class AnnouncementMessageFormatter {
             )).then();
     }
 
-    public static Mono<Void> sendAnnouncementDM(final Announcement a, final Event event, final User user, final CalendarData data,
-                                                final GuildSettings settings) {
+    public static Mono<Void> sendAnnouncementDM(Announcement a, Event event, User user, CalendarData data,
+                                                GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID())
             .map(g -> Messages.getMessage("Embed.Announcement.Announce.Dm.Message", "%guild%", g.getName(), settings))
             .flatMap(msg -> getRealAnnouncementEmbed(a, event, data, settings)
@@ -364,20 +370,20 @@ public class AnnouncementMessageFormatter {
             ).then();
     }
 
-    private static String condensedTime(final Announcement a) {
+    private static String condensedTime(Announcement a) {
         return a.getHoursBefore() + "H" + a.getMinutesBefore() + "m";
     }
 
-    public static Mono<String> getSubscriberNames(final Announcement a, final Guild guild) {
+    public static Mono<String> getSubscriberNames(Announcement a, Guild guild) {
         return Mono.defer(() -> {
-            final Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
+            Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .map(Member::getDisplayName)
                 .onErrorReturn("")
                 .collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
-            final Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
+            Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
                 .flatMap(s -> {
                     if ("everyone".equalsIgnoreCase(s))
                         return Mono.just("everyone");
@@ -392,15 +398,15 @@ public class AnnouncementMessageFormatter {
                 .defaultIfEmpty(new ArrayList<>());
 
             return Mono.zip(userMentions, roleMentions).map(TupleUtils.function((users, roles) -> {
-                final StringBuilder mentions = new StringBuilder();
+                StringBuilder mentions = new StringBuilder();
 
                 mentions.append("Subscribers: ");
 
-                for (final String s : users) {
+                for (String s : users) {
                     mentions.append(s).append(" ");
                 }
 
-                for (final String s : roles) {
+                for (String s : roles) {
                     mentions.append(s).append(" ");
                 }
 
@@ -409,16 +415,16 @@ public class AnnouncementMessageFormatter {
         });
     }
 
-    private static Mono<String> getSubscriberMentions(final Announcement a, final Guild guild) {
+    private static Mono<String> getSubscriberMentions(Announcement a, Guild guild) {
         return Mono.defer(() -> {
-            final Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
+            Mono<List<String>> userMentions = Flux.fromIterable(a.getSubscriberUserIds())
                 .flatMap(s -> UserUtils.getUserFromID(s, guild))
                 .map(Member::getNicknameMention)
                 .onErrorReturn("")
                 .collectList()
                 .defaultIfEmpty(new ArrayList<>());
 
-            final Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
+            Mono<List<String>> roleMentions = Flux.fromIterable(a.getSubscriberRoleIds())
                 .flatMap(s -> {
                     if ("everyone".equalsIgnoreCase(s))
                         return Mono.just("@everyone");
@@ -433,15 +439,15 @@ public class AnnouncementMessageFormatter {
                 .defaultIfEmpty(new ArrayList<>());
 
             return Mono.zip(userMentions, roleMentions).map(TupleUtils.function((users, roles) -> {
-                final StringBuilder mentions = new StringBuilder();
+                StringBuilder mentions = new StringBuilder();
 
                 mentions.append("Subscribers: ");
 
-                for (final String s : users) {
+                for (String s : users) {
                     mentions.append(s).append(" ");
                 }
 
-                for (final String s : roles) {
+                for (String s : roles) {
                     mentions.append(s).append(" ");
                 }
 
