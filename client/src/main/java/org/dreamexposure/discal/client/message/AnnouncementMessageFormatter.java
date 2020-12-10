@@ -6,6 +6,8 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.logger.LogFeed;
+import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -25,6 +27,7 @@ import java.util.function.Consumer;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
@@ -90,6 +93,8 @@ public class AnnouncementMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Channel", settings), chanName, true);
+                if (settings.isDevGuild() || settings.isPatronGuild())
+                    spec.addField("Publishable", a.isPublishable() + "", true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
                 if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
                     spec.setColor(a.getEventColor().asColor());
@@ -339,7 +344,16 @@ public class AnnouncementMessageFormatter {
                             .filter(HttpResponseStatus.NOT_FOUND::equals)
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
-                    .flatMap(chan -> Messages.sendMessage(men, em, chan))
+                    .flatMap(chan -> {
+                        if (a.isPublishable()) {
+                            return Messages.sendMessage(men, em, chan)
+                                .flatMap(Message::publish)
+                                .doOnError(e -> LogFeed.log(LogObject.forException("Failed to publish ann", e, AnnouncementMessageFormatter.class)))
+                                .onErrorResume(e -> Mono.empty());
+                        } else {
+                            return Messages.sendMessage(men, em, chan);
+                        }
+                    })
             )).then();
     }
 
@@ -357,7 +371,16 @@ public class AnnouncementMessageFormatter {
                             .filter(HttpResponseStatus.NOT_FOUND::equals)
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
-                    .flatMap(chan -> Messages.sendMessage(men, em, chan))
+                    .flatMap(chan -> {
+                        if (a.isPublishable()) {
+                            return Messages.sendMessage(men, em, chan)
+                                .flatMap(Message::publish)
+                                .doOnError(e -> LogFeed.log(LogObject.forException("Failed to publish ann", e, AnnouncementMessageFormatter.class)))
+                                .onErrorResume(e -> Mono.empty());
+                        } else {
+                            return Messages.sendMessage(men, em, chan);
+                        }
+                    })
             )).then();
     }
 
