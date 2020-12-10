@@ -189,6 +189,11 @@ public class AnnouncementCommand implements Command {
                     case "color":
                     case "colour":
                         return this.moduleColor(args, event, settings);
+                    case "publish":
+                        if (settings.isDevGuild() || settings.isPatronGuild())
+                            return this.modulePublish(event, settings);
+                        else
+                            return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);
                     case "copy":
                         return PermissionChecker.hasDisCalRole(event, settings).flatMap(has -> {
                             if (has)
@@ -1302,10 +1307,23 @@ public class AnnouncementCommand implements Command {
         }).then();
     }
 
-    private Mono<Void> modulePublish(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        //TODO: Add code
+    private Mono<Void> modulePublish(MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
+                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
 
-        return Mono.empty();
+                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
+                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
+
+                a.setPublishable(!a.isPublishable());
+                return Mono.when(deleteUserMessage, deleteCreatorMessage)
+                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
+                    .flatMap(em -> Messages.sendMessage(em, event))
+                    .doOnNext(a::setCreatorMessage);
+            } else {
+                return Messages.sendMessage(Messages.getMessage("Creator.Announcement.NotInit", settings), event);
+            }
+        }).then();
     }
 
     private Mono<Void> moduleChannel(String[] args, MessageCreateEvent event, GuildSettings settings) {
