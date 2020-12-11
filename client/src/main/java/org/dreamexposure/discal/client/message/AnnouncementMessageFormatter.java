@@ -6,8 +6,6 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -93,8 +91,6 @@ public class AnnouncementMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Hours", settings), String.valueOf(a.getHoursBefore()), true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Channel", settings), chanName, true);
-                if (settings.isDevGuild() || settings.isPatronGuild())
-                    spec.addField("Publishable", a.isPublishable() + "", true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
                 if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
                     spec.setColor(a.getEventColor().asColor());
@@ -102,6 +98,8 @@ public class AnnouncementMessageFormatter {
                     spec.setColor(GlobalConst.discalColor);
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+                if (settings.isDevGuild() || settings.isPatronGuild())
+                    spec.addField("Publishable", a.isPublishable() + "", true);
             }));
     }
 
@@ -345,14 +343,10 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable()) {
-                            return Messages.sendMessage(men, em, chan)
-                                .flatMap(Message::publish)
-                                .doOnError(e -> LogFeed.log(LogObject.forException("Failed to publish ann", e, AnnouncementMessageFormatter.class)))
-                                .onErrorResume(e -> Mono.empty());
-                        } else {
+                        if (a.isPublishable())
+                            return Messages.sendMessage(men, em, chan).flatMap(Message::publish);
+                        else
                             return Messages.sendMessage(men, em, chan);
-                        }
                     })
             )).then();
     }
@@ -372,14 +366,10 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable()) {
-                            return Messages.sendMessage(men, em, chan)
-                                .flatMap(Message::publish)
-                                .doOnError(e -> LogFeed.log(LogObject.forException("Failed to publish ann", e, AnnouncementMessageFormatter.class)))
-                                .onErrorResume(e -> Mono.empty());
-                        } else {
+                        if (a.isPublishable())
+                            return Messages.sendMessage(men, em, chan).flatMap(Message::publish);
+                        else
                             return Messages.sendMessage(men, em, chan);
-                        }
                     })
             )).then();
     }
