@@ -88,10 +88,7 @@ public class EventListCommand implements Command {
                     case "ongoing":
                     case "now":
                     case "current":
-                        if (settings.isDevGuild() || settings.isPatronGuild())
-                            return this.moduleOngoing(args, event, settings);
-                        else
-                            return Messages.sendMessage(Messages.getMessage("Notifications.Disabled", settings), event);
+                        return this.moduleOngoing(args, event, settings);
                     case "today":
                     case "day":
                         return this.moduleDay(args, event, settings);
