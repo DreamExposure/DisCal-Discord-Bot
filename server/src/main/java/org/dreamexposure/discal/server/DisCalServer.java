@@ -133,6 +133,7 @@ public class DisCalServer {
             LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
         } catch (final Exception e) {
             LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
+            e.printStackTrace();
             System.exit(2);
         }
     }

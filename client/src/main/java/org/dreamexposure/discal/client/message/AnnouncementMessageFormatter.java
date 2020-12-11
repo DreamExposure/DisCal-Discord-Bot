@@ -343,9 +343,11 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable())
-                            return Messages.sendMessage(men, em, chan).flatMap(Message::publish);
-                        else
+                        if (a.isPublishable()) {
+                            return Messages.sendMessage(men, em, chan)
+                                .flatMap(Message::publish)
+                                .onErrorResume(e -> Mono.empty());
+                        } else
                             return Messages.sendMessage(men, em, chan);
                     })
             )).then();
@@ -366,9 +368,11 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable())
-                            return Messages.sendMessage(men, em, chan).flatMap(Message::publish);
-                        else
+                        if (a.isPublishable()) {
+                            return Messages.sendMessage(men, em, chan)
+                                .flatMap(Message::publish)
+                                .onErrorResume(e -> Mono.empty());
+                        } else
                             return Messages.sendMessage(men, em, chan);
                     })
             )).then();
