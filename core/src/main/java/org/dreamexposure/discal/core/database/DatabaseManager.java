@@ -309,7 +309,7 @@ public class DatabaseManager {
                         + " SET SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,"
                         + " ANNOUNCEMENT_TYPE = ?, MODIFIER = ?, EVENT_ID = ?, EVENT_COLOR = ?, "
                         + " HOURS_BEFORE = ?, MINUTES_BEFORE = ?,"
-                        + " INFO = ?, ENABLED = ?, INFO_ONLY = ?"
+                        + " INFO = ?, ENABLED = ?, INFO_ONLY = ?, PUBLISH = ?"
                         + " WHERE ANNOUNCEMENT_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -325,7 +325,8 @@ public class DatabaseManager {
                         .bind(9, announcement.getInfo())
                         .bind(10, announcement.isEnabled())
                         .bind(11, announcement.isInfoOnly())
-                        .bind(12, announcement.getAnnouncementId().toString())
+                        .bind(12, announcement.isPublishable())
+                        .bind(13, announcement.getAnnouncementId().toString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
@@ -333,8 +334,8 @@ public class DatabaseManager {
                     final String insertCommand = "INSERT INTO " + table +
                         "(ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER, " +
                         "CHANNEL_ID, ANNOUNCEMENT_TYPE, MODIFIER, EVENT_ID, EVENT_COLOR, " +
-                        "HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY)" +
-                        " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY, PUBLISH)" +
+                        " VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, announcement.getAnnouncementId().toString())
@@ -351,6 +352,7 @@ public class DatabaseManager {
                         .bind(11, announcement.getInfo())
                         .bind(12, announcement.isEnabled())
                         .bind(13, announcement.isInfoOnly())
+                        .bind(14, announcement.isPublishable())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
@@ -734,6 +736,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -772,6 +775,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -811,6 +815,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -852,6 +857,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -891,6 +897,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -932,6 +939,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -972,6 +980,7 @@ public class DatabaseManager {
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
+            a.setPublishable(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
