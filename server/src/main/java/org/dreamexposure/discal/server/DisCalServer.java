@@ -126,8 +126,7 @@ public class DisCalServer {
             if (repair)
                 flyway.repair();
             else
-                sm = flyway.migrate();
-
+                sm = flyway.migrate().migrationsExecuted;
 
             org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
             LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
