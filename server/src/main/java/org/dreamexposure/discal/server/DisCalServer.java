@@ -19,7 +19,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.system.ApplicationPid;
 
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,7 +36,7 @@ public class DisCalServer {
     public static void main(final String[] args) throws IOException {
         //Get settings
         final Properties p = new Properties();
-        p.load(new FileReader(new File("settings.properties")));
+        p.load(new FileReader("settings.properties"));
         BotSettings.init(p);
 
         if (args.length > 1 && "-forceNewAuth".equalsIgnoreCase(args[0])) {
