@@ -43,13 +43,13 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>6.5.5</version>
+            <version>7.3.1</version>
         </dependency>
         <!--MySQL Driver-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.21</version>
+            <version>8.0.22</version>
         </dependency>
         <!--top.gg API library-->
         <dependency>
