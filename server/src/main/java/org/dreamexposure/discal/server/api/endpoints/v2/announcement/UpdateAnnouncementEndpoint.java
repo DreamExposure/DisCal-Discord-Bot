@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
+import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -19,12 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import discord4j.common.util.Snowflake;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/v2/announcement")
@@ -72,6 +70,8 @@ public class UpdateAnnouncementEndpoint {
                     a.setInfoOnly(body.getBoolean("info_only"));
                 if (body.has("enabled"))
                     a.setEnabled(body.getBoolean("enabled"));
+                if (body.has("publish"))
+                    a.setPublishable(body.getBoolean("publish"));
 
                 //Handle subscribers....
                 if (body.has("remove_subscriber_roles")) {
