@@ -102,7 +102,7 @@ public class AddCalendarCommand implements Command {
                                     .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
                                     .flatMap(valid -> {
                                         if (valid) {
-                                            final CalendarData data = CalendarData.fromData(settings.getGuildID(), 1,
+                                            final CalendarData data = new CalendarData(settings.getGuildID(), 1,
                                                 args[0], args[0], true, 0);
 
                                             //update guild settings to reflect changes...

@@ -42,39 +42,41 @@ public class KeepAliveEndpoint {
             final int index = body.getInt("index");
             if (DisCalServer.getNetworkInfo().doesClientExist(index)) {
                 //In network, update info...
-                final ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(index);
+                ConnectedClient cc = DisCalServer.getNetworkInfo().getClient(index);
+                String oldPid = cc.getPid();
 
-                cc.setLastKeepAlive(System.currentTimeMillis());
-                cc.setConnectedServers(body.getInt("guilds"));
-                cc.setMemUsed(body.getDouble("memory"));
-                cc.setUptime(body.getString("uptime"));
-                cc.setIpForRestart(body.getString("ip"));
-                cc.setPortForRestart(body.getInt("port"));
+                cc = cc.copy(
+                    cc.getClientIndex(),
+                    body.optString("version", "Unknown"),
+                    body.optString("d4j_version", "Unknown"),
+                    body.getInt("guilds"),
+                    System.currentTimeMillis(),
+                    body.getString("uptime"),
+                    body.getDouble("memory"),
+                    body.getString("ip"),
+                    body.getInt("port"),
+                    body.getString("pid")
+                );
 
-                cc.setVersion(body.optString("version", "Unknown"));
-                cc.setD4JVersion(body.optString("d4j_version", "Unknown"));
-
-                if (!cc.getPid().equals(body.getString("pid"))) {
-                    //Was restarted at some point, so we are "re-adding" to network
-                    cc.setPid(body.getString("pid"));
-
+                if (!oldPid.equals(body.getString("pid"))) {
                     LogFeed.log(LogObject.forStatus("Client pid changed", "Shard index: " + cc.getClientIndex()));
                 }
+
+                DisCalServer.getNetworkInfo().updateClient(cc);
             } else {
                 //Not in network, add info...
-                final ConnectedClient cc = new ConnectedClient(index);
-
-                cc.setLastKeepAlive(System.currentTimeMillis());
-                cc.setConnectedServers(body.getInt("guilds"));
-                cc.setMemUsed(body.getDouble("memory"));
-                cc.setUptime(body.getString("uptime"));
-                cc.setVersion(body.optString("version", "Unknown"));
-                cc.setD4JVersion(body.optString("d4j_version", "Unknown"));
-
-                //Network handling stuffs
-                cc.setIpForRestart(body.getString("ip"));
-                cc.setPortForRestart(body.getInt("port"));
-                cc.setPid(body.getString("pid"));
+                final ConnectedClient cc = new ConnectedClient(
+                    index,
+                    body.optString("version", "Unknown"),
+                    body.optString("d4j_version", "Unknown"),
+                    body.getInt("guilds"),
+                    System.currentTimeMillis(),
+                    body.getString("uptime"),
+                    body.getDouble("memory"),
+                    body.getString("ip"),
+                    body.getInt("port"),
+                    body.getString("pid")
+                );
 
                 DisCalServer.getNetworkInfo().addClient(cc);
             }

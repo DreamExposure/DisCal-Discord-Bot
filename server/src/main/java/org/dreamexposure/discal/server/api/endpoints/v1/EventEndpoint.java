@@ -257,9 +257,9 @@ public class EventEndpoint {
                 event.setRecurrence(Arrays.asList(rr));
             }
 
-            EventData ed = EventData.empty();
+            EventData ed = new EventData();
             if (!"".equalsIgnoreCase(body.getString("image"))) {
-                ed = EventData.fromImage(
+                ed = new EventData(
                     Snowflake.of(guildId),
                     eventId,
                     end.getDateTime().getValue(),
@@ -357,9 +357,9 @@ public class EventEndpoint {
                 event.setRecurrence(Arrays.asList(rr));
             }
 
-            EventData ed = EventData.empty();
+            EventData ed = new EventData();
             if (!"".equalsIgnoreCase(body.getString("image"))) {
-                ed = EventData.fromImage(
+                ed = new EventData(
                     Snowflake.of(guildId),
                     event.getId(),
                     end.getDateTime().getValue(),

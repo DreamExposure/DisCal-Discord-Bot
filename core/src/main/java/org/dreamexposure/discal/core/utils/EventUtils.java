@@ -73,7 +73,7 @@ public class EventUtils {
                         p.setColor(EventColor.NONE);
                 })
             ).switchIfEmpty(Mono.just(new PreEvent(guildId))
-                .doOnNext(p -> p.setEventData(EventData.empty()))
+                .doOnNext(p -> p.setEventData(new EventData()))
                 .doOnNext(p -> p.setSummary(event.getSummary()))
                 .doOnNext(p -> p.setDescription(event.getDescription()))
                 .doOnNext(p -> p.setLocation(event.getLocation()))

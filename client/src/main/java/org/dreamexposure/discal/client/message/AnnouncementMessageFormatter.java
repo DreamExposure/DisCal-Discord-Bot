@@ -54,7 +54,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
@@ -118,7 +118,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
@@ -182,7 +182,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getAnnouncementType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
             .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
@@ -246,7 +246,7 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty("TZ Unknown/Error");
 
         Mono<EventData> eData = DatabaseManager.getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(EventData.empty())
+            .defaultIfEmpty(new EventData())
             .cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)

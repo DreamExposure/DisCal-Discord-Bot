@@ -87,12 +87,14 @@ public class GoogleExternalAuth {
 
                         return event.getMessage().getAuthorAsMember().flatMap(user -> {
                             //Start timer to poll Google Cal for auth
-                            final Poll poll = new Poll(user, settings);
-
-                            poll.setDevice_code(codeResponse.getString("device_code"));
-                            poll.setRemainingSeconds(codeResponse.getInt("expires_in"));
-                            poll.setExpires_in(codeResponse.getInt("expires_in"));
-                            poll.setInterval(codeResponse.getInt("interval"));
+                            final Poll poll = new Poll(
+                                user,
+                                settings,
+                                codeResponse.getInt("interval"),
+                                codeResponse.getInt("expires_in"),
+                                codeResponse.getInt("expires_in"),
+                                codeResponse.getString("device_code")
+                            );
 
                             PollManager.getManager().scheduleNextPoll(poll);
 
@@ -127,7 +129,7 @@ public class GoogleExternalAuth {
             final RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", Authorization.getAuth().getClientData().getClientId())
                 .addEncoded("client_secret", Authorization.getAuth().getClientData().getClientSecret())
-                .addEncoded("code", poll.getDevice_code())
+                .addEncoded("code", poll.getDeviceCode())
                 .addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
                 .build();
 

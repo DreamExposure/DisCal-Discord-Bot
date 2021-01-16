@@ -193,12 +193,12 @@ public class EventWrapper {
             ).filter(i -> i > -1)
             .flatMap(correctCredential -> {
                 //Ayyyyy we found the correct one!! Lets go ahead and save that and bump this back to the calling method
-                CalendarData corrected = CalendarData.fromData(
+                CalendarData corrected = new CalendarData(
                     data.getGuildId(),
                     data.getCalendarNumber(),
                     data.getCalendarId(),
                     data.getCalendarAddress(),
-                    data.isExternal(),
+                    data.getExternal(),
                     correctCredential);
 
 

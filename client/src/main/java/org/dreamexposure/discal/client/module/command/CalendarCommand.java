@@ -95,7 +95,7 @@ public class CalendarCommand implements Command {
                 return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
             } else {
                 return DatabaseManager.getMainCalendar(settings.getGuildID())
-                    .defaultIfEmpty(CalendarData.empty())
+                    .defaultIfEmpty(new CalendarData())
                     .flatMap(calData -> {
                         switch (args[0].toLowerCase()) {
                             case "create":
@@ -244,9 +244,9 @@ public class CalendarCommand implements Command {
                     "Please wait... (if this takes longer than 5 minutes, please alert the devs. " +
                     "We are working on fixing it. Sorry.", event)
                     .then(CalendarCreator.getCreator().confirmCalendar(settings).flatMap(response -> {
-                        if (response.isSuccessful()) {
+                        if (response.getSuccessful()) {
                             final String msg;
-                            if (response.isEdited())
+                            if (response.getEdited())
                                 msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Success", settings);
                             else
                                 msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Success", settings);
@@ -261,7 +261,7 @@ public class CalendarCommand implements Command {
                             //Failed, post failure message
                             final PreCalendar preCal = CalendarCreator.getCreator().getPreCalendar(settings.getGuildID());
                             final String msg;
-                            if (response.isEdited())
+                            if (response.getEdited())
                                 msg = Messages.getMessage("Creator.Calendar.Confirm.Edit.Failure", settings);
                             else
                                 msg = Messages.getMessage("Creator.Calendar.Confirm.Create.Failure", settings);

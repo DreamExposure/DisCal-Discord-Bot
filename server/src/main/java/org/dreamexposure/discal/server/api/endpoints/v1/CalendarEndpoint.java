@@ -54,7 +54,7 @@ public class CalendarEndpoint {
             if (!"primary".equalsIgnoreCase(calendar.getCalendarAddress())) {
 
                 final JSONObject body = new JSONObject();
-                body.put("external", calendar.isExternal());
+                body.put("external", calendar.getExternal());
                 body.put("id", calendar.getCalendarId());
                 body.put("address", calendar.getCalendarAddress());
 
@@ -102,7 +102,7 @@ public class CalendarEndpoint {
                 if (!"primary".equalsIgnoreCase(cal.getCalendarAddress())) {
                     final JSONObject body = new JSONObject();
                     body.put("number", cal.getCalendarNumber());
-                    body.put("external", cal.isExternal());
+                    body.put("external", cal.getExternal());
                     body.put("id", cal.getCalendarId());
                     body.put("address", cal.getCalendarAddress());
 

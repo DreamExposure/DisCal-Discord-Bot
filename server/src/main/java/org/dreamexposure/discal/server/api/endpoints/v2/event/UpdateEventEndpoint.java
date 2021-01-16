@@ -97,7 +97,7 @@ public class UpdateEventEndpoint {
                 if (requestBody.has("image")) {
                     if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild()).block()) {
                         //Link is good...
-                        final EventData ed = EventData.fromImage(
+                        final EventData ed = new EventData(
                             Snowflake.of(guildId),
                             event.getId(),
                             event.getEnd().getDateTime().getValue(),

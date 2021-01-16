@@ -133,7 +133,7 @@ public class CalendarCreator {
                 if (!pre.isEditing()) {
                     return CalendarWrapper.createCalendar(calendar, credId)
                         .flatMap(confirmed -> {
-                            final CalendarData data = CalendarData.fromData(
+                            final CalendarData data = new CalendarData(
                                 settings.getGuildID(),
                                 1, //TODO: Support multi-calendar
                                 confirmed.getId(),
@@ -145,8 +145,8 @@ public class CalendarCreator {
                                 .setScope(new AclRule.Scope().setType("default"))
                                 .setRole("reader");
 
-                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true,
-                                confirmed, pre.getCreatorMessage(), false);
+                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true, false,
+                                pre.getCreatorMessage(), confirmed);
 
                             return Mono.when(
                                 DatabaseManager.updateCalendar(data),
@@ -154,7 +154,7 @@ public class CalendarCreator {
                             )
                                 .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
                                 .thenReturn(response);
-                        }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), false));
+                        }).defaultIfEmpty(new CalendarCreatorResponse(false, false, pre.getCreatorMessage(), null));
                 } else {
                     //Editing calendar...
                     calendar.setId(pre.getCalendarId());
@@ -164,15 +164,15 @@ public class CalendarCreator {
                                 .setScope(new AclRule.Scope().setType("default"))
                                 .setRole("reader");
 
-                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true,
-                                confirmed, pre.getCreatorMessage(), true);
+                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true, true,
+                                pre.getCreatorMessage(), confirmed);
 
                             return AclRuleWrapper.insertRule(rule, pre.getCalendarData(), settings)
                                 .doOnNext(a -> this.terminate(settings.getGuildID()))
                                 .thenReturn(response);
-                        }).defaultIfEmpty(new CalendarCreatorResponse(false, null, pre.getCreatorMessage(), true));
+                        }).defaultIfEmpty(new CalendarCreatorResponse(false, true, pre.getCreatorMessage(), null));
                 }
-            }).defaultIfEmpty(new CalendarCreatorResponse(false, null, null, false));
+            }).defaultIfEmpty(new CalendarCreatorResponse(false, false, null, null));
     }
 
     //Getters
