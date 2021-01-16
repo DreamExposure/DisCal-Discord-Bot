@@ -63,7 +63,7 @@ public class PreEvent {
         this.recur = false;
         this.recurrence = new Recurrence();
 
-        this.eventData = EventData.empty();
+        this.eventData = new EventData();
 
         this.editing = false;
         this.lastEdit = System.currentTimeMillis();

@@ -50,7 +50,7 @@ public class CalendarWrapper {
 
     public static Mono<Void> deleteCalendar(final CalendarData data, final GuildSettings settings) {
         return Mono.just(data)
-            .filter(cd -> !cd.isExternal())
+            .filter(cd -> !cd.getExternal())
             .filter(cd -> !"primary".equalsIgnoreCase(cd.getCalendarAddress()))
             .flatMap(cd ->
                 CalendarAuth.getCalendarService(settings, data).flatMap(service ->

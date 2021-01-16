@@ -40,7 +40,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> sDate = getHumanReadableDate(event.getStart(), false, settings);
         final Mono<String> sTime = getHumanReadableTime(event.getStart(), false, settings);
         final Mono<String> eDate = getHumanReadableDate(event.getEnd(), false, settings);
@@ -111,7 +111,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> sDate = getHumanReadableDate(event.getStart(), calNum, false, settings);
         final Mono<String> sTime = getHumanReadableTime(event.getStart(), calNum, false, settings);
         final Mono<String> eDate = getHumanReadableDate(event.getEnd(), calNum, false, settings);
@@ -183,7 +183,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> date = getHumanReadableDate(event.getStart(), false, settings);
         final Mono<String> time = getHumanReadableTime(event.getStart(), false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
@@ -236,7 +236,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
         final Mono<String> time = getHumanReadableTime(event.getOriginalStartTime(), 1, false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
@@ -432,7 +432,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), ecr.getEvent().getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), false, settings);
         final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
@@ -482,7 +482,7 @@ public class EventMessageFormatter {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         final Mono<EventData> data = DatabaseManager
             .getEventData(settings.getGuildID(), ecr.getEvent().getId())
-            .defaultIfEmpty(EventData.empty()).cache();
+            .defaultIfEmpty(new EventData()).cache();
         final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), calNum, false, settings);
         final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), calNum, false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)

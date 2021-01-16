@@ -2,8 +2,7 @@ package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.EventDateTime;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
+
 import org.dreamexposure.discal.client.event.EventCreator;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
@@ -15,9 +14,13 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.utils.*;
+import org.dreamexposure.discal.core.utils.EventUtils;
+import org.dreamexposure.discal.core.utils.GeneralUtils;
+import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,6 +29,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.function.Consumer;
+
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
+import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -110,7 +117,7 @@ public class EventCommand implements Command {
     @Override
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         //TODO: Add multi-cal handling
-        return DatabaseManager.getMainCalendar(settings.getGuildID()).defaultIfEmpty(CalendarData.empty())
+        return DatabaseManager.getMainCalendar(settings.getGuildID()).defaultIfEmpty(new CalendarData())
             .flatMap(calData -> {
                 if (args.length < 1) {
                     return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
@@ -776,7 +783,7 @@ public class EventCommand implements Command {
                     final String value = args[1].trim();
                     if ("delete".equalsIgnoreCase(value) || "remove".equalsIgnoreCase(value)
                         || "clear".equalsIgnoreCase(value)) {
-                        pre.setEventData(EventData.empty());
+                        pre.setEventData(new EventData());
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -788,7 +795,7 @@ public class EventCommand implements Command {
                             if (valid) {
                                 final PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 
-                                final EventData eventData = EventData.fromImage(
+                                final EventData eventData = new EventData(
                                     settings.getGuildID(),
                                     preEvent.getEventId(),
                                     preEvent.getEndDateTime().getDateTime().getValue(),

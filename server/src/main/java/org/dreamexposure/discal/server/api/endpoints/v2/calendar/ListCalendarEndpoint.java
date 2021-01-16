@@ -61,7 +61,7 @@ public class ListCalendarEndpoint {
                     jCal.put("calendar_address", calData.getCalendarAddress());
                     jCal.put("calendar_id", calData.getCalendarId());
                     jCal.put("calendar_number", calData.getCalendarNumber());
-                    jCal.put("external", calData.isExternal());
+                    jCal.put("external", calData.getExternal());
                     jCal.put("summary", cal.getSummary());
                     jCal.put("description", cal.getDescription());
                     jCal.put("timezone", cal.getTimeZone());

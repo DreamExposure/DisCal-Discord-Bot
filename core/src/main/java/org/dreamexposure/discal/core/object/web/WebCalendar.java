@@ -30,9 +30,9 @@ public class WebCalendar {
             return CalendarWrapper.getCalendar(cd, gs)
                 .map(cal -> new WebCalendar(
                         id, address, link, cal.getSummary(), cal.getDescription(),
-                        cal.getTimeZone().replace("/", "___"), cd.isExternal()
+                        cal.getTimeZone().replace("/", "___"), cd.getExternal()
                     )
-                ).onErrorReturn(new WebCalendar(id, address, link, "ERROR", "ERROR", "ERROR", cd.isExternal()));
+                ).onErrorReturn(new WebCalendar(id, address, link, "ERROR", "ERROR", "ERROR", cd.getExternal()));
         }
     }
 

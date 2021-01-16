@@ -262,7 +262,7 @@ public class DatabaseManager {
                         .bind(0, calData.getCalendarNumber())
                         .bind(1, calData.getCalendarId())
                         .bind(2, calData.getCalendarAddress())
-                        .bind(3, calData.isExternal())
+                        .bind(3, calData.getExternal())
                         .bind(4, calData.getCredentialId())
                         .bind(5, calData.getGuildId().asString())
                         .execute())
@@ -279,7 +279,7 @@ public class DatabaseManager {
                         .bind(1, calData.getCalendarNumber())
                         .bind(2, calData.getCalendarId())
                         .bind(3, calData.getCalendarAddress())
-                        .bind(4, calData.isExternal())
+                        .bind(4, calData.getExternal())
                         .bind(5, calData.getCredentialId())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
@@ -561,7 +561,7 @@ public class DatabaseManager {
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
 
-            return CalendarData.fromData(guildId, 1, calId, calAddr, external, credId);
+            return new CalendarData(guildId, 1, calId, calAddr, external, credId);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -590,7 +590,7 @@ public class DatabaseManager {
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
 
-            return CalendarData.fromData(guildId, calendarNumber, calId, calAddr, external, credId);
+            return new CalendarData(guildId, calendarNumber, calId, calAddr, external, credId);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -617,7 +617,7 @@ public class DatabaseManager {
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
 
-            return CalendarData.fromData(guildId, 1, calId, calAddr, external, credId);
+            return new CalendarData(guildId, 1, calId, calAddr, external, credId);
         }))
             .collectList()
             .retryWhen(Retry.max(3)
@@ -670,7 +670,7 @@ public class DatabaseManager {
             final long end = row.get("EVENT_END", Long.class);
             final String img = row.get("IMAGE_LINK", String.class);
 
-            return EventData.fromImage(guildId, id, end, img);
+            return new EventData(guildId, id, end, img);
         }))
             .next()
             .retryWhen(Retry.max(3)

@@ -58,7 +58,7 @@ public class GetCalendarEndpoint {
                 body.put("calendar_address", calData.getCalendarAddress());
                 body.put("calendar_id", calData.getCalendarId());
                 body.put("calendar_number", calData.getCalendarNumber());
-                body.put("external", calData.isExternal());
+                body.put("external", calData.getExternal());
                 body.put("summary", cal.getSummary());
                 body.put("description", cal.getDescription());
                 body.put("timezone", cal.getTimeZone());

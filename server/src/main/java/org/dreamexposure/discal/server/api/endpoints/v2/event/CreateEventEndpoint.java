@@ -38,7 +38,7 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/events")
 public class CreateEventEndpoint {
     @PostMapping(value = "/create", produces = "application/json")
-    public String createEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
+    public String createEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.isSuccess()) {
@@ -94,11 +94,11 @@ public class CreateEventEndpoint {
                 event.setRecurrence(Arrays.asList(rr));
             }
 
-            EventData eventData = EventData.empty();
+            EventData eventData = new EventData();
             if (requestBody.has("image")) {
                 if (ImageUtils.validate(requestBody.getString("image"), settings.isPatronGuild()).block()) {
                     //Link is good...
-                    eventData = EventData.fromImage(
+                    eventData = new EventData(
                         Snowflake.of(guildId),
                         event.getId(),
                         event.getEnd().getDateTime().getValue(),

@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONArray;
@@ -74,6 +75,13 @@ public class NetworkInfo {
         LogFeed.log(LogObject
             .forStatus("Client Connected to Network",
                 "Shard index of connected client: " + client.getClientIndex()));
+    }
+
+    public void updateClient(ConnectedClient client) {
+        if (this.doesClientExist(client.getClientIndex()))
+            this.clients.remove(this.getClient(client.getClientIndex()));
+        this.clients.add(client);
+        this.clients.sort(Comparator.comparingInt(ConnectedClient::getClientIndex));
     }
 
     public void removeClient(final int clientIndex) {
@@ -172,7 +180,7 @@ public class NetworkInfo {
 
         final JSONArray jClients = new JSONArray();
         for (final ConnectedClient c : this.clients)
-            jClients.put(c.toJson());
+            jClients.put(JsonUtil.INSTANCE.encodeToJSON(ConnectedClient.class, c));
 
         json.put("clients", jClients);
 
@@ -187,8 +195,9 @@ public class NetworkInfo {
         this.calCount = json.getInt("calendars");
 
         final JSONArray jClients = json.getJSONArray("clients");
+
         for (int i = 0; i < jClients.length(); i++)
-            this.clients.add(new ConnectedClient().fromJson(jClients.getJSONObject(i)));
+            this.clients.add(JsonUtil.INSTANCE.decodeFromJSON(ConnectedClient.class, jClients.getJSONObject(i)));
 
         return this;
     }
