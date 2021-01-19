@@ -99,7 +99,7 @@ public class EventMessageFormatter {
                 spec.setFooter(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
 
                 if (event.getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -170,7 +170,7 @@ public class EventMessageFormatter {
                 spec.setFooter(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
 
                 if (event.getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -224,7 +224,7 @@ public class EventMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -277,7 +277,7 @@ public class EventMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(event.getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -305,7 +305,7 @@ public class EventMessageFormatter {
 
                 if (hasImg)
                     spec.setImage(event.getEventData().getImageLink());
-                if (event.isEditing())
+                if (event.getEditing())
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
 
                 if (event.getSummary() != null) {
@@ -328,7 +328,7 @@ public class EventMessageFormatter {
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
                 }
-                if (event.shouldRecur()) {
+                if (event.getRecur()) {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
@@ -337,7 +337,7 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Pre.StartTime", settings), startTime, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndDate", settings), endDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
+                spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimezone(), true);
 
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
@@ -376,7 +376,7 @@ public class EventMessageFormatter {
 
                 if (hasImg)
                     spec.setImage(event.getEventData().getImageLink());
-                if (event.isEditing())
+                if (event.getEditing())
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
 
                 if (event.getSummary() != null) {
@@ -399,7 +399,7 @@ public class EventMessageFormatter {
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
                 }
-                if (event.shouldRecur()) {
+                if (event.getRecur()) {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
                 } else {
                     spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
@@ -408,7 +408,7 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Pre.StartTime", settings), startTime, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndDate", settings), endDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimeZone(), true);
+                spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimezone(), true);
 
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
@@ -468,7 +468,7 @@ public class EventMessageFormatter {
                 spec.setUrl(ecr.getEvent().getHtmlLink());
 
                 if (ecr.getEvent().getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
@@ -519,7 +519,7 @@ public class EventMessageFormatter {
                 spec.setUrl(ecr.getEvent().getHtmlLink());
 
                 if (ecr.getEvent().getColorId() != null) {
-                    final EventColor ec = EventColor.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
+                    final EventColor ec = EventColor.Companion.fromId(Integer.valueOf(ecr.getEvent().getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);

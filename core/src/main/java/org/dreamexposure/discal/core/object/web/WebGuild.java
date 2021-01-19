@@ -1,5 +1,18 @@
 package org.dreamexposure.discal.core.object.web;
 
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.exceptions.BotNotInGuildException;
+import org.dreamexposure.discal.core.object.BotSettings;
+import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.announcement.Announcement;
+import org.dreamexposure.discal.core.utils.GuildUtils;
+import org.dreamexposure.discal.core.utils.JsonUtil;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -9,19 +22,8 @@ import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestGuild;
 import discord4j.rest.util.Image;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.exceptions.BotNotInGuildException;
-import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.announcement.Announcement;
-import org.dreamexposure.discal.core.utils.GuildUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Nova Fox on 12/19/17.
@@ -53,28 +55,28 @@ public class WebGuild {
         final Mono<GuildSettings> settings = DatabaseManager.getSettings(id).cache();
 
         final Mono<List<WebRole>> roles = settings.flatMapMany(s ->
-            g.getRoles().map(role -> WebRole.fromRole(role, s)))
+            g.getRoles().map(role -> WebRole.Companion.fromRole(role, s)))
             .collectList();
 
         final Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
             g.getChannels()
                 .ofType(GuildMessageChannel.class)
-                .map(channel -> WebChannel.fromChannel(channel, s)))
+                .map(channel -> WebChannel.Companion.fromChannel(channel, s)))
             .collectList();
 
         final Mono<List<Announcement>> announcements = DatabaseManager.getAnnouncements(id);
 
         final Mono<WebCalendar> calendar = settings.flatMap(s ->
             DatabaseManager.getMainCalendar(id)
-                .flatMap(d -> WebCalendar.fromCalendar(d, s))
+                .flatMap(d -> WebCalendar.Companion.fromCalendar(d, s))
         )
-            .defaultIfEmpty(WebCalendar.empty());
+            .defaultIfEmpty(WebCalendar.Companion.empty());
 
         return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
             .map(TupleUtils.function((bn, s, r, wc, a, c) -> {
                 final WebGuild wg = new WebGuild(id.asLong(), name, iconUrl, s, bn, false, false, c);
 
-                wg.getChannels().add(WebChannel.all(s));
+                wg.getChannels().add(WebChannel.Companion.all(s));
 
                 wg.getRoles().addAll(r);
                 wg.getChannels().addAll(wc);
@@ -95,27 +97,27 @@ public class WebGuild {
         final Mono<GuildSettings> settings = DatabaseManager.getSettings(g.getId()).cache();
 
         final Mono<List<WebRole>> roles = settings.flatMapMany(s ->
-            g.getRoles().map(role -> WebRole.fromRole(role, s)))
+            g.getRoles().map(role -> WebRole.Companion.fromRole(role, s)))
             .collectList();
 
         final Mono<List<WebChannel>> webChannels = settings.flatMapMany(s ->
             g.getChannels()
                 .ofType(GuildMessageChannel.class)
-                .map(channel -> WebChannel.fromChannel(channel, s)))
+                .map(channel -> WebChannel.Companion.fromChannel(channel, s)))
             .collectList();
 
         final Mono<List<Announcement>> announcements = DatabaseManager.getAnnouncements(g.getId());
 
         final Mono<WebCalendar> calendar = settings.flatMap(s ->
             DatabaseManager.getMainCalendar(Snowflake.of(id))
-                .flatMap(d -> WebCalendar.fromCalendar(d, s))
+                .flatMap(d -> WebCalendar.Companion.fromCalendar(d, s))
         );
 
         return Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
             .map(TupleUtils.function((bn, s, r, wc, a, c) -> {
                 final WebGuild wg = new WebGuild(id, name, iconUrl, s, bn, false, false, c);
 
-                wg.getChannels().add(WebChannel.all(s));
+                wg.getChannels().add(WebChannel.Companion.all(s));
 
                 wg.getRoles().addAll(r);
                 wg.getChannels().addAll(wc);
@@ -137,21 +139,22 @@ public class WebGuild {
             data.optString("bot_nick"),
             data.getBoolean("manage_server"),
             data.getBoolean("discal_role"),
-            WebCalendar.fromJson(data.getJSONObject("calendar")));
+            JsonUtil.INSTANCE.decodeFromJSON(WebCalendar.class, data.getJSONObject("calendar")));
 
         final JSONArray jRoles = data.getJSONArray("roles");
         for (int i = 0; i < jRoles.length(); i++) {
-            webGuild.getRoles().add(WebRole.fromJson(jRoles.getJSONObject(i)));
+            webGuild.getRoles().add(JsonUtil.INSTANCE.decodeFromJSON(WebRole.class, jRoles.getJSONObject(i)));
         }
 
         final JSONArray jChannels = data.getJSONArray("channels");
         for (int i = 0; i < jChannels.length(); i++) {
-            webGuild.getChannels().add(WebChannel.fromJson(jChannels.getJSONObject(i)));
+            webGuild.getChannels().add(JsonUtil.INSTANCE.decodeFromJSON(WebChannel.class, jChannels.getJSONObject(i)));
         }
 
         final JSONArray jAnnouncements = data.getJSONArray("announcements");
         for (int i = 0; i < jAnnouncements.length(); i++) {
-            webGuild.getAnnouncements().add(new Announcement(Snowflake.of(id)).fromJson(jAnnouncements.getJSONObject(i)));
+            webGuild.getAnnouncements()
+                .add(JsonUtil.INSTANCE.decodeFromJSON(Announcement.class, jAnnouncements.getJSONObject(i)));
         }
 
         return webGuild;
@@ -283,23 +286,23 @@ public class WebGuild {
 
         final JSONArray jRoles = new JSONArray();
         for (final WebRole wr : this.roles) {
-            jRoles.put(wr.toJson());
+            jRoles.put(JsonUtil.INSTANCE.encodeToJSON(WebRole.class, wr));
         }
         data.put("roles", jRoles);
 
         final JSONArray jChannels = new JSONArray();
         for (final WebChannel wc : this.channels) {
-            jChannels.put(wc.toJson());
+            jChannels.put(JsonUtil.INSTANCE.encodeToJSON(WebChannel.class, wc));
         }
         data.put("channels", jChannels);
 
         final JSONArray jAnnouncements = new JSONArray();
         for (final Announcement a : this.announcements) {
-            jAnnouncements.put(a.toJson());
+            jAnnouncements.put(JsonUtil.INSTANCE.encodeToJSON(Announcement.class, a));
         }
         data.put("announcements", jAnnouncements);
 
-        data.put("calendar", this.calendar.toJson());
+        data.put("calendar", JsonUtil.INSTANCE.encodeToJSON(WebCalendar.class, this.calendar));
 
         //Add data about shard this guild is expected to be on
         data.put("shard", GuildUtils.findShard(Snowflake.of(this.getId())));

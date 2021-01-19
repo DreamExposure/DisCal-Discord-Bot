@@ -6,6 +6,6 @@ import discord4j.core.`object`.entity.Message
 data class CalendarCreatorResponse(
         val successful: Boolean,
         val edited: Boolean,
-        val creatorMessage: Message,
+        val creatorMessage: Message?,
         val calendar: Calendar
 )

@@ -21,6 +21,7 @@ import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONObject;
@@ -47,10 +48,10 @@ public class EventEndpoint {
     public static String getEventsForMonth(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -107,10 +108,10 @@ public class EventEndpoint {
     public static String getEventsForSelectedDate(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -154,12 +155,12 @@ public class EventEndpoint {
                 else
                     jo.put("location", "N/a");
 
-                jo.put("color", EventColor.fromNameOrHexOrID(e.getColorId()).name());
+                jo.put("color", EventColor.Companion.fromNameOrHexOrId(e.getColorId()).name());
                 jo.put("isParent", !(e.getId().contains("_")));
 
                 if (e.getRecurrence() != null && !e.getRecurrence().isEmpty()) {
                     jo.put("recur", true);
-                    final Recurrence r = new Recurrence().fromRRule(e.getRecurrence().get(0));
+                    final Recurrence r = Recurrence.Companion.fromRRule(e.getRecurrence().get(0));
 
                     final JSONObject rjo = new JSONObject();
                     rjo.put("frequency", r.getFrequency().name());
@@ -206,10 +207,10 @@ public class EventEndpoint {
     public static String updateEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -240,7 +241,7 @@ public class EventEndpoint {
             event.setEnd(end.setTimeZone(cal.getTimeZone()));
 
             if (!"NONE".equalsIgnoreCase(body.getString("color")))
-                event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId() + "");
+                event.setColorId(EventColor.Companion.fromNameOrHexOrId(body.getString("color")).getId() + "");
 
             if (!"".equalsIgnoreCase(body.getString("location")) || !"N/a".equalsIgnoreCase(body.getString("location")))
                 event.setLocation(body.getString("location"));
@@ -248,10 +249,11 @@ public class EventEndpoint {
             final JSONObject recur = body.getJSONObject("recurrence");
             if (recur.getBoolean("recur")) {
                 //Handle recur
-                final Recurrence recurrence = new Recurrence();
-                recurrence.setFrequency(EventFrequency.fromValue(recur.getString("frequency")));
-                recurrence.setCount(recur.getInt("count"));
-                recurrence.setInterval(recur.getInt("interval"));
+                final Recurrence recurrence = new Recurrence(
+                    EventFrequency.Companion.fromValue(recur.getString("frequency")),
+                    recur.getInt("interval"),
+                    recur.getInt("count")
+                );
 
                 final String[] rr = {recurrence.toRRule()};
                 event.setRecurrence(Arrays.asList(rr));
@@ -306,10 +308,10 @@ public class EventEndpoint {
     public static String createEvent(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -340,7 +342,7 @@ public class EventEndpoint {
             event.setEnd(end.setTimeZone(cal.getTimeZone()));
 
             if (!"NONE".equalsIgnoreCase(body.getString("color")))
-                event.setColorId(EventColor.fromNameOrHexOrID(body.getString("color")).getId() + "");
+                event.setColorId(EventColor.Companion.fromNameOrHexOrId(body.getString("color")).getId() + "");
 
             if (!"".equalsIgnoreCase(body.getString("location")) || !"N/a".equalsIgnoreCase(body.getString("location")))
                 event.setLocation(body.getString("location"));
@@ -348,10 +350,11 @@ public class EventEndpoint {
             final JSONObject recur = body.getJSONObject("recurrence");
             if (recur.getBoolean("recur")) {
                 //Handle recur
-                final Recurrence recurrence = new Recurrence();
-                recurrence.setFrequency(EventFrequency.fromValue(recur.getString("frequency")));
-                recurrence.setCount(recur.getInt("count"));
-                recurrence.setInterval(recur.getInt("interval"));
+                final Recurrence recurrence = new Recurrence(
+                    EventFrequency.Companion.fromValue(recur.getString("frequency")),
+                    recur.getInt("interval"),
+                    recur.getInt("count")
+                );
 
                 final String[] rr = {recurrence.toRRule()};
                 event.setRecurrence(Arrays.asList(rr));
@@ -412,10 +415,10 @@ public class EventEndpoint {
                                      @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.

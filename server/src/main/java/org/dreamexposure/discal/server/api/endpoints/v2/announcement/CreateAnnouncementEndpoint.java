@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
-import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -10,6 +9,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import discord4j.common.util.Snowflake;
+
 @RestController
 @RequestMapping("/v2/announcement")
 public class CreateAnnouncementEndpoint {
@@ -29,11 +31,11 @@ public class CreateAnnouncementEndpoint {
     public String createAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (authState.isReadOnly()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (authState.getReadOnly()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
@@ -47,15 +49,15 @@ public class CreateAnnouncementEndpoint {
             final Announcement a = new Announcement(guildId);
 
             a.setAnnouncementChannelId(body.getString("channel"));
-            a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+            a.setType(AnnouncementType.Companion.fromValue(body.getString("type")));
 
-            a.setModifier(AnnouncementModifier.fromValue(body.optString("modifier", "BEFORE")));
+            a.setModifier(AnnouncementModifier.Companion.fromValue(body.optString("modifier", "BEFORE")));
 
-            if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
-                a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("color")));
+            if (a.getType().equals(AnnouncementType.COLOR))
+                a.setEventColor(EventColor.Companion.fromNameOrHexOrId(body.getString("color")));
 
-            if (a.getAnnouncementType().equals(AnnouncementType.RECUR) ||
-                a.getAnnouncementType().equals(AnnouncementType.SPECIFIC))
+            if (a.getType().equals(AnnouncementType.RECUR) ||
+                a.getType().equals(AnnouncementType.SPECIFIC))
                 a.setEventId(body.getString("event_id"));
 
             a.setHoursBefore(body.getInt("hours"));
@@ -69,7 +71,7 @@ public class CreateAnnouncementEndpoint {
             if (body.has("info_only"))
                 a.setInfoOnly(body.getBoolean("info_only"));
             if (body.has("publish"))
-                a.setPublishable(body.getBoolean("publish"));
+                a.setPublish(body.getBoolean("publish"));
 
             if (DatabaseManager.updateAnnouncement(a).block()) {
                 final JSONObject responseBody = new JSONObject();

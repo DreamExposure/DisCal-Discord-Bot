@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.web.network.discord;
 
-import org.dreamexposure.discal.core.enums.GoodTimezone;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.enums.timezone.GoodTimezone;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;

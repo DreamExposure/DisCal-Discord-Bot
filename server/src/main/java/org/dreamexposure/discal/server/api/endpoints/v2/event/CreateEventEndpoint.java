@@ -18,6 +18,7 @@ import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -41,11 +42,11 @@ public class CreateEventEndpoint {
     public String createEvent(HttpServletRequest request, HttpServletResponse response, @RequestBody String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (authState.isReadOnly()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (authState.getReadOnly()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
@@ -82,13 +83,13 @@ public class CreateEventEndpoint {
             if (requestBody.has("description"))
                 event.setDescription(requestBody.getString("description"));
             if (requestBody.has("color"))
-                event.setColorId(EventColor.fromNameOrHexOrID(requestBody.getString("color")).getId() + "");
+                event.setColorId(EventColor.Companion.fromNameOrHexOrId(requestBody.getString("color")).getId() + "");
             if (requestBody.has("location"))
                 event.setLocation(requestBody.getString("location"));
             if (requestBody.has("recur") && requestBody.getBoolean("recur")) {
                 final JSONObject recur = requestBody.getJSONObject("recurrence");
 
-                final Recurrence recurrence = new Recurrence().fromJson(recur);
+                final Recurrence recurrence = JsonUtil.INSTANCE.decodeFromJSON(Recurrence.class, recur);
                 final String[] rr = {recurrence.toRRule()};
 
                 event.setRecurrence(Arrays.asList(rr));

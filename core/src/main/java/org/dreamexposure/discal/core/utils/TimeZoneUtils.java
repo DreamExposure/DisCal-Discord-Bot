@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.utils;
 
-import org.dreamexposure.discal.core.enums.BadTimezone;
+import org.dreamexposure.discal.core.enums.timezone.BadTimezone;
 import org.joda.time.DateTimeZone;
 
 /**

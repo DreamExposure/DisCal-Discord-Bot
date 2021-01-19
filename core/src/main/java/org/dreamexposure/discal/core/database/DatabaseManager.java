@@ -131,7 +131,7 @@ public class DatabaseManager {
 
                     return connect(master, c -> Mono.from(c.createStatement(updateCommand)
                         .bind(0, acc.getUserId())
-                        .bind(1, acc.isBlocked())
+                        .bind(1, acc.getBlocked())
                         .bind(2, acc.getAPIKey())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
@@ -144,7 +144,7 @@ public class DatabaseManager {
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, acc.getUserId())
                         .bind(1, acc.getAPIKey())
-                        .bind(2, acc.isBlocked())
+                        .bind(2, acc.getBlocked())
                         .bind(3, acc.getTimeIssued())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
@@ -316,16 +316,16 @@ public class DatabaseManager {
                         .bind(0, announcement.getSubscriberRoleIdString())
                         .bind(1, announcement.getSubscriberUserIdString())
                         .bind(2, announcement.getAnnouncementChannelId())
-                        .bind(3, announcement.getAnnouncementType().name())
+                        .bind(3, announcement.getType().name())
                         .bind(4, announcement.getModifier().name())
                         .bind(5, announcement.getEventId())
                         .bind(6, announcement.getEventColor().name())
                         .bind(7, announcement.getHoursBefore())
                         .bind(8, announcement.getMinutesBefore())
                         .bind(9, announcement.getInfo())
-                        .bind(10, announcement.isEnabled())
-                        .bind(11, announcement.isInfoOnly())
-                        .bind(12, announcement.isPublishable())
+                        .bind(10, announcement.getEnabled())
+                        .bind(11, announcement.getInfoOnly())
+                        .bind(12, announcement.getPublish())
                         .bind(13, announcement.getAnnouncementId().toString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
@@ -343,16 +343,16 @@ public class DatabaseManager {
                         .bind(2, announcement.getSubscriberRoleIdString())
                         .bind(3, announcement.getSubscriberUserIdString())
                         .bind(4, announcement.getAnnouncementChannelId())
-                        .bind(5, announcement.getAnnouncementType().name())
+                        .bind(5, announcement.getType().name())
                         .bind(6, announcement.getModifier().name())
                         .bind(7, announcement.getEventId())
                         .bind(8, announcement.getEventColor().name())
                         .bind(9, announcement.getHoursBefore())
                         .bind(10, announcement.getMinutesBefore())
                         .bind(11, announcement.getInfo())
-                        .bind(12, announcement.isEnabled())
-                        .bind(13, announcement.isInfoOnly())
-                        .bind(14, announcement.isPublishable())
+                        .bind(12, announcement.getEnabled())
+                        .bind(13, announcement.getInfoOnly())
+                        .bind(14, announcement.getPublish())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
@@ -478,13 +478,12 @@ public class DatabaseManager {
                 .bind(0, APIKey)
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            final UserAPIAccount account = new UserAPIAccount();
-            account.setAPIKey(APIKey);
-            account.setUserId(row.get("USER_ID", String.class));
-            account.setBlocked(row.get("BLOCKED", Boolean.class));
-            account.setTimeIssued(row.get("TIME_ISSUED", Long.class));
-
-            return account;
+            return new UserAPIAccount(
+                row.get("USER_ID", String.class),
+                APIKey,
+                row.get("BLOCKED", Boolean.class),
+                row.get("TIME_ISSUED", Long.class)
+            );
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -723,20 +722,20 @@ public class DatabaseManager {
                 .bind(0, announcementId.toString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -762,20 +761,20 @@ public class DatabaseManager {
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -802,20 +801,20 @@ public class DatabaseManager {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
             final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -844,20 +843,20 @@ public class DatabaseManager {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
             final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -884,20 +883,20 @@ public class DatabaseManager {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
             final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -926,20 +925,20 @@ public class DatabaseManager {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
             final Snowflake guildId = Snowflake.of(row.get("GUILD_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))
@@ -967,20 +966,20 @@ public class DatabaseManager {
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             final UUID announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String.class));
 
-            final Announcement a = new Announcement(announcementId, guildId);
+            final Announcement a = new Announcement(guildId, announcementId);
             a.setSubscriberRoleIdsFromString(row.get("SUBSCRIBERS_ROLE", String.class));
             a.setSubscriberUserIdsFromString(row.get("SUBSCRIBERS_USER", String.class));
             a.setAnnouncementChannelId(row.get("CHANNEL_ID", String.class));
-            a.setAnnouncementType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
+            a.setType(AnnouncementType.valueOf(row.get("ANNOUNCEMENT_TYPE", String.class)));
             a.setModifier(AnnouncementModifier.valueOf(row.get("MODIFIER", String.class)));
             a.setEventId(row.get("EVENT_ID", String.class));
-            a.setEventColor(EventColor.fromNameOrHexOrID(row.get("EVENT_COLOR", String.class)));
+            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(row.get("EVENT_COLOR", String.class)));
             a.setHoursBefore(row.get("HOURS_BEFORE", Integer.class));
             a.setMinutesBefore(row.get("MINUTES_BEFORE", Integer.class));
             a.setInfo(row.get("INFO", String.class));
             a.setEnabled(row.get("ENABLED", Boolean.class));
             a.setInfoOnly(row.get("INFO_ONLY", Boolean.class));
-            a.setPublishable(row.get("PUBLISH", Boolean.class));
+            a.setPublish(row.get("PUBLISH", Boolean.class));
 
             return a;
         }))

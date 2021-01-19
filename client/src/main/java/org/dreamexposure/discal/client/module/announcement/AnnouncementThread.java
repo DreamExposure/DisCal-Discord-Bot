@@ -90,7 +90,7 @@ public class AnnouncementThread {
     //Modifier handling
     private Mono<Void> handleBeforeModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
                                             Calendar service) {
-        switch (a.getAnnouncementType()) {
+        switch (a.getType()) {
             case SPECIFIC:
                 return EventWrapper.getEvent(calData, settings, a.getEventId())
                     .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
@@ -120,7 +120,7 @@ public class AnnouncementThread {
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> e.getColorId() != null
                         && a.getEventColor().equals(EventColor
-                        .fromNameOrHexOrID(e.getColorId())))
+                        .Companion.fromNameOrHexOrId(e.getColorId())))
                     .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
@@ -142,7 +142,7 @@ public class AnnouncementThread {
     //TODO: Actually support this.
     private Mono<Void> handleDuringModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
                                             Calendar service) {
-        switch (a.getAnnouncementType()) {
+        switch (a.getType()) {
             case SPECIFIC:
             case UNIVERSAL:
             case COLOR:
@@ -155,7 +155,7 @@ public class AnnouncementThread {
     //TODO: Actually support this too
     private Mono<Void> handleEndModifier(Guild guild, Announcement a, GuildSettings settings, CalendarData calData,
                                          Calendar service) {
-        switch (a.getAnnouncementType()) {
+        switch (a.getType()) {
             case SPECIFIC:
             case UNIVERSAL:
             case COLOR:
@@ -176,7 +176,7 @@ public class AnnouncementThread {
 
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
-                if (a.getAnnouncementType() == SPECIFIC)
+                if (a.getType() == SPECIFIC)
                     return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
                         .thenReturn(false);
 
@@ -195,7 +195,7 @@ public class AnnouncementThread {
 
         if (difference < 0) {
             //Event past, we can delete announcement depending on the type
-            if (a.getAnnouncementType() == SPECIFIC)
+            if (a.getType() == SPECIFIC)
                 return false; //Shouldn't even be used for specific types...
 
             return false;

@@ -28,9 +28,9 @@ public class Authentication {
     public static AuthenticationState authenticate(final HttpServletRequest request) {
         if (!"POST".equalsIgnoreCase(request.getMethod()) || "GET".equalsIgnoreCase(request.getMethod())) {
             LogFeed.log(LogObject.forDebug("Denied Access", "Method: " + request.getMethod()));
-            return new AuthenticationState(false)
-                .setStatus(GlobalConst.STATUS_NOT_ALLOWED)
-                .setReason("Method not allowed");
+            return AuthenticationState.Companion.invoke(false)
+                .status(GlobalConst.STATUS_NOT_ALLOWED)
+                .reason("Method not allowed");
         }
         //Requires "Authorization Header
         if (request.getHeader("Authorization") != null) {
@@ -38,54 +38,54 @@ public class Authentication {
 
             //Check if this is from within the DisCal network...
             if (key.equals(BotSettings.BOT_API_TOKEN.get())) {
-                return new AuthenticationState(true)
-                    .setStatus(GlobalConst.STATUS_SUCCESS)
-                        .setReason("Success")
-                        .setKeyUsed(key)
-                        .setFromDisCalNetwork(true);
+                return AuthenticationState.Companion.invoke(true)
+                    .status(GlobalConst.STATUS_SUCCESS)
+                    .reason("Success")
+                    .keyUsed(key)
+                    .fromDisCalNetwork(true);
                 //Check if this is a temp key, granted for a logged in user...
             } else if (tempKeys.containsKey(key)) {
-                return new AuthenticationState(true)
-                    .setStatus(GlobalConst.STATUS_SUCCESS)
-                        .setReason("Success")
-                        .setKeyUsed(key)
-                        .setFromDisCalNetwork(false)
-                        .setIsReadOnly(false);
+                return AuthenticationState.Companion.invoke(true)
+                    .status(GlobalConst.STATUS_SUCCESS)
+                    .reason("Success")
+                    .keyUsed(key)
+                    .fromDisCalNetwork(false)
+                    .readOnly(false);
             } else if (readOnlyKeys.containsKey(key)) {
-                return new AuthenticationState(true)
-                    .setStatus(GlobalConst.STATUS_SUCCESS)
-                    .setReason("Success")
-                    .setKeyUsed(key)
-                    .setFromDisCalNetwork(false)
-                    .setIsReadOnly(true);
+                return AuthenticationState.Companion.invoke(true)
+                    .status(GlobalConst.STATUS_SUCCESS)
+                    .reason("Success")
+                    .keyUsed(key)
+                    .fromDisCalNetwork(false)
+                    .readOnly(true);
             } else if ("teapot".equals(key)) {
-                return new AuthenticationState(false)
-                    .setStatus(GlobalConst.STATUS_TEAPOT)
-                    .setReason("I'm a teapot")
-                    .setKeyUsed(key);
+                return AuthenticationState.Companion.invoke(false)
+                    .status(GlobalConst.STATUS_TEAPOT)
+                    .reason("I'm a teapot")
+                    .keyUsed(key);
             }
 
             //Check if this key is in the database...
             final UserAPIAccount acc = DatabaseManager.getAPIAccount(key).block();
-            if (acc != null && !acc.isBlocked()) {
-                return new AuthenticationState(true)
-                    .setStatus(HttpStatusCodes.STATUS_CODE_OK)
-                        .setReason("Success")
-                        .setKeyUsed(key)
-                        .setFromDisCalNetwork(false);
+            if (acc != null && !acc.getBlocked()) {
+                return AuthenticationState.Companion.invoke(true)
+                    .status(HttpStatusCodes.STATUS_CODE_OK)
+                    .reason("Success")
+                    .keyUsed(key)
+                    .fromDisCalNetwork(false);
             }
 
             //If we reach here, the API key does not exist or is blocked...
-            return new AuthenticationState(false)
-                .setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED)
-                    .setReason("Authorization Denied");
+            return AuthenticationState.Companion.invoke(false)
+                .status(GlobalConst.STATUS_AUTHORIZATION_DENIED)
+                .reason("Authorization Denied");
         } else {
             LogFeed.log(LogObject
-                    .forDebug("Attempted API use without Authorization Header",
-                            "IP: " + request.getRemoteAddr()));
-            return new AuthenticationState(false)
-                .setStatus(GlobalConst.STATUS_BAD_REQUEST)
-                    .setReason("Bad Request");
+                .forDebug("Attempted API use without Authorization Header",
+                    "IP: " + request.getRemoteAddr()));
+            return AuthenticationState.Companion.invoke(false)
+                .status(GlobalConst.STATUS_BAD_REQUEST)
+                .reason("Bad Request");
         }
     }
 

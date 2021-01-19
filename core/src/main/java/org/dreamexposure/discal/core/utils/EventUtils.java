@@ -68,7 +68,7 @@ public class EventUtils {
                 .doOnNext(p -> p.setLocation(event.getLocation()))
                 .doOnNext(p -> {
                     if (event.getColorId() != null)
-                        p.setColor(EventColor.fromNameOrHexOrID(event.getColorId()));
+                        p.setColor(EventColor.Companion.fromNameOrHexOrId(event.getColorId()));
                     else
                         p.setColor(EventColor.NONE);
                 })
@@ -79,7 +79,7 @@ public class EventUtils {
                 .doOnNext(p -> p.setLocation(event.getLocation()))
                 .doOnNext(p -> {
                     if (event.getColorId() != null)
-                        p.setColor(EventColor.fromNameOrHexOrID(event.getColorId()));
+                        p.setColor(EventColor.Companion.fromNameOrHexOrId(event.getColorId()));
                     else
                         p.setColor(EventColor.NONE);
                 })

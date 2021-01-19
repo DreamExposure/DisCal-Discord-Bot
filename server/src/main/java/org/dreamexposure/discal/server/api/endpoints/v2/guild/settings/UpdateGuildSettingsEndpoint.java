@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.GuildUtils;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -35,11 +36,11 @@ public class UpdateGuildSettingsEndpoint {
     public String updateSettings(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (authState.isReadOnly()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (authState.getReadOnly()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
@@ -74,7 +75,7 @@ public class UpdateGuildSettingsEndpoint {
                 settings.setPrefix(body.getString("prefix"));
 
             //Allow Official DisCal Shards to change some other things...
-            if (authState.isFromDiscalNetwork()) {
+            if (authState.getFromDiscalNetwork()) {
                 if (body.has("external_calendar"))
                     settings.setUseExternalCalendar(body.getBoolean("external_calendar"));
                 if (body.has("patron_guild"))

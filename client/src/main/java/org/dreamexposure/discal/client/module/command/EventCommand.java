@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
+import org.dreamexposure.discal.core.object.event.Recurrence;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GeneralUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -407,9 +408,9 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
                 if (pre.hasRequiredValues()) {
                     return EventCreator.getCreator().confirmEvent(settings).flatMap(response -> {
-                        if (response.isSuccessful()) {
+                        if (response.getSuccessful()) {
                             final String msg;
-                            if (response.isEdited())
+                            if (response.getEdited())
                                 msg = Messages.getMessage("Creator.Event.Confirm.Edit", settings);
                             else
                                 msg = Messages.getMessage("Creator.Event.Confirm.Create", settings);
@@ -456,7 +457,7 @@ public class EventCommand implements Command {
                         return Mono.just(args[1].trim()).flatMap(dateRaw -> {
                             //Do a lot of date shuffling to get to proper formats and shit like that.
                             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimezone());
                             sdf.setTimeZone(tz);
                             final Date dateObj;
                             try {
@@ -540,7 +541,7 @@ public class EventCommand implements Command {
                         return Mono.just(args[1].trim()).flatMap(dateRaw -> {
                             //Do a lot of date shuffling to get to proper formats and shit like that.
                             final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
-                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimeZone());
+                            final TimeZone tz = TimeZone.getTimeZone(pre.getTimezone());
                             sdf.setTimeZone(tz);
                             final Date dateObj;
                             try {
@@ -688,8 +689,8 @@ public class EventCommand implements Command {
                                 "Use either the name or ID in the command: `!event color <name/id>`", embed, event))
                             .doOnNext(pre::setCreatorMessage);
                     } else {
-                        if (EventColor.exists(value)) {
-                            pre.setColor(EventColor.fromNameOrHexOrID(value));
+                        if (EventColor.Companion.exists(value)) {
+                            pre.setColor(EventColor.Companion.fromNameOrHexOrId(value));
 
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -841,7 +842,7 @@ public class EventCommand implements Command {
 
                 if (args.length == 2) {
                     final String valueString = args[1];
-                    if (pre.isEditing() && pre.getEventId().contains("_")) {
+                    if (pre.getEditing() && pre.getEventId().contains("_")) {
                         //This event is a child of a recurring parent. we can't edit it's recurrence
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -852,7 +853,7 @@ public class EventCommand implements Command {
                     }
 
                     final boolean shouldRecur = Boolean.parseBoolean(valueString);
-                    pre.setShouldRecur(shouldRecur);
+                    pre.setRecur(shouldRecur);
 
                     if (shouldRecur) {
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
@@ -890,9 +891,11 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    if (pre.shouldRecur()) {
-                        if (EventFrequency.isValid(args[1])) {
-                            pre.getRecurrence().setFrequency(EventFrequency.fromValue(args[1]));
+                    if (pre.getRecur()) {
+                        if (EventFrequency.Companion.isValid(args[1])) {
+                            Recurrence r = pre.getRecurrence();
+                            pre.setRecurrence(r.copy(EventFrequency.Companion.fromValue(args[1]), r.getInterval(),
+                                r.getCount()));
 
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -941,7 +944,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    if (pre.shouldRecur()) {
+                    if (pre.getRecur()) {
                         final int amount;
 
                         try {
@@ -954,7 +957,8 @@ public class EventCommand implements Command {
                                 .doOnNext(pre::setCreatorMessage);
                         }
 
-                        pre.getRecurrence().setCount(amount);
+                        Recurrence r = pre.getRecurrence();
+                        pre.setRecurrence(r.copy(r.getFrequency(), r.getInterval(), amount));
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
@@ -990,7 +994,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 if (args.length == 2) {
-                    if (pre.shouldRecur()) {
+                    if (pre.getRecur()) {
                         int amount;
 
                         try {
@@ -1003,7 +1007,8 @@ public class EventCommand implements Command {
                                 .doOnNext(pre::setCreatorMessage);
                         }
 
-                        pre.getRecurrence().setInterval(amount);
+                        Recurrence r = pre.getRecurrence();
+                        pre.setRecurrence(r.copy(r.getFrequency(), amount, r.getCount()));
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(EventMessageFormatter.getPreEventEmbed(pre, settings))

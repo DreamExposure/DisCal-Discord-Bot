@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -40,10 +41,10 @@ public class AnnouncementEndpoint {
     public static String getAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -60,12 +61,12 @@ public class AnnouncementEndpoint {
                 body.put("channel", a.getAnnouncementChannelId());
                 body.put("event_id", a.getEventId());
                 body.put("event_color", a.getEventColor().name());
-                body.put("type", a.getAnnouncementType().name());
+                body.put("type", a.getType().name());
                 body.put("hours", a.getHoursBefore());
                 body.put("minutes", a.getMinutesBefore());
                 body.put("info", a.getInfo());
-                body.put("enabled", a.isEnabled());
-                body.put("info_only", a.isInfoOnly());
+                body.put("enabled", a.getEnabled());
+                body.put("info_only", a.getInfoOnly());
                 body.put("subscribers_role", a.getSubscriberRoleIds());
                 body.put("subscribers_user", a.getSubscriberUserIds());
 
@@ -98,10 +99,10 @@ public class AnnouncementEndpoint {
     public static String createAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -113,12 +114,12 @@ public class AnnouncementEndpoint {
 
             final JSONObject body = new JSONObject(requestBody);
             a.setAnnouncementChannelId(body.getString("channel"));
-            a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+            a.setType(AnnouncementType.Companion.fromValue(body.getString("type")));
 
-            if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
-                a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
+            if (a.getType().equals(AnnouncementType.COLOR))
+                a.setEventColor(EventColor.Companion.fromNameOrHexOrId(body.getString("event_color")));
 
-            if (a.getAnnouncementType().equals(AnnouncementType.RECUR) || a.getAnnouncementType().equals(AnnouncementType.SPECIFIC))
+            if (a.getType().equals(AnnouncementType.RECUR) || a.getType().equals(AnnouncementType.SPECIFIC))
                 a.setEventId(body.getString("event_id"));
 
 
@@ -160,10 +161,10 @@ public class AnnouncementEndpoint {
     public static String updateAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -183,9 +184,9 @@ public class AnnouncementEndpoint {
                 if (body.has("event_id"))
                     a.setEventId(body.getString("event_id"));
                 if (body.has("event_color"))
-                    a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
+                    a.setEventColor(EventColor.Companion.fromNameOrHexOrId(body.getString("event_color")));
                 if (body.has("type"))
-                    a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+                    a.setType(AnnouncementType.Companion.fromValue(body.getString("type")));
                 if (body.has("hours"))
                     a.setHoursBefore(body.getInt("hours"));
                 if (body.has("minutes"))
@@ -231,10 +232,10 @@ public class AnnouncementEndpoint {
     public static String deleteAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -278,10 +279,10 @@ public class AnnouncementEndpoint {
     public static String listAnnouncements(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
         }
 
         //Okay, now handle actual request.
@@ -299,12 +300,12 @@ public class AnnouncementEndpoint {
                     obj.put("channel", a.getAnnouncementChannelId());
                     obj.put("event_id", a.getEventId());
                     obj.put("event_color", a.getEventColor().name());
-                    obj.put("type", a.getAnnouncementType().name());
+                    obj.put("type", a.getType().name());
                     obj.put("hours", a.getHoursBefore());
                     obj.put("minutes", a.getMinutesBefore());
                     obj.put("info", a.getInfo());
-                    obj.put("enabled", a.isEnabled());
-                    obj.put("info_only", a.isInfoOnly());
+                    obj.put("enabled", a.getEnabled());
+                    obj.put("info_only", a.getInfo());
                     obj.put("subscribers_role", a.getSubscriberRoleIds());
                     obj.put("subscribers_user", a.getSubscriberUserIds());
 
@@ -319,12 +320,12 @@ public class AnnouncementEndpoint {
                         obj.put("channel", a.getAnnouncementChannelId());
                         obj.put("event_id", a.getEventId());
                         obj.put("event_color", a.getEventColor().name());
-                        obj.put("type", a.getAnnouncementType().name());
+                        obj.put("type", a.getType().name());
                         obj.put("hours", a.getHoursBefore());
                         obj.put("minutes", a.getMinutesBefore());
                         obj.put("info", a.getInfo());
-                        obj.put("enabled", a.isEnabled());
-                        obj.put("info_only", a.isInfoOnly());
+                        obj.put("enabled", a.getEnabled());
+                        obj.put("info_only", a.getInfo());
                         obj.put("subscribers_role", a.getSubscriberRoleIds());
                         obj.put("subscribers_user", a.getSubscriberUserIds());
 

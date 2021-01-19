@@ -51,7 +51,7 @@ public class EventCreator {
                     this.events.add(event);
 
                     return CalendarWrapper.getCalendar(calData, settings)
-                        .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                        .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                         .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                         .flatMap(embed -> Messages.sendMessage(
                             Messages.getMessage("Creator.Event.Create.Init", settings), embed, e))
@@ -73,7 +73,7 @@ public class EventCreator {
                     this.events.add(event);
 
                     return CalendarWrapper.getCalendar(calData, settings)
-                        .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                        .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                         .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                         .flatMap(embed -> Messages.sendMessage(
                             Messages.getMessage("Creator.Event.Create.Init", settings), embed, e))
@@ -96,7 +96,7 @@ public class EventCreator {
                         this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData, settings)
-                            .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                            .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                             .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                             .flatMap(embed -> Messages.sendMessage(
                                 Messages.getMessage("Creator.Event.Copy.Init", settings), embed, e))
@@ -119,7 +119,7 @@ public class EventCreator {
                         this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData, settings)
-                            .doOnNext(c -> event.setTimeZone(c.getTimeZone()))
+                            .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                             .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                             .flatMap(embed -> Messages.sendMessage(
                                 Messages.getMessage("Creator.Event.Edit.Init", settings), embed, e))
@@ -144,8 +144,8 @@ public class EventCreator {
                         final Event event = new Event();
                         event.setSummary(pre.getSummary());
                         event.setDescription(pre.getDescription());
-                        event.setStart(pre.getStartDateTime().setTimeZone(pre.getTimeZone()));
-                        event.setEnd(pre.getEndDateTime().setTimeZone(pre.getTimeZone()));
+                        event.setStart(pre.getStartDateTime().setTimeZone(pre.getTimezone()));
+                        event.setEnd(pre.getEndDateTime().setTimeZone(pre.getTimezone()));
                         event.setVisibility("public");
                         if (!pre.getColor().equals(EventColor.NONE))
                             event.setColorId(String.valueOf(pre.getColor().getId()));
@@ -154,10 +154,10 @@ public class EventCreator {
                             event.setLocation(pre.getLocation());
 
                         //Set recurrence
-                        if (pre.shouldRecur())
+                        if (pre.getRecur())
                             event.setRecurrence(Collections.singletonList(pre.getRecurrence().toRRule()));
 
-                        if (!pre.isEditing()) {
+                        if (!pre.getEditing()) {
                             event.setId(KeyGenerator.generateEventId());
 
                             return EventWrapper.createEvent(calData, event, settings)
