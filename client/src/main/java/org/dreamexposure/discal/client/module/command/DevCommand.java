@@ -162,10 +162,12 @@ public class DevCommand implements Command {
             if (args.length == 2) {
                 final String userId = args[1];
 
-                final UserAPIAccount acc = new UserAPIAccount();
-                acc.setUserId(userId);
-                acc.setAPIKey(KeyGenerator.csRandomAlphaNumericString(64));
-                acc.setTimeIssued(System.currentTimeMillis());
+                final UserAPIAccount acc = new UserAPIAccount(
+                    userId,
+                    KeyGenerator.csRandomAlphaNumericString(64),
+                    false,
+                    System.currentTimeMillis()
+                );
 
                 return DatabaseManager.updateAPIAccount(acc)
                     .flatMap(success -> {
@@ -192,7 +194,7 @@ public class DevCommand implements Command {
 
                 return Messages.sendMessage("Blocking API key...", event)
                     .then(DatabaseManager.getAPIAccount(key))
-                    .doOnNext(acc -> acc.setBlocked(true))
+                    .doOnNext(acc -> acc = acc.copy(acc.getUserId(), acc.getAPIKey(), true, acc.getTimeIssued()))
                     .flatMap(DatabaseManager::updateAPIAccount)
                     .flatMap(success -> {
                         if (success)

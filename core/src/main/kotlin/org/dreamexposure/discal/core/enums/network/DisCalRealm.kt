@@ -1,0 +1,15 @@
+package org.dreamexposure.discal.core.enums.network
+
+enum class DisCalRealm {
+    WEBSITE_DASHBOARD_DEFAULTS,
+    WEBSITE_DASHBOARD_GUILD,
+    WEBSITE_EMBED_CALENDAR,
+    BOT_SETTINGS,
+    BOT_GUILD_SETTINGS,
+    BOT_LANGS,
+    BOT_INVALIDATE_CACHES,
+    GUILD_LEAVE,
+    GUILD_MAX_CALENDARS,
+    GUILD_IS_DEV,
+    GUILD_IS_PATRON,
+}

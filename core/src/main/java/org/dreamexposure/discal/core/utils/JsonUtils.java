@@ -32,11 +32,11 @@ public class JsonUtils {
 
         json.put("is_parent", !(event.getId().contains("_")));
 
-        json.put("color", EventColor.fromNameOrHexOrID(event.getColorId()).name());
+        json.put("color", EventColor.Companion.fromNameOrHexOrId(event.getColorId()).name());
 
         if (event.getRecurrence() != null && !event.getRecurrence().isEmpty()) {
             json.put("recur", true);
-            final Recurrence r = new Recurrence().fromRRule(event.getRecurrence().get(0));
+            final Recurrence r = Recurrence.Companion.fromRRule(event.getRecurrence().get(0));
 
             final JSONObject recurrence = new JSONObject();
             recurrence.put("frequency", r.getFrequency().name());

@@ -97,7 +97,7 @@ public class CalendarMessageFormatter {
             else
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.TimeZone", settings), "***UNSET***", true);
 
-            if (calendar.isEditing())
+            if (calendar.getEditing())
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.CalendarId", settings), calendar.getCalendarId(), false);
 
 

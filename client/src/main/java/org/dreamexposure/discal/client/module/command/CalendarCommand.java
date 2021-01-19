@@ -201,7 +201,7 @@ public class CalendarCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(preCal.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(Mono.just(preCal.isEditing()))
+                    .then(Mono.just(preCal.getEditing()))
                     .filter(identity -> identity)
                     .flatMap(b ->
                         Messages.sendMessage(Messages.getMessage("Creator.Calendar.Cancel.Success", settings), event)

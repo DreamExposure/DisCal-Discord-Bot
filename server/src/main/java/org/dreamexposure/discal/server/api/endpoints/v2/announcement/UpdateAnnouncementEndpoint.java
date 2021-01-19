@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.announcement;
 
-import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
@@ -10,6 +9,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONArray;
@@ -20,22 +20,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
+
+import discord4j.common.util.Snowflake;
 
 @RestController
 @RequestMapping("/v2/announcement")
 public class UpdateAnnouncementEndpoint {
     @PostMapping(value = "/update", produces = "application/json")
-    public String updateAnnouncement(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
+    public String updateAnnouncement(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (authState.isReadOnly()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (authState.getReadOnly()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");
@@ -55,11 +58,11 @@ public class UpdateAnnouncementEndpoint {
                 if (body.has("event_id"))
                     a.setEventId(body.getString("event_id"));
                 if (body.has("event_color"))
-                    a.setEventColor(EventColor.fromNameOrHexOrID(body.getString("event_color")));
+                    a.setEventColor(EventColor.Companion.fromNameOrHexOrId(body.getString("event_color")));
                 if (body.has("type"))
-                    a.setAnnouncementType(AnnouncementType.fromValue(body.getString("type")));
+                    a.setType(AnnouncementType.Companion.fromValue(body.getString("type")));
                 if (body.has("modifier"))
-                    a.setModifier(AnnouncementModifier.fromValue(body.getString("modifier")));
+                    a.setModifier(AnnouncementModifier.Companion.fromValue(body.getString("modifier")));
                 if (body.has("hours"))
                     a.setHoursBefore(body.getInt("hours"));
                 if (body.has("minutes"))
@@ -71,7 +74,7 @@ public class UpdateAnnouncementEndpoint {
                 if (body.has("enabled"))
                     a.setEnabled(body.getBoolean("enabled"));
                 if (body.has("publish"))
-                    a.setPublishable(body.getBoolean("publish"));
+                    a.setPublish(body.getBoolean("publish"));
 
                 //Handle subscribers....
                 if (body.has("remove_subscriber_roles")) {

@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.network.discal.ConnectedClient;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.DisCalServer;
 import org.dreamexposure.discal.server.utils.Authentication;
@@ -26,11 +27,11 @@ public class KeepAliveEndpoint {
     public String keepAlive(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String rBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (!authState.isFromDiscalNetwork()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (!authState.getFromDiscalNetwork()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Only official DisCal clients can use this Endpoint");

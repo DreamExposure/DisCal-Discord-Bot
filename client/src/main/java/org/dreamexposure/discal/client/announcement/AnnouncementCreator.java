@@ -59,7 +59,7 @@ public class AnnouncementCreator {
         if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(toCopy -> {
-                    final Announcement a = new Announcement(toCopy);
+                    final Announcement a = Announcement.Companion.copy(toCopy, false);
                     this.announcements.add(a);
 
                     return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
@@ -79,7 +79,7 @@ public class AnnouncementCreator {
         if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(edit -> {
-                    final Announcement a = new Announcement(edit, true);
+                    final Announcement a = Announcement.Companion.copy(edit, true);
                     a.setEditing(true);
                     this.announcements.add(a);
 

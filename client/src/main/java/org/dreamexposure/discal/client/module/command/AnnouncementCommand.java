@@ -283,9 +283,9 @@ public class AnnouncementCommand implements Command {
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementCreator.getCreator().confirmAnnouncement(settings.getGuildID()))
                     .flatMap(acr -> {
-                        if (acr.isSuccessful()) {
+                        if (acr.getSuccessful()) {
                             String msg;
-                            if (a.isEditing())
+                            if (a.getEditing())
                                 msg = Messages.getMessage("Creator.Announcement.Confirm.Edit.Success", settings);
                             else
                                 msg = Messages.getMessage("Creator.Announcement.Confirm.Create.Success", settings);
@@ -954,9 +954,9 @@ public class AnnouncementCommand implements Command {
                 Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
-                    if (AnnouncementType.isValid(args[1])) {
-                        AnnouncementType type = AnnouncementType.fromValue(args[1]);
-                        a.setAnnouncementType(type);
+                    if (AnnouncementType.Companion.isValid(args[1])) {
+                        AnnouncementType type = AnnouncementType.Companion.fromValue(args[1]);
+                        a.setType(type);
 
                         //Get the correct message to send depending on the type...
                         String msg;
@@ -1144,7 +1144,7 @@ public class AnnouncementCommand implements Command {
                 Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
                 if (args.length == 2) {
-                    if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                    if (a.getType().equals(AnnouncementType.SPECIFIC)) {
                         return EventUtils.eventExists(settings, args[1]).flatMap(exists -> {
                             if (exists) {
                                 a.setEventId(args[1]);
@@ -1164,7 +1164,7 @@ public class AnnouncementCommand implements Command {
                                     .doOnNext(a::setCreatorMessage);
                             }
                         });
-                    } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                    } else if (a.getType().equals(AnnouncementType.RECUR)) {
                         return EventUtils.eventExists(settings, args[1]).flatMap(exists -> {
                             if (exists) {
                                 String value = args[1];
@@ -1256,8 +1256,8 @@ public class AnnouncementCommand implements Command {
                         UUID id = UUID.fromString(args[1]);
                         AtomicBoolean en = new AtomicBoolean(false); //This has got to be tested...
                         return DatabaseManager.getAnnouncement(id, settings.getGuildID())
-                            .doOnNext(a -> a.setEnabled(!a.isEnabled()))
-                            .doOnNext(a -> en.set(a.isEnabled()))
+                            .doOnNext(a -> a.setEnabled(!a.getEnabled()))
+                            .doOnNext(a -> en.set(a.getEnabled()))
                             .flatMap(DatabaseManager::updateAnnouncement)
                             .map(i -> Messages.getMessage("Announcement.Enable.Success", "%value%", en.get() + "", settings))
                             .flatMap(msg -> Messages.sendMessage(msg, event));
@@ -1291,8 +1291,8 @@ public class AnnouncementCommand implements Command {
                         UUID id = UUID.fromString(args[1]);
                         AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
                         return DatabaseManager.getAnnouncement(id, settings.getGuildID())
-                            .doOnNext(a -> a.setInfoOnly(!a.isInfoOnly()))
-                            .doOnNext(a -> io.set(a.isInfoOnly()))
+                            .doOnNext(a -> a.setInfoOnly(!a.getInfoOnly()))
+                            .doOnNext(a -> io.set(a.getInfoOnly()))
                             .flatMap(DatabaseManager::updateAnnouncement)
                             .map(i -> Messages.getMessage("Announcement.InfoOnly.Success", "%value%", io.get() + "", settings))
                             .flatMap(msg -> Messages.sendMessage(msg, event));
@@ -1315,7 +1315,7 @@ public class AnnouncementCommand implements Command {
                 Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
                 Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
-                a.setPublishable(!a.isPublishable());
+                a.setPublish(!a.getPublish());
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
                     .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
                     .flatMap(em -> Messages.sendMessage(em, event))
@@ -1373,10 +1373,10 @@ public class AnnouncementCommand implements Command {
                 Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
                 Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
 
-                if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                if (a.getType().equals(AnnouncementType.COLOR)) {
                     if (args.length == 2) {
-                        if (EventColor.exists(args[1])) {
-                            a.setEventColor(EventColor.fromNameOrHexOrID(args[1]));
+                        if (EventColor.Companion.exists(args[1])) {
+                            a.setEventColor(EventColor.Companion.fromNameOrHexOrId(args[1]));
 
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
                                 .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))

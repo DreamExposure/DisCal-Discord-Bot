@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -21,11 +22,11 @@ public class LogoutEndpoint {
     public String logoutOfAccount(final HttpServletRequest request, final HttpServletResponse response) {
         //Check auth
         final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.isSuccess()) {
+        if (!authState.getSuccess()) {
             response.setStatus(authState.getStatus());
             response.setContentType("application/json");
-            return authState.toJson();
-        } else if (authState.isReadOnly()) {
+            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+        } else if (authState.getReadOnly()) {
             response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
             response.setContentType("application/json");
             return JsonUtils.getJsonResponseMessage("Read-Only key not Allowed");

@@ -21,7 +21,7 @@ public class DisCalWeb {
         //Get settings
         final Properties p = new Properties();
         p.load(new FileReader(new File("settings.properties")));
-        BotSettings.init(p);
+        BotSettings.Companion.init(p);
 
         if (args.length > 1 && "-forceNewAuth".equalsIgnoreCase(args[0])) {
             //Forcefully start a browser for google account authorization.

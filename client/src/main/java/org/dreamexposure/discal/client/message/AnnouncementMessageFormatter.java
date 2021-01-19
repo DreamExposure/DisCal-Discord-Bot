@@ -51,7 +51,7 @@ public class AnnouncementMessageFormatter {
             .flatMap(g -> ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), g));
 
         Mono<EventData> eData = Mono.just(a)
-            .map(Announcement::getAnnouncementType)
+            .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(new EventData()).cache();
@@ -73,17 +73,17 @@ public class AnnouncementMessageFormatter {
                 else
                     spec.addField(Messages.getMessage("Embed.Announcement.Info.ID", settings), "ID IS NULL???", true);
 
-                spec.addField(Messages.getMessage("Embed.Announcement.Info.Type", settings), a.getAnnouncementType().name(), true);
+                spec.addField(Messages.getMessage("Embed.Announcement.Info.Type", settings), a.getType().name(), true);
 
 
-                if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                if (a.getType().equals(AnnouncementType.SPECIFIC)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Info.EventID", settings), a.getEventId(), true);
                     if (hasImg)
                         spec.setImage(ed.getImageLink());
 
-                } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                } else if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Info.Color", settings), a.getEventColor().name(), true);
-                } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                } else if (a.getType().equals(AnnouncementType.RECUR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Info.RecurID", settings), a.getEventId(), true);
                     if (hasImg)
                         spec.setImage(ed.getImageLink());
@@ -92,14 +92,14 @@ public class AnnouncementMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Minutes", settings), String.valueOf(a.getMinutesBefore()), true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Channel", settings), chanName, true);
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Info", settings), a.getInfo(), false);
-                if (a.getAnnouncementType().equals(AnnouncementType.COLOR))
+                if (a.getType().equals(AnnouncementType.COLOR))
                     spec.setColor(a.getEventColor().asColor());
                 else
                     spec.setColor(GlobalConst.discalColor);
 
-                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
                 if (settings.isDevGuild() || settings.isPatronGuild())
-                    spec.addField("Publishable", a.isPublishable() + "", true);
+                    spec.addField("Publishable", a.getType() + "", true);
             }));
     }
 
@@ -108,14 +108,14 @@ public class AnnouncementMessageFormatter {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
 
         Mono<Event> event = Mono.just(a)
-            .map(Announcement::getAnnouncementType)
+            .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getMainCalendar(a.getGuildId()))
             .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
-            .map(Announcement::getAnnouncementType)
+            .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(new EventData()).cache();
@@ -136,7 +136,7 @@ public class AnnouncementMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Time", settings), condensedTime(a), false);
 
-                if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                if (a.getType().equals(AnnouncementType.SPECIFIC)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
 
                     if (hasImg)
@@ -150,20 +150,20 @@ public class AnnouncementMessageFormatter {
                         }
                         spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Summary", settings), summary, true);
                     }
-                } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                } else if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
-                } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                } else if (a.getType().equals(AnnouncementType.RECUR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.RecurID", settings), a.getEventId(), true);
                 }
-                spec.setFooter(Messages.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getAnnouncementType().name(), settings), null);
+                spec.setFooter(Messages.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getType().name(), settings), null);
 
-                if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.setColor(a.getEventColor().asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
                 }
 
-                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
             }));
     }
 
@@ -172,14 +172,14 @@ public class AnnouncementMessageFormatter {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
 
         Mono<Event> event = Mono.just(a)
-            .map(Announcement::getAnnouncementType)
+            .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getCalendar(a.getGuildId(), calNum))
             .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
-            .map(Announcement::getAnnouncementType)
+            .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC) || t.equals(AnnouncementType.RECUR))
             .flatMap(t -> DatabaseManager.getEventData(a.getGuildId(), a.getEventId()))
             .defaultIfEmpty(new EventData()).cache();
@@ -200,7 +200,7 @@ public class AnnouncementMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Time", settings), condensedTime(a), false);
 
-                if (a.getAnnouncementType().equals(AnnouncementType.SPECIFIC)) {
+                if (a.getType().equals(AnnouncementType.SPECIFIC)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.EventID", settings), a.getEventId(), false);
 
                     if (hasImg)
@@ -214,20 +214,20 @@ public class AnnouncementMessageFormatter {
                         }
                         spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Summary", settings), summary, true);
                     }
-                } else if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                } else if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.Color", settings), a.getEventColor().name(), true);
-                } else if (a.getAnnouncementType().equals(AnnouncementType.RECUR)) {
+                } else if (a.getType().equals(AnnouncementType.RECUR)) {
                     spec.addField(Messages.getMessage("Embed.Announcement.Condensed.RecurID", settings), a.getEventId(), true);
                 }
-                spec.setFooter(Messages.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getAnnouncementType().name(), settings), null);
+                spec.setFooter(Messages.getMessage("Embed.Announcement.Condensed.Type", "%type%", a.getType().name(), settings), null);
 
-                if (a.getAnnouncementType().equals(AnnouncementType.COLOR)) {
+                if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.setColor(a.getEventColor().asColor());
                 } else {
                     spec.setColor(GlobalConst.discalColor);
                 }
 
-                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.isEnabled() + "", true);
+                spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
             }));
     }
 
@@ -267,7 +267,7 @@ public class AnnouncementMessageFormatter {
                 spec.setUrl(event.getHtmlLink());
 
                 try {
-                    EventColor ec = EventColor.fromNameOrHexOrID(event.getColorId());
+                    EventColor ec = EventColor.Companion.fromNameOrHexOrId(event.getColorId());
                     spec.setColor(ec.asColor());
                 } catch (Exception e) {
                     //I dunno, color probably null.
@@ -278,7 +278,7 @@ public class AnnouncementMessageFormatter {
                     spec.setFooter(Messages.getMessage("Embed.Announcement.Announce.ID", "%id%", a.getAnnouncementId().toString(), settings), null);
                 }
 
-                if (a.isInfoOnly() && a.getInfo() != null && !"none".equalsIgnoreCase(a.getInfo())) {
+                if (a.getInfoOnly() && !"none".equalsIgnoreCase(a.getInfo())) {
                     //Only send info...
                     spec.addField(Messages.getMessage("Embed.Announcement.Announce.Info", settings), a.getInfo(), false);
                 } else {
@@ -343,7 +343,7 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable()) {
+                        if (a.getPublish()) {
                             return Messages.sendMessage(men, em, chan)
                                 .flatMap(Message::publish)
                                 .onErrorResume(e -> Mono.empty());
@@ -368,7 +368,7 @@ public class AnnouncementMessageFormatter {
                             .flatMap(ignored -> DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString()))
                             .then(Mono.empty()))
                     .flatMap(chan -> {
-                        if (a.isPublishable()) {
+                        if (a.getPublish()) {
                             return Messages.sendMessage(men, em, chan)
                                 .flatMap(Message::publish)
                                 .onErrorResume(e -> Mono.empty());

@@ -68,8 +68,7 @@ public class CalendarCreator {
             return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data ->
                 CalendarWrapper.getCalendar(data, settings)
                     .flatMap(calendar -> {
-                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
-                        preCalendar.setEditing(true);
+                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
                         preCalendar.setCalendarData(data);
 
@@ -93,8 +92,7 @@ public class CalendarCreator {
             return DatabaseManager.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
                 CalendarWrapper.getCalendar(data, settings)
                     .flatMap(calendar -> {
-                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar);
-                        preCalendar.setEditing(true);
+                        final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
                         preCalendar.setCalendarData(data);
 
@@ -130,7 +128,7 @@ public class CalendarCreator {
                 // If creation fails, and the user retries, it will pick another random credential to use.
                 final int credId = new Random().nextInt(CalendarAuth.credentialsCount());
 
-                if (!pre.isEditing()) {
+                if (!pre.getEditing()) {
                     return CalendarWrapper.createCalendar(calendar, credId)
                         .flatMap(confirmed -> {
                             final CalendarData data = new CalendarData(
