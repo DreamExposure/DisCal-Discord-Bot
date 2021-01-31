@@ -14,6 +14,7 @@ import org.dreamexposure.discal.server.utils.Authentication;
 import org.dreamexposure.novautils.database.DatabaseInfo;
 import org.dreamexposure.novautils.database.DatabaseSettings;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.internal.command.DbMigrate;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
@@ -130,6 +131,11 @@ public class DisCalServer {
 
             org.dreamexposure.novautils.database.DatabaseManager.disconnectFromMySQL(info);
             LogFeed.log(LogObject.forDebug("Migrations Successful", sm + " migrations applied!"));
+        } catch (DbMigrate.FlywayMigrateException e) {
+            LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
+            e.printStackTrace();
+            System.out.println("Migration Error Message: " + e.getMigration().validate().errorMessage);
+            System.exit(3);
         } catch (final Exception e) {
             LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
             e.printStackTrace();
