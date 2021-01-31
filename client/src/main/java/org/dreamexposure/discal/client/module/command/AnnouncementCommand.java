@@ -190,7 +190,7 @@ public class AnnouncementCommand implements Command {
                     case "colour":
                         return this.moduleColor(args, event, settings);
                     case "publish":
-                        if (settings.isDevGuild() || settings.isPatronGuild())
+                        if (settings.getPatronGuild() || settings.getPatronGuild())
                             return this.modulePublish(event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);

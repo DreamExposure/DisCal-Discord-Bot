@@ -72,7 +72,7 @@ public class AddCalendarCommand implements Command {
     @Override
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings)
-            .filter(s -> s.isDevGuild() || s.isPatronGuild())
+            .filter(s -> s.getDevGuild() || s.getPatronGuild())
             .flatMap(s -> PermissionChecker.hasManageServerRole(event)
                 .filter(identity -> identity)
                 .flatMap(ignore -> {
@@ -90,31 +90,29 @@ public class AddCalendarCommand implements Command {
                                 }
                             });
                     } else if (args.length == 1) {
-                        return DatabaseManager.getMainCalendar(settings.getGuildID()).hasElement().flatMap(hasCal -> {
-                            if (hasCal) {
+                        return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data -> {
+                            if ("primary".equalsIgnoreCase(data.getCalendarAddress())) {
                                 return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                            } else if ("N/a".equalsIgnoreCase(settings.getEncryptedAccessToken())
-                                && "N/a".equalsIgnoreCase(settings.getEncryptedRefreshToken())) {
+                            } else if ("N/a".equalsIgnoreCase(data.getEncryptedAccessToken())
+                                && "N/a".equalsIgnoreCase(data.getEncryptedRefreshToken())) {
                                 return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
                             } else {
-                                return CalendarWrapper.getUsersExternalCalendars(settings)
+                                return CalendarWrapper.getUsersExternalCalendars(data)
                                     .flatMapMany(Flux::fromIterable)
                                     .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
                                     .flatMap(valid -> {
                                         if (valid) {
-                                            final CalendarData data = new CalendarData(settings.getGuildID(), 1,
-                                                args[0], args[0], true, 0);
-
-                                            //update guild settings to reflect changes...
-                                            settings.setUseExternalCalendar(true);
+                                            final CalendarData newData = new CalendarData(
+                                                data.getGuildId(), 1, args[0], args[0], true, 0,
+                                                data.getPrivateKey(), data.getEncryptedAccessToken(),
+                                                data.getEncryptedRefreshToken());
 
                                             //combine db calls and message send to be executed together async
-                                            final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(data);
-                                            final Mono<Boolean> settingsUpdate = DatabaseManager.updateSettings(settings);
+                                            final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(newData);
                                             final Mono<Message> sendMsg = Messages.sendMessage(
                                                 Messages.getMessage("AddCalendar.Select.Success", settings), event);
 
-                                            return Mono.when(calInsert, settingsUpdate, sendMsg)
+                                            return Mono.when(calInsert, sendMsg)
                                                 .thenReturn(GlobalConst.NOT_EMPTY);
                                         } else {
                                             return Messages.sendMessage(Messages

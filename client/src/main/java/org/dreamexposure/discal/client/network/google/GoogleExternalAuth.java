@@ -11,6 +11,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.network.google.Poll;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
@@ -181,34 +182,35 @@ public class GoogleExternalAuth {
                         final JSONObject aprGrant = new JSONObject(responseBody);
 
                         //Save credentials securely.
-                        final GuildSettings gs = poll.getSettings();
+                        CalendarData calData = CalendarData.emptyExternal(poll.getSettings().getGuildID());
 
-                        final AESEncryption encryption = new AESEncryption(gs);
-                        gs.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
-                        gs.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
-                        gs.setUseExternalCalendar(true);
+                        final AESEncryption encryption = new AESEncryption(calData);
+
+
+                        calData.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));
+                        calData.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
 
                         //Update settings and then we will list the calendars for the user
-                        return DatabaseManager.updateSettings(gs)
-                            .then(CalendarWrapper.getUsersExternalCalendars(gs))
+                        return DatabaseManager.updateCalendar(calData)
+                            .then(CalendarWrapper.getUsersExternalCalendars(calData))
                             .flatMapMany(Flux::fromIterable)
                             .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
                                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
-                                spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", gs));
+                                spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()));
 
                                 spec.addField(
-                                    Messages.getMessage("Embed.AddCalendar.List.Name", gs),
+                                    Messages.getMessage("Embed.AddCalendar.List.Name", poll.getSettings()),
                                     i.getSummary(),
                                     false);
 
                                 spec.addField(
-                                    Messages.getMessage("Embed.AddCalendar.List.TimeZone", gs),
+                                    Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.getSettings()),
                                     i.getTimeZone(),
                                     false);
 
                                 spec.addField(
-                                    Messages.getMessage("Embed.AddCalendar.List.ID", gs),
+                                    Messages.getMessage("Embed.AddCalendar.List.ID", poll.getSettings()),
                                     i.getId(),
                                     false);
 
@@ -216,7 +218,8 @@ public class GoogleExternalAuth {
                             })
                             .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                             .switchIfEmpty(Messages.sendDirectMessage(
-                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", gs), poll.getUser()))
+                                Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", poll.getSettings()),
+                                poll.getUser()))
                             .then(Mono.error(new GoogleAuthCancelException()));
                     } else {
                         //Unknown network error...

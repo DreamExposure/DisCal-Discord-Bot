@@ -131,7 +131,7 @@ public class DisCalCommand implements Command {
 
         final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
             .map(TupleUtils.function((guild, guilds, calendars, announcements) -> (EmbedCreateSpec spec) -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -208,10 +208,10 @@ public class DisCalCommand implements Command {
 
     private Mono<Void> moduleSimpleAnnouncement(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings)
-            .doOnNext(s -> s.setSimpleAnnouncements(!s.usingSimpleAnnouncements()))
+            .doOnNext(s -> s.setSimpleAnnouncements(!s.getSimpleAnnouncements()))
             .flatMap(DatabaseManager::updateSettings)
             .then(Messages.sendMessage(
-                Messages.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.usingSimpleAnnouncements() + "", settings)
+                Messages.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.getSimpleAnnouncements() + "", settings)
                 , event))
             .then();
     }
@@ -224,23 +224,23 @@ public class DisCalCommand implements Command {
 
         final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
             .map(TupleUtils.function((guild, dRole, dChannel) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
                 spec.setTitle(Messages.getMessage("Embed.DisCal.Settings.Title", settings));
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.ExternalCal", settings), settings.useExternalCalendar() + "", true);
                 spec.addField(Messages.getMessage("Embed.Discal.Settings.Role", settings), dRole, true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.Channel", settings), dChannel, false);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), settings.usingSimpleAnnouncements() + "", true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Patron", settings), settings.isPatronGuild() + "", true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Dev", settings), settings.isDevGuild() + "", true);
+                spec.addField(Messages.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), settings.getSimpleAnnouncements() + "",
+                    true);
+                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Patron", settings), settings.getPatronGuild() + "", true);
+                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Dev", settings), settings.getDevGuild() + "", true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.MaxCal", settings), settings.getMaxCalendars() + "", true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
                 //TODO: Add translations...
-                spec.addField("Using Branding", settings.isBranded() + "", true);
+                spec.addField("Using Branding", settings.getBranded() + "", true);
                 spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
                 spec.setUrl("https://www.discalbot.com/");
                 spec.setColor(GlobalConst.discalColor);
@@ -250,7 +250,7 @@ public class DisCalCommand implements Command {
     }
 
     private Mono<Void> moduleDmAnnouncements(final MessageCreateEvent event, final GuildSettings settings) {
-        return Mono.just(settings.isDevGuild())
+        return Mono.just(settings.getDevGuild())
             .filter(identity -> identity)
             .flatMap(b -> event.getMessage().getAuthorAsMember())
             .flatMap(member -> {
@@ -321,13 +321,13 @@ public class DisCalCommand implements Command {
     private Mono<Void> moduleBrand(final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasDisCalRole(event, settings)
             .filter(identity -> identity)
-            .map(b -> settings.isPatronGuild())
+            .map(b -> settings.getPatronGuild())
             .flatMap(isPatron -> {
                 if (isPatron) {
-                    settings.setBranded(!settings.isBranded());
+                    settings.setBranded(!settings.getBranded());
                     return DatabaseManager.updateSettings(settings)
                         .then(Messages.sendMessage(
-                            Messages.getMessage("DisCal.Brand", "%value%", settings.isBranded() + "", settings),
+                            Messages.getMessage("DisCal.Brand", "%value%", settings.getBranded() + "", settings),
                             event));
                 } else {
                     return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);

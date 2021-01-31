@@ -50,7 +50,7 @@ public class ListEventRangeEndpoint {
 
             //okay, lets actually get the range's events.
             final List<JSONObject> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
-                .flatMap(calData -> EventWrapper.getEvents(calData, settings, startEpoch, endEpoch))
+                .flatMap(calData -> EventWrapper.getEvents(calData, startEpoch, endEpoch))
                 .flatMapMany(Flux::fromIterable)
                 .map(e -> JsonUtils.convertEventToJson(e, settings))
                 .collectList()

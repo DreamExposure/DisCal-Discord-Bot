@@ -51,40 +51,44 @@ public class UpdateGuildSettingsEndpoint {
             final JSONObject body = new JSONObject(requestBody);
             final String guildId = body.getString("guild_id");
 
-            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
             //Handle various things that are allowed to change.
-            if (body.has("control_role"))
-                settings.setControlRole(body.getString("control_role"));
+            String conRole = body.optString("control_role", settings.getControlRole());
+            String disChannel = settings.getDiscalChannel();
             if (body.has("discal_channel")) {
                 final String id = body.getString("discal_channel");
                 if ("0".equalsIgnoreCase(id) || "all".equalsIgnoreCase(id))
-                    settings.setDiscalChannel("all");
-                else
-                    settings.setDiscalChannel(id);
+                    disChannel = "all";
+                else disChannel = id;
             }
-            if (body.has("simple_announcements"))
-                settings.setSimpleAnnouncements(body.getBoolean("simple_announcements"));
-            if (body.has("lang")) {
-                final String lang = body.getString("lang");
-                //noinspection unchecked
-                if (new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet()).contains(lang.toUpperCase()))
-                    settings.setLang(body.getString("lang"));
-            }
-            if (body.has("prefix"))
-                settings.setPrefix(body.getString("prefix"));
+            boolean simpleAnn = body.optBoolean("simple_announcements", settings.getSimpleAnnouncements());
+            String lang = body.optString("lang", settings.getLang());
+            if (!(new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet()).contains(lang.toUpperCase())))
+                lang = settings.getLang();
+            String prefix = body.optString("prefix", settings.getPrefix());
+            boolean patronGuild = settings.getPatronGuild();
+            boolean devGuild = settings.getDevGuild();
+            boolean branded = settings.getBranded();
+            int maxCals = settings.getMaxCalendars();
+
+            //TODO: Support changing twelve hour format once implemented
+
 
             //Allow Official DisCal Shards to change some other things...
             if (authState.getFromDiscalNetwork()) {
-                if (body.has("external_calendar"))
-                    settings.setUseExternalCalendar(body.getBoolean("external_calendar"));
-                if (body.has("patron_guild"))
-                    settings.setPatronGuild(body.getBoolean("patron_guild"));
-                if (body.has("dev_guild"))
-                    settings.setDevGuild(body.getBoolean("dev_guild"));
-                if (body.has("branded"))
-                    settings.setBranded(body.getBoolean("branded"));
+                patronGuild = body.optBoolean("patron_guild", patronGuild);
+                devGuild = body.optBoolean("dev_guild", devGuild);
+                branded = body.optBoolean("branded", branded);
+                maxCals = body.optInt("max_calendars", maxCals);
+
             }
+
+            //Copy the settings and then update the database
+            settings = settings.copy(
+                settings.getGuildID(), conRole, disChannel, simpleAnn, lang, prefix,
+                patronGuild, devGuild, maxCals, settings.getTwelveHour(), branded
+            );
 
             if (DatabaseManager.updateSettings(settings).block()) {
                 response.setContentType("application/json");

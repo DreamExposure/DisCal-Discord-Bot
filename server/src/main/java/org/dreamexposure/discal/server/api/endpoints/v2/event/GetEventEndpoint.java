@@ -50,7 +50,7 @@ public class GetEventEndpoint {
             final CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
 
             //okay, get the calendar service and then the event
-            final Calendar service = CalendarAuth.getCalendarService(settings, calendarData).block();
+            final Calendar service = CalendarAuth.getCalendarService(calendarData).block();
 
             final Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();
 

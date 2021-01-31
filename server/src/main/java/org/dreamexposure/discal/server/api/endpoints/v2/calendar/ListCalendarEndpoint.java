@@ -6,7 +6,6 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
@@ -45,13 +44,11 @@ public class ListCalendarEndpoint {
             final JSONObject jsonMain = new JSONObject(requestBody);
             final Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
 
-            final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
-
             final JSONArray jCals = new JSONArray();
             for (final CalendarData calData : DatabaseManager.getAllCalendars(guildId).block()) {
                 if (!"primary".equalsIgnoreCase(calData.getCalendarAddress())
-                    && CalendarUtils.calendarExists(calData, settings).block()) {
-                    final Calendar service = CalendarAuth.getCalendarService(settings, calData).block();
+                    && CalendarUtils.calendarExists(calData).block()) {
+                    final Calendar service = CalendarAuth.getCalendarService(calData).block();
 
                     final com.google.api.services.calendar.model.Calendar cal = service.calendars()
                         .get(calData.getCalendarAddress())

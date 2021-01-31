@@ -57,7 +57,7 @@ public class AnnouncementThread {
 
                     final Mono<GuildSettings> s = this.getSettings(a).cache();
                     final Mono<CalendarData> cd = this.getCalendarData(a).cache();
-                    final Mono<Calendar> se = cd.flatMap(calData -> s.flatMap(gs -> this.getService(gs, calData)));
+                    final Mono<Calendar> se = cd.flatMap(calData -> s.flatMap(gs -> this.getService(calData)));
 
                     return Mono.zip(s, cd, se)
                         .flatMap(function((settings, calData, service) -> {
@@ -92,7 +92,7 @@ public class AnnouncementThread {
                                             Calendar service) {
         switch (a.getType()) {
             case SPECIFIC:
-                return EventWrapper.getEvent(calData, settings, a.getEventId())
+                return EventWrapper.getEvent(calData, a.getEventId())
                     .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
                         .then(Mono.empty())
                     ).flatMap(e -> this.inRangeSpecific(a, e)
@@ -109,14 +109,14 @@ public class AnnouncementThread {
                         }))
                     .then();
             case UNIVERSAL:
-                return this.getEvents(settings, calData, service)
+                return this.getEvents(calData, service)
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> this.isInRange(a, e))
                     .flatMap(e -> AnnouncementMessageFormatter
                         .sendAnnouncementMessage(guild, a, e, calData, settings))
                     .then();
             case COLOR:
-                return this.getEvents(settings, calData, service)
+                return this.getEvents(calData, service)
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> e.getColorId() != null
                         && a.getEventColor().equals(EventColor
@@ -127,7 +127,7 @@ public class AnnouncementThread {
                     .then();
 
             case RECUR:
-                return this.getEvents(settings, calData, service)
+                return this.getEvents(calData, service)
                     .flatMapMany(Flux::fromIterable)
                     .filter(e -> e.getId().contains("_") && e.getId().split("_")[0].equals(a.getEventId()))
                     .filter(e -> this.isInRange(a, e))
@@ -227,21 +227,21 @@ public class AnnouncementThread {
         return this.calendars.get(a.getGuildId());
     }
 
-    private Mono<Calendar> getService(GuildSettings gs, CalendarData cd) {
-        if (gs.useExternalCalendar()) {
-            if (!this.customServices.containsKey(gs.getGuildID()))
-                this.customServices.put(gs.getGuildID(), CalendarAuth.getCalendarService(gs, cd).cache());
+    private Mono<Calendar> getService(CalendarData cd) {
+        if (cd.getExternal()) {
+            if (!this.customServices.containsKey(cd.getGuildId()))
+                this.customServices.put(cd.getGuildId(), CalendarAuth.getCalendarService(cd).cache());
 
-            return this.customServices.get(gs.getGuildID());
+            return this.customServices.get(cd.getGuildId());
         }
         return this.discalServices.get(cd.getCredentialId());
     }
 
-    private Mono<List<Event>> getEvents(GuildSettings gs, CalendarData cd, Calendar service) {
-        if (!this.allEvents.containsKey(gs.getGuildID())) {
+    private Mono<List<Event>> getEvents(CalendarData cd, Calendar service) {
+        if (!this.allEvents.containsKey(cd.getGuildId())) {
             Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
-            this.allEvents.put(gs.getGuildID(), events);
+            this.allEvents.put(cd.getGuildId(), events);
         }
-        return this.allEvents.get(gs.getGuildID());
+        return this.allEvents.get(cd.getGuildId());
     }
 }

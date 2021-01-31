@@ -50,7 +50,7 @@ public class ListEventOngoingEndpoint {
 
             //okay, lets actually get the date's events.
             final List<JSONObject> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
-                .flatMap(calData -> EventWrapper.getEvents(calData, settings, start, end))
+                .flatMap(calData -> EventWrapper.getEvents(calData, start, end))
                 .flatMapMany(Flux::fromIterable)
                 .filter(e -> e.getStart().getDateTime().getValue() < System.currentTimeMillis())
                 .filter(e -> e.getEnd().getDateTime().getValue() > System.currentTimeMillis())

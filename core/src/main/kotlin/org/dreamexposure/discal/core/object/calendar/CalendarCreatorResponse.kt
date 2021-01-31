@@ -7,5 +7,5 @@ data class CalendarCreatorResponse(
         val successful: Boolean,
         val edited: Boolean,
         val creatorMessage: Message?,
-        val calendar: Calendar
+        val calendar: Calendar?
 )

@@ -1,14 +1,14 @@
 package org.dreamexposure.discal.core.crypto
 
 import org.apache.commons.codec.binary.Base64
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class AESEncryption(settings: GuildSettings) {
+class AESEncryption(calData: CalendarData) {
     //Public key, its fine if this is here, I don't even have access to private keys
     private val key1: String = "E4B39r8F57F1Csde"
 
@@ -17,7 +17,7 @@ class AESEncryption(settings: GuildSettings) {
     private var cipher: Cipher?
 
     init {
-        val key2 = settings.privateKey
+        val key2 = calData.privateKey
         this.ivParameterSpec = IvParameterSpec(key1.toByteArray(StandardCharsets.UTF_8))
         this.secretKeySpec = SecretKeySpec(key2.toByteArray(StandardCharsets.UTF_8), "AES")
 

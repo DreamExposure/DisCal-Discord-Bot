@@ -32,7 +32,7 @@ public class CalendarMessageFormatter {
     @Deprecated
     public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
-            if (settings.isBranded())
+            if (settings.getBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -54,7 +54,7 @@ public class CalendarMessageFormatter {
 
     public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final int calNum, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
-            if (settings.isBranded())
+            if (settings.getBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -76,7 +76,7 @@ public class CalendarMessageFormatter {
 
     public static Mono<Consumer<EmbedCreateSpec>> getPreCalendarEmbed(final PreCalendar calendar, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
-            if (settings.isBranded())
+            if (settings.getBranded())
                 spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
             else
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);

@@ -58,13 +58,12 @@ data class PreEvent private constructor(
 
         //Here is where I need to fix the display times
         //TODO: Get rid of the blocking
-        val settings = DatabaseManager.getSettings(this.guildId).block()!!
         //TODO: Support multi-cal
         val data = DatabaseManager.getMainCalendar(this.guildId).block()!!
 
         var cal: Calendar? = null
         try {
-            cal = CalendarWrapper.getCalendar(data, settings).block()
+            cal = CalendarWrapper.getCalendar(data).block()
         } catch (ex: Exception) {
             LogFeed.log(LogObject.forException("Failed to get proper date/time for event!", ex, this.javaClass))
         }

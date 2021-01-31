@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.database;
 
-import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -160,9 +159,6 @@ public class DatabaseManager {
         guildSettingsCache.remove(set.getGuildID());
         guildSettingsCache.put(set.getGuildID(), set);
 
-        if ("N/a".equalsIgnoreCase(set.getPrivateKey()))
-            set.setPrivateKey(KeyGenerator.csRandomAlphaNumericString(16));
-
         final String table = String.format("%sguild_settings", settings.getPrefix());
 
         return connect(slave, c -> {
@@ -176,59 +172,48 @@ public class DatabaseManager {
             .flatMap(exists -> {
                 if (exists) {
                     final String update = "UPDATE " + table
-                        + " SET EXTERNAL_CALENDAR = ?, PRIVATE_KEY = ?,"
-                        + " ACCESS_TOKEN = ?, REFRESH_TOKEN = ?,"
-                        + " CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
+                        + " SET CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,"
                         + " LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,"
                         + " MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?,"
                         + " BRANDED = ? WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
-                        .bind(0, set.useExternalCalendar())
-                        .bind(1, set.getPrivateKey())
-                        .bind(2, set.getEncryptedAccessToken())
-                        .bind(3, set.getEncryptedRefreshToken())
-                        .bind(4, set.getControlRole())
-                        .bind(5, set.getDiscalChannel())
-                        .bind(6, set.usingSimpleAnnouncements())
-                        .bind(7, set.getLang())
-                        .bind(8, set.getPrefix())
-                        .bind(9, set.isPatronGuild())
-                        .bind(10, set.isDevGuild())
-                        .bind(11, set.getMaxCalendars())
-                        .bind(12, set.getDmAnnouncementsString())
-                        .bind(13, set.useTwelveHour())
-                        .bind(14, set.isBranded())
-                        .bind(15, set.getGuildID().asString())
+                        .bind(0, set.getControlRole())
+                        .bind(1, set.getDiscalChannel())
+                        .bind(2, set.getSimpleAnnouncements())
+                        .bind(3, set.getLang())
+                        .bind(4, set.getPrefix())
+                        .bind(5, set.getPatronGuild())
+                        .bind(6, set.getDevGuild())
+                        .bind(7, set.getMaxCalendars())
+                        .bind(8, set.getDmAnnouncementsString())
+                        .bind(9, set.getTwelveHour())
+                        .bind(10, set.getBranded())
+                        .bind(11, set.getGuildID().asString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
                         .thenReturn(true);
                 } else {
                     final String insertCommand = "INSERT INTO " + table + "(GUILD_ID, " +
-                        "EXTERNAL_CALENDAR, PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, " +
                         "CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, " +
                         "PREFIX, PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, " +
                         "DM_ANNOUNCEMENTS, 12_HOUR, BRANDED) " +
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, set.getGuildID().asString())
-                        .bind(1, set.useExternalCalendar())
-                        .bind(2, set.getPrivateKey())
-                        .bind(3, set.getEncryptedAccessToken())
-                        .bind(4, set.getEncryptedRefreshToken())
-                        .bind(5, set.getControlRole())
-                        .bind(6, set.getDiscalChannel())
-                        .bind(7, set.usingSimpleAnnouncements())
-                        .bind(8, set.getLang())
-                        .bind(9, set.getPrefix())
-                        .bind(10, set.isPatronGuild())
-                        .bind(11, set.isDevGuild())
-                        .bind(12, set.getMaxCalendars())
-                        .bind(13, set.getDmAnnouncementsString())
-                        .bind(14, set.useTwelveHour())
-                        .bind(15, set.isBranded())
+                        .bind(1, set.getControlRole())
+                        .bind(2, set.getDiscalChannel())
+                        .bind(3, set.getSimpleAnnouncements())
+                        .bind(4, set.getLang())
+                        .bind(5, set.getPrefix())
+                        .bind(6, set.getPatronGuild())
+                        .bind(7, set.getDevGuild())
+                        .bind(8, set.getMaxCalendars())
+                        .bind(9, set.getDmAnnouncementsString())
+                        .bind(10, set.getTwelveHour())
+                        .bind(11, set.getBranded())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -255,7 +240,8 @@ public class DatabaseManager {
                 if (exists) {
                     final String update = "UPDATE " + table
                         + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
-                        + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?"
+                        + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,"
+                        + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH TOKEN = ?"
                         + " WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -264,7 +250,10 @@ public class DatabaseManager {
                         .bind(2, calData.getCalendarAddress())
                         .bind(3, calData.getExternal())
                         .bind(4, calData.getCredentialId())
-                        .bind(5, calData.getGuildId().asString())
+                        .bind(5, calData.getPrivateKey())
+                        .bind(6, calData.getEncryptedAccessToken())
+                        .bind(7, calData.getEncryptedRefreshToken())
+                        .bind(8, calData.getGuildId().asString())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -477,14 +466,12 @@ public class DatabaseManager {
             return Mono.from(c.createStatement(query)
                 .bind(0, APIKey)
                 .execute());
-        }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            return new UserAPIAccount(
-                row.get("USER_ID", String.class),
-                APIKey,
-                row.get("BLOCKED", Boolean.class),
-                row.get("TIME_ISSUED", Long.class)
-            );
-        }))
+        }).flatMapMany(res -> res.map((row, rowMetadata) -> new UserAPIAccount(
+            row.get("USER_ID", String.class),
+            APIKey,
+            row.get("BLOCKED", Boolean.class),
+            row.get("TIME_ISSUED", Long.class)
+        )))
             .next()
             .retryWhen(Retry.max(3)
                 .filter(IllegalStateException.class::isInstance)
@@ -508,39 +495,40 @@ public class DatabaseManager {
                 .bind(0, guildId.asString())
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
-            final GuildSettings set = new GuildSettings(guildId);
+            String controlRole = row.get("CONTROL_ROLE", String.class);
+            String discalChannel = row.get("DISCAL_CHANNEL", String.class);
+            boolean simpleAnnouncements = row.get("SIMPLE_ANNOUNCEMENT", Boolean.class);
+            String lang = row.get("LANG", String.class);
+            String prefix = row.get("PREFIX", String.class);
+            boolean patron = row.get("PATRON_GUILD", Boolean.class);
+            boolean dev = row.get("DEV_GUILD", Boolean.class);
+            int maxCals = row.get("MAX_CALENDARS", Integer.class);
+            String dmAnnouncementsString = row.get("DM_ANNOUNCEMENTS", String.class);
+            boolean twelveHour = row.get("12_HOUR", Boolean.class);
+            boolean branded = row.get("BRANDED", Boolean.class);
 
-            set.setUseExternalCalendar(row.get("EXTERNAL_CALENDAR", Boolean.class));
-            set.setPrivateKey(row.get("PRIVATE_KEY", String.class));
-            set.setEncryptedAccessToken(row.get("ACCESS_TOKEN", String.class));
-            set.setEncryptedRefreshToken(row.get("REFRESH_TOKEN", String.class));
-            set.setControlRole(row.get("CONTROL_ROLE", String.class));
-            set.setDiscalChannel(row.get("DISCAL_CHANNEL", String.class));
-            set.setSimpleAnnouncements(row.get("SIMPLE_ANNOUNCEMENT", Boolean.class));
-            set.setLang(row.get("LANG", String.class));
-            set.setPrefix(row.get("PREFIX", String.class));
-            set.setPatronGuild(row.get("PATRON_GUILD", Boolean.class));
-            set.setDevGuild(row.get("DEV_GUILD", Boolean.class));
-            set.setMaxCalendars(row.get("MAX_CALENDARS", Integer.class));
-            set.setDmAnnouncementsFromString(row.get("DM_ANNOUNCEMENTS", String.class));
-            set.setTwelveHour(row.get("12_HOUR", Boolean.class));
-            set.setBranded(row.get("BRANDED", Boolean.class));
+            GuildSettings settings = new GuildSettings(
+                guildId, controlRole, discalChannel, simpleAnnouncements,
+                lang, prefix, patron, dev, maxCals, twelveHour, branded
+            );
+
+            settings.setDmAnnouncementsString(dmAnnouncementsString);
 
             //Store in cache...
             guildSettingsCache.remove(guildId);
-            guildSettingsCache.put(guildId, set);
+            guildSettingsCache.put(guildId, settings);
 
-            return set;
+            return settings;
         }))
             .next()
             .retryWhen(Retry.max(3)
                 .filter(IllegalStateException.class::isInstance)
                 .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
             )
-            .defaultIfEmpty(new GuildSettings(guildId))
+            .defaultIfEmpty(GuildSettings.empty(guildId))
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to get guild settings", e, DatabaseManager.class));
-                return Mono.just(new GuildSettings(guildId));
+                return Mono.just(GuildSettings.empty(guildId));
             });
     }
 
@@ -559,8 +547,12 @@ public class DatabaseManager {
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
+            final String privateKey = row.get("PRIVATE_KEY", String.class);
+            final String accessToken = row.get("ACCESS_TOKEN", String.class);
+            final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, 1, calId, calAddr, external, credId);
+            return new CalendarData(guildId, 1, calId, calAddr, external, credId,
+                privateKey, accessToken, refreshToken);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -588,8 +580,12 @@ public class DatabaseManager {
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
+            final String privateKey = row.get("PRIVATE_KEY", String.class);
+            final String accessToken = row.get("ACCESS_TOKEN", String.class);
+            final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, calendarNumber, calId, calAddr, external, credId);
+            return new CalendarData(guildId, calendarNumber, calId, calAddr, external, credId,
+                privateKey, accessToken, refreshToken);
         }))
             .next()
             .retryWhen(Retry.max(3)
@@ -612,11 +608,16 @@ public class DatabaseManager {
                 .execute());
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             final String calId = row.get("CALENDAR_ID", String.class);
+            final int calNumber = row.get("CALENDAR_NUMBER", Integer.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
+            final String privateKey = row.get("PRIVATE_KEY", String.class);
+            final String accessToken = row.get("ACCESS_TOKEN", String.class);
+            final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, 1, calId, calAddr, external, credId);
+            return new CalendarData(guildId, calNumber, calId, calAddr, external, credId,
+                privateKey, accessToken, refreshToken);
         }))
             .collectList()
             .retryWhen(Retry.max(3)
@@ -784,7 +785,8 @@ public class DatabaseManager {
                 .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
             )
             .onErrorResume(e -> {
-                LogFeed.log(LogObject.forException("Failed to get all announcements for guild", e, DatabaseManager.class));
+                LogFeed.log(LogObject.forException("Failed to get all announcements for guild", e,
+                    DatabaseManager.class));
 
                 return Mono.just(new ArrayList<>());
             });
@@ -989,7 +991,8 @@ public class DatabaseManager {
                 .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
             )
             .onErrorResume(e -> {
-                LogFeed.log(LogObject.forException("Failed to get enabled announcements for guild", e, DatabaseManager.class));
+                LogFeed.log(LogObject.forException("Failed to get enabled announcements for guild", e,
+                    DatabaseManager.class));
 
                 return Mono.just(new ArrayList<>());
             });
@@ -1046,7 +1049,8 @@ public class DatabaseManager {
         }).flatMapMany(Result::getRowsUpdated)
             .then(Mono.just(true))
             .onErrorResume(e -> {
-                LogFeed.log(LogObject.forException("Failed to delete announcements for event", e, DatabaseManager.class));
+                LogFeed.log(LogObject.forException("Failed to delete announcements for event", e,
+                    DatabaseManager.class));
                 return Mono.just(false);
             });
     }
@@ -1082,7 +1086,8 @@ public class DatabaseManager {
         }).flatMapMany(Result::getRowsUpdated)
             .then(Mono.just(true))
             .onErrorResume(e -> {
-                LogFeed.log(LogObject.forException("Failed to delete all event data for guild", e, DatabaseManager.class));
+                LogFeed.log(LogObject.forException("Failed to delete all event data for guild", e,
+                    DatabaseManager.class));
                 return Mono.just(false);
             });
     }
@@ -1098,7 +1103,8 @@ public class DatabaseManager {
         }).flatMapMany(Result::getRowsUpdated)
             .then(Mono.just(true))
             .onErrorResume(e -> {
-                LogFeed.log(LogObject.forException("Failed to delete all announcements for guild", e, DatabaseManager.class));
+                LogFeed.log(LogObject.forException("Failed to delete all announcements for guild", e,
+                    DatabaseManager.class));
                 return Mono.just(false);
             });
     }

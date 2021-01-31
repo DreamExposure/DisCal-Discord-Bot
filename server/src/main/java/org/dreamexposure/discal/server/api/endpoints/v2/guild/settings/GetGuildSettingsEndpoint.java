@@ -25,7 +25,7 @@ import discord4j.common.util.Snowflake;
 @RequestMapping("/v2/guild/settings")
 public class GetGuildSettingsEndpoint {
     @PostMapping(value = "/get", produces = "application/json")
-    public String getSettings(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
+    public String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.getSuccess()) {
@@ -43,11 +43,8 @@ public class GetGuildSettingsEndpoint {
 
             response.setContentType("application/json");
             response.setStatus(GlobalConst.STATUS_SUCCESS);
-            if (authState.getFromDiscalNetwork())
-                return settings.toJson().toString();
-            else
-                return settings.toJsonSecure().toString();
 
+            return JsonUtil.INSTANCE.encodeToString(GuildSettings.class, settings);
         } catch (final JSONException e) {
             e.printStackTrace();
 

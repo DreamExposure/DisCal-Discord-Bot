@@ -46,16 +46,16 @@ public class EventMessageFormatter {
         final Mono<String> eDate = getHumanReadableDate(event.getEnd(), false, settings);
         final Mono<String> eTime = getHumanReadableTime(event.getEnd(), false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
         final Mono<String> timezone = DatabaseManager.getMainCalendar(settings.getGuildID())
-            .flatMap(d -> CalendarWrapper.getCalendar(d, settings))
+            .flatMap(d -> CalendarWrapper.getCalendar(d))
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("Error/Unknown");
 
         return Mono.zip(guild, data, sDate, sTime, eDate, eTime, img, timezone)
             .map(TupleUtils.function((g, ed, startDate, startTime, endDate, endTime, hasImg, tz) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -117,16 +117,16 @@ public class EventMessageFormatter {
         final Mono<String> eDate = getHumanReadableDate(event.getEnd(), calNum, false, settings);
         final Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
         final Mono<String> timezone = DatabaseManager.getCalendar(settings.getGuildID(), calNum)
-            .flatMap(d -> CalendarWrapper.getCalendar(d, settings))
+            .flatMap(d -> CalendarWrapper.getCalendar(d))
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("Error/Unknown");
 
         return Mono.zip(guild, data, sDate, sTime, eDate, eTime, img, timezone)
             .map(TupleUtils.function((g, ed, startDate, startTime, endDate, endTime, hasImg, tz) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -187,13 +187,13 @@ public class EventMessageFormatter {
         final Mono<String> date = getHumanReadableDate(event.getStart(), false, settings);
         final Mono<String> time = getHumanReadableTime(event.getStart(), false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, time, date, img)
             .map(TupleUtils.function((g, ed, startDate, startTime, hasImg) -> spec -> {
 
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -240,13 +240,13 @@ public class EventMessageFormatter {
         final Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
         final Mono<String> time = getHumanReadableTime(event.getOriginalStartTime(), 1, false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
             .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> spec -> {
 
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -293,12 +293,12 @@ public class EventMessageFormatter {
         final Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), calNum, false, settings);
         final Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), calNum, false, settings);
         final Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, sDate, sTime, eDate, eTime, img)
             .map(TupleUtils.function((g, startDate, startTime, endDate, endTime, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -364,12 +364,12 @@ public class EventMessageFormatter {
         final Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), false, settings);
         final Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), false, settings);
         final Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, sDate, sTime, eDate, eTime, img)
             .map(TupleUtils.function((g, startDate, startTime, endDate, endTime, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -436,12 +436,12 @@ public class EventMessageFormatter {
         final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), false, settings);
         final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
             .map(TupleUtils.function((g, ed, d, t, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite,
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
@@ -486,12 +486,12 @@ public class EventMessageFormatter {
         final Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), calNum, false, settings);
         final Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), calNum, false, settings);
         final Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.isPatronGuild()))
+            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
             .map(TupleUtils.function((g, ed, d, t, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite,
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
@@ -533,7 +533,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getMainCalendar(settings.getGuildID())
-                        .flatMap(data -> CalendarWrapper.getCalendar(data, settings))
+                        .flatMap(data -> CalendarWrapper.getCalendar(data))
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -561,7 +561,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getCalendar(settings.getGuildID(), calNum)
-                        .flatMap(data -> CalendarWrapper.getCalendar(data, settings))
+                        .flatMap(data -> CalendarWrapper.getCalendar(data))
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -589,7 +589,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getMainCalendar(settings.getGuildID())
-                        .flatMap(data -> CalendarWrapper.getCalendar(data, settings))
+                        .flatMap(data -> CalendarWrapper.getCalendar(data))
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -617,7 +617,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getCalendar(settings.getGuildID(), calNum)
-                        .flatMap(data -> CalendarWrapper.getCalendar(data, settings))
+                        .flatMap(data -> CalendarWrapper.getCalendar(data))
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");

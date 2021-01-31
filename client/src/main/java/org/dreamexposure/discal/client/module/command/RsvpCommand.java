@@ -308,7 +308,7 @@ public class RsvpCommand implements Command {
 
         return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono)
             .map(TupleUtils.function((guild, onTime, late, undecided, notGoing) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -317,24 +317,16 @@ public class RsvpCommand implements Command {
                 spec.addField("Event ID", data.getEventId(), false);
 
                 final StringBuilder onTimeBuilder = new StringBuilder();
-                for (final Member u : onTime) {
-                    onTimeBuilder.append(u.getDisplayName()).append(", ");
-                }
+                for (final Member u : onTime) onTimeBuilder.append(u.getDisplayName()).append(", ");
 
                 final StringBuilder lateBuilder = new StringBuilder();
-                for (final Member u : late) {
-                    lateBuilder.append(u.getDisplayName()).append(", ");
-                }
+                for (final Member u : late) lateBuilder.append(u.getDisplayName()).append(", ");
 
                 final StringBuilder unsureBuilder = new StringBuilder();
-                for (final Member u : undecided) {
-                    unsureBuilder.append(u.getDisplayName()).append(", ");
-                }
+                for (final Member u : undecided) unsureBuilder.append(u.getDisplayName()).append(", ");
 
                 final StringBuilder notGoingBuilder = new StringBuilder();
-                for (final Member u : notGoing) {
-                    notGoingBuilder.append(u.getDisplayName()).append(", ");
-                }
+                for (final Member u : notGoing) notGoingBuilder.append(u.getDisplayName()).append(", ");
 
                 if (onTimeBuilder.toString().isEmpty())
                     spec.addField("On time", "N/a", true);

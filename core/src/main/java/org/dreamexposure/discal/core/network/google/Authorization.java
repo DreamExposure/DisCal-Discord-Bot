@@ -5,7 +5,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -54,12 +54,12 @@ public class Authorization {
 
 
     //TODO: Rewrite this to be reactive
-    public String requestNewAccessToken(GuildSettings settings, AESEncryption encryption) {
+    public String requestNewAccessToken(CalendarData calData, AESEncryption encryption) {
         try {
             RequestBody body = new FormBody.Builder()
                 .addEncoded("client_id", this.clientData.getClientId())
                 .addEncoded("client_secret", this.clientData.getClientSecret())
-                .addEncoded("refresh_token", encryption.decrypt(settings.getEncryptedRefreshToken()))
+                .addEncoded("refresh_token", encryption.decrypt(calData.getEncryptedRefreshToken()))
                 .addEncoded("grant_type", "refresh_token")
                 .build();
 
@@ -75,8 +75,8 @@ public class Authorization {
                 JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
                 //Update Db data.
-                settings.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
-                DatabaseManager.updateSettings(settings).subscribe();
+                calData.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
+                DatabaseManager.updateCalendar(calData).subscribe();
 
                 //Okay, we can return the access token to be used when this method is called.
                 return autoRefreshResponse.getString("access_token");
@@ -86,9 +86,7 @@ public class Authorization {
                 if ("invalid_grant".equalsIgnoreCase(errorBody.getString("error"))) {
                     // User revoked access to the calendar, delete our reference to it since they need to re-auth anyway
 
-                    DatabaseManager.getCalendar(settings.getGuildID(), 1)
-                        .flatMap(cd -> CalendarUtils.deleteCalendar(cd, settings))
-                        .subscribe();
+                    CalendarUtils.deleteCalendar(calData).subscribe();
                 } else {
                     LogFeed.log(LogObject.forDebug("Error requesting new access token.",
                         "Status code: " + httpResponse.code() + " | " + httpResponse.message() +

@@ -76,34 +76,33 @@ public class TimeCommand implements Command {
     //TODO: Support multiple calendars
     private Mono<Void> calendarTime(final MessageCreateEvent event, final GuildSettings settings) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
-            .flatMap(calData ->
-                CalendarWrapper.getCalendar(calData, settings).flatMap(cal -> {
-                    final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
-                    final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
-                    final String correctTime = fmt.format(ldt);
+            .flatMap(calData -> CalendarWrapper.getCalendar(calData).flatMap(cal -> {
+                final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
+                final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+                final String correctTime = fmt.format(ldt);
 
-                    return event.getGuild().flatMap(guild ->
-                        Messages.sendMessage(embed -> {
-                            if (settings.isBranded()) {
-                                embed.setAuthor(guild.getName(), GlobalConst.discalSite,
-                                    guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
-                            } else {
-                                embed.setAuthor("DisCal", GlobalConst.discalSite,
-                                    GlobalConst.iconUrl);
-                            }
+                return event.getGuild().flatMap(guild ->
+                    Messages.sendMessage(embed -> {
+                        if (settings.getBranded()) {
+                            embed.setAuthor(guild.getName(), GlobalConst.discalSite,
+                                guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                        } else {
+                            embed.setAuthor("DisCal", GlobalConst.discalSite,
+                                GlobalConst.iconUrl);
+                        }
 
-                            embed.setTitle(Messages.getMessage("Embed.Time.Title", settings));
+                        embed.setTitle(Messages.getMessage("Embed.Time.Title", settings));
 
-                            embed.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false);
+                        embed.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false);
 
-                            embed.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
+                        embed.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
-                            embed.setFooter(Messages.getMessage("Embed.Time.Footer", settings), null);
-                            embed.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calData.getCalendarNumber()));
+                        embed.setFooter(Messages.getMessage("Embed.Time.Footer", settings), null);
+                        embed.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calData.getCalendarNumber()));
 
-                            embed.setColor(GlobalConst.discalColor);
-                        }, event));
-                }))
+                        embed.setColor(GlobalConst.discalColor);
+                    }, event));
+            }))
             .switchIfEmpty(Messages.sendMessage(
                 Messages.getMessage("Creator.Calendar.NoCalendar", settings), event))
             .then();

@@ -5,7 +5,6 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
@@ -18,37 +17,26 @@ import reactor.core.publisher.Mono;
  */
 public class CalendarUtils {
     //TODO: Make sure this supports multi calendar support
-    public static Mono<Boolean> deleteCalendar(final CalendarData data, final GuildSettings settings) {
-        return CalendarWrapper.deleteCalendar(data, settings)
-            .then(Mono.just(settings)
-                .doOnNext(s -> s.setUseExternalCalendar(false))
-                .doOnNext(s -> s.setEncryptedAccessToken("N/a"))
-                .doOnNext(s -> s.setEncryptedRefreshToken("N/a"))
-                .flatMap(s -> Mono.when(
-                    DatabaseManager.updateSettings(s),
-                    DatabaseManager.deleteCalendar(data),
-                    DatabaseManager.deleteAllEventData(s.getGuildID()),
-                    DatabaseManager.deleteAllRSVPData(s.getGuildID()),
-                    DatabaseManager.deleteAllAnnouncementData(settings.getGuildID())
-                ))
-            ).thenReturn(true)
+    public static Mono<Boolean> deleteCalendar(final CalendarData data) {
+        return CalendarWrapper.deleteCalendar(data).then(
+            Mono.when(
+                DatabaseManager.deleteCalendar(data),
+                DatabaseManager.deleteAllEventData(data.getGuildId()),
+                DatabaseManager.deleteAllRSVPData(data.getGuildId()),
+                DatabaseManager.deleteAllAnnouncementData(data.getGuildId())
+            )).thenReturn(true)
             .doOnError(e -> LogFeed.log(LogObject.forException("Failed to delete calendar", e, CalendarUtils.class)))
             .onErrorReturn(false);
     }
 
     //TODO: Make sure this supports multi calendar support!!
-    public static Mono<Boolean> calendarExists(final CalendarData data, final GuildSettings settings) {
-        return CalendarWrapper.getCalendar(data, settings)
+    public static Mono<Boolean> calendarExists(final CalendarData data) {
+        return CalendarWrapper.getCalendar(data)
             .hasElement()
             .onErrorResume(GoogleJsonResponseException.class, ge -> {
                 if (ge.getStatusCode() == GlobalConst.STATUS_GONE || ge.getStatusCode() == GlobalConst.STATUS_NOT_FOUND) {
                     //Calendar does not exist... remove from db...
-                    settings.setUseExternalCalendar(false);
-                    settings.setEncryptedRefreshToken("N/a");
-                    settings.setEncryptedAccessToken("N/a");
-
                     return Mono.when(
-                        DatabaseManager.updateSettings(settings),
                         DatabaseManager.deleteCalendar(data),
                         DatabaseManager.deleteAllEventData(data.getGuildId()),
                         DatabaseManager.deleteAllRSVPData(data.getGuildId()),

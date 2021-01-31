@@ -57,12 +57,12 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, channelName, eData, img)
             .map(TupleUtils.function((g, chanName, ed, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -98,7 +98,7 @@ public class AnnouncementMessageFormatter {
                     spec.setColor(GlobalConst.discalColor);
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
-                if (settings.isDevGuild() || settings.isPatronGuild())
+                if (settings.getDevGuild() || settings.getPatronGuild())
                     spec.addField("Publishable", a.getType() + "", true);
             }));
     }
@@ -111,7 +111,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getMainCalendar(a.getGuildId()))
-            .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
+            .flatMap(cd -> EventWrapper.getEvent(cd, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
@@ -121,13 +121,13 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
 
         return Mono.zip(guild, event, eData, img)
             .map(TupleUtils.function((g, e, ed, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -175,7 +175,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.getCalendar(a.getGuildId(), calNum))
-            .flatMap(cd -> EventWrapper.getEvent(cd, settings, a.getEventId()))
+            .flatMap(cd -> EventWrapper.getEvent(cd, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
@@ -185,13 +185,13 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
 
         return Mono.zip(guild, event, eData, img)
             .map(TupleUtils.function((g, e, ed, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -241,7 +241,7 @@ public class AnnouncementMessageFormatter {
         Mono<String> startTime = EventMessageFormatter
             .getHumanReadableTime(event.getStart(), cd.getCalendarNumber(), false, settings);
 
-        Mono<String> timezone = CalendarWrapper.getCalendar(cd, settings)
+        Mono<String> timezone = CalendarWrapper.getCalendar(cd)
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("TZ Unknown/Error");
 
@@ -250,12 +250,12 @@ public class AnnouncementMessageFormatter {
             .cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.isPatronGuild()))
+            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, startDate, startTime, timezone, eData, img)
             .map(TupleUtils.function((g, sDate, sTime, tz, ed, hasImg) -> spec -> {
-                if (settings.isBranded())
+                if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
@@ -274,7 +274,7 @@ public class AnnouncementMessageFormatter {
                     spec.setColor(GlobalConst.discalColor);
                 }
 
-                if (!settings.usingSimpleAnnouncements()) {
+                if (!settings.getSimpleAnnouncements()) {
                     spec.setFooter(Messages.getMessage("Embed.Announcement.Announce.ID", "%id%", a.getAnnouncementId().toString(), settings), null);
                 }
 
@@ -299,7 +299,7 @@ public class AnnouncementMessageFormatter {
                         }
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
                     }
-                    if (!settings.usingSimpleAnnouncements()) {
+                    if (!settings.getSimpleAnnouncements()) {
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Date", settings), sDate, true);
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Time", settings), sTime, true);
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
@@ -317,7 +317,7 @@ public class AnnouncementMessageFormatter {
                         }
                     }
 
-                    if (!settings.usingSimpleAnnouncements())
+                    if (!settings.getSimpleAnnouncements())
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
                     if (!"None".equalsIgnoreCase(a.getInfo()) && !"".equalsIgnoreCase(a.getInfo()))
                         spec.addField(Messages.getMessage("Embed.Announcement.Announce.Info", settings), a.getInfo(), false);

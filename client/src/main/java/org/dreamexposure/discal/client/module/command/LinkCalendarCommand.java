@@ -70,7 +70,7 @@ public class LinkCalendarCommand implements Command {
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         //TODO: Support multiple calendars...
         return DatabaseManager.getMainCalendar(settings.getGuildID())
-            .flatMap(calData -> CalendarWrapper.getCalendar(calData, settings)
+            .flatMap(calData -> CalendarWrapper.getCalendar(calData)
                 .flatMap(cal -> CalendarMessageFormatter.getCalendarLinkEmbed(cal, calData.getCalendarNumber(), settings)
                     .flatMap(embed -> Messages.sendMessage(embed, event))
                 ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Error.Unknown", settings), event))

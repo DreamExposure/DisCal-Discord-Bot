@@ -25,7 +25,7 @@ data class WebCalendar private constructor(
                 Mono.just(empty())
             else {
                 val link = "https://www.discalbot.com/embed/calendar/${gs.guildID.asString()}"
-                CalendarWrapper.getCalendar(cd, gs).map { cal ->
+                CalendarWrapper.getCalendar(cd).map { cal ->
                     WebCalendar(
                             cd.calendarId,
                             cd.calendarAddress,

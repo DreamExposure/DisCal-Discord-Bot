@@ -52,14 +52,13 @@ public class GuildEndpoint {
             response.setStatus(GlobalConst.STATUS_SUCCESS);
 
             final JSONObject body = new JSONObject();
-            body.put("external_calendar", settings.useExternalCalendar());
             body.put("control_role", settings.getControlRole());
             body.put("discal_channel", settings.getDiscalChannel());
-            body.put("simple_announcement", settings.usingSimpleAnnouncements());
+            body.put("simple_announcement", settings.getSimpleAnnouncements());
             body.put("lang", settings.getLang());
             body.put("prefix", settings.getPrefix());
-            body.put("patron_guild", settings.isPatronGuild());
-            body.put("dev_guild", settings.isDevGuild());
+            body.put("patron_guild", settings.getPatronGuild());
+            body.put("dev_guild", settings.getDevGuild());
             body.put("max_calendars", settings.getMaxCalendars());
 
             return body.toString();
@@ -95,18 +94,19 @@ public class GuildEndpoint {
 
             final long guildId = body.getLong("guild_id");
 
-            final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
+            GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
 
-            if (body.has("control_role"))
-                settings.setControlRole(body.getString("control_role"));
-            if (body.has("discal_channel"))
-                settings.setDiscalChannel(body.getString("discal_channel"));
-            if (body.has("simple_announcement"))
-                settings.setSimpleAnnouncements(body.getBoolean("simple_announcement"));
-            if (body.has("lang"))
-                settings.setLang(body.getString("lang"));
-            if (body.has("prefix"))
-                settings.setPrefix(body.getString("prefix"));
+            settings = settings.copy(settings.getGuildID(),
+                body.optString("control_role", settings.getControlRole()),
+                body.optString("discal_channel", settings.getDiscalChannel()),
+                body.optBoolean("simple_announcement", settings.getSimpleAnnouncements()),
+                body.optString("lang", settings.getLang()),
+                body.optString("prefix", settings.getPrefix()),
+                settings.getPatronGuild(),
+                settings.getDevGuild(),
+                settings.getMaxCalendars(),
+                settings.getTwelveHour(),
+                settings.getBranded());
 
             if (DatabaseManager.updateSettings(settings).block()) {
                 response.setContentType("application/json");

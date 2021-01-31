@@ -6,7 +6,6 @@ import com.google.api.services.calendar.model.CalendarListEntry;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 
 import java.io.IOException;
@@ -26,9 +25,8 @@ public class CalendarWrapper {
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Calendar> updateCalendar(final Calendar calendar, final GuildSettings settings,
-                                                final CalendarData calData) {
-        return CalendarAuth.getCalendarService(settings, calData)
+    public static Mono<Calendar> updateCalendar(final Calendar calendar, final CalendarData calData) {
+        return CalendarAuth.getCalendarService(calData)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendars()
                     .update(calendar.getId(), calendar)
@@ -37,8 +35,8 @@ public class CalendarWrapper {
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Calendar> getCalendar(final CalendarData data, final GuildSettings settings) {
-        return CalendarAuth.getCalendarService(settings, data)
+    public static Mono<Calendar> getCalendar(final CalendarData data) {
+        return CalendarAuth.getCalendarService(data)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendars()
                     .get(data.getCalendarAddress())
@@ -48,12 +46,12 @@ public class CalendarWrapper {
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Void> deleteCalendar(final CalendarData data, final GuildSettings settings) {
+    public static Mono<Void> deleteCalendar(final CalendarData data) {
         return Mono.just(data)
             .filter(cd -> !cd.getExternal())
             .filter(cd -> !"primary".equalsIgnoreCase(cd.getCalendarAddress()))
             .flatMap(cd ->
-                CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+                CalendarAuth.getCalendarService(data).flatMap(service ->
                     Mono.fromCallable(() -> service.calendars()
                         .delete(cd.getCalendarAddress())
                         .execute()
@@ -64,8 +62,8 @@ public class CalendarWrapper {
             .then();
     }
 
-    public static Mono<List<CalendarListEntry>> getUsersExternalCalendars(final GuildSettings settings) {
-        return CalendarAuth.getExternalCalendarService(settings)
+    public static Mono<List<CalendarListEntry>> getUsersExternalCalendars(CalendarData calData) {
+        return CalendarAuth.getExternalCalendarService(calData)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendarList()
                     .list()

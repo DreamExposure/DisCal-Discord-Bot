@@ -307,7 +307,7 @@ public class CalendarCommand implements Command {
                 //Test perms and delete calendar...
                 return PermissionChecker.hasManageServerRole(event)
                     .filter(identity -> identity)
-                    .flatMap(b -> CalendarUtils.deleteCalendar(calendarData, settings)
+                    .flatMap(b -> CalendarUtils.deleteCalendar(calendarData)
                         .flatMap(success -> {
                             if (success) {
                                 return Messages.sendMessage(

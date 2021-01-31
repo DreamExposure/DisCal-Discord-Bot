@@ -18,7 +18,6 @@ import com.google.api.services.calendar.CalendarScopes;
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +86,7 @@ public class CalendarAuth {
     private static Mono<Credential> authorize(int credentialId) {
         return Mono.fromCallable(() -> {
             // Load client secrets.
-            InputStream in = new FileInputStream(new File("client_secret.json"));
+            InputStream in = new FileInputStream("client_secret.json");
             GoogleClientSecrets clientSecrets = GoogleClientSecrets
                 .load(JacksonFactory.getDefaultInstance(), new InputStreamReader(in));
 
@@ -111,13 +110,13 @@ public class CalendarAuth {
     }
 
     //TODO: This won't need guild settings eventually once we move the data to calendar data like it should be at
-    private static Mono<Credential> authorize(GuildSettings g) {
+    private static Mono<Credential> authorize(CalendarData calData) {
         return Mono.fromCallable(() -> {
-            if ("N/a".equalsIgnoreCase(g.getEncryptedAccessToken()))
+            if ("N/a".equalsIgnoreCase(calData.getEncryptedAccessToken()))
                 return null;
 
-            AESEncryption encryption = new AESEncryption(g);
-            String accessToken = Authorization.getAuth().requestNewAccessToken(g, encryption);
+            AESEncryption encryption = new AESEncryption(calData);
+            String accessToken = Authorization.getAuth().requestNewAccessToken(calData, encryption);
 
             Credential credential = new GoogleCredential();
             credential.setAccessToken(accessToken);
@@ -126,11 +125,10 @@ public class CalendarAuth {
     }
 
     //TODO: Remove need for guild settings once we move the relevant data to more appropriate classes
-    public static Mono<Calendar> getCalendarService(@NotNull GuildSettings g,
-                                                    @NotNull CalendarData calData) {
+    public static Mono<Calendar> getCalendarService(@NotNull CalendarData calData) {
         return Mono.fromCallable(() -> {
-            if (g.useExternalCalendar()) {
-                return authorize(g).map(cred ->
+            if (calData.getExternal()) {
+                return authorize(calData).map(cred ->
                     new Calendar.
                         Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
                         .setApplicationName(APPLICATION_NAME)
@@ -150,8 +148,8 @@ public class CalendarAuth {
             .build());
     }
 
-    public static Mono<Calendar> getExternalCalendarService(GuildSettings settings) {
-        return authorize(settings).map(cred ->
+    public static Mono<Calendar> getExternalCalendarService(CalendarData calendarData) {
+        return authorize(calendarData).map(cred ->
             new Calendar.
                 Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
                 .setApplicationName(APPLICATION_NAME)

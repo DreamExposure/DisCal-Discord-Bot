@@ -3,7 +3,6 @@ package org.dreamexposure.discal.server.api.endpoints.v2.calendar;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
@@ -46,12 +45,11 @@ public class DeleteCalendarEndpoint {
             final Snowflake guildId = Snowflake.of(jsonMain.getString("guild_id"));
             final int calNumber = jsonMain.getInt("calendar_number");
 
-            final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
             final CalendarData calendar = DatabaseManager.getCalendar(guildId, calNumber).block();
 
             if (!"primary".equalsIgnoreCase(calendar.getCalendarAddress())) {
-                if (CalendarUtils.calendarExists(calendar, settings).block()) {
-                    if (CalendarUtils.deleteCalendar(calendar, settings).block()) {
+                if (CalendarUtils.calendarExists(calendar).block()) {
+                    if (CalendarUtils.deleteCalendar(calendar).block()) {
                         response.setContentType("application/json");
                         response.setStatus(GlobalConst.STATUS_SUCCESS);
                         return JsonUtils.getJsonResponseMessage("Calendar successfully deleted");

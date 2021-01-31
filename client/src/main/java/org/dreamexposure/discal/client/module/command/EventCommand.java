@@ -388,7 +388,7 @@ public class EventCommand implements Command {
             } else {
                 //Check if enough args and event exists...
                 if (args.length == 2) {
-                    return EventWrapper.getEvent(calendarData, settings, args[1])
+                    return EventWrapper.getEvent(calendarData, args[1])
                         .flatMap(e -> EventMessageFormatter.getEventEmbed(e, calendarData.getCalendarNumber(), settings))
                         .flatMap(em -> Messages.sendMessage(em, event))
                         .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event));
@@ -792,7 +792,7 @@ public class EventCommand implements Command {
                                 Messages.getMessage("Creator.Event.Attachment.Delete", settings), em, event))
                             .doOnNext(pre::setCreatorMessage);
                     } else {
-                        return ImageUtils.validate(value, settings.isPatronGuild()).flatMap(valid -> {
+                        return ImageUtils.validate(value, settings.getPatronGuild()).flatMap(valid -> {
                             if (valid) {
                                 final PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 

@@ -32,7 +32,7 @@ import discord4j.rest.entity.RestMember;
 @RequestMapping("/v2/guild/")
 public class GetWebGuildEndpoint {
     @PostMapping(value = "/get", produces = "application/json")
-    public String getSettings(final HttpServletRequest request, final HttpServletResponse response, @RequestBody final String requestBody) {
+    public String getSettings(HttpServletRequest request, HttpServletResponse response, @RequestBody String requestBody) {
         //Authenticate...
         final AuthenticationState authState = Authentication.authenticate(request);
         if (!authState.getSuccess()) {
@@ -48,7 +48,7 @@ public class GetWebGuildEndpoint {
 
             final RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
-            final WebGuild wg = WebGuild.fromGuild(g);
+            final WebGuild wg = WebGuild.fromGuild(g).block();
 
             final RestMember m = g.member(userId);
 
@@ -66,7 +66,7 @@ public class GetWebGuildEndpoint {
 
             response.setContentType("application/json");
             response.setStatus(GlobalConst.STATUS_SUCCESS);
-            return wg.toJson(!authState.getFromDiscalNetwork()).toString();
+            return JsonUtil.INSTANCE.encodeToString(WebGuild.class, wg);
         } catch (final BotNotInGuildException e) {
             response.setContentType("application/json");
             response.setStatus(GlobalConst.STATUS_NOT_FOUND);

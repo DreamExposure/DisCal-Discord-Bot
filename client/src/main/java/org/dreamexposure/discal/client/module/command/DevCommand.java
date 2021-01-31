@@ -121,7 +121,7 @@ public class DevCommand implements Command {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
                     .flatMap(DatabaseManager::getSettings)
-                    .doOnNext(settings -> settings.setPatronGuild(!settings.isPatronGuild()))
+                    .doOnNext(settings -> settings.setPatronGuild(!settings.getPatronGuild()))
                     .flatMap(DatabaseManager::updateSettings)
                     .then(Messages.sendMessage("isPatronGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->
@@ -140,7 +140,7 @@ public class DevCommand implements Command {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
                     .flatMap(DatabaseManager::getSettings)
-                    .doOnNext(settings -> settings.setDevGuild(!settings.isDevGuild()))
+                    .doOnNext(settings -> settings.setDevGuild(!settings.getDevGuild()))
                     .flatMap(DatabaseManager::updateSettings)
                     .then(Messages.sendMessage("isDevGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->

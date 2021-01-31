@@ -81,7 +81,7 @@ public class EventListCommand implements Command {
             } else {
                 switch (args[0].toLowerCase()) {
                     case "search":
-                        if (settings.isDevGuild())
+                        if (settings.getDevGuild())
                             return this.moduleSearch(args, event, settings);
                         else
                             return Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event);
@@ -103,7 +103,7 @@ public class EventListCommand implements Command {
         return Mono.defer(() -> {
             if (args.length == 0) {
                 return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
-                    .flatMap(data -> EventWrapper.getEvents(data, settings, 1, System.currentTimeMillis())
+                    .flatMap(data -> EventWrapper.getEvents(data, 1, System.currentTimeMillis())
                         .flatMap(events -> {
                             if (events.isEmpty()) {
                                 return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
@@ -123,7 +123,7 @@ public class EventListCommand implements Command {
                         return Messages.sendMessage(Messages.getMessage("Event.List.Amount.Under", settings), event);
                     } else {
                         return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
-                            .flatMap(data -> EventWrapper.getEvents(data, settings, count, System.currentTimeMillis())
+                            .flatMap(data -> EventWrapper.getEvents(data, count, System.currentTimeMillis())
                                 .flatMap(events -> {
                                     if (events.isEmpty()) {
                                         return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
@@ -164,7 +164,7 @@ public class EventListCommand implements Command {
                         final long now = System.currentTimeMillis();
                         final long end = now + GlobalConst.oneDayMs;
 
-                        return EventWrapper.getEvents(data, settings, 20, now, end).flatMap(events -> {
+                        return EventWrapper.getEvents(data, 20, now, end).flatMap(events -> {
                             if (events.isEmpty()) {
                                 return Messages.sendMessage(Messages.getMessage("Event.List.Found.None", settings), event);
                             } else if (events.size() == 1) {
@@ -197,7 +197,7 @@ public class EventListCommand implements Command {
                         final long start = System.currentTimeMillis() - (GlobalConst.oneDayMs * 14); // 2 weeks ago
                         final long end = System.currentTimeMillis() + GlobalConst.oneDayMs; // one day from now
 
-                        return EventWrapper.getEvents(data, settings, start, end).flatMap(events -> {
+                        return EventWrapper.getEvents(data, start, end).flatMap(events -> {
                             if (events.isEmpty()) {
                                 return Messages.sendMessage("No ongoing events found!", event);
                             } else {

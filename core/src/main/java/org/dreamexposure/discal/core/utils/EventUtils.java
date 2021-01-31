@@ -23,7 +23,7 @@ public class EventUtils {
     public static Mono<Boolean> deleteEvent(final GuildSettings settings, final String eventId) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(data ->
-                EventWrapper.deleteEvent(data, settings, eventId)
+                EventWrapper.deleteEvent(data, eventId)
                     .then(Mono.when(
                         DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
                         DatabaseManager.deleteEventData(eventId))
@@ -34,7 +34,7 @@ public class EventUtils {
     public static Mono<Boolean> deleteEvent(final GuildSettings settings, final int calNumber, final String eventId) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
             .flatMap(data ->
-                EventWrapper.deleteEvent(data, settings, eventId)
+                EventWrapper.deleteEvent(data, eventId)
                     .then(Mono.when(
                         DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
                         DatabaseManager.deleteEventData(eventId))
@@ -46,7 +46,7 @@ public class EventUtils {
     public static Mono<Boolean> eventExists(final GuildSettings settings, final String eventId) {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(data ->
-                EventWrapper.getEvent(data, settings, eventId)
+                EventWrapper.getEvent(data, eventId)
                     .hasElement()
             ).switchIfEmpty(Mono.just(false));
     }
@@ -54,7 +54,7 @@ public class EventUtils {
     public static Mono<Boolean> eventExists(final GuildSettings settings, final int calNumber, final String eventId) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
             .flatMap(data ->
-                EventWrapper.getEvent(data, settings, eventId)
+                EventWrapper.getEvent(data, eventId)
                     .hasElement()
             ).switchIfEmpty(Mono.just(false));
     }

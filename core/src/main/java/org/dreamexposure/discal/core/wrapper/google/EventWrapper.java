@@ -9,7 +9,6 @@ import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
@@ -21,8 +20,8 @@ import reactor.core.scheduler.Schedulers;
 
 @SuppressWarnings("DuplicatedCode")
 public class EventWrapper {
-    public static Mono<Event> createEvent(final CalendarData data, final Event event, final GuildSettings settings) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+    public static Mono<Event> createEvent(final CalendarData data, final Event event) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .insert(data.getCalendarId(), event)
@@ -32,12 +31,12 @@ public class EventWrapper {
             if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
                 "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
-                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
+                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + data.getGuildId()));
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
-                            .flatMap(cd -> createEvent(cd, event, settings));
+                            .flatMap(cd -> createEvent(cd, event));
                     } else {
                         return Mono.empty();
                     }
@@ -49,8 +48,8 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Event> updateEvent(final CalendarData data, final Event event, final GuildSettings settings) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+    public static Mono<Event> updateEvent(final CalendarData data, final Event event) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .update(data.getCalendarId(), event.getId(), event)
@@ -60,12 +59,12 @@ public class EventWrapper {
             if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
                 "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
-                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
+                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + data.getGuildId()));
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
-                            .flatMap(cd -> updateEvent(cd, event, settings));
+                            .flatMap(cd -> updateEvent(cd, event));
                     } else {
                         return Mono.empty();
                     }
@@ -76,8 +75,8 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Event> getEvent(final CalendarData data, final GuildSettings settings, final String id) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+    public static Mono<Event> getEvent(final CalendarData data, final String id) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .get(data.getCalendarAddress(), id)
@@ -86,9 +85,9 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty()); //Can ignore this, the event just doesn't exist.
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount,
+    public static Mono<List<Event>> getEvents(final CalendarData data, final int amount,
                                               final long start) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
                     .setMaxResults(amount)
@@ -115,9 +114,8 @@ public class EventWrapper {
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final int amount,
-                                              final long start, final long end) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+    public static Mono<List<Event>> getEvents(CalendarData data, int amount, long start, long end) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
                     .setMaxResults(amount)
@@ -131,9 +129,9 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final GuildSettings settings, final long start,
+    public static Mono<List<Event>> getEvents(final CalendarData data, final long start,
                                               final long end) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
                     .setTimeMin(new DateTime(start))
@@ -146,8 +144,8 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Void> deleteEvent(final CalendarData data, final GuildSettings settings, final String id) {
-        return CalendarAuth.getCalendarService(settings, data).flatMap(service ->
+    public static Mono<Void> deleteEvent(final CalendarData data, final String id) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .delete(data.getCalendarAddress(), id)
@@ -156,12 +154,12 @@ public class EventWrapper {
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
             if ("requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
                 //This is caused by credentials issue. Lets fix it.
-                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + settings.getGuildID()));
+                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + data.getGuildId()));
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
-                            .flatMap(cd -> deleteEvent(cd, settings, id));
+                            .flatMap(cd -> deleteEvent(cd, id));
                     } else {
                         return Mono.empty();
                     }
@@ -199,7 +197,10 @@ public class EventWrapper {
                     data.getCalendarId(),
                     data.getCalendarAddress(),
                     data.getExternal(),
-                    correctCredential);
+                    correctCredential,
+                    data.getPrivateKey(),
+                    data.getEncryptedAccessToken(),
+                    data.getEncryptedRefreshToken());
 
 
                 LogFeed.log(LogObject.forDebug("Corrected credentials issue! Yay!", "Guild ID: " + data.getGuildId()));
