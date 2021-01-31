@@ -39,7 +39,7 @@
 
         <netty.version.forced>4.1.44.Final</netty.version.forced>
 
-        <reactor.version.bom>Dysprosium-SR7</reactor.version.bom>
+        <reactor.version.bom>2020.0.3</reactor.version.bom>
 
         <discal.version.name>${revision}</discal.version.name>
 
