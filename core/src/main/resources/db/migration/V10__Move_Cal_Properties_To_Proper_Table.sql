@@ -2,9 +2,9 @@
 
 # Add columns for calendar data that will be moved over
 ALTER TABLE ${prefix}calendars
-    ADD COLUMN private_key   VARCHAR(16)    NOT NULL DEFAULT 'N/a',
-    ADD COLUMN access_token  VARCHAR(65535) NOT NULL DEFAULT 'N/a',
-    ADD COLUMN refresh_token VARCHAR(65535) NOT NULL DEFAULT 'N/a';
+    ADD COLUMN private_key   VARCHAR(16) NOT NULL DEFAULT 'N/a',
+    ADD COLUMN access_token  LONGTEXT    NOT NULL,
+    ADD COLUMN refresh_token LONGTEXT    NOT NULL;
 
 # Copy and move data, setting defaults if not present
 UPDATE ${prefix}calendars AS c

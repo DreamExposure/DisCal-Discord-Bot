@@ -135,7 +135,7 @@ public class DisCalServer {
         } catch (FlywayValidateException e) {
             LogFeed.log(LogObject.forException("Migrations failure (validate)", e, DisCalServer.class));
             e.printStackTrace();
-            System.out.println("Migration Error Message: " + e.getErrorCode());
+            System.out.println("Migration Validate Error Message: " + e.getErrorCode());
             System.exit(3);
         } catch (DbMigrate.FlywayMigrateException e) {
             LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer.class));
