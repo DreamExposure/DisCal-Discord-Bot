@@ -74,7 +74,7 @@ enum class BotSettings {
 
     PROFILE;
 
-    private lateinit var value: String
+    private var value: String? = null
 
     companion object {
         fun init(properties: Properties) {
@@ -90,5 +90,5 @@ enum class BotSettings {
         }
     }
 
-    fun get() = this.value
+    fun get() = this.value!!
 }
