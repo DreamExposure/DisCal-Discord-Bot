@@ -77,7 +77,17 @@ enum class BotSettings {
     private lateinit var value: String
 
     companion object {
-        fun init(properties: Properties) = values().forEach { it.value = properties.getProperty(it.name) }
+        fun init(properties: Properties) {
+            values().forEach {
+                try {
+                    it.value = properties.getProperty(it.name)
+                } catch (npe: NullPointerException) {
+                    println("NPE On settings property | name: ${it.name} | Value: ${it.value}")
+
+                    throw IllegalStateException("Settings not valid! Check console for more information")
+                }
+            }
+        }
     }
 
     fun get() = this.value
