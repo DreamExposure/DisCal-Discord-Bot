@@ -124,6 +124,14 @@ public class DisCalServer {
                 .placeholders(placeholders)
                 .load();
 
+            ///validate?
+            flyway.validateWithResult().invalidMigrations.forEach(result -> {
+                System.out.println("Invalid Migration: " + result.filepath);
+                System.out.println("Version: " + result.version);
+                System.out.println("Description: " + result.description);
+                System.out.println("Details: " + result.errorDetails.errorMessage);
+            });
+
             int sm = 0;
             if (repair)
                 flyway.repair();
