@@ -22,19 +22,19 @@ import javax.servlet.http.HttpServletResponse;
 public class LoginEndpoint {
     @PostMapping(value = "/login", produces = "application/json")
     public String loginForKey(final HttpServletRequest request, final HttpServletResponse response) {
-        //Check auth, must be from within DisCal network, as this is generating an API key...
-        final AuthenticationState authState = Authentication.authenticate(request);
-        if (!authState.getSuccess()) {
-            response.setStatus(authState.getStatus());
-            response.setContentType("application/json");
-            return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
-        } else if (!authState.getFromDiscalNetwork()) {
-            response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
-            response.setContentType("application/json");
-            return JsonUtils.getJsonResponseMessage("Unauthorized to use this Endpoint.");
-        }
-
         try {
+            //Check auth, must be from within DisCal network, as this is generating an API key...
+            final AuthenticationState authState = Authentication.authenticate(request);
+            if (!authState.getSuccess()) {
+                response.setStatus(authState.getStatus());
+                response.setContentType("application/json");
+                return JsonUtil.INSTANCE.encodeToString(AuthenticationState.class, authState);
+            } else if (!authState.getFromDiscalNetwork()) {
+                response.setStatus(GlobalConst.STATUS_AUTHORIZATION_DENIED);
+                response.setContentType("application/json");
+                return JsonUtils.getJsonResponseMessage("Unauthorized to use this Endpoint.");
+            }
+
             //Generate temporary API key. This key should only be valid for 48 hours unless refreshed..
             final String key = KeyGenerator.csRandomAlphaNumericString(64);
 
