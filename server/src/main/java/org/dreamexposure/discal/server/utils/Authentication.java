@@ -28,7 +28,7 @@ public class Authentication {
     public static AuthenticationState authenticate(final HttpServletRequest request) {
         if (!"POST".equalsIgnoreCase(request.getMethod()) || "GET".equalsIgnoreCase(request.getMethod())) {
             LogFeed.log(LogObject.forDebug("Denied Access", "Method: " + request.getMethod()));
-            return AuthenticationState.Companion.invoke(false)
+            return new AuthenticationState(false)
                 .status(GlobalConst.STATUS_NOT_ALLOWED)
                 .reason("Method not allowed");
         }
@@ -38,28 +38,28 @@ public class Authentication {
 
             //Check if this is from within the DisCal network...
             if (key.equals(BotSettings.BOT_API_TOKEN.get())) {
-                return AuthenticationState.Companion.invoke(true)
+                return new AuthenticationState(true)
                     .status(GlobalConst.STATUS_SUCCESS)
                     .reason("Success")
                     .keyUsed(key)
                     .fromDisCalNetwork(true);
                 //Check if this is a temp key, granted for a logged in user...
             } else if (tempKeys.containsKey(key)) {
-                return AuthenticationState.Companion.invoke(true)
+                return new AuthenticationState(true)
                     .status(GlobalConst.STATUS_SUCCESS)
                     .reason("Success")
                     .keyUsed(key)
                     .fromDisCalNetwork(false)
                     .readOnly(false);
             } else if (readOnlyKeys.containsKey(key)) {
-                return AuthenticationState.Companion.invoke(true)
+                return new AuthenticationState(true)
                     .status(GlobalConst.STATUS_SUCCESS)
                     .reason("Success")
                     .keyUsed(key)
                     .fromDisCalNetwork(false)
                     .readOnly(true);
             } else if ("teapot".equals(key)) {
-                return AuthenticationState.Companion.invoke(false)
+                return new AuthenticationState(false)
                     .status(GlobalConst.STATUS_TEAPOT)
                     .reason("I'm a teapot")
                     .keyUsed(key);
@@ -68,7 +68,7 @@ public class Authentication {
             //Check if this key is in the database...
             final UserAPIAccount acc = DatabaseManager.getAPIAccount(key).block();
             if (acc != null && !acc.getBlocked()) {
-                return AuthenticationState.Companion.invoke(true)
+                return new AuthenticationState(true)
                     .status(HttpStatusCodes.STATUS_CODE_OK)
                     .reason("Success")
                     .keyUsed(key)
@@ -76,14 +76,14 @@ public class Authentication {
             }
 
             //If we reach here, the API key does not exist or is blocked...
-            return AuthenticationState.Companion.invoke(false)
+            return new AuthenticationState(false)
                 .status(GlobalConst.STATUS_AUTHORIZATION_DENIED)
                 .reason("Authorization Denied");
         } else {
             LogFeed.log(LogObject
                 .forDebug("Attempted API use without Authorization Header",
                     "IP: " + request.getRemoteAddr()));
-            return AuthenticationState.Companion.invoke(false)
+            return new AuthenticationState(false)
                 .status(GlobalConst.STATUS_BAD_REQUEST)
                 .reason("Bad Request");
         }

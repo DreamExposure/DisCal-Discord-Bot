@@ -19,11 +19,7 @@ data class AuthenticationState private constructor(
         @Transient
         val keyUsed: String = ""
 ) {
-    companion object {
-        operator fun invoke(success: Boolean): AuthenticationState {
-            return AuthenticationState(success)
-        }
-    }
+    constructor(success: Boolean) : this(success, reason = "")
 
     //TODO: Remove after no longer using this class in java
     fun status(status: Int) = this.copy(status = status)
