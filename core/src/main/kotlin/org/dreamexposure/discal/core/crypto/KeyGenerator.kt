@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.crypto
 
+import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 
 object KeyGenerator {
@@ -9,19 +10,21 @@ object KeyGenerator {
     @JvmStatic
     fun csRandomAlphaNumericString(numChars: Int): String {
         val secRand = SecureRandom()
-        val buff = CharArray(numChars)
+        val buff = ByteArray(numChars)
 
-        (0 until numChars - 1).forEach { i -> buff[i] = VALID_CHARS[secRand.nextInt(VALID_CHARS.size)] }
-        return buff.joinToString("")
+        buff.indices.forEach { index -> buff[index] = VALID_CHARS[secRand.nextInt(VALID_CHARS.size)].toByte() }
+
+        return buff.toString(StandardCharsets.UTF_8)
     }
 
     @JvmStatic
     fun generateEventId(): String {
         val secRand = SecureRandom()
-        val buff = CharArray(9)
+        val buff = ByteArray(9)
 
-        (0 until 9).forEach { i -> buff[i] = VALID_CHARS_2[secRand.nextInt(VALID_CHARS_2.size)] }
-        return "e${buff.joinToString("")}"
+        buff.indices.forEach { index -> buff[index] = VALID_CHARS[secRand.nextInt(VALID_CHARS.size)].toByte() }
+
+        return buff.toString(StandardCharsets.UTF_8)
     }
 
     @JvmStatic
