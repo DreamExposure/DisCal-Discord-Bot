@@ -191,19 +191,19 @@ public class CalendarAuth {
             this.jsonFactory = jsonFactory;
         }
 
-        public int getCredentialId() {
+        int getCredentialId() {
             return this.credentialId;
         }
 
-        public FileDataStoreFactory getStoreFactory() {
+        FileDataStoreFactory getStoreFactory() {
             return this.storeFactory;
         }
 
-        public HttpTransport getTransport() {
+        HttpTransport getTransport() {
             return this.transport;
         }
 
-        public JsonFactory getJsonFactory() {
+        JsonFactory getJsonFactory() {
             return this.jsonFactory;
         }
     }

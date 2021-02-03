@@ -8,6 +8,7 @@ import discord4j.discordjson.json.GuildUpdateData
 import discord4j.discordjson.json.MemberData
 import discord4j.discordjson.possible.Possible
 import discord4j.rest.entity.RestGuild
+import discord4j.rest.http.client.ClientException
 import discord4j.rest.util.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -95,7 +96,7 @@ data class WebGuild(
                                 this.announcements.addAll(a)
                             }
                         })
-            }.switchIfEmpty(Mono.error(BotNotInGuildException()))
+            }.onErrorResume(ClientException::class.java) { Mono.error(BotNotInGuildException()) }
         }
 
         @JvmStatic

@@ -32,6 +32,7 @@ data class GuildSettings(
         var twelveHour: Boolean = true,
         var branded: Boolean = false,
 ) {
+    @SerialName("")
     val dmAnnouncements: MutableList<String> = mutableListOf()
 
     companion object {

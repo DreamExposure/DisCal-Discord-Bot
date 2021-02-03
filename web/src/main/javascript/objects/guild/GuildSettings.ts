@@ -1,32 +1,23 @@
 export class GuildSettings {
-	private _id: string;
-	private _hasExternalCalendar: boolean = false;
-	private _controlRole: string = "everyone";
-	private _disCalChannel: string = "all";
-	private _hasSimpleAnnouncements: boolean = false;
-	private _lang: string = "";
-	private _prefix: string = "";
-	private _isPatronGuild: boolean = false;
-	private _isDevGuild: boolean = false;
-	private _maxCalendars: number = 1;
-	private _usingTwelveHour: boolean = false;
-	private _isBranded: boolean = false;
+    private _id: string;
+    private _controlRole: string = "everyone";
+    private _disCalChannel: string = "all";
+    private _hasSimpleAnnouncements: boolean = false;
+    private _lang: string = "";
+    private _prefix: string = "";
+    private _isPatronGuild: boolean = false;
+    private _isDevGuild: boolean = false;
+    private _maxCalendars: number = 1;
+    private _usingTwelveHour: boolean = false;
+    private _isBranded: boolean = false;
 
-	constructor(id: string) {
-		this._id = id;
-	}
-
-	//Getter/setter pairs
-	get id() {
-		return this._id;
-	}
-
-	get hasExternalCalendar() {
-		return this._hasExternalCalendar;
+    constructor(id: string) {
+        this._id = id;
     }
 
-    set hasExternalCalendar(external) {
-        this._hasExternalCalendar = external;
+    //Getter/setter pairs
+    get id() {
+        return this._id;
     }
 
     get controlRole() {
@@ -113,7 +104,6 @@ export class GuildSettings {
     toJson() {
         return {
             "guild_id": this.id,
-            "external_calendar": this.hasExternalCalendar,
             "control_role": this.controlRole,
             "discal_channel": this.disCalChannel,
             "simple_announcement": this.hasSimpleAnnouncements,
@@ -129,7 +119,6 @@ export class GuildSettings {
 
     fromJson(json: any) {
         this._id = json.guild_id;
-        this.hasExternalCalendar = json.external_calendar;
         this.controlRole = json.control_role;
         this.disCalChannel = json.discal_channel;
         this.hasSimpleAnnouncements = json.simple_announcement;

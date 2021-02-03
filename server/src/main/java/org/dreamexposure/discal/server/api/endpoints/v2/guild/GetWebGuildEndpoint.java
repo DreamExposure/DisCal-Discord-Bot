@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.entity.RestGuild;
 import discord4j.rest.entity.RestMember;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/v2/guild/")
@@ -48,29 +49,33 @@ public class GetWebGuildEndpoint {
 
             final RestGuild g = DisCalServer.getClient().getGuildById(guildId);
 
-            final WebGuild wg = WebGuild.fromGuild(g).block();
+            final WebGuild wg = WebGuild.fromGuild(g)
+                .onErrorResume(BotNotInGuildException.class, e -> Mono.empty())
+                .block();
 
-            final RestMember m = g.member(userId);
+            if (wg != null) {
+                final RestMember m = g.member(userId);
 
-            if (m != null) { //Assume false if we can't get the user...
-                //TODO: Check logs for full stack trace here, something weird is up with it
-                wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).blockOptional().orElse(false));
-                wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
+                if (m != null) { //Assume false if we can't get the user...
+                    wg.setManageServer(PermissionChecker.hasManageServerRole(m, g).blockOptional().orElse(false));
+                    wg.setDiscalRole(PermissionChecker.hasSufficientRole(m, wg.getSettings()).blockOptional().orElse(false));
+                }
+
+                //Add available langs so that editing of langs can be done on the website
+                //noinspection unchecked
+                for (final String l : new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet())) {
+                    wg.getAvailableLangs().add(l);
+                }
+
+                response.setContentType("application/json");
+                response.setStatus(GlobalConst.STATUS_SUCCESS);
+                return JsonUtil.INSTANCE.encodeToString(WebGuild.class, wg);
+
+            } else {
+                response.setContentType("application/json");
+                response.setStatus(GlobalConst.STATUS_NOT_FOUND);
+                return JsonUtils.getJsonResponseMessage("Guild not connected to DisCal");
             }
-
-            //Add available langs so that editing of langs can be done on the website
-            //noinspection unchecked
-            for (final String l : new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet())) {
-                wg.getAvailableLangs().add(l);
-            }
-
-            response.setContentType("application/json");
-            response.setStatus(GlobalConst.STATUS_SUCCESS);
-            return JsonUtil.INSTANCE.encodeToString(WebGuild.class, wg);
-        } catch (final BotNotInGuildException e) {
-            response.setContentType("application/json");
-            response.setStatus(GlobalConst.STATUS_NOT_FOUND);
-            return JsonUtils.getJsonResponseMessage("Guild not connected to DisCal");
         } catch (final JSONException e) {
             e.printStackTrace();
 

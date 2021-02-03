@@ -50,7 +50,7 @@ export class WebGuildGetRequest implements AsyncTask {
 
             }.bind(this),
             error: function (jqXHR: jqXHR) {
-                console.log("WebGuildGetRequest err: " + jqXHR);
+                console.log("WebGuildGetRequest err", jqXHR);
                 let status = new NetworkCallStatus(false, TaskType.WEB_GUILD_GET);
                 status.code = jqXHR.status;
                 status.body = jqXHR.responseJSON;

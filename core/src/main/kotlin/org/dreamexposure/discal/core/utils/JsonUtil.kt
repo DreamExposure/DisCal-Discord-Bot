@@ -9,11 +9,15 @@ import kotlin.jvm.internal.Reflection
 
 @OptIn(InternalSerializationApi::class)
 object JsonUtil {
+    val format = Json {
+        encodeDefaults = true
+    }
+
     fun <T> encodeToJSON(clazz: Class<T>, data: T): JSONObject {
         val kClass = Reflection.createKotlinClass(clazz)
         val serializer = kClass.serializer() as KSerializer<T>
 
-        return JSONObject(Json.encodeToString(serializer, data))
+        return JSONObject(format.encodeToString(serializer, data))
     }
 
     fun <T> encodeToString(clazz: Class<T>, data: T): String = encodeToJSON(clazz, data).toString()
@@ -24,6 +28,6 @@ object JsonUtil {
         val kClass = Reflection.createKotlinClass(clazz)
         val serializer = kClass.serializer()
 
-        return Json.decodeFromString(serializer, str) as T
+        return format.decodeFromString(serializer, str) as T
     }
 }
