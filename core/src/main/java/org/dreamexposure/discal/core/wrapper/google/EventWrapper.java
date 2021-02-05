@@ -41,6 +41,10 @@ public class EventWrapper {
                         return Mono.empty();
                     }
                 });
+            } else {
+                //Some other error, lets log it, might be getting swallowed
+                LogFeed.log(LogObject
+                    .forException("Event create error; Cred Id: " + data.getCredentialId(), e, EventWrapper.class));
             }
             return Mono.empty();
         }).doOnError(e -> LogFeed.log(LogObject
@@ -69,6 +73,10 @@ public class EventWrapper {
                         return Mono.empty();
                     }
                 });
+            } else {
+                //Some other error, lets log it, might be getting swallowed
+                LogFeed.log(LogObject
+                    .forException("Event create error; Cred Id: " + data.getCredentialId(), e, EventWrapper.class));
             }
             return Mono.empty();
         }).doOnError(e -> LogFeed.log(LogObject.forException("Failed to edit event", e, EventWrapper.class))

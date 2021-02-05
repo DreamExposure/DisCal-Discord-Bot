@@ -22,9 +22,9 @@ object KeyGenerator {
         val secRand = SecureRandom()
         val buff = ByteArray(9)
 
-        buff.indices.forEach { index -> buff[index] = VALID_CHARS[secRand.nextInt(VALID_CHARS.size)].toByte() }
+        buff.indices.forEach { index -> buff[index] = VALID_CHARS_2[secRand.nextInt(VALID_CHARS_2.size)].toByte() }
 
-        return buff.toString(StandardCharsets.UTF_8)
+        return "e${buff.toString(StandardCharsets.UTF_8)}"
     }
 
     @JvmStatic
