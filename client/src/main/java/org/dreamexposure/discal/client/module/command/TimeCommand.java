@@ -78,7 +78,12 @@ public class TimeCommand implements Command {
         return DatabaseManager.getMainCalendar(settings.getGuildID())
             .flatMap(calData -> CalendarWrapper.getCalendar(calData).flatMap(cal -> {
                 final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
-                final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+
+                DateTimeFormatter fmt;
+                if (settings.getTwelveHour()) fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a");
+                else fmt = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
+
                 final String correctTime = fmt.format(ldt);
 
                 return event.getGuild().flatMap(guild ->

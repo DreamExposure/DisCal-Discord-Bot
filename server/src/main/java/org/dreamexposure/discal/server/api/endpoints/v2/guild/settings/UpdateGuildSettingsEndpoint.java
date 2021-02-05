@@ -67,12 +67,11 @@ public class UpdateGuildSettingsEndpoint {
             if (!(new ArrayList<String>(ReadFile.readAllLangFiles().block().keySet()).contains(lang.toUpperCase())))
                 lang = settings.getLang();
             String prefix = body.optString("prefix", settings.getPrefix());
+            boolean twelveHour = body.optBoolean("twelve_hour", settings.getTwelveHour());
             boolean patronGuild = settings.getPatronGuild();
             boolean devGuild = settings.getDevGuild();
             boolean branded = settings.getBranded();
             int maxCals = settings.getMaxCalendars();
-
-            //TODO: Support changing twelve hour format once implemented
 
 
             //Allow Official DisCal Shards to change some other things...
@@ -87,7 +86,7 @@ public class UpdateGuildSettingsEndpoint {
             //Copy the settings and then update the database
             settings = settings.copy(
                 settings.getGuildID(), conRole, disChannel, simpleAnn, lang, prefix,
-                patronGuild, devGuild, maxCals, settings.getTwelveHour(), branded
+                patronGuild, devGuild, maxCals, twelveHour, branded
             );
 
             if (DatabaseManager.updateSettings(settings).block()) {

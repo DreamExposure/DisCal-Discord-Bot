@@ -74,6 +74,8 @@ public class DisCalCommand implements Command {
         info.getSubCommands().put("invite", "Displays an invite to the support guild.");
         info.getSubCommands().put("dashboard", "Displays the link to the web control dashboard.");
         info.getSubCommands().put("brand", "Enables/Disables server branding.");
+        info.getSubCommands().put("twelveHour", "Changes between a 12-hour time format, or 24-hour time format");
+        info.getSubCommands().put("timeFormat", "Alias for \"twelveHour\"");
 
         return info;
     }
@@ -116,6 +118,9 @@ public class DisCalCommand implements Command {
                         return this.moduleDashboard(event, settings);
                     case "brand":
                         return this.moduleBrand(event, settings);
+                    case "timeformat":
+                    case "twelvehour":
+                        return this.moduleTwelveHour(event, settings);
                     default:
                         return Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
                 }
@@ -240,6 +245,7 @@ public class DisCalCommand implements Command {
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
                 //TODO: Add translations...
+                spec.addField("Using Twelve Hour Format", settings.getTwelveHour() + "", true);
                 spec.addField("Using Branding", settings.getBranded() + "", true);
                 spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
                 spec.setUrl("https://www.discalbot.com/");
@@ -319,7 +325,7 @@ public class DisCalCommand implements Command {
     }
 
     private Mono<Void> moduleBrand(final MessageCreateEvent event, final GuildSettings settings) {
-        return PermissionChecker.hasDisCalRole(event, settings)
+        return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
             .map(b -> settings.getPatronGuild())
             .flatMap(isPatron -> {
@@ -333,7 +339,20 @@ public class DisCalCommand implements Command {
                     return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);
                 }
             })
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event))
+            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
+            .then();
+    }
+
+    private Mono<Void> moduleTwelveHour(MessageCreateEvent event, GuildSettings settings) {
+        return PermissionChecker.hasManageServerRole(event)
+            .filter(identity -> identity)
+            .then(Mono.just(settings))
+            .doOnNext(s -> s.setTwelveHour(!s.getTwelveHour()))
+            .flatMap(DatabaseManager::updateSettings)
+            //TODO: Add translations
+            .then(Messages.sendMessage("Twelve hour time format use changed to: " + !settings.getTwelveHour(), event))
+            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings),
+                event))
             .then();
     }
 

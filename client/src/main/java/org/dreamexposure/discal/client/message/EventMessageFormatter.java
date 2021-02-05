@@ -589,7 +589,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getMainCalendar(settings.getGuildID())
-                        .flatMap(data -> CalendarWrapper.getCalendar(data))
+                        .flatMap(CalendarWrapper::getCalendar)
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -597,7 +597,10 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                final DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                DateTimeFormatter format;
+                if (settings.getTwelveHour()) format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                else format = DateTimeFormatter.ofPattern("HH:mm:ss");
+
                 if (eventDateTime.getDateTime() != null) {
                     final long dateTime = eventDateTime.getDateTime().getValue();
                     final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
@@ -617,7 +620,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.getCalendar(settings.getGuildID(), calNum)
-                        .flatMap(data -> CalendarWrapper.getCalendar(data))
+                        .flatMap(CalendarWrapper::getCalendar)
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -625,7 +628,10 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of)
             .map(tz -> {
-                final DateTimeFormatter format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                DateTimeFormatter format;
+                if (settings.getTwelveHour()) format = DateTimeFormatter.ofPattern("hh:mm:ss a");
+                else format = DateTimeFormatter.ofPattern("HH:mm:ss");
+
                 if (eventDateTime.getDateTime() != null) {
                     final long dateTime = eventDateTime.getDateTime().getValue();
                     final LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), tz);
