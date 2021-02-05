@@ -422,7 +422,7 @@ public class DatabaseManager {
                         + " GOING_LATE = ?,"
                         + " NOT_GOING = ?,"
                         + " UNDECIDED = ?,"
-                        + " 'LIMIT' = ?"
+                        + " RSVP_LIMIT = ?"
                         + " WHERE EVENT_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -439,7 +439,7 @@ public class DatabaseManager {
                 } else {
                     final String insertCommand = "INSERT INTO " + table +
                         "(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, " +
-                        "NOT_GOING, UNDECIDED, `LIMIT`)" +
+                        "NOT_GOING, UNDECIDED, RSVP_LIMIT)" +
                         " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
@@ -702,7 +702,7 @@ public class DatabaseManager {
             data.setGoingLateFromString(row.get("GOING_LATE", String.class));
             data.setNotGoingFromString(row.get("NOT_GOING", String.class));
             data.setUndecidedFromString(row.get("UNDECIDED", String.class));
-            data.setLimit(row.get("LIMIT", Integer.class));
+            data.setLimit(row.get("RSVP_LIMIT", Integer.class));
 
             return data;
         }))
