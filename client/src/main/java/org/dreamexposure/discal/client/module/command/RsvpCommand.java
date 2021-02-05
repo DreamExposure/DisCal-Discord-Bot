@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.dreamexposure.discal.core.utils.UserUtils;
 
@@ -70,6 +71,7 @@ public class RsvpCommand implements Command {
         info.getSubCommands().put("unsure", "Marks that you may or may not go to event");
         info.getSubCommands().put("remove", "Removes your RSVP from the event");
         info.getSubCommands().put("list", "Lists who has RSVPed to event");
+        info.getSubCommands().put("limit", "Sets the amount of people that can RSVP to the event, -1 to disable");
 
         return info;
     }
@@ -98,6 +100,14 @@ public class RsvpCommand implements Command {
                         return this.moduleRemove(args, event, settings);
                     case "list":
                         return this.moduleList(args, event, settings);
+                    case "limit":
+                        return PermissionChecker.hasDisCalRole(event, settings)
+                            .flatMap(has -> {
+                                if (has)
+                                    return this.moduleLimit(args, event, settings);
+                                else
+                                    return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
+                            });
                     default:
                         return Messages.sendMessage(Messages.getMessage("Notification.Args.InvalidSubCmd", settings), event);
                 }
@@ -117,12 +127,15 @@ public class RsvpCommand implements Command {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .filter(data -> data.hasRoom(mem.getId().asString()))
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getGoingOnTime().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.going.success", settings), embed, event))
+                                            ).switchIfEmpty(Messages.sendMessage("You cannot RSVP to the event as the" +
+                                                " max number of people are already attending", event)
                                             );
                                     } else {
                                         return Messages
@@ -151,12 +164,15 @@ public class RsvpCommand implements Command {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .filter(data -> data.hasRoom(mem.getId().asString()))
                                             .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
                                             .doOnNext(data -> data.getGoingLate().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.late.success", settings), embed, event))
+                                            ).switchIfEmpty(Messages.sendMessage("You cannot RSVP to the event as the" +
+                                                " max number of people are already attending", event)
                                             );
                                     } else {
                                         return Messages
@@ -276,6 +292,45 @@ public class RsvpCommand implements Command {
             }).then();
     }
 
+    //!rsvp limit <event-id> <limit>
+    private Mono<Void> moduleLimit(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 3) {
+                return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
+                                if (!inPast) {
+                                    //Okay, finally, we can change the limit
+                                    try {
+                                        int newLimit = Integer.parseInt(args[2]);
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .doOnNext(data -> data.setLimit(newLimit))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                                .then(this.getRsvpEmbed(data, settings))
+                                                .flatMap(embed -> Messages.sendMessage("RSVP Limit changed", embed, event))
+                                            );
+                                    } catch (NumberFormatException e) {
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Args.Value" +
+                                            ".Integer", settings), event);
+                                    }
+                                } else {
+                                    return Messages.sendMessage(Messages.getMessage("Notifications.Event.InPast",
+                                        settings), event);
+                                }
+                            });
+                        } else {
+                            return Messages.sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings),
+                                event);
+                        }
+                    }));
+            } else {
+                return Messages.sendMessage("Limit command uses the following format: `!rsvp limit <event-id> " +
+                    "<#limit>", event);
+            }
+        }).then();
+    }
+
 
     private Mono<Void> moduleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
@@ -315,6 +370,10 @@ public class RsvpCommand implements Command {
 
                 spec.setTitle(Messages.getMessage("Embed.RSVP.List.Title", settings));
                 spec.addField("Event ID", data.getEventId(), false);
+                if (data.getLimit() > -1)
+                    spec.addField("Max Respondents", data.getCurrentCount() + "/" + data.getLimit(), true);
+                else
+                    spec.addField("Max Respondents", "Unlimited", true);
 
                 final StringBuilder onTimeBuilder = new StringBuilder();
                 for (final Member u : onTime) onTimeBuilder.append(u.getDisplayName()).append(", ");

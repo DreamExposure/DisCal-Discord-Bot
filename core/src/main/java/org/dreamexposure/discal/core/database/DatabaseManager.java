@@ -421,7 +421,8 @@ public class DatabaseManager {
                         + " GOING_ON_TIME = ?,"
                         + " GOING_LATE = ?,"
                         + " NOT_GOING = ?,"
-                        + " UNDECIDED = ?"
+                        + " UNDECIDED = ?,"
+                        + " 'LIMIT' = ?"
                         + " WHERE EVENT_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -430,15 +431,16 @@ public class DatabaseManager {
                         .bind(2, data.getGoingLateString())
                         .bind(3, data.getNotGoingString())
                         .bind(4, data.getUndecidedString())
-                        .bind(5, data.getEventId())
+                        .bind(5, data.getLimit())
+                        .bind(6, data.getEventId())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
                     final String insertCommand = "INSERT INTO " + table +
                         "(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, " +
-                        "NOT_GOING, UNDECIDED)" +
-                        " VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        "NOT_GOING, UNDECIDED, `LIMIT`)" +
+                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, data.getGuildId().asString())
@@ -448,6 +450,7 @@ public class DatabaseManager {
                         .bind(4, data.getGoingLateString())
                         .bind(5, data.getNotGoingString())
                         .bind(6, data.getUndecidedString())
+                        .bind(7, data.getLimit())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
@@ -699,6 +702,7 @@ public class DatabaseManager {
             data.setGoingLateFromString(row.get("GOING_LATE", String.class));
             data.setNotGoingFromString(row.get("NOT_GOING", String.class));
             data.setUndecidedFromString(row.get("UNDECIDED", String.class));
+            data.setLimit(row.get("LIMIT", Integer.class));
 
             return data;
         }))

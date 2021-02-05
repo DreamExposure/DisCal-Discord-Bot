@@ -16,6 +16,8 @@ data class RsvpData(
     @SerialName("event_end")
     var eventEnd: Long = 0
 
+    var limit: Int = -1
+
     @SerialName("on_time")
     val goingOnTime: MutableList<String> = mutableListOf()
 
@@ -81,6 +83,14 @@ data class RsvpData(
 
     fun setUndecidedFromString(strList: String) {
         this.undecided += strList.split(",")
+    }
+
+    fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size
+
+    fun hasRoom(userId: String): Boolean {
+        return if (limit == -1 || getCurrentCount() + 1 <= limit) true
+        //Check if they are in a list that counts toward limit, if true, that means they will fit in the event
+        else goingOnTime.contains(userId) || goingLate.contains(userId)
     }
 
     //Functions

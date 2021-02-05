@@ -50,32 +50,10 @@ public class UpdateRsvpEndpoint {
 
             final RsvpData rsvp = DatabaseManager.getRsvpData(Snowflake.of(guildId), eventId).block();
 
-            //Handle additions...
-            if (requestBody.has("to_add")) {
-                final JSONObject jToAdd = requestBody.getJSONObject("to_add");
-                if (jToAdd.has("on_time")) {
-                    final JSONArray ar = jToAdd.getJSONArray("on_time");
-                    for (int i = 0; i < jToAdd.length(); i++)
-                        rsvp.getGoingOnTime().add(ar.getString(i));
-                }
-                if (jToAdd.has("late")) {
-                    final JSONArray ar = jToAdd.getJSONArray("late");
-                    for (int i = 0; i < jToAdd.length(); i++)
-                        rsvp.getGoingLate().add(ar.getString(i));
-                }
-                if (jToAdd.has("not_going")) {
-                    final JSONArray ar = jToAdd.getJSONArray("not_going");
-                    for (int i = 0; i < jToAdd.length(); i++)
-                        rsvp.getNotGoing().add(ar.getString(i));
-                }
-                if (jToAdd.has("undecided")) {
-                    final JSONArray ar = jToAdd.getJSONArray("undecided");
-                    for (int i = 0; i < jToAdd.length(); i++)
-                        rsvp.getUndecided().add(ar.getString(i));
-                }
-            }
+            //Handle limit change
+            rsvp.setLimit(requestBody.optInt("limit", rsvp.getLimit()));
 
-            //handle removals...
+            //handle removals... (We do this first just in case they are using the limit)
             if (requestBody.has("to_remove")) {
                 final JSONObject jToRemove = requestBody.getJSONObject("to_remove");
                 if (jToRemove.has("on_time")) {
@@ -97,6 +75,43 @@ public class UpdateRsvpEndpoint {
                     final JSONArray ar = jToRemove.getJSONArray("undecided");
                     for (int i = 0; i < jToRemove.length(); i++)
                         rsvp.getUndecided().remove(ar.getString(i));
+                }
+            }
+
+            //Handle additions...
+            if (requestBody.has("to_add")) {
+                final JSONObject jToAdd = requestBody.getJSONObject("to_add");
+                if (jToAdd.has("on_time")) {
+                    final JSONArray ar = jToAdd.getJSONArray("on_time");
+                    for (int i = 0; i < jToAdd.length(); i++) {
+                        if (rsvp.hasRoom(ar.getString(i))) {
+                            rsvp.removeCompletely(ar.getString(i));
+                            rsvp.getGoingOnTime().add(ar.getString(i));
+                        }
+                    }
+                }
+                if (jToAdd.has("late")) {
+                    final JSONArray ar = jToAdd.getJSONArray("late");
+                    for (int i = 0; i < jToAdd.length(); i++) {
+                        if (rsvp.hasRoom(ar.getString(i))) {
+                            rsvp.removeCompletely(ar.getString(i));
+                            rsvp.getGoingLate().add(ar.getString(i));
+                        }
+                    }
+                }
+                if (jToAdd.has("not_going")) {
+                    final JSONArray ar = jToAdd.getJSONArray("not_going");
+                    for (int i = 0; i < jToAdd.length(); i++) {
+                        rsvp.removeCompletely(ar.getString(i));
+                        rsvp.getNotGoing().add(ar.getString(i)); //Limit not needed here
+                    }
+                }
+                if (jToAdd.has("undecided")) {
+                    final JSONArray ar = jToAdd.getJSONArray("undecided");
+                    for (int i = 0; i < jToAdd.length(); i++) {
+                        rsvp.removeCompletely(ar.getString(i));
+                        rsvp.getUndecided().add(ar.getString(i)); //Limit also not needed here
+                    }
                 }
             }
 
