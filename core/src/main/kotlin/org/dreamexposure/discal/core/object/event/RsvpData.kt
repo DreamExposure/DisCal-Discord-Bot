@@ -32,8 +32,10 @@ data class RsvpData(
     fun getGoingOnTimeString(): String {
         val sb = StringBuilder()
         for ((i, s) in this.goingOnTime.withIndex()) {
-            if (i == 0) sb.append(s)
-            else sb.append(",").append(s)
+            if (s.isNotBlank()) {
+                if (i == 0) sb.append(s)
+                else sb.append(",").append(s)
+            }
         }
 
         return sb.toString()
@@ -42,8 +44,10 @@ data class RsvpData(
     fun getGoingLateString(): String {
         val sb = StringBuilder()
         for ((i, s) in this.goingLate.withIndex()) {
-            if (i == 0) sb.append(s)
-            else sb.append(",").append(s)
+            if (s.isNotBlank()) {
+                if (i == 0) sb.append(s)
+                else sb.append(",").append(s)
+            }
         }
 
         return sb.toString()
@@ -52,8 +56,10 @@ data class RsvpData(
     fun getNotGoingString(): String {
         val sb = StringBuilder()
         for ((i, s) in this.notGoing.withIndex()) {
-            if (i == 0) sb.append(s)
-            else sb.append(",").append(s)
+            if (s.isNotBlank()) {
+                if (i == 0) sb.append(s)
+                else sb.append(",").append(s)
+            }
         }
 
         return sb.toString()
@@ -62,27 +68,29 @@ data class RsvpData(
     fun getUndecidedString(): String {
         val sb = StringBuilder()
         for ((i, s) in this.undecided.withIndex()) {
-            if (i == 0) sb.append(s)
-            else sb.append(",").append(s)
+            if (s.isNotBlank()) {
+                if (i == 0) sb.append(s)
+                else sb.append(",").append(s)
+            }
         }
 
         return sb.toString()
     }
 
     fun setGoingOnTimeFromString(strList: String) {
-        this.goingOnTime += strList.split(",")
+        this.goingOnTime += strList.split(",").filter { it.isNotBlank() }
     }
 
     fun setGoingLateFromString(strList: String) {
-        this.goingLate += strList.split(",")
+        this.goingLate += strList.split(",").filter { it.isNotBlank() }
     }
 
     fun setNotGoingFromString(strList: String) {
-        this.notGoing += strList.split(",")
+        this.notGoing += strList.split(",").filter { it.isNotBlank() }
     }
 
     fun setUndecidedFromString(strList: String) {
-        this.undecided += strList.split(",")
+        this.undecided += strList.split(",").filter { it.isNotBlank() }
     }
 
     fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size
@@ -106,5 +114,6 @@ data class RsvpData(
                 || this.goingLate.isNotEmpty()
                 || this.notGoing.isNotEmpty()
                 || this.undecided.isNotEmpty()
+                || limit != -1
     }
 }
