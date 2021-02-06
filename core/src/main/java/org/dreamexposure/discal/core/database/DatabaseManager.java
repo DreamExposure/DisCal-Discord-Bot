@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.core.database;
 
+import discord4j.common.util.Snowflake;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.*;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -13,6 +17,8 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,26 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import discord4j.common.util.Snowflake;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
-import io.r2dbc.spi.Result;
-import io.r2dbc.spi.ValidationDepth;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
-import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
-import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.*;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -422,36 +409,47 @@ public class DatabaseManager {
                         + " GOING_LATE = ?,"
                         + " NOT_GOING = ?,"
                         + " UNDECIDED = ?,"
-                        + " RSVP_LIMIT = ?"
+                        + " RSVP_LIMIT = ?, "
+                        + " RSVP_ROLE = ?"
                         + " WHERE EVENT_ID = ?";
 
-                    return connect(master, c -> Mono.from(c.createStatement(update)
-                        .bind(0, data.getEventEnd())
-                        .bind(1, data.getGoingOnTimeString())
-                        .bind(2, data.getGoingLateString())
-                        .bind(3, data.getNotGoingString())
-                        .bind(4, data.getUndecidedString())
-                        .bind(5, data.getLimit())
-                        .bind(6, data.getEventId())
-                        .execute())
+                    return connect(master, c -> Mono.just(c.createStatement(update)
+                            .bind(0, data.getEventEnd())
+                            .bind(1, data.getGoingOnTimeString())
+                            .bind(2, data.getGoingLateString())
+                            .bind(3, data.getNotGoingString())
+                            .bind(4, data.getUndecidedString())
+                            .bind(5, data.getLimit())
+                            .bind(7, data.getEventId())
+                        ).doOnNext(statement -> {
+                            if (data.getRoleId() == null)
+                                statement.bindNull(6, Long.class);
+                            else
+                                statement.bind(6, data.getRoleId().asLong());
+                        }).flatMap(s -> Mono.from(s.execute()))
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 } else {
                     final String insertCommand = "INSERT INTO " + table +
                         "(GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE, " +
-                        "NOT_GOING, UNDECIDED, RSVP_LIMIT)" +
-                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                        "NOT_GOING, UNDECIDED, RSVP_LIMIT, RSVP_ROLE)" +
+                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-                    return connect(master, c -> Mono.from(c.createStatement(insertCommand)
-                        .bind(0, data.getGuildId().asString())
-                        .bind(1, data.getEventId())
-                        .bind(2, data.getEventEnd())
-                        .bind(3, data.getGoingOnTimeString())
-                        .bind(4, data.getGoingLateString())
-                        .bind(5, data.getNotGoingString())
-                        .bind(6, data.getUndecidedString())
-                        .bind(7, data.getLimit())
-                        .execute())
+                    return connect(master, c -> Mono.just(c.createStatement(insertCommand)
+                            .bind(0, data.getGuildId().asString())
+                            .bind(1, data.getEventId())
+                            .bind(2, data.getEventEnd())
+                            .bind(3, data.getGoingOnTimeString())
+                            .bind(4, data.getGoingLateString())
+                            .bind(5, data.getNotGoingString())
+                            .bind(6, data.getUndecidedString())
+                            .bind(7, data.getLimit())
+                        ).doOnNext(statement -> {
+                            if (data.getRoleId() == null)
+                                statement.bindNull(8, Long.class);
+                            else
+                                statement.bind(8, data.getRoleId().asLong());
+                        }).flatMap(s -> Mono.from(s.execute()))
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .thenReturn(true);
                 }
@@ -703,6 +701,10 @@ public class DatabaseManager {
             data.setNotGoingFromString(row.get("NOT_GOING", String.class));
             data.setUndecidedFromString(row.get("UNDECIDED", String.class));
             data.setLimit(row.get("RSVP_LIMIT", Integer.class));
+
+            //Handle new rsvp role
+            Long roleId = row.get("RSVP_ROLE", Long.class);
+            if (roleId != null) data.setRoleId(Snowflake.of(roleId));
 
             return data;
         }))
