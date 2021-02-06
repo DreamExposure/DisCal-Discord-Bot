@@ -82,8 +82,10 @@ data class Announcement(
         val subs = StringBuilder()
 
         for ((i, sub) in this.subscriberRoleIds.withIndex()) {
-            if (i == 0) subs.append(sub)
-            else subs.append(",").append(sub)
+            if (sub.isNotBlank()) {
+                if (i == 0) subs.append(sub)
+                else subs.append(",").append(sub)
+            }
         }
 
         return subs.toString()
@@ -92,8 +94,10 @@ data class Announcement(
     fun getSubscriberUserIdString(): String {
         val subs = StringBuilder()
         for ((i, sub) in this.subscriberUserIds.withIndex()) {
-            if (i == 0) subs.append(sub)
-            else subs.append(",").append(sub)
+            if (sub.isNotBlank()) {
+                if (i == 0) subs.append(sub)
+                else subs.append(",").append(sub)
+            }
         }
 
         return subs.toString()

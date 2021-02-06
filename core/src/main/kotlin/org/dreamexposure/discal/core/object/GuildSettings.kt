@@ -44,8 +44,10 @@ data class GuildSettings(
         val dm = StringBuilder()
 
         for ((i, sub) in this.dmAnnouncements.withIndex()) {
-            if (i == 0) dm.append(sub)
-            else dm.append(",").append(sub)
+            if (sub.isNotBlank()) {
+                if (i == 0) dm.append(sub)
+                else dm.append(",").append(sub)
+            }
         }
 
         return dm.toString()
