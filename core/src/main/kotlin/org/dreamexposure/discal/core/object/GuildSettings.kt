@@ -54,6 +54,6 @@ data class GuildSettings(
     }
 
     fun setDmAnnouncementsString(dm: String) {
-        this.dmAnnouncements += dm.split(",")
+        this.dmAnnouncements += dm.split(",").filter(String::isNotBlank)
     }
 }

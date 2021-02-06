@@ -18,6 +18,10 @@ data class RsvpData(
 
     var limit: Int = -1
 
+    @Serializable(with = SnowflakeAsStringSerializer::class)
+    @SerialName("role_id")
+    var roleId: Snowflake = Snowflake.of(0)
+
     @SerialName("on_time")
     val goingOnTime: MutableList<String> = mutableListOf()
 
@@ -26,6 +30,7 @@ data class RsvpData(
 
     @SerialName("not_going")
     val notGoing: MutableList<String> = mutableListOf()
+
     val undecided: MutableList<String> = mutableListOf()
 
     //List string stuffs
@@ -78,19 +83,19 @@ data class RsvpData(
     }
 
     fun setGoingOnTimeFromString(strList: String) {
-        this.goingOnTime += strList.split(",").filter { it.isNotBlank() }
+        this.goingOnTime += strList.split(",").filter(String::isNotBlank)
     }
 
     fun setGoingLateFromString(strList: String) {
-        this.goingLate += strList.split(",").filter { it.isNotBlank() }
+        this.goingLate += strList.split(",").filter(String::isNotBlank)
     }
 
     fun setNotGoingFromString(strList: String) {
-        this.notGoing += strList.split(",").filter { it.isNotBlank() }
+        this.notGoing += strList.split(",").filter(String::isNotBlank)
     }
 
     fun setUndecidedFromString(strList: String) {
-        this.undecided += strList.split(",").filter { it.isNotBlank() }
+        this.undecided += strList.split(",").filter(String::isNotBlank)
     }
 
     fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size

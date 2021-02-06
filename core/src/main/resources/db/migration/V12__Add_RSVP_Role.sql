@@ -1,0 +1,2 @@
+ALTER TABLE ${prefix}rsvp
+    ADD COLUMN role BIGINT NOT NULL DEFAULT 0;
