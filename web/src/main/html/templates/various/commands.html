@@ -456,7 +456,7 @@
                             <td>!event image [link]</td>
                             <td>!event image https://life.has-destroyed.me/CoXnNvOVq.jpg</td>
                             <td>Sets the event's image. Must be a valid link to image directly.
-                                NO GIFS!
+                                <strong>.gif support is Patron only!</strong>
                             </td>
                         </tr>
                         <!-- Start event review command-->
@@ -662,6 +662,15 @@
                             <td>!rsvp limit [Event ID] 5</td>
                             <td>!rsvp list eihctjdgmf 5</td>
                             <td>Sets a limit of how many people can RSVP to the event. -1 to disable</td>
+                        </tr>
+                        <!--Start rsvp role command-->
+                        <tr>
+                            <td>!rsvp role</td>
+                            <td>!rsvp role [Event ID] [role-id-or-name]</td>
+                            <td>!rsvp role Peeps</td>
+                            <td>Sets the role assigned when RSVPing to the event. "none" to disable/remove
+                                <strong>Patron only!</strong>
+                            </td>
                         </tr>
                         </tbody>
                     </table>

@@ -9,6 +9,7 @@ import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.utils.EventUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.RoleUtils;
 import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.dreamexposure.discal.core.utils.UserUtils;
 
@@ -19,6 +20,7 @@ import java.util.function.Consumer;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
 import reactor.core.publisher.Mono;
@@ -72,6 +74,8 @@ public class RsvpCommand implements Command {
         info.getSubCommands().put("remove", "Removes your RSVP from the event");
         info.getSubCommands().put("list", "Lists who has RSVPed to event");
         info.getSubCommands().put("limit", "Sets the amount of people that can RSVP to the event, -1 to disable");
+        info.getSubCommands().put("role", "Sets the  role people will get when they RSVP to the event, 'none' to " +
+            "remove");
 
         return info;
     }
@@ -108,6 +112,19 @@ public class RsvpCommand implements Command {
                                 else
                                     return Messages.sendMessage(Messages.getMessage("Notification.Perm.CONTROL_ROLE", settings), event);
                             });
+                    case "role":
+                        if (settings.getPatronGuild() || settings.getDevGuild()) {
+                            return PermissionChecker.hasDisCalRole(event, settings)
+                                .flatMap(has -> {
+                                    if (has)
+                                        return this.moduleRole(args, event, settings);
+                                    else
+                                        return Messages.sendMessage(Messages.getMessage("Notification.Perm" +
+                                            ".CONTROL_ROLE", settings), event);
+                                });
+                        } else {
+                            return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);
+                        }
                     default:
                         return Messages.sendMessage(Messages.getMessage("Notification.Args.InvalidSubCmd", settings), event);
                 }
@@ -128,8 +145,8 @@ public class RsvpCommand implements Command {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .filter(data -> data.hasRoom(mem.getId().asString()))
-                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
-                                            .doOnNext(data -> data.getGoingOnTime().add(mem.getId().asString()))
+                                            .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
+                                            .flatMap(data -> data.addGoingOnTime(mem).thenReturn(data))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
@@ -165,8 +182,8 @@ public class RsvpCommand implements Command {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
                                             .filter(data -> data.hasRoom(mem.getId().asString()))
-                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
-                                            .doOnNext(data -> data.getGoingLate().add(mem.getId().asString()))
+                                            .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
+                                            .flatMap(data -> data.addGoingLate(mem).thenReturn(data))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
@@ -201,7 +218,7 @@ public class RsvpCommand implements Command {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
-                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .doOnNext(data -> data.getNotGoing().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
@@ -235,7 +252,7 @@ public class RsvpCommand implements Command {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
-                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
@@ -268,7 +285,7 @@ public class RsvpCommand implements Command {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
                                         return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
-                                            .doOnNext(data -> data.removeCompletely(mem.getId().asString()))
+                                            .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .doOnNext(data -> data.getUndecided().add(mem.getId().asString()))
                                             .flatMap(data -> DatabaseManager.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
@@ -331,6 +348,48 @@ public class RsvpCommand implements Command {
         }).then();
     }
 
+    //!rsvp role <event-id> <role-name-id-or-mention>
+    private Mono<Void> moduleRole(String[] args, MessageCreateEvent event, GuildSettings settings) {
+        return Mono.defer(() -> {
+            if (args.length == 3) {
+                return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
+                                if (!inPast) {
+                                    //Okay, finally, we can change the role
+                                    if ("none".equalsIgnoreCase(args[2])) { //Remove RSVP role...
+                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .flatMap(data -> data.clearRole(event).thenReturn(data))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data).thenReturn(data))
+                                            .flatMap(embed -> Messages.sendMessage("Role removed from RSVP", event));
+                                    }
+
+                                    return RoleUtils.getRole(args[2], event.getMessage())
+                                        .flatMap(role -> DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                            .flatMap(data -> data.setRole(role).thenReturn(data))
+                                            .flatMap(data -> DatabaseManager.updateRsvpData(data).thenReturn(data))
+                                            .flatMap(data -> this.getRsvpEmbed(data, settings))
+                                            .flatMap(embed -> Messages.sendMessage("Role added to RSVP", embed, event)))
+                                        .switchIfEmpty(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole" +
+                                            ".Invalid", settings), event));
+                                } else {
+                                    return Messages.sendMessage(Messages.getMessage("Notifications.Event.InPast",
+                                        settings), event);
+                                }
+                            });
+                        } else {
+                            return Messages.sendMessage(Messages.getMessage("Notifications.Event.NotExist", settings),
+                                event);
+                        }
+                    }));
+            } else {
+                return Messages.sendMessage("Role command uses the following format: `!rsvp role <event-id> <role>",
+                    event);
+            }
+        }).then();
+    }
+
 
     private Mono<Void> moduleList(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.defer(() -> {
@@ -352,7 +411,6 @@ public class RsvpCommand implements Command {
         }).then();
     }
 
-
     private Mono<Consumer<EmbedCreateSpec>> getRsvpEmbed(final RsvpData data, final GuildSettings settings) {
         final Mono<Guild> guildMono = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
@@ -360,9 +418,13 @@ public class RsvpCommand implements Command {
         final Mono<List<Member>> lateMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingLate(), g));
         final Mono<List<Member>> undecidedMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getUndecided(), g));
         final Mono<List<Member>> notGoingMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getNotGoing(), g));
+        final Mono<String> rsvpRoleNameMono = guildMono.flatMap(g -> {
+            if (data.getRoleId() != null) return g.getRoleById(data.getRoleId()).map(Role::getName);
+            else return Mono.just("None");
+        });
 
-        return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono)
-            .map(TupleUtils.function((guild, onTime, late, undecided, notGoing) -> spec -> {
+        return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono, rsvpRoleNameMono)
+            .map(TupleUtils.function((guild, onTime, late, undecided, notGoing, roleName) -> spec -> {
                 if (settings.getBranded())
                     spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
                 else
@@ -374,6 +436,8 @@ public class RsvpCommand implements Command {
                     spec.addField("Max Respondents", data.getCurrentCount() + "/" + data.getLimit(), true);
                 else
                     spec.addField("Max Respondents", "Unlimited", true);
+
+                spec.addField("Role on RSVP", roleName, true);
 
                 final StringBuilder onTimeBuilder = new StringBuilder();
                 for (final Member u : onTime) onTimeBuilder.append(u.getDisplayName()).append(", ");
@@ -390,22 +454,22 @@ public class RsvpCommand implements Command {
                 if (onTimeBuilder.toString().isEmpty())
                     spec.addField("On time", "N/a", true);
                 else
-                    spec.addField("On Time", onTimeBuilder.toString(), true);
+                    spec.addField("On Time", onTimeBuilder.toString(), false);
 
                 if (lateBuilder.toString().isEmpty())
                     spec.addField("Late", "N/a", true);
                 else
-                    spec.addField("Late", lateBuilder.toString(), true);
+                    spec.addField("Late", lateBuilder.toString(), false);
 
                 if (unsureBuilder.toString().isEmpty())
                     spec.addField("Unsure", "N/a", true);
                 else
-                    spec.addField("Unsure", unsureBuilder.toString(), true);
+                    spec.addField("Unsure", unsureBuilder.toString(), false);
 
                 if (notGoingBuilder.toString().isEmpty())
                     spec.addField("Not Going", "N/a", true);
                 else
-                    spec.addField("Not Going", notGoingBuilder.toString(), true);
+                    spec.addField("Not Going", notGoingBuilder.toString(), false);
 
                 spec.setFooter(Messages.getMessage("Embed.RSVP.List.Footer", settings), null);
                 spec.setColor(GlobalConst.discalColor);

@@ -1,10 +1,12 @@
 package org.dreamexposure.discal.core.utils;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
+import discord4j.rest.http.client.ClientException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -30,6 +32,13 @@ public class RoleUtils {
 
     public static Mono<Boolean> roleExists(final String id, final MessageCreateEvent event) {
         return getRoleFromID(id, event).hasElement();
+    }
+
+    public static Mono<Boolean> roleExists(DiscordClient client, Snowflake guildId, Snowflake roleId) {
+        return client.getRoleById(guildId, roleId)
+            .getData()
+            .transform(ClientException.emptyOnStatus(GlobalConst.STATUS_NOT_FOUND))
+            .hasElement();
     }
 
     public static Mono<String> getRoleNameFromID(final String id, final MessageCreateEvent event) {
@@ -73,10 +82,7 @@ public class RoleUtils {
         }
 
         return guild.getRoles()
-            .filter(r ->
-                r.getName().equalsIgnoreCase(lower)
-                    || r.getName().toLowerCase().contains(lower)
-            )
+            .filter(r -> r.getName().equalsIgnoreCase(lower) || r.getName().toLowerCase().contains(lower))
             .next()
             .onErrorResume(e -> Mono.empty()); //Role not found, we don't really care about the error
     }

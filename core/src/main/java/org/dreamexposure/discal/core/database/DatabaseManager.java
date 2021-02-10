@@ -1,9 +1,5 @@
 package org.dreamexposure.discal.core.database;
 
-import discord4j.common.util.Snowflake;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.*;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -17,8 +13,6 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +21,26 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import static io.r2dbc.spi.ConnectionFactoryOptions.*;
+import discord4j.common.util.Snowflake;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.ConnectionFactories;
+import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
+import io.r2dbc.spi.Result;
+import io.r2dbc.spi.ValidationDepth;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
+import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -391,6 +404,9 @@ public class DatabaseManager {
     }
 
     public static Mono<Boolean> updateRsvpData(final RsvpData data) {
+        //Check if roleData even needs to be updated/inserted anyway
+        if (!data.shouldBeSaved()) return Mono.just(false);
+
         final String table = String.format("%srsvp", settings.getPrefix());
 
         return connect(slave, c -> {
@@ -704,7 +720,7 @@ public class DatabaseManager {
 
             //Handle new rsvp role
             Long roleId = row.get("RSVP_ROLE", Long.class);
-            if (roleId != null) data.setRoleId(Snowflake.of(roleId));
+            if (roleId != null) data.setRole(Snowflake.of(roleId));
 
             return data;
         }))
@@ -1127,6 +1143,27 @@ public class DatabaseManager {
             .then(Mono.just(true))
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("Failed to delete all rsvps for guild", e, DatabaseManager.class));
+                return Mono.just(false);
+            });
+    }
+
+    public static Mono<Boolean> removeRSVPRole(Snowflake guildId, Snowflake roleId) {
+        return connect(master, c -> {
+            final String rsvpTable = String.format("%srsvp", settings.getPrefix());
+            final String query = "UPDATE " + rsvpTable +
+                "SET RSVP_ROLE = ? " +
+                " WHERE GUILD_ID = ? AND RSVP_ROLE = ?";
+
+            return Mono.from(c.createStatement(query)
+                .bindNull(0, Long.class)
+                .bind(1, guildId.asString())
+                .bind(2, roleId.asLong())
+                .execute());
+        }).flatMapMany(Result::getRowsUpdated)
+            .then(Mono.just(true))
+            .onErrorResume(e -> {
+                LogFeed.log(LogObject.forException("Failed to update all rsvps with role for guild", e,
+                    DatabaseManager.class));
                 return Mono.just(false);
             });
     }

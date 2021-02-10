@@ -16,7 +16,7 @@ DisCal is a discord bot that connects Discord and Google Calendar as seamlessly 
 * Versatile and built for all communities
 * Web dashboard for bot and calendar management
 
-## Patron-Only Features
+## Main Patron-Only Features
 
 Patrons and supporters on the $5/month plans get access to work in progress and exclusive features.
 
@@ -30,6 +30,11 @@ Patrons and supporters on the $5/month plans get access to work in progress and 
 * Announcement Publishing
     - Announcements posted in news channels can be (optionally) automatically "published" so servers following the news
       channel receive them as well!
+
+### Smaller Patron-only Features
+
+* Gif support for event images
+* Automatically assign roles to users when RSVPing to an event.
 
 ## Planned Features & Work in Progress Changes
 

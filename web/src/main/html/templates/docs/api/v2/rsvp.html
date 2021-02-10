@@ -325,7 +325,8 @@
 				"late": ["233611560545812480", "142107863307780097"],
 				"undecided": [],
 				"not_going": [],
-                "limit", -1
+                "limit": -1,
+                "role_id": null
 				}
 				</code></pre>
 
@@ -414,6 +415,11 @@
                         <td>Integer</td>
                         <td>Amount of people that can RSVP to the event, `-1` to disable</td>
                     </tr>
+                    <tr>
+                        <td>role_id</td>
+                        <td>String?</td>
+                        <td>The ID of the role to be assigned when RSVPing to the event. `null` if no role is used</td>
+                    </tr>
                     </tbody>
                 </table>
 
@@ -437,7 +443,8 @@
 				{
 				"guild_id": 375357265198317579,
 				"event_id": "divq9ihqhoq9hbm2tncj8set04",
-                "limit": 10
+                "limit": 10,
+                "role_id": null,
 				"to_add": {
 					"on_time": ["130510525770629121"],
 					"late": ["233611560545812480"]
@@ -490,6 +497,12 @@
                         <td>limit</td>
                         <td>Integer</td>
                         <td>Amount of people that can RSVP to the event, `-1` to disable</td>
+                        <td>False</td>
+                    </tr>
+                    <tr>
+                        <td>role_id</td>
+                        <td>String?</td>
+                        <td>The ID of the role to assign when RSVPing to the event. `null` or "none" to remove role</td>
                         <td>False</td>
                     </tr>
                     <tr>
