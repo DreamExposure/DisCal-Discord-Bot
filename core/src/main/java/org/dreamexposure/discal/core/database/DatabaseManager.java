@@ -241,7 +241,7 @@ public class DatabaseManager {
                     final String update = "UPDATE " + table
                         + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
                         + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,"
-                        + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH TOKEN = ?"
+                        + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?"
                         + " WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
