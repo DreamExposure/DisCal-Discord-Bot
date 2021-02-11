@@ -6,7 +6,6 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 
@@ -71,64 +70,64 @@ public class AddCalendarCommand implements Command {
      */
     @Override
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
-        return Mono.just(settings)
-            .filter(s -> s.getDevGuild() || s.getPatronGuild())
-            .flatMap(s -> PermissionChecker.hasManageServerRole(event)
-                .filter(identity -> identity)
-                .flatMap(ignore -> {
-                    if (args.length == 0) {
-                        return DatabaseManager.getMainCalendar(settings.getGuildID())
-                            .hasElement()
-                            .flatMap(hasCal -> {
-                                if (hasCal) {
-                                    return Messages.sendMessage(
-                                        Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                                } else {
-                                    return GoogleExternalAuth.getAuth().requestCode(event, settings)
-                                        .then(Messages.sendMessage(
-                                            Messages.getMessage("AddCalendar.Start", settings), event));
-                                }
-                            });
-                    } else if (args.length == 1) {
-                        return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data -> {
-                            if ("primary".equalsIgnoreCase(data.getCalendarAddress())) {
-                                return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
-                            } else if ("N/a".equalsIgnoreCase(data.getEncryptedAccessToken())
-                                && "N/a".equalsIgnoreCase(data.getEncryptedRefreshToken())) {
-                                return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
-                            } else {
-                                return CalendarWrapper.getUsersExternalCalendars(data)
-                                    .flatMapMany(Flux::fromIterable)
-                                    .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
-                                    .flatMap(valid -> {
-                                        if (valid) {
-                                            final CalendarData newData = new CalendarData(
-                                                data.getGuildId(), 1, args[0], args[0], true, 0,
-                                                data.getPrivateKey(), data.getEncryptedAccessToken(),
-                                                data.getEncryptedRefreshToken());
+        if (!(settings.getDevGuild() || settings.getPatronGuild())) {
+            return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event).then();
+        }
 
-                                            //combine db calls and message send to be executed together async
-                                            final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(newData);
-                                            final Mono<Message> sendMsg = Messages.sendMessage(
-                                                Messages.getMessage("AddCalendar.Select.Success", settings), event);
+        return PermissionChecker.hasManageServerRole(event).flatMap(hasManageRole -> {
+            if (!hasManageRole) {
+                return Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event);
+            }
 
-                                            return Mono.when(calInsert, sendMsg)
-                                                .thenReturn(GlobalConst.NOT_EMPTY);
-                                        } else {
-                                            return Messages.sendMessage(Messages
-                                                .getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
-                                        }
-                                    });
-                            }
-                        });
-                    } else {
-                        //Invalid argument count...
-                        return Messages.sendMessage(Messages.getMessage("AddCalendar.Specify", settings), event);
-                    }
-                })
-                .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
-            )
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event))
-            .then();
+            if (args.length == 0) {
+                return DatabaseManager.getMainCalendar(settings.getGuildID())
+                    .hasElement()
+                    .flatMap(hasCal -> {
+                        if (hasCal) {
+                            return Messages.sendMessage(
+                                Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                        } else {
+                            return GoogleExternalAuth.getAuth().requestCode(event, settings)
+                                .then(Messages.sendMessage(
+                                    Messages.getMessage("AddCalendar.Start", settings), event));
+                        }
+                    });
+            } else if (args.length == 1) {
+                return DatabaseManager.getMainCalendar(settings.getGuildID())
+                    .flatMap(data -> {
+                        if (!"primary".equalsIgnoreCase(data.getCalendarAddress())) {
+                            return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
+                        } else if ("N/a".equalsIgnoreCase(data.getEncryptedAccessToken())
+                            && "N/a".equalsIgnoreCase(data.getEncryptedRefreshToken())) {
+                            return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
+                        } else {
+                            return CalendarWrapper.getUsersExternalCalendars(data)
+                                .flatMapMany(Flux::fromIterable)
+                                .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
+                                .flatMap(valid -> {
+                                    if (valid) {
+                                        final CalendarData newData = new CalendarData(
+                                            data.getGuildId(), 1, args[0], args[0], true, 0,
+                                            data.getPrivateKey(), data.getEncryptedAccessToken(),
+                                            data.getEncryptedRefreshToken());
+
+                                        //combine db calls and message send to be executed together async
+                                        final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(newData);
+                                        final Mono<Message> sendMsg = Messages.sendMessage(
+                                            Messages.getMessage("AddCalendar.Select.Success", settings), event);
+
+                                        return Mono.when(calInsert, sendMsg);
+                                    } else {
+                                        return Messages.sendMessage(Messages
+                                            .getMessage("AddCalendar.Select.Failure.Invalid", settings), event);
+                                    }
+                                });
+                        }
+                    });
+            } else {
+                //Invalid argument count...
+                return Messages.sendMessage(Messages.getMessage("AddCalendar.Specify", settings), event);
+            }
+        }).then();
     }
 }
