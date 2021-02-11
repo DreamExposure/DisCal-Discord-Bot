@@ -261,7 +261,8 @@ public class DatabaseManager {
                 } else {
                     final String insertCommand = "INSERT INTO " + table
                         + "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, " +
-                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID)" + " VALUES (?, ?, ?, ?, ?, ?)";
+                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID, " +
+                        "PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, calData.getGuildId().asString())
@@ -270,6 +271,9 @@ public class DatabaseManager {
                         .bind(3, calData.getCalendarAddress())
                         .bind(4, calData.getExternal())
                         .bind(5, calData.getCredentialId())
+                        .bind(6, calData.getPrivateKey())
+                        .bind(7, calData.getEncryptedAccessToken())
+                        .bind(8, calData.getEncryptedRefreshToken())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
