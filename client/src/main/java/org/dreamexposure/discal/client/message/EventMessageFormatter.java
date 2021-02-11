@@ -158,7 +158,7 @@ public class EventMessageFormatter {
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
 
                 //Timezone so that start/end times are split up cleanly on discord
-                spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
+                spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, false);
 
                 //End time
                 spec.addField(Messages.getMessage("Embed.Event.Info.EndDate", settings), endDate, true);
