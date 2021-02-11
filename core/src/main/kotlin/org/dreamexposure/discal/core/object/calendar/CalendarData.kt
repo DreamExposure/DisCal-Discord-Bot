@@ -13,7 +13,7 @@ data class CalendarData(
         @SerialName("guild_id")
         val guildId: Snowflake = Snowflake.of(0),
         @SerialName("calendar_number")
-        val calendarNumber: Int = 0,
+        val calendarNumber: Int = 1,
         @SerialName("calendar_id")
         val calendarId: String = "primary",
         @SerialName("calendar_address")
