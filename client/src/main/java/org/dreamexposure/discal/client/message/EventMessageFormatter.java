@@ -151,12 +151,20 @@ public class EventMessageFormatter {
                     }
                     spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, false);
                 }
+
+
+                //Start time
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartDate", settings), startDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
+
+                //Timezone so that start/end times are split up cleanly on discord
+                spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
+
+                //End time
                 spec.addField(Messages.getMessage("Embed.Event.Info.EndDate", settings), endDate, true);
                 spec.addField(Messages.getMessage("Embed.Event.Info.EndTime", settings), endTime, true);
 
-                spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, true);
+                //Location handling
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
                         final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
