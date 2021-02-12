@@ -19,8 +19,15 @@ public class JsonUtils {
         final JSONObject json = new JSONObject();
 
         json.put("event_id", event.getId());
-        json.put("epoch_start", event.getStart().getDateTime().getValue());
-        json.put("epoch_end", event.getEnd().getDateTime().getValue());
+        if (event.getStart().getDateTime() != null)
+            json.put("epoch_start", event.getStart().getDateTime().getValue());
+        else
+            json.put("epoch_start", event.getStart().getDate().getValue());
+
+        if (event.getEnd().getDateTime() != null)
+            json.put("epoch_end", event.getEnd().getDateTime().getValue());
+        else
+            json.put("epoch_end", event.getEnd().getDate().getValue());
 
         //These 3 are optional values
         if (event.getSummary() != null)
@@ -32,7 +39,10 @@ public class JsonUtils {
 
         json.put("is_parent", !(event.getId().contains("_")));
 
-        json.put("color", EventColor.Companion.fromNameOrHexOrId(event.getColorId()).name());
+        if (event.getColorId() != null)
+            json.put("color", EventColor.Companion.fromNameOrHexOrId(event.getColorId()).name());
+        else
+            json.put("color", EventColor.NONE.name());
 
         if (event.getRecurrence() != null && !event.getRecurrence().isEmpty()) {
             json.put("recur", true);
