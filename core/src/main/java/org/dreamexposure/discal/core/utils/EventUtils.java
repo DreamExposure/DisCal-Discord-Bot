@@ -59,9 +59,9 @@ public class EventUtils {
             ).switchIfEmpty(Mono.just(false));
     }
 
-    public static Mono<PreEvent> copyEvent(final Snowflake guildId, final Event event) {
+    public static Mono<PreEvent> copyEvent(final Snowflake guildId, final Event event, int calNum) {
         return DatabaseManager.getEventData(guildId, event.getId())
-            .flatMap(data -> Mono.just(new PreEvent(guildId))
+            .flatMap(data -> Mono.just(new PreEvent(guildId, calNum))
                 .doOnNext(p -> p.setEventData(data))
                 .doOnNext(p -> p.setSummary(event.getSummary()))
                 .doOnNext(p -> p.setDescription(event.getDescription()))
@@ -72,7 +72,7 @@ public class EventUtils {
                     else
                         p.setColor(EventColor.NONE);
                 })
-            ).switchIfEmpty(Mono.just(new PreEvent(guildId))
+            ).switchIfEmpty(Mono.just(new PreEvent(guildId, calNum))
                 .doOnNext(p -> p.setEventData(new EventData()))
                 .doOnNext(p -> p.setSummary(event.getSummary()))
                 .doOnNext(p -> p.setDescription(event.getDescription()))

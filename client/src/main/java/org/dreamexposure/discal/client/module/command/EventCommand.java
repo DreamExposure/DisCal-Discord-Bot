@@ -233,7 +233,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
             } else if (!"primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
@@ -257,7 +257,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
             } else if (!"primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
@@ -291,7 +291,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.AlreadyInit", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
             } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
@@ -345,7 +345,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                     .flatMap(em -> Messages.sendMessage(Messages
                         .getMessage("Creator.Event.Delete.Failure.Creator", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
@@ -379,7 +379,7 @@ public class EventCommand implements Command {
                 final Mono<Void> deleteCreatorMessage = Messages.deleteMessage(pre.getCreatorMessage());
 
                 return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                    .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                     .flatMap(em -> Messages.sendMessage(Messages.getMessage("Event.View.Creator.Confirm", settings), em, event))
                     .doOnNext(pre::setCreatorMessage);
             } else if ("primary".equalsIgnoreCase(calendarData.getCalendarAddress())) {
@@ -421,7 +421,7 @@ public class EventCommand implements Command {
                                 .flatMap(em -> Messages.sendMessage(msg, em, event));
                         } else {
                             return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                                .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(),
+                                .then(EventMessageFormatter.getPreEventEmbed(pre,
                                     settings))
                                 .flatMap(em -> Messages.sendMessage(
                                     Messages.getMessage("Creator.Event.Confirm.Failure", settings), em, event))
@@ -431,7 +431,7 @@ public class EventCommand implements Command {
                 } else {
                     //Some values are unset, tell user.
                     return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                        .then(EventMessageFormatter.getPreEventEmbed(pre, calendarData.getCalendarNumber(), settings))
+                        .then(EventMessageFormatter.getPreEventEmbed(pre, settings))
                         .flatMap(em -> Messages.sendMessage(Messages.getMessage("Creator.Event.NoRequired", settings), em, event))
                         .doOnNext(pre::setCreatorMessage);
                 }

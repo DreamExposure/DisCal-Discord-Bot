@@ -1,20 +1,18 @@
 package org.dreamexposure.discal.core.`object`.event
 
-import com.google.api.services.calendar.model.Calendar
 import com.google.api.services.calendar.model.Event
 import com.google.api.services.calendar.model.EventDateTime
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Message
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
 
 @Suppress("DataClassPrivateConstructor")
 data class PreEvent private constructor(
         val guildId: Snowflake,
         val eventId: String,
+        val calNumber: Int,
 ) {
     //fields
     var summary: String? = null
@@ -39,9 +37,9 @@ data class PreEvent private constructor(
     var lastEdit = System.currentTimeMillis()
 
     //Constructors
-    constructor(guildId: Snowflake) : this(guildId, "N/a")
+    constructor(guildId: Snowflake, calNumber: Int) : this(guildId, "N/a", calNumber)
 
-    constructor(guildId: Snowflake, e: Event) : this(guildId, e.id) {
+    constructor(guildId: Snowflake, e: Event, calData: CalendarData) : this(guildId, e.id, calData.calendarNumber) {
         this.color = EventColor.fromNameOrHexOrId(e.colorId)
 
         if (e.recurrence != null && e.recurrence.isNotEmpty()) {
@@ -56,20 +54,7 @@ data class PreEvent private constructor(
         this.startDateTime = e.start
         this.endDateTime = e.end
 
-        //Here is where I need to fix the display times
-        //TODO: Get rid of the blocking
-        //TODO: Support multi-cal
-        val data = DatabaseManager.getMainCalendar(this.guildId).block()!!
-
-        var cal: Calendar? = null
-        try {
-            cal = CalendarWrapper.getCalendar(data).block()
-        } catch (ex: Exception) {
-            LogFeed.log(LogObject.forException("Failed to get proper date/time for event!", ex, this.javaClass))
-        }
-
-        if (cal != null) this.timezone = cal.timeZone
-        else this.timezone = "ERROR/Unknown"
+        if (e.start.timeZone != null) this.timezone = e.start.timeZone
 
         this.eventData = DatabaseManager.getEventData(this.guildId, e.id).block()!!
     }
