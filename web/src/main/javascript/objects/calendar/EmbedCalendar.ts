@@ -15,7 +15,7 @@ import {ElementUtil} from "@/utils/ElementUtil";
 //The calendar class. This just handles all the stuff inside of the calendar, and keeps it isolated.
 export class EmbedCalendar implements TaskCallback {
     private readonly guildId: string;
-	private readonly calNumber: number;
+    private readonly calNumber: number;
     private todaysDate: Date;
     private displays: string[];
     private apiKey: string;
@@ -40,21 +40,21 @@ export class EmbedCalendar implements TaskCallback {
         this.apiUrl = url;
 
         if (this.apiKey === "internal_error") {
-			ElementUtil.hideLoader();
-			alert("Failed to get a read-only API key to display your calendar. \n" +
-				"If you keep receiving this error, please contact the developers");
+            ElementUtil.hideLoader();
+            alert("Failed to get a read-only API key to display your calendar. \n" +
+                "If you keep receiving this error, please contact the developers");
 
-		} else {
-			//Request calendar information
-			let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
-			calReq.provideApiDetails(this.apiKey, this.apiUrl);
+        } else {
+            //Request calendar information
+            let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
+            calReq.provideApiDetails(this.apiKey, this.apiUrl);
 
-			//Execute the calls
-			this.setMonth(this.selectedDate);
+            //Execute the calls
+            this.setMonth(this.selectedDate);
 
-			calReq.execute();
-			this.getEventsForMonth();
-		}
+            calReq.execute();
+            this.getEventsForMonth();
+        }
 
         return this;
     }
@@ -146,7 +146,7 @@ export class EmbedCalendar implements TaskCallback {
         for (let ii = 0; ii < tcc.length; ii++) {
             let e = document.getElementById(tcc[ii])!;
             e.innerHTML = "";
-			e.className = "cal-date";
+            e.className = "cal-date";
         }
 
         let tc = this.dateDisplaysToChange(this.findFirstDayOfMonthPosition());
@@ -160,19 +160,19 @@ export class EmbedCalendar implements TaskCallback {
 
                 let thisDate = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), d);
                 if (d === this.selectedDate.getDate()) {
-					el.className = "selected cal-date";
+                    el.className = "selected cal-date";
                 }
                 if (thisDate.getMonth() === this.todaysDate.getMonth()
                     && thisDate.getFullYear() === this.todaysDate.getFullYear()
                     && thisDate.getDate() === this.todaysDate.getDate()) {
-					if (el.classList.contains("selected")) {
-						el.className = "today selected cal-date";
-						//get events for it
-						this.getEventsForSelectedDate();
-					} else {
-						el.className = "today cal-date";
-					}
-				}
+                    if (el.classList.contains("selected")) {
+                        el.className = "today selected cal-date";
+                        //get events for it
+                        this.getEventsForSelectedDate();
+                    } else {
+                        el.className = "today cal-date";
+                    }
+                }
             }
         }
     }
@@ -190,16 +190,16 @@ export class EmbedCalendar implements TaskCallback {
     }
 
     getEventsForSelectedDate() {
-		let ds = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
-		ds.setHours(0, 0, 0, 0);
+        let ds = new Date(this.selectedDate.getFullYear(), this.selectedDate.getMonth(), this.selectedDate.getDate());
+        ds.setHours(0, 0, 0, 0);
 
-		ElementUtil.hideEventsContainer();
+        ElementUtil.hideEventsContainer();
 
-		let eventReq = new EventListDateRequest(this.guildId, this.calNumber, ds.getTime(), this);
-		eventReq.provideApiDetails(this.apiKey, this.apiUrl);
+        let eventReq = new EventListDateRequest(this.guildId, this.calNumber, ds.getTime(), this);
+        eventReq.provideApiDetails(this.apiKey, this.apiUrl);
 
-		eventReq.execute();
-	}
+        eventReq.execute();
+    }
 
     onCallback(status: NetworkCallStatus): void {
         if (status.isSuccess) {
@@ -208,352 +208,361 @@ export class EmbedCalendar implements TaskCallback {
                     this.calendarData = new WebCalendar().fromJson(status.body);
 
                     (<HTMLLinkElement>document.getElementById("view-on-google-button"))
-						.href = "https://calendar.google.com/calendar/embed?src="
-						+ this.calendarData.address;
-					break;
-				case TaskType.EVENT_LIST_MONTH:
-					//Display the event counts on the calendar...
-					for (let i = 0; i < status.body.events.length; i++) {
-						let d = new Date(status.body.events[i].epoch_start);
+                        .href = "https://calendar.google.com/calendar/embed?src="
+                        + this.calendarData.address;
+                    break;
+                case TaskType.EVENT_LIST_MONTH:
+                    //Display the event counts on the calendar...
+                    for (let i = 0; i < status.body.events.length; i++) {
+                        let d = new Date(status.body.events[i].epoch_start);
 
-						let e = document.getElementById(this.displays[d.getDate()])!;
+                        //Apparently this can be null??
+                        let e = document.getElementById(this.displays[d.getDate()])!;
 
-						if (e.innerHTML.indexOf("[") === -1) {
-							e.innerHTML = d.getDate() + "[1]";
-						} else {
-							e.innerHTML = d.getDate().toString()
-								+ "[" + (parseInt(e.innerHTML.split("[")[1][0]) + 1).toString() + "]";
-						}
-					}
-					ElementUtil.hideLoader();
-					ElementUtil.showCalendarContainer();
-					break;
-				case TaskType.EVENT_LIST_DATE:
-					EmbedCalendar.loadEventDisplay(status);
-					break;
-				default:
-					break;
-			}
-		} else {
-			Snackbar.showSnackbar("ERROR] " + status.message);
-		}
-	}
+                        if (e != null) {
+                            if (e.innerHTML.indexOf("[") === -1) {
+                                e.innerHTML = d.getDate() + "[1]";
+                            } else {
+                                e.innerHTML = d.getDate().toString()
+                                    + "[" + (parseInt(e.innerHTML.split("[")[1][0]) + 1).toString() + "]";
+                            }
+                        } else {
+                            //BUG: This should never ever be able to be null, and if it is, something is wrong.
+                            //We will show a dialog to the user and log shit in the console.
+                            console.warn("Null value for not null object", e, d, this.displays[d.getDate()]);
+                            Snackbar.showSnackbar("[Warning] Something may be wrong, please contact the developers");
+                        }
+                    }
+                    ElementUtil.hideLoader();
+                    ElementUtil.showCalendarContainer();
+                    break;
+                case TaskType.EVENT_LIST_DATE:
+                    EmbedCalendar.loadEventDisplay(status);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            Snackbar.showSnackbar("ERROR] " + status.message);
+        }
+    }
 
-	private static loadEventDisplay(status: NetworkCallStatus) {
-		//Display the selected day's event details for editing and such.
-		let container = document.getElementById("events-container")!;
+    private static loadEventDisplay(status: NetworkCallStatus) {
+        //Display the selected day's event details for editing and such.
+        let container = document.getElementById("events-container")!;
 
-		while (container.firstChild) {
-			container.removeChild(container.firstChild);
-		}
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
 
-		for (let i = 0; i < status.body.events.length; i++) {
-			let event = new Event().fromJson(status.body.events[i]);
+        for (let i = 0; i < status.body.events.length; i++) {
+            let event = new Event().fromJson(status.body.events[i]);
 
-			//Create View Button
-			let viewButton = document.createElement("button");
-			viewButton.type = "button";
-			viewButton.className =
-				"btn bg-discord-blurple btn-discord btn-block " +
-				"text-discord-full-white event-view-btn";
-			viewButton.setAttribute("data-toggle", "modal");
-			viewButton.setAttribute("data-target", "#modal-" + event.eventId);
-			viewButton.innerHTML = "View " + event.summary;
-			container.appendChild(viewButton);
+            //Create View Button
+            let viewButton = document.createElement("button");
+            viewButton.type = "button";
+            viewButton.className =
+                "btn bg-discord-blurple btn-discord btn-block " +
+                "text-discord-full-white event-view-btn";
+            viewButton.setAttribute("data-toggle", "modal");
+            viewButton.setAttribute("data-target", "#modal-" + event.eventId);
+            viewButton.innerHTML = "View " + event.summary;
+            container.appendChild(viewButton);
 
-			container.appendChild(document.createElement("br"));
-			container.appendChild(document.createElement("br"));
+            container.appendChild(document.createElement("br"));
+            container.appendChild(document.createElement("br"));
 
-			//Create modal container
-			let modalContainer = document.createElement("div");
-			modalContainer.className = "modal fade";
-			modalContainer.id = "modal-" + event.eventId;
-			// @ts-ignore
-			modalContainer.role = "dialog";
-			container.appendChild(modalContainer);
+            //Create modal container
+            let modalContainer = document.createElement("div");
+            modalContainer.className = "modal fade";
+            modalContainer.id = "modal-" + event.eventId;
+            // @ts-ignore
+            modalContainer.role = "dialog";
+            container.appendChild(modalContainer);
 
-			//Create modal-dialog
-			let modalDia = document.createElement("div");
-			modalDia.className = "modal-dialog";
-			modalContainer.appendChild(modalDia);
+            //Create modal-dialog
+            let modalDia = document.createElement("div");
+            modalDia.className = "modal-dialog";
+            modalContainer.appendChild(modalDia);
 
-			//Create Modal Content
-			let modalCon = document.createElement("div");
-			modalCon.className = "modal-content bg-discal-not-black";
-			modalDia.appendChild(modalCon);
+            //Create Modal Content
+            let modalCon = document.createElement("div");
+            modalCon.className = "modal-content bg-discal-not-black";
+            modalDia.appendChild(modalCon);
 
-			//Create modal header and title
-			let modalHeader = document.createElement("div");
-			modalHeader.className = "modal-header bg-discal-not-black";
-			modalCon.appendChild(modalHeader);
-			let modalTitle = document.createElement("h4");
-			modalTitle.className = "modal-title text-discord-blurple text-center";
-			modalTitle.innerHTML = "Viewing Event";
-			modalHeader.appendChild(modalTitle);
+            //Create modal header and title
+            let modalHeader = document.createElement("div");
+            modalHeader.className = "modal-header bg-discal-not-black";
+            modalCon.appendChild(modalHeader);
+            let modalTitle = document.createElement("h4");
+            modalTitle.className = "modal-title text-discord-blurple text-center";
+            modalTitle.innerHTML = "Viewing Event";
+            modalHeader.appendChild(modalTitle);
 
-			//Create Modal Body
-			let modalBody = document.createElement("div");
-			modalBody.className = "modal-body";
-			modalCon.appendChild(modalBody);
+            //Create Modal Body
+            let modalBody = document.createElement("div");
+            modalBody.className = "modal-body";
+            modalCon.appendChild(modalBody);
 
-			let form = document.createElement("form");
-			modalBody.appendChild(form);
+            let form = document.createElement("form");
+            modalBody.appendChild(form);
 
-			//Summary
-			let summaryLabel = document.createElement("label");
-			summaryLabel.innerHTML = "Summary";
-			summaryLabel.className = "text-discord-full-white";
-			summaryLabel.appendChild(document.createElement("br"));
-			form.appendChild(summaryLabel);
-			let summary = document.createElement("input");
-			summary.name = "summary";
-			summary.type = "text";
-			// noinspection JSDeprecatedSymbols
-			summary.value = event.summary;
-			summary.id = "editSummary-" + event.eventId;
-			summary.readOnly = true;
-			summaryLabel.appendChild(summary);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //Summary
+            let summaryLabel = document.createElement("label");
+            summaryLabel.innerHTML = "Summary";
+            summaryLabel.className = "text-discord-full-white";
+            summaryLabel.appendChild(document.createElement("br"));
+            form.appendChild(summaryLabel);
+            let summary = document.createElement("input");
+            summary.name = "summary";
+            summary.type = "text";
+            // noinspection JSDeprecatedSymbols
+            summary.value = event.summary;
+            summary.id = "editSummary-" + event.eventId;
+            summary.readOnly = true;
+            summaryLabel.appendChild(summary);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//Description
-			let descriptionLabel = document.createElement("label");
-			descriptionLabel.innerHTML = "Description";
-			descriptionLabel.className = "text-discord-full-white";
-			descriptionLabel.appendChild(document.createElement("br"));
-			form.appendChild(descriptionLabel);
-			let description = document.createElement("input");
-			description.name = "edit-description";
-			description.type = "text";
-			description.value = event.description;
-			description.id = "editDescription-" + event.eventId;
-			description.readOnly = true;
-			descriptionLabel.appendChild(description);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //Description
+            let descriptionLabel = document.createElement("label");
+            descriptionLabel.innerHTML = "Description";
+            descriptionLabel.className = "text-discord-full-white";
+            descriptionLabel.appendChild(document.createElement("br"));
+            form.appendChild(descriptionLabel);
+            let description = document.createElement("input");
+            description.name = "edit-description";
+            description.type = "text";
+            description.value = event.description;
+            description.id = "editDescription-" + event.eventId;
+            description.readOnly = true;
+            descriptionLabel.appendChild(description);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//Start date and time
-			let sd = new Date(event.epochStart);
-			let startLabel = document.createElement("label");
-			startLabel.innerHTML = "Start Date and Time";
-			startLabel.className = "text-discord-full-white";
-			startLabel.appendChild(document.createElement("br"));
-			form.appendChild(startLabel);
-			let startDate = document.createElement("input");
-			startDate.name = "start-date";
-			startDate.type = "date";
-			startDate.valueAsDate = sd;
-			startDate.id = "editStartDate-" + event.eventId;
-			startDate.readOnly = true;
-			startLabel.appendChild(startDate);
-			let startTime = document.createElement("input");
-			startTime.name = "start-time";
-			startTime.type = "time";
-			startTime.value = (sd.getHours() < 10 ? "0" : "") + sd.getHours() + ":" + (sd.getMinutes() < 10 ? "0" : "") + sd.getMinutes();
-			startTime.id = "editStartTime-" + event.eventId;
-			startTime.readOnly = true;
-			startLabel.appendChild(startTime);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //TODO: Change this to respect timezones properly!!!!!!!!!!!11!!!!!!!!1!!!!
+            //Start date and time
+            let sd = new Date(event.epochStart);
+            let startLabel = document.createElement("label");
+            startLabel.innerHTML = "Start Date and Time";
+            startLabel.className = "text-discord-full-white";
+            startLabel.appendChild(document.createElement("br"));
+            form.appendChild(startLabel);
+            let startDate = document.createElement("input");
+            startDate.name = "start-date";
+            startDate.type = "date";
+            startDate.valueAsDate = sd;
+            startDate.id = "editStartDate-" + event.eventId;
+            startDate.readOnly = true;
+            startLabel.appendChild(startDate);
+            let startTime = document.createElement("input");
+            startTime.name = "start-time";
+            startTime.type = "time";
+            startTime.value = (sd.getHours() < 10 ? "0" : "") + sd.getHours() + ":" + (sd.getMinutes() < 10 ? "0" : "") + sd.getMinutes();
+            startTime.id = "editStartTime-" + event.eventId;
+            startTime.readOnly = true;
+            startLabel.appendChild(startTime);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//End date and time
-			let ed = new Date(event.epochEnd);
-			let endLabel = document.createElement("label");
-			endLabel.innerHTML = "End Date and Time";
-			endLabel.className = "text-discord-full-white";
-			endLabel.appendChild(document.createElement("br"));
-			form.appendChild(endLabel);
-			let endDate = document.createElement("input");
-			endDate.name = "end-date";
-			endDate.type = "date";
-			endDate.valueAsDate = ed;
-			endDate.id = "editEndDate-" + event.eventId;
-			endDate.readOnly = true;
-			endLabel.appendChild(endDate);
-			let endTime = document.createElement("input");
-			endTime.name = "end-time";
-			endTime.type = "time";
-			endTime.value = (ed.getHours() < 10 ? "0" : "") + ed.getHours() + ":" + (ed.getMinutes() < 10 ? "0" : "") + ed.getMinutes();
-			endTime.id = "editEndTime-" + event.eventId;
-			endTime.readOnly = true;
-			endLabel.appendChild(endTime);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //End date and time
+            let ed = new Date(event.epochEnd);
+            let endLabel = document.createElement("label");
+            endLabel.innerHTML = "End Date and Time";
+            endLabel.className = "text-discord-full-white";
+            endLabel.appendChild(document.createElement("br"));
+            form.appendChild(endLabel);
+            let endDate = document.createElement("input");
+            endDate.name = "end-date";
+            endDate.type = "date";
+            endDate.valueAsDate = ed;
+            endDate.id = "editEndDate-" + event.eventId;
+            endDate.readOnly = true;
+            endLabel.appendChild(endDate);
+            let endTime = document.createElement("input");
+            endTime.name = "end-time";
+            endTime.type = "time";
+            endTime.value = (ed.getHours() < 10 ? "0" : "") + ed.getHours() + ":" + (ed.getMinutes() < 10 ? "0" : "") + ed.getMinutes();
+            endTime.id = "editEndTime-" + event.eventId;
+            endTime.readOnly = true;
+            endLabel.appendChild(endTime);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//Location
-			let locationLabel = document.createElement("label");
-			locationLabel.innerHTML = "Location";
-			locationLabel.className = "text-discord-full-white";
-			locationLabel.appendChild(document.createElement("br"));
-			form.appendChild(locationLabel);
-			let location = document.createElement("input");
-			location.name = "location";
-			location.type = "text";
-			location.value = event.location;
-			location.id = "editLocation-" + event.eventId;
-			location.readOnly = true;
-			locationLabel.appendChild(location);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //Location
+            let locationLabel = document.createElement("label");
+            locationLabel.innerHTML = "Location";
+            locationLabel.className = "text-discord-full-white";
+            locationLabel.appendChild(document.createElement("br"));
+            form.appendChild(locationLabel);
+            let location = document.createElement("input");
+            location.name = "location";
+            location.type = "text";
+            location.value = event.location;
+            location.id = "editLocation-" + event.eventId;
+            location.readOnly = true;
+            locationLabel.appendChild(location);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//Color
-			let colorLabel = document.createElement("label");
-			colorLabel.innerHTML = "Color";
-			colorLabel.className = "text-discord-full-white";
-			colorLabel.appendChild(document.createElement("br"));
-			form.appendChild(colorLabel);
-			let colorSelect = document.createElement("select");
-			colorSelect.name = "color";
-			colorSelect.id = "editColor-" + event.eventId;
-			colorSelect.disabled = true;
-			colorLabel.appendChild(colorSelect);
+            //Color
+            let colorLabel = document.createElement("label");
+            colorLabel.innerHTML = "Color";
+            colorLabel.className = "text-discord-full-white";
+            colorLabel.appendChild(document.createElement("br"));
+            form.appendChild(colorLabel);
+            let colorSelect = document.createElement("select");
+            colorSelect.name = "color";
+            colorSelect.id = "editColor-" + event.eventId;
+            colorSelect.disabled = true;
+            colorLabel.appendChild(colorSelect);
 
-			for (let ec in EventColor) {
-				let option = document.createElement("option");
-				option.value = EventColor[ec];
-				option.text = EventColor[ec];
-				option.selected = (EventColor[event.color] === EventColor[ec]);
-				colorSelect.appendChild(option);
-			}
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            for (let ec in EventColor) {
+                let option = document.createElement("option");
+                option.value = EventColor[ec];
+                option.text = EventColor[ec];
+                option.selected = (EventColor[event.color] === EventColor[ec]);
+                colorSelect.appendChild(option);
+            }
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
             if (event.doesRecur) {
-				//Recurrence
-				let recurrenceLabel = document.createElement("label");
-				recurrenceLabel.innerHTML = "Recurrence";
-				recurrenceLabel.className = "text-discord-full-white";
-				recurrenceLabel.appendChild(document.createElement("br"));
-				form.appendChild(recurrenceLabel);
+                //Recurrence
+                let recurrenceLabel = document.createElement("label");
+                recurrenceLabel.innerHTML = "Recurrence";
+                recurrenceLabel.className = "text-discord-full-white";
+                recurrenceLabel.appendChild(document.createElement("br"));
+                form.appendChild(recurrenceLabel);
 
-				if (event.isParent) {
-					let enableRecurrence = document.createElement("input");
-					enableRecurrence.name = "enable-recurrence";
-					enableRecurrence.type = "checkbox";
-					enableRecurrence.checked = false;
-					enableRecurrence.readOnly = true;
-					enableRecurrence.id = "editEnableRecur-" + event.eventId;
-					recurrenceLabel.appendChild(enableRecurrence);
-					form.appendChild(document.createElement("br"));
-					form.appendChild(document.createElement("br"));
+                if (event.isParent) {
+                    let enableRecurrence = document.createElement("input");
+                    enableRecurrence.name = "enable-recurrence";
+                    enableRecurrence.type = "checkbox";
+                    enableRecurrence.checked = false;
+                    enableRecurrence.readOnly = true;
+                    enableRecurrence.id = "editEnableRecur-" + event.eventId;
+                    recurrenceLabel.appendChild(enableRecurrence);
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createElement("br"));
 
-					//Frequency
-					let frequencyLabel = document.createElement("label");
-					frequencyLabel.innerHTML = "Recurrence - Frequency";
-					frequencyLabel.className = "text-discord-full-white";
-					frequencyLabel.appendChild(document.createElement("br"));
-					form.appendChild(frequencyLabel);
-					let freqSelect = document.createElement("select");
-					freqSelect.name = "frequency";
-					freqSelect.id = "editFrequency-" + event.eventId;
-					frequencyLabel.appendChild(freqSelect);
+                    //Frequency
+                    let frequencyLabel = document.createElement("label");
+                    frequencyLabel.innerHTML = "Recurrence - Frequency";
+                    frequencyLabel.className = "text-discord-full-white";
+                    frequencyLabel.appendChild(document.createElement("br"));
+                    form.appendChild(frequencyLabel);
+                    let freqSelect = document.createElement("select");
+                    freqSelect.name = "frequency";
+                    freqSelect.id = "editFrequency-" + event.eventId;
+                    frequencyLabel.appendChild(freqSelect);
 
-					for (let f in EventFrequency) {
-						let op = document.createElement("option");
-						op.value = EventFrequency[f];
-						op.text = EventFrequency[f];
+                    for (let f in EventFrequency) {
+                        let op = document.createElement("option");
+                        op.value = EventFrequency[f];
+                        op.text = EventFrequency[f];
                         op.selected = (EventFrequency[event.recurrence.frequency] === EventFrequency[f]);
-						freqSelect.appendChild(op);
-					}
+                        freqSelect.appendChild(op);
+                    }
 
-					freqSelect.disabled = true;
-					frequencyLabel.appendChild(freqSelect);
-					form.appendChild(document.createElement("br"));
-					form.appendChild(document.createElement("br"));
+                    freqSelect.disabled = true;
+                    frequencyLabel.appendChild(freqSelect);
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createElement("br"));
 
-					//Count
-					let countLabel = document.createElement("label");
-					countLabel.innerHTML = "Recurrence - Count";
-					countLabel.className = "text-discord-full-white";
-					countLabel.appendChild(document.createElement("br"));
-					form.appendChild(countLabel);
-					let count = document.createElement("input");
-					count.name = "count";
-					count.type = "number";
-					count.valueAsNumber = event.recurrence.count;
-					count.min = "-1";
-					count.id = "editCount-" + event.eventId;
-					count.readOnly = true;
-					countLabel.appendChild(count);
-					form.appendChild(document.createElement("br"));
-					form.appendChild(document.createElement("br"));
+                    //Count
+                    let countLabel = document.createElement("label");
+                    countLabel.innerHTML = "Recurrence - Count";
+                    countLabel.className = "text-discord-full-white";
+                    countLabel.appendChild(document.createElement("br"));
+                    form.appendChild(countLabel);
+                    let count = document.createElement("input");
+                    count.name = "count";
+                    count.type = "number";
+                    count.valueAsNumber = event.recurrence.count;
+                    count.min = "-1";
+                    count.id = "editCount-" + event.eventId;
+                    count.readOnly = true;
+                    countLabel.appendChild(count);
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createElement("br"));
 
-					//Interval
-					let intervalLabel = document.createElement("label");
-					intervalLabel.innerHTML = "Recurrence - Interval";
-					intervalLabel.className = "text-discord-full-white";
-					intervalLabel.appendChild(document.createElement("br"));
-					form.appendChild(intervalLabel);
-					let interval = document.createElement("input");
-					interval.name = "interval";
-					interval.type = "number";
-					interval.valueAsNumber = event.recurrence.interval;
-					interval.min = "1";
-					interval.id = "editInterval-" + event.eventId;
-					interval.readOnly = true;
-					intervalLabel.appendChild(interval);
-					form.appendChild(document.createElement("br"));
-					form.appendChild(document.createElement("br"));
+                    //Interval
+                    let intervalLabel = document.createElement("label");
+                    intervalLabel.innerHTML = "Recurrence - Interval";
+                    intervalLabel.className = "text-discord-full-white";
+                    intervalLabel.appendChild(document.createElement("br"));
+                    form.appendChild(intervalLabel);
+                    let interval = document.createElement("input");
+                    interval.name = "interval";
+                    interval.type = "number";
+                    interval.valueAsNumber = event.recurrence.interval;
+                    interval.min = "1";
+                    interval.id = "editInterval-" + event.eventId;
+                    interval.readOnly = true;
+                    intervalLabel.appendChild(interval);
+                    form.appendChild(document.createElement("br"));
+                    form.appendChild(document.createElement("br"));
 
-				} else {
-					//Cannot edit recurrence
-					let cannotEditRecur = document.createElement("input");
-					cannotEditRecur.name = "ignore-cer";
-					cannotEditRecur.type = "text";
-					cannotEditRecur.readOnly = true;
-					cannotEditRecur.value = "Cannot edit child";
-					recurrenceLabel.appendChild(cannotEditRecur);
-				}
-				form.appendChild(document.createElement("br"));
-				form.appendChild(document.createElement("br"));
-			}
+                } else {
+                    //Cannot edit recurrence
+                    let cannotEditRecur = document.createElement("input");
+                    cannotEditRecur.name = "ignore-cer";
+                    cannotEditRecur.type = "text";
+                    cannotEditRecur.readOnly = true;
+                    cannotEditRecur.value = "Cannot edit child";
+                    recurrenceLabel.appendChild(cannotEditRecur);
+                }
+                form.appendChild(document.createElement("br"));
+                form.appendChild(document.createElement("br"));
+            }
 
-			//Image
-			let imageLabel = document.createElement("label");
-			imageLabel.innerHTML = "Image";
-			imageLabel.className = "text-discord-full-white";
-			imageLabel.appendChild(document.createElement("br"));
-			form.appendChild(imageLabel);
-			let image = document.createElement("input");
-			image.name = "image";
-			image.type = "text";
-			image.value = event.image;
-			image.id = "editImage-" + event.eventId;
-			image.readOnly = true;
-			imageLabel.appendChild(image);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //Image
+            let imageLabel = document.createElement("label");
+            imageLabel.innerHTML = "Image";
+            imageLabel.className = "text-discord-full-white";
+            imageLabel.appendChild(document.createElement("br"));
+            form.appendChild(imageLabel);
+            let image = document.createElement("input");
+            image.name = "image";
+            image.type = "text";
+            image.value = event.image;
+            image.id = "editImage-" + event.eventId;
+            image.readOnly = true;
+            imageLabel.appendChild(image);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//ID (readonly) for API
-			let idLabel = document.createElement("label");
-			idLabel.innerHTML = "Event ID";
-			idLabel.className = "text-discord-full-white";
-			idLabel.appendChild(document.createElement("br"));
-			form.appendChild(idLabel);
-			let hiddenId = document.createElement("input");
-			hiddenId.type = "text";
-			hiddenId.name = "id";
-			hiddenId.value = event.eventId;
-			hiddenId.id = "editId-" + event.eventId;
-			hiddenId.readOnly = true;
-			idLabel.appendChild(hiddenId);
-			form.appendChild(document.createElement("br"));
-			form.appendChild(document.createElement("br"));
+            //ID (readonly) for API
+            let idLabel = document.createElement("label");
+            idLabel.innerHTML = "Event ID";
+            idLabel.className = "text-discord-full-white";
+            idLabel.appendChild(document.createElement("br"));
+            form.appendChild(idLabel);
+            let hiddenId = document.createElement("input");
+            hiddenId.type = "text";
+            hiddenId.name = "id";
+            hiddenId.value = event.eventId;
+            hiddenId.id = "editId-" + event.eventId;
+            hiddenId.readOnly = true;
+            idLabel.appendChild(hiddenId);
+            form.appendChild(document.createElement("br"));
+            form.appendChild(document.createElement("br"));
 
-			//Create modal footer
-			let modalFooter = document.createElement("div");
-			modalFooter.className = "modal-footer";
-			modalCon.appendChild(modalFooter);
+            //Create modal footer
+            let modalFooter = document.createElement("div");
+            modalFooter.className = "modal-footer";
+            modalCon.appendChild(modalFooter);
 
-			let closeButton = document.createElement("button");
-			closeButton.type = "button";
-			closeButton.className = "btn bg-discord-blurple btn-discord btn-block " +
-				"text-discord-full-white";
-			closeButton.setAttribute("data-dismiss", "modal");
-			closeButton.innerHTML = "Close";
-			modalFooter.appendChild(closeButton);
-			//Oh my god finally done!!!
-		}
-		ElementUtil.showEventsContainer();
-	}
+            let closeButton = document.createElement("button");
+            closeButton.type = "button";
+            closeButton.className = "btn bg-discord-blurple btn-discord btn-block " +
+                "text-discord-full-white";
+            closeButton.setAttribute("data-dismiss", "modal");
+            closeButton.innerHTML = "Close";
+            modalFooter.appendChild(closeButton);
+            //Oh my god finally done!!!
+        }
+        ElementUtil.showEventsContainer();
+    }
 }

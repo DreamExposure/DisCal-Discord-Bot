@@ -1,13 +1,17 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.event.list;
 
+import com.google.api.services.calendar.model.Calendar;
+
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
@@ -17,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZoneId;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/v2/events/list")
@@ -48,13 +54,21 @@ public class ListEventOngoingEndpoint {
             final long end = System.currentTimeMillis() + GlobalConst.oneDayMs; // one day from now
             final GuildSettings settings = DatabaseManager.getSettings(guildId).block();
 
+            Mono<CalendarData> calDataMono = DatabaseManager.getCalendar(guildId, calNumber)
+                .cache();
+            final ZoneId tz = calDataMono.flatMap(CalendarWrapper::getCalendar)
+                .map(Calendar::getTimeZone)
+                .map(ZoneId::of)
+                .block();
+
+
             //okay, lets actually get the date's events.
-            final List<JSONObject> events = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
+            final List<JSONObject> events = calDataMono
                 .flatMap(calData -> EventWrapper.getEvents(calData, start, end))
                 .flatMapMany(Flux::fromIterable)
                 .filter(e -> e.getStart().getDateTime().getValue() < System.currentTimeMillis())
                 .filter(e -> e.getEnd().getDateTime().getValue() > System.currentTimeMillis())
-                .map(e -> JsonUtils.convertEventToJson(e, settings))
+                .flatMap(e -> JsonUtils.convertEventToJson(e, tz, settings))
                 .collectList()
                 .block();
 
