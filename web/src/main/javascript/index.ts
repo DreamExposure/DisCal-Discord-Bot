@@ -13,8 +13,7 @@ function loadDashboardCalendarPage(apiKey: string, apiUrl: string, userId: strin
 }
 
 function loadEmbedCalendar(embedKey: string, apiUrl: string) {
-    let embedRunner = new EmbedCalendarRunner();
-    embedRunner.init(embedKey, apiUrl);
+    new EmbedCalendarRunner(embedKey, apiUrl);
 }
 
 const body = document.getElementById("page-top")!;

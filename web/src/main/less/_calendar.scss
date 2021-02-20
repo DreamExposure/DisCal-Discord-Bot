@@ -1,26 +1,22 @@
 @import "variables";
 
-.cal-date {
-  width: 80px;
-  height: 80px;
+.fc-toolbar-title {
+  color: $discal-light-gray;
 }
 
-.cal-date:hover {
-  background-color: $discal-red;
+.fc-prev-button, .fc-today-button, .fc-next-button, .fc-viewGoogle-button, .fc-dayGridMonth-button,
+.fc-timeGridDay-button, .fc-timeGridWeek-button {
+  background-color: $discal-blue !important;
+  border-color: $discal-blue !important;
+
+  :active {
+    background-color: $discal-red !important;
+    border-color: $discal-red !important;
+  }
 }
 
-.cal-date.today {
-  background-color: $discord-blurple;
-}
-
-.cal-date.selected {
-  background-color: $discord-greyple;
-}
-
-.cal-nav {
-  text-align: center;
-}
-
-.event-view-btn {
-  margin: 0 auto;
+.tippy-box[data-theme~='discal'] {
+  background-color: $discal-light-gray;
+  color: $discal-dark-gray;
+  padding: 5px;
 }

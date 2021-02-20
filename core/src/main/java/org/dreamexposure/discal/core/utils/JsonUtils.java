@@ -73,12 +73,8 @@ public class JsonUtils {
                 json.put("recur", true);
                 final Recurrence r = Recurrence.Companion.fromRRule(event.getRecurrence().get(0));
 
-                final JSONObject recurrence = new JSONObject();
-                recurrence.put("frequency", r.getFrequency().name());
-                recurrence.put("count", r.getCount());
-                recurrence.put("interval", r.getInterval());
-
-                json.put("recurrence", recurrence); //Optional
+                json.put("recurrence", JsonUtil.INSTANCE.encodeToJSON(Recurrence.class, r)); //Optional
+                json.put("rrule", r.toRRule());
             } else
                 json.put("recur", false);
 

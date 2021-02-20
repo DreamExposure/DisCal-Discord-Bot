@@ -45,6 +45,7 @@
 
     <!-- Custom styles for this template-->
     <link href="/assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="/assets/js/main.css" rel="stylesheet">
 
 </head>
 
@@ -53,22 +54,22 @@
 <!-- Page Wrapper -->
 <div id="wrapper">
 
-	<!-- Sidebar -->
-	<ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion"
-		id="accordionSidebar">
+    <!-- Sidebar -->
+    <ul class="navbar-nav bg-gradient-discal-dark-gray sidebar sidebar-dark accordion"
+        id="accordionSidebar">
 
-		<!-- Sidebar - Brand -->
-		<a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-			<div class="sidebar-brand-icon rotate-n-15">
-				<i class="fas fa-calendar"></i>
-			</div>
-			<div class="sidebar-brand-text mx-3">DISCAL</div>
-		</a>
+        <!-- Sidebar - Brand -->
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+            <div class="sidebar-brand-icon rotate-n-15">
+                <i class="fas fa-calendar"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">DISCAL</div>
+        </a>
 
-		<!-- Divider -->
-		<hr class="sidebar-divider my-0">
+        <!-- Divider -->
+        <hr class="sidebar-divider my-0">
 
-		<!-- Nav Item - About -->
+        <!-- Nav Item - About -->
         <li class="nav-item">
             <a class="nav-link" href="/about">
                 <i class="fas fa-fw fa-info-circle"></i>
@@ -192,23 +193,23 @@
 
                     <!-- Nav Item - User Information -->
                     <li th:if="${logged_in}" class="nav-item dropdown no-arrow">
-						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-						   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
-							<img class="img-profile rounded-circle" th:src="${pfp}"
-								 alt="pfp">
-						</a>
-						<!-- Dropdown - User Information -->
-						<div class="dropdown-menu dropdown-menu-right shadow
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
+                            <img class="img-profile rounded-circle" th:src="${pfp}"
+                                 alt="pfp">
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow
 						animated--grow-in bg-discal-not-black"
-							 aria-labelledby="userDropdown">
-							<a class="dropdown-item text-discord-full-white" href="#"
-							   data-toggle="modal" data-target="#logoutModal">
-								<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-								Logout
-							</a>
-						</div>
-					</li>
+                             aria-labelledby="userDropdown">
+                            <a class="dropdown-item text-discord-full-white" href="#"
+                               data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
                     <li th:unless="${logged_in}" class="nav-item">
                         <a class="nav-link text-discord-full-white" href="/login">
                             <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
@@ -225,111 +226,27 @@
             <div class="container-fluid">
                 <div class="loader"></div>
 
+                <div>
+                    <label class="text-discord-full-white form-select" for="time-zone-selector">Timezone:</label>
+                    <select id="time-zone-selector">
+                        <option value="local">local</option>
+                        <option value="UTC">UTC</option>
+                    </select>
+                </div>
+
                 <!--Start calendar -->
-                <div id="calendar-container" hidden="hidden">
-                    <table id="calendar" style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
-                        <tbody>
-                        <tr style="height: 50px;">
-							<th id="previous-month" class="cal-nav">
-								<i class="fa fa-arrow-left"></i>
-							</th>
-							<th></th>
-							<th></th>
-							<th id="month-display" class="text-center"></th>
-							<th></th>
-							<th></th>
-							<th id="next-month" class="cal-nav">
-								<i class="fa fa-arrow-right"></i>
-							</th>
-						</tr>
-                        <tr style="height: 40px;">
-                            <th>Sunday</th>
-                            <th>Monday</th>
-                            <th>Tuesday</th>
-                            <th>Wednesday</th>
-                            <th>Thursday</th>
-                            <th>Friday</th>
-                            <th>Saturday</th>
-                        </tr>
-						<tr>
-							<td class="cal-date" id="r1c1"></td>
-							<td class="cal-date" id="r1c2"></td>
-							<td class="cal-date" id="r1c3"></td>
-							<td class="cal-date" id="r1c4"></td>
-							<td class="cal-date" id="r1c5"></td>
-							<td class="cal-date" id="r1c6"></td>
-							<td class="cal-date" id="r1c7"></td>
-						</tr>
-						<tr>
-							<td class="cal-date" id="r2c1"></td>
-							<td class="cal-date" id="r2c2"></td>
-							<td class="cal-date" id="r2c3"></td>
-							<td class="cal-date" id="r2c4"></td>
-							<td class="cal-date" id="r2c5"></td>
-							<td class="cal-date" id="r2c6"></td>
-							<td class="cal-date" id="r2c7"></td>
-						</tr>
-						<tr>
-							<td class="cal-date" id="r3c1"></td>
-							<td class="cal-date" id="r3c2"></td>
-							<td class="cal-date" id="r3c3"></td>
-							<td class="cal-date" id="r3c4"></td>
-							<td class="cal-date" id="r3c5"></td>
-							<td class="cal-date" id="r3c6"></td>
-							<td class="cal-date" id="r3c7"></td>
-						</tr>
-						<tr>
-							<td class="cal-date" id="r4c1"></td>
-							<td class="cal-date" id="r4c2"></td>
-							<td class="cal-date" id="r4c3"></td>
-							<td class="cal-date" id="r4c4"></td>
-							<td class="cal-date" id="r4c5"></td>
-							<td class="cal-date" id="r4c6"></td>
-							<td class="cal-date" id="r4c7"></td>
-						</tr>
-						<tr>
-							<td class="cal-date" id="r5c1"></td>
-							<td class="cal-date" id="r5c2"></td>
-							<td class="cal-date" id="r5c3"></td>
-							<td class="cal-date" id="r5c4"></td>
-							<td class="cal-date" id="r5c5"></td>
-							<td class="cal-date" id="r5c6"></td>
-							<td class="cal-date" id="r5c7"></td>
-						</tr>
-						<tr>
-							<td class="cal-date" id="r6c1"></td>
-							<td class="cal-date" id="r6c2"></td>
-							<td class="cal-date" id="r6c3"></td>
-							<td class="cal-date" id="r6c4"></td>
-							<td class="cal-date" id="r6c5"></td>
-							<td class="cal-date" id="r6c6"></td>
-							<td class="cal-date" id="r6c7"></td>
-						</tr>
-                        </tbody>
-                    </table>
-
-
-					<p class="text-discord-full-white text-center" id="local-time-display">All Dates
-						and Times are displayed in the calendar's timezone!</p>
-                    <br>
-                    <br>
-                    <a id="view-on-google-button"
-                       class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white"
-                       style="margin: 0 auto; max-width: 200px"
-                       target="_blank">
-                        View on Google Calendar
-                    </a>
+                <div id="calendar-container">
+                    <div id="calendar"></div>
                 </div>
                 <!--End calendar -->
 
                 <hr>
 
                 <!--Start Event Container-->
-				<div id="events-container" hidden="hidden">
-					<h6>Events for Selected Date</h6>
-					<!--Add events for selected date via JS and JQuery-->
-				</div>
+                <div id="events-container" hidden="hidden">
+                    <h6>Events for Selected Date</h6>
+                    <!--Add events for selected date via JS and JQuery-->
+                </div>
                 <!--End Event Container-->
             </div>
             <!--End container fluid-->
@@ -376,25 +293,25 @@
      aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content bg-discal-not-black">
-			<div class="modal-header">
-				<h5 class="modal-title text-discal-blue" id="exampleModalLabel">Ready to Leave?</h5>
-				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
-					<span class="text-discal-red" aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<p class="text-left text-discord-full-white">
-					Select "Logout" below if you are ready to end your current session.
-				</p>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-discal-dark-gray text-discord-full-white"
-						type="button" data-dismiss="modal">Cancel
-				</button>
+            <div class="modal-header">
+                <h5 class="modal-title text-discal-blue" id="exampleModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span class="text-discal-red" aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-left text-discord-full-white">
+                    Select "Logout" below if you are ready to end your current session.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-discal-dark-gray text-discord-full-white"
+                        type="button" data-dismiss="modal">Cancel
+                </button>
 
-				<a class="btn btn-discal-red text-discord-full-white" href="/logout">Logout</a>
-			</div>
-		</div>
+                <a class="btn btn-discal-red text-discord-full-white" href="/logout">Logout</a>
+            </div>
+        </div>
     </div>
 </div>
 
