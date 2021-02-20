@@ -1,31 +1,31 @@
 {
   "compilerOptions": {
-	"target": "ES5",
-	"module": "ES6",
-	"strict": true,
-	"noImplicitThis": false,
-	"removeComments": true,
-	"importHelpers": true,
-	"sourceMap": true,
-	"esModuleInterop": true,
-	"allowSyntheticDefaultImports": true,
-	"allowJs": true,
-	"moduleResolution": "node",
-	"baseUrl": ".",
-	"types": [
-	  "jquery"
-	],
-	"paths": {
-	  "@/*": [
-		"web/src/main/javascript/*"
-	  ]
-	}
+    "target": "ES5",
+    "module": "ES6",
+    "strict": true,
+    "noImplicitThis": false,
+    "removeComments": true,
+    "importHelpers": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "types": [
+      "jquery"
+    ],
+    "paths": {
+      "@/*": [
+        "web/src/main/javascript/*"
+      ]
+    }
   },
   "include": [
-	"web/src/main/javascript/**/*.ts",
-	"web/src/main/javascript/**/*.js"
+    "web/src/main/javascript/**/*.ts",
+    "web/src/main/javascript/**/*.js"
   ],
   "exclude": [
-	"node_modules"
+    "node_modules"
   ]
 }

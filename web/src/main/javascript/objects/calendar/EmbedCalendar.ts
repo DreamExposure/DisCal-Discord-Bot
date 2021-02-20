@@ -563,6 +563,5 @@ export class EmbedCalendar implements TaskCallback {
             modalFooter.appendChild(closeButton);
             //Oh my god finally done!!!
         }
-        ElementUtil.showEventsContainer();
     }
 }
