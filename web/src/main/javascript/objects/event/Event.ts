@@ -136,6 +136,8 @@ export class Event {
 
             overlap: true,
             editable: editable,
+
+            rawEvent: this,
         };
 
         if (this.color != EventColor.NONE) {

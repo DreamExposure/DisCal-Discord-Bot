@@ -50,3 +50,45 @@ export function eventColorRGB(color: EventColor) {
         }
     }
 }
+
+export function eventColorClass(color: EventColor) {
+    switch (color) {
+        case EventColor.MELROSE: {
+            return 'google-melrose';
+        }
+        case EventColor.RIPTIDE: {
+            return 'google-riptide';
+        }
+        case EventColor.MAUVE: {
+            return 'google-mauve';
+        }
+        case EventColor.TANGERINE: {
+            return 'google-tangerine';
+        }
+        case EventColor.DANDELION: {
+            return 'google-dandelion';
+        }
+        case EventColor.MAC_AND_CHEESE: {
+            return 'google-mac_and_cheese';
+        }
+        case EventColor.TURQUOISE: {
+            return 'google-turquoise';
+        }
+        case EventColor.MERCURY: {
+            return 'google-mercury';
+        }
+        case EventColor.BLUE: {
+            return 'google-blue';
+        }
+        case EventColor.GREEN: {
+            return 'google-green';
+        }
+        case EventColor.RED: {
+            return 'google-red';
+        }
+        default: {
+            return "discord-blurple";
+        }
+    }
+}
+
