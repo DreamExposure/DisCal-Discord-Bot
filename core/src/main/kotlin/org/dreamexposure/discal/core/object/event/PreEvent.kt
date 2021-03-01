@@ -40,7 +40,11 @@ data class PreEvent private constructor(
     constructor(guildId: Snowflake, calNumber: Int) : this(guildId, "N/a", calNumber)
 
     constructor(guildId: Snowflake, e: Event, calData: CalendarData) : this(guildId, e.id, calData.calendarNumber) {
-        this.color = EventColor.fromNameOrHexOrId(e.colorId)
+        try {
+            this.color = EventColor.fromNameOrHexOrId(e.colorId)
+        } catch (ignore: NullPointerException) {
+            this.color = EventColor.NONE
+        }
 
         if (e.recurrence != null && e.recurrence.isNotEmpty()) {
             this.recur = true
@@ -56,7 +60,7 @@ data class PreEvent private constructor(
 
         if (e.start.timeZone != null) this.timezone = e.start.timeZone
 
-        this.eventData = DatabaseManager.getEventData(this.guildId, e.id).block()!!
+        this.eventData = DatabaseManager.getEventData(this.guildId, e.id).block() ?: EventData(guildId, eventId)
     }
 
     //Functions

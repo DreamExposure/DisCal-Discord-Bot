@@ -67,7 +67,12 @@ public class TimeUtils {
                 final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 final Date endDate = sdf.parse(endRaw);
-                final Date startDate = new Date(event.getStartDateTime().getDateTime().getValue());
+
+                final Date startDate;
+                if (event.getStartDateTime().getDateTime() != null)
+                    startDate = new Date(event.getStartDateTime().getDateTime().getValue());
+                else
+                    startDate = new Date(event.getStartDateTime().getDate().getValue());
 
                 return endDate.before(startDate);
             } catch (final ParseException e) {
@@ -77,13 +82,20 @@ public class TimeUtils {
         return false;
     }
 
+    //TODO: For future Nova, test this. has already been deployed to dev shard
     public static boolean hasStartAfterEnd(final String startRaw, final TimeZone timezone, final PreEvent event) {
         if (event.getEndDateTime() != null) {
             try {
                 final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 final Date startDate = sdf.parse(startRaw);
-                final Date endDate = new Date(event.getEndDateTime().getDateTime().getValue());
+
+                Date endDate;
+                if (event.getEndDateTime().getDateTime() != null)
+                    endDate = new Date(event.getEndDateTime().getDateTime().getValue());
+                else
+                    endDate = new Date(event.getEndDateTime().getDate().getValue());
+
 
                 return startDate.after(endDate);
             } catch (final ParseException e) {
