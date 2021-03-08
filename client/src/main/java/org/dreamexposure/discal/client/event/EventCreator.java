@@ -90,9 +90,8 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
-                    .flatMap(toCopy -> {
-                        final PreEvent event = new PreEvent(settings.getGuildID(), toCopy, calData);
-
+                    .flatMap(toCopy -> PreEvent.copy(settings.getGuildID(), toCopy, calData))
+                    .flatMap(event -> {
                         this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData)
@@ -112,8 +111,8 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
-                    .flatMap(toEdit -> {
-                        final PreEvent event = new PreEvent(settings.getGuildID(), toEdit, calData);
+                    .flatMap(toEdit -> PreEvent.copy(settings.getGuildID(), toEdit, calData))
+                    .flatMap(event -> {
                         event.setEditing(true);
 
                         this.events.add(event);

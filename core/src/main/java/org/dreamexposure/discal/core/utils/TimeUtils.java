@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.utils;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -10,6 +11,9 @@ import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -82,7 +86,6 @@ public class TimeUtils {
         return false;
     }
 
-    //TODO: For future Nova, test this. has already been deployed to dev shard
     public static boolean hasStartAfterEnd(final String startRaw, final TimeZone timezone, final PreEvent event) {
         if (event.getEndDateTime() != null) {
             try {
@@ -103,5 +106,18 @@ public class TimeUtils {
             }
         }
         return false;
+    }
+
+    public static DateTime doTimeShiftBullshit(DateTime original, ZoneId tz) {
+        return new DateTime(Instant.ofEpochMilli(original.getValue())
+            .plus(1, ChronoUnit.DAYS)
+            .atZone(tz)
+            .truncatedTo(ChronoUnit.DAYS)
+            .toLocalDate()
+            .atStartOfDay()
+            .atZone(tz)
+            .toInstant()
+            .toEpochMilli()
+        );
     }
 }
