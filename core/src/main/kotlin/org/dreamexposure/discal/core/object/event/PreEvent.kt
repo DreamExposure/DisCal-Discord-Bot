@@ -7,6 +7,10 @@ import discord4j.core.`object`.entity.Message
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.event.EventColor
+import org.dreamexposure.discal.core.utils.TimeUtils
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
+import reactor.core.publisher.Mono
+import java.time.ZoneId
 
 @Suppress("DataClassPrivateConstructor")
 data class PreEvent private constructor(
@@ -39,7 +43,8 @@ data class PreEvent private constructor(
     //Constructors
     constructor(guildId: Snowflake, calNumber: Int) : this(guildId, "N/a", calNumber)
 
-    constructor(guildId: Snowflake, e: Event, calData: CalendarData) : this(guildId, e.id, calData.calendarNumber) {
+    private constructor(guildId: Snowflake, e: Event, calData: CalendarData) : this(guildId, e.id, calData
+            .calendarNumber) {
         try {
             this.color = EventColor.fromNameOrHexOrId(e.colorId)
         } catch (ignore: NullPointerException) {
@@ -55,12 +60,44 @@ data class PreEvent private constructor(
         if (e.description != null) this.description = e.description
         if (e.location != null) this.location = e.location
 
-        this.startDateTime = e.start
-        this.endDateTime = e.end
+        if (e.start.date == null)
+            this.startDateTime = e.start
+
+        if (e.end.date == null)
+            this.endDateTime = e.end
 
         if (e.start.timeZone != null) this.timezone = e.start.timeZone
+    }
 
-        this.eventData = DatabaseManager.getEventData(this.guildId, e.id).block() ?: EventData(guildId, eventId)
+    companion object {
+        @JvmStatic
+        fun copy(guildId: Snowflake, e: Event, calData: CalendarData): Mono<PreEvent> {
+            return CalendarWrapper.getCalendar(calData)
+                    .map { ZoneId.of(it.timeZone) }
+                    .map { tz ->
+                        val event = PreEvent(guildId, e, calData)
+                        event.timezone = tz.id
+
+                        if (e.start.date != null) {
+                            event.startDateTime = EventDateTime()
+                            event.startDateTime!!.dateTime = TimeUtils.doTimeShiftBullshit(e.start.date, tz)
+                        }
+                        if (e.end.date != null) {
+                            event.endDateTime = EventDateTime()
+                            event.endDateTime!!.dateTime = TimeUtils.doTimeShiftBullshit(e.end.date, tz)
+                        }
+
+                        return@map event
+                    }
+                    .flatMap { event ->
+                        DatabaseManager.getEventData(guildId, event.eventId)
+                                .switchIfEmpty(Mono.just(EventData(guildId, event.eventId)))
+                                .doOnNext {
+                                    event.eventData = it
+                                }
+                                .thenReturn(event)
+                    }
+        }
     }
 
     //Functions
