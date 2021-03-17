@@ -1,15 +1,13 @@
 package org.dreamexposure.discal.core.utils;
 
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -18,27 +16,20 @@ import reactor.core.publisher.Mono;
  * For Project: DisCal-Discord-Bot
  */
 public class EventUtils {
-
-    @Deprecated
-    public static Mono<Boolean> deleteEvent(final GuildSettings settings, final String eventId) {
-        return DatabaseManager.getMainCalendar(settings.getGuildID())
-            .flatMap(data ->
-                EventWrapper.deleteEvent(data, eventId)
-                    .then(Mono.when(
-                        DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
-                        DatabaseManager.deleteEventData(eventId))
-                    ).thenReturn(true)
-            ).defaultIfEmpty(false);
-    }
-
     public static Mono<Boolean> deleteEvent(final GuildSettings settings, final int calNumber, final String eventId) {
         return DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
             .flatMap(data ->
                 EventWrapper.deleteEvent(data, eventId)
-                    .then(Mono.when(
-                        DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
-                        DatabaseManager.deleteEventData(eventId))
-                    ).thenReturn(true)
+                    .flatMap(success -> {
+                        if (success) {
+                            return Mono.when(
+                                DatabaseManager.deleteAnnouncementsForEvent(settings.getGuildID(), eventId),
+                                DatabaseManager.deleteEventData(eventId)
+                            ).thenReturn(true);
+                        } else {
+                            return Mono.just(false);
+                        }
+                    })
             ).defaultIfEmpty(false);
     }
 

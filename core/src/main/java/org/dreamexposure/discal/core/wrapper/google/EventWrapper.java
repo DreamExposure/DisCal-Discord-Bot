@@ -1,22 +1,22 @@
 package org.dreamexposure.discal.core.wrapper.google;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
-
-import java.util.List;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.List;
 
 @SuppressWarnings("DuplicatedCode")
 public class EventWrapper {
@@ -152,12 +152,22 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Void> deleteEvent(final CalendarData data, final String id) {
+    public static Mono<Boolean> deleteEvent(final CalendarData data, final String id) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
-            Mono.fromCallable(() ->
-                service.events()
-                    .delete(data.getCalendarAddress(), id)
-                    .execute()
+            Mono.fromCallable(() -> {
+                    HttpResponse response = service.events()
+                        .delete(data.getCalendarAddress(), id)
+                        .executeUnparsed();
+
+                    //Log error code if one happened
+                    if (response.getStatusCode() != HttpStatusCodes.STATUS_CODE_OK) {
+                        LogFeed.log(LogObject.forDebug(
+                            "Event Delete Error | " + response.getStatusCode() + " | " + response.getStatusMessage()
+                        ));
+                    }
+
+                    return response.getStatusCode() == HttpStatusCodes.STATUS_CODE_OK;
+                }
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
             if ("requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
@@ -169,16 +179,16 @@ public class EventWrapper {
                         return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
                             .flatMap(cd -> deleteEvent(cd, id));
                     } else {
-                        return Mono.empty();
+                        return Mono.just(false);
                     }
                 });
             } else {
                 //This is some other issue I am not currently aware of, logging for handling
                 LogFeed.log(LogObject.forException("GJRE: Event delete Failure", e, EventWrapper.class));
+                return Mono.just(false);
             }
-            return Mono.empty();
         }).doOnError(e -> LogFeed.log(LogObject.forException("Event Delete Failure", e, EventWrapper.class))
-        ).onErrorResume(e -> Mono.empty());
+        ).onErrorReturn(false);
     }
 
 
@@ -187,16 +197,16 @@ public class EventWrapper {
             CalendarAuth.getCalendarService(i).flatMap(service -> Mono.fromCallable(() ->
                     service.calendarList().get(data.getCalendarId()).execute()
                 ).subscribeOn(Schedulers.boundedElastic())
-                .onErrorResume(GoogleJsonResponseException.class, e -> {
-                    if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
-                        "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
-                        return Mono.empty();
-                    }
+                    .onErrorResume(GoogleJsonResponseException.class, e -> {
+                        if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
+                            "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                            return Mono.empty();
+                        }
 
-                    return Mono.empty();
-                })
+                        return Mono.empty();
+                    })
             ).map(cal -> "owner".equalsIgnoreCase(cal.getAccessRole()) ? i : -1)
-            ).filter(i -> i > -1)
+        ).filter(i -> i > -1)
             .flatMap(correctCredential -> {
                 //Ayyyyy we found the correct one!! Lets go ahead and save that and bump this back to the calling method
                 CalendarData corrected = new CalendarData(
