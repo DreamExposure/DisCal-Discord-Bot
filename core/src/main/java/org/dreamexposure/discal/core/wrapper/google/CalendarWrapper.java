@@ -2,51 +2,53 @@ package org.dreamexposure.discal.core.wrapper.google;
 
 import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.CalendarListEntry;
-
+import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.util.List;
 
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
 public class CalendarWrapper {
-    public static Mono<Calendar> createCalendar(final Calendar calendar, final int credId) {
+    public static Mono<Calendar> createCalendar(Calendar calendar, int credId, Snowflake guildId) {
         return CalendarAuth.getCalendarService(credId)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendars()
                     .insert(calendar)
+                    .setQuotaUser(guildId.asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic()))
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Calendar> updateCalendar(final Calendar calendar, final CalendarData calData) {
+    public static Mono<Calendar> updateCalendar(Calendar calendar, CalendarData calData) {
         return CalendarAuth.getCalendarService(calData)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendars()
                     .update(calendar.getId(), calendar)
+                    .setQuotaUser(calData.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic()))
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Calendar> getCalendar(final CalendarData data) {
+    public static Mono<Calendar> getCalendar(CalendarData data) {
         return CalendarAuth.getCalendarService(data)
             .flatMap(service -> Mono.fromCallable(() ->
                 service.calendars()
                     .get(data.getCalendarAddress())
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic()))
             .doOnError(e -> LogFeed.log(LogObject.forException("Get Cal Failure", e, CalendarWrapper.class)))
             .onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Void> deleteCalendar(final CalendarData data) {
+    public static Mono<Void> deleteCalendar(CalendarData data) {
         return Mono.just(data)
             .filter(cd -> !cd.getExternal())
             .filter(cd -> !"primary".equalsIgnoreCase(cd.getCalendarAddress()))
@@ -54,6 +56,7 @@ public class CalendarWrapper {
                 CalendarAuth.getCalendarService(data).flatMap(service ->
                     Mono.fromCallable(() -> service.calendars()
                         .delete(cd.getCalendarAddress())
+                        .setQuotaUser(data.getGuildId().asString())
                         .execute()
                     ).subscribeOn(Schedulers.boundedElastic())
                 )
@@ -68,6 +71,7 @@ public class CalendarWrapper {
                 service.calendarList()
                     .list()
                     .setMinAccessRole("writer")
+                    .setQuotaUser(calData.getGuildId().asString())
                     .execute()
                     .getItems()
             ).subscribeOn(Schedulers.boundedElastic()))

@@ -20,11 +20,12 @@ import java.util.List;
 
 @SuppressWarnings("DuplicatedCode")
 public class EventWrapper {
-    public static Mono<Event> createEvent(final CalendarData data, final Event event) {
+    public static Mono<Event> createEvent(CalendarData data, Event event) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .insert(data.getCalendarId(), event)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
@@ -52,11 +53,12 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Event> updateEvent(final CalendarData data, final Event event) {
+    public static Mono<Event> updateEvent(CalendarData data, Event event) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .update(data.getCalendarId(), event.getId(), event)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(GoogleJsonResponseException.class, e -> {
@@ -83,18 +85,18 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Event> getEvent(final CalendarData data, final String id) {
+    public static Mono<Event> getEvent(CalendarData data, String id) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events()
                     .get(data.getCalendarAddress(), id)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(e -> Mono.empty()); //Can ignore this, the event just doesn't exist.
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final int amount,
-                                              final long start) {
+    public static Mono<List<Event>> getEvents(CalendarData data, int amount, long start) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
@@ -103,13 +105,13 @@ public class EventWrapper {
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .setShowDeleted(false)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute().getItems()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final Calendar service, final int amount,
-                                              final long start) {
+    public static Mono<List<Event>> getEvents(CalendarData data, Calendar service, int amount, long start) {
         return Mono.fromCallable(() ->
             service.events().list(data.getCalendarId())
                 .setMaxResults(amount)
@@ -117,6 +119,7 @@ public class EventWrapper {
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
                 .setShowDeleted(false)
+                .setQuotaUser(data.getGuildId().asString())
                 .execute().getItems()
         ).subscribeOn(Schedulers.boundedElastic())
             .onErrorResume(e -> Mono.empty());
@@ -132,13 +135,13 @@ public class EventWrapper {
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .setShowDeleted(false)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute().getItems()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<List<Event>> getEvents(final CalendarData data, final long start,
-                                              final long end) {
+    public static Mono<List<Event>> getEvents(CalendarData data, long start, long end) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
                 service.events().list(data.getCalendarId())
@@ -147,21 +150,23 @@ public class EventWrapper {
                     .setOrderBy("startTime")
                     .setSingleEvents(true)
                     .setShowDeleted(false)
+                    .setQuotaUser(data.getGuildId().asString())
                     .execute().getItems()
             ).subscribeOn(Schedulers.boundedElastic())
         ).onErrorResume(e -> Mono.empty());
     }
 
-    public static Mono<Boolean> deleteEvent(final CalendarData data, final String id) {
+    public static Mono<Boolean> deleteEvent(CalendarData data, String id) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() -> {
-                    HttpResponse response = service.events()
-                        .delete(data.getCalendarAddress(), id)
-                        .executeUnparsed();
+                HttpResponse response = service.events()
+                    .delete(data.getCalendarAddress(), id)
+                    .setQuotaUser(data.getGuildId().asString())
+                    .executeUnparsed();
 
-                    //Log error code if one happened
-                    if (response.getStatusCode() != HttpStatusCodes.STATUS_CODE_OK) {
-                        LogFeed.log(LogObject.forDebug(
+                //Log error code if one happened
+                if (response.getStatusCode() != HttpStatusCodes.STATUS_CODE_OK) {
+                    LogFeed.log(LogObject.forDebug(
                             "Event Delete Error | " + response.getStatusCode() + " | " + response.getStatusMessage()
                         ));
                     }
@@ -195,7 +200,10 @@ public class EventWrapper {
     private static Mono<Boolean> correctAssignedCredentialId(CalendarData data) {
         return Flux.range(0, CalendarAuth.credentialsCount()).flatMap(i ->
             CalendarAuth.getCalendarService(i).flatMap(service -> Mono.fromCallable(() ->
-                    service.calendarList().get(data.getCalendarId()).execute()
+                    service.calendarList()
+                        .get(data.getCalendarId())
+                        .setQuotaUser(data.getGuildId().asString())
+                        .execute()
                 ).subscribeOn(Schedulers.boundedElastic())
                     .onErrorResume(GoogleJsonResponseException.class, e -> {
                         if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
