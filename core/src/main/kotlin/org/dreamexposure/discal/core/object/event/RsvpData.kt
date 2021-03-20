@@ -8,6 +8,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -153,7 +154,6 @@ data class RsvpData(
 
     fun clearRole(event: MessageCreateEvent) = clearRole(event.client.rest())
 
-    //TODO: Add check for if role can be assigned once D4J accepts my PR
     //Functions
     fun removeCompletely(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)
@@ -163,9 +163,7 @@ data class RsvpData(
                 .doOnNext(undecided::remove)
                 .flatMap {
                     if (roleId != null) {
-                        client.getGuildById(this.guildId)
-                                .removeMemberRole(Snowflake.of(it), roleId, "Removed RSVP to event with ID: $eventId")
-                                .onErrorResume(ClientException::class.java) { Mono.empty() }
+                        removeRole(it, roleId!!, "Removed RSVP to event with ID: $eventId", client)
                     } else Mono.empty()
                 }.then()
     }
@@ -177,9 +175,7 @@ data class RsvpData(
                 .doOnNext(goingOnTime::add)
                 .flatMap {
                     if (roleId != null) {
-                        client.getGuildById(this.guildId)
-                                .addMemberRole(Snowflake.of(it), roleId, "RSVP'd to event with ID: $eventId")
-                                .onErrorResume(ClientException::class.java) { Mono.empty() }
+                        addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
                     } else Mono.empty()
                 }.then()
     }
@@ -191,9 +187,7 @@ data class RsvpData(
                 .doOnNext(goingLate::add)
                 .flatMap {
                     if (roleId != null) {
-                        client.getGuildById(this.guildId)
-                                .addMemberRole(Snowflake.of(it), roleId, "RSVP'd to event with ID: $eventId")
-                                .onErrorResume(ClientException::class.java) { Mono.empty() }
+                        addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
                     } else Mono.empty()
                 }.then()
     }
@@ -206,5 +200,27 @@ data class RsvpData(
                 || this.notGoing.isNotEmpty()
                 || this.undecided.isNotEmpty()
                 || limit != -1
+    }
+
+    private fun addRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
+        return client.getMemberById(this.guildId, Snowflake.of(BotSettings.ID.get()))
+                .isHigher(Snowflake.of(userId))
+                .filter { it }
+                .flatMap {
+                    client.getGuildById(this.guildId)
+                            .addMemberRole(Snowflake.of(userId), roleId, reason)
+                            .onErrorResume(ClientException::class.java) { Mono.empty() }
+                }
+    }
+
+    private fun removeRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
+        return client.getMemberById(this.guildId, Snowflake.of(BotSettings.ID.get()))
+                .isHigher(Snowflake.of(userId))
+                .filter { it }
+                .flatMap {
+                    client.getGuildById(this.guildId)
+                            .removeMemberRole(Snowflake.of(userId), roleId, reason)
+                            .onErrorResume(ClientException::class.java) { Mono.empty() }
+                }
     }
 }
