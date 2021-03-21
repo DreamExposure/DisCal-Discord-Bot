@@ -38,7 +38,7 @@
         <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
         <r2dbc.pool.version>0.8.3.RELEASE</r2dbc.pool.version>
 
-        <netty.version.forced>4.1.44.Final</netty.version.forced>
+        <netty.version.forced>4.1.56.Final</netty.version.forced>
 
         <reactor.version.bom>2020.0.3</reactor.version.bom>
 
