@@ -1,9 +1,8 @@
 package org.dreamexposure.discal.server.api.endpoints.v2.event;
 
-import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Calendar;
 import com.google.api.services.calendar.model.Event;
 
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -13,6 +12,8 @@ import org.dreamexposure.discal.core.object.web.AuthenticationState;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.JsonUtils;
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import org.dreamexposure.discal.server.utils.Authentication;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,10 +22,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.ZoneId;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/v2/events")
@@ -46,18 +50,22 @@ public class GetEventEndpoint {
             final String guildId = requestBody.getString("guild_id");
             final int calNumber = requestBody.getInt("calendar_number");
             final String eventId = requestBody.getString("event_id");
+
             final GuildSettings settings = DatabaseManager.getSettings(Snowflake.of(guildId)).block();
-            final CalendarData calendarData = DatabaseManager.getCalendar(settings.getGuildID(), calNumber).block();
+            Mono<CalendarData> calDataMono = DatabaseManager.getCalendar(settings.getGuildID(), calNumber)
+                .cache();
+            final Event event = calDataMono.flatMap(calData -> EventWrapper.getEvent(calData, eventId))
+                .block();
+            final ZoneId tz = calDataMono.flatMap(CalendarWrapper::getCalendar)
+                .map(Calendar::getTimeZone)
+                .map(ZoneId::of)
+                .block();
 
-            //okay, get the calendar service and then the event
-            final Calendar service = CalendarAuth.getCalendarService(calendarData).block();
-
-            final Event event = service.events().get(calendarData.getCalendarAddress(), eventId).execute();
 
             response.setContentType("application/json");
             if (event != null) {
                 response.setStatus(GlobalConst.STATUS_SUCCESS);
-                return JsonUtils.convertEventToJson(event, settings).toString();
+                return JsonUtils.convertEventToJson(event, tz, settings).block().toString();
             } else {
                 response.setStatus(GlobalConst.STATUS_NOT_FOUND);
                 return JsonUtils.getJsonResponseMessage("Event not Found");

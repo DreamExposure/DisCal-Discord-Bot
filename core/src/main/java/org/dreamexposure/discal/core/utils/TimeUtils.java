@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.utils;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -10,6 +11,9 @@ import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -67,7 +71,12 @@ public class TimeUtils {
                 final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 final Date endDate = sdf.parse(endRaw);
-                final Date startDate = new Date(event.getStartDateTime().getDateTime().getValue());
+
+                final Date startDate;
+                if (event.getStartDateTime().getDateTime() != null)
+                    startDate = new Date(event.getStartDateTime().getDateTime().getValue());
+                else
+                    startDate = new Date(event.getStartDateTime().getDate().getValue());
 
                 return endDate.before(startDate);
             } catch (final ParseException e) {
@@ -83,7 +92,13 @@ public class TimeUtils {
                 final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd-HH:mm:ss");
                 sdf.setTimeZone(timezone);
                 final Date startDate = sdf.parse(startRaw);
-                final Date endDate = new Date(event.getEndDateTime().getDateTime().getValue());
+
+                Date endDate;
+                if (event.getEndDateTime().getDateTime() != null)
+                    endDate = new Date(event.getEndDateTime().getDateTime().getValue());
+                else
+                    endDate = new Date(event.getEndDateTime().getDate().getValue());
+
 
                 return startDate.after(endDate);
             } catch (final ParseException e) {
@@ -91,5 +106,18 @@ public class TimeUtils {
             }
         }
         return false;
+    }
+
+    public static DateTime doTimeShiftBullshit(DateTime original, ZoneId tz) {
+        return new DateTime(Instant.ofEpochMilli(original.getValue())
+            .plus(1, ChronoUnit.DAYS)
+            .atZone(tz)
+            .truncatedTo(ChronoUnit.DAYS)
+            .toLocalDate()
+            .atStartOfDay()
+            .atZone(tz)
+            .toInstant()
+            .toEpochMilli()
+        );
     }
 }

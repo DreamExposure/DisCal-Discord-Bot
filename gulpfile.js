@@ -10,40 +10,49 @@ let browserSync = require('browser-sync').create();
 
 // Set the banner content
 let banner = ['/*!\n',
-	' */\n',
-	'\n'
+    ' */\n',
+    '\n'
 ].join('');
 
 // Copy third party libraries from /node_modules into /vendor
-gulp.task('vendor', gulp.series(function(done) {
-	// Bootstrap
-	gulp.src([
+gulp.task('vendor', gulp.series(function (done) {
+    // Bootstrap
+    gulp.src([
         './node_modules/bootstrap/dist/**/*',
         '!./node_modules/bootstrap/dist/css/bootstrap-grid*',
         '!./node_modules/bootstrap/dist/css/bootstrap-reboot*'
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/bootstrap'));
 
-	// jQuery
+    // jQuery
     gulp.src([
         './node_modules/jquery/dist/*',
         '!./node_modules/jquery/dist/core.js'
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/jquery'));
 
-	// jQuery Easing
+    // jQuery Easing
     gulp.src([
         './node_modules/jquery.easing/*.js'
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/jquery-easing'));
 
-	//ChartJS
+    // FullCalendar
+    /*
+    gulp.src([
+        './node_modules/fullcalendar/main.min.js',
+        './node_modules/fullcalendar/main.min.css'
+    ])
+        .pipe(gulp.dest('./web/src/main/html/static/vendor/fullcalendar'))
+     */
+
+    // ChartJS
     gulp.src([
         './node_modules/chart.js/dist/*.js'
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/chart.js'));
 
-	//DataTables
+    // DataTables
     gulp.src([
         './node_modules/datatables.net/js/*.js',
         './node_modules/datatables.net-bs4/js/*.js',
@@ -51,13 +60,13 @@ gulp.task('vendor', gulp.series(function(done) {
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/datatables'));
 
-	// Font Awesome 5
+    // Font Awesome 5
     gulp.src([
         './node_modules/@fortawesome/**/*'
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor'));
 
-	// Simple Line Icons
+    // Simple Line Icons
     gulp.src([
         './node_modules/simple-line-icons/fonts/**'
     ])
@@ -68,11 +77,11 @@ gulp.task('vendor', gulp.series(function(done) {
     ])
         .pipe(gulp.dest('./web/src/main/html/static/vendor/simple-line-icons/css'));
 
-	done();
+    done();
 }));
 
 gulp.task('clean:all', gulp.series(function () {
-	return del([
+    return del([
         "./web/build",
         "./web/src/main/html/static/assets/js/**",
         "./web/src/main/html/static/assets/css/**",
@@ -81,14 +90,14 @@ gulp.task('clean:all', gulp.series(function () {
 }));
 
 gulp.task('clean:build', gulp.series(function () {
-	return del([
-		"./web/build"
-	])
+    return del([
+        "./web/build"
+    ])
 }));
 
 // Compile SCSS
 gulp.task('css:compile', gulp.series(function () {
-	return gulp.src('./web/src/main/less/**/*.scss')
+    return gulp.src('./web/src/main/less/**/*.scss')
         .pipe(sass.sync({
             outputStyle: 'expanded'
         }).on('error', sass.logError))
@@ -124,12 +133,12 @@ gulp.task('default', gulp.series(['clean:all', 'css', 'vendor', 'clean:build']))
 gulp.task('build', gulp.series(['clean:all', 'css', 'vendor', 'clean:build']));
 
 // Configure the browserSync task
-gulp.task('browserSync', gulp.series(function() {
-	browserSync.init({
-		server: {
+gulp.task('browserSync', gulp.series(function () {
+    browserSync.init({
+        server: {
             baseDir: "./web/src/main/html/"
         }
-	});
+    });
 }));
 
 // Dev task

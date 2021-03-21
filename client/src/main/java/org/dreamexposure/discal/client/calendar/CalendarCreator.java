@@ -2,7 +2,8 @@ package org.dreamexposure.discal.client.calendar;
 
 import com.google.api.services.calendar.model.AclRule;
 import com.google.api.services.calendar.model.Calendar;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
@@ -13,14 +14,11 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -129,7 +127,7 @@ public class CalendarCreator {
                 final int credId = new Random().nextInt(CalendarAuth.credentialsCount());
 
                 if (!pre.getEditing()) {
-                    return CalendarWrapper.createCalendar(calendar, credId)
+                    return CalendarWrapper.createCalendar(calendar, credId, settings.getGuildID())
                         .flatMap(confirmed -> {
                             final CalendarData data = new CalendarData(
                                 settings.getGuildID(),

@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.core.database;
 
+import discord4j.common.util.Snowflake;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.*;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
@@ -13,6 +17,8 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.RsvpData;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.novautils.database.DatabaseSettings;
+import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,26 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import discord4j.common.util.Snowflake;
-import io.r2dbc.pool.ConnectionPool;
-import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.Connection;
-import io.r2dbc.spi.ConnectionFactories;
-import io.r2dbc.spi.ConnectionFactory;
-import io.r2dbc.spi.ConnectionFactoryOptions;
-import io.r2dbc.spi.Result;
-import io.r2dbc.spi.ValidationDepth;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
-import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
-import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
-import static io.r2dbc.spi.ConnectionFactoryOptions.PROTOCOL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.SSL;
-import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.*;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -241,7 +228,7 @@ public class DatabaseManager {
                     final String update = "UPDATE " + table
                         + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
                         + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,"
-                        + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH TOKEN = ?"
+                        + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?"
                         + " WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
@@ -261,7 +248,8 @@ public class DatabaseManager {
                 } else {
                     final String insertCommand = "INSERT INTO " + table
                         + "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, " +
-                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID)" + " VALUES (?, ?, ?, ?, ?, ?)";
+                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID, " +
+                        "PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                     return connect(master, c -> Mono.from(c.createStatement(insertCommand)
                         .bind(0, calData.getGuildId().asString())
@@ -270,6 +258,9 @@ public class DatabaseManager {
                         .bind(3, calData.getCalendarAddress())
                         .bind(4, calData.getExternal())
                         .bind(5, calData.getCredentialId())
+                        .bind(6, calData.getPrivateKey())
+                        .bind(7, calData.getEncryptedAccessToken())
+                        .bind(8, calData.getEncryptedRefreshToken())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -1061,12 +1052,11 @@ public class DatabaseManager {
         return connect(master, c -> {
             final String announcementTableName = String.format("%sannouncements", settings.getPrefix());
             final String query = "DELETE FROM " + announcementTableName + " WHERE EVENT_ID = ? AND " +
-                "GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?";
+                "GUILD_ID = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, eventId)
                 .bind(1, guildId.asString())
-                .bind(2, AnnouncementType.SPECIFIC.name())
                 .execute());
         }).flatMapMany(Result::getRowsUpdated)
             .then(Mono.just(true))

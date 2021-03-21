@@ -47,7 +47,7 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
-                    final PreEvent event = new PreEvent(settings.getGuildID());
+                    final PreEvent event = new PreEvent(settings.getGuildID(), calData.getCalendarNumber());
                     this.events.add(event);
 
                     return CalendarWrapper.getCalendar(calData)
@@ -67,7 +67,7 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
-                    final PreEvent event = new PreEvent(settings.getGuildID());
+                    final PreEvent event = new PreEvent(settings.getGuildID(), calData.getCalendarNumber());
                     event.setSummary(summary);
 
                     this.events.add(event);
@@ -90,9 +90,8 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
-                    .flatMap(toCopy -> {
-                        final PreEvent event = new PreEvent(settings.getGuildID(), toCopy);
-
+                    .flatMap(toCopy -> PreEvent.copy(settings.getGuildID(), toCopy, calData))
+                    .flatMap(event -> {
                         this.events.add(event);
 
                         return CalendarWrapper.getCalendar(calData)
@@ -112,8 +111,8 @@ public class EventCreator {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
-                    .flatMap(toEdit -> {
-                        final PreEvent event = new PreEvent(settings.getGuildID(), toEdit);
+                    .flatMap(toEdit -> PreEvent.copy(settings.getGuildID(), toEdit, calData))
+                    .flatMap(event -> {
                         event.setEditing(true);
 
                         this.events.add(event);

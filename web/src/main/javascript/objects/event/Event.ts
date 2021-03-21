@@ -1,30 +1,31 @@
-import {EventColor} from "@/enums/EventColor";
+import {EventColor, eventColorRGB} from "@/enums/EventColor";
 import {Recurrence} from "@/objects/event/Recurrence";
 
 export class Event {
-	private _eventId: string = "";
-	private _epochStart: number = 0;
-	private _epochEnd: number = 0;
+    private _eventId: string = "";
+    private _epochStart: number = 0;
+    private _epochEnd: number = 0;
 
-	private _summary: string = "";
-	private _description: string = "";
-	private _location: string = "";
+    private _summary: string = "";
+    private _description: string = "";
+    private _location: string = "";
 
-	private _isParent: boolean = false;
-	private _color: EventColor = EventColor.NONE;
+    private _isParent: boolean = false;
+    private _color: EventColor = EventColor.NONE;
 
-	private _recur: boolean = false;
-	private _recurrence: Recurrence = new Recurrence();
+    private _recur: boolean = false;
+    private _recurrence: Recurrence = new Recurrence();
+    private _rrule: String = "";
 
-	private _image: string = "";
+    private _image: string = "";
 
-	constructor() {
-	}
+    constructor() {
+    }
 
-	//Setter/getter pairs
-	get eventId() {
-		return this._eventId;
-	}
+    //Setter/getter pairs
+    get eventId() {
+        return this._eventId;
+    }
 
     set eventId(id) {
         this._eventId = id;
@@ -102,6 +103,14 @@ export class Event {
         this._recurrence = rec;
     }
 
+    get rrule() {
+        return this._rrule;
+    }
+
+    set rrule(rr) {
+        this._rrule = rr;
+    }
+
     get image() {
         return this._image;
     }
@@ -112,6 +121,36 @@ export class Event {
 
 
     //Json conversion
+    toFullCalEvent(editable: boolean) {
+        let event: any = {
+            id: this.eventId,
+            groupId: this.eventId.split("_")[0],
+            title: this.summary,
+            description: this.description,
+            location: this.location,
+            image: this.image,
+            eventColor: this.color,
+
+            start: this.epochStart,
+            end: this.epochEnd,
+
+            overlap: true,
+            editable: editable,
+
+            rawEvent: this,
+        };
+
+        if (this.color != EventColor.NONE) {
+            event.borderColor = eventColorRGB(this.color);
+        }
+        if (this.doesRecur) {
+            event.rrule = this.rrule;
+        }
+
+        return event;
+    }
+
+
     toJson() {
         let json: any = {
             "event_id": this.eventId,
@@ -132,6 +171,7 @@ export class Event {
         }
         if (this.doesRecur) {
             json.recurrence = this.recurrence.toJson();
+            json.rrule = this.rrule
         }
         if (this.image.length > 0) {
             json.image = this.image;
@@ -161,6 +201,7 @@ export class Event {
         this.doesRecur = json.recur;
         if (this.doesRecur) {
             this.recurrence = new Recurrence().fromJson(json.recurrence);
+            this.rrule = json.rrule;
         }
 
         if (json.hasOwnProperty("image")) {
