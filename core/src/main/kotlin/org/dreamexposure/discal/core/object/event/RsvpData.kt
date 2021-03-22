@@ -8,7 +8,6 @@ import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -203,24 +202,14 @@ data class RsvpData(
     }
 
     private fun addRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
-        return client.getMemberById(this.guildId, Snowflake.of(BotSettings.ID.get()))
-                .isHigher(Snowflake.of(userId))
-                .filter { it }
-                .flatMap {
-                    client.getGuildById(this.guildId)
-                            .addMemberRole(Snowflake.of(userId), roleId, reason)
-                            .onErrorResume(ClientException::class.java) { Mono.empty() }
-                }
+        return client.getGuildById(this.guildId)
+                .addMemberRole(Snowflake.of(userId), roleId, reason)
+                .onErrorResume(ClientException::class.java) { Mono.empty() }
     }
 
     private fun removeRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
-        return client.getMemberById(this.guildId, Snowflake.of(BotSettings.ID.get()))
-                .isHigher(Snowflake.of(userId))
-                .filter { it }
-                .flatMap {
-                    client.getGuildById(this.guildId)
-                            .removeMemberRole(Snowflake.of(userId), roleId, reason)
-                            .onErrorResume(ClientException::class.java) { Mono.empty() }
-                }
+        return client.getGuildById(this.guildId)
+                .removeMemberRole(Snowflake.of(userId), roleId, reason)
+                .onErrorResume(ClientException::class.java) { Mono.empty() }
     }
 }
