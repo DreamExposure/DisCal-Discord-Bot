@@ -8,7 +8,7 @@
     <properties>
         <revision>4.1.0-SNAPSHOT</revision>
 
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.4.31</kotlin.version>
         <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
 
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -28,7 +28,8 @@
         <spring.session.version>2.4.1</spring.session.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
-        <discord4j.version>3.1.3</discord4j.version>
+        <discord4j.version>3.2.0-SNAPSHOT</discord4j.version>
+        <discord4j.stores.version>3.1.5</discord4j.stores.version>
 
         <google.client-api.core.version>1.31.1</google.client-api.core.version>
         <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
@@ -37,7 +38,7 @@
         <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
         <r2dbc.pool.version>0.8.3.RELEASE</r2dbc.pool.version>
 
-        <netty.version.forced>4.1.44.Final</netty.version.forced>
+        <netty.version.forced>4.1.56.Final</netty.version.forced>
 
         <reactor.version.bom>2020.0.3</reactor.version.bom>
 
@@ -117,6 +118,12 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
             <version>${netty.version.forced}</version>
+        </dependency>
+        <!-- *dies* Forced due to so many issues -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.12.2</version>
         </dependency>
         <!--Forcing reactor version-->
         <dependency>

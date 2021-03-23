@@ -104,11 +104,11 @@ data class Announcement(
     }
 
     fun setSubscriberRoleIdsFromString(subList: String) {
-        this.subscriberRoleIds += subList.split(",")
+        this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
     }
 
     fun setSubscriberUserIdsFromString(subList: String) {
-        this.subscriberUserIds += subList.split(",")
+        this.subscriberUserIds += subList.split(",").filter(String::isNotBlank)
     }
 
     fun hasRequiredValues(): Boolean {

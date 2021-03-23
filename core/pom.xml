@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.discord4j</groupId>
             <artifactId>stores-redis</artifactId>
-            <version>${discord4j.version}</version>
+            <version>${discord4j.stores.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
