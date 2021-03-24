@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.entities.event
+package org.dreamexposure.discal.core.entities.google
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
@@ -10,7 +10,10 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
 
-class GoogleEvent(override val eventId: String, override val guildId: Snowflake) : Event {
+class GoogleEvent(
+        override val eventId: String,
+        override val guildId: Snowflake
+) : Event {
 
     override var name: String = ""
     override var description: String = ""
