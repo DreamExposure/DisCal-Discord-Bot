@@ -1,13 +1,18 @@
 package org.dreamexposure.discal.core.entities
 
 import discord4j.common.util.Snowflake
+import discord4j.core.`object`.entity.Guild
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.event.RsvpData
+import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
+import java.time.ZoneId
 
 interface Event {
     /**
@@ -17,76 +22,101 @@ interface Event {
     val eventId: String
 
     /**
-     * The ID of the guild this event belongs to.
+     * The ID of the [Guild] this event belongs to.
      */
     val guildId: Snowflake
+        get() = calendar.guildId
+
+    /**
+     * The [Calendar] this Event belongs to
+     */
+    val calendar: Calendar
+
+    /**
+     * The of the event saved to the DisCal database
+     */
+    val eventData: EventData
 
     /**
      * The name of the event, renamed from "summary" to make it more user-friendly and clear.
-     * This has already been sanitized
      */
-    var name: String
+    val name: String
 
     /**
      * A description of what the event is about.
-     * This has already been sanitized
      */
-    var description: String
+    val description: String
 
     /**
      * The location at which the event occurs, usually a map location.
-     * This has already been sanitized
      */
-    var location: String
+    val location: String
 
     /**
      * The color of the event. Used for visually identifying it in Discord embeds.
-     * If no event color is assigned, it returns .NONE which is DisCal blue.
+     * If no event color is assigned, it returns [EventColor.NONE] which is DisCal blue.
      */
-    var color: EventColor
+    val color: EventColor
 
     /**
-     * The start of the event, as a Java Instant representing the time starting from January 1st 1970.
+     * The start of the event, as an [Instant] representing the time starting from January 1st 1970.
      */
-    var start: Instant
+    val start: Instant
 
     /**
-     * The end of the event, as a Java Instant representing the time starting from January 1st 1970.
+     * The end of the event, as an [Instant] representing the time starting from January 1st 1970.
      */
-    var end: Instant
+    val end: Instant
 
     /**
      * Whether or not the event is a recurring event.
      */
-    var recur: Boolean
+    val recur: Boolean
 
     /**
      * The rules of the recurring event. Contains the RRule an human readable information on how the event will recur
      */
-    var recurrence: Recurrence
+    val recurrence: Recurrence
 
     /**
      * A link to the image, if none is present, returns empty
      */
-    var image: String
+    val image: String
+        get() = eventData.imageLink
+
+    /**
+     * The timezone that the event takes place in. This is always the same as the [Calendar]'s timezone
+     */
+    val timezone: ZoneId
+        get() = calendar.timezone
 
     //Reactive
-    /**
-     * Attempts to request the Timezone the event occurs in, normally the timezone of the calendar.
-     * If an error occurs, it is emitted through the Mono.
-     */
-    fun getTimezone(): Mono<String>
 
     /**
-     * Attempts to request the announcements linked to the event, such as a SPECIFIC type announcement.
+     * Attempts to request the announcements linked to the event, such as a [SPECIFIC][AnnouncementType.SPECIFIC]
+     * type announcement.
      * If an error occurs, it is emitted through the Flux.
+     *
+     * @return A [Flux] of all announcements that are linked to the event.
      */
     fun getLinkedAnnouncements(): Flux<Announcement>
 
     /**
-     * Attempts to request the RsvpData of the event.
+     * Attempts to request the [RsvpData] of the event.
      * If an error occurs, it is emitted through the Mono.
+     *
+     * @return A [Mono] containing the [RsvpData] of the event
      */
-    fun getRsvp(): Mono<RsvpData>
-    //Should I add #save #update #delete here? nah, probably should be on the calendar entity
+    fun getRsvp(): Mono<RsvpData> = DatabaseManager.getRsvpData(guildId, eventId)
+
+
+    /**
+     * Attempts to delete the event and returns the result.
+     * If an error occurs, it is emitted through the [Mono].
+     *
+     * @return A [Mono] containing whether or not the delete succeeded.
+     */
+    fun delete(): Mono<Boolean>
+
+    //TODO: Add update once I figure out specs
 }

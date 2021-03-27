@@ -2,12 +2,13 @@ package org.dreamexposure.discal.core.utils;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
-
+import com.google.api.services.calendar.model.EventDateTime;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,8 +17,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.TimeZone;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -119,5 +118,20 @@ public class TimeUtils {
             .toInstant()
             .toEpochMilli()
         );
+    }
+
+    public static Instant convertToInstant(EventDateTime edt, ZoneId tz) {
+        if (edt.getDateTime() != null) {
+            return Instant.ofEpochMilli(edt.getDateTime().getValue());
+        } else {
+            return Instant.ofEpochMilli(edt.getDate().getValue())
+                .plus(1, ChronoUnit.DAYS)
+                .atZone(tz)
+                .truncatedTo(ChronoUnit.DAYS)
+                .toLocalDate()
+                .atStartOfDay()
+                .atZone(tz)
+                .toInstant();
+        }
     }
 }
