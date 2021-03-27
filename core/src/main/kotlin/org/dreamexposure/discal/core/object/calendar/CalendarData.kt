@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import org.dreamexposure.novautils.crypto.KeyGenerator
 
@@ -14,6 +15,7 @@ data class CalendarData(
         val guildId: Snowflake = Snowflake.of(0),
         @SerialName("calendar_number")
         val calendarNumber: Int = 1,
+        val host: CalendarHost,
         @SerialName("calendar_id")
         val calendarId: String = "primary",
         @SerialName("calendar_address")
@@ -30,14 +32,15 @@ data class CalendarData(
         @Transient
         var encryptedRefreshToken: String = "N/a",
 ) {
-    constructor(guildId: Snowflake, calendarNumber: Int, calendarId: String, calendarAddress: String, credentialId:
-    Int) : this(guildId, calendarNumber, calendarId, calendarAddress, false, credentialId)
+    constructor(guildId: Snowflake, calendarNumber: Int, host: CalendarHost, calendarId: String,
+                calendarAddress: String, credentialId: Int) :
+            this(guildId, calendarNumber, host, calendarId, calendarAddress, false, credentialId)
 
     companion object {
         @JvmStatic
-        fun empty(guildId: Snowflake) = CalendarData(guildId)
+        fun empty(guildId: Snowflake, host: CalendarHost) = CalendarData(guildId, host = host)
 
         @JvmStatic
-        fun emptyExternal(guildId: Snowflake) = CalendarData(guildId, external = true)
+        fun emptyExternal(guildId: Snowflake, host: CalendarHost) = CalendarData(guildId, external = true, host = host)
     }
 }

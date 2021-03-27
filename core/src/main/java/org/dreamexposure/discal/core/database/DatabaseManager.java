@@ -6,6 +6,7 @@ import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.*;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -34,7 +35,7 @@ import static io.r2dbc.spi.ConnectionFactoryOptions.*;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
-@SuppressWarnings({"UnusedReturnValue", "unused", "ConstantConditions", "SqlResolve", "MagicNumber"})
+@SuppressWarnings({"UnusedReturnValue", "unused", "ConstantConditions", "SqlResolve", "MagicNumber", "DuplicatedCode"})
 public class DatabaseManager {
     private final static DatabaseSettings settings;
 
@@ -226,34 +227,14 @@ public class DatabaseManager {
             .flatMap(exists -> {
                 if (exists) {
                     final String update = "UPDATE " + table
-                        + " SET CALENDAR_NUMBER = ?, CALENDAR_ID = ?,"
+                        + " SET CALENDAR_NUMBER = ?, HOST = ?, CALENDAR_ID = ?,"
                         + " CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,"
                         + " PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?"
                         + " WHERE GUILD_ID = ?";
 
                     return connect(master, c -> Mono.from(c.createStatement(update)
                         .bind(0, calData.getCalendarNumber())
-                        .bind(1, calData.getCalendarId())
-                        .bind(2, calData.getCalendarAddress())
-                        .bind(3, calData.getExternal())
-                        .bind(4, calData.getCredentialId())
-                        .bind(5, calData.getPrivateKey())
-                        .bind(6, calData.getEncryptedAccessToken())
-                        .bind(7, calData.getEncryptedRefreshToken())
-                        .bind(8, calData.getGuildId().asString())
-                        .execute())
-                    ).flatMap(res -> Mono.from(res.getRowsUpdated()))
-                        .hasElement()
-                        .thenReturn(true);
-                } else {
-                    final String insertCommand = "INSERT INTO " + table
-                        + "(GUILD_ID, CALENDAR_NUMBER, CALENDAR_ID, " +
-                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID, " +
-                        "PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
-                    return connect(master, c -> Mono.from(c.createStatement(insertCommand)
-                        .bind(0, calData.getGuildId().asString())
-                        .bind(1, calData.getCalendarNumber())
+                        .bind(1, calData.getHost().name())
                         .bind(2, calData.getCalendarId())
                         .bind(3, calData.getCalendarAddress())
                         .bind(4, calData.getExternal())
@@ -261,6 +242,28 @@ public class DatabaseManager {
                         .bind(6, calData.getPrivateKey())
                         .bind(7, calData.getEncryptedAccessToken())
                         .bind(8, calData.getEncryptedRefreshToken())
+                        .bind(9, calData.getGuildId().asString())
+                        .execute())
+                    ).flatMap(res -> Mono.from(res.getRowsUpdated()))
+                        .hasElement()
+                        .thenReturn(true);
+                } else {
+                    final String insertCommand = "INSERT INTO " + table
+                        + "(GUILD_ID, CALENDAR_NUMBER, HOST, CALENDAR_ID, " +
+                        "CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID, " +
+                        "PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN)" + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    return connect(master, c -> Mono.from(c.createStatement(insertCommand)
+                        .bind(0, calData.getGuildId().asString())
+                        .bind(1, calData.getCalendarNumber())
+                        .bind(2, calData.getHost().name())
+                        .bind(3, calData.getCalendarId())
+                        .bind(4, calData.getCalendarAddress())
+                        .bind(5, calData.getExternal())
+                        .bind(6, calData.getCredentialId())
+                        .bind(7, calData.getPrivateKey())
+                        .bind(8, calData.getEncryptedAccessToken())
+                        .bind(9, calData.getEncryptedRefreshToken())
                         .execute())
                     ).flatMap(res -> Mono.from(res.getRowsUpdated()))
                         .hasElement()
@@ -543,8 +546,7 @@ public class DatabaseManager {
     public static Mono<CalendarData> getMainCalendar(final Snowflake guildId) {
         return connect(slave, c -> {
             final String calendarTableName = String.format("%scalendars", settings.getPrefix());
-            final String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? " +
-                "AND CALENDAR_NUMBER = ?";
+            final String query = "SELECT * FROM " + calendarTableName + " WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?";
 
             return Mono.from(c.createStatement(query)
                 .bind(0, guildId.asString())
@@ -553,13 +555,14 @@ public class DatabaseManager {
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             final String calId = row.get("CALENDAR_ID", String.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final CalendarHost host = CalendarHost.valueOf(row.get("HOST", String.class));
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
             final String privateKey = row.get("PRIVATE_KEY", String.class);
             final String accessToken = row.get("ACCESS_TOKEN", String.class);
             final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, 1, calId, calAddr, external, credId,
+            return new CalendarData(guildId, 1, host, calId, calAddr, external, credId,
                 privateKey, accessToken, refreshToken);
         }))
             .next()
@@ -586,13 +589,14 @@ public class DatabaseManager {
         }).flatMapMany(res -> res.map((row, rowMetadata) -> {
             final String calId = row.get("CALENDAR_ID", String.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final CalendarHost host = CalendarHost.valueOf(row.get("HOST", String.class));
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
             final String privateKey = row.get("PRIVATE_KEY", String.class);
             final String accessToken = row.get("ACCESS_TOKEN", String.class);
             final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, calendarNumber, calId, calAddr, external, credId,
+            return new CalendarData(guildId, calendarNumber, host, calId, calAddr, external, credId,
                 privateKey, accessToken, refreshToken);
         }))
             .next()
@@ -618,13 +622,14 @@ public class DatabaseManager {
             final String calId = row.get("CALENDAR_ID", String.class);
             final int calNumber = row.get("CALENDAR_NUMBER", Integer.class);
             final String calAddr = row.get("CALENDAR_ADDRESS", String.class);
+            final CalendarHost host = CalendarHost.valueOf(row.get("HOST", String.class));
             final boolean external = row.get("EXTERNAL", Boolean.class);
             final int credId = row.get("CREDENTIAL_ID", Integer.class);
             final String privateKey = row.get("PRIVATE_KEY", String.class);
             final String accessToken = row.get("ACCESS_TOKEN", String.class);
             final String refreshToken = row.get("REFRESH_TOKEN", String.class);
 
-            return new CalendarData(guildId, calNumber, calId, calAddr, external, credId,
+            return new CalendarData(guildId, calNumber, host, calId, calAddr, external, credId,
                 privateKey, accessToken, refreshToken);
         }))
             .collectList()
