@@ -4,6 +4,8 @@ import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
+import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.core.utils.TimeUtils
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
@@ -36,6 +38,10 @@ class GoogleCalendar internal constructor(
                         DatabaseManager.deleteAllAnnouncementData(guildId)
                 )).thenReturn(true)
                 .defaultIfEmpty(false)
+    }
+
+    override fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse> {
+        TODO("Not yet implemented")
     }
 
     override fun getEvent(eventId: String): Mono<Event> {
