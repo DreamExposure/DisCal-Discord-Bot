@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
+import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -70,6 +71,17 @@ fun Guild.getAllCalendars(): Flux<Calendar> {
 }
 
 //TODO: Create/update/delete calendars
+
+/**
+ * Attempts to create a [Calendar] with the supplied information on a 3rd party host.
+ * If an error occurs, it is emitted through the [Mono].
+ *
+ * @param spec The instructions for creating the [Calendar]
+ * @return A [Mono] containing the newly created [Calendar]
+ */
+fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
+    TODO("Not yet implemented")
+}
 
 //Announcements
 /**

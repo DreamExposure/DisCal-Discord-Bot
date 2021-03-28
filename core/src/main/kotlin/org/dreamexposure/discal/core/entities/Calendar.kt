@@ -6,6 +6,8 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
+import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -89,6 +91,15 @@ interface Calendar {
      * @return A [Mono] boolean telling whether or not the deletion was successful
      */
     fun delete(): Mono<Boolean>
+
+    /**
+     * Attempts to update the calendar with the provided details and return the result.
+     * If an error occurs, it is emitted through the [Mono].
+     *
+     * @param spec The details to update the calendar with
+     * @return A [Mono] where upon successful completion, returns an [UpdateCalendarResponse] with the new calendar
+     */
+    fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse>
 
     //TODO: Add update once I figure out specs
 
