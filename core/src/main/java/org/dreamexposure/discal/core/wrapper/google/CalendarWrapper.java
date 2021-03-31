@@ -13,6 +13,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.util.List;
 
+//TODO: Proper error handling/logging is NEEDED BADLY
 public class CalendarWrapper {
     public static Mono<Calendar> createCalendar(Calendar calendar, int credId, Snowflake guildId) {
         return CalendarAuth.getCalendarService(credId)
@@ -20,6 +21,17 @@ public class CalendarWrapper {
                 service.calendars()
                     .insert(calendar)
                     .setQuotaUser(guildId.asString())
+                    .execute()
+            ).subscribeOn(Schedulers.boundedElastic()))
+            .onErrorResume(e -> Mono.empty());
+    }
+
+    public static Mono<Calendar> patchCalendar(Calendar calendar, CalendarData calData) {
+        return CalendarAuth.getCalendarService(calData)
+            .flatMap(service -> Mono.fromCallable(() ->
+                service.calendars()
+                    .patch(calData.getCalendarId(), calendar)
+                    .setQuotaUser(calData.getGuildId().asString())
                     .execute()
             ).subscribeOn(Schedulers.boundedElastic()))
             .onErrorResume(e -> Mono.empty());

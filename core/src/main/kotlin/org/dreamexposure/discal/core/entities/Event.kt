@@ -7,6 +7,8 @@ import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.event.RsvpData
 import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
+import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import reactor.core.publisher.Flux
@@ -99,7 +101,18 @@ interface Event {
      *
      * @return A [Flux] of all announcements that are linked to the event.
      */
-    fun getLinkedAnnouncements(): Flux<Announcement>
+    fun getLinkedAnnouncements(): Flux<Announcement> {
+        return DatabaseManager.getAnnouncements(this.guildId)
+                .flatMapMany { Flux.fromIterable(it) }
+                .filter { ann ->
+                    when (ann.type) {
+                        AnnouncementType.UNIVERSAL -> return@filter true
+                        AnnouncementType.COLOR -> return@filter ann.eventColor == this.color
+                        AnnouncementType.SPECIFIC -> return@filter ann.eventId == this.eventId
+                        AnnouncementType.RECUR -> return@filter this.eventId.contains(ann.eventId)
+                    }
+                }
+    }
 
     /**
      * Attempts to request the [RsvpData] of the event.
@@ -109,6 +122,14 @@ interface Event {
      */
     fun getRsvp(): Mono<RsvpData> = DatabaseManager.getRsvpData(guildId, eventId)
 
+    /**
+     * Attempts to update the event and returns the result.
+     * If an error occurs, it is emitted through the [Mono].
+     *
+     * @param spec The information to update the event with
+     * @return A [Mono] that contains the [UpdateEventResponse] containing information on success and the changes.
+     */
+    fun update(spec: UpdateEventSpec): Mono<UpdateEventResponse>
 
     /**
      * Attempts to delete the event and returns the result.
@@ -117,6 +138,4 @@ interface Event {
      * @return A [Mono] containing whether or not the delete succeeded.
      */
     fun delete(): Mono<Boolean>
-
-    //TODO: Add update once I figure out specs
 }

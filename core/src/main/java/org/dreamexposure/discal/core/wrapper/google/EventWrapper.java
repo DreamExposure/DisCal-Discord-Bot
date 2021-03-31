@@ -53,6 +53,38 @@ public class EventWrapper {
         ).onErrorResume(e -> Mono.empty());
     }
 
+    public static Mono<Event> patchEvent(CalendarData data, Event event) {
+        return CalendarAuth.getCalendarService(data).flatMap(service ->
+            Mono.fromCallable(() ->
+                service.events()
+                    .patch(data.getCalendarId(), event.getId(), event)
+                    .setQuotaUser(data.getGuildId().asString())
+                    .execute()
+            ).subscribeOn(Schedulers.boundedElastic())
+        ).onErrorResume(GoogleJsonResponseException.class, e -> {
+            if (e.getStatusCode() == GlobalConst.STATUS_NOT_FOUND ||
+                "requiredAccessLevel".equalsIgnoreCase(e.getDetails().getErrors().get(0).getReason())) {
+                //This is caused by credentials issue. Lets fix it.
+                LogFeed.log(LogObject.forDebug("Attempting credentials fix...", "Guild Id: " + data.getGuildId()));
+
+                return correctAssignedCredentialId(data).flatMap(success -> {
+                    if (success) {
+                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                            .flatMap(cd -> patchEvent(cd, event));
+                    } else {
+                        return Mono.empty();
+                    }
+                });
+            } else {
+                //Some other error, lets log it, might be getting swallowed
+                LogFeed.log(LogObject
+                    .forException("Event patch error; Cred Id: " + data.getCredentialId(), e, EventWrapper.class));
+            }
+            return Mono.empty();
+        }).doOnError(e -> LogFeed.log(LogObject.forException("Failed to patch event", e, EventWrapper.class))
+        ).onErrorResume(e -> Mono.empty());
+    }
+
     public static Mono<Event> updateEvent(CalendarData data, Event event) {
         return CalendarAuth.getCalendarService(data).flatMap(service ->
             Mono.fromCallable(() ->
@@ -78,7 +110,7 @@ public class EventWrapper {
             } else {
                 //Some other error, lets log it, might be getting swallowed
                 LogFeed.log(LogObject
-                    .forException("Event create error; Cred Id: " + data.getCredentialId(), e, EventWrapper.class));
+                    .forException("Event update error; Cred Id: " + data.getCredentialId(), e, EventWrapper.class));
             }
             return Mono.empty();
         }).doOnError(e -> LogFeed.log(LogObject.forException("Failed to edit event", e, EventWrapper.class))
@@ -220,6 +252,7 @@ public class EventWrapper {
                 CalendarData corrected = new CalendarData(
                     data.getGuildId(),
                     data.getCalendarNumber(),
+                    data.getHost(),
                     data.getCalendarId(),
                     data.getCalendarAddress(),
                     data.getExternal(),

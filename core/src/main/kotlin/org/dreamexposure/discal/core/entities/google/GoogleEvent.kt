@@ -1,22 +1,25 @@
 package org.dreamexposure.discal.core.entities.google
 
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import com.google.api.client.util.DateTime
+import com.google.api.services.calendar.model.EventDateTime
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
+import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.temporal.ChronoUnit
+import com.google.api.services.calendar.model.Event as GoogleEventModel
 
 class GoogleEvent internal constructor(
         override val calendar: Calendar,
         override val eventData: EventData,
-        private val baseEvent: com.google.api.services.calendar.model.Event,
+        private val baseEvent: GoogleEventModel,
 ) : Event {
     override val eventId: String
         get() = baseEvent.id
@@ -81,8 +84,67 @@ class GoogleEvent internal constructor(
                 Recurrence()
         }
 
-    override fun getLinkedAnnouncements(): Flux<Announcement> {
-        TODO("Not yet implemented")
+    override fun update(spec: UpdateEventSpec): Mono<UpdateEventResponse> {
+        val event = GoogleEventModel()
+        event.id = this.eventId
+
+        spec.name?.let { event.summary = it }
+        spec.description?.let { event.description = it }
+        spec.location?.let { event.location = it }
+
+        //Always update start/end so that we can safely handle all day events without DateTime by overwriting it
+        if (spec.start != null) {
+            event.start = EventDateTime()
+                    .setDateTime(DateTime(spec.start.toEpochMilli()))
+                    .setTimeZone(this.timezone.id)
+        } else {
+            event.start = EventDateTime()
+                    .setDateTime(DateTime(this.start.toEpochMilli()))
+                    .setTimeZone(this.timezone.id)
+        }
+        if (spec.end != null) {
+            event.end = EventDateTime()
+                    .setDateTime(DateTime(spec.end.toEpochMilli()))
+                    .setTimeZone(this.timezone.id)
+        } else {
+            event.end = EventDateTime()
+                    .setDateTime(DateTime(this.end.toEpochMilli()))
+                    .setTimeZone(this.timezone.id)
+        }
+
+        spec.color?.let {
+            if (it == EventColor.NONE)
+                event.colorId = null
+            else
+                event.colorId = it.id.toString()
+        }
+
+        //Special recurrence handling
+        if (spec.recur != null) {
+            if (spec.recur) {
+                //event now recurs, add the RRUle.
+                spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+            } else {
+                //Event no longer recurs, clear it...
+                event.recurrence.clear()
+            }
+        } else {
+            //Recur equals null, so its not changing whether or not its recurring, so handle if RRule changes only
+            spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+        }
+
+        //Okay, all values are set, lets patch this event now...
+        return EventWrapper.patchEvent(this.calendar.calendarData, event).flatMap { confirmed ->
+            val data = EventData(
+                    this.guildId,
+                    confirmed.id,
+                    confirmed.end.dateTime.value,
+                    spec.image ?: this.image
+            )
+
+            return@flatMap DatabaseManager.updateEventData(data)
+                    .thenReturn(UpdateEventResponse(true, old = this, GoogleEvent(this.calendar, data, confirmed)))
+        }.defaultIfEmpty(UpdateEventResponse(false, old = this))
     }
 
     override fun delete(): Mono<Boolean> {

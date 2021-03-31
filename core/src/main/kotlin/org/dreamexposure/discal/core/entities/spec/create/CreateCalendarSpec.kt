@@ -5,6 +5,8 @@ import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 data class CreateCalendarSpec(
         val host: CalendarHost,
 
+        val calNumber: Int,
+
         val name: String,
 
         val description: String? = null,
