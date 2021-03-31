@@ -3,17 +3,15 @@ package org.dreamexposure.discal.core.entities
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
+import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 interface Calendar {
     /**
@@ -101,8 +99,6 @@ interface Calendar {
      */
     fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse>
 
-    //TODO: Add update once I figure out specs
-
     //Reactive - Events
     /**
      * Requests to retrieve the [Event] with the ID.
@@ -147,35 +143,12 @@ interface Calendar {
     fun getEventsInMonth(start: Instant, daysInMonth: Int): Flux<Event> =
             getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
 
-    //TODO: Create/update/delete event
-
-    // Reactive - Announcements
     /**
-     * Requests to retrieve the [Announcement] with the supplied [ID][UUID].
+     * Requests to create an event with the supplied information.
      * If an error occurs, it is emitted through the [Mono]
      *
-     * @return A [Mono] containing the [Announcement] with the supplied [ID][UUID], [empty][Mono.empty] if it does not
-     * exist.
+     * @param spec The information to input into the new [Event]
+     * @return A [Mono] containing the newly created [Event]
      */
-    fun getAnnouncement(id: UUID): Mono<Announcement> = DatabaseManager.getAnnouncement(id, guildId)
-
-    /**
-     * Requests to retrieve all [announcements][Announcement] associated with the owning [Guild].
-     * If an error occurs, it is emitted through the [Flux]
-     *
-     * @return A [Flux] of all [announcements][Announcement] associated with the owning [Guild].
-     */
-    fun getAllAnnouncements(): Flux<Announcement> =
-            DatabaseManager.getAnnouncements(guildId).flatMapMany { Flux.fromIterable(it) }
-
-    /**
-     * Requests to retrieve all [announcements][Announcement] associated with the owning [Guild] that are enabled.
-     * If an error occurs, it is emitted through the [Flux]
-     *
-     * @return A [Flux] of all [announcements][Announcement] associated with the owning [Guild] that are enabled.
-     */
-    fun getEnabledAnnouncements(): Flux<Announcement> =
-            DatabaseManager.getEnabledAnnouncements(guildId).flatMapMany { Flux.fromIterable(it) }
-
-    //TODO: Create/update/delete announcements
+    fun createEvent(spec: CreateEventSpec): Mono<Event>
 }

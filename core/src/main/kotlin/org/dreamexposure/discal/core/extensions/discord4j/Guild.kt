@@ -1,19 +1,26 @@
 package org.dreamexposure.discal.core.extensions.discord4j
 
+import com.google.api.services.calendar.model.AclRule
 import discord4j.core.`object`.entity.Guild
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.calendar.CalendarAuth
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
+import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.util.*
+import com.google.api.services.calendar.model.Calendar as GoogleCalendarModel
 
-//TODO: Settings and some other objects
-
+//Settings
+fun Guild.getSettings(): Mono<GuildSettings> = DatabaseManager.getSettings(this.id)
 
 //Calendars
 /**
@@ -70,8 +77,6 @@ fun Guild.getAllCalendars(): Flux<Calendar> {
             }
 }
 
-//TODO: Create/update/delete calendars
-
 /**
  * Attempts to create a [Calendar] with the supplied information on a 3rd party host.
  * If an error occurs, it is emitted through the [Mono].
@@ -80,10 +85,51 @@ fun Guild.getAllCalendars(): Flux<Calendar> {
  * @return A [Mono] containing the newly created [Calendar]
  */
 fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
-    TODO("Not yet implemented")
+    when (spec.host) {
+        CalendarHost.GOOGLE -> {
+            val googleCal = GoogleCalendarModel()
+
+            googleCal.summary = spec.name
+            spec.description?.let { googleCal.description = it }
+            googleCal.timeZone = spec.timezone
+
+            val credId = Random().nextInt(CalendarAuth.credentialsCount())
+
+            //Call to google to create it...
+            return CalendarWrapper.createCalendar(googleCal, credId, this.id)
+                    .timeout(Duration.ofSeconds(30))
+                    .flatMap { confirmed ->
+                        val data = CalendarData(
+                                this.id,
+                                spec.calNumber,
+                                CalendarHost.GOOGLE,
+                                confirmed.id,
+                                confirmed.id,
+                                credId)
+
+                        val rule = AclRule()
+                                .setScope(AclRule.Scope().setType("default"))
+                                .setRole("reader")
+
+                        return@flatMap Mono.`when`(
+                                DatabaseManager.updateCalendar(data),
+                                AclRuleWrapper.insertRule(rule, data)
+                        ).thenReturn(GoogleCalendar(data, confirmed))
+                    }
+        }
+    }
 }
 
 //Announcements
+/**
+ * Requests to check if an announcement with the supplied ID exists.
+ * If an error occurs, it is emitted through the Mono.
+ *
+ * @param id The ID of the announcement to check for
+ * @return A Mono, where upon successful completion, returns a boolean as to if the announcement exists or not
+ */
+fun Guild.announcementExists(id: UUID): Mono<Boolean> = this.getAnnouncement(id).hasElement()
+
 /**
  * Attempts to retrieve an [Announcement] with the supplied [ID][UUID].
  * If an error occurs, it is emitted through the [Mono]
@@ -115,4 +161,8 @@ fun Guild.getEnabledAnnouncements(): Flux<Announcement> {
             .flatMapMany { Flux.fromIterable(it) }
 }
 
-//TODO: create/update/delete announcements
+fun Guild.createAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)
+
+fun Guild.updateAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)
+
+fun Guild.deleteAnnouncement(id: UUID): Mono<Boolean> = DatabaseManager.deleteAnnouncement(id.toString())
