@@ -93,12 +93,19 @@ class GoogleCalendar internal constructor(
     }
 
     override fun getEventsInTimeRange(start: Instant, end: Instant): Flux<Event> {
-        return EventWrapper.getEvents(calendarData, start.toEpochMilli(), end.toEpochMilli())
+        EventWrapper.getEvents(calendarData, start.toEpochMilli(), end.toEpochMilli())
+                .doOnNext { println("a4 $it") }
                 .flatMapMany { Flux.fromIterable(it) }
+                .doOnNext { println("a5 $it") }
                 .flatMap { event ->
                     DatabaseManager.getEventData(guildId, event.id)
-                            .map { GoogleEvent(this, it, event) }
+                            .map {
+                                GoogleEvent(this, it, event)
+                            }
+                }.doOnNext {
+                    println("a6 $it")
                 }
+        return cast()
     }
 
     override fun createEvent(spec: CreateEventSpec): Mono<Event> {

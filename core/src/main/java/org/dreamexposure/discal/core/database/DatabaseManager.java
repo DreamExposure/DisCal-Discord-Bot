@@ -686,6 +686,7 @@ public class DatabaseManager {
             return new EventData(guildId, id, end, img);
         }))
             .next()
+            .defaultIfEmpty(new EventData(guildId, eventId, 0, ""))
             .retryWhen(Retry.max(3)
                 .filter(IllegalStateException.class::isInstance)
                 .filter(e -> e.getMessage() != null && e.getMessage().contains("Request queue was disposed"))
