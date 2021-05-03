@@ -9,6 +9,8 @@ services:
       MYSQL_DATABASE: discal
     ports:
       - "3306:3306"
+    volumes:
+      - ./.docker/data/mysql:/var/lib/mysql
 
   redis:
     image: redis:6.0.10
