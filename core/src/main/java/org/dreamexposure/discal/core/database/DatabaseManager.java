@@ -1150,7 +1150,7 @@ public class DatabaseManager {
                 " WHERE GUILD_ID = ? AND RSVP_ROLE = ?";
 
             return Mono.from(c.createStatement(query)
-                .bindNull(0, Long.class)
+                .bind(0, roleId.asLong())
                 .bind(1, guildId.asString())
                 .bind(2, roleId.asLong())
                 .execute());
