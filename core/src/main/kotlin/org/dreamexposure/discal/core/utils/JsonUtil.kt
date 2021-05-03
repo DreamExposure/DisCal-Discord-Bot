@@ -8,6 +8,7 @@ import org.json.JSONObject
 import kotlin.jvm.internal.Reflection
 
 @OptIn(InternalSerializationApi::class)
+@Deprecated("Phase out org.json usage")
 object JsonUtil {
     val format = Json {
         encodeDefaults = true

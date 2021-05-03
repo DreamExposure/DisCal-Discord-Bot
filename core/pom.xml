@@ -21,6 +21,11 @@
             <artifactId>discord4j-core</artifactId>
             <version>${discord4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.discord4j</groupId>
+            <artifactId>discord-json</artifactId>
+            <version>${discord4j.json.version}</version>
+        </dependency>
         <!--Discord4J Redis Stores-->
         <dependency>
             <groupId>com.discord4j</groupId>

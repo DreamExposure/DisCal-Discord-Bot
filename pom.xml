@@ -8,27 +8,30 @@
     <properties>
         <revision>4.1.0-SNAPSHOT</revision>
 
-        <kotlin.version>1.4.31</kotlin.version>
+        <kotlin.version>1.4.32</kotlin.version>
         <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
 
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
         <maven.compiler.testSource>1.8</maven.compiler.testSource>
+        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.targetEncoding>UTF-8</project.build.targetEncoding>
 
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
-        <thymeleaf-layout-dialect.version>2.5.1</thymeleaf-layout-dialect.version>
+        <thymeleaf.springsecurity.version>3.0.4.RELEASE</thymeleaf.springsecurity.version>
+        <thymeleaf.layout-dialect.version>2.5.1</thymeleaf.layout-dialect.version>
 
-        <spring.version>2.2.8.RELEASE</spring.version>
-        <spring.security.version>5.4.2</spring.security.version>
-        <spring.session.version>2.4.1</spring.session.version>
+        <spring.version>2.4.4</spring.version>
+        <spring.security.version>5.4.5</spring.security.version>
+        <spring.session.version>2.4.2</spring.session.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
-        <discord4j.version>3.2.0-SNAPSHOT</discord4j.version>
+        <discord4j.version>3.1.5</discord4j.version>
+        <discord4j.json.version>1.5.10</discord4j.json.version>
         <discord4j.stores.version>3.1.5</discord4j.stores.version>
 
         <google.client-api.core.version>1.31.1</google.client-api.core.version>
@@ -84,16 +87,12 @@
             <url>https://repo.novafox161.com/repository/nova-public/</url>
         </repository>
         <repository>
-            <id>jcenter</id>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-        <repository>
             <id>kotlin</id>
             <url>https://kotlin.bintray.com/kotlinx</url>
         </repository>
         <repository>
             <id>oss.sonatype.org-snapshot</id>
-            <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -178,6 +177,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--TODO: Remove this soon-->
         <!--r2jdbc API for reactive database queries-->
         <dependency>
             <groupId>dev.miku</groupId>
@@ -194,6 +194,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!--TODO: Probably also remove this soon too-->
         <!--r2dbc pools API for mysql connection pooling-->
         <dependency>
             <groupId>io.r2dbc</groupId>
@@ -224,58 +225,17 @@
             <artifactId>discord-webhooks</artifactId>
             <version>0.3.1</version>
         </dependency>
-        <!--Thymeleaf-->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf</artifactId>
-            <version>${thymeleaf.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--Thymeleaf 5 for Spring-->
-        <dependency>
-            <groupId>org.thymeleaf</groupId>
-            <artifactId>thymeleaf-spring5</artifactId>
-            <version>${thymeleaf.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--Thymeleaf dialect-->
-        <dependency>
-            <groupId>nz.net.ultraq.thymeleaf</groupId>
-            <artifactId>thymeleaf-layout-dialect</artifactId>
-            <version>${thymeleaf-layout-dialect.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--Spring Boot starter Thymeleaf API-->
+        <!--Spring Boot starter webflux API-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${spring.version}</version>
-            <scope>compile</scope>
         </dependency>
-        <!--Spring Boot starter web API-->
+        <!--Spring data r2dbc for MySQL-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-r2dbc</artifactId>
             <version>${spring.version}</version>
-        </dependency>
-        <!--Spring Session API-->
-        <dependency>
-            <groupId>org.springframework.session</groupId>
-            <artifactId>spring-session-data-redis</artifactId>
-            <version>${spring.session.version}</version>
-        </dependency>
-        <!--Spring Security Core-->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-core</artifactId>
-            <version>${spring.security.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--Spring Security Web-->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>${spring.security.version}</version>
         </dependency>
     </dependencies>
 
@@ -315,6 +275,7 @@
                 <configuration>
                     <compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
+                        <plugin>spring</plugin>
                     </compilerPlugins>
                     <args>
                         <arg>-Xopt-in=kotlinx.serialization.InternalSerializationApi::class</arg>
@@ -325,6 +286,11 @@
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-maven-serialization</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
@@ -364,8 +330,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
             <plugin>

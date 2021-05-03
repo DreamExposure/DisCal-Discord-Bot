@@ -4,9 +4,11 @@ import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
+import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -151,4 +153,39 @@ interface Calendar {
      * @return A [Mono] containing the newly created [Event]
      */
     fun createEvent(spec: CreateEventSpec): Mono<Event>
+
+    //Convenience
+
+    /**
+     * Converts this entity into a [WebCalendar] object.
+     *
+     * @return A [WebCalendar] containing the information from this entity
+     */
+    fun toWebCalendar(): WebCalendar {
+        return WebCalendar(
+                this.calendarId,
+                this.calendarAddress,
+                this.calendarNumber,
+                this.calendarData.host,
+                this.getLink(),
+                this.name,
+                this.description,
+                this.timezone.id.replace("/", "___"),
+                this.external
+        )
+    }
+
+    fun toJson(): JSONObject {
+        return JSONObject()
+                .put("guild_id", guildId)
+                .put("calendar_id", calendarId)
+                .put("calendar_address", calendarAddress)
+                .put("calendar_number", calendarNumber)
+                .put("host", calendarData.host.name)
+                .put("external", external)
+                .put("name", name)
+                .put("description", description)
+                .put("timezone", timezone)
+                .put("link", getLink())
+    }
 }

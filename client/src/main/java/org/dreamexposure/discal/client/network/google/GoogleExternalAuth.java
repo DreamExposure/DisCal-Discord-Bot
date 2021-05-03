@@ -2,10 +2,15 @@ package org.dreamexposure.discal.client.network.google;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.services.calendar.CalendarScopes;
-
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.AESEncryption;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -16,17 +21,11 @@ import org.dreamexposure.discal.core.object.network.google.Poll;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
-
-import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
-import okhttp3.FormBody;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+
+import java.util.function.Consumer;
 
 /**
  * @author NovaFox161
@@ -182,7 +181,7 @@ public class GoogleExternalAuth {
                         final JSONObject aprGrant = new JSONObject(responseBody);
 
                         //Save credentials securely.
-                        CalendarData calData = CalendarData.emptyExternal(poll.getSettings().getGuildID());
+                        CalendarData calData = CalendarData.emptyExternal(poll.getSettings().getGuildID(), CalendarHost.GOOGLE);
 
                         final AESEncryption encryption = new AESEncryption(calData);
 

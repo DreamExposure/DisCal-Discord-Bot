@@ -8,6 +8,7 @@ import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarCreatorResponse;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -132,6 +133,7 @@ public class CalendarCreator {
                             final CalendarData data = new CalendarData(
                                 settings.getGuildID(),
                                 1, //TODO: Support multi-calendar
+                                CalendarHost.GOOGLE,
                                 confirmed.getId(),
                                 confirmed.getId(),
                                 credId);

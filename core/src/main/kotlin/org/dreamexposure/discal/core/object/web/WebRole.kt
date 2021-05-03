@@ -30,12 +30,12 @@ data class WebRole private constructor(
         }
 
         fun fromRole(r: RoleData, settings: GuildSettings): WebRole {
-            val everyone = r.id() == settings.guildID.asString()
+            val everyone = r.id().asString() == settings.guildID.asString()
             val controlRole =
                     if (everyone && settings.controlRole.equals("everyone", true)) true
-                    else settings.controlRole == r.id()
+                    else settings.controlRole == r.id().asString()
 
-            return WebRole(r.id().toLong(), r.name(), r.managed(), controlRole, everyone)
+            return WebRole(r.id().asLong(), r.name(), r.managed(), controlRole, everyone)
         }
     }
 }

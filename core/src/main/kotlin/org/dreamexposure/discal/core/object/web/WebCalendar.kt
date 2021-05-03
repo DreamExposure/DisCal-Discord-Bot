@@ -3,14 +3,17 @@ package org.dreamexposure.discal.core.`object`.web
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.entities.Calendar
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
 import reactor.core.publisher.Mono
 
-@Suppress("DataClassPrivateConstructor")
 @Serializable
-data class WebCalendar private constructor(
+data class WebCalendar internal constructor(
         val id: String,
         val address: String,
+        val number: Int,
+        val host: CalendarHost,
         val link: String,
         val name: String,
         val description: String,
@@ -18,8 +21,13 @@ data class WebCalendar private constructor(
         val external: Boolean,
 ) {
     companion object {
-        fun empty() = WebCalendar("primary", "primary", "N/a", "N/a", "N/a", "N/a", false)
+        fun empty() = WebCalendar("primary", "primary", 1, CalendarHost.GOOGLE,
+                "N/a", "N/a", "N/a", "N/a", false)
 
+        /**
+         * @see [Calendar.toWebCalendar]
+         */
+        @Deprecated("Does not support calendar hosts other than Google.")
         fun fromCalendar(cd: CalendarData, gs: GuildSettings): Mono<WebCalendar> {
             return if (cd.calendarAddress.equals("primary", true))
                 Mono.just(empty())
@@ -29,7 +37,10 @@ data class WebCalendar private constructor(
                     WebCalendar(
                             cd.calendarId,
                             cd.calendarAddress,
-                            link, cal.summary,
+                            1,
+                            CalendarHost.GOOGLE,
+                            link,
+                            cal.summary,
                             cal.description,
                             cal.timeZone.replace("/", "___"),
                             cd.external)
