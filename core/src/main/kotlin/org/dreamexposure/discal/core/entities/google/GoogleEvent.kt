@@ -25,13 +25,13 @@ class GoogleEvent internal constructor(
         get() = baseEvent.id
 
     override val name: String
-        get() = baseEvent.summary
+        get() = baseEvent.summary.orEmpty()
 
     override val description: String
-        get() = baseEvent.description
+        get() = baseEvent.description.orEmpty()
 
     override val location: String
-        get() = baseEvent.location
+        get() = baseEvent.location.orEmpty()
 
     override val color: EventColor
         get() {

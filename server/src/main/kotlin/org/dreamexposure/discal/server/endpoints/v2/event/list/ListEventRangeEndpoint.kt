@@ -43,10 +43,13 @@ class ListEventRangeEndpoint {
 
             return@flatMap DisCalServer.client.getGuildById(guildId).getCalendar(calendarNumber)
                     .flatMapMany { it.getEventsInTimeRange(start, end) }
+                    .doOnNext { println("1 $it") }
                     .map(Event::toJson)
                     .collectList()
+                    .doOnNext { println("2 $it") }
                     .map(::JSONArray)
                     .map { JSONObject().put("events", it).put("message", "Success").toString() }
+                    .doOnNext { println("3 $it") }
                     .doOnNext { response.rawStatusCode = GlobalConst.STATUS_SUCCESS }
                     .switchIfEmpty(responseMessage("Calendar not found")
                             .doOnNext { response.rawStatusCode = GlobalConst.STATUS_NOT_FOUND }
