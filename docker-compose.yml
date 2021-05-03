@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:5.7.33
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: discal
+    ports:
+      - "3306:3306"
+
+  redis:
+    image: redis:6.0.10
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    container_name: discal_api
+    build:
+      context: server
+      dockerfile: Dockerfile
+    image: discal-api:latest
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./.docker/api:/discal/api/
+      - ./.docker/creds:/discal/creds/
+      - ./.docker/logs/api/:/discal/logs/
+      - ./.docker/langs:/discal/langs/
+    working_dir: /discal/api/
+    ports:
+      - "20100:20100"
+    restart: on-failure
+
+  web:
+    container_name: discal_web
+    build:
+      context: web
+      dockerfile: Dockerfile
+    image: discal-web:latest
+    depends_on:
+      - redis
+      - api
+    volumes:
+      - ./.docker/web:/discal/web/
+      - ./.docker/logs/web/:/discal/logs/
+      - ./.docker/langs:/discal/langs/
+    working_dir: /discal/web/
+    ports:
+      - "20101:20101"
+
+  bot:
+    container_name: discal_bot
+    build:
+      context: client
+      dockerfile: Dockerfile
+    image: discal-bot:latest
+    depends_on:
+      - mysql
+      - redis
+      - api
+    volumes:
+      - ./.docker/bot:/discal/bot/
+      - ./.docker/creds:/discal/creds/
+      - ./.docker/logs/bot/:/discal/logs/
+      - ./.docker/langs:/discal/langs/
+    working_dir: /discal/bot/
+    ports:
+      - "20200:20200"

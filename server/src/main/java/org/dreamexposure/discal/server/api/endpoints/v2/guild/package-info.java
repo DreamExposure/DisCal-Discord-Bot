@@ -1,1 +1,0 @@
-package org.dreamexposure.discal.server.api.endpoints.v2.guild;

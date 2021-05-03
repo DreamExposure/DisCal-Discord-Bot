@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.calendar.CalendarCreator;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
@@ -12,11 +14,9 @@ import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.GeneralUtils;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.utils.TimeZoneUtils;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/4/2017.
@@ -95,7 +95,7 @@ public class CalendarCommand implements Command {
                 return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
             } else {
                 return DatabaseManager.getMainCalendar(settings.getGuildID())
-                    .defaultIfEmpty(new CalendarData())
+                    .defaultIfEmpty(CalendarData.empty(settings.getGuildID(), CalendarHost.GOOGLE))
                     .flatMap(calData -> {
                         switch (args[0].toLowerCase()) {
                             case "create":

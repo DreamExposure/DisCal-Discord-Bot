@@ -1,20 +1,20 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
-
-import java.util.ArrayList;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
 
 /**
  * Created by Nova Fox on 6/29/2017.
@@ -107,7 +107,7 @@ public class AddCalendarCommand implements Command {
                                 .flatMap(valid -> {
                                     if (valid) {
                                         final CalendarData newData = new CalendarData(
-                                            data.getGuildId(), 1, args[0], args[0], true, 0,
+                                            data.getGuildId(), 1, CalendarHost.GOOGLE, args[0], args[0], true, 0,
                                             data.getPrivateKey(), data.getEncryptedAccessToken(),
                                             data.getEncryptedRefreshToken());
 

@@ -21,7 +21,6 @@ data class AuthenticationState private constructor(
 ) {
     constructor(success: Boolean) : this(success, reason = "")
 
-    //TODO: Remove after no longer using this class in java
     fun status(status: Int) = this.copy(status = status)
 
     fun reason(reason: String) = this.copy(reason = reason)
@@ -32,13 +31,3 @@ data class AuthenticationState private constructor(
 
     fun readOnly(readOnly: Boolean) = this.copy(readOnly = readOnly)
 }
-
-fun AuthenticationState.status(status: Int) = this.copy(status = status)
-
-fun AuthenticationState.reason(reason: String) = this.copy(reason = reason)
-
-fun AuthenticationState.keyUsed(key: String) = this.copy(keyUsed = key)
-
-fun AuthenticationState.fromDisCalNetwork(from: Boolean) = this.copy(fromDiscalNetwork = from)
-
-fun AuthenticationState.readOnly(readOnly: Boolean) = this.copy(readOnly = readOnly)

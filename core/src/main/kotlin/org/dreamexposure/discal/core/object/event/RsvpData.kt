@@ -138,17 +138,16 @@ data class RsvpData(
 
     fun clearRole(client: DiscordClient): Mono<Void> {
         //Attempt to remove the role from all users RSVP'd...
-        return Mono.just(client.getGuildById(guildId))
-                .flatMap { guild ->
-                    val removeOnTimeRoles = Flux.fromIterable(goingOnTime).flatMap { id ->
-                        guild.removeMemberRole(Snowflake.of(id), roleId, "Role removed from event with ID: $eventId")
-                    }.then()
-                    val removeLateRole = Flux.fromIterable(goingLate).flatMap { id ->
-                        guild.addMemberRole(Snowflake.of(id), roleId, "Role removed from event with ID: $eventId")
-                    }
+        return Mono.just(client.getGuildById(guildId)).flatMap { guild ->
+            val removeOnTimeRoles = Flux.fromIterable(goingOnTime).flatMap { id ->
+                guild.removeMemberRole(Snowflake.of(id), roleId, "Role removed from event with ID: $eventId")
+            }.then()
+            val removeLateRole = Flux.fromIterable(goingLate).flatMap { id ->
+                guild.addMemberRole(Snowflake.of(id), roleId, "Role removed from event with ID: $eventId")
+            }
 
-                    Mono.`when`(removeOnTimeRoles, removeLateRole)
-                }
+            Mono.`when`(removeOnTimeRoles, removeLateRole).doFinally { this.setRole(null) }
+        }
     }
 
     fun clearRole(event: MessageCreateEvent) = clearRole(event.client.rest())
@@ -199,6 +198,7 @@ data class RsvpData(
                 || this.notGoing.isNotEmpty()
                 || this.undecided.isNotEmpty()
                 || limit != -1
+                || roleId != null
     }
 
     private fun addRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {

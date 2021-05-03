@@ -33,6 +33,59 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+        <!--Thymeleaf-->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>${thymeleaf.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Thymeleaf 5 for Spring-->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring5</artifactId>
+            <version>${thymeleaf.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Thymeleaf dialect-->
+        <dependency>
+            <groupId>nz.net.ultraq.thymeleaf</groupId>
+            <artifactId>thymeleaf-layout-dialect</artifactId>
+            <version>${thymeleaf.layout-dialect.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Thymeleaf spring security-->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity5</artifactId>
+            <version>${thymeleaf.springsecurity.version}</version>
+        </dependency>
+        <!--Spring Boot starter Thymeleaf API-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Spring Session API-->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>${spring.session.version}</version>
+        </dependency>
+        <!--Spring Security Core-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring.security.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Spring Security Web-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

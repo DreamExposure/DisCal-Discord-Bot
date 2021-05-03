@@ -2,6 +2,8 @@ package org.dreamexposure.discal.core.entities
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
@@ -11,6 +13,7 @@ import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
+import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Instant
@@ -138,4 +141,22 @@ interface Event {
      * @return A [Mono] containing whether or not the delete succeeded.
      */
     fun delete(): Mono<Boolean>
+
+    fun toJson(): JSONObject {
+        return JSONObject()
+                .put("guild_id", guildId)
+                .put("calendar", calendar.toJson())
+                .put("event_id", eventId)
+                .put("epoch_start", start.toEpochMilli())
+                .put("epoch_end", end.toEpochMilli())
+                .put("name", name)
+                .put("description", description)
+                .put("location", location)
+                .put("is_parent", !eventId.contains("_"))
+                .put("color", color.name)
+                .put("recur", recur)
+                .put("recurrence", JSONObject(Json.Default.encodeToString(recurrence)))
+                .put("rrule", recurrence.toRRule())
+                .put("image", eventData.imageLink)
+    }
 }

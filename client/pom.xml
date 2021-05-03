@@ -33,6 +33,31 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
+        <!--Spring Session API-->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>${spring.session.version}</version>
+        </dependency>
+        <!--Spring Security Core-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring.security.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--Spring Security Web-->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring.security.version}</version>
+        </dependency>
+        <!--Spring r2dbc-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-r2dbc</artifactId>
+            <version>5.3.5</version>
+        </dependency>
     </dependencies>
 
     <build>
