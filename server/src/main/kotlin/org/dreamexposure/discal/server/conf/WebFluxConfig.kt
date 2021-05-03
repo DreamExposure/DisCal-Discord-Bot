@@ -14,25 +14,19 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.http.HttpStatus
-import org.springframework.web.reactive.config.CorsRegistry
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.reactive.CorsWebFilter
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 import org.springframework.web.reactive.config.EnableWebFlux
-import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
 @EnableAutoConfiguration
-class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
     override fun customize(factory: ConfigurableWebServerFactory?) {
         factory?.setPort(BotSettings.PORT.get().toInt())
         factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
-    }
-
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/api/**")
-                .allowedOrigins("*")
-        registry.addMapping("/v2/**")
-                .allowedOrigins("*")
     }
 
     @Bean
@@ -71,5 +65,22 @@ class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<Configurable
                 .option(ConnectionFactoryOptions.DATABASE, BotSettings.SQL_DB.get())
                 .option(ConnectionFactoryOptions.SSL, false)
                 .build())
+    }
+
+    @Bean
+    fun corsWebFilter(): CorsWebFilter {
+        val config = CorsConfiguration()
+
+        config.maxAge = 8000L
+        config.addAllowedOrigin("*")
+        config.addAllowedMethod("GET")
+        config.addAllowedMethod("POST")
+        config.addAllowedHeader("Authorization")
+
+        val source = UrlBasedCorsConfigurationSource()
+
+        source.registerCorsConfiguration("/**", config)
+
+        return CorsWebFilter(source)
     }
 }

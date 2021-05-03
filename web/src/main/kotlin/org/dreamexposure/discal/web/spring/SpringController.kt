@@ -118,7 +118,7 @@ class SpringController {
     }
 
     //Embed pages
-    @RequestMapping("/embed/calendar{id}")
+    @RequestMapping("/embed/calendar/{id}")
     @Deprecated("This remains solely for backwards compat for users", ReplaceWith("N/a"))
     fun oldEmbedCalendar(model: MutableMap<String, Any>, swe: ServerWebExchange, @PathVariable id: String):
             Mono<String> {
@@ -126,7 +126,7 @@ class SpringController {
         return Mono.just("redirect:/embed/$id/calendar/1")
     }
 
-    @RequestMapping("/embed/{id}calendar/{num}")
+    @RequestMapping("/embed/{id}/calendar/{num}")
     fun embedCalendarWithNum(model: MutableMap<String, Any>, swe: ServerWebExchange, @PathVariable id: String,
                              @PathVariable num: String): Mono<String> {
         return DiscordAccountHandler.getEmbedAccount(swe)
