@@ -1147,11 +1147,11 @@ public class DatabaseManager {
         return connect(master, c -> {
             final String rsvpTable = String.format("%srsvp", settings.getPrefix());
             final String query = "UPDATE " + rsvpTable +
-                "SET RSVP_ROLE = ? " +
+                " SET RSVP_ROLE = ? " +
                 " WHERE GUILD_ID = ? AND RSVP_ROLE = ?";
 
             return Mono.from(c.createStatement(query)
-                .bind(0, roleId.asLong())
+                .bindNull(0, Long.class)
                 .bind(1, guildId.asString())
                 .bind(2, roleId.asLong())
                 .execute());
