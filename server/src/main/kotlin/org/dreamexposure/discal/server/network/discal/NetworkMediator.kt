@@ -7,49 +7,26 @@ import com.jcraft.jsch.JSchException
 import com.jcraft.jsch.Session
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.ConnectedClient
+import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.IOException
 import java.io.InputStreamReader
+import java.time.Duration
 import java.util.*
-import kotlin.concurrent.timerTask
 
-object NetworkMediator {
-    //TODO: Use flux interval instead of timer eventually
-    private var timer: Timer? = null
-
-    fun init() {
-        timer = Timer(true)
-
-        timer?.schedule(timerTask {
-            val downShards = mutableListOf<ConnectedClient>()
-
-            for (client in DisCalServer.networkInfo.clients) {
-                if (System.currentTimeMillis() > client.lastKeepAlive + (5 * GlobalConst.oneMinuteMs))
-                    downShards.add(client) //Missed last 5+ heartbeats...
-            }
-
-            //Now we issue the restarts for the shards
-            Flux.fromIterable(downShards)
-                    .flatMap(this@NetworkMediator::issueRestart)
-                    .subscribe()
-
-            downShards.forEach(this@NetworkMediator::issueRestart)
-
-        }, GlobalConst.oneMinuteMs, GlobalConst.oneMinuteMs)
-    }
-
-    fun shutdown() {
-        if (timer != null) timer?.cancel()
-    }
+@Component
+class NetworkMediator(private val networkInfo: NetworkInfo) : ApplicationRunner {
 
     private fun issueRestart(client: ConnectedClient): Mono<Void> {
         if (BotSettings.USE_RESTART_SERVICE.get().equals("true", true)) {
-            DisCalServer.networkInfo.removeClient(client.clientIndex, "Restart service not active!")
+            networkInfo.removeClient(client.clientIndex, "Restart service not active!")
             return Mono.empty()
         }
 
@@ -60,8 +37,7 @@ object NetworkMediator {
             val channel = session.openChannel("exec") as ChannelExec
 
             //Tell network manager to remove this client until it restarts.
-            DisCalServer.networkInfo
-                    .removeClient(client.clientIndex, "Restart issued by mediator for missed heartbeats")
+            networkInfo.removeClient(client.clientIndex, "Restart issued by mediator for missed heartbeats")
 
             //Do it
             try {
@@ -109,5 +85,13 @@ object NetworkMediator {
         } catch (ignored: Exception) {
         }
         session.disconnect()
+    }
+
+    override fun run(args: ApplicationArguments?) {
+        Flux.interval(Duration.ofMinutes(1))
+                .flatMapIterable { networkInfo.clients }
+                .filter { System.currentTimeMillis() > it.lastKeepAlive + (5 * GlobalConst.oneMinuteMs) }
+                .flatMap(::issueRestart)
+                .subscribe()
     }
 }

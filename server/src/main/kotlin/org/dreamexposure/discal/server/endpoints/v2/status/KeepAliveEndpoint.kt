@@ -3,10 +3,10 @@ package org.dreamexposure.discal.server.endpoints.v2.status
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.`object`.network.discal.ConnectedClient
+import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/status")
-class KeepAliveEndpoint {
+class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
 
     @PostMapping(value = ["/keep-alive"], produces = ["application/json"])
     fun keepAlive(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
@@ -38,9 +38,9 @@ class KeepAliveEndpoint {
             val body = JSONObject(rBody)
             val index = body.getInt("index")
 
-            if (DisCalServer.networkInfo.doesClientExist(index)) {
+            if (networkInfo.doesClientExist(index)) {
                 //In network, update info
-                val cc = DisCalServer.networkInfo.getClient(index)
+                val cc = networkInfo.getClient(index)
                 val oldPid = cc.pid
 
                 val newClient = cc.copy(
@@ -59,7 +59,7 @@ class KeepAliveEndpoint {
                     LogFeed.log(LogObject.forStatus("Client pid changed", "Shard index: ${cc.clientIndex}"))
                 }
 
-                DisCalServer.networkInfo.updateClient(newClient)
+                networkInfo.updateClient(newClient)
             } else {
                 //Not in network, add info
                 val cc = ConnectedClient(
@@ -75,7 +75,7 @@ class KeepAliveEndpoint {
                         body.getString("pid")
                 )
 
-                DisCalServer.networkInfo.addClient(cc)
+                networkInfo.addClient(cc)
             }
 
             response.rawStatusCode = GlobalConst.STATUS_SUCCESS

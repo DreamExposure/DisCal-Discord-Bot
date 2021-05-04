@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.event
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.entities.Event
@@ -8,7 +9,6 @@ import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/event")
-class DeleteEventEndpoint {
+class DeleteEventEndpoint(val client: DiscordClient) {
     @PostMapping("/delete", produces = ["application/json"])
     fun delete(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -41,7 +41,7 @@ class DeleteEventEndpoint {
             val calendarNumber = body.getInt("calendar_number")
             val eventId = body.getString("event_id")
 
-            return@flatMap DisCalServer.client.getGuildById(guildId).getCalendar(calendarNumber)
+            return@flatMap client.getGuildById(guildId).getCalendar(calendarNumber)
                     .flatMap { it.getEvent(eventId) }
                     .flatMap(Event::delete)
                     .flatMap { success ->

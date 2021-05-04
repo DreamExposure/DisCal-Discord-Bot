@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import discord4j.discordjson.json.ImmutableNicknameModifyData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -23,7 +23,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v2/guild")
-class UpdateWebGuildEndpoint {
+class UpdateWebGuildEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
     fun updateGuild(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -39,7 +39,7 @@ class UpdateWebGuildEndpoint {
             val body = JSONObject(rBody)
             val guildId = Snowflake.of(body.getString("guild_id"))
 
-            val guild = DisCalServer.client.getGuildById(guildId)
+            val guild = client.getGuildById(guildId)
 
             //Handle nickname change
             val nicknameMono = Mono.defer {

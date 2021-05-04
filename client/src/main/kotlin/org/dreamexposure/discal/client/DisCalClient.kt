@@ -19,6 +19,7 @@ import discord4j.store.jdk.JdkStoreService
 import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
+import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.listeners.discord.ChannelDeleteListener
 import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener
 import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener
@@ -35,8 +36,7 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.FileReader
@@ -45,7 +45,7 @@ import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
-@SpringBootApplication(exclude = [SessionAutoConfiguration::class])
+@Component
 class DisCalClient {
     companion object {
         @JvmStatic
@@ -94,7 +94,7 @@ class DisCalClient {
 
             //Start Spring
             try {
-                val app = SpringApplication(DisCalClient::class.java)
+                val app = SpringApplication(Application::class.java)
                 app.setAdditionalProfiles(BotSettings.PROFILE.get())
                 app.run(*args)
             } catch (e: Exception) {

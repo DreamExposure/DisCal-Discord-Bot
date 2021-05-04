@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.event.list
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.entities.Event
@@ -8,7 +9,6 @@ import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONArray
@@ -25,7 +25,7 @@ import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/events/list")
-class ListEventDateEndpoint {
+class ListEventDateEndpoint(val client: DiscordClient) {
     @PostMapping("/date", produces = ["application/json"])
     fun listByDate(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -41,7 +41,7 @@ class ListEventDateEndpoint {
             val start = Instant.ofEpochMilli(body.getLong("epoch_start"))
             val end = Instant.ofEpochMilli(body.getLong("epoch_end"))
 
-            return@flatMap DisCalServer.client.getGuildById(guildId).getCalendar(calendarNumber)
+            return@flatMap client.getGuildById(guildId).getCalendar(calendarNumber)
                     .flatMapMany { it.getEventsInTimeRange(start, end) }
                     .map(Event::toJson)
                     .collectList()

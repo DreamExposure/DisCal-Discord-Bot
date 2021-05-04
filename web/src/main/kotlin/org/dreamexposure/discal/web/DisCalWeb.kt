@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.web
 
+import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.calendar.CalendarAuth
 import org.dreamexposure.discal.core.logger.LogFeed
@@ -10,11 +11,13 @@ import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
+@Component
 @SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
 class DisCalWeb {
     companion object {
@@ -39,7 +42,7 @@ class DisCalWeb {
             //Start up spring
             try {
                 DiscordAccountHandler.init()
-                val app = SpringApplication(DisCalWeb::class.java)
+                val app = SpringApplication(Application::class.java)
                 app.setAdditionalProfiles(BotSettings.PROFILE.get())
                 app.run(*args)
             } catch (e: Exception) {

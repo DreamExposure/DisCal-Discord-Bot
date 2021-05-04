@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.server
 
-import discord4j.core.DiscordClient
-import discord4j.core.DiscordClientBuilder
+import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.calendar.CalendarAuth
@@ -9,32 +8,42 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
-import org.dreamexposure.discal.server.network.dbotsgg.UpdateDBotsData
-import org.dreamexposure.discal.server.network.discal.NetworkMediator
-import org.dreamexposure.discal.server.network.topgg.UpdateTopStats
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.novautils.database.DatabaseSettings
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.exception.FlywayValidateException
 import org.flywaydb.core.internal.command.DbMigrate
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.SpringApplication
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import org.springframework.boot.system.ApplicationPid
+import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 import org.dreamexposure.novautils.database.DatabaseManager as NovaUtilsDatabaseManager
 
-@SpringBootApplication(exclude = [SessionAutoConfiguration::class])
-class DisCalServer {
+@Component
+class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
+
+    override fun run(args: ApplicationArguments) {
+        //Handle the rest of the bullshit
+        Authentication.init()
+
+        //Save pid
+        networkInfo.pid = ApplicationPid().toString()
+        LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online!"))
+    }
+
+    @PreDestroy
+    fun onShutdown() {
+        LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."))
+        Authentication.shutdown()
+        DatabaseManager.disconnectFromMySQL()
+    }
+
     companion object {
-        val networkInfo = NetworkInfo()
-
-        lateinit var client: DiscordClient
-            internal set
-
         @JvmStatic
         fun main(args: Array<String>) {
             //Get settings
@@ -56,11 +65,9 @@ class DisCalServer {
             //Start Google Authorization daemon
             Authorization.getAuth().init()
 
-            client = DiscordClientBuilder.create(BotSettings.TOKEN.get()).build()
-
             //Start up spring
             try {
-                val app = SpringApplication(DisCalServer::class.java)
+                val app = SpringApplication(Application::class.java)
                 app.setAdditionalProfiles(BotSettings.PROFILE.get())
                 app.run(*args)
             } catch (e: Exception) {
@@ -68,30 +75,7 @@ class DisCalServer {
                 LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
                 exitProcess(4)
             }
-
-            //Start network monitoring
-            NetworkMediator.init()
-
-            //Handle the rest of the bullshit
-            UpdateTopStats.init()
-            UpdateDBotsData.init()
-            Authentication.init()
-
-            //Save pid
-            networkInfo.pid = ApplicationPid().toString()
-
-            LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online!"))
         }
-    }
-
-    @PreDestroy
-    fun onShutdown() {
-        LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."))
-        Authentication.shutdown()
-        NetworkMediator.shutdown()
-        UpdateTopStats.shutdown()
-        UpdateDBotsData.shutdown()
-        DatabaseManager.disconnectFromMySQL()
     }
 }
 

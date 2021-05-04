@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.rsvp
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -8,7 +9,6 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.core.utils.RoleUtils
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -25,7 +25,7 @@ import reactor.function.TupleUtils
 
 @RestController
 @RequestMapping("/v2/rsvp")
-class UpdateRsvpEndpoint {
+class UpdateRsvpEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
     fun updateRsvp(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -53,13 +53,13 @@ class UpdateRsvpEndpoint {
                     it.has("role_id") && (settings.patronGuild || settings.devGuild)
                 }.flatMap { jsonBody ->
                     if (jsonBody.isNull("role_id") || jsonBody.getString("role_id").equals("none", true)) {
-                        rsvp.clearRole(DisCalServer.client)
+                        rsvp.clearRole(client)
                     } else {
                         val roleId = Snowflake.of(jsonBody.getString("role_id"))
 
-                        RoleUtils.roleExists(DisCalServer.client, guildId, roleId)
+                        RoleUtils.roleExists(client, guildId, roleId)
                                 .filter { it }
-                                .flatMap { rsvp.setRole(roleId, DisCalServer.client) }
+                                .flatMap { rsvp.setRole(roleId, client) }
                     }
                 }
 
@@ -88,7 +88,7 @@ class UpdateRsvpEndpoint {
                         (0 until ar.length()).forEach { toRemove.add(ar.getString(it)) }
                     }
 
-                    Flux.fromIterable(toRemove).flatMap { rsvp.removeCompletely(it, DisCalServer.client) }.then()
+                    Flux.fromIterable(toRemove).flatMap { rsvp.removeCompletely(it, client) }.then()
                 }
 
                 //Handle additions
@@ -103,8 +103,8 @@ class UpdateRsvpEndpoint {
                         val ar = toAddJson.getJSONArray("on_time")
                         for (i in 0 until ar.length()) {
                             if (rsvp.hasRoom(ar.getString(i))) {
-                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), DisCalServer.client)
-                                        .then(rsvp.addGoingOnTime(ar.getString(i), DisCalServer.client)))
+                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), client)
+                                        .then(rsvp.addGoingOnTime(ar.getString(i), client)))
                             }
                         }
                     }
@@ -113,8 +113,8 @@ class UpdateRsvpEndpoint {
                         val ar = toAddJson.getJSONArray("late")
                         for (i in 0 until ar.length()) {
                             if (rsvp.hasRoom(ar.getString(i))) {
-                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), DisCalServer.client)
-                                        .then(rsvp.addGoingLate(ar.getString(i), DisCalServer.client)))
+                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), client)
+                                        .then(rsvp.addGoingLate(ar.getString(i), client)))
                             }
                         }
                     }
@@ -123,7 +123,7 @@ class UpdateRsvpEndpoint {
                         val ar = toAddJson.getJSONArray("on_time")
                         for (i in 0 until ar.length()) {
                             if (rsvp.hasRoom(ar.getString(i))) {
-                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), DisCalServer.client)
+                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), client)
                                         .then(Mono.from { rsvp.notGoing.add(ar.getString(i)) }))
                             }
                         }
@@ -133,7 +133,7 @@ class UpdateRsvpEndpoint {
                         val ar = toAddJson.getJSONArray("undecided")
                         for (i in 0 until ar.length()) {
                             if (rsvp.hasRoom(ar.getString(i))) {
-                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), DisCalServer.client)
+                                allTheMonos.add(rsvp.removeCompletely(ar.getString(i), client)
                                         .then(Mono.from { rsvp.undecided.add(ar.getString(i)) }))
                             }
                         }

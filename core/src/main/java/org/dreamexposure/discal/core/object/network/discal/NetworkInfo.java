@@ -10,14 +10,14 @@ import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
  * Contact: nova@dreamexposure.org
  */
 @SuppressWarnings("Duplicates")
+@Component
 public class NetworkInfo {
     private final List<ConnectedClient> clients = new ArrayList<>();
 

@@ -2,10 +2,10 @@ package org.dreamexposure.discal.server.endpoints.v2.status
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/status")
-class GetStatusEndpoint {
+class GetStatusEndpoint(val networkInfo: NetworkInfo) {
 
     @PostMapping("/get", produces = ["application/json"])
     fun getStatus(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
@@ -30,8 +30,8 @@ class GetStatusEndpoint {
 
             //Handle request
             response.rawStatusCode = GlobalConst.STATUS_SUCCESS
-            return@flatMap DisCalServer.networkInfo.update()
-                    .thenReturn(DisCalServer.networkInfo.toJson().toString())
+            return@flatMap networkInfo.update()
+                    .thenReturn(networkInfo.toJson().toString())
         }.onErrorResume(JSONException::class.java) {
             it.printStackTrace()
 

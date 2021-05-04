@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.`object`.web.WebGuild
@@ -10,7 +11,6 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.core.utils.PermissionChecker
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -27,7 +27,7 @@ import reactor.function.TupleUtils
 
 @RestController
 @RequestMapping("/v2/guild")
-class GetWebGuildEndpoint {
+class GetWebGuildEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -41,7 +41,7 @@ class GetWebGuildEndpoint {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val userId = Snowflake.of(body.getString("user_id"))
 
-            val g = DisCalServer.client.getGuildById(guildId)
+            val g = client.getGuildById(guildId)
 
             WebGuild.fromGuild(g).onErrorResume(BotNotInGuildException::class.java) { Mono.empty() }.flatMap { wg ->
                 val member = g.member(userId)

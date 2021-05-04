@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.announcement
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
@@ -11,7 +12,6 @@ import org.dreamexposure.discal.core.extensions.discord4j.updateAnnouncement
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -27,7 +27,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v2/announcement")
-class UpdateAnnouncementEndpoint {
+class UpdateAnnouncementEndpoint(val client: DiscordClient) {
     @PostMapping("/update", produces = ["application/json"])
     fun update(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -44,7 +44,7 @@ class UpdateAnnouncementEndpoint {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val announcementId = UUID.fromString(body.getString("announcement_id"))
 
-            val guild = DisCalServer.client.getGuildById(guildId)
+            val guild = client.getGuildById(guildId)
 
             return@flatMap guild.getAnnouncement(announcementId).flatMap { ann ->
                 ann.announcementChannelId = body.optString("channel", ann.announcementChannelId)

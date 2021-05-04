@@ -4,37 +4,26 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.json.JSONObject
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.*
-import kotlin.concurrent.timerTask
+import java.time.Duration
 
-object UpdateDBotsData {
-    //TODO: Use flux interval instead of timer eventually
-    private var timer: Timer? = null
-
-    fun init() {
-        if (BotSettings.UPDATE_SITES.get().equals("true", true)) {
-            timer = Timer(true)
-            timer?.schedule(timerTask {
-                update().subscribe()
-            }, GlobalConst.oneHourMs)
-        }
-    }
-
-    fun shutdown() {
-        if (timer != null) timer?.cancel()
-    }
+@Component
+class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner {
 
     private fun update(): Mono<Void> {
         return Mono.fromCallable {
             val json = JSONObject()
-                    .put("guildCount", DisCalServer.networkInfo.totalGuildCount)
-                    .put("shardCount", DisCalServer.networkInfo.expectedClientCount)
+                    .put("guildCount", networkInfo.totalGuildCount)
+                    .put("shardCount", networkInfo.expectedClientCount)
 
             val client = OkHttpClient()
 
@@ -54,5 +43,13 @@ object UpdateDBotsData {
         }.onErrorResume {
             Mono.empty()
         }.then()
+    }
+
+    override fun run(args: ApplicationArguments?) {
+        if (BotSettings.UPDATE_SITES.get().equals("true", true)) {
+            Flux.interval(Duration.ofHours(1))
+                    .flatMap { update() }
+                    .subscribe()
+        }
     }
 }

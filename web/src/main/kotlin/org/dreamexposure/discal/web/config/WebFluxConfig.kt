@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.web.config
 
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
 import org.springframework.boot.web.server.ErrorPage
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -28,7 +27,6 @@ import org.thymeleaf.templatemode.TemplateMode
 
 @Configuration
 @EnableWebFlux
-@EnableAutoConfiguration
 class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>,
         ApplicationContextAware, WebFluxConfigurer {
 

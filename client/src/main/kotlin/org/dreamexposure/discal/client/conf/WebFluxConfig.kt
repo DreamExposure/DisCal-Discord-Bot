@@ -4,7 +4,6 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryOptions
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
 import org.springframework.boot.web.server.ErrorPage
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
@@ -20,7 +19,6 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
-@EnableAutoConfiguration
 class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
     override fun customize(factory: ConfigurableWebServerFactory?) {

@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.server.endpoints.v2.announcement
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.extensions.discord4j.deleteAnnouncement
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -23,7 +23,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v2/announcement")
-class DeleteAnnouncementEndpoint {
+class DeleteAnnouncementEndpoint(val client: DiscordClient) {
     @PostMapping("/delete", produces = ["application/json"])
     fun delete(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -40,7 +40,7 @@ class DeleteAnnouncementEndpoint {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val announcementId = UUID.fromString(body.getString("announcement_id"))
 
-            return@flatMap DisCalServer.client.getGuildById(guildId).deleteAnnouncement(announcementId)
+            return@flatMap client.getGuildById(guildId).deleteAnnouncement(announcementId)
                     .then(responseMessage("Success")
                             .doOnNext { response.rawStatusCode = GlobalConst.STATUS_SUCCESS }
                     )

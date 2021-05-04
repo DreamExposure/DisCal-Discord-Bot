@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.event
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.`object`.event.Recurrence
@@ -10,7 +11,6 @@ import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -26,7 +26,7 @@ import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/event")
-class UpdateEventEndpoint {
+class UpdateEventEndpoint(val client: DiscordClient) {
     @PostMapping("/update", produces = ["application/json"])
     fun update(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -44,7 +44,7 @@ class UpdateEventEndpoint {
             val calendarNumber = body.getInt("calendar_number")
             val eventId = body.getString("event_id")
 
-            return@flatMap DisCalServer.client.getGuildById(guildId).getCalendar(calendarNumber).flatMap { it.getEvent(eventId) }
+            return@flatMap client.getGuildById(guildId).getCalendar(calendarNumber).flatMap { it.getEvent(eventId) }
                     .flatMap { event ->
                         var spec = UpdateEventSpec()
 

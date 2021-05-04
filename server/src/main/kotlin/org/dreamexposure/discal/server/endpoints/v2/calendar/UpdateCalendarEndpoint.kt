@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.calendar
 
 import discord4j.common.util.Snowflake
+import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
@@ -9,7 +10,6 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.core.utils.TimeZoneUtils
-import org.dreamexposure.discal.server.DisCalServer
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -25,7 +25,7 @@ import java.time.ZoneId
 
 @RestController
 @RequestMapping("/v2/calendar")
-class UpdateCalendarEndpoint {
+class UpdateCalendarEndpoint(val client: DiscordClient) {
     @PostMapping("/update", produces = ["application/json"])
     fun updateCalendar(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
@@ -42,7 +42,7 @@ class UpdateCalendarEndpoint {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val calendarNumber = body.getInt("calendar_number")
 
-            DisCalServer.client.getGuildById(guildId).getCalendar(calendarNumber).flatMap { calendar ->
+            client.getGuildById(guildId).getCalendar(calendarNumber).flatMap { calendar ->
                 var spec = UpdateCalendarSpec()
 
                 if (body.has("name")) {
