@@ -161,7 +161,7 @@ export class Event {
         };
 
         if (this.summary.length > 0) {
-            json.summary = this.summary;
+            json.name = this.summary;
         }
         if (this.description.length) {
             json.description = this.description;
@@ -185,8 +185,8 @@ export class Event {
         this.epochStart = json.epoch_start;
         this.epochEnd = json.epoch_end;
 
-        if (json.hasOwnProperty("summary")) {
-            this.summary = json.summary;
+        if (json.hasOwnProperty("name")) {
+            this.summary = json.name;
         }
         if (json.hasOwnProperty("description")) {
             this.description = json.description;
