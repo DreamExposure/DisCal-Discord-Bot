@@ -83,8 +83,8 @@
 
     <repositories>
         <repository>
-            <id>nova-public</id>
-            <url>https://repo.novafox161.com/repository/nova-public/</url>
+            <id>dreamexposure-public</id>
+            <url>https://emily.dreamexposure.org/artifactory/dreamexposure-public/</url>
         </repository>
         <repository>
             <id>kotlin</id>
