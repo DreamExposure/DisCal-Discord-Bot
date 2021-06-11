@@ -8,7 +8,7 @@
     <properties>
         <revision>4.1.0-SNAPSHOT</revision>
 
-        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin.version>1.5.10</kotlin.version>
         <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
 
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -51,6 +51,7 @@
         <maven.test.skip>true</maven.test.skip>
 
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <maven.plugin.jib.version>3.0.0</maven.plugin.jib.version>
     </properties>
 
     <parent>
@@ -100,6 +101,10 @@
         <repository>
             <id>repo.spring.io-milestone</id>
             <url>https://repo.spring.io/milestone</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -177,8 +182,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--TODO: Remove this soon-->
-        <!--r2jdbc API for reactive database queries-->
+        <!--r2jdbc Driver-->
         <dependency>
             <groupId>dev.miku</groupId>
             <artifactId>r2dbc-mysql</artifactId>
@@ -194,8 +198,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--TODO: Probably also remove this soon too-->
-        <!--r2dbc pools API for mysql connection pooling-->
+        <!--r2dbc pools Driver-->
         <dependency>
             <groupId>io.r2dbc</groupId>
             <artifactId>r2dbc-pool</artifactId>
@@ -223,7 +226,7 @@
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>discord-webhooks</artifactId>
-            <version>0.3.1</version>
+            <version>0.5.7</version>
         </dependency>
         <!--Spring Boot starter webflux API-->
         <dependency>
