@@ -251,6 +251,7 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+                <inherited>false</inherited>
             </plugin>
             <!--Kotlin plugin-->
             <plugin>

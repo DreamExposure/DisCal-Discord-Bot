@@ -50,6 +50,7 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
+                <inherited>false</inherited>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
