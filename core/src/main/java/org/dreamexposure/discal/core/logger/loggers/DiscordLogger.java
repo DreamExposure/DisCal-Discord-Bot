@@ -1,18 +1,17 @@
 package org.dreamexposure.discal.core.logger.loggers;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
+import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.core.logger.interfaces.Logger;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.Instant;
-
-import club.minnced.discord.webhook.WebhookClient;
-import club.minnced.discord.webhook.send.WebhookEmbed;
-import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 
 @SuppressWarnings("MagicNumber")
 public class DiscordLogger implements Logger {
@@ -47,7 +46,7 @@ public class DiscordLogger implements Logger {
         final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
             .setTitle(new WebhookEmbed.EmbedTitle("Status", null))
             .addField(new WebhookEmbed
-                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+                .EmbedField(true, "Shard Index", Application.getShardIndex()))
             .addField(new WebhookEmbed
                 .EmbedField(false, "Time", log.getTimestamp()))
             .setDescription(log.getMessage())
@@ -66,7 +65,7 @@ public class DiscordLogger implements Logger {
         final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
             .setTitle(new WebhookEmbed.EmbedTitle("Debug", null))
             .addField(new WebhookEmbed
-                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+                .EmbedField(true, "Shard Index", Application.getShardIndex()))
             .addField(new WebhookEmbed
                 .EmbedField(false, "Time", log.getTimestamp()))
             .setDescription(log.getMessage())
@@ -99,7 +98,7 @@ public class DiscordLogger implements Logger {
         final WebhookEmbedBuilder builder = new WebhookEmbedBuilder()
             .setTitle(new WebhookEmbed.EmbedTitle("Exception", null))
             .addField(new WebhookEmbed
-                .EmbedField(true, "Shard Index", BotSettings.SHARD_INDEX.get()))
+                .EmbedField(true, "Shard Index", Application.getShardIndex()))
             .addField(new WebhookEmbed
                 .EmbedField(false, "Class", log.getClazz().getName()))
             .addField(new WebhookEmbed

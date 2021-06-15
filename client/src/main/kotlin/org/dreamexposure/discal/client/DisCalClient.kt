@@ -157,8 +157,8 @@ class DisCalClient {
 
 private fun getStrategy(): ShardingStrategy {
     return ShardingStrategy.builder()
-            .count(BotSettings.SHARD_COUNT.get().toInt())
-            .indices(BotSettings.SHARD_INDEX.get().toInt())
+            .count(Application.getShardCount())
+            .indices(Application.getShardIndex().toInt())
             .build()
 }
 

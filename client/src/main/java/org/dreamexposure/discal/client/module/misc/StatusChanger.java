@@ -2,9 +2,9 @@ package org.dreamexposure.discal.client.module.misc;
 
 import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
+import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public class StatusChanger extends TimerTask {
             status = status.replace("%guCount%", DisCalClient.getClient().getGuilds().count().block() + "");
             status = status.replace("%calCount%", DatabaseManager.INSTANCE.getCalendarCount().block() + "");
             status = status.replace("%annCount%", DatabaseManager.INSTANCE.getAnnouncementCount().block() + "");
-            status = status.replace("%shards%", BotSettings.SHARD_COUNT.get());
+            status = status.replace("%shards%", Application.getShardCount() + "");
 
             DisCalClient.getClient().updatePresence(Presence.online(Activity.playing(status))).subscribe();
             //Set new index.

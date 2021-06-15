@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.service;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -35,7 +36,7 @@ public class KeepAliveHandler {
             public void run() {
                 try {
                     final JSONObject data = new JSONObject();
-                    data.put("index", Integer.parseInt(BotSettings.SHARD_INDEX.get()));
+                    data.put("index", Application.getShardIndex());
 
                     if (DisCalClient.getClient() != null)
                         data.put("guilds", DisCalClient.getClient().getGuilds().count().block());
