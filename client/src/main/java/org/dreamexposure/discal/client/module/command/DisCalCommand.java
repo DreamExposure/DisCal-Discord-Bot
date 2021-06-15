@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -9,16 +13,11 @@ import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.dreamexposure.discal.core.utils.RoleUtils;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.util.Image;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 1/5/2017.
@@ -131,8 +130,8 @@ public class DisCalCommand implements Command {
     private Mono<Void> moduleDisCalInfo(final MessageCreateEvent event, final GuildSettings settings) {
         final Mono<Guild> guildMono = event.getGuild();
         final Mono<String> guildCountMono = event.getClient().getGuilds().count().map(i -> i + "");
-        final Mono<String> calCountMono = DatabaseManager.getCalendarCount().map(i -> i + "");
-        final Mono<String> annCountMono = DatabaseManager.getAnnouncementCount().map(i -> i + "");
+        final Mono<String> calCountMono = DatabaseManager.INSTANCE.getCalendarCount().map(i -> i + "");
+        final Mono<String> annCountMono = DatabaseManager.INSTANCE.getAnnouncementCount().map(i -> i + "");
 
         final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
             .map(TupleUtils.function((guild, guilds, calendars, announcements) -> (EmbedCreateSpec spec) -> {
@@ -165,13 +164,13 @@ public class DisCalCommand implements Command {
                     final String roleName = args[1];
                     if ("everyone".equalsIgnoreCase(roleName)) {
                         settings.setControlRole("everyone");
-                        return DatabaseManager.updateSettings(settings)
+                        return DatabaseManager.INSTANCE.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Reset", settings), event));
                     } else {
                         return event.getGuild().flatMap(g -> RoleUtils.getRole(roleName, g)
                             .doOnNext(r -> settings.setControlRole(r.getId().asString()))
                             .flatMap(r ->
-                                DatabaseManager.updateSettings(settings)
+                                DatabaseManager.INSTANCE.updateSettings(settings)
                                     .then(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Set", "%role%",
                                         r.getName(), settings), event))
                             ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Invalid", settings), event))
@@ -192,13 +191,13 @@ public class DisCalCommand implements Command {
                     final String channelName = args[1];
                     if ("all".equalsIgnoreCase(channelName)) {
                         settings.setDiscalChannel("all");
-                        return DatabaseManager.updateSettings(settings)
+                        return DatabaseManager.INSTANCE.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.Channel.All", settings), event));
                     } else {
                         return event.getGuild().flatMap(g -> ChannelUtils.getChannelFromNameOrId(channelName, g)
                             .doOnNext(c -> settings.setDiscalChannel(c.getId().asString()))
                             .flatMap(channel ->
-                                DatabaseManager.updateSettings(settings)
+                                DatabaseManager.INSTANCE.updateSettings(settings)
                                     .then(Messages.sendMessage(Messages.getMessage("DisCal.Channel.Set", "%channel%",
                                         channel.getName(), settings), event))
                             ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Discal.Channel.NotFound", settings), event))
@@ -214,7 +213,7 @@ public class DisCalCommand implements Command {
     private Mono<Void> moduleSimpleAnnouncement(final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(settings)
             .doOnNext(s -> s.setSimpleAnnouncements(!s.getSimpleAnnouncements()))
-            .flatMap(DatabaseManager::updateSettings)
+            .flatMap(DatabaseManager.INSTANCE::updateSettings)
             .then(Messages.sendMessage(
                 Messages.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.getSimpleAnnouncements() + "", settings)
                 , event))
@@ -262,11 +261,11 @@ public class DisCalCommand implements Command {
             .flatMap(member -> {
                 if (settings.getDmAnnouncements().contains(member.getId().asString())) {
                     settings.getDmAnnouncements().remove(member.getId().asString());
-                    return DatabaseManager.updateSettings(settings)
+                    return DatabaseManager.INSTANCE.updateSettings(settings)
                         .then(Messages.sendMessage(Messages.getMessage("DisCal.DmAnnouncements.Off", settings), event));
                 } else {
                     settings.getDmAnnouncements().add(member.getId().asString());
-                    return DatabaseManager.updateSettings(settings)
+                    return DatabaseManager.INSTANCE.updateSettings(settings)
                         .then(Messages.sendMessage(Messages.getMessage("DisCal.DmAnnouncements.On", settings), event));
                 }
             })
@@ -282,7 +281,7 @@ public class DisCalCommand implements Command {
                     final String prefix = args[1];
                     settings.setPrefix(prefix);
 
-                    return DatabaseManager.updateSettings(settings).then(Messages
+                    return DatabaseManager.INSTANCE.updateSettings(settings).then(Messages
                         .sendMessage(Messages.getMessage("DisCal.Prefix.Set", "%prefix%", prefix, settings), event));
                 } else {
                     return Messages.sendMessage(Messages.getMessage("DisCal.Prefix.Specify", settings), event);
@@ -302,7 +301,7 @@ public class DisCalCommand implements Command {
                         final String valid = Messages.getValidLang(value);
                         settings.setLang(valid);
 
-                        return DatabaseManager.updateSettings(settings)
+                        return DatabaseManager.INSTANCE.updateSettings(settings)
                             .then(Messages.sendMessage(Messages.getMessage("DisCal.Lang.Success", settings), event));
                     } else {
                         final String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
@@ -331,7 +330,7 @@ public class DisCalCommand implements Command {
             .flatMap(isPatron -> {
                 if (isPatron) {
                     settings.setBranded(!settings.getBranded());
-                    return DatabaseManager.updateSettings(settings)
+                    return DatabaseManager.INSTANCE.updateSettings(settings)
                         .then(Messages.sendMessage(
                             Messages.getMessage("DisCal.Brand", "%value%", settings.getBranded() + "", settings),
                             event));
@@ -348,7 +347,7 @@ public class DisCalCommand implements Command {
             .filter(identity -> identity)
             .then(Mono.just(settings))
             .doOnNext(s -> s.setTwelveHour(!s.getTwelveHour()))
-            .flatMap(DatabaseManager::updateSettings)
+            .flatMap(DatabaseManager.INSTANCE::updateSettings)
             //TODO: Add translations
             .then(Messages.sendMessage("Twelve hour time format use changed to: " + !settings.getTwelveHour(), event))
             .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings),

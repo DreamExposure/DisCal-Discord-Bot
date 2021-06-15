@@ -12,6 +12,9 @@ data class ConnectedClient(
         @SerialName("index")
         val clientIndex: Int = -1,
 
+        @SerialName("expected")
+        val expectedClientCount: Int = -1,
+
         val version: String = GlobalConst.version,
 
         @SerialName("d4j_version")

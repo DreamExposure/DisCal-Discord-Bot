@@ -20,10 +20,10 @@ public class CalendarUtils {
     public static Mono<Boolean> deleteCalendar(final CalendarData data) {
         return CalendarWrapper.deleteCalendar(data).then(
             Mono.when(
-                DatabaseManager.deleteCalendar(data),
-                DatabaseManager.deleteAllEventData(data.getGuildId()),
-                DatabaseManager.deleteAllRSVPData(data.getGuildId()),
-                DatabaseManager.deleteAllAnnouncementData(data.getGuildId())
+                DatabaseManager.INSTANCE.deleteCalendar(data),
+                DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId()),
+                DatabaseManager.INSTANCE.deleteAllRsvpData(data.getGuildId()),
+                DatabaseManager.INSTANCE.deleteAllAnnouncementData(data.getGuildId())
             )).thenReturn(true)
             .doOnError(e -> LogFeed.log(LogObject.forException("Failed to delete calendar", e, CalendarUtils.class)))
             .onErrorReturn(false);
@@ -37,10 +37,10 @@ public class CalendarUtils {
                 if (ge.getStatusCode() == GlobalConst.STATUS_GONE || ge.getStatusCode() == GlobalConst.STATUS_NOT_FOUND) {
                     //Calendar does not exist... remove from db...
                     return Mono.when(
-                        DatabaseManager.deleteCalendar(data),
-                        DatabaseManager.deleteAllEventData(data.getGuildId()),
-                        DatabaseManager.deleteAllRSVPData(data.getGuildId()),
-                        DatabaseManager.deleteAllAnnouncementData(data.getGuildId())
+                        DatabaseManager.INSTANCE.deleteCalendar(data),
+                        DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId()),
+                        DatabaseManager.INSTANCE.deleteAllRsvpData(data.getGuildId()),
+                        DatabaseManager.INSTANCE.deleteAllAnnouncementData(data.getGuildId())
                     ).thenReturn(false);
                 } else {
                     LogFeed.log(LogObject

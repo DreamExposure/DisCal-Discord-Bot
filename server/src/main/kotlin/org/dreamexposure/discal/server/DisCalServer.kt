@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server
 
+import com.zaxxer.hikari.HikariDataSource
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
@@ -9,6 +10,7 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.server.utils.Authentication
+import org.dreamexposure.novautils.database.DatabaseInfo
 import org.dreamexposure.novautils.database.DatabaseSettings
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.exception.FlywayValidateException
@@ -23,6 +25,7 @@ import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 import org.dreamexposure.novautils.database.DatabaseManager as NovaUtilsDatabaseManager
+
 
 @Component
 class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
@@ -83,14 +86,14 @@ private fun handleMigrations(repair: Boolean) {
     val placeholders: Map<String, String> = mapOf(Pair("prefix", BotSettings.SQL_PREFIX.get()))
 
     val databaseSettings = DatabaseSettings(
-            BotSettings.SQL_MASTER_HOST.get(),
-            BotSettings.SQL_MASTER_PORT.get(),
+            BotSettings.SQL_HOST.get(),
+            BotSettings.SQL_PORT.get(),
             BotSettings.SQL_DB.get(),
-            BotSettings.SQL_MASTER_USER.get(),
-            BotSettings.SQL_MASTER_PASS.get(),
+            BotSettings.SQL_USER.get(),
+            BotSettings.SQL_PASS.get(),
             BotSettings.SQL_PREFIX.get(),
     )
-    val databaseInfo = NovaUtilsDatabaseManager.connectToMySQL(databaseSettings)
+    val databaseInfo = connect(databaseSettings)
 
     try {
         val flyway = Flyway.configure()
@@ -132,4 +135,17 @@ private fun handleMigrations(repair: Boolean) {
         e.printStackTrace()
         exitProcess(2)
     }
+}
+
+private fun connect(settings: DatabaseSettings): DatabaseInfo {
+    val ds = HikariDataSource()
+    var connectionURL = "jdbc:mysql://" + settings.hostname + ":" + settings.port
+    if (settings.database != null) {
+        connectionURL = connectionURL + "/" + settings.database
+    }
+    ds.jdbcUrl = connectionURL
+    ds.username = settings.user
+    ds.password = settings.password
+    println("Database connection successful!")
+    return DatabaseInfo(ds, settings, null)
 }

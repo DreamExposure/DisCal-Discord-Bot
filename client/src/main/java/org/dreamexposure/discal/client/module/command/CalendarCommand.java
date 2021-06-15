@@ -94,7 +94,7 @@ public class CalendarCommand implements Command {
             if (args.length < 1) {
                 return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);
             } else {
-                return DatabaseManager.getMainCalendar(settings.getGuildID())
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID())
                     .defaultIfEmpty(CalendarData.empty(settings.getGuildID(), CalendarHost.GOOGLE))
                     .flatMap(calData -> {
                         switch (args[0].toLowerCase()) {

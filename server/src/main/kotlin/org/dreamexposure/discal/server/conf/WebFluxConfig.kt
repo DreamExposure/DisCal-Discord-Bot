@@ -23,7 +23,6 @@ import org.springframework.web.reactive.config.EnableWebFlux
 class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
     override fun customize(factory: ConfigurableWebServerFactory?) {
-        factory?.setPort(BotSettings.PORT.get().toInt())
         factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
     }
 
@@ -31,37 +30,23 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()
         rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
-        rsc.port = BotSettings.PORT.get().toInt()
-        rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
+        rsc.port = BotSettings.REDIS_PORT.get().toInt()
+        if (BotSettings.REDIS_USE_PASSWORD.get().equals("true", true))
+            rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
 
         return LettuceConnectionFactory(rsc)
     }
 
     @Bean
-    fun mysqlMasterConnectionFactory(): ConnectionFactory {
+    fun mysqlConnectionFactory(): ConnectionFactory {
         return ConnectionFactories.get(ConnectionFactoryOptions.builder()
                 .option(ConnectionFactoryOptions.DRIVER, "pool")
                 .option(ConnectionFactoryOptions.PROTOCOL, "mysql")
-                .option(ConnectionFactoryOptions.HOST, BotSettings.SQL_MASTER_HOST.get())
-                .option(ConnectionFactoryOptions.PORT, BotSettings.SQL_MASTER_PORT.get().toInt())
-                .option(ConnectionFactoryOptions.USER, BotSettings.SQL_MASTER_USER.get())
-                .option(ConnectionFactoryOptions.PASSWORD, BotSettings.SQL_MASTER_PASS.get())
+                .option(ConnectionFactoryOptions.HOST, BotSettings.SQL_HOST.get())
+                .option(ConnectionFactoryOptions.PORT, BotSettings.SQL_PORT.get().toInt())
+                .option(ConnectionFactoryOptions.USER, BotSettings.SQL_USER.get())
+                .option(ConnectionFactoryOptions.PASSWORD, BotSettings.SQL_PASS.get())
                 .option(ConnectionFactoryOptions.DATABASE, BotSettings.SQL_DB.get())
-                .option(ConnectionFactoryOptions.SSL, false)
-                .build())
-    }
-
-    @Bean
-    fun mysqlSlaveConnectionFactory(): ConnectionFactory {
-        return ConnectionFactories.get(ConnectionFactoryOptions.builder()
-                .option(ConnectionFactoryOptions.DRIVER, "pool")
-                .option(ConnectionFactoryOptions.PROTOCOL, "mysql")
-                .option(ConnectionFactoryOptions.HOST, BotSettings.SQL_SLAVE_HOST.get())
-                .option(ConnectionFactoryOptions.PORT, BotSettings.SQL_SLAVE_PORT.get().toInt())
-                .option(ConnectionFactoryOptions.USER, BotSettings.SQL_SLAVE_USER.get())
-                .option(ConnectionFactoryOptions.PASSWORD, BotSettings.SQL_SLAVE_PASS.get())
-                .option(ConnectionFactoryOptions.DATABASE, BotSettings.SQL_DB.get())
-                .option(ConnectionFactoryOptions.SSL, false)
                 .build())
     }
 

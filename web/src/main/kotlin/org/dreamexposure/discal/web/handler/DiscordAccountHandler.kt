@@ -153,7 +153,7 @@ object DiscordAccountHandler {
             val client = OkHttpClient()
             val keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "")
             val keyGrantRequest = Request.Builder()
-                    .url("${BotSettings.API_URL_INTERNAL.get()}/v2/account/key/readonly/get")
+                    .url("${BotSettings.API_URL.get()}/v2/account/key/readonly/get")
                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                     .post(keyGrantRequestBody)
                     .build()

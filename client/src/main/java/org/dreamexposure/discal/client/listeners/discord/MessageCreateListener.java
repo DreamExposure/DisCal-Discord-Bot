@@ -1,19 +1,18 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.module.command.CommandExecutor;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import reactor.core.publisher.Mono;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class MessageCreateListener {
@@ -26,7 +25,7 @@ public class MessageCreateListener {
             )
             .map(Message::getContent)
             .flatMap(content ->
-                DatabaseManager.getSettings(event.getGuildId().get()).flatMap(settings -> {
+                DatabaseManager.INSTANCE.getSettings(event.getGuildId().get()).flatMap(settings -> {
                     if (content.startsWith(settings.getPrefix())) {
                         return Mono.from(PermissionChecker.isCorrectChannel(event, settings))
                             .filter(correct -> correct)

@@ -8,13 +8,13 @@ import reactor.core.publisher.Mono;
 
 public class RoleDeleteListener {
     public static Mono<Void> handle(final RoleDeleteEvent event) {
-        Mono<Boolean> updateRsvps = DatabaseManager.removeRSVPRole(event.getGuildId(), event.getRoleId());
+        Mono<Boolean> updateRsvps = DatabaseManager.INSTANCE.removeRsvpRole(event.getGuildId(), event.getRoleId());
 
-        Mono<Boolean> updateControlRole = DatabaseManager.getSettings(event.getGuildId())
+        Mono<Boolean> updateControlRole = DatabaseManager.INSTANCE.getSettings(event.getGuildId())
             .filter(settings -> !"everyone".equalsIgnoreCase(settings.getControlRole()))
             .filter(settings -> event.getRoleId().equals(Snowflake.of(settings.getControlRole())))
             .doOnNext(settings -> settings.setControlRole("everyone"))
-            .flatMap(DatabaseManager::updateSettings);
+            .flatMap(DatabaseManager.INSTANCE::updateSettings);
 
         return Mono.when(updateRsvps, updateControlRole);
     }

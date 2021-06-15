@@ -31,7 +31,7 @@ fun RestGuild.getSettings(): Mono<GuildSettings> = DatabaseManager.getSettings(t
  * @return A [Mono] containing whether or not this [Guild] has a [Calendar].
  */
 fun RestGuild.hasCalendar(): Mono<Boolean> {
-    return DatabaseManager.getAllCalendars(this.id).map(MutableList<CalendarData>::isNotEmpty)
+    return DatabaseManager.getAllCalendars(this.id).map(List<CalendarData>::isNotEmpty)
 }
 
 /**

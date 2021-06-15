@@ -64,7 +64,7 @@ public class CalendarCreator {
     @Deprecated
     public Mono<PreCalendar> edit(final MessageCreateEvent event, final GuildSettings settings) {
         if (!this.hasPreCalendar(settings.getGuildID())) {
-            return DatabaseManager.getMainCalendar(settings.getGuildID()).flatMap(data ->
+            return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()).flatMap(data ->
                 CalendarWrapper.getCalendar(data)
                     .flatMap(calendar -> {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
@@ -88,7 +88,7 @@ public class CalendarCreator {
 
     public Mono<PreCalendar> edit(final int calNumber, final MessageCreateEvent event, final GuildSettings settings) {
         if (!this.hasPreCalendar(settings.getGuildID())) {
-            return DatabaseManager.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
+            return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
                 CalendarWrapper.getCalendar(data)
                     .flatMap(calendar -> {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
@@ -146,7 +146,7 @@ public class CalendarCreator {
                                 pre.getCreatorMessage(), confirmed);
 
                             return Mono.when(
-                                DatabaseManager.updateCalendar(data),
+                                DatabaseManager.INSTANCE.updateCalendar(data),
                                 AclRuleWrapper.insertRule(rule, data)
                             )
                                 .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))

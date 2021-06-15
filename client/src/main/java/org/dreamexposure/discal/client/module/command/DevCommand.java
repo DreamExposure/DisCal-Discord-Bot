@@ -1,5 +1,9 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -7,14 +11,9 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 4/4/2017.
@@ -120,9 +119,9 @@ public class DevCommand implements Command {
             if (args.length == 2) {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
-                    .flatMap(DatabaseManager::getSettings)
+                    .flatMap(DatabaseManager.INSTANCE::getSettings)
                     .doOnNext(settings -> settings.setPatronGuild(!settings.getPatronGuild()))
-                    .flatMap(DatabaseManager::updateSettings)
+                    .flatMap(DatabaseManager.INSTANCE::updateSettings)
                     .then(Messages.sendMessage("isPatronGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->
                         Messages.sendMessage("Specified ID is not a valid LONG", event));
@@ -139,9 +138,9 @@ public class DevCommand implements Command {
             if (args.length == 2) {
                 return Mono.just(Long.valueOf(args[1]))
                     .map(Snowflake::of)
-                    .flatMap(DatabaseManager::getSettings)
+                    .flatMap(DatabaseManager.INSTANCE::getSettings)
                     .doOnNext(settings -> settings.setDevGuild(!settings.getDevGuild()))
-                    .flatMap(DatabaseManager::updateSettings)
+                    .flatMap(DatabaseManager.INSTANCE::updateSettings)
                     .then(Messages.sendMessage("isDevGuild value updated! Client's cache needs to be invalidated", event))
                     .onErrorResume(NumberFormatException.class, e ->
                         Messages.sendMessage("Specified ID is not a valid LONG", event));
@@ -169,7 +168,7 @@ public class DevCommand implements Command {
                     System.currentTimeMillis()
                 );
 
-                return DatabaseManager.updateAPIAccount(acc)
+                return DatabaseManager.INSTANCE.updateAPIAccount(acc)
                     .flatMap(success -> {
                         if (success) {
                             final Mono<Message> confirm = Messages.sendMessage("Check your DMs for the new API key!", event);
@@ -193,9 +192,9 @@ public class DevCommand implements Command {
                 final String key = args[1];
 
                 return Messages.sendMessage("Blocking API key...", event)
-                    .then(DatabaseManager.getAPIAccount(key))
+                    .then(DatabaseManager.INSTANCE.getAPIAccount(key))
                     .doOnNext(acc -> acc = acc.copy(acc.getUserId(), acc.getAPIKey(), true, acc.getTimeIssued()))
-                    .flatMap(DatabaseManager::updateAPIAccount)
+                    .flatMap(DatabaseManager.INSTANCE::updateAPIAccount)
                     .flatMap(success -> {
                         if (success)
                             return Messages.sendMessage("Successfully blocked API key!", event);

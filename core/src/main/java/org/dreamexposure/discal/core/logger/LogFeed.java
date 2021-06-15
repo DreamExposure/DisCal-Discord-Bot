@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.logger;
 
+import club.minnced.discord.webhook.WebhookClient;
 import org.dreamexposure.discal.core.logger.interfaces.Logger;
 import org.dreamexposure.discal.core.logger.loggers.DiscordLogger;
 import org.dreamexposure.discal.core.logger.loggers.FileLogger;
@@ -7,13 +8,12 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.logger.threads.LoggerThread;
 import org.dreamexposure.discal.core.object.BotSettings;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import club.minnced.discord.webhook.WebhookClient;
 
 @SuppressWarnings({"Duplicates", "resource", "IOResourceOpenedButNotSafelyClosed"})
 public class LogFeed {
@@ -48,8 +48,10 @@ public class LogFeed {
         final String timestamp = new SimpleDateFormat("dd-MM-yyyy-hh.mm.ss")
             .format(System.currentTimeMillis());
 
-        exceptionsFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-exceptions.log";
-        debugFile = BotSettings.LOG_FOLDER.get() + "/" + timestamp + "-debug.log";
+        new File(BotSettings.LOG_FOLDER.get()).mkdirs();
+
+        exceptionsFile = BotSettings.LOG_FOLDER.get() + "/exceptions.log";
+        debugFile = BotSettings.LOG_FOLDER.get() + "/debug.log";
 
         try {
             //Write to files to init

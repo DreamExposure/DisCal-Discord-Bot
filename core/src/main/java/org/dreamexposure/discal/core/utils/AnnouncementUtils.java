@@ -22,7 +22,7 @@ public class AnnouncementUtils {
     public static Mono<Boolean> announcementExists(final String value, final Snowflake guildId) {
         return Mono.just(UUID.fromString(value))
             .onErrorResume(e -> Mono.empty())
-            .flatMap(id -> DatabaseManager.getAnnouncement(id, guildId).hasElement())
+            .flatMap(id -> DatabaseManager.INSTANCE.getAnnouncement(id, guildId).hasElement())
             .defaultIfEmpty(false);
     }
 }

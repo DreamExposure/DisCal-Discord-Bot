@@ -190,7 +190,7 @@ public class GoogleExternalAuth {
                         calData.setEncryptedRefreshToken(encryption.encrypt(aprGrant.getString("refresh_token")));
 
                         //Update settings and then we will list the calendars for the user
-                        return DatabaseManager.updateCalendar(calData)
+                        return DatabaseManager.INSTANCE.updateCalendar(calData)
                             .then(CalendarWrapper.getUsersExternalCalendars(calData))
                             .flatMapMany(Flux::fromIterable)
                             .map(i -> (Consumer<EmbedCreateSpec>) spec -> {

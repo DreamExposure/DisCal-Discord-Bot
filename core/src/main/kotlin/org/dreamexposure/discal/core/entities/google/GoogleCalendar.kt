@@ -45,7 +45,7 @@ class GoogleCalendar internal constructor(
                 Mono.`when`(
                         DatabaseManager.deleteCalendar(calendarData),
                         DatabaseManager.deleteAllEventData(guildId),
-                        DatabaseManager.deleteAllRSVPData(guildId),
+                        DatabaseManager.deleteAllRsvpData(guildId),
                         DatabaseManager.deleteAllAnnouncementData(guildId)
                 )).thenReturn(true)
                 .defaultIfEmpty(false)

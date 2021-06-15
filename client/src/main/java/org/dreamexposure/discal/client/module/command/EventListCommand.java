@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -9,14 +9,12 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -102,7 +100,7 @@ public class EventListCommand implements Command {
     private Mono<Void> moduleSimpleList(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 0) {
-                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
                     .flatMap(data -> EventWrapper.getEvents(data, 1, System.currentTimeMillis())
                         .flatMap(events -> {
                             if (events.isEmpty()) {
@@ -122,7 +120,7 @@ public class EventListCommand implements Command {
                     } else if (count < 1) {
                         return Messages.sendMessage(Messages.getMessage("Event.List.Amount.Under", settings), event);
                     } else {
-                        return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
+                        return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: support multi-cal
                             .flatMap(data -> EventWrapper.getEvents(data, count, System.currentTimeMillis())
                                 .flatMap(events -> {
                                     if (events.isEmpty()) {
@@ -159,7 +157,7 @@ public class EventListCommand implements Command {
     private Mono<Void> moduleDay(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1) {
-                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
                     .flatMap(data -> {
                         final long now = System.currentTimeMillis();
                         final long end = now + GlobalConst.oneDayMs;
@@ -192,7 +190,7 @@ public class EventListCommand implements Command {
     private Mono<Void> moduleOngoing(String[] args, MessageCreateEvent event, GuildSettings settings) {
         return Mono.defer(() -> {
             if (args.length == 1) {
-                return DatabaseManager.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
                     .flatMap(data -> {
                         final long start = System.currentTimeMillis() - (GlobalConst.oneDayMs * 14); // 2 weeks ago
                         final long end = System.currentTimeMillis() + GlobalConst.oneDayMs; // one day from now

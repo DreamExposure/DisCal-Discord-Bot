@@ -113,7 +113,7 @@ class DiscordLoginHandler {
                             //Do temp API key request...
                             val keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "")
                             val keyGrantRequest = Request.Builder()
-                                    .url("${BotSettings.API_URL_INTERNAL.get()}/v2/account/login")
+                                    .url("${BotSettings.API_URL.get()}/v2/account/login")
                                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                                     .post(keyGrantRequestBody)
                                     .build()
@@ -168,7 +168,7 @@ class DiscordLoginHandler {
                 val requestBody = RequestBody.create(GlobalConst.JSON, "")
 
                 val logoutRequest = Request.Builder()
-                        .url("${BotSettings.API_URL_INTERNAL.get()}/v2/account/logout")
+                        .url("${BotSettings.API_URL.get()}/v2/account/logout")
                         .header("Authorization", model["key"] as String)
                         .post(requestBody)
                         .build()

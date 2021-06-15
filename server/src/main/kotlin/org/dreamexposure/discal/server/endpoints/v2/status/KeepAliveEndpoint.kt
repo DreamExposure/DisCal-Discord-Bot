@@ -44,6 +44,7 @@ class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
                 val oldPid = cc.pid
 
                 val newClient = cc.copy(
+                        expectedClientCount = body.optInt("expected", -1),
                         version = body.optString("version", "Unknown"),
                         d4jVersion = body.optString("d4j_version", "Unknown"),
                         connectedServers = body.getInt("guilds"),
@@ -64,6 +65,7 @@ class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
                 //Not in network, add info
                 val cc = ConnectedClient(
                         index,
+                        body.optInt("expected", -1),
                         body.optString("version", "Unknown"),
                         body.optString("d4j_version", "Unknown"),
                         body.getInt("guilds"),

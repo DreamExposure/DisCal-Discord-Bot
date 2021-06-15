@@ -1,5 +1,10 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Role;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
@@ -9,14 +14,10 @@ import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.AnnouncementUtils;
-import org.dreamexposure.discal.core.utils.ChannelUtils;
-import org.dreamexposure.discal.core.utils.EventUtils;
-import org.dreamexposure.discal.core.utils.GeneralUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.RoleUtils;
-import org.dreamexposure.discal.core.utils.UserUtils;
+import org.dreamexposure.discal.core.utils.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,15 +25,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.function.TupleUtils;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -340,7 +332,7 @@ public class AnnouncementCommand implements Command {
                 return AnnouncementUtils.announcementExists(args[1], settings.getGuildID())
                     .flatMap(exists -> {
                         if (exists) {
-                            return DatabaseManager.deleteAnnouncement(args[1]).flatMap(success -> {
+                            return DatabaseManager.INSTANCE.deleteAnnouncement(args[1]).flatMap(success -> {
                                 if (success) {
                                     return Messages.sendMessage(
                                         Messages.getMessage("Creator.Announcement.Delete.Success", settings), event);
@@ -381,7 +373,7 @@ public class AnnouncementCommand implements Command {
                         return Messages.sendMessage(Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
                     }
 
-                    return DatabaseManager.getAnnouncement(id, settings.getGuildID()).flatMap(a -> {
+                    return DatabaseManager.INSTANCE.getAnnouncement(id, settings.getGuildID()).flatMap(a -> {
                         Mono<String> subNamesMono = event.getGuild()
                             .flatMap(g -> AnnouncementMessageFormatter.getSubscriberNames(a, g));
                         Mono<Consumer<EmbedCreateSpec>> emMono = AnnouncementMessageFormatter
@@ -513,11 +505,11 @@ public class AnnouncementCommand implements Command {
                 return AnnouncementUtils.announcementExists(value, settings.getGuildID())
                     .flatMap(exists -> {
                         if (exists) {
-                            return DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID())
+                            return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(value), settings.getGuildID())
                                 .flatMap(a -> event.getMessage().getAuthorAsMember()
                                     .filter(u -> !a.getSubscriberUserIds().contains(u.getId().asString()))
                                     .doOnNext(u -> a.getSubscriberUserIds().add(u.getId().asString()))
-                                    .flatMap(u -> DatabaseManager.updateAnnouncement(a))
+                                    .flatMap(u -> DatabaseManager.INSTANCE.updateAnnouncement(a))
                                 )
                                 .then(Messages.sendMessage(
                                     Messages.getMessage("Creator.Announcement.Subscribe.Self.Success", settings),
@@ -537,7 +529,7 @@ public class AnnouncementCommand implements Command {
             //First we check if the first arg is an announcement ID, because we don't want to stop people from subbing,
             //while a staff member is creating an announcement.
             if (args[1].length() > 32) {
-                return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
+                return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
                     //We have the announcement, now lets handle subscribing all of those users/roles...
                     List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
 
@@ -587,7 +579,7 @@ public class AnnouncementCommand implements Command {
                                 a.getAnnouncementId().toString(), settings), null);
                         };
 
-                        return DatabaseManager.updateAnnouncement(a).thenReturn(embed);
+                        return DatabaseManager.INSTANCE.updateAnnouncement(a).thenReturn(embed);
                     }))
                         .flatMap(em -> Messages.sendMessage(em, event));
                 })
@@ -787,10 +779,10 @@ public class AnnouncementCommand implements Command {
                 return AnnouncementUtils.announcementExists(value, settings.getGuildID())
                     .flatMap(exists -> {
                         if (exists) {
-                            return DatabaseManager.getAnnouncement(UUID.fromString(value), settings.getGuildID())
+                            return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(value), settings.getGuildID())
                                 .flatMap(a -> event.getMessage().getAuthorAsMember()
                                     .doOnNext(u -> a.getSubscriberUserIds().remove(u.getId().asString()))
-                                    .flatMap(u -> DatabaseManager.updateAnnouncement(a)))
+                                    .flatMap(u -> DatabaseManager.INSTANCE.updateAnnouncement(a)))
                                 .then(Messages.sendMessage(
                                     Messages.getMessage("Creator.Announcement.Unsubscribe.Self.Success", settings),
                                     event));
@@ -809,7 +801,7 @@ public class AnnouncementCommand implements Command {
             //First we check if the first arg is an announcement ID, because we don't want to stop people from unsubbing,
             //while a staff member is creating an announcement.
             if (args[1].length() > 32) {
-                return DatabaseManager.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
+                return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(args[1]), settings.getGuildID()).flatMap(a -> {
                     //We have the announcement, now lets handle subscribing all of those users/roles...
                     List<String> toLookFor = Arrays.asList(args).subList(2, args.length);
 
@@ -859,7 +851,7 @@ public class AnnouncementCommand implements Command {
                                 a.getAnnouncementId().toString(), settings), null);
                         };
 
-                        return DatabaseManager.updateAnnouncement(a).thenReturn(embed);
+                        return DatabaseManager.INSTANCE.updateAnnouncement(a).thenReturn(embed);
                     }))
                         .flatMap(em -> Messages.sendMessage(em, event));
                 })
@@ -1097,7 +1089,7 @@ public class AnnouncementCommand implements Command {
                     .doOnNext(a::setCreatorMessage);
             } else if (args.length == 2) {
                 if ("all".equalsIgnoreCase(args[1])) {
-                    return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(announcements ->
+                    return DatabaseManager.INSTANCE.getAnnouncements(settings.getGuildID()).flatMap(announcements ->
                         Messages.sendMessage(Messages.getMessage("Creator.Announcement.List.All", "%amount%",
                             announcements.size() + "", settings), event)
                             .then(Flux.fromIterable(announcements)
@@ -1114,7 +1106,7 @@ public class AnnouncementCommand implements Command {
                             event);
                     }
 
-                    return DatabaseManager.getAnnouncements(settings.getGuildID()).flatMap(allAnnouncements -> {
+                    return DatabaseManager.INSTANCE.getAnnouncements(settings.getGuildID()).flatMap(allAnnouncements -> {
                         List<Announcement> toPost; //We only post the amount listed...
                         if (allAnnouncements.size() > amount)
                             toPost = allAnnouncements.subList(0, amount);
@@ -1255,10 +1247,10 @@ public class AnnouncementCommand implements Command {
                     if (exists) {
                         UUID id = UUID.fromString(args[1]);
                         AtomicBoolean en = new AtomicBoolean(false); //This has got to be tested...
-                        return DatabaseManager.getAnnouncement(id, settings.getGuildID())
+                        return DatabaseManager.INSTANCE.getAnnouncement(id, settings.getGuildID())
                             .doOnNext(a -> a.setEnabled(!a.getEnabled()))
                             .doOnNext(a -> en.set(a.getEnabled()))
-                            .flatMap(DatabaseManager::updateAnnouncement)
+                            .flatMap(DatabaseManager.INSTANCE::updateAnnouncement)
                             .map(i -> Messages.getMessage("Announcement.Enable.Success", "%value%", en.get() + "", settings))
                             .flatMap(msg -> Messages.sendMessage(msg, event));
                     } else {
@@ -1290,10 +1282,10 @@ public class AnnouncementCommand implements Command {
                     if (exists) {
                         UUID id = UUID.fromString(args[1]);
                         AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
-                        return DatabaseManager.getAnnouncement(id, settings.getGuildID())
+                        return DatabaseManager.INSTANCE.getAnnouncement(id, settings.getGuildID())
                             .doOnNext(a -> a.setInfoOnly(!a.getInfoOnly()))
                             .doOnNext(a -> io.set(a.getInfoOnly()))
-                            .flatMap(DatabaseManager::updateAnnouncement)
+                            .flatMap(DatabaseManager.INSTANCE::updateAnnouncement)
                             .map(i -> Messages.getMessage("Announcement.InfoOnly.Success", "%value%", io.get() + "", settings))
                             .flatMap(msg -> Messages.sendMessage(msg, event));
                     } else {

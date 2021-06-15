@@ -112,7 +112,7 @@ public class EventCommand implements Command {
     @Override
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         //TODO: Add multi-cal handling
-        return DatabaseManager.getMainCalendar(settings.getGuildID()).defaultIfEmpty(CalendarData.empty(settings.getGuildID(), CalendarHost.GOOGLE))
+        return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()).defaultIfEmpty(CalendarData.empty(settings.getGuildID(), CalendarHost.GOOGLE))
             .flatMap(calData -> {
                 if (args.length < 1) {
                     return Messages.sendMessage(Messages.getMessage("Notification.Args.Few", settings), event);

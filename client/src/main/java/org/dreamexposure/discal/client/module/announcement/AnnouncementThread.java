@@ -2,7 +2,9 @@ package org.dreamexposure.discal.client.module.announcement;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -14,17 +16,13 @@ import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import static org.dreamexposure.discal.core.enums.announcement.AnnouncementType.SPECIFIC;
 import static reactor.function.TupleUtils.function;
@@ -51,7 +49,7 @@ public class AnnouncementThread {
 
     public Mono<Void> run() {
         return this.client.getGuilds()
-            .flatMap(guild -> DatabaseManager.getEnabledAnnouncements(guild.getId())
+            .flatMap(guild -> DatabaseManager.INSTANCE.getEnabledAnnouncements(guild.getId())
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(a -> {
 
@@ -93,7 +91,7 @@ public class AnnouncementThread {
         switch (a.getType()) {
             case SPECIFIC:
                 return EventWrapper.getEvent(calData, a.getEventId())
-                    .switchIfEmpty(DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                    .switchIfEmpty(DatabaseManager.INSTANCE.deleteAnnouncement(a.getAnnouncementId().toString())
                         .then(Mono.empty())
                     ).flatMap(e -> this.inRangeSpecific(a, e)
                         .flatMap(inRange -> {
@@ -101,7 +99,7 @@ public class AnnouncementThread {
                                 return AnnouncementMessageFormatter
                                     .sendAnnouncementMessage(guild, a, e, calData, settings)
                                     .then(DatabaseManager
-                                        .deleteAnnouncement(a.getAnnouncementId().toString())
+                                        .INSTANCE.deleteAnnouncement(a.getAnnouncementId().toString())
                                     );
                             } else {
                                 return Mono.empty(); //Not in range, but still valid.
@@ -177,7 +175,7 @@ public class AnnouncementThread {
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
                 if (a.getType() == SPECIFIC)
-                    return DatabaseManager.deleteAnnouncement(a.getAnnouncementId().toString())
+                    return DatabaseManager.INSTANCE.deleteAnnouncement(a.getAnnouncementId().toString())
                         .thenReturn(false);
 
                 return Mono.just(false);
@@ -214,7 +212,7 @@ public class AnnouncementThread {
 
     private Mono<GuildSettings> getSettings(Announcement a) {
         if (!this.allSettings.containsKey(a.getGuildId()))
-            this.allSettings.put(a.getGuildId(), DatabaseManager.getSettings(a.getGuildId()).cache());
+            this.allSettings.put(a.getGuildId(), DatabaseManager.INSTANCE.getSettings(a.getGuildId()).cache());
 
         return this.allSettings.get(a.getGuildId());
     }
@@ -222,7 +220,7 @@ public class AnnouncementThread {
     //TODO: Allow multiple calendar support
     private Mono<CalendarData> getCalendarData(Announcement a) {
         if (!this.calendars.containsKey(a.getGuildId()))
-            this.calendars.put(a.getGuildId(), DatabaseManager.getMainCalendar(a.getGuildId()).cache());
+            this.calendars.put(a.getGuildId(), DatabaseManager.INSTANCE.getMainCalendar(a.getGuildId()).cache());
 
         return this.calendars.get(a.getGuildId());
     }

@@ -80,7 +80,7 @@ public class AddCalendarCommand implements Command {
             }
 
             if (args.length == 0) {
-                return DatabaseManager.getMainCalendar(settings.getGuildID())
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID())
                     .hasElement()
                     .flatMap(hasCal -> {
                         if (hasCal) {
@@ -93,7 +93,7 @@ public class AddCalendarCommand implements Command {
                         }
                     });
             } else if (args.length == 1) {
-                return DatabaseManager.getMainCalendar(settings.getGuildID())
+                return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID())
                     .flatMap(data -> {
                         if (!"primary".equalsIgnoreCase(data.getCalendarAddress())) {
                             return Messages.sendMessage(Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
@@ -112,7 +112,7 @@ public class AddCalendarCommand implements Command {
                                             data.getEncryptedRefreshToken());
 
                                         //combine db calls and message send to be executed together async
-                                        final Mono<Boolean> calInsert = DatabaseManager.updateCalendar(newData);
+                                        final Mono<Boolean> calInsert = DatabaseManager.INSTANCE.updateCalendar(newData);
                                         final Mono<Message> sendMsg = Messages.sendMessage(
                                             Messages.getMessage("AddCalendar.Select.Success", settings), event);
 

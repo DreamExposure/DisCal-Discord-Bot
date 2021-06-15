@@ -2,17 +2,16 @@ package org.dreamexposure.discal.core.file;
 
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.BotSettings;
 import org.json.JSONObject;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
 import java.io.FileReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -26,9 +25,7 @@ public class ReadFile {
             final JSONObject langs = new JSONObject();
 
             try {
-                final File langDir = new File(BotSettings.LANG_FOLDER.get());
-
-                for (final File file : langDir.listFiles()) {
+                for (final File file : getResourceFolderFiles("languages")) {
                     // Open the file
                     final FileReader fr = new FileReader(file);
 
@@ -46,5 +43,12 @@ public class ReadFile {
             }
             return langs;
         }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    private static File[] getResourceFolderFiles(String folder) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        URL url = loader.getResource(folder);
+        String path = url.getPath();
+        return new File(path).listFiles();
     }
 }

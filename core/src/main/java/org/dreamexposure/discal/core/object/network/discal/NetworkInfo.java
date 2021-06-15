@@ -3,7 +3,6 @@ package org.dreamexposure.discal.core.object.network.discal;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.joda.time.Interval;
@@ -41,9 +40,9 @@ public class NetworkInfo {
 
 
     public Mono<Void> update() {
-        return DatabaseManager.getCalendarCount()
+        return DatabaseManager.INSTANCE.getCalendarCount()
             .doOnNext(i -> this.calCount = i)
-            .then(DatabaseManager.getAnnouncementCount())
+            .then(DatabaseManager.INSTANCE.getAnnouncementCount())
             .doOnNext(i -> this.announcementCount = i)
             .then();
     }
@@ -125,7 +124,10 @@ public class NetworkInfo {
     }
 
     public int getExpectedClientCount() {
-        return Integer.parseInt(BotSettings.SHARD_COUNT.get());
+        if (!clients.isEmpty())
+            return clients.get(0).getExpectedClientCount();
+        else
+            return -1;
     }
 
     public int getCalendarCount() {

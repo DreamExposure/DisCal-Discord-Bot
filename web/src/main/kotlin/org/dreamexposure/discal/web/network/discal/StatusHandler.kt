@@ -19,7 +19,7 @@ object StatusHandler {
             val body = RequestBody.create(GlobalConst.JSON, "")
 
             val request = Request.Builder()
-                    .url("${BotSettings.API_URL_INTERNAL.get()}/v2/status/get")
+                    .url("${BotSettings.API_URL.get()}/v2/status/get")
                     .post(body)
                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                     .header("Content-Type", "application/json")

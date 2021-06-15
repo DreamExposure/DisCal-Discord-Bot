@@ -36,7 +36,7 @@ public class EventWrapper {
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
-                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                        return DatabaseManager.INSTANCE.getCalendar(data.getGuildId(), data.getCalendarNumber())
                             .flatMap(cd -> createEvent(cd, event));
                     } else {
                         return Mono.empty();
@@ -69,7 +69,7 @@ public class EventWrapper {
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
-                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                        return DatabaseManager.INSTANCE.getCalendar(data.getGuildId(), data.getCalendarNumber())
                             .flatMap(cd -> patchEvent(cd, event));
                     } else {
                         return Mono.empty();
@@ -101,7 +101,7 @@ public class EventWrapper {
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
-                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                        return DatabaseManager.INSTANCE.getCalendar(data.getGuildId(), data.getCalendarNumber())
                             .flatMap(cd -> updateEvent(cd, event));
                     } else {
                         return Mono.empty();
@@ -213,7 +213,7 @@ public class EventWrapper {
 
                 return correctAssignedCredentialId(data).flatMap(success -> {
                     if (success) {
-                        return DatabaseManager.getCalendar(data.getGuildId(), data.getCalendarNumber())
+                        return DatabaseManager.INSTANCE.getCalendar(data.getGuildId(), data.getCalendarNumber())
                             .flatMap(cd -> deleteEvent(cd, id));
                     } else {
                         return Mono.just(false);
@@ -263,7 +263,7 @@ public class EventWrapper {
 
 
                 LogFeed.log(LogObject.forDebug("Corrected credentials issue! Yay!", "Guild ID: " + data.getGuildId()));
-                return DatabaseManager.updateCalendar(corrected);
+                return DatabaseManager.INSTANCE.updateCalendar(corrected);
             }).any(bool -> bool);
     }
 }

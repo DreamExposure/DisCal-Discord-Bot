@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.client.event;
 
 import com.google.api.services.calendar.model.Event;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.EventMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.crypto.KeyGenerator;
@@ -13,14 +14,11 @@ import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -45,7 +43,7 @@ public class EventCreator {
     //Functional
     public Mono<PreEvent> init(final MessageCreateEvent e, final GuildSettings settings) {
         if (!this.hasPreEvent(settings.getGuildID())) {
-            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+            return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
                     final PreEvent event = new PreEvent(settings.getGuildID(), calData.getCalendarNumber());
                     this.events.add(event);
@@ -65,7 +63,7 @@ public class EventCreator {
 
     public Mono<PreEvent> init(final MessageCreateEvent e, final GuildSettings settings, final String summary) {
         if (!this.hasPreEvent(settings.getGuildID())) {
-            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+            return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> {
                     final PreEvent event = new PreEvent(settings.getGuildID(), calData.getCalendarNumber());
                     event.setSummary(summary);
@@ -88,7 +86,7 @@ public class EventCreator {
     //Copy event
     public Mono<PreEvent> init(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
         if (!this.hasPreEvent(settings.getGuildID())) {
-            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+            return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
                     .flatMap(toCopy -> PreEvent.copy(settings.getGuildID(), toCopy, calData))
                     .flatMap(event -> {
@@ -109,7 +107,7 @@ public class EventCreator {
 
     public Mono<PreEvent> edit(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
         if (!this.hasPreEvent(settings.getGuildID())) {
-            return DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
+            return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
                 .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
                     .flatMap(toEdit -> PreEvent.copy(settings.getGuildID(), toEdit, calData))
                     .flatMap(event -> {
@@ -138,7 +136,7 @@ public class EventCreator {
         return Mono.justOrEmpty(this.getPreEvent(settings.getGuildID()))
             .filter(PreEvent::hasRequiredValues)
             .flatMap(pre ->
-                DatabaseManager.getCalendar(settings.getGuildID(), 1) //TODO: Add multi-cal support
+                DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: Add multi-cal support
                     .flatMap(calData -> {
                         final Event event = new Event();
                         event.setSummary(pre.getSummary());
@@ -170,7 +168,7 @@ public class EventCreator {
 
                                     return Mono.just(eventData)
                                         .filter(EventData::shouldBeSaved)
-                                        .flatMap(DatabaseManager::updateEventData)
+                                        .flatMap(DatabaseManager.INSTANCE::updateEventData)
                                         .thenReturn(response);
                                 }).defaultIfEmpty(new EventCreatorResponse(false, null,
                                     pre.getCreatorMessage(), false));
@@ -188,7 +186,7 @@ public class EventCreator {
 
                                     return Mono.just(eventData)
                                         .filter(EventData::shouldBeSaved)
-                                        .flatMap(DatabaseManager::updateEventData)
+                                        .flatMap(DatabaseManager.INSTANCE::updateEventData)
                                         .thenReturn(response);
                                 }).defaultIfEmpty(new EventCreatorResponse(false, null,
                                     pre.getCreatorMessage(), true));

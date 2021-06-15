@@ -37,7 +37,6 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>,
     }
 
     override fun customize(factory: ConfigurableWebServerFactory?) {
-        factory?.setPort(BotSettings.PORT.get().toInt())
         factory?.addErrorPages(
                 ErrorPage(HttpStatus.BAD_REQUEST, "/400"),
                 ErrorPage(HttpStatus.NOT_FOUND, "/404"),

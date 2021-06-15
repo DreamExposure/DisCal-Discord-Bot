@@ -1,30 +1,24 @@
 package org.dreamexposure.discal.client.module.command;
 
-import org.dreamexposure.discal.client.DisCalClient;
-import org.dreamexposure.discal.client.message.Messages;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.object.event.RsvpData;
-import org.dreamexposure.discal.core.utils.EventUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.RoleUtils;
-import org.dreamexposure.discal.core.utils.TimeUtils;
-import org.dreamexposure.discal.core.utils.UserUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
+import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.client.message.Messages;
+import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.GuildSettings;
+import org.dreamexposure.discal.core.object.command.CommandInfo;
+import org.dreamexposure.discal.core.object.event.RsvpData;
+import org.dreamexposure.discal.core.utils.*;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 8/31/17.
@@ -143,11 +137,11 @@ public class RsvpCommand implements Command {
                             if (exists) {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .filter(data -> data.hasRoom(mem.getId().asString()))
                                             .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .flatMap(data -> data.addGoingOnTime(mem).thenReturn(data))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.going.success", settings), embed, event))
@@ -180,11 +174,11 @@ public class RsvpCommand implements Command {
                             if (exists) {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .filter(data -> data.hasRoom(mem.getId().asString()))
                                             .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .flatMap(data -> data.addGoingLate(mem).thenReturn(data))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.late.success", settings), embed, event))
@@ -217,10 +211,10 @@ public class RsvpCommand implements Command {
                             if (exists) {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .doOnNext(data -> data.getNotGoing().add(mem.getId().asString()))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.not.success", settings), embed, event))
@@ -251,9 +245,9 @@ public class RsvpCommand implements Command {
                             if (exists) {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.remove.success", settings), embed, event))
@@ -284,10 +278,10 @@ public class RsvpCommand implements Command {
                             if (exists) {
                                 return TimeUtils.isInPast(eventId, settings).flatMap(inPast -> {
                                     if (!inPast) {
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .flatMap(data -> data.removeCompletely(mem).thenReturn(data))
                                             .doOnNext(data -> data.getUndecided().add(mem.getId().asString()))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage(
                                                     Messages.getMessage("RSVP.unsure.success", settings), embed, event))
@@ -321,9 +315,9 @@ public class RsvpCommand implements Command {
                                     //Okay, finally, we can change the limit
                                     try {
                                         int newLimit = Integer.parseInt(args[2]);
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .doOnNext(data -> data.setLimit(newLimit))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data)
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data)
                                                 .then(this.getRsvpEmbed(data, settings))
                                                 .flatMap(embed -> Messages.sendMessage("RSVP Limit changed", embed, event))
                                             );
@@ -359,16 +353,16 @@ public class RsvpCommand implements Command {
                                 if (!inPast) {
                                     //Okay, finally, we can change the role
                                     if ("none".equalsIgnoreCase(args[2])) { //Remove RSVP role...
-                                        return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .flatMap(data -> data.clearRole(event).thenReturn(data))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data).thenReturn(data))
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data).thenReturn(data))
                                             .flatMap(embed -> Messages.sendMessage("Role removed from RSVP", event));
                                     }
 
                                     return RoleUtils.getRole(args[2], event.getMessage())
-                                        .flatMap(role -> DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                                        .flatMap(role -> DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                             .flatMap(data -> data.setRole(role).thenReturn(data))
-                                            .flatMap(data -> DatabaseManager.updateRsvpData(data).thenReturn(data))
+                                            .flatMap(data -> DatabaseManager.INSTANCE.updateRsvpData(data).thenReturn(data))
                                             .flatMap(data -> this.getRsvpEmbed(data, settings))
                                             .flatMap(embed -> Messages.sendMessage("Role added to RSVP", embed, event)))
                                         .switchIfEmpty(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole" +
@@ -397,7 +391,7 @@ public class RsvpCommand implements Command {
                 return Mono.just(args[1]).flatMap(eventId -> EventUtils.eventExists(settings, eventId)
                     .flatMap(exists -> {
                         if (exists) {
-                            return DatabaseManager.getRsvpData(settings.getGuildID(), eventId)
+                            return DatabaseManager.INSTANCE.getRsvpData(settings.getGuildID(), eventId)
                                 .flatMap(data -> this.getRsvpEmbed(data, settings))
                                 .flatMap(embed -> Messages.sendMessage(embed, event));
                         } else {

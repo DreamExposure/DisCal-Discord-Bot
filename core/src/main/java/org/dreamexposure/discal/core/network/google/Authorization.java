@@ -76,7 +76,7 @@ public class Authorization {
 
                 //Update Db data.
                 calData.setEncryptedAccessToken(encryption.encrypt(autoRefreshResponse.getString("access_token")));
-                DatabaseManager.updateCalendar(calData).subscribe();
+                DatabaseManager.INSTANCE.updateCalendar(calData).subscribe();
 
                 //Okay, we can return the access token to be used when this method is called.
                 return autoRefreshResponse.getString("access_token");

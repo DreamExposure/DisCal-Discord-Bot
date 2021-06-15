@@ -9,11 +9,11 @@ import reactor.core.publisher.Mono;
 public class ChannelDeleteListener {
     public static Mono<Void> handle(final TextChannelDeleteEvent event) {
         //Check if deleted channel is discal channel...
-        return DatabaseManager.getSettings(event.getChannel().getGuildId())
+        return DatabaseManager.INSTANCE.getSettings(event.getChannel().getGuildId())
             .filter(settings -> !"all".equalsIgnoreCase(settings.getDiscalChannel()))
             .filter(settings -> event.getChannel().getId().equals(Snowflake.of(settings.getDiscalChannel())))
             .doOnNext(settings -> settings.setDiscalChannel("all"))
-            .flatMap(DatabaseManager::updateSettings)
+            .flatMap(DatabaseManager.INSTANCE::updateSettings)
             .then();
     }
 }

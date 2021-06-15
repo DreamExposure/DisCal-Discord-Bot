@@ -1,5 +1,8 @@
 package org.dreamexposure.discal.client.service;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -14,10 +17,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 
 /**
  * @author NovaFox161
@@ -57,7 +56,7 @@ public class KeepAliveHandler {
 
                     final RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
                     final Request request = new Request.Builder()
-                        .url(BotSettings.API_URL_INTERNAL.get() + "/v2/status/keep-alive")
+                        .url(BotSettings.API_URL.get() + "/v2/status/keep-alive")
                         .post(body)
                         .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                         .header("Content-Type", "application/json")

@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.client.announcement;
 
+import discord4j.common.util.Snowflake;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -7,14 +9,11 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -57,7 +56,7 @@ public class AnnouncementCreator {
 
     public Mono<Announcement> init(final MessageCreateEvent e, final String announcementId, final GuildSettings settings) {
         if (!this.hasAnnouncement(settings.getGuildID())) {
-            return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
+            return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(toCopy -> {
                     final Announcement a = Announcement.Companion.copy(toCopy, false);
                     this.announcements.add(a);
@@ -77,7 +76,7 @@ public class AnnouncementCreator {
 
     public Mono<Announcement> edit(final MessageCreateEvent e, final String announcementId, final GuildSettings settings) {
         if (!this.hasAnnouncement(settings.getGuildID())) {
-            return DatabaseManager.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
+            return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(edit -> {
                     final Announcement a = Announcement.Companion.copy(edit, true);
                     a.setEditing(true);
@@ -106,7 +105,7 @@ public class AnnouncementCreator {
         return Mono.justOrEmpty(this.getAnnouncement(guildId))
             .filter(Announcement::hasRequiredValues)
             .flatMap(a ->
-                DatabaseManager.updateAnnouncement(a).map(success -> {
+                DatabaseManager.INSTANCE.updateAnnouncement(a).map(success -> {
                     if (success) {
                         this.terminate(guildId);
                         return new AnnouncementCreatorResponse(true, a);

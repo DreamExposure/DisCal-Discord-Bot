@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
@@ -7,15 +9,12 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.rest.util.Image;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 6/16/17.
@@ -75,7 +74,7 @@ public class TimeCommand implements Command {
 
     //TODO: Support multiple calendars
     private Mono<Void> calendarTime(final MessageCreateEvent event, final GuildSettings settings) {
-        return DatabaseManager.getMainCalendar(settings.getGuildID())
+        return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID())
             .flatMap(calData -> CalendarWrapper.getCalendar(calData).flatMap(cal -> {
                 final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
 
