@@ -11,18 +11,19 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
-
 import org.dreamexposure.discal.core.crypto.AESEncryption;
+import org.dreamexposure.discal.core.google.MySQLDataStoreFactory;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,9 +32,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -64,7 +62,7 @@ public class CalendarAuth {
             int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
             for (int i = 0; i < credCount; i++) {
                 credentials.add(new DisCalCredential(i,
-                    new FileDataStoreFactory(getCredentialsFolder(i)),
+                    new MySQLDataStoreFactory(i), //Using custom data store impl.
                     GoogleNetHttpTransport.newTrustedTransport(),
                     JacksonFactory.getDefaultInstance()));
             }
@@ -109,13 +107,12 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    //TODO: This won't need guild settings eventually once we move the data to calendar data like it should be at
     private static Mono<Credential> authorize(CalendarData calData) {
         return Mono.fromCallable(() -> {
             if ("N/a".equalsIgnoreCase(calData.getEncryptedAccessToken()))
                 return null;
 
-            AESEncryption encryption = new AESEncryption(calData);
+            AESEncryption encryption = new AESEncryption(calData.getPrivateKey());
             String accessToken = Authorization.getAuth().requestNewAccessToken(calData, encryption);
 
             Credential credential = new GoogleCredential();
@@ -124,7 +121,6 @@ public class CalendarAuth {
         }).subscribeOn(Schedulers.boundedElastic());
     }
 
-    //TODO: Remove need for guild settings once we move the relevant data to more appropriate classes
     public static Mono<Calendar> getCalendarService(@NotNull CalendarData calData) {
         return Mono.fromCallable(() -> {
             if (calData.getExternal()) {
@@ -156,10 +152,6 @@ public class CalendarAuth {
                 .build());
     }
 
-    private static File getCredentialsFolder(int credentialId) {
-        return new File(BotSettings.CREDENTIAL_FOLDER.get() + "/" + credentialId);
-    }
-
     private static @Nullable DisCalCredential getCredential(int id) {
         for (DisCalCredential c : CREDENTIALS) {
             if (c.getCredentialId() == id) {
@@ -178,13 +170,13 @@ public class CalendarAuth {
     private static class DisCalCredential {
         private final int credentialId;
 
-        private final FileDataStoreFactory storeFactory;
+        private final DataStoreFactory storeFactory;
 
         private final HttpTransport transport;
 
         private final JsonFactory jsonFactory;
 
-        DisCalCredential(int id, FileDataStoreFactory store, HttpTransport transport, JsonFactory jsonFactory) {
+        DisCalCredential(int id, DataStoreFactory store, HttpTransport transport, JsonFactory jsonFactory) {
             this.credentialId = id;
             this.storeFactory = store;
             this.transport = transport;
@@ -195,7 +187,7 @@ public class CalendarAuth {
             return this.credentialId;
         }
 
-        FileDataStoreFactory getStoreFactory() {
+        DataStoreFactory getStoreFactory() {
             return this.storeFactory;
         }
 

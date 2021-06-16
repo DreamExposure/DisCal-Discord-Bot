@@ -183,7 +183,7 @@ public class GoogleExternalAuth {
                         //Save credentials securely.
                         CalendarData calData = CalendarData.emptyExternal(poll.getSettings().getGuildID(), CalendarHost.GOOGLE);
 
-                        final AESEncryption encryption = new AESEncryption(calData);
+                        final AESEncryption encryption = new AESEncryption(calData.getPrivateKey());
 
 
                         calData.setEncryptedAccessToken(encryption.encrypt(aprGrant.getString("access_token")));

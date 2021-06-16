@@ -443,6 +443,43 @@ object DatabaseManager {
         }
     }
 
+    fun updateCredentialData(credNumber: Int, data: String): Mono<Boolean> {
+        return connect { c ->
+            val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
+            Mono.from(c.createStatement(query)
+                    .bind(0, credNumber)
+                    .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ -> row }
+            }.hasElements().flatMap { exists ->
+                if (exists) {
+                    val updateCommand = "UPDATE ${Tables.CREDS.table} SET SECRET = ? WHERE CREDENTIAL_NUMBER = ?"
+
+                    Mono.from(c.createStatement(updateCommand)
+                            .bind(0, data)
+                            .bind(1, credNumber)
+                            .execute()
+                    ).flatMapMany(Result::getRowsUpdated)
+                            .hasElements()
+                            .thenReturn(true)
+                } else {
+                    val insertCommand = "INSERT INTO ${Tables.CREDS.table} (CREDENTIAL_NUMBER, SECRET) VALUES(?, ?)"
+
+                    Mono.from(c.createStatement(insertCommand)
+                            .bind(0, credNumber)
+                            .bind(1, data)
+                            .execute()
+                    ).flatMapMany(Result::getRowsUpdated)
+                            .hasElements()
+                            .thenReturn(true)
+                }.doOnError {
+                    LogFeed.log(LogObject.forException("Failed to credential data", it, this::class.java))
+                }.onErrorResume { Mono.just(false) }
+            }
+
+        }
+    }
+
     fun getAPIAccount(APIKey: String): Mono<UserAPIAccount> {
         return connect { c ->
             val query = "SELECT * FROM ${Tables.API.table} WHERE API_KEY = ?"
@@ -978,6 +1015,27 @@ object DatabaseManager {
         }
     }
 
+    fun getCredentialData(credNumber: Int): Mono<String> {
+        return connect { c ->
+            val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
+
+            Mono.from(c.createStatement(query)
+                    .bind(0, credNumber)
+                    .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+
+                    row.get("SECRET", String::class.java)
+                }
+            }.next().retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LogFeed.log(LogObject.forException("Failed to get enabled ann's by type", it, this::class.java))
+            }.onErrorResume { Mono.empty() }
+        }
+    }
+
     fun deleteAnnouncement(announcementId: String): Mono<Boolean> {
         return connect { c ->
             val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE ANNOUNCEMENT_ID = ?"
@@ -1122,4 +1180,5 @@ private enum class Tables constructor(val table: String) {
     ANNOUNCEMENTS("${BotSettings.SQL_PREFIX.get()}announcements"),
     EVENTS("${BotSettings.SQL_PREFIX.get()}events"),
     RSVP("${BotSettings.SQL_PREFIX.get()}rsvp"),
+    CREDS("${BotSettings.SQL_PREFIX.get()}credentials")
 }
