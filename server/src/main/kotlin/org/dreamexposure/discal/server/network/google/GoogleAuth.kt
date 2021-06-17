@@ -42,8 +42,9 @@ object GoogleAuth {
                 if (response.code() == GlobalConst.STATUS_SUCCESS) {
                     val codeResponse = JSONObject(responseBody)
 
-                    println("URL: ${codeResponse.getString("verification_url")}")
-                    println("Code: ${codeResponse.getString("user_code")}")
+                    val url = codeResponse.getString("verification_url")
+                    val code = codeResponse.getString("user_code")
+                    LogFeed.log(LogObject.forDebug("[!GDC!] DisCal Google Cred Auth $credNumber", "$url | $code"))
 
                     val pol = DisCalPoll(credNumber,
                             codeResponse.getInt("interval"),

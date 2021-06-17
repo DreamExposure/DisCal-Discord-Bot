@@ -8,7 +8,6 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
-import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.server.network.google.GoogleAuth
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.novautils.database.DatabaseInfo
@@ -65,26 +64,17 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
             if (args.size > 1 && args[0].equals("-forceNewAuth", true)) {
                 //This will automatically kill this instance once finished
                 GoogleAuth.requestCode(args[1].toInt()).subscribe()
+            }
 
-                //Create dummy thread to keep jvm alive
-                val dummyThread = Thread {
-                    while (true) {
-                        Thread.sleep(GlobalConst.oneMinuteMs)
-                    }
-                }
-                dummyThread.isDaemon = false
-                dummyThread.start()
-            } else {
-                //Start up spring
-                try {
-                    val app = SpringApplication(Application::class.java)
-                    app.setAdditionalProfiles(BotSettings.PROFILE.get())
-                    app.run(*args)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
-                    exitProcess(4)
-                }
+            //Start up spring
+            try {
+                val app = SpringApplication(Application::class.java)
+                app.setAdditionalProfiles(BotSettings.PROFILE.get())
+                app.run(*args)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
+                exitProcess(4)
             }
         }
     }
