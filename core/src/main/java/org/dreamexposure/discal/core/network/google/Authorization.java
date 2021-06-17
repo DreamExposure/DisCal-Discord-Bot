@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
+import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
 import org.dreamexposure.discal.core.utils.GlobalConst;
@@ -22,6 +23,9 @@ import okhttp3.Response;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+
+//TODO: Rewrite this to be reactive
+//TODO: Start storing key expiry so we don't refresh all the time!!!
 @SuppressWarnings("ConstantConditions")
 public class Authorization {
     private static Authorization instance;
@@ -53,7 +57,6 @@ public class Authorization {
     }
 
 
-    //TODO: Rewrite this to be reactive
     public String requestNewAccessToken(CalendarData calData, AESEncryption encryption) {
         try {
             RequestBody body = new FormBody.Builder()
@@ -106,6 +109,62 @@ public class Authorization {
             //Error occurred, lets just log it and return null.
             LogFeed.log(LogObject
                 .forException("Failed to request new access token.", e, this.getClass()));
+            return null;
+        }
+    }
+
+    public String requestNewAccessToken(DisCalGoogleCredential credential) {
+        try {
+            RequestBody body = new FormBody.Builder()
+                .addEncoded("client_id", this.clientData.getClientId())
+                .addEncoded("client_secret", this.clientData.getClientSecret())
+                .addEncoded("refresh_token", credential.getRefreshToken())
+                .addEncoded("grant_type", "refresh_token")
+                .build();
+
+            Request httpRequest = new okhttp3.Request.Builder()
+                .url("https://www.googleapis.com/oauth2/v4/token")
+                .post(body)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .build();
+
+            Response httpResponse = this.client.newCall(httpRequest).execute();
+
+            if (httpResponse.code() == GlobalConst.STATUS_SUCCESS) {
+                JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
+
+                //Update Db data.
+                credential.setAccessToken(autoRefreshResponse.getString("access_token"));
+                DatabaseManager.INSTANCE.updateCredentialData(credential.getCredentialData()).subscribe();
+
+                //Okay, we can return the access token to be used when this method is called.
+                return autoRefreshResponse.getString("access_token");
+            } else if (httpResponse.code() == GlobalConst.STATUS_BAD_REQUEST) {
+                JSONObject errorBody = new JSONObject(httpResponse.body().string());
+
+                if ("invalid_grant".equalsIgnoreCase(errorBody.getString("error"))) {
+                    // We revoked access to this account. Is this on purpose?
+                    LogFeed.log(LogObject.forDebug("[!DGC!] GOOGLE CALENDAR CREDENTIAL REFRESH FAILURE",
+                        "CredId: " + credential.getCredentialData().getCredentialNumber()));
+                } else {
+                    LogFeed.log(LogObject.forDebug("[!DGC!] Error requesting new access token.",
+                        "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+                            " | " + errorBody));
+                }
+
+                return null;
+            } else {
+                //Failed to get OK. Send debug info.
+                LogFeed.log(LogObject.forDebug("[!DGC!] Error requesting new access token.",
+                    "Status code: " + httpResponse.code() + " | " + httpResponse.message() +
+                        " | " + httpResponse.body().string()));
+                return null;
+            }
+
+        } catch (Exception e) {
+            //Error occurred, lets just log it and return null.
+            LogFeed.log(LogObject
+                .forException("[!DGC!] Failed to request new access token.", e, this.getClass()));
             return null;
         }
     }

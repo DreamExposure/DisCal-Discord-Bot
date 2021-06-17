@@ -4,11 +4,11 @@ import com.zaxxer.hikari.HikariDataSource
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
-import org.dreamexposure.discal.core.calendar.CalendarAuth
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
+import org.dreamexposure.discal.server.network.google.GoogleAuth
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.novautils.database.DatabaseInfo
 import org.dreamexposure.novautils.database.DatabaseSettings
@@ -54,29 +54,27 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
             p.load(FileReader("settings.properties"))
             BotSettings.init(p)
 
-            //Handle generating new google auth credentials for discal accounts
-            if (args.size > 1 && args[0].equals("-forceNewAuth", true)) {
-                CalendarAuth.getCalendarService(args[1].toInt()).block() //Block until auth completes
-
-                //Kill the running instance as this is only meant for generating new credentials, IllegalState
-                exitProcess(100)
-            }
-
             //Handle database migrations
             handleMigrations(args.isNotEmpty() && args[0].equals("--repair", true))
 
             //Start Google Authorization daemon
             Authorization.getAuth().init()
 
-            //Start up spring
-            try {
-                val app = SpringApplication(Application::class.java)
-                app.setAdditionalProfiles(BotSettings.PROFILE.get())
-                app.run(*args)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
-                exitProcess(4)
+            //Handle generating new google auth credentials for discal accounts
+            if (args.size > 1 && args[0].equals("-forceNewAuth", true)) {
+                //This will automatically kill this instance once finished
+                GoogleAuth.requestCode(args[1].toInt()).subscribe()
+            } else {
+                //Start up spring
+                try {
+                    val app = SpringApplication(Application::class.java)
+                    app.setAdditionalProfiles(BotSettings.PROFILE.get())
+                    app.run(*args)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
+                    exitProcess(4)
+                }
             }
         }
     }

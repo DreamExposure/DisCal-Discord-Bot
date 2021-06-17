@@ -16,6 +16,7 @@ import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.RsvpData
+import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
@@ -443,37 +444,43 @@ object DatabaseManager {
         }
     }
 
-    fun updateCredentialData(credNumber: Int, data: String): Mono<Boolean> {
+    fun updateCredentialData(credData: GoogleCredentialData): Mono<Boolean> {
         return connect { c ->
             val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
             Mono.from(c.createStatement(query)
-                    .bind(0, credNumber)
+                    .bind(0, credData.credentialNumber)
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
                 if (exists) {
-                    val updateCommand = "UPDATE ${Tables.CREDS.table} SET SECRET = ? WHERE CREDENTIAL_NUMBER = ?"
+                    val updateCommand = """UPDATE ${Tables.CREDS.table} SET
+                        REFRESH_TOKEN = ?, ACCESS_TOKEN = ?
+                        WHERE CREDENTIAL_NUMBER = ?""".trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, data)
-                            .bind(1, credNumber)
+                            .bind(0, credData.encryptedRefreshToken)
+                            .bind(1, credData.encryptedAccessToken)
+                            .bind(2, credData.credentialNumber)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
                             .thenReturn(true)
                 } else {
-                    val insertCommand = "INSERT INTO ${Tables.CREDS.table} (CREDENTIAL_NUMBER, SECRET) VALUES(?, ?)"
+                    val insertCommand = """INSERT INTO ${Tables.CREDS.table}
+                        |(CREDENTIAL_NUMBER, REFRESH_TOKEN, ACCESS_TOKEN)
+                        |VALUES(?, ?, ?)""".trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, credNumber)
-                            .bind(1, data)
+                            .bind(0, credData.credentialNumber)
+                            .bind(1, credData.encryptedRefreshToken)
+                            .bind(2, credData.encryptedAccessToken)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
                             .thenReturn(true)
                 }.doOnError {
-                    LogFeed.log(LogObject.forException("Failed to credential data", it, this::class.java))
+                    LogFeed.log(LogObject.forException("Failed to update credential data", it, this::class.java))
                 }.onErrorResume { Mono.just(false) }
             }
 
@@ -1015,7 +1022,7 @@ object DatabaseManager {
         }
     }
 
-    fun getCredentialData(credNumber: Int): Mono<String> {
+    fun getCredentialData(credNumber: Int): Mono<GoogleCredentialData> {
         return connect { c ->
             val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
 
@@ -1024,8 +1031,10 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
+                    val refresh = row["REFRESH_TOKEN", String::class.java]
+                    val access = row["ACCESS_TOKEN", String::class.java]
 
-                    row.get("SECRET", String::class.java)
+                    GoogleCredentialData(credNumber, refresh, access)
                 }
             }.next().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)

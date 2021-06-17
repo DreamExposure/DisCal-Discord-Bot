@@ -30,7 +30,6 @@ import org.dreamexposure.discal.client.module.command.*
 import org.dreamexposure.discal.client.service.KeepAliveHandler
 import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.calendar.CalendarAuth
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
@@ -59,14 +58,6 @@ class DisCalClient {
             val p = Properties()
             p.load(FileReader("settings.properties"))
             BotSettings.init(p)
-
-            //Handle generating new google auth credentials for discal accounts
-            if (args.size > 1 && args[0].equals("-forceNewAuth", true)) {
-                CalendarAuth.getCalendarService(args[1].toInt()).block() //Block until auth completes
-
-                //Kill the running instance as this is only meant for generating new credentials, IllegalState
-                exitProcess(100)
-            }
 
             ///Start google authorization daemon
             Authorization.getAuth().init()

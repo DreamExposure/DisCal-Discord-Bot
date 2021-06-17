@@ -2,10 +2,9 @@ package org.dreamexposure.discal.client.network.google;
 
 import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException;
 import org.dreamexposure.discal.core.object.network.google.Poll;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -32,7 +31,7 @@ public class PollManager {
         Mono.defer(() -> {
             poll.setRemainingSeconds(poll.getRemainingSeconds() - poll.getInterval());
             return GoogleExternalAuth.getAuth().pollForAuth(poll);
-        }).then(Mono.defer(() -> Mono.delay(Duration.ofSeconds(poll.getInterval()))))
+        }).then(Mono.delay(Duration.ofSeconds(poll.getInterval())))
             .repeat()
             .then()
             .onErrorResume(GoogleAuthCancelException.class, e -> Mono.empty())
