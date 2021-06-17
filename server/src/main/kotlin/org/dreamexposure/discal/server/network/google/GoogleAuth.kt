@@ -68,7 +68,7 @@ object GoogleAuth {
                     .addEncoded("client_id", Authorization.getAuth().clientData.clientId)
                     .addEncoded("client_secret", Authorization.getAuth().clientData.clientSecret)
                     .addEncoded("code", poll.deviceCode)
-                    .addEncoded("grant_type", "https://oauth.net/grant_type/device/1.0")
+                    .addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
                     .build()
 
             val httpRequest = Request.Builder()
