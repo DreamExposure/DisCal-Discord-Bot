@@ -100,19 +100,6 @@
 
         <plugins>
             <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>${maven.plugin.jib.version}</version>
-                <configuration>
-                    <to>
-                        <image>rg.nl-ams.scw.cloud/dreamexposure/discal-server:${revision}</image>
-                    </to>
-                    <container>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                    </container>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven.plugin.shade.version}</version>

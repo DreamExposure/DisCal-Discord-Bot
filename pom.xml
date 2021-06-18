@@ -51,7 +51,10 @@
         <maven.test.skip>true</maven.test.skip>
 
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
-        <maven.plugin.jib.version>3.0.0</maven.plugin.jib.version>
+
+        <!--Jib stuff-->
+        <jib.plugin.version>3.1.1</jib.plugin.version>
+        <image>rg.nl-ams.scw.cloud/dreamexposure/discal-${project.artifactId}:${revision}</image>
     </properties>
 
     <parent>
@@ -243,16 +246,22 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.cloud.tools</groupId>
+                    <artifactId>jib-maven-plugin</artifactId>
+                    <version>${jib.plugin.version}</version>
+                    <configuration>
+                        <container>
+                            <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        </container>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <inherited>false</inherited>
-            </plugin>
             <!--Kotlin plugin-->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
