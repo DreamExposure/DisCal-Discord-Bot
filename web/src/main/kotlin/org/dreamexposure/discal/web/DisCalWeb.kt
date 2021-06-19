@@ -7,13 +7,12 @@ import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
-@Component
+//@Component
 class DisCalWeb {
     companion object {
         @JvmStatic
