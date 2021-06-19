@@ -17,7 +17,7 @@ import org.flywaydb.core.api.exception.FlywayValidateException
 import org.flywaydb.core.internal.command.DbMigrate
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
-import org.springframework.boot.SpringApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.system.ApplicationPid
 import org.springframework.stereotype.Component
 import java.io.FileReader
@@ -68,9 +68,11 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
 
             //Start up spring
             try {
-                val app = SpringApplication(Application::class.java)
-                app.setAdditionalProfiles(BotSettings.PROFILE.get())
-                app.run(*args)
+                SpringApplicationBuilder(Application::class.java)
+                        .properties("spring.config.name:server")
+                        .profiles(BotSettings.PROFILE.get())
+                        .build()
+                        .run(*args)
             } catch (e: Exception) {
                 e.printStackTrace()
                 LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))

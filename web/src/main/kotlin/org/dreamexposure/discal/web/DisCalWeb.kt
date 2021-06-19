@@ -6,10 +6,10 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
-import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.util.*
@@ -33,9 +33,11 @@ class DisCalWeb {
             //Start up spring
             try {
                 DiscordAccountHandler.init()
-                val app = SpringApplication(Application::class.java)
-                app.setAdditionalProfiles(BotSettings.PROFILE.get())
-                app.run(*args)
+                SpringApplicationBuilder(Application::class.java)
+                        .properties("spring.config.name:web")
+                        .profiles(BotSettings.PROFILE.get())
+                        .build()
+                        .run(*args)
             } catch (e: Exception) {
                 e.printStackTrace()
                 LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb::class.java))

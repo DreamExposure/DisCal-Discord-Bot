@@ -34,7 +34,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
-import org.springframework.boot.SpringApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -85,9 +85,11 @@ class DisCalClient {
 
             //Start Spring
             try {
-                val app = SpringApplication(Application::class.java)
-                app.setAdditionalProfiles(BotSettings.PROFILE.get())
-                app.run(*args)
+                SpringApplicationBuilder(Application::class.java)
+                        .properties("spring.config.name:client")
+                        .profiles(BotSettings.PROFILE.get())
+                        .build()
+                        .run(*args)
             } catch (e: Exception) {
                 e.printStackTrace()
                 LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! at the Client'", e, DisCalClient::class.java))
