@@ -6,9 +6,6 @@ import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
-import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import java.io.FileReader
@@ -17,7 +14,6 @@ import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
 @Component
-@SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
 class DisCalWeb {
     companion object {
         @JvmStatic
