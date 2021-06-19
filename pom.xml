@@ -372,11 +372,12 @@
             <id>jenkinsBuildNumber</id>
             <activation>
                 <property>
-                    <name>JENKINS_BUILD_NUMBER</name>
+                    <name>env.BUILD_NUMBER</name>
                 </property>
             </activation>
             <properties>
-                <discal.version.name>${revision}.b${JENKINS_BUILD_NUMBER}</discal.version.name>
+                <!--suppress UnresolvedMavenProperty -->
+                <discal.version.name>${revision}.b${env.BUILD_NUMBER}</discal.version.name>
             </properties>
         </profile>
 
@@ -384,12 +385,40 @@
             <id>developmentBuildNumber</id>
             <activation>
                 <property>
-                    <name>!JENKINS_BUILD_NUMBER</name>
+                    <name>!env.BUILD_NUMBER</name>
                 </property>
             </activation>
             <properties>
                 <discal.version.name>${revision}.d${maven.build.timestamp}</discal.version.name>
             </properties>
+        </profile>
+
+        <profile>
+            <id>jibAuth</id>
+            <activation>
+                <property>
+                    <name>env.SCW_USER</name>
+                </property>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.google.cloud.tools</groupId>
+                            <artifactId>jib-maven-plugin</artifactId>
+                            <version>${jib.plugin.version}</version>
+                            <configuration>
+                                <to>
+                                    <auth>
+                                        <username>${env.SCW_USER}</username>
+                                        <password>${env.SCW_SECRET}</password>
+                                    </auth>
+                                </to>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
         </profile>
     </profiles>
 </project>
