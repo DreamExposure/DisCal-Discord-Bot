@@ -1,8 +1,8 @@
 # DisCal Discord Bot
 
 [![Discord](https://img.shields.io/discord/375357265198317579?label=DreamExposure&style=flat-square)](https://discord.gg/2TFqyuy)
-[![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.dreamexposure.org%2Fview%2FDiscord-Bots%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/)
-[![Jenkins tests](https://img.shields.io/jenkins/tests?compact_message&jobUrl=https%3A%2F%2Fjenkins.dreamexposure.org%2Fview%2FDiscord-Bots%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/tests)
+[![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.dreamexposure.org%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/)
+[![Jenkins tests](https://img.shields.io/jenkins/tests?compact_message&jobUrl=https%3A%2F%2Fentrapta.dreamexposure.org%2Fjob%2FDisCal%2F&style=flat-square)](https://jenkins.dreamexposure.org/job/DisCal/tests)
 
 DisCal is a discord bot that connects Discord and Google Calendar as seamlessly as possible with a wide feature set for calendar management and information.
 
@@ -21,7 +21,7 @@ DisCal is a discord bot that connects Discord and Google Calendar as seamlessly 
 Patrons and supporters on the $5/month plans get access to work in progress and exclusive features.
 
 * External Calendars
-    - Use an already existing calendar that is on your google account with DisCal
+    - Use an already existing calendar that is on your Google account with DisCal
 * Web Dashboard (WIP)
     - Use the web dashboard to manage the bot, calendar, and more without the need for commands.
     - Still very early in development
@@ -49,7 +49,6 @@ Patrons and supporters on the $5/month plans get access to work in progress and 
 
 * [Website](https://www.discalbot.com)
 * [Discord](https://discord.gg/2TFqyuy)
-* [Trello](https://trello.com/b/2Xx3Galz)
 
 # Technologies
 
@@ -97,7 +96,7 @@ Follow the format provided in the [TEMPLATE LANGUAGE JSON File.](client/src/main
 
 ### Translation Guidelines
 
-We very much appreciate all of the translations we can get, but please follow the guidelines below so that we may ensure that we have high quality translations.
+We very much appreciate all the translations we can get, but please follow the guidelines below so that we may ensure that we have high quality translations.
 
 1. Please be fluent in the language you are translating to. We will ***NOT*** accept any translations that are made through Google Translate as it cannot tell statement context and we want to maintain high standards for the bot.
 2. The general JSON format is `"key": "value"`, which means that the "key" must remain the same in all files, so ***DO NOT*** change the key, only the values.
