@@ -26,7 +26,7 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
         factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
     }
 
-    @Bean
+    @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()
         rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
@@ -37,7 +37,7 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
         return LettuceConnectionFactory(rsc)
     }
 
-    @Bean
+    @Bean(name = ["mysqlDatasource"])
     fun mysqlConnectionFactory(): ConnectionFactory {
         return ConnectionFactories.get(ConnectionFactoryOptions.builder()
                 .option(ConnectionFactoryOptions.DRIVER, "pool")

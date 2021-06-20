@@ -44,12 +44,13 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>,
         )
     }
 
-    @Bean
+    @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()
         rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
         rsc.port = BotSettings.REDIS_PORT.get().toInt()
-        rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
+        if (BotSettings.REDIS_USE_PASSWORD.get().equals("true", true))
+            rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
 
         return LettuceConnectionFactory(rsc)
     }

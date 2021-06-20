@@ -30,7 +30,7 @@ class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<Configurable
                 .allowedOrigins("*")
     }
 
-    @Bean
+    @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()
         rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
@@ -40,7 +40,8 @@ class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<Configurable
 
         return LettuceConnectionFactory(rsc)
     }
-    @Bean
+
+    @Bean(name = ["mysqlDatasource"])
     fun mysqlConnectionFactory(): ConnectionFactory {
         return ConnectionFactories.get(ConnectionFactoryOptions.builder()
                 .option(ConnectionFactoryOptions.DRIVER, "pool")
