@@ -11,11 +11,11 @@
         <kotlin.version>1.5.10</kotlin.version>
         <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
 
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.testTarget>1.8</maven.compiler.testTarget>
-        <maven.compiler.testSource>1.8</maven.compiler.testSource>
-        <kotlin.compiler.jvmTarget>1.8</kotlin.compiler.jvmTarget>
+        <maven.compiler.target>16</maven.compiler.target>
+        <maven.compiler.source>16</maven.compiler.source>
+        <maven.compiler.testTarget>16</maven.compiler.testTarget>
+        <maven.compiler.testSource>16</maven.compiler.testSource>
+        <kotlin.compiler.jvmTarget>16</kotlin.compiler.jvmTarget>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -50,7 +50,8 @@
         <maven.build.timestamp.format>yyyy.MM.dd.HH.mm</maven.build.timestamp.format>
         <maven.test.skip>true</maven.test.skip>
 
-        <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
+        <!--Disabled due to open bug: https://youtrack.jetbrains.com/issue/KT-45689 -->
+        <kotlin.compiler.incremental>false</kotlin.compiler.incremental>
 
         <!--Jib stuff-->
         <jib.plugin.version>3.1.1</jib.plugin.version>
