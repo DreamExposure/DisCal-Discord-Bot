@@ -257,6 +257,9 @@
                         <container>
                             <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                         </container>
+                        <from>
+                            <image>adoptopenjdk:16-jre</image>
+                        </from>
                     </configuration>
                 </plugin>
             </plugins>
