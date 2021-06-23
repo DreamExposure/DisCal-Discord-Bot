@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM adoptopenjdk/openjdk16:alpine-jre
 MAINTAINER DreamExposure
 COPY target/DisCal-Client.jar DisCal-Client.jar
 ENTRYPOINT ["java", "-jar", "/DisCal-Client.jar"]

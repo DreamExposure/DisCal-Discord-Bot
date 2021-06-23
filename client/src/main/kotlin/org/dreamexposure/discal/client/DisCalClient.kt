@@ -86,7 +86,6 @@ class DisCalClient {
             //Start Spring
             try {
                 SpringApplicationBuilder(Application::class.java)
-                        .properties("spring.config.name:client")
                         .profiles(BotSettings.PROFILE.get())
                         .build()
                         .run(*args)

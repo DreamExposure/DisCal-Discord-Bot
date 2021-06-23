@@ -52,10 +52,6 @@
 
         <!--Disabled due to open bug: https://youtrack.jetbrains.com/issue/KT-45689 -->
         <kotlin.compiler.incremental>false</kotlin.compiler.incremental>
-
-        <!--Jib stuff-->
-        <jib.plugin.version>3.1.1</jib.plugin.version>
-        <image>rg.nl-ams.scw.cloud/dreamexposure/discal-${project.artifactId}:${revision}</image>
     </properties>
 
     <parent>
@@ -111,7 +107,6 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
-
 
     <dependencies>
         <!--Kotlin!!!!-->
@@ -247,24 +242,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.google.cloud.tools</groupId>
-                    <artifactId>jib-maven-plugin</artifactId>
-                    <version>${jib.plugin.version}</version>
-                    <configuration>
-                        <container>
-                            <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                        </container>
-                        <from>
-                            <image>adoptopenjdk:16-jre</image>
-                        </from>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
         <plugins>
             <!--Kotlin plugin-->
             <plugin>
@@ -395,34 +372,6 @@
             <properties>
                 <discal.version.name>${revision}.d${maven.build.timestamp}</discal.version.name>
             </properties>
-        </profile>
-
-        <profile>
-            <id>jibAuth</id>
-            <activation>
-                <property>
-                    <name>env.SCW_USER</name>
-                </property>
-            </activation>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>com.google.cloud.tools</groupId>
-                            <artifactId>jib-maven-plugin</artifactId>
-                            <version>${jib.plugin.version}</version>
-                            <configuration>
-                                <to>
-                                    <auth>
-                                        <username>${env.SCW_USER}</username>
-                                        <password>${env.SCW_SECRET}</password>
-                                    </auth>
-                                </to>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
         </profile>
     </profiles>
 </project>

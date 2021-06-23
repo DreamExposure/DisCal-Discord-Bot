@@ -69,7 +69,6 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
             //Start up spring
             try {
                 SpringApplicationBuilder(Application::class.java)
-                        .properties("spring.config.name:server")
                         .profiles(BotSettings.PROFILE.get())
                         .build()
                         .run(*args)

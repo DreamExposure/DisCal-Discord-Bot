@@ -30,7 +30,6 @@ class DisCalWeb {
             try {
                 DiscordAccountHandler.init()
                 SpringApplicationBuilder(Application::class.java)
-                        .properties("spring.config.name:web")
                         .profiles(BotSettings.PROFILE.get())
                         .build()
                         .run(*args)
