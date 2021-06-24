@@ -373,5 +373,36 @@
                 <discal.version.name>${revision}.d${maven.build.timestamp}</discal.version.name>
             </properties>
         </profile>
+
+        <profile>
+            <id>pruneDockerImage-JenkinsOnly</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven.plugin.exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>Prune images</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>podman</executable>
+                                    <commandlineArgs>image prune -a -f</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>
