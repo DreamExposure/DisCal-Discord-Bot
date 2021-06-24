@@ -92,7 +92,8 @@ Do note however, that we are planning on making the translation system much more
 
 ### Translation Instructions
 
-Follow the format provided in the [TEMPLATE LANGUAGE JSON File.](client/src/main/resources/languages/TEMPLATE.json) and submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
+Follow the format provided in the [TEMPLATE LANGUAGE JSON File.](core/src/main/resources/languages/TEMPLATE.json) and 
+submit a new translation by making adding a new JSON file with the naming scheme `LANG_NAME.json` (Where "LANG_NAME" is the name of the language you translated it to).
 
 ### Translation Guidelines
 
