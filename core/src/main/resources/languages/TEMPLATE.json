@@ -1,5 +1,5 @@
 {
-  "Language": "ENGLISH",
+  "Language": "TEMPLATE",
 
   "Creator.Notif.MANAGE_MESSAGES": "DisCal does not have \"Manage Messages\" permissions in this channel! In order to use the the new creators DisCal must have these permissions! (HINT: Restart Creator/Editor after permissions are added!)",
   "Creator.Calendar.Create.Init": "Calendar Creator initialized! Please specify the description with `!calendar description <desc, spaces allowed>`",
