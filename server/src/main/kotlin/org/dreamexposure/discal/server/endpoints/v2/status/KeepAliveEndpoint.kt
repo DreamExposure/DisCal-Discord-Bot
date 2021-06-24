@@ -51,8 +51,6 @@ class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
                         lastKeepAlive = System.currentTimeMillis(),
                         uptime = body.getString("uptime"),
                         memUsed = body.getDouble("memory"),
-                        ipForRestart = body.getString("ip"),
-                        portForRestart = body.getInt("port"),
                         pid = body.getString("pid"),
                 )
 
@@ -72,8 +70,6 @@ class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
                         System.currentTimeMillis(),
                         body.getString("uptime"),
                         body.getDouble("memory"),
-                        body.getString("ip"),
-                        body.getInt("port"),
                         body.getString("pid")
                 )
 

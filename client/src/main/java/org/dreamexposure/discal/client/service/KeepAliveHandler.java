@@ -50,8 +50,6 @@ public class KeepAliveHandler {
 
                     //Network handling data
                     data.put("pid", new ApplicationPid().toString());
-                    data.put("ip", BotSettings.RESTART_IP.get());
-                    data.put("port", Integer.parseInt(BotSettings.RESTART_PORT.get()));
 
                     final OkHttpClient client = new OkHttpClient();
 

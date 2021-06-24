@@ -32,12 +32,6 @@ data class ConnectedClient(
         val memUsed: Double = 0.0,
 
         @Transient
-        val ipForRestart: String = "",
-
-        @Transient
-        val portForRestart: Int = 0,
-
-        @Transient
         val pid: String = ""
 ) {
     fun getLastKeepAliveHumanReadable(): String {

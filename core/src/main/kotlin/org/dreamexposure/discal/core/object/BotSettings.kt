@@ -53,12 +53,6 @@ enum class BotSettings {
 
     BOT_API_TOKEN,
 
-    RESTART_IP,
-    RESTART_PORT,
-    RESTART_SSH_KEY,
-    RESTART_USER,
-    RESTART_CMD,
-
     PROFILE;
 
     private var value: String? = null
