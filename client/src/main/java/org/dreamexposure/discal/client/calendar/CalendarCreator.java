@@ -125,50 +125,53 @@ public class CalendarCreator {
 
                 //Randomly determine what credentials account the calendar will be assigned to.
                 // If creation fails, and the user retries, it will pick another random credential to use.
-                final int credId = new Random().nextInt(CalendarAuth.credentialsCount());
 
-                if (!pre.getEditing()) {
-                    return CalendarWrapper.createCalendar(calendar, credId, settings.getGuildID())
-                        .flatMap(confirmed -> {
-                            final CalendarData data = new CalendarData(
-                                settings.getGuildID(),
-                                1, //TODO: Support multi-calendar
-                                CalendarHost.GOOGLE,
-                                confirmed.getId(),
-                                confirmed.getId(),
-                                credId);
+                return CalendarAuth.credentialsCount().flatMap(credCount -> {
+                    final int credId = new Random().nextInt(credCount);
 
-                            final AclRule rule = new AclRule()
-                                .setScope(new AclRule.Scope().setType("default"))
-                                .setRole("reader");
+                    if (!pre.getEditing()) {
+                        return CalendarWrapper.createCalendar(calendar, credId, settings.getGuildID())
+                            .flatMap(confirmed -> {
+                                final CalendarData data = new CalendarData(
+                                    settings.getGuildID(),
+                                    1, //TODO: Support multi-calendar
+                                    CalendarHost.GOOGLE,
+                                    confirmed.getId(),
+                                    confirmed.getId(),
+                                    credId);
 
-                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true, false,
-                                pre.getCreatorMessage(), confirmed);
+                                final AclRule rule = new AclRule()
+                                    .setScope(new AclRule.Scope().setType("default"))
+                                    .setRole("reader");
 
-                            return Mono.when(
-                                DatabaseManager.INSTANCE.updateCalendar(data),
-                                AclRuleWrapper.insertRule(rule, data)
-                            )
-                                .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
-                                .thenReturn(response);
-                        }).defaultIfEmpty(new CalendarCreatorResponse(false, false, pre.getCreatorMessage(), null));
-                } else {
-                    //Editing calendar...
-                    calendar.setId(pre.getCalendarId());
-                    return CalendarWrapper.updateCalendar(calendar, pre.getCalendarData())
-                        .flatMap(confirmed -> {
-                            final AclRule rule = new AclRule()
-                                .setScope(new AclRule.Scope().setType("default"))
-                                .setRole("reader");
+                                final CalendarCreatorResponse response = new CalendarCreatorResponse(true, false,
+                                    pre.getCreatorMessage(), confirmed);
 
-                            final CalendarCreatorResponse response = new CalendarCreatorResponse(true, true,
-                                pre.getCreatorMessage(), confirmed);
+                                return Mono.when(
+                                    DatabaseManager.INSTANCE.updateCalendar(data),
+                                    AclRuleWrapper.insertRule(rule, data)
+                                )
+                                    .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
+                                    .thenReturn(response);
+                            }).defaultIfEmpty(new CalendarCreatorResponse(false, false, pre.getCreatorMessage(), null));
+                    } else {
+                        //Editing calendar...
+                        calendar.setId(pre.getCalendarId());
+                        return CalendarWrapper.updateCalendar(calendar, pre.getCalendarData())
+                            .flatMap(confirmed -> {
+                                final AclRule rule = new AclRule()
+                                    .setScope(new AclRule.Scope().setType("default"))
+                                    .setRole("reader");
 
-                            return AclRuleWrapper.insertRule(rule, pre.getCalendarData())
-                                .doOnNext(a -> this.terminate(settings.getGuildID()))
-                                .thenReturn(response);
-                        }).defaultIfEmpty(new CalendarCreatorResponse(false, true, pre.getCreatorMessage(), null));
-                }
+                                final CalendarCreatorResponse response = new CalendarCreatorResponse(true, true,
+                                    pre.getCreatorMessage(), confirmed);
+
+                                return AclRuleWrapper.insertRule(rule, pre.getCalendarData())
+                                    .doOnNext(a -> this.terminate(settings.getGuildID()))
+                                    .thenReturn(response);
+                            }).defaultIfEmpty(new CalendarCreatorResponse(false, true, pre.getCreatorMessage(), null));
+                    }
+                });
             }).defaultIfEmpty(new CalendarCreatorResponse(false, false, null, null));
     }
 

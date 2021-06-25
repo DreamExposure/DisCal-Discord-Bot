@@ -37,6 +37,7 @@ public class KeepAliveHandler {
                 try {
                     final JSONObject data = new JSONObject();
                     data.put("index", Application.getShardIndex());
+                    data.put("expected",Application.getShardCount());
 
                     if (DisCalClient.getClient() != null)
                         data.put("guilds", DisCalClient.getClient().getGuilds().count().block());

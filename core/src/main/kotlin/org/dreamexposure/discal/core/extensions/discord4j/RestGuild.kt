@@ -88,36 +88,38 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
 fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
     when (spec.host) {
         CalendarHost.GOOGLE -> {
-            val googleCal = GoogleCalendarModel()
+            return CalendarAuth.credentialsCount().flatMap { credCount ->
+                val googleCal = GoogleCalendarModel()
 
-            googleCal.summary = spec.name
-            spec.description?.let { googleCal.description = it }
-            googleCal.timeZone = spec.timezone
+                googleCal.summary = spec.name
+                spec.description?.let { googleCal.description = it }
+                googleCal.timeZone = spec.timezone
 
-            val credId = Random().nextInt(CalendarAuth.credentialsCount())
+                val credId = Random().nextInt(credCount)
 
-            //Call google to create it
-            return CalendarWrapper.createCalendar(googleCal, credId, this.id)
-                    .timeout(Duration.ofSeconds(30))
-                    .flatMap { confirmed ->
-                        val data = CalendarData(
-                                this.id,
-                                spec.calNumber,
-                                CalendarHost.GOOGLE,
-                                confirmed.id,
-                                confirmed.id,
-                                credId
-                        )
+                //Call google to create it
+                CalendarWrapper.createCalendar(googleCal, credId, this.id)
+                        .timeout(Duration.ofSeconds(30))
+                        .flatMap { confirmed ->
+                            val data = CalendarData(
+                                    this.id,
+                                    spec.calNumber,
+                                    CalendarHost.GOOGLE,
+                                    confirmed.id,
+                                    confirmed.id,
+                                    credId
+                            )
 
-                        val rule = AclRule()
-                                .setScope(AclRule.Scope().setType("default"))
-                                .setRole("reader")
+                            val rule = AclRule()
+                                    .setScope(AclRule.Scope().setType("default"))
+                                    .setRole("reader")
 
-                        return@flatMap Mono.`when`(
-                                DatabaseManager.updateCalendar(data),
-                                AclRuleWrapper.insertRule(rule, data)
-                        ).thenReturn(GoogleCalendar(data, confirmed))
-                    }
+                            Mono.`when`(
+                                    DatabaseManager.updateCalendar(data),
+                                    AclRuleWrapper.insertRule(rule, data)
+                            ).thenReturn(GoogleCalendar(data, confirmed))
+                        }
+            }
         }
     }
 }

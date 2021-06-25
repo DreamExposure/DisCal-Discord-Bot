@@ -19,7 +19,6 @@ import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,20 +34,25 @@ public class AnnouncementThread {
     private final Map<Snowflake, Mono<Calendar>> customServices = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<List<Event>>> allEvents = new ConcurrentHashMap<>();
 
-    private final Map<Integer, Mono<Calendar>> discalServices = new HashMap<>();
+    private final Map<Integer, Mono<Calendar>> discalServices = new ConcurrentHashMap<>();
 
     private final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
 
     public AnnouncementThread(GatewayDiscordClient client) {
         this.client = client;
-
-        for (int i = 0; i < CalendarAuth.credentialsCount(); i++) {
-            this.discalServices.put(i, CalendarAuth.getCalendarService(i).cache());
-        }
     }
 
     public Mono<Void> run() {
-        return this.client.getGuilds()
+        //Get the credentials and cache them
+        Mono<Void> getCredsMono = CalendarAuth.credentialsCount()
+            .flatMapMany(i -> Flux.range(0, i))
+            .map(index -> {
+                this.discalServices.put(index, CalendarAuth.getCalendarService(index).cache());
+                return index;
+            }).then();
+
+        //Actually do announcements
+        Mono<Void> doAnnMono = this.client.getGuilds()
             .flatMap(guild -> DatabaseManager.INSTANCE.getEnabledAnnouncements(guild.getId())
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(a -> {
@@ -81,8 +85,10 @@ public class AnnouncementThread {
                 this.calendars.clear();
                 this.customServices.clear();
                 this.allEvents.clear();
-            })
-            .then();
+            }).then();
+
+        //Finally execute those two chains, in order.
+        return getCredsMono.then(doAnnMono);
     }
 
     //Modifier handling

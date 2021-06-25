@@ -12,13 +12,10 @@ import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -30,27 +27,15 @@ import java.util.function.Function;
 public class CalendarAuth {
     private final static String APPLICATION_NAME = "DisCal";
 
-    private final static List<DisCalGoogleCredential> CREDENTIALS;
+    private final static Flux<DisCalGoogleCredential> CREDENTIALS;
 
     static {
-        try {
-            List<DisCalGoogleCredential> credentials = new ArrayList<>();
-
-            int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
-            for (int i = 0; i < credCount; i++) {
-                DatabaseManager.INSTANCE.getCredentialData(i)
-                    .map(DisCalGoogleCredential::new)
-                    .doOnNext(credentials::add)
-                    .block();
-            }
-
-            CREDENTIALS = Collections.unmodifiableList(credentials);
-
-        } catch (Throwable t) {
-            t.printStackTrace();
-            System.exit(1);
-            throw new RuntimeException(t); //Never reached, makes compiler happy :)
-        }
+        int credCount = Integer.parseInt(BotSettings.CREDENTIALS_COUNT.get());
+        CREDENTIALS = Flux.range(0, credCount)
+            .flatMap(DatabaseManager.INSTANCE::getCredentialData)
+            .map(DisCalGoogleCredential::new)
+            .doOnError(ignored -> System.exit(1))
+            .cache();
     }
 
     /**
@@ -59,17 +44,16 @@ public class CalendarAuth {
      * @return an authorized Credential object.
      */
     private static Mono<Credential> authorize(int credentialId) {
-        return Mono.fromCallable(() -> {
-            DisCalGoogleCredential cred = getCredential(credentialId);
+        return CREDENTIALS.filter(c -> c.getCredentialData().getCredentialNumber() == credentialId)
+            .next().map(cred -> {
+                //Handle refreshing... TODO: Make this more optimized!!..
+                String accessToken = Authorization.getAuth().requestNewAccessToken(cred);
 
-            //Handle refreshing... TODO: Make this more optimized!!..
-            String accessToken = Authorization.getAuth().requestNewAccessToken(cred);
-
-            //Create google's cred and pass it along
-            Credential credential = new GoogleCredential();
-            credential.setAccessToken(accessToken);
-            return credential;
-        }).subscribeOn(Schedulers.boundedElastic());
+                //Create google's cred and pass it along
+                Credential credential = new GoogleCredential();
+                credential.setAccessToken(accessToken);
+                return credential;
+            }).subscribeOn(Schedulers.boundedElastic());
     }
 
     private static Mono<Credential> authorize(CalendarData calData) {
@@ -115,17 +99,14 @@ public class CalendarAuth {
                 .build());
     }
 
-    private static @Nullable DisCalGoogleCredential getCredential(int id) {
-        for (DisCalGoogleCredential c : CREDENTIALS) {
-            if (c.getCredentialData().getCredentialNumber() == id) {
-                return c;
-            }
-        }
-
-        return null;
+    public static Flux<Calendar> getAllDisCalServices() {
+        return credentialsCount()
+            .flatMapMany(count -> Flux.range(0, count))
+            .flatMap(CalendarAuth::getCalendarService);
     }
 
-    public static int credentialsCount() {
-        return CREDENTIALS.size();
+    public static Mono<Integer> credentialsCount() {
+        return CREDENTIALS.count()
+            .map(Long::intValue);
     }
 }
