@@ -53,7 +53,9 @@ public class CalendarAuth {
                 Credential credential = new GoogleCredential();
                 credential.setAccessToken(accessToken);
                 return credential;
-            }).subscribeOn(Schedulers.boundedElastic());
+            })
+            .subscribeOn(Schedulers.boundedElastic())
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     private static Mono<Credential> authorize(CalendarData calData) {
@@ -67,7 +69,9 @@ public class CalendarAuth {
             Credential credential = new GoogleCredential();
             credential.setAccessToken(accessToken);
             return credential;
-        }).subscribeOn(Schedulers.boundedElastic());
+        })
+            .subscribeOn(Schedulers.boundedElastic())
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     public static Mono<Calendar> getCalendarService(@NotNull CalendarData calData) {
@@ -81,28 +85,32 @@ public class CalendarAuth {
             } else {
                 return getCalendarService(calData.getCredentialId());
             }
-        }).flatMap(Function.identity());
+        })
+            .flatMap(Function.identity())
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     public static Mono<Calendar> getCalendarService(int credentialId) {
         return authorize(credentialId).map(cred -> new Calendar
             .Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
             .setApplicationName(APPLICATION_NAME)
-            .build());
+            .build())
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     public static Mono<Calendar> getExternalCalendarService(CalendarData calendarData) {
-        return authorize(calendarData).map(cred ->
-            new Calendar.
-                Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
-                .setApplicationName(APPLICATION_NAME)
-                .build());
+        return authorize(calendarData).map(cred -> new Calendar
+            .Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance(), cred)
+            .setApplicationName(APPLICATION_NAME)
+            .build())
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     public static Flux<Calendar> getAllDisCalServices() {
         return credentialsCount()
             .flatMapMany(count -> Flux.range(0, count))
-            .flatMap(CalendarAuth::getCalendarService);
+            .flatMap(CalendarAuth::getCalendarService)
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
     public static Mono<Integer> credentialsCount() {
