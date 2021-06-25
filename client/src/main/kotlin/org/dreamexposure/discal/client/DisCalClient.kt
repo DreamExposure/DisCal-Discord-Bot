@@ -49,7 +49,7 @@ class DisCalClient {
     companion object {
         @JvmStatic
         @Deprecated("Try to use client that is provided by d4j entities until using DI")
-        lateinit var client: GatewayDiscordClient
+        var client: GatewayDiscordClient? = null
             private set
 
         @JvmStatic
@@ -143,7 +143,7 @@ class DisCalClient {
         TimeManager.getManager().shutdown()
         DatabaseManager.disconnectFromMySQL()
 
-        client.logout().subscribe()
+        client?.logout()?.subscribe()
     }
 }
 

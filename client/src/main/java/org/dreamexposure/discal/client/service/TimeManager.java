@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.client.service;
 
-import org.dreamexposure.discal.client.module.misc.StatusChanger;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 
 import java.util.ArrayList;
@@ -36,14 +35,6 @@ public class TimeManager {
      * Initializes the TimeManager and schedules the appropriate Timers.
      */
     public void init() {
-        final Timer timer = new Timer(true);
-        timer.schedule(new StatusChanger(), 10 * 1000, 10 * 1000);
-        this.timers.add(timer);
-
-        //Timer at = new Timer(true);
-        //at.schedule(new AnnouncementTask(), 5 * 1000 * 60, 5 * 1000 * 60);
-        //timers.add(at);
-
         final Timer cc = new Timer(true);
         cc.schedule(new CreatorCleaner(), GlobalConst.oneHourMs, GlobalConst.oneHourMs);
         this.timers.add(cc);
