@@ -1,5 +1,11 @@
 package org.dreamexposure.discal.client.message;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.http.client.ClientException;
 import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
@@ -7,18 +13,11 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.GuildMessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.http.client.ClientException;
-import reactor.core.publisher.Mono;
 
 /**
  * @author NovaFox161
@@ -72,7 +71,7 @@ public class Messages {
     public static String getMessage(String key, GuildSettings settings) {
         JSONObject messages;
 
-        if (settings.getLang() != null && langs.has(settings.getLang()))
+        if (langs.has(settings.getLang()))
             messages = langs.getJSONObject(settings.getLang());
         else
             messages = langs.getJSONObject("ENGLISH");
@@ -86,7 +85,7 @@ public class Messages {
     public static String getMessage(String key, String var, String replace, GuildSettings settings) {
         JSONObject messages;
 
-        if (settings.getLang() != null && langs.has(settings.getLang()))
+        if (langs.has(settings.getLang()))
             messages = langs.getJSONObject(settings.getLang());
         else
             messages = langs.getJSONObject("ENGLISH");
@@ -115,6 +114,7 @@ public class Messages {
                                             MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
+            .doOnError(e -> LogFeed.log(LogObject.forException("Message send failed", e, Messages.class)))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
