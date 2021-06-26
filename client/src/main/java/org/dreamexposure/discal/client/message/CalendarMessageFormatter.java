@@ -1,18 +1,16 @@
 package org.dreamexposure.discal.client.message;
 
 import com.google.api.services.calendar.model.Calendar;
-
+import discord4j.common.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.utils.GlobalConst;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
-
-import discord4j.common.util.Snowflake;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.util.Image;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -82,12 +80,12 @@ public class CalendarMessageFormatter {
                 spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
             spec.setTitle(Messages.getMessage("Embed.Calendar.Pre.Title", settings));
-            if (calendar.getSummary() != null)
+            if (!calendar.getSummary().isEmpty())
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.Summary", settings), calendar.getSummary(), true);
             else
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.Summary", settings), "***UNSET***", true);
 
-            if (calendar.getDescription() != null)
+            if (!calendar.getDescription().isEmpty())
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.Description", settings), calendar.getDescription(), false);
             else
                 spec.addField(Messages.getMessage("Embed.Calendar.Pre.Description", settings), "***UNSET***", false);
@@ -103,6 +101,7 @@ public class CalendarMessageFormatter {
 
             spec.setFooter(Messages.getMessage("Embed.Calendar.Pre.Key", settings), null);
             spec.setColor(GlobalConst.discalColor);
+
         });
     }
 }
