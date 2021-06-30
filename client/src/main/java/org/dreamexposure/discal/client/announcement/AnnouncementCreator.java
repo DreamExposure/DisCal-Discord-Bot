@@ -5,6 +5,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
@@ -78,16 +79,21 @@ public class AnnouncementCreator {
         if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(edit -> {
+                    LogFeed.log(LogObject.forDebug("a1"));
                     final Announcement a = Announcement.Companion.copy(edit, true);
                     a.setEditing(true);
                     this.announcements.add(a);
 
                     return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
+                        .doOnNext(n -> LogFeed.log(LogObject.forDebug("a2")))
                         .flatMap(em ->
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Edit.Init", settings), em, e))
+                        .doOnNext(n -> LogFeed.log(LogObject.forDebug("a3")))
                         .doOnNext(a::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
+                        .doOnNext(n -> LogFeed.log(LogObject.forDebug("a4")))
                         .thenReturn(a)
+                        .doOnNext(n -> LogFeed.log(LogObject.forDebug("a5")))
                         .doOnError(err -> LogObject.forException("Failed to init editor", err, this.getClass()))
                         .onErrorResume(err -> Mono.empty());
                 });
