@@ -114,7 +114,6 @@ public class Messages {
                                             MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
-            .doOnError(e -> LogFeed.log(LogObject.forException("Failed to send msg", e, Messages.class)))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 

@@ -12,8 +12,6 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -40,8 +38,10 @@ public class AnnouncementMessageFormatter {
     public static Mono<Consumer<EmbedCreateSpec>> getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
+        //FIXME: This is returning empty
         Mono<String> channelName = guild
-            .flatMap(g -> ChannelUtils.getChannelNameFromNameOrId(a.getAnnouncementChannelId(), g))
+            .flatMap(g -> g.getRoleById(Snowflake.of(a.getAnnouncementChannelId())))
+            .map(Role::getName)
             .switchIfEmpty(Mono.error(new IllegalStateException("Cannot not be empty!")));
 
         Mono<EventData> eData = Mono.just(a)
@@ -55,7 +55,6 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, channelName, eData, img)
-            .doOnNext(n -> LogFeed.log(LogObject.forDebug("amf 1")))
             .map(TupleUtils.function((g, chanName, ed, hasImg) -> spec -> {
                 if (settings.getBranded())
                     spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
