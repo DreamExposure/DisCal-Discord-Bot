@@ -35,15 +35,13 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings({"Duplicates", "MagicNumber", "StringConcatenationMissingWhitespace"})
 public class AnnouncementMessageFormatter {
-    //FIXME: This is returning empty when editing
     public static Mono<Consumer<EmbedCreateSpec>> getFormatAnnouncementEmbed(Announcement a, GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
-        //FIXME: This is returning empty
         Mono<String> channelName = guild
             .flatMap(g -> g.getChannelById(Snowflake.of(a.getAnnouncementChannelId())))
             .map(GuildChannel::getName)
-            .switchIfEmpty(Mono.error(new IllegalStateException("Cannot not be empty!")));
+            .defaultIfEmpty("!!Channel not found!!");
 
         Mono<EventData> eData = Mono.just(a)
             .map(Announcement::getType)
@@ -63,10 +61,7 @@ public class AnnouncementMessageFormatter {
                     spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
 
                 spec.setTitle(Messages.getMessage("Embed.Announcement.Info.Title", settings));
-                if (a.getAnnouncementId() != null)
-                    spec.addField(Messages.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
-                else
-                    spec.addField(Messages.getMessage("Embed.Announcement.Info.ID", settings), "ID IS NULL???", true);
+                spec.addField(Messages.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Type", settings), a.getType().name(), true);
 
