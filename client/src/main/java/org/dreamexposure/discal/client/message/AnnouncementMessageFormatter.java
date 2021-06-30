@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.message;
 import com.google.api.services.calendar.model.Event;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
@@ -40,8 +41,8 @@ public class AnnouncementMessageFormatter {
 
         //FIXME: This is returning empty
         Mono<String> channelName = guild
-            .flatMap(g -> g.getRoleById(Snowflake.of(a.getAnnouncementChannelId())))
-            .map(Role::getName)
+            .flatMap(g -> g.getChannelById(Snowflake.of(a.getAnnouncementChannelId())))
+            .map(GuildChannel::getName)
             .switchIfEmpty(Mono.error(new IllegalStateException("Cannot not be empty!")));
 
         Mono<EventData> eData = Mono.just(a)
