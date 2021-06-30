@@ -69,12 +69,26 @@ data class Announcement(
 
     companion object {
         fun copy(from: Announcement, copyId: Boolean = false): Announcement {
-            return if (copyId) from.copy()
-            else {
-                val a = from.copy()
-                a.announcementId = UUID.randomUUID()
-                a
-            }
+            //This should be an actual copy method cuz I'm dumb...
+            val a = from.copy()
+            if (copyId) a.announcementId = UUID.randomUUID()
+
+            //Copy all the other params...
+            a.subscriberRoleIds.addAll(from.subscriberRoleIds)
+            a.subscriberUserIds.addAll(from.subscriberUserIds)
+            a.announcementChannelId = from.announcementChannelId
+            a.type = from.type
+            a.modifier = from.modifier
+            a.eventId = from.eventId
+            a.eventColor = from.eventColor
+            a.hoursBefore = from.hoursBefore
+            a.minutesBefore = from.minutesBefore
+            a.info = from.info
+            a.enabled = from.enabled
+            a.infoOnly = from.infoOnly
+            a.publish = a.publish
+
+            return a
         }
     }
 
