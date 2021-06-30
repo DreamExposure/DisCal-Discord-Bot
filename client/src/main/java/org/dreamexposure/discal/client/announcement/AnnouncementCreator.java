@@ -78,16 +78,15 @@ public class AnnouncementCreator {
         if (!this.hasAnnouncement(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getAnnouncement(UUID.fromString(announcementId), settings.getGuildID())
                 .flatMap(edit -> {
-                    final Announcement a = Announcement.Companion.copy(edit, true);
-                    a.setEditing(true);
-                    this.announcements.add(a);
+                    edit.setEditing(true);
+                    this.announcements.add(edit);
 
-                    return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings)
+                    return AnnouncementMessageFormatter.getFormatAnnouncementEmbed(edit, settings)
                         .flatMap(em ->
                             Messages.sendMessage(Messages.getMessage("Creator.Announcement.Edit.Init", settings), em, e))
-                        .doOnNext(a::setCreatorMessage)
+                        .doOnNext(edit::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
-                        .thenReturn(a)
+                        .thenReturn(edit)
                         .doOnError(err -> LogObject.forException("Failed to init editor", err, this.getClass()))
                         .onErrorResume(err -> Mono.empty());
                 });
