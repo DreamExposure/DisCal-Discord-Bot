@@ -497,10 +497,10 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     UserAPIAccount(
-                            row["USER_ID", String::class.java],
+                            row["USER_ID", String::class.java]!!,
                             APIKey,
-                            row["BLOCKED", Boolean::class.java],
-                            row["TIME_ISSUED", Long::class.java]
+                            row["BLOCKED", Boolean::class.java]!!,
+                            row["TIME_ISSUED", Long::class.java]!!
                     )
                 }
             }.next().retryWhen(Retry.max(3)
@@ -514,7 +514,7 @@ object DatabaseManager {
 
     fun getSettings(guildId: Snowflake): Mono<GuildSettings> {
         if (DiscalCache.guildSettings.containsKey(guildId))
-            return Mono.just(DiscalCache.guildSettings[guildId])
+            return Mono.just(DiscalCache.guildSettings[guildId]!!)
 
         return connect { c ->
             val query = "SELECT * FROM ${Tables.GUILD_SETTINGS.table} WHERE GUILD_ID = ?"
@@ -524,17 +524,17 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val controlRole = row["CONTROL_ROLE", String::class.java]
-                    val discalChannel = row["DISCAL_CHANNEL", String::class.java]
-                    val simpleAnnouncements = row["SIMPLE_ANNOUNCEMENT", Boolean::class.java]
-                    val lang = row["LANG", String::class.java]
-                    val prefix = row["PREFIX", String::class.java]
-                    val patron = row["PATRON_GUILD", Boolean::class.java]
-                    val dev = row["DEV_GUILD", Boolean::class.java]
-                    val maxCals = row["MAX_CALENDARS", Int::class.java]
-                    val dmAnnouncementsString = row["DM_ANNOUNCEMENTS", String::class.java]
-                    val twelveHour = row["12_HOUR", Boolean::class.java]
-                    val branded = row["BRANDED", Boolean::class.java]
+                    val controlRole = row["CONTROL_ROLE", String::class.java]!!
+                    val discalChannel = row["DISCAL_CHANNEL", String::class.java]!!
+                    val simpleAnnouncements = row["SIMPLE_ANNOUNCEMENT", Boolean::class.java]!!
+                    val lang = row["LANG", String::class.java]!!
+                    val prefix = row["PREFIX", String::class.java]!!
+                    val patron = row["PATRON_GUILD", Boolean::class.java]!!
+                    val dev = row["DEV_GUILD", Boolean::class.java]!!
+                    val maxCals = row["MAX_CALENDARS", Int::class.java]!!
+                    val dmAnnouncementsString = row["DM_ANNOUNCEMENTS", String::class.java]!!
+                    val twelveHour = row["12_HOUR", Boolean::class.java]!!
+                    val branded = row["BRANDED", Boolean::class.java]!!
 
                     val settings = GuildSettings(
                             guildId, controlRole, discalChannel, simpleAnnouncements,
@@ -569,15 +569,15 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val calId = row["CALENDAR_ID", String::class.java]
-                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]
-                    val calAddr = row["CALENDAR_ADDRESS", String::class.java]
-                    val host = CalendarHost.valueOf(row["HOST", String::class.java])
-                    val external = row["EXTERNAL", Boolean::class.java]
-                    val credId = row["CREDENTIAL_ID", Int::class.java]
-                    val privateKey = row["PRIVATE_KEY", String::class.java]
-                    val accessToken = row["ACCESS_TOKEN", String::class.java]
-                    val refreshToken = row["REFRESH_TOKEN", String::class.java]
+                    val calId = row["CALENDAR_ID", String::class.java]!!
+                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]!!
+                    val calAddr = row["CALENDAR_ADDRESS", String::class.java]!!
+                    val host = CalendarHost.valueOf(row["HOST", String::class.java]!!)
+                    val external = row["EXTERNAL", Boolean::class.java]!!
+                    val credId = row["CREDENTIAL_ID", Int::class.java]!!
+                    val privateKey = row["PRIVATE_KEY", String::class.java]!!
+                    val accessToken = row["ACCESS_TOKEN", String::class.java]!!
+                    val refreshToken = row["REFRESH_TOKEN", String::class.java]!!
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
                             credId, privateKey, accessToken, refreshToken)
@@ -600,15 +600,15 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val calId = row["CALENDAR_ID", String::class.java]
-                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]
-                    val calAddr = row["CALENDAR_ADDRESS", String::class.java]
-                    val host = CalendarHost.valueOf(row["HOST", String::class.java])
-                    val external = row["EXTERNAL", Boolean::class.java]
-                    val credId = row["CREDENTIAL_ID", Int::class.java]
-                    val privateKey = row["PRIVATE_KEY", String::class.java]
-                    val accessToken = row["ACCESS_TOKEN", String::class.java]
-                    val refreshToken = row["REFRESH_TOKEN", String::class.java]
+                    val calId = row["CALENDAR_ID", String::class.java]!!
+                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]!!
+                    val calAddr = row["CALENDAR_ADDRESS", String::class.java]!!
+                    val host = CalendarHost.valueOf(row["HOST", String::class.java]!!)
+                    val external = row["EXTERNAL", Boolean::class.java]!!
+                    val credId = row["CREDENTIAL_ID", Int::class.java]!!
+                    val privateKey = row["PRIVATE_KEY", String::class.java]!!
+                    val accessToken = row["ACCESS_TOKEN", String::class.java]!!
+                    val refreshToken = row["REFRESH_TOKEN", String::class.java]!!
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
                             credId, privateKey, accessToken, refreshToken)
@@ -630,7 +630,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val calendars = row.get(0, Long::class.java)
+                    val calendars = row.get(0, Long::class.java)!!
                     return@map calendars.toInt()
                 }
             }.next().retryWhen(Retry.max(3)
@@ -653,9 +653,9 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
 
-                    val id = row["EVENT_ID", String::class.java]
-                    val end = row["EVENT_END", Long::class.java]
-                    val img = row["IMAGE_LINK", String::class.java]
+                    val id = row["EVENT_ID", String::class.java]!!
+                    val end = row["EVENT_END", Long::class.java]!!
+                    val img = row["IMAGE_LINK", String::class.java]!!
 
                     EventData(guildId, id, end, img)
                 }
@@ -680,12 +680,12 @@ object DatabaseManager {
                 res.map { row, _ ->
                     val data = RsvpData(guildId, eventId)
 
-                    data.eventEnd = row["EVENT_END", Long::class.java]
-                    data.setGoingOnTimeFromString(row["GOING_ON_TIME", String::class.java])
-                    data.setGoingLateFromString(row["GOING_LATE", String::class.java])
-                    data.setNotGoingFromString(row["NOT_GOING", String::class.java])
-                    data.setUndecidedFromString(row["UNDECIDED", String::class.java])
-                    data.limit = row["RSVP_LIMIT", Int::class.java]
+                    data.eventEnd = row["EVENT_END", Long::class.java]!!
+                    data.setGoingOnTimeFromString(row["GOING_ON_TIME", String::class.java]!!)
+                    data.setGoingLateFromString(row["GOING_LATE", String::class.java]!!)
+                    data.setNotGoingFromString(row["NOT_GOING", String::class.java]!!)
+                    data.setUndecidedFromString(row["UNDECIDED", String::class.java]!!)
+                    data.limit = row["RSVP_LIMIT", Int::class.java]!!
 
                     //Handle new rsvp role
                     val roleId = row["RSVP_ROLE", Long::class.java]
@@ -715,19 +715,19 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -752,19 +752,19 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -790,19 +790,19 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -827,19 +827,19 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -865,19 +865,19 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -902,19 +902,19 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -939,19 +939,19 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -977,19 +977,19 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java])
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java])
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java])
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java])
-                    a.eventId = row["EVENT_ID", String::class.java]
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java])
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]
-                    a.info = row["INFO", String::class.java]
-                    a.enabled = row["ENABLED", Boolean::class.java]
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]
-                    a.publish = row["PUBLISH", Boolean::class.java]
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
                 }
@@ -1010,7 +1010,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcements = row[0, Long::class.java]
+                    val announcements = row[0, Long::class.java]!!
                     return@map announcements.toInt()
                 }
             }.next().retryWhen(Retry.max(3)
@@ -1031,8 +1031,8 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val refresh = row["REFRESH_TOKEN", String::class.java]
-                    val access = row["ACCESS_TOKEN", String::class.java]
+                    val refresh = row["REFRESH_TOKEN", String::class.java]!!
+                    val access = row["ACCESS_TOKEN", String::class.java]!!
 
                     GoogleCredentialData(credNumber, refresh, access)
                 }
@@ -1147,7 +1147,7 @@ object DatabaseManager {
 
     fun removeRsvpRole(guildId: Snowflake, roleId: Snowflake): Mono<Boolean> {
         return connect { c ->
-            val query = "UPDATE ${Tables.RSVP.table} SET RSVP ROLE = ? WHERE GUILD_ID = ? AND RSVP_ROLE = ?"
+            val query = "UPDATE ${Tables.RSVP.table} SET RSVP_ROLE = ? WHERE GUILD_ID = ? AND RSVP_ROLE = ?"
 
             Mono.from(c.createStatement(query)
                     .bindNull(0, Long::class.java)
@@ -1159,7 +1159,7 @@ object DatabaseManager {
                     .thenReturn(true)
                     .doOnError {
                         LogFeed.log(LogObject
-                                .forException("Failed to up[date all rsvp with role for guild", it, this::class.java))
+                                .forException("Failed to update all rsvp with role for guild", it, this::class.java))
                     }.onErrorReturn(false)
         }
     }
