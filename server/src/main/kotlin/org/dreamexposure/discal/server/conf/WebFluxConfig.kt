@@ -27,10 +27,9 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>, 
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://discalbot.com", "https://www.discalbot.com", "https://dev.discalbot.com")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type")
-                .allowCredentials(true)
                 .maxAge(600)
     }
 
