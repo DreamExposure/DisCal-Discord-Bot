@@ -177,7 +177,7 @@ interface Calendar {
 
     fun toJson(): JSONObject {
         return JSONObject()
-                .put("guild_id", guildId)
+                .put("guild_id", guildId.asString())
                 .put("calendar_id", calendarId)
                 .put("calendar_address", calendarAddress)
                 .put("calendar_number", calendarNumber)

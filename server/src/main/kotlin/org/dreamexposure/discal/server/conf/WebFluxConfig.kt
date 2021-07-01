@@ -13,18 +13,27 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.http.HttpStatus
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.reactive.CorsWebFilter
-import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
+import org.springframework.web.reactive.config.CorsRegistry
 import org.springframework.web.reactive.config.EnableWebFlux
+import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
-class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>, WebFluxConfigurer {
 
     override fun customize(factory: ConfigurableWebServerFactory?) {
         factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
     }
+
+    override fun addCorsMappings(registry: CorsRegistry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "OPTIONS")
+                .allowedHeaders("Authorization", "Content-Type")
+                .allowCredentials(true)
+                .maxAge(600)
+    }
+
 
     @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
@@ -48,22 +57,5 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
                 .option(ConnectionFactoryOptions.PASSWORD, BotSettings.SQL_PASS.get())
                 .option(ConnectionFactoryOptions.DATABASE, BotSettings.SQL_DB.get())
                 .build())
-    }
-
-    @Bean
-    fun corsWebFilter(): CorsWebFilter {
-        val config = CorsConfiguration()
-
-        config.maxAge = 8000L
-        config.addAllowedOrigin("*")
-        config.addAllowedMethod("GET")
-        config.addAllowedMethod("POST")
-        config.addAllowedHeader("Authorization")
-
-        val source = UrlBasedCorsConfigurationSource()
-
-        source.registerCorsConfiguration("/**", config)
-
-        return CorsWebFilter(source)
     }
 }
