@@ -9,6 +9,7 @@ import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
+import io.r2dbc.spi.ValidationDepth
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
@@ -59,11 +60,6 @@ object DatabaseManager {
 
     private fun <T> connect(connection: Function<Connection, Mono<T>>): Mono<T> {
         return pool.create().flatMap { c ->
-            connection.apply(c).flatMap<T>(Mono.from(c.close())::thenReturn)
-        }
-
-        /*
-        return pool.create().flatMap { c ->
             connection.apply(c).flatMap { item ->
                 Mono.from(c.validate(ValidationDepth.LOCAL)).flatMap { validate ->
                     if (validate) {
@@ -74,7 +70,6 @@ object DatabaseManager {
                 }
             }
         }
-         */
     }
 
     fun disconnectFromMySQL() = pool.dispose()
