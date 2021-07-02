@@ -22,13 +22,14 @@ object Authentication {
     private val readOnlyKeys: ConcurrentMap<String, Long> = ConcurrentHashMap()
 
     fun authenticate(swe: ServerWebExchange): Mono<AuthenticationState> {
+        LogFeed.log(LogObject.forDebug("a1"))
         //Check if correct method
         if (!swe.request.methodValue.equals("POST", true) || swe.request.methodValue.equals("GET", true)) {
             LogFeed.log(LogObject.forDebug("Denied access", "Method ${swe.request.methodValue}"))
             return Mono.just(AuthenticationState(false)
                     .status(GlobalConst.STATUS_NOT_ALLOWED)
                     .reason("Method not allowed")
-            )
+            ).doOnNext { LogFeed.log(LogObject.forDebug("a2")) }
         }
 
         //Requires auth header
@@ -42,7 +43,7 @@ object Authentication {
                             .reason("Success")
                             .keyUsed(authKey)
                             .fromDisCalNetwork(true)
-                    )
+                    ).doOnNext { LogFeed.log(LogObject.forDebug("a3")) }
                 }
                 tempKeys.containsKey(authKey) -> { //Temp key granted for logged in user
                     Mono.just(AuthenticationState(true)
@@ -51,7 +52,7 @@ object Authentication {
                             .keyUsed(authKey)
                             .fromDisCalNetwork(false)
                             .readOnly(false)
-                    )
+                    ).doOnNext { LogFeed.log(LogObject.forDebug("a4")) }
                 }
                 readOnlyKeys.containsKey(authKey) -> { //Read-only key granted for embed pages
                     Mono.just(AuthenticationState(true)
@@ -60,24 +61,26 @@ object Authentication {
                             .keyUsed(authKey)
                             .fromDisCalNetwork(false)
                             .readOnly(true)
-                    )
+                    ).doOnNext { LogFeed.log(LogObject.forDebug("a5")) }
                 }
                 authKey == "teapot" -> { //I'm a teapot
                     Mono.just(AuthenticationState(false)
                             .status(GlobalConst.STATUS_TEAPOT)
                             .reason("I'm a teapot")
                             .keyUsed(authKey)
-                    )
+                    ).doOnNext { LogFeed.log(LogObject.forDebug("a6")) }
                 }
                 else -> { //Check if key is in database...
                     DatabaseManager.getAPIAccount(authKey).map { acc ->
                         if (!acc.blocked) {
+                            LogFeed.log(LogObject.forDebug("a7"))
                             return@map AuthenticationState(true)
                                     .status(GlobalConst.STATUS_SUCCESS)
                                     .reason("Success")
                                     .keyUsed(authKey)
                                     .fromDisCalNetwork(false)
                         } else {
+                            LogFeed.log(LogObject.forDebug("a8"))
                             return@map AuthenticationState(false)
                                     .status(GlobalConst.STATUS_AUTHORIZATION_DENIED)
                                     .reason("Authorization Denied. API key blocked")
@@ -85,7 +88,7 @@ object Authentication {
                     }.defaultIfEmpty(AuthenticationState(false)
                             .status(GlobalConst.STATUS_AUTHORIZATION_DENIED)
                             .reason("Authorization Denied")
-                    )
+                    ).doOnNext { LogFeed.log(LogObject.forDebug("a9")) }
                 }
             }
         } else {
