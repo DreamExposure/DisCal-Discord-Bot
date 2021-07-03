@@ -664,7 +664,9 @@ object DatabaseManager {
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get event data", it, this::class.java))
-            }.onErrorResume { Mono.empty() }
+            }.onErrorResume {
+                Mono.empty()
+            }.defaultIfEmpty(EventData(guildId, eventId = eventId))
         }
     }
 
