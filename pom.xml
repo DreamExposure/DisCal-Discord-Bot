@@ -30,9 +30,9 @@
         <spring.session.version>2.4.2</spring.session.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
-        <discord4j.version>3.1.5</discord4j.version>
-        <discord4j.json.version>1.5.10</discord4j.json.version>
-        <discord4j.stores.version>3.1.5</discord4j.stores.version>
+        <discord4j.version>3.1.6</discord4j.version>
+        <discord4j.json.version>1.5.13</discord4j.json.version>
+        <discord4j.stores.version>3.1.7</discord4j.stores.version>
 
         <google.client-api.core.version>1.31.1</google.client-api.core.version>
         <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
@@ -43,7 +43,7 @@
 
         <netty.version.forced>4.1.56.Final</netty.version.forced>
 
-        <reactor.version.bom>2020.0.3</reactor.version.bom>
+        <reactor.version.bom>Dysprosium-SR21</reactor.version.bom>
 
         <discal.version.name>${revision}</discal.version.name>
 
