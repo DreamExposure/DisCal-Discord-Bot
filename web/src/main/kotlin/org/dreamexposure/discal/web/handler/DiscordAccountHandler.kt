@@ -6,11 +6,12 @@ import okhttp3.RequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.time.Duration
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -29,7 +30,7 @@ object DiscordAccountHandler {
 
         timer?.schedule(timerTask {
             removeTimedOutAccounts()
-        }, GlobalConst.oneMinuteMs * 30)
+        }, Duration.ofMinutes(30).toMillis())
     }
 
     fun shutdown() {
@@ -151,7 +152,7 @@ object DiscordAccountHandler {
     private fun getReadOnlyApikey(): Mono<String> {
         return Mono.fromCallable {
             val client = OkHttpClient()
-            val keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "")
+            val keyGrantRequestBody = RequestBody.create(GlobalVal.JSON, "")
             val keyGrantRequest = Request.Builder()
                     .url("${BotSettings.API_URL.get()}/v2/account/key/readonly/get")
                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())

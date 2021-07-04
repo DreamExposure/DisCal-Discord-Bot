@@ -1,12 +1,11 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.rest.util.Image;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import reactor.core.publisher.Mono;
 
 /**
@@ -21,7 +20,7 @@ import reactor.core.publisher.Mono;
 public class ReadyEventListener {
     public static Mono<Void> handle(final ReadyEvent event) {
         return event.getClient().getApplicationInfo()
-            .doOnNext(info -> GlobalConst.iconUrl = info.getIconUrl(Image.Format.PNG).get())
+            .doOnNext(info -> GlobalVal.setIconUrl(info.getIconUrl(Image.Format.PNG).get()))
             .doOnNext(info ->
                 LogFeed.log(LogObject.forDebug("[ReadyEvent]",
                     "Connection success! Session ID: " + event.getSessionId()))

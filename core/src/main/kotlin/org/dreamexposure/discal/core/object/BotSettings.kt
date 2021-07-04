@@ -40,6 +40,7 @@ enum class BotSettings {
     INVITE_URL,
     SUPPORT_INVITE,
 
+    BASE_URL,
     API_URL,
 
     DEBUG_WEBHOOK,

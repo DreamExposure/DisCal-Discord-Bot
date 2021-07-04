@@ -8,11 +8,12 @@ import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import reactor.core.publisher.Mono;
@@ -52,9 +53,10 @@ public class EventMessageFormatter {
         return Mono.zip(guild, data, sDate, sTime, eDate, eTime, img, timezone)
             .map(TupleUtils.function((g, ed, startDate, startTime, endDate, endTime, hasImg, tz) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Event.Info.Title", settings));
                 if (hasImg) {
@@ -106,7 +108,7 @@ public class EventMessageFormatter {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
             }));
     }
@@ -126,9 +128,10 @@ public class EventMessageFormatter {
         return Mono.zip(guild, data, date, time, img)
             .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Event.Condensed.Title", settings));
                 if (hasImg)
@@ -159,7 +162,7 @@ public class EventMessageFormatter {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
             }));
     }
@@ -177,9 +180,10 @@ public class EventMessageFormatter {
         return Mono.zip(guild, sDate, sTime, eDate, eTime, img)
             .map(TupleUtils.function((g, startDate, startTime, endDate, endTime, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 if (hasImg)
                     spec.setImage(event.getEventData().getImageLink());
@@ -248,10 +252,10 @@ public class EventMessageFormatter {
         return Mono.zip(guild, data, date, time, img)
             .map(TupleUtils.function((g, ed, d, t, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite,
-                        g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Event.Confirm.Title", settings));
 
@@ -277,7 +281,7 @@ public class EventMessageFormatter {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(ecr.getEvent().getColorId()));
                     spec.setColor(ec.asColor());
                 } else {
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
             }));
     }

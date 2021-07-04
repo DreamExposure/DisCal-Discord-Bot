@@ -1,16 +1,16 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.dreamexposure.discal.client.message.Messages;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.spec.EmbedCreateSpec;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -64,7 +64,7 @@ public class HelpCommand implements Command {
         return Mono.just(args).flatMap(ignore -> {
             if (args.length < 1) {
                 final Consumer<EmbedCreateSpec> embed = spec -> {
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
                     spec.setTitle("DisCal Command Help");
                     for (final Command c : CommandExecutor.getCommands()) {
                         if (!c.getAliases().isEmpty()) {
@@ -75,8 +75,8 @@ public class HelpCommand implements Command {
                         }
                     }
                     spec.setFooter("Check out the official site for more command info!", null);
-                    spec.setUrl("https://www.discalbot.com/commands");
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
+                    spec.setColor(GlobalVal.getDiscalColor());
                 };
                 return Messages.sendMessage(embed, event);
             } else if (args.length == 1) {
@@ -98,7 +98,7 @@ public class HelpCommand implements Command {
     //Embed formatters
     private Consumer<EmbedCreateSpec> getCommandInfoEmbed(final Command cmd) {
         return spec -> {
-            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
             spec.addField("Command", cmd.getCommand(), true);
             spec.addField("Description", cmd.getCommandInfo().getDescription(), true);
             spec.addField("Example", cmd.getCommandInfo().getExample(), true);
@@ -112,16 +112,16 @@ public class HelpCommand implements Command {
 
             spec.setFooter("<> = required | () = optional", null);
 
-            spec.setUrl("https://www.discalbot.com/commands");
+            spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
 
-            spec.setColor(GlobalConst.discalColor);
+            spec.setColor(GlobalVal.getDiscalColor());
 
         };
     }
 
     private Consumer<EmbedCreateSpec> getSubCommandEmbed(final Command cmd, final String subCommand) {
         return spec -> {
-            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
             spec.addField("Command", cmd.getCommand(), true);
             spec.addField("Sub Command", subCommand, true);
 
@@ -129,9 +129,9 @@ public class HelpCommand implements Command {
 
             spec.setFooter("<> = required | () = optional", null);
 
-            spec.setUrl("https://www.discalbot.com/commands");
+            spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
 
-            spec.setColor(GlobalConst.discalColor);
+            spec.setColor(GlobalVal.getDiscalColor());
 
         };
     }

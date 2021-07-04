@@ -37,7 +37,7 @@ public class RoleUtils {
     public static Mono<Boolean> roleExists(DiscordClient client, Snowflake guildId, Snowflake roleId) {
         return client.getRoleById(guildId, roleId)
             .getData()
-            .transform(ClientException.emptyOnStatus(GlobalConst.STATUS_NOT_FOUND))
+            .transform(ClientException.emptyOnStatus(GlobalVal.STATUS_NOT_FOUND))
             .hasElement();
     }
 

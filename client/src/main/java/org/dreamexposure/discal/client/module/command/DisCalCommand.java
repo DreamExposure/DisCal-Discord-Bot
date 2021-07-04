@@ -7,12 +7,10 @@ import discord4j.rest.util.Image;
 import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.ChannelUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.RoleUtils;
+import org.dreamexposure.discal.core.utils.*;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
@@ -136,21 +134,22 @@ public class DisCalCommand implements Command {
         final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
             .map(TupleUtils.function((guild, guilds, calendars, announcements) -> (EmbedCreateSpec spec) -> {
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                        guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.DisCal.Info.Title", settings));
                 spec.addField(Messages.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
-                spec.addField(Messages.getMessage("Embed.Discal.Info.Version", settings), GlobalConst.version, true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.Library", settings), GlobalConst.d4jVersion, false);
+                spec.addField(Messages.getMessage("Embed.Discal.Info.Version", settings), GlobalVal.getVersion(), true);
+                spec.addField(Messages.getMessage("Embed.DisCal.Info.Library", settings), GlobalVal.getD4jVersion(), false);
                 spec.addField("Shard Index", Application.getShardIndex() + "/" + Application.getShardCount(), true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalGuilds", settings), guilds, true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalCalendars", settings), calendars, true);
                 spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), announcements, true);
                 spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
-                spec.setUrl("https://www.discalbot.com");
-                spec.setColor(GlobalConst.discalColor);
+                spec.setUrl(BotSettings.BASE_URL.get());
+                spec.setColor(GlobalVal.getDiscalColor());
             }));
 
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
@@ -229,9 +228,10 @@ public class DisCalCommand implements Command {
         final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
             .map(TupleUtils.function((guild, dRole, dChannel) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                        guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.DisCal.Settings.Title", settings));
                 spec.addField(Messages.getMessage("Embed.Discal.Settings.Role", settings), dRole, true);
@@ -247,8 +247,8 @@ public class DisCalCommand implements Command {
                 spec.addField("Using Twelve Hour Format", settings.getTwelveHour() + "", true);
                 spec.addField("Using Branding", settings.getBranded() + "", true);
                 spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
-                spec.setUrl("https://www.discalbot.com/");
-                spec.setColor(GlobalConst.discalColor);
+                spec.setUrl(BotSettings.BASE_URL.get());
+                spec.setColor(GlobalVal.getDiscalColor());
             }));
 
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
@@ -320,7 +320,7 @@ public class DisCalCommand implements Command {
 
     private Mono<Void> moduleInvite(final MessageCreateEvent event, final GuildSettings settings) {
         return Messages.sendMessage(Messages.getMessage("DisCal.InviteLink", "%link%",
-            GlobalConst.supportInviteLink, settings), event).then();
+            BotSettings.SUPPORT_INVITE.get(), settings), event).then();
     }
 
     private Mono<Void> moduleBrand(final MessageCreateEvent event, final GuildSettings settings) {
@@ -357,6 +357,6 @@ public class DisCalCommand implements Command {
 
     private Mono<Void> moduleDashboard(final MessageCreateEvent event, final GuildSettings settings) {
         return Messages.sendMessage(Messages.getMessage("DisCal.DashboardLink", "%link%",
-            GlobalConst.discalDashboardLink, settings), event).then();
+            GlobalVal.getDiscalDashboardLink(), settings), event).then();
     }
 }

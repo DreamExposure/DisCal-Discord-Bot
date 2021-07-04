@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.`object`.network.discal
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -15,10 +15,10 @@ data class ConnectedClient(
         @SerialName("expected")
         val expectedClientCount: Int = -1,
 
-        val version: String = GlobalConst.version,
+        val version: String = GlobalVal.version,
 
         @SerialName("d4j_version")
-        val d4jVersion: String = GlobalConst.d4jVersion,
+        val d4jVersion: String = GlobalVal.d4jVersion,
 
         @SerialName("guilds")
         val connectedServers: Int = 0,

@@ -8,7 +8,7 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import reactor.core.publisher.Mono
 
@@ -16,7 +16,7 @@ object StatusHandler {
     fun getLatestStatusInfo(): Mono<NetworkInfo> {
         return Mono.fromCallable {
             val client = OkHttpClient()
-            val body = RequestBody.create(GlobalConst.JSON, "")
+            val body = RequestBody.create(GlobalVal.JSON, "")
 
             val request = Request.Builder()
                     .url("${BotSettings.API_URL.get()}/v2/status/get")

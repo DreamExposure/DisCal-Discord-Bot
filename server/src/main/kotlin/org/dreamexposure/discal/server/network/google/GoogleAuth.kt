@@ -13,7 +13,7 @@ import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -39,7 +39,7 @@ object GoogleAuth {
             }.subscribeOn(Schedulers.boundedElastic()).map { response ->
                 val responseBody = response.body()!!.string()
 
-                if (response.code() == GlobalConst.STATUS_SUCCESS) {
+                if (response.code() == GlobalVal.STATUS_SUCCESS) {
                     val codeResponse = JSONObject(responseBody)
 
                     val url = codeResponse.getString("verification_url")
@@ -82,13 +82,13 @@ object GoogleAuth {
             }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
                 val responseBody = response.body()!!.string()
 
-                if (response.code() == GlobalConst.STATUS_FORBIDDEN) {
+                if (response.code() == GlobalVal.STATUS_FORBIDDEN) {
                     //Handle access denied
                     LogFeed.log(LogObject.forDebug("[!GDC!] Access denied for credential: ${poll.credNumber}"))
 
                     Mono.error<GoogleAuthCancelException>(GoogleAuthCancelException())
-                } else if (response.code() == GlobalConst.STATUS_BAD_REQUEST
-                        || response.code() == GlobalConst.STATUS_PRECONDITION_REQUIRED) {
+                } else if (response.code() == GlobalVal.STATUS_BAD_REQUEST
+                        || response.code() == GlobalVal.STATUS_PRECONDITION_REQUIRED) {
                     //See if auth is pending, if so, just reschedule.
 
                     val aprError = JSONObject(responseBody)
@@ -110,12 +110,12 @@ object GoogleAuth {
                             Mono.error(GoogleAuthCancelException())
                         }
                     }
-                } else if (response.code() == GlobalConst.STATUS_RATE_LIMITED) {
+                } else if (response.code() == GlobalVal.STATUS_RATE_LIMITED) {
                     //We got rate limited... oops. Lets just poll half as often...
                     poll.interval = poll.interval * 2
 
                     Mono.empty()
-                } else if (response.code() == GlobalConst.STATUS_SUCCESS) {
+                } else if (response.code() == GlobalVal.STATUS_SUCCESS) {
                     //Access granted, save credentials...
                     val aprGrant = JSONObject(responseBody)
                     val aes = AESEncryption(BotSettings.CREDENTIALS_KEY.get())

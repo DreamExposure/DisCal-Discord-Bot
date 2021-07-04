@@ -34,7 +34,7 @@ public class CalendarUtils {
         return CalendarWrapper.getCalendar(data)
             .hasElement()
             .onErrorResume(GoogleJsonResponseException.class, ge -> {
-                if (ge.getStatusCode() == GlobalConst.STATUS_GONE || ge.getStatusCode() == GlobalConst.STATUS_NOT_FOUND) {
+                if (ge.getStatusCode() == GlobalVal.STATUS_GONE || ge.getStatusCode() == GlobalVal.STATUS_NOT_FOUND) {
                     //Calendar does not exist... remove from db...
                     return Mono.when(
                         DatabaseManager.INSTANCE.deleteCalendar(data),

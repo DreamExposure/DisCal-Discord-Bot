@@ -10,15 +10,11 @@ import kotlin.jvm.internal.Reflection
 @OptIn(InternalSerializationApi::class)
 @Deprecated("Phase out org.json usage")
 object JsonUtil {
-    val format = Json {
-        encodeDefaults = true
-    }
-
     fun <T> encodeToJSON(clazz: Class<T>, data: T): JSONObject {
         val kClass = Reflection.createKotlinClass(clazz)
         val serializer = kClass.serializer() as KSerializer<T>
 
-        return JSONObject(format.encodeToString(serializer, data))
+        return JSONObject(GlobalVal.JSON_FORMAT.encodeToString(serializer, data))
     }
 
     fun <T> encodeToString(clazz: Class<T>, data: T): String = encodeToJSON(clazz, data).toString()
@@ -29,6 +25,6 @@ object JsonUtil {
         val kClass = Reflection.createKotlinClass(clazz)
         val serializer = kClass.serializer()
 
-        return format.decodeFromString(serializer, str) as T
+        return GlobalVal.JSON_FORMAT.decodeFromString(serializer, str) as T
     }
 }

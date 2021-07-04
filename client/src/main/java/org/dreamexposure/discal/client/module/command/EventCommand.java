@@ -11,6 +11,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.enums.event.EventFrequency;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -666,11 +667,11 @@ public class EventCommand implements Command {
                     if ("list".equalsIgnoreCase(value) || "colors".equalsIgnoreCase(value)
                         || "colours".equalsIgnoreCase(value)) {
                         final Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                             spec.setTitle("Available Colors");
-                            spec.setUrl("https://discalbot.com/docs/event/colors");
-                            spec.setColor(GlobalConst.discalColor);
+                            spec.setUrl(BotSettings.BASE_URL.get() + "/docs/event/colors");
+                            spec.setColor(GlobalVal.getDiscalColor());
                             spec.setFooter("Click Title for previews of the colors!", null);
 
                             for (final EventColor ec : EventColor.values()) {
@@ -710,11 +711,11 @@ public class EventCommand implements Command {
             } else {
                 //Not in creator/editor, just default to listing the supported colors.
                 final Consumer<EmbedCreateSpec> embed = spec -> {
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                     spec.setTitle("Available Colors");
-                    spec.setUrl("https://discalbot.com/docs/event/colors");
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setUrl(BotSettings.BASE_URL.get() + "/docs/event/colors");
+                    spec.setColor(GlobalVal.getDiscalColor());
                     spec.setFooter("Click Title for previews of the colors!", null);
 
                     for (final EventColor ec : EventColor.values()) {

@@ -7,11 +7,11 @@ import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -135,7 +135,7 @@ public class EventListCommand implements Command {
                                             .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e,
                                                 data.getCalendarNumber(), settings).flatMap(embed ->
                                                 Messages.sendMessage(embed, event)))
-                                            .then()).thenReturn(GlobalConst.NOT_EMPTY);
+                                            .then()).thenReturn("Not empty");
                                     }
                                 })
                             ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
@@ -160,7 +160,7 @@ public class EventListCommand implements Command {
                 return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
                     .flatMap(data -> {
                         final long now = System.currentTimeMillis();
-                        final long end = now + GlobalConst.oneDayMs;
+                        final long end = now + Duration.ofDays(1).toMillis();
 
                         return EventWrapper.getEvents(data, 20, now, end).flatMap(events -> {
                             if (events.isEmpty()) {
@@ -175,7 +175,7 @@ public class EventListCommand implements Command {
                                     events.size() + "", settings), event).then(Flux.fromIterable(events)
                                     .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
                                         .flatMap(embed -> Messages.sendMessage(embed, event))).then())
-                                    .thenReturn(GlobalConst.NOT_EMPTY);
+                                    .thenReturn("Not Empty");
                             }
                         });
                     }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Calendar.NoCalendar", settings), event));
@@ -192,8 +192,8 @@ public class EventListCommand implements Command {
             if (args.length == 1) {
                 return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()) //TODO: Support multi-cal
                     .flatMap(data -> {
-                        final long start = System.currentTimeMillis() - (GlobalConst.oneDayMs * 14); // 2 weeks ago
-                        final long end = System.currentTimeMillis() + GlobalConst.oneDayMs; // one day from now
+                        final long start = System.currentTimeMillis() - Duration.ofDays(14).toMillis(); // 2 weeks ago
+                        final long end = System.currentTimeMillis() + Duration.ofDays(1).toMillis(); // one day from now
 
                         return EventWrapper.getEvents(data, start, end).flatMap(events -> {
                             if (events.isEmpty()) {
@@ -218,7 +218,7 @@ public class EventListCommand implements Command {
                                         .then(Flux.fromIterable(ongoing)
                                             .concatMap(e -> EventMessageFormatter.getCondensedEventEmbed(e, data.getCalendarNumber(), settings)
                                                 .flatMap(embed -> Messages.sendMessage(embed, event))).then())
-                                        .thenReturn(GlobalConst.NOT_EMPTY);
+                                        .thenReturn("Not Empty");
                                 }
                             }
                         });

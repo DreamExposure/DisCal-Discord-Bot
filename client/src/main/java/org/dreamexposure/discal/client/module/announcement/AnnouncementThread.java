@@ -14,11 +14,11 @@ import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.dreamexposure.discal.core.utils.GlobalConst;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +36,7 @@ public class AnnouncementThread {
 
     private final Map<Integer, Mono<Calendar>> discalServices = new ConcurrentHashMap<>();
 
-    private final long maxDifferenceMs = 5 * GlobalConst.oneMinuteMs;
+    private final long maxDifferenceMs = Duration.ofMinutes(5).toMillis();
 
     public AnnouncementThread(GatewayDiscordClient client) {
         this.client = client;

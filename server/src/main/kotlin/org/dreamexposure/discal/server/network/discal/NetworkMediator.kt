@@ -3,7 +3,6 @@ package org.dreamexposure.discal.server.network.discal
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.ConnectedClient
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
-import org.dreamexposure.discal.core.utils.GlobalConst
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -27,7 +26,7 @@ class NetworkMediator(private val networkInfo: NetworkInfo) : ApplicationRunner 
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofMinutes(1))
                 .flatMapIterable { networkInfo.clients }
-                .filter { System.currentTimeMillis() > it.lastKeepAlive + (5 * GlobalConst.oneMinuteMs) }
+                .filter { System.currentTimeMillis() > it.lastKeepAlive + Duration.ofMinutes(5).toMillis() }
                 .flatMap(::issueRestart)
                 .subscribe()
     }

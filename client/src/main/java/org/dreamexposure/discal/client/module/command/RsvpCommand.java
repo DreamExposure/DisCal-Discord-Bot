@@ -9,6 +9,7 @@ import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.event.RsvpData;
@@ -420,9 +421,10 @@ public class RsvpCommand implements Command {
         return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono, rsvpRoleNameMono)
             .map(TupleUtils.function((guild, onTime, late, undecided, notGoing, roleName) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), GlobalConst.discalSite, guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                        guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.RSVP.List.Title", settings));
                 spec.addField("Event ID", data.getEventId(), false);
@@ -466,7 +468,7 @@ public class RsvpCommand implements Command {
                     spec.addField("Not Going", notGoingBuilder.toString(), false);
 
                 spec.setFooter(Messages.getMessage("Embed.RSVP.List.Footer", settings), null);
-                spec.setColor(GlobalConst.discalColor);
+                spec.setColor(GlobalVal.getDiscalColor());
             }));
     }
 }

@@ -3,7 +3,6 @@ package org.dreamexposure.discal.core.entities
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
@@ -13,6 +12,7 @@ import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -155,7 +155,7 @@ interface Event {
                 .put("is_parent", !eventId.contains("_"))
                 .put("color", color.name)
                 .put("recur", recur)
-                .put("recurrence", JSONObject(Json.Default.encodeToString(recurrence)))
+                .put("recurrence", JSONObject(GlobalVal.JSON_FORMAT.encodeToString(recurrence)))
                 .put("rrule", recurrence.toRRule())
                 .put("image", eventData.imageLink)
     }

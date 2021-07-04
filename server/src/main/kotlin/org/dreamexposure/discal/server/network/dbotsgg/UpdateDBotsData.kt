@@ -7,7 +7,7 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -27,7 +27,7 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
 
             val client = OkHttpClient()
 
-            val body = RequestBody.create(GlobalConst.JSON, json.toString())
+            val body = RequestBody.create(GlobalVal.JSON, json.toString())
             val request = Request.Builder()
                     .url("https://discord.bots.gg/api/v1/bots/265523588918935552/stats")
                     .post(body)
@@ -37,7 +37,7 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
 
             client.newCall(request).execute()
         }.doOnNext { response ->
-            if (response.code() != GlobalConst.STATUS_SUCCESS) {
+            if (response.code() != GlobalVal.STATUS_SUCCESS) {
                 LogFeed.log(LogObject.forDebug("Failed to update DBots.gg stats", "Body: ${response.body()?.string()}"))
             }
         }.onErrorResume {

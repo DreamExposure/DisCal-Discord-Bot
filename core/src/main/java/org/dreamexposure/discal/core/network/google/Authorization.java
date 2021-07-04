@@ -9,7 +9,7 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential;
 import org.dreamexposure.discal.core.object.network.google.ClientData;
 import org.dreamexposure.discal.core.utils.CalendarUtils;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.json.JSONObject;
 
 import okhttp3.FormBody;
@@ -74,7 +74,7 @@ public class Authorization {
 
             Response httpResponse = this.client.newCall(httpRequest).execute();
 
-            if (httpResponse.code() == GlobalConst.STATUS_SUCCESS) {
+            if (httpResponse.code() == GlobalVal.STATUS_SUCCESS) {
                 JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
                 //Update Db data.
@@ -83,7 +83,7 @@ public class Authorization {
 
                 //Okay, we can return the access token to be used when this method is called.
                 return autoRefreshResponse.getString("access_token");
-            } else if (httpResponse.code() == GlobalConst.STATUS_BAD_REQUEST) {
+            } else if (httpResponse.code() == GlobalVal.STATUS_BAD_REQUEST) {
                 JSONObject errorBody = new JSONObject(httpResponse.body().string());
 
                 if ("invalid_grant".equalsIgnoreCase(errorBody.getString("error"))) {
@@ -130,7 +130,7 @@ public class Authorization {
 
             Response httpResponse = this.client.newCall(httpRequest).execute();
 
-            if (httpResponse.code() == GlobalConst.STATUS_SUCCESS) {
+            if (httpResponse.code() == GlobalVal.STATUS_SUCCESS) {
                 JSONObject autoRefreshResponse = new JSONObject(httpResponse.body().string());
 
                 //Update Db data.
@@ -139,7 +139,7 @@ public class Authorization {
 
                 //Okay, we can return the access token to be used when this method is called.
                 return autoRefreshResponse.getString("access_token");
-            } else if (httpResponse.code() == GlobalConst.STATUS_BAD_REQUEST) {
+            } else if (httpResponse.code() == GlobalVal.STATUS_BAD_REQUEST) {
                 JSONObject errorBody = new JSONObject(httpResponse.body().string());
 
                 if ("invalid_grant".equalsIgnoreCase(errorBody.getString("error"))) {

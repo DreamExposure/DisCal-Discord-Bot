@@ -15,10 +15,11 @@ import org.dreamexposure.discal.core.exceptions.GoogleAuthCancelException;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.network.google.Authorization;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.network.google.Poll;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import org.json.JSONObject;
 import reactor.core.publisher.Flux;
@@ -72,7 +73,7 @@ public class GoogleExternalAuth {
 
                         //Send DM to user with code.
                         final Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
                             spec.setTitle(Messages.getMessage("Embed.AddCalendar.Code.Title", settings));
 
                             spec.addField(
@@ -82,7 +83,7 @@ public class GoogleExternalAuth {
                             spec.setFooter(Messages.getMessage("Embed.AddCalendar.Code.Footer", settings), null);
 
                             spec.setUrl(codeResponse.getString("verification_url"));
-                            spec.setColor(GlobalConst.discalColor);
+                            spec.setColor(GlobalVal.getDiscalColor());
                         };
 
                         return event.getMessage().getAuthorAsMember().flatMap(user -> {
@@ -142,13 +143,13 @@ public class GoogleExternalAuth {
             return Mono.fromCallable(() -> Authorization.getAuth().getClient().newCall(httpRequest).execute())
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(response -> Mono.fromCallable(() -> response.body().string()).flatMap(responseBody -> {
-                    if (response.code() == GlobalConst.STATUS_FORBIDDEN) {
+                    if (response.code() == GlobalVal.STATUS_FORBIDDEN) {
                         //Handle access denied
                         return Messages.sendDirectMessage(Messages.getMessage("AddCalendar.Auth.Poll.Failure.Deny",
                             poll.getSettings()), poll.getUser())
                             .then(Mono.error(new GoogleAuthCancelException()));
-                    } else if (response.code() == GlobalConst.STATUS_BAD_REQUEST
-                        || response.code() == GlobalConst.STATUS_PRECONDITION_REQUIRED) {
+                    } else if (response.code() == GlobalVal.STATUS_BAD_REQUEST
+                        || response.code() == GlobalVal.STATUS_PRECONDITION_REQUIRED) {
                         //See if auth is pending, if so, just reschedule.
                         final JSONObject aprError = new JSONObject(responseBody);
 
@@ -170,7 +171,7 @@ public class GoogleExternalAuth {
                                 Messages.getMessage("Notification.Error.Network", poll.getSettings()), poll.getUser())
                                 .then(Mono.error(new GoogleAuthCancelException()));
                         }
-                    } else if (response.code() == GlobalConst.STATUS_RATE_LIMITED) {
+                    } else if (response.code() == GlobalVal.STATUS_RATE_LIMITED) {
                         //We got rate limited... oops. Let's just poll half as often.
                         poll.setInterval(poll.getInterval() * 2);
                         //PollManager.getManager().scheduleNextPoll(poll);
@@ -194,7 +195,7 @@ public class GoogleExternalAuth {
                             .then(CalendarWrapper.getUsersExternalCalendars(calData))
                             .flatMapMany(Flux::fromIterable)
                             .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
-                                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                                spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                                 spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()));
 
@@ -213,7 +214,7 @@ public class GoogleExternalAuth {
                                     i.getId(),
                                     false);
 
-                                spec.setColor(GlobalConst.discalColor);
+                                spec.setColor(GlobalVal.getDiscalColor());
                             })
                             .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                             .switchIfEmpty(Messages.sendDirectMessage(

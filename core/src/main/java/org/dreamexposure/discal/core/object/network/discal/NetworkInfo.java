@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.object.network.discal;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.joda.time.Interval;
 import org.joda.time.Period;
@@ -102,11 +102,11 @@ public class NetworkInfo {
     }
 
     public String getVersion() {
-        return GlobalConst.version;
+        return GlobalVal.getVersion();
     }
 
     public String getD4JVersion() {
-        return GlobalConst.d4jVersion;
+        return GlobalVal.getD4jVersion();
     }
 
     public int getTotalGuildCount() {

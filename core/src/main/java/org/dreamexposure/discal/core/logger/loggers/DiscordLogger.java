@@ -6,7 +6,7 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.core.logger.interfaces.Logger;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -50,7 +50,7 @@ public class DiscordLogger implements Logger {
             .addField(new WebhookEmbed
                 .EmbedField(false, "Time", log.getTimestamp()))
             .setDescription(log.getMessage())
-            .setColor(GlobalConst.discalColor.getRGB())
+            .setColor(GlobalVal.getDiscalColor().getRGB())
             .setTimestamp(Instant.now());
 
         if (log.getInfo() != null) {
@@ -69,7 +69,7 @@ public class DiscordLogger implements Logger {
             .addField(new WebhookEmbed
                 .EmbedField(false, "Time", log.getTimestamp()))
             .setDescription(log.getMessage())
-            .setColor(GlobalConst.discalColor.getRGB())
+            .setColor(GlobalVal.getDiscalColor().getRGB())
             .setTimestamp(Instant.now());
 
         if (log.getInfo() != null) {
@@ -106,7 +106,7 @@ public class DiscordLogger implements Logger {
             .addField(new WebhookEmbed
                 .EmbedField(false, "Message", log.getMessage()))
             .setDescription(error)
-            .setColor(GlobalConst.discalColor.getRGB())
+            .setColor(GlobalVal.getDiscalColor().getRGB())
             .setTimestamp(Instant.now());
         if (log.getInfo() != null) {
             builder.addField(new WebhookEmbed.EmbedField(false, "Info", log.getInfo()));

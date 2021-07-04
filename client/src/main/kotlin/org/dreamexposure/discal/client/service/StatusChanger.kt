@@ -5,7 +5,7 @@ import discord4j.core.`object`.presence.Presence
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -55,7 +55,7 @@ class StatusChanger: ApplicationRunner {
                             .replace("{calendars}", calendars.toString())
                             .replace("{announcements}", announcements.toString())
                             .replace("{shards}", Application.getShardCount().toString())
-                            .replace("{version}", GlobalConst.version)
+                            .replace("{version}", GlobalVal.version)
 
 
                     DisCalClient.client!!.updatePresence(Presence.online(Activity.playing(status)))
@@ -63,7 +63,7 @@ class StatusChanger: ApplicationRunner {
     }
 
     override fun run(args: ApplicationArguments?) {
-        Flux.interval(Duration.ofMinutes(1))
+        Flux.interval(Duration.ofMinutes(5))
                 .flatMap { update() }
                 .subscribe()
     }

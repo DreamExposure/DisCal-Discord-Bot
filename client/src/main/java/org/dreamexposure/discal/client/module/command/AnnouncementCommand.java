@@ -11,6 +11,7 @@ import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
@@ -564,14 +565,14 @@ public class AnnouncementCommand implements Command {
                         String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                         String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
                         Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                            spec.setColor(GlobalConst.discalColor);
+                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                            spec.setColor(GlobalVal.getDiscalColor());
 
                             spec.setTitle("Subscribed the Following");
 
                             spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
                                 subMemString, settings)
-                                + GlobalConst.lineBreak
+                                + GlobalVal.getLineBreak()
                                 + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
                                 subRoleString, settings));
 
@@ -628,14 +629,14 @@ public class AnnouncementCommand implements Command {
                     String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                     String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
                     Consumer<EmbedCreateSpec> embed = spec -> {
-                        spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                        spec.setColor(GlobalConst.discalColor);
+                        spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                        spec.setColor(GlobalVal.getDiscalColor());
 
                         spec.setTitle("Subscribed the Following");
 
                         spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
                             subMemString, settings)
-                            + GlobalConst.lineBreak
+                            + GlobalVal.getLineBreak()
                             + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
                             subRoleString, settings));
 
@@ -836,14 +837,14 @@ public class AnnouncementCommand implements Command {
                         String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                         String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
                         Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                            spec.setColor(GlobalConst.discalColor);
+                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                            spec.setColor(GlobalVal.getDiscalColor());
 
                             spec.setTitle("Unsubscribed the Following");
 
                             spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
                                 subMemString, settings)
-                                + GlobalConst.lineBreak
+                                + GlobalVal.getLineBreak()
                                 + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
                                 subRoleString, settings));
 
@@ -900,14 +901,14 @@ public class AnnouncementCommand implements Command {
                     String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                     String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
                     Consumer<EmbedCreateSpec> embed = spec -> {
-                        spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
-                        spec.setColor(GlobalConst.discalColor);
+                        spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                        spec.setColor(GlobalVal.getDiscalColor());
 
                         spec.setTitle("Unsubscribed the Following");
 
                         spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
                             subMemString, settings)
-                            + GlobalConst.lineBreak
+                            + GlobalVal.getLineBreak()
                             + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
                             subRoleString, settings));
 

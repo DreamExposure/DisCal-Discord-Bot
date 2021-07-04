@@ -5,9 +5,10 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -20,20 +21,21 @@ import java.util.function.Consumer;
 public class CalendarMessageFormatter {
     @Deprecated
     public static String getCalendarLink(final Snowflake guildId) {
-        return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/1";
+        return BotSettings.BASE_URL.get() + "/embed/" + guildId.asString() + "/calendar/1";
     }
 
     public static String getCalendarLink(final Snowflake guildId, final int calNumber) {
-        return "https://www.discalbot.com/embed/" + guildId.asString() + "/calendar/" + calNumber;
+        return BotSettings.BASE_URL.get() + "/embed/" + guildId.asString() + "/calendar/" + calNumber;
     }
 
     @Deprecated
     public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.getBranded())
-                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
             else
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
             spec.setTitle(Messages.getMessage("Embed.Calendar.Link.Title", settings));
 
@@ -46,16 +48,17 @@ public class CalendarMessageFormatter {
             spec.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
             spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID()));
             spec.setFooter(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
-            spec.setColor(GlobalConst.discalColor);
+            spec.setColor(GlobalVal.getDiscalColor());
         });
     }
 
     public static Mono<Consumer<EmbedCreateSpec>> getCalendarLinkEmbed(final Calendar cal, final int calNum, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.getBranded())
-                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
             else
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
             spec.setTitle(Messages.getMessage("Embed.Calendar.Link.Title", settings));
 
@@ -68,16 +71,17 @@ public class CalendarMessageFormatter {
             spec.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
             spec.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calNum));
             spec.setFooter(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
-            spec.setColor(GlobalConst.discalColor);
+            spec.setColor(GlobalVal.getDiscalColor());
         });
     }
 
     public static Mono<Consumer<EmbedCreateSpec>> getPreCalendarEmbed(final PreCalendar calendar, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> spec -> {
             if (settings.getBranded())
-                spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
             else
-                spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
             spec.setTitle(Messages.getMessage("Embed.Calendar.Pre.Title", settings));
             if (!calendar.getSummary().isEmpty())
@@ -100,7 +104,7 @@ public class CalendarMessageFormatter {
 
 
             spec.setFooter(Messages.getMessage("Embed.Calendar.Pre.Key", settings), null);
-            spec.setColor(GlobalConst.discalColor);
+            spec.setColor(GlobalVal.getDiscalColor());
 
         });
     }

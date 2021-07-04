@@ -5,9 +5,10 @@ import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import reactor.core.publisher.Mono;
 
@@ -88,11 +89,11 @@ public class TimeCommand implements Command {
                 return event.getGuild().flatMap(guild ->
                     Messages.sendMessage(embed -> {
                         if (settings.getBranded()) {
-                            embed.setAuthor(guild.getName(), GlobalConst.discalSite,
-                                guild.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                            embed.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                                guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                         } else {
-                            embed.setAuthor("DisCal", GlobalConst.discalSite,
-                                GlobalConst.iconUrl);
+                            embed.setAuthor("DisCal", BotSettings.BASE_URL.get(),
+                                GlobalVal.getIconUrl());
                         }
 
                         embed.setTitle(Messages.getMessage("Embed.Time.Title", settings));
@@ -104,7 +105,7 @@ public class TimeCommand implements Command {
                         embed.setFooter(Messages.getMessage("Embed.Time.Footer", settings), null);
                         embed.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calData.getCalendarNumber()));
 
-                        embed.setColor(GlobalConst.discalColor);
+                        embed.setColor(GlobalVal.getDiscalColor());
                     }, event));
             }))
             .switchIfEmpty(Messages.sendMessage(

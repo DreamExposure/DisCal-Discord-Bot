@@ -8,7 +8,7 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.json.JSONObject;
@@ -45,8 +45,8 @@ public class KeepAliveHandler {
                         data.put("guilds", 0);
                     data.put("memory", usedMemory());
                     data.put("uptime", humanReadableUptime());
-                    data.put("version", GlobalConst.version);
-                    data.put("d4j_version", GlobalConst.d4jVersion);
+                    data.put("version", GlobalVal.getVersion());
+                    data.put("d4j_version", GlobalVal.getD4jVersion());
                     //TODO: Add announcement count!!!
 
                     //Network handling data
@@ -54,7 +54,7 @@ public class KeepAliveHandler {
 
                     final OkHttpClient client = new OkHttpClient();
 
-                    final RequestBody body = RequestBody.create(GlobalConst.JSON, data.toString());
+                    final RequestBody body = RequestBody.create(GlobalVal.getJSON(), data.toString());
                     final Request request = new Request.Builder()
                         .url(BotSettings.API_URL.get() + "/v2/status/keep-alive")
                         .post(body)

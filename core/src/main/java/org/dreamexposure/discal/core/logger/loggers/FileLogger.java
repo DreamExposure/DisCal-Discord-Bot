@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.logger.loggers;
 
 import org.dreamexposure.discal.core.logger.interfaces.Logger;
 import org.dreamexposure.discal.core.logger.object.LogObject;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -47,15 +47,15 @@ public class FileLogger implements Logger {
 
         try {
             final FileWriter exceptions = new FileWriter(this.exceptionFile, true);
-            exceptions.write("ERROR --- " + log.getTimestamp() + " ---" + GlobalConst.lineBreak);
-            exceptions.write("message: " + log.getMessage() + GlobalConst.lineBreak);
+            exceptions.write("ERROR --- " + log.getTimestamp() + " ---" + GlobalVal.getLineBreak());
+            exceptions.write("message: " + log.getMessage() + GlobalVal.getLineBreak());
 
             if (log.getInfo() != null)
-                exceptions.write("info: " + log.getInfo() + GlobalConst.lineBreak);
+                exceptions.write("info: " + log.getInfo() + GlobalVal.getLineBreak());
 
-            exceptions.write("Class:" + log.getClazz().getName() + GlobalConst.lineBreak);
+            exceptions.write("Class:" + log.getClazz().getName() + GlobalVal.getLineBreak());
 
-            exceptions.write(error + GlobalConst.lineBreak);
+            exceptions.write(error + GlobalVal.getLineBreak());
             exceptions.close();
         } catch (final IOException io) {
             io.printStackTrace();
@@ -65,11 +65,11 @@ public class FileLogger implements Logger {
     private void writeDebug(final LogObject log) {
         try {
             final FileWriter file = new FileWriter(this.debugFile, true);
-            file.write("DEBUG --- " + log.getTimestamp() + " ---" + GlobalConst.lineBreak);
-            file.write("message: " + log.getMessage() + GlobalConst.lineBreak);
+            file.write("DEBUG --- " + log.getTimestamp() + " ---" + GlobalVal.getLineBreak());
+            file.write("message: " + log.getMessage() + GlobalVal.getLineBreak());
 
             if (log.getInfo() != null)
-                file.write("info: " + log.getInfo() + GlobalConst.lineBreak);
+                file.write("info: " + log.getInfo() + GlobalVal.getLineBreak());
 
             file.close();
         } catch (final IOException io) {

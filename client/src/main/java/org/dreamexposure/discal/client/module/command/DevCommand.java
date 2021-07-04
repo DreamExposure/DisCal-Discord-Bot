@@ -10,7 +10,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.object.web.UserAPIAccount;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -80,12 +80,8 @@ public class DevCommand implements Command {
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return event.getMessage().getAuthorAsMember()
             .map(Member::getId)
-            .filter(id ->
-                id.equals(GlobalConst.novaId)
-                    || id.equals(GlobalConst.xaanitId)
-                    || id.equals(GlobalConst.calId)
-                    || id.equals(GlobalConst.dreamId)
-            ).flatMap(id -> {
+            .filter(GlobalVal.getDevUserIds()::contains)
+            .flatMap(id -> {
                 if (args.length < 1) {
                     return Messages.sendMessage("Please specify the function you would like to execute. " +
                         "To view valid functions use `!help dev`", event);

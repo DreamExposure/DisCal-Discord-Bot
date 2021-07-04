@@ -10,7 +10,7 @@ import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.utils.GlobalConst;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import reactor.core.publisher.Mono;
@@ -77,7 +77,7 @@ public class Messages {
             messages = langs.getJSONObject("ENGLISH");
 
         if (messages.has(key))
-            return messages.getString(key).replace("%lb%", GlobalConst.lineBreak);
+            return messages.getString(key).replace("%lb%", GlobalVal.getLineBreak());
         else
             return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
     }
@@ -91,7 +91,7 @@ public class Messages {
             messages = langs.getJSONObject("ENGLISH");
 
         if (messages.has(key))
-            return messages.getString(key).replace(var, replace).replace("%lb%", GlobalConst.lineBreak);
+            return messages.getString(key).replace(var, replace).replace("%lb%", GlobalVal.getLineBreak());
         else
             return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
     }

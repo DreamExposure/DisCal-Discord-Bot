@@ -11,7 +11,7 @@ import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.timezone.GoodTimezone
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.json.JSONArray
 import org.json.JSONObject
@@ -41,7 +41,7 @@ class DiscordLoginHandler {
                     .build()
 
             val tokenRequest = Request.Builder()
-                    .url("${GlobalConst.discordApiUrl}/oauth2/token")
+                    .url("${GlobalVal.discordApiUrl}/oauth2/token")
                     .post(body)
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build()
@@ -54,14 +54,14 @@ class DiscordLoginHandler {
                 //GET request for user info
                 val userDataRequest = Request.Builder()
                         .get()
-                        .url("${GlobalConst.discordApiUrl}/users/@me")
+                        .url("${GlobalVal.discordApiUrl}/users/@me")
                         .header("Authorization", "Bearer ${info.getString("access_token")}")
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .build()
 
                 val userGuildsRequest = Request.Builder()
                         .get()
-                        .url("${GlobalConst.discordApiUrl}/users/@me/guilds")
+                        .url("${GlobalVal.discordApiUrl}/users/@me/guilds")
                         .header("Authorization", "Bearer ${info.getString("access_token")}")
                         .header("Content-Type", "application/x-www-form-urlencoded")
                         .build()
@@ -87,7 +87,7 @@ class DiscordLoginHandler {
                             model["username"] = userInfo.getString("username")
                             model["discrim"] = userInfo.getString("discriminator")
                             if (userInfo.has("avatar") && !userInfo.isNull("avatar")) {
-                                model["pfp"] = """${GlobalConst.discordCdnUrl}/avatars/
+                                model["pfp"] = """${GlobalVal.discordCdnUrl}/avatars/
                                             |${userInfo.getString("id")}/
                                             |${userInfo.getString("avatar")}
                                             |.png""".trimMargin()
@@ -101,7 +101,7 @@ class DiscordLoginHandler {
                                 val id = jGuild.getLong("id")
                                 val name = jGuild.getString("name")
                                 val icon: String = if (jGuild.has("icon") && !jGuild.isNull("icon")) {
-                                    "${GlobalConst.discordCdnUrl}/icons/$id/${jGuild.getString("icon")}.png"
+                                    "${GlobalVal.discordCdnUrl}/icons/$id/${jGuild.getString("icon")}.png"
                                 } else {
                                     "/assets/img/default/guild-icon.png"
                                 }
@@ -111,7 +111,7 @@ class DiscordLoginHandler {
                             model["guilds"] = guilds
 
                             //Do temp API key request...
-                            val keyGrantRequestBody = RequestBody.create(GlobalConst.JSON, "")
+                            val keyGrantRequestBody = RequestBody.create(GlobalVal.JSON, "")
                             val keyGrantRequest = Request.Builder()
                                     .url("${BotSettings.API_URL.get()}/v2/account/login")
                                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
@@ -165,7 +165,7 @@ class DiscordLoginHandler {
                 //Tell the API server the user has logged out and to delete the temp key
                 val client = OkHttpClient()
 
-                val requestBody = RequestBody.create(GlobalConst.JSON, "")
+                val requestBody = RequestBody.create(GlobalVal.JSON, "")
 
                 val logoutRequest = Request.Builder()
                         .url("${BotSettings.API_URL.get()}/v2/account/logout")

@@ -13,6 +13,7 @@ import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
@@ -56,9 +57,10 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(guild, channelName, eData, img)
             .map(TupleUtils.function((g, chanName, ed, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Announcement.Info.Title", settings));
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.ID", settings), a.getAnnouncementId().toString(), true);
@@ -85,7 +87,7 @@ public class AnnouncementMessageFormatter {
                 if (a.getType().equals(AnnouncementType.COLOR))
                     spec.setColor(a.getEventColor().asColor());
                 else
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
                 if (settings.getDevGuild() || settings.getPatronGuild())
@@ -118,9 +120,10 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(guild, event, eData, img)
             .map(TupleUtils.function((g, e, ed, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Announcement.Condensed.Title", settings));
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
@@ -150,7 +153,7 @@ public class AnnouncementMessageFormatter {
                 if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.setColor(a.getEventColor().asColor());
                 } else {
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
@@ -182,9 +185,10 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(guild, event, eData, img)
             .map(TupleUtils.function((g, e, ed, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Announcement.Condensed.Title", settings));
                 spec.addField(Messages.getMessage("Embed.Announcement.Condensed.ID", settings), a.getAnnouncementId().toString(), false);
@@ -214,7 +218,7 @@ public class AnnouncementMessageFormatter {
                 if (a.getType().equals(AnnouncementType.COLOR)) {
                     spec.setColor(a.getEventColor().asColor());
                 } else {
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
 
                 spec.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
@@ -246,9 +250,10 @@ public class AnnouncementMessageFormatter {
         return Mono.zip(guild, startDate, startTime, timezone, eData, img)
             .map(TupleUtils.function((g, sDate, sTime, tz, ed, hasImg) -> spec -> {
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), GlobalConst.discalSite, g.getIconUrl(Image.Format.PNG).orElse(GlobalConst.iconUrl));
+                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", GlobalConst.discalSite, GlobalConst.iconUrl);
+                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 spec.setTitle(Messages.getMessage("Embed.Announcement.Announce.Title", settings));
                 if (hasImg)
@@ -261,7 +266,7 @@ public class AnnouncementMessageFormatter {
                     spec.setColor(ec.asColor());
                 } catch (Exception e) {
                     //I dunno, color probably null.
-                    spec.setColor(GlobalConst.discalColor);
+                    spec.setColor(GlobalVal.getDiscalColor());
                 }
 
                 if (!settings.getSimpleAnnouncements()) {

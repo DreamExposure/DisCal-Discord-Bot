@@ -3,12 +3,11 @@ package org.dreamexposure.discal.server.endpoints.v2.event.list
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.utils.GlobalConst
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONArray
@@ -31,7 +30,7 @@ class ListEventRangeEndpoint(val client: DiscordClient) {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
-                return@flatMap Mono.just(Json.encodeToString(authState))
+                return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             }
 
             //Handle request
@@ -47,19 +46,19 @@ class ListEventRangeEndpoint(val client: DiscordClient) {
                     .collectList()
                     .map(::JSONArray)
                     .map { JSONObject().put("events", it).put("message", "Success").toString() }
-                    .doOnNext { response.rawStatusCode = GlobalConst.STATUS_SUCCESS }
+                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
                     .switchIfEmpty(responseMessage("Calendar not found")
-                            .doOnNext { response.rawStatusCode = GlobalConst.STATUS_NOT_FOUND }
+                            .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
                     )
         }.onErrorResume(JSONException::class.java) {
             it.printStackTrace()
 
-            response.rawStatusCode = GlobalConst.STATUS_BAD_REQUEST
+            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LogFeed.log(LogObject.forException("[API-v2] list events by range err", it, this.javaClass))
 
-            response.rawStatusCode = GlobalConst.STATUS_INTERNAL_ERROR
+            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

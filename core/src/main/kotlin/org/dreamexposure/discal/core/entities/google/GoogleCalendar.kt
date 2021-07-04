@@ -13,7 +13,6 @@ import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.utils.GlobalConst
 import org.dreamexposure.discal.core.utils.TimeUtils
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
@@ -79,8 +78,8 @@ class GoogleCalendar internal constructor(
     }
 
     override fun getOngoingEvents(): Flux<Event> {
-        val start = System.currentTimeMillis() - (GlobalConst.oneDayMs * 14) // 2 weeks ago
-        val end = System.currentTimeMillis() + GlobalConst.oneDayMs // One day from now
+        val start = System.currentTimeMillis() - Duration.ofDays(14).toMillis() // 2 weeks ago
+        val end = System.currentTimeMillis() + Duration.ofDays(1).toMillis() // One day from now
 
         return EventWrapper.getEvents(calendarData, start, end)
                 .flatMapMany { Flux.fromIterable(it) }

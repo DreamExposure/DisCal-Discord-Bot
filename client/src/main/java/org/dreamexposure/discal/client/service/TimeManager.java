@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.service;
 
-import org.dreamexposure.discal.core.utils.GlobalConst;
-
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Timer;
@@ -36,7 +35,7 @@ public class TimeManager {
      */
     public void init() {
         final Timer cc = new Timer(true);
-        cc.schedule(new CreatorCleaner(), GlobalConst.oneHourMs, GlobalConst.oneHourMs);
+        cc.schedule(new CreatorCleaner(), Duration.ofHours(1).toMillis(), Duration.ofHours(1).toMillis());
         this.timers.add(cc);
     }
 
