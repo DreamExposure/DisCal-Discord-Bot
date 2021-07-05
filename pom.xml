@@ -26,13 +26,13 @@
         <thymeleaf.layout-dialect.version>2.5.1</thymeleaf.layout-dialect.version>
 
         <spring.version>2.5.2</spring.version>
-        <spring.security.version>5.4.5</spring.security.version>
+        <spring.security.version>5.5.1</spring.security.version>
         <spring.session.version>2.5.1</spring.session.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
-        <discord4j.version>3.1.6</discord4j.version>
-        <discord4j.json.version>1.5.13</discord4j.json.version>
-        <discord4j.stores.version>3.1.7</discord4j.stores.version>
+        <discord4j.version>3.2.0-M3</discord4j.version>
+        <discord4j.json.version>1.6.5</discord4j.json.version>
+        <discord4j.stores.version>3.2.0</discord4j.stores.version>
 
         <google.client-api.core.version>1.31.1</google.client-api.core.version>
         <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
