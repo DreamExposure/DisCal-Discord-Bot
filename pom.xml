@@ -25,9 +25,9 @@
         <thymeleaf.springsecurity.version>3.0.4.RELEASE</thymeleaf.springsecurity.version>
         <thymeleaf.layout-dialect.version>2.5.1</thymeleaf.layout-dialect.version>
 
-        <spring.version>2.4.4</spring.version>
+        <spring.version>2.5.2</spring.version>
         <spring.security.version>5.4.5</spring.security.version>
-        <spring.session.version>2.4.2</spring.session.version>
+        <spring.session.version>2.5.1</spring.session.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
         <discord4j.version>3.1.6</discord4j.version>
@@ -144,11 +144,6 @@
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
         </dependency>
-        <!--Forcing reactor netty version-->
-        <dependency>
-            <groupId>io.projectreactor.netty</groupId>
-            <artifactId>reactor-netty</artifactId>
-        </dependency>
         <!--NovaUtils API-->
         <dependency>
             <groupId>org.dreamexposure</groupId>
@@ -193,6 +188,10 @@
                 </exclusion>
                 <exclusion>
                     <groupId>io.projectreactor</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.projectreactor.netty</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>

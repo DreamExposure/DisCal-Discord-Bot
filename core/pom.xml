@@ -20,6 +20,12 @@
             <groupId>com.discord4j</groupId>
             <artifactId>discord4j-core</artifactId>
             <version>${discord4j.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.projectreactor.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.discord4j</groupId>
@@ -34,6 +40,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.projectreactor.netty</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
