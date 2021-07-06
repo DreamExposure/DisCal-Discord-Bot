@@ -1,9 +1,11 @@
 package org.dreamexposure.discal.client
 
+import discord4j.common.store.Store
+import discord4j.common.store.legacy.LegacyStoreLayout
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
-import discord4j.core.`object`.presence.Activity
-import discord4j.core.`object`.presence.Presence
+import discord4j.core.`object`.presence.ClientActivity
+import discord4j.core.`object`.presence.ClientPresence
 import discord4j.core.event.domain.channel.TextChannelDeleteEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
@@ -100,8 +102,8 @@ class DisCalClient {
                     .build().gateway()
                     .setEnabledIntents(getIntents())
                     .setSharding(getStrategy())
-                    .setStoreService(getStores())
-                    .setInitialPresence { Presence.doNotDisturb(Activity.playing("Booting Up!")) }
+                    .setStore(Store.fromLayout(LegacyStoreLayout.of(getStores())))
+                    .setInitialPresence { ClientPresence.doNotDisturb(ClientActivity.playing("Booting Up!")) }
                     .withGateway { client ->
                         DisCalClient.client = client
 
@@ -158,7 +160,7 @@ private fun getStores(): StoreService {
     return if (BotSettings.USE_REDIS_STORES.get().equals("true", ignoreCase = true)) {
         val uri = RedisURI.Builder
                 .redis(BotSettings.REDIS_HOSTNAME.get(), BotSettings.REDIS_PORT.get().toInt())
-                .withPassword(BotSettings.REDIS_PASSWORD.get())
+                .withPassword(BotSettings.REDIS_PASSWORD.get().toCharArray())
                 .build()
 
         val rss = RedisStoreService.Builder()

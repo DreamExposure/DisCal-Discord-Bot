@@ -33,12 +33,6 @@
             <version>${revision}</version>
             <scope>compile</scope>
         </dependency>
-        <!--JSch for SSH Tunneling-->
-        <dependency>
-            <groupId>com.jcraft</groupId>
-            <artifactId>jsch</artifactId>
-            <version>0.1.55</version>
-        </dependency>
         <!--FlywayDB API for Database Migrations-->
         <dependency>
             <groupId>org.flywaydb</groupId>

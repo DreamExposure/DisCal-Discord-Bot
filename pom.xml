@@ -41,9 +41,7 @@
         <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
         <r2dbc.pool.version>0.8.3.RELEASE</r2dbc.pool.version>
 
-        <netty.version.forced>4.1.56.Final</netty.version.forced>
-
-        <reactor.version.bom>Dysprosium-SR21</reactor.version.bom>
+        <reactor.version.bom>2020.0.8</reactor.version.bom>
 
         <discal.version.name>${revision}</discal.version.name>
 
@@ -127,18 +125,6 @@
             <artifactId>annotations</artifactId>
             <version>20.1.0</version>
         </dependency>
-        <!--  *dies*  forced due to stores-redis:lettuce-core giving 4.1.38 -->
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version.forced}</version>
-        </dependency>
-        <!-- *dies* Forced due to so many issues -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>2.12.2</version>
-        </dependency>
         <!--Forcing reactor version-->
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -176,7 +162,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--r2jdbc Driver-->
+        <!--r2dbc Driver-->
         <dependency>
             <groupId>dev.miku</groupId>
             <artifactId>r2dbc-mysql</artifactId>
