@@ -293,7 +293,7 @@ export class EmbedCalendarRunner implements TaskCallback {
         let end = document.createElement("input");
         end.type = "text";
         end.className = "form-control";
-        end.id = "event-start-" + event.eventId;
+        end.id = "event-end-" + event.eventId;
         end.name = "label";
         end.readOnly = true;
         end.value = endString;
