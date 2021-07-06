@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.client.service
 
-import discord4j.core.`object`.presence.Activity
-import discord4j.core.`object`.presence.Presence
+import discord4j.core.`object`.presence.ClientActivity
+import discord4j.core.`object`.presence.ClientPresence
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -58,7 +58,7 @@ class StatusChanger: ApplicationRunner {
                             .replace("{version}", GlobalVal.version)
 
 
-                    DisCalClient.client!!.updatePresence(Presence.online(Activity.playing(status)))
+                    DisCalClient.client!!.updatePresence(ClientPresence.online(ClientActivity.playing(status)))
                 })
     }
 
