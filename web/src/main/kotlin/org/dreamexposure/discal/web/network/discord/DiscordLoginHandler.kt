@@ -23,6 +23,7 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.function.TupleUtils
+import java.net.URI
 import java.util.*
 
 @RestController
@@ -135,20 +136,21 @@ class DiscordLoginHandler {
                                             model["key"] = keyGrantResponseBody.getString("key")
 
                                             DiscordAccountHandler.addAccount(model, swe)
-                                                    .then(ServerResponse.ok().render("redirect:/dashboard"))
+                                                    .then(ServerResponse.temporaryRedirect(URI.create("/dashboard"))
+                                                            .build())
                                         } else {
                                             //Something didn't work, just redirect back to login page
                                             LogFeed.log(
                                                     LogObject.forDebug("login issue", keyGrantResponse.body?.string())
                                             )
 
-                                            ServerResponse.ok().render("redirect:/login")
+                                            ServerResponse.temporaryRedirect(URI.create("/login")).build()
                                         }
                                     })
                         })
             } else {
                 //Token not provided. Auth denied or error. Redirect to login page
-                return@flatMap ServerResponse.ok().render("redirect:/login")
+                return@flatMap ServerResponse.temporaryRedirect(URI.create("/login")).build()
             }
         }.doOnError {
             LogFeed.log(LogObject.forException("[Login-Discord] Discord login failed", it, this.javaClass))
@@ -160,7 +162,7 @@ class DiscordLoginHandler {
         return DiscordAccountHandler.getAccount(swe).flatMap { model ->
             if (!model.containsKey("key")) {
                 //User isn't logged in, just redirect to home page
-                return@flatMap ServerResponse.ok().render("redirect:/")
+                return@flatMap ServerResponse.temporaryRedirect(URI.create("/")).build()
             } else {
                 //Tell the API server the user has logged out and to delete the temp key
                 val client = OkHttpClient()
@@ -176,10 +178,10 @@ class DiscordLoginHandler {
                 return@flatMap Mono.fromCallable(client.newCall(logoutRequest)::execute)
                         .subscribeOn(Schedulers.boundedElastic())
                         .then(DiscordAccountHandler.removeAccount(swe))
-                        .then(ServerResponse.ok().render("redirect:/"))
+                        .then(ServerResponse.temporaryRedirect(URI.create("/")).build())
                         .doOnError {
                             LogFeed.log(LogObject.forException("[Web] Discord logout fail", it, this.javaClass))
-                        }.onErrorResume { ServerResponse.ok().render("redirect:/") }
+                        }.onErrorResume { ServerResponse.temporaryRedirect(URI.create("/")).build() }
             }
         }
     }
