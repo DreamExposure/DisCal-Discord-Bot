@@ -116,7 +116,7 @@
 
         <!-- Modules list (only displayed if logged in) -->
         <div th:if="${logged_in}">
-            <!-- Heading     -->
+            <!-- Heading -->
             <div class="sidebar-heading">
                 Modules
             </div>
@@ -124,7 +124,7 @@
             <!-- Start Nav Item - Guild Overview Container -->
             <div class="nav-item active">
                 <a class="nav-link" id="dash-overview-select"
-                   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(1)}">
+                   th:href="'/dashboard/' + ${dashboard_selected_id}">
                     <i class="fas fa-fw fa-book-open"></i>
                     <span>Guild Overview</span>
                 </a>
@@ -134,7 +134,7 @@
             <!-- Start Nav Item - Guild Calendar Container -->
             <div class="nav-item">
                 <a class="nav-link" id="dash-calendar-select"
-                   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(1)} + '/calendar'">
+                   th:href="'/dashboard/' + ${dashboard_selected_id} + '/calendar'">
                     <i class="fas fa-fw fa-calendar-alt"></i>
                     <span>Calendar</span>
                 </a>
@@ -144,7 +144,7 @@
             <!-- Start Nav Item - Guild Events Container -->
             <div class="nav-item">
                 <a class="nav-link" id="dash-events-select"
-                   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(1)} + '/events'">
+                   th:href="'/dashboard/' + ${dashboard_selected_id} + '/events'">
                     <i class="fas fa-fw fa-calendar-day"></i>
                     <span>Events</span>
                 </a>
@@ -154,7 +154,7 @@
             <!-- Start Nav Item - Guild Announcements Container -->
             <div class="nav-item">
                 <a class="nav-link" id="dash-ann-select"
-                   th:href="'/dashboard/' + ${#strings.listSplit(#httpServletRequest.requestURI, '/').get(1)} + '/announcements'">
+                   th:href="'/dashboard/' + ${dashboard_selected_id} + '/announcements'">
                     <i class="fas fa-fw fa-bell"></i>
                     <span>Announcements</span>
                 </a>
@@ -175,7 +175,7 @@
 
             <!-- Start Nav Item - Guild Container -->
             <th:block th:each="guild : ${guilds}">
-                <th:block th:if="${#strings.contains(#httpServletRequest.requestURI, guild.id)}">
+                <th:block th:if="${dashboard_selected_id == guild.id}">
                     <div class="nav-item active">
                         <a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
                             <i class="fas fa-fw fa-chart-area"></i>
@@ -184,8 +184,7 @@
                     </div>
                 </th:block>
 
-                <th:block
-                        th:unless="${#strings.contains(#httpServletRequest.requestURI, guild.id)}">
+                <th:block th:unless="${dashboard_selected_id == guild.id}">
                     <div class="nav-item">
                         <a class="nav-link" th:href="'/dashboard/' + ${guild.id}">
                             <i class="fas fa-fw fa-chart-area"></i>

@@ -51,7 +51,7 @@ object DiscordAccountHandler {
         return swe.session.map { session ->
             val acc = session.getAttribute("account") as? String
 
-            if (acc != null) {
+            if (acc != null && discordAccounts.containsKey(acc)) {
                 val model = discordAccounts[acc]!!
 
                 model.remove("last_use")
@@ -100,13 +100,13 @@ object DiscordAccountHandler {
     fun addAccount(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<Void> {
         model.remove("last_use")
         model["last_use"] = System.currentTimeMillis()
-        return removeAccount(swe)
-                .then(swe.session
-                        .flatMap { session ->
-                            discordAccounts[session.getRequiredAttribute("account") as String] = model
-                            Mono.empty()
-                        }
-                )
+        return removeAccount(swe).then(swe.session
+                .flatMap { session ->
+                    session.attributes["account"] = UUID.randomUUID().toString()
+                    discordAccounts[session.getRequiredAttribute("account") as String] = model
+                    Mono.empty()
+                }
+        )
     }
 
     fun removeAccount(swe: ServerWebExchange): Mono<Void> {
@@ -114,6 +114,7 @@ object DiscordAccountHandler {
             if (has) {
                 swe.session.map {
                     this.discordAccounts.remove(it.getRequiredAttribute("account"))
+                    it.attributes.remove("account")
                 }.then()
             } else Mono.empty()
         }

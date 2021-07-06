@@ -96,6 +96,7 @@ class SpringController {
                         return@flatMap DiscordAccountHandler.getAccount(swe)
                                 .doOnNext { model.clear() }
                                 .doOnNext(model::putAll)
+                                .doOnNext { model["dashboard_selected_id"] = id }
                                 .thenReturn("dashboard/guild")
                     }
                 }
@@ -112,6 +113,7 @@ class SpringController {
                         return@flatMap DiscordAccountHandler.getAccount(swe)
                                 .doOnNext { model.clear() }
                                 .doOnNext(model::putAll)
+                                .doOnNext { model["dashboard_selected_id"] = id }
                                 .thenReturn("dashboard/calendar")
                     }
                 }

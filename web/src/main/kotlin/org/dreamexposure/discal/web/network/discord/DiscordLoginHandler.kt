@@ -77,6 +77,7 @@ class DiscordLoginHandler {
 
                             //Saving session and access info into memory...
                             val model = DiscordAccountHandler.createDefaultModel()
+                            model["logged_in"] = true
                             model["good_timezones"] = GoodTimezone.values()
                             model["announcement_types"] = AnnouncementType.values()
                             model["event_colors"] = EventColor.values()
