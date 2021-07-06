@@ -3,7 +3,7 @@ package org.dreamexposure.discal.web.network.discord
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
@@ -48,7 +48,7 @@ class DiscordLoginHandler {
 
             return@fromCallable client.newCall(tokenRequest).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap {
-            Mono.fromCallable { JSONObject(it.body()?.string()) }
+            Mono.fromCallable { JSONObject(it.body?.string()) }
         }.flatMap { info ->
             if (info.has("access_token")) {
                 //GET request for user info
@@ -73,8 +73,8 @@ class DiscordLoginHandler {
 
                 Mono.zip(dataResMono, guildResMono)
                         .flatMap(TupleUtils.function { userDataResponse, userGuildsResponse ->
-                            val userInfo = JSONObject(userDataResponse.body()?.string())
-                            val guildsInfo = JSONArray(userGuildsResponse.body()?.string())
+                            val userInfo = JSONObject(userDataResponse.body?.string())
+                            val guildsInfo = JSONArray(userGuildsResponse.body?.string())
 
                             //Saving session and access info into memory...
                             val model = DiscordAccountHandler.createDefaultModel()
@@ -111,7 +111,7 @@ class DiscordLoginHandler {
                             model["guilds"] = guilds
 
                             //Do temp API key request...
-                            val keyGrantRequestBody = RequestBody.create(GlobalVal.JSON, "")
+                            val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
                             val keyGrantRequest = Request.Builder()
                                     .url("${BotSettings.API_URL.get()}/v2/account/login")
                                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
@@ -130,7 +130,7 @@ class DiscordLoginHandler {
 
                                         //Handle response
                                         if (keyGrantResponse.isSuccessful) {
-                                            val keyGrantResponseBody = JSONObject(keyGrantResponse.body()?.string())
+                                            val keyGrantResponseBody = JSONObject(keyGrantResponse.body?.string())
                                             //API Key received
                                             model["key"] = keyGrantResponseBody.getString("key")
 
@@ -139,7 +139,7 @@ class DiscordLoginHandler {
                                         } else {
                                             //Something didn't work, just redirect back to login page
                                             LogFeed.log(
-                                                    LogObject.forDebug("login issue", keyGrantResponse.body()?.string())
+                                                    LogObject.forDebug("login issue", keyGrantResponse.body?.string())
                                             )
 
                                             Mono.just("redirect:/login")
@@ -165,7 +165,7 @@ class DiscordLoginHandler {
                 //Tell the API server the user has logged out and to delete the temp key
                 val client = OkHttpClient()
 
-                val requestBody = RequestBody.create(GlobalVal.JSON, "")
+                val requestBody = "".toRequestBody(GlobalVal.JSON)
 
                 val logoutRequest = Request.Builder()
                         .url("${BotSettings.API_URL.get()}/v2/account/logout")

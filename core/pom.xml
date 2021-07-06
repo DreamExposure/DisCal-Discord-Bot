@@ -27,11 +27,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.discord4j</groupId>
-            <artifactId>discord-json</artifactId>
-            <version>${discord4j.json.version}</version>
-        </dependency>
         <!--Discord4J Redis Stores-->
         <dependency>
             <groupId>com.discord4j</groupId>

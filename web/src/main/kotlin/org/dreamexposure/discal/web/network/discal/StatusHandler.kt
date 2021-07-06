@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpStatusCodes
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
@@ -16,7 +17,7 @@ object StatusHandler {
     fun getLatestStatusInfo(): Mono<NetworkInfo> {
         return Mono.fromCallable {
             val client = OkHttpClient()
-            val body = RequestBody.create(GlobalVal.JSON, "")
+            val body = "".toRequestBody(GlobalVal.JSON)
 
             val request = Request.Builder()
                     .url("${BotSettings.API_URL.get()}/v2/status/get")
@@ -27,8 +28,8 @@ object StatusHandler {
 
             return@fromCallable client.newCall(request).execute()
         }.map { response ->
-            if (response.code() == HttpStatusCodes.STATUS_CODE_OK) {
-                return@map NetworkInfo().fromJson(JSONObject(response.body()?.string()))
+            if (response.code == HttpStatusCodes.STATUS_CODE_OK) {
+                return@map NetworkInfo().fromJson(JSONObject(response.body?.string()))
             } else {
                 return@map NetworkInfo() //Just return an empty object, its fine.
             }

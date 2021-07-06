@@ -2,7 +2,7 @@ package org.dreamexposure.discal.web.handler
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
@@ -152,7 +152,7 @@ object DiscordAccountHandler {
     private fun getReadOnlyApikey(): Mono<String> {
         return Mono.fromCallable {
             val client = OkHttpClient()
-            val keyGrantRequestBody = RequestBody.create(GlobalVal.JSON, "")
+            val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
             val keyGrantRequest = Request.Builder()
                     .url("${BotSettings.API_URL.get()}/v2/account/key/readonly/get")
                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
@@ -164,12 +164,12 @@ object DiscordAccountHandler {
                 .map { response ->
                     if (response.isSuccessful) {
                         //TODO: Change to use kotlin serialization
-                        val body = JSONObject(response.body()?.string())
+                        val body = JSONObject(response.body?.string())
 
                         return@map body.optString("key", "internal_error")
                     } else {
                         //Something didn't work, log and add "key" embed page knows how to handle
-                        LogFeed.log(LogObject.forDebug("Embed key fail: ${response.body()?.string()}"))
+                        LogFeed.log(LogObject.forDebug("Embed key fail: ${response.body?.string()}"))
                         return@map "internal_error"
                     }
                 }

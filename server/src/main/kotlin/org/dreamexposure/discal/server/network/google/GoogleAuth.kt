@@ -37,9 +37,9 @@ object GoogleAuth {
             Mono.fromCallable {
                 Authorization.getAuth().client.newCall(httpRequest).execute()
             }.subscribeOn(Schedulers.boundedElastic()).map { response ->
-                val responseBody = response.body()!!.string()
+                val responseBody = response.body!!.string()
 
-                if (response.code() == GlobalVal.STATUS_SUCCESS) {
+                if (response.code == GlobalVal.STATUS_SUCCESS) {
                     val codeResponse = JSONObject(responseBody)
 
                     val url = codeResponse.getString("verification_url")
@@ -56,7 +56,7 @@ object GoogleAuth {
                     scheduleNextPoll(pol)
                 } else {
                     LogFeed.log(LogObject.forDebug("Error request access token",
-                            "Status code: ${response.code()} | ${response.message()} | $responseBody"))
+                            "Status code: ${response.code} | ${response.message} | $responseBody"))
                 }
             }
         }.then()
@@ -80,15 +80,15 @@ object GoogleAuth {
             Mono.fromCallable {
                 Authorization.getAuth().client.newCall(httpRequest).execute()
             }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
-                val responseBody = response.body()!!.string()
+                val responseBody = response.body!!.string()
 
-                if (response.code() == GlobalVal.STATUS_FORBIDDEN) {
+                if (response.code == GlobalVal.STATUS_FORBIDDEN) {
                     //Handle access denied
                     LogFeed.log(LogObject.forDebug("[!GDC!] Access denied for credential: ${poll.credNumber}"))
 
                     Mono.error<GoogleAuthCancelException>(GoogleAuthCancelException())
-                } else if (response.code() == GlobalVal.STATUS_BAD_REQUEST
-                        || response.code() == GlobalVal.STATUS_PRECONDITION_REQUIRED) {
+                } else if (response.code == GlobalVal.STATUS_BAD_REQUEST
+                        || response.code == GlobalVal.STATUS_PRECONDITION_REQUIRED) {
                     //See if auth is pending, if so, just reschedule.
 
                     val aprError = JSONObject(responseBody)
@@ -105,17 +105,17 @@ object GoogleAuth {
                         }
                         else -> {
                             LogFeed.log(LogObject.forDebug("[!GDC!] Poll Failure!",
-                                    "Status code: ${response.code()} | ${response.message()} | $responseBody"))
+                                    "Status code: ${response.code} | ${response.message} | $responseBody"))
 
                             Mono.error(GoogleAuthCancelException())
                         }
                     }
-                } else if (response.code() == GlobalVal.STATUS_RATE_LIMITED) {
+                } else if (response.code == GlobalVal.STATUS_RATE_LIMITED) {
                     //We got rate limited... oops. Lets just poll half as often...
                     poll.interval = poll.interval * 2
 
                     Mono.empty()
-                } else if (response.code() == GlobalVal.STATUS_SUCCESS) {
+                } else if (response.code == GlobalVal.STATUS_SUCCESS) {
                     //Access granted, save credentials...
                     val aprGrant = JSONObject(responseBody)
                     val aes = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
@@ -130,7 +130,7 @@ object GoogleAuth {
                 } else {
                     //Unknown network error...
                     LogFeed.log(LogObject.forDebug("[!GDC!] Network error; poll failure",
-                            "Status code: ${response.code()} | ${response.message()} | $responseBody"))
+                            "Status code: ${response.code} | ${response.message} | $responseBody"))
 
                     Mono.error(GoogleAuthCancelException())
                 }

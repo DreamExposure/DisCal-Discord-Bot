@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.utils
 import discord4j.common.util.Snowflake
 import discord4j.rest.util.Color
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
@@ -40,7 +40,7 @@ object GlobalVal {
     const val discordCdnUrl = "https://cdn.discordapp.com"
 
     @JvmStatic
-    val JSON = MediaType.parse("application/json; charset=utf-8")!!
+    val JSON = "application/json; charset=utf-8".toMediaType()
 
     val JSON_FORMAT = Json { encodeDefaults = true }
 

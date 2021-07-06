@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server
 
-import com.zaxxer.hikari.HikariDataSource
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
@@ -10,7 +9,6 @@ import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.server.network.google.GoogleAuth
 import org.dreamexposure.discal.server.utils.Authentication
-import org.dreamexposure.novautils.database.DatabaseInfo
 import org.dreamexposure.novautils.database.DatabaseSettings
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.exception.FlywayValidateException
@@ -92,7 +90,7 @@ private fun handleMigrations(repair: Boolean) {
             BotSettings.SQL_PASS.get(),
             BotSettings.SQL_PREFIX.get(),
     )
-    val databaseInfo = connect(databaseSettings)
+    val databaseInfo = NovaUtilsDatabaseManager.connectToMySQL(databaseSettings)
 
     try {
         val flyway = Flyway.configure()
@@ -134,17 +132,4 @@ private fun handleMigrations(repair: Boolean) {
         e.printStackTrace()
         exitProcess(2)
     }
-}
-
-private fun connect(settings: DatabaseSettings): DatabaseInfo {
-    val ds = HikariDataSource()
-    var connectionURL = "jdbc:mysql://" + settings.hostname + ":" + settings.port
-    if (settings.database != null) {
-        connectionURL = connectionURL + "/" + settings.database
-    }
-    ds.jdbcUrl = connectionURL
-    ds.username = settings.user
-    ds.password = settings.password
-    println("Database connection successful!")
-    return DatabaseInfo(ds, settings, null)
 }

@@ -2,7 +2,7 @@ package org.dreamexposure.discal.server.network.dbotsgg
 
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LogFeed
@@ -27,7 +27,7 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
 
             val client = OkHttpClient()
 
-            val body = RequestBody.create(GlobalVal.JSON, json.toString())
+            val body = json.toString().toRequestBody(GlobalVal.JSON)
             val request = Request.Builder()
                     .url("https://discord.bots.gg/api/v1/bots/265523588918935552/stats")
                     .post(body)
@@ -37,8 +37,8 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
 
             client.newCall(request).execute()
         }.doOnNext { response ->
-            if (response.code() != GlobalVal.STATUS_SUCCESS) {
-                LogFeed.log(LogObject.forDebug("Failed to update DBots.gg stats", "Body: ${response.body()?.string()}"))
+            if (response.code != GlobalVal.STATUS_SUCCESS) {
+                LogFeed.log(LogObject.forDebug("Failed to update DBots.gg stats", "Body: ${response.body?.string()}"))
             }
         }.onErrorResume {
             Mono.empty()
