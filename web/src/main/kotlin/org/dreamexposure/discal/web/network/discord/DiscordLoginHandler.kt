@@ -15,21 +15,19 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.json.JSONArray
 import org.json.JSONObject
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.function.TupleUtils
-import java.net.URI
 import java.util.*
 
-@RestController
+@Controller
 class DiscordLoginHandler {
     @GetMapping("/account/login")
-    fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<ServerResponse> {
+    fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<String> {
         val client = OkHttpClient()
 
         return Mono.fromCallable {
@@ -136,21 +134,20 @@ class DiscordLoginHandler {
                                             model["key"] = keyGrantResponseBody.getString("key")
 
                                             DiscordAccountHandler.addAccount(model, swe)
-                                                    .then(ServerResponse.temporaryRedirect(URI.create("/dashboard"))
-                                                            .build())
+                                                    .thenReturn("redirect:/dashboard")
                                         } else {
                                             //Something didn't work, just redirect back to login page
                                             LogFeed.log(
                                                     LogObject.forDebug("login issue", keyGrantResponse.body?.string())
                                             )
 
-                                            ServerResponse.temporaryRedirect(URI.create("/login")).build()
+                                            Mono.just("redirect:/login")
                                         }
                                     })
                         })
             } else {
                 //Token not provided. Auth denied or error. Redirect to login page
-                return@flatMap ServerResponse.temporaryRedirect(URI.create("/login")).build()
+                return@flatMap Mono.just("redirect:/login")
             }
         }.doOnError {
             LogFeed.log(LogObject.forException("[Login-Discord] Discord login failed", it, this.javaClass))
@@ -158,11 +155,11 @@ class DiscordLoginHandler {
     }
 
     @GetMapping("/logout")
-    fun handleLogout(swe: ServerWebExchange): Mono<ServerResponse> {
+    fun handleLogout(swe: ServerWebExchange): Mono<String> {
         return DiscordAccountHandler.getAccount(swe).flatMap { model ->
             if (!model.containsKey("key")) {
                 //User isn't logged in, just redirect to home page
-                return@flatMap ServerResponse.temporaryRedirect(URI.create("/")).build()
+                return@flatMap Mono.just("redirect:/")
             } else {
                 //Tell the API server the user has logged out and to delete the temp key
                 val client = OkHttpClient()
@@ -178,10 +175,10 @@ class DiscordLoginHandler {
                 return@flatMap Mono.fromCallable(client.newCall(logoutRequest)::execute)
                         .subscribeOn(Schedulers.boundedElastic())
                         .then(DiscordAccountHandler.removeAccount(swe))
-                        .then(ServerResponse.temporaryRedirect(URI.create("/")).build())
+                        .thenReturn("redirect:/")
                         .doOnError {
                             LogFeed.log(LogObject.forException("[Web] Discord logout fail", it, this.javaClass))
-                        }.onErrorResume { ServerResponse.temporaryRedirect(URI.create("/")).build() }
+                        }.onErrorReturn("redirect:/")
             }
         }
     }
