@@ -96,7 +96,9 @@ data class WebGuild(
                                 this.announcements.addAll(a)
                             }
                         })
-            }.onErrorResume(ClientException::class.java) { Mono.error(BotNotInGuildException()) }
+            }.onErrorResume(ClientException::class.java) {
+                Mono.error(BotNotInGuildException())
+            }.switchIfEmpty(Mono.error(BotNotInGuildException()))
         }
 
         @JvmStatic
