@@ -42,7 +42,7 @@ class GetWebGuildEndpoint(val client: DiscordClient) {
 
             val g = client.getGuildById(guildId)
 
-            WebGuild.fromGuild(g).onErrorResume(BotNotInGuildException::class.java) { Mono.empty() }.flatMap { wg ->
+            WebGuild.fromGuild(g).flatMap { wg ->
                 val member = g.member(userId)
 
                 val manageServerMono = PermissionChecker.hasManageServerRole(member, g)
