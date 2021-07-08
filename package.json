@@ -1,13 +1,13 @@
 {
   "title": "DisCal",
   "name": "discal",
-  "version": "3.0.0-SNAPSHOT",
+  "version": "4.1.0-SNAPSHOT",
   "description": "A Discord bot that integrates Google Calendar into Discord",
   "homepage": "https://www.discalbot.com",
   "bugs": {
     "url": "https://github.com/DreamExposure/DisCal-Discord-Bot/issues"
   },
-  "license": "LGPL-3.0",
+  "license": "GPL-3.0",
   "author": "NovaFox161",
   "contributors": [],
   "repository": {
