@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.presence.ClientPresence;
 import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -28,7 +27,6 @@ public class ReadyEventListener {
             )
             .doOnNext(info -> LogFeed.log(LogObject.forStatus("Ready Event Success!")))
             .then(Messages.reloadLangs())
-            .then(event.getClient().updatePresence(ClientPresence.online()))
             .onErrorResume(e -> {
                 LogFeed.log(LogObject.forException("BAD!!!!!1!!", e, ReadyEventListener.class));
                 return Mono.empty();
