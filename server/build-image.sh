@@ -1,5 +1,14 @@
+#!/bin/bash
+
 version=$1
+versionName=$version
 
-podman build --events-backend=file -t rg.nl-ams.scw.cloud/dreamexposure/discal-server:"$version" --file ./Dockerfile .
+if [[ $version == *"SNAPSHOT"* ]]; then
+  versionName="latest"
+fi
 
-podman push --events-backend=file rg.nl-ams.scw.cloud/dreamexposure/discal-server:"$version" --creds="$SCW_USER:$SCW_SECRET"
+podman build --events-backend=file -t rg.nl-ams.scw.cloud/dreamexposure/discal-server:"$versionName" --file \
+./Dockerfile .
+
+podman push --events-backend=file rg.nl-ams.scw.cloud/dreamexposure/discal-server:"$versionName" \
+--creds="$SCW_USER:$SCW_SECRET"
