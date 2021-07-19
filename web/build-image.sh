@@ -1,10 +1,13 @@
 #!/bin/bash
 
 version=$1
+echo "Version: $version"
 
-if [[ $version == *"SNAPSHOT"* ]]; then
-  version="latest"
-fi
+case "$version" in
+  *SNAPSHOT*)
+    version="latest"
+    ;;
+esac
 
 echo "Using image tag: $version"
 
