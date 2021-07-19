@@ -1,14 +1,15 @@
 #!/bin/bash
 
 version=$1
-versionName=$version
 
 if [[ $version == *"SNAPSHOT"* ]]; then
-  versionName="latest"
+  version="latest"
 fi
 
-podman build --events-backend=file -t rg.nl-ams.scw.cloud/dreamexposure/discal-web:"$versionName" --file \
+echo "Using image tag: $version"
+
+podman build --events-backend=file -t rg.nl-ams.scw.cloud/dreamexposure/discal-web:"$version" --file \
 ./Dockerfile .
 
-podman push --events-backend=file rg.nl-ams.scw.cloud/dreamexposure/discal-web:"$versionName" \
+podman push --events-backend=file rg.nl-ams.scw.cloud/dreamexposure/discal-web:"$version" \
 --creds="$SCW_USER:$SCW_SECRET"
