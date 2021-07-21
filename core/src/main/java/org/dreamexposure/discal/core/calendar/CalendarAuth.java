@@ -11,7 +11,6 @@ import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential;
 import org.dreamexposure.discal.core.network.google.Authorization;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
-import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -74,7 +73,7 @@ public class CalendarAuth {
             .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
     }
 
-    public static Mono<Calendar> getCalendarService(@NotNull CalendarData calData) {
+    public static Mono<Calendar> getCalendarService(CalendarData calData) {
         return Mono.fromCallable(() -> {
             if (calData.getExternal()) {
                 return authorize(calData).map(cred ->

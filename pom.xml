@@ -124,12 +124,6 @@
             <version>${kotlinx.serialization.version}</version>
             <type>pom</type>
         </dependency>
-        <!--For Annotations-->
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>20.1.0</version>
-        </dependency>
         <!-- slf4j-api - Need to force this for logback to work. I dunno -->
         <dependency>
             <groupId>org.slf4j</groupId>
