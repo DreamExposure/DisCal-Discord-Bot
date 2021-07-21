@@ -9,13 +9,10 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.GlobalVal;
-import org.joda.time.Interval;
-import org.joda.time.Period;
+import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.json.JSONObject;
 import org.springframework.boot.system.ApplicationPid;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,7 +41,7 @@ public class KeepAliveHandler {
                     else
                         data.put("guilds", 0);
                     data.put("memory", usedMemory());
-                    data.put("uptime", humanReadableUptime());
+                    data.put("uptime", TimeUtils.getHumanReadableUptime());
                     data.put("version", GlobalVal.getVersion());
                     data.put("d4j_version", GlobalVal.getD4jVersion());
                     //TODO: Add announcement count!!!
@@ -77,13 +74,5 @@ public class KeepAliveHandler {
         final long freeMemory = Runtime.getRuntime().freeMemory();
         final double a = (totalMemory - freeMemory) / (double) (1024 * 1024);
         return (double) Math.round(a * 100) / 100;
-    }
-
-    private static String humanReadableUptime() {
-        final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
-        final Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
-        final Period period = interval.toPeriod();
-
-        return String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
     }
 }

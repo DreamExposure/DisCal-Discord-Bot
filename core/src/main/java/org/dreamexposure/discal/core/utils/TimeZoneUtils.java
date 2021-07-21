@@ -1,7 +1,8 @@
 package org.dreamexposure.discal.core.utils;
 
 import org.dreamexposure.discal.core.enums.timezone.BadTimezone;
-import org.joda.time.DateTimeZone;
+
+import java.time.ZoneId;
 
 /**
  * Created by Nova Fox on 4/7/2017.
@@ -11,9 +12,8 @@ import org.joda.time.DateTimeZone;
 public class TimeZoneUtils {
     public static boolean isValid(final String value) {
         try {
-            final DateTimeZone tz = DateTimeZone.forID(value);
-            return tz != null && !isBadTz(value);
-        } catch (final IllegalArgumentException e) {
+            return ZoneId.getAvailableZoneIds().contains(value) && !isBadTz(value);
+        } catch (Exception e) {
             return false;
         }
     }

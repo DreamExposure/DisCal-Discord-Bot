@@ -5,15 +5,12 @@ import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.JsonUtil;
-import org.joda.time.Interval;
-import org.joda.time.Period;
+import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -139,12 +136,7 @@ public class NetworkInfo {
     }
 
     public String getUptimeLatest() {
-        final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
-        final Interval interval = new Interval(mxBean.getStartTime(), System.currentTimeMillis());
-        final Period period = interval.toPeriod();
-
-
-        this.uptime = String.format("%d months, %d days, %d hours, %d minutes, %d seconds%n", period.getMonths(), period.getDays(), period.getHours(), period.getMinutes(), period.getSeconds());
+        this.uptime = TimeUtils.getHumanReadableUptime();
 
         return this.uptime;
     }

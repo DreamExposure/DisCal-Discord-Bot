@@ -25,7 +25,7 @@ import java.util.ArrayList;
  */
 //TODO: Basically rewrite this whole class in order to support multi-cal!!!!!
 public class CalendarCommand implements Command {
-    private static final String TIME_ZONE_DB = "http://www.joda.org/joda-time/timezones.html";
+    private static final String TIME_ZONE_DB = "https://www.timezoneconverter.com/cgi-bin/zonehelp.tzc";
 
     /**
      * Gets the command this Object is responsible for.

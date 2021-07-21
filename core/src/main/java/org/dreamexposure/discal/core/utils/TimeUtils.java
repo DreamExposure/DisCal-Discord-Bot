@@ -10,8 +10,11 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Mono;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -133,5 +136,15 @@ public class TimeUtils {
                 .atZone(tz)
                 .toInstant();
         }
+    }
+
+    public static String getHumanReadableUptime() {
+        final RuntimeMXBean mxBean = ManagementFactory.getRuntimeMXBean();
+
+        long rawDuration = System.currentTimeMillis() - mxBean.getStartTime();
+        Duration duration = Duration.ofMillis(rawDuration);
+
+        return String.format("%d days, %d hours, %d minutes, %d seconds%n",
+            duration.toDays(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart());
     }
 }
