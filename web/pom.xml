@@ -146,7 +146,7 @@
                         </goals>
                         <configuration>
                             <executable>npm</executable>
-                            <commandlineArgs>install</commandlineArgs>
+                            <commandlineArgs>ci</commandlineArgs>
                             <workingDirectory>..</workingDirectory>
                         </configuration>
                     </execution>
