@@ -7,7 +7,7 @@
 
     <properties>
         <!--Project properties-->
-        <revision>4.1.0</revision>
+        <revision>4.1.1-SNAPSHOT</revision>
 
         <discal.version.name>${revision}</discal.version.name>
 
