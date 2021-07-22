@@ -53,7 +53,9 @@ object DatabaseManager {
                 .option(DATABASE, settings.database)
                 .build())
 
-        val conf = ConnectionPoolConfiguration.builder(factory).build()
+        val conf = ConnectionPoolConfiguration.builder(factory)
+                .maxSize(15)
+                .build()
 
         pool = ConnectionPool(conf)
     }
