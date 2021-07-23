@@ -70,7 +70,7 @@ public class CalendarAuth {
             return credential;
         })
             .subscribeOn(Schedulers.boundedElastic())
-            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed")));
+            .switchIfEmpty(Mono.error(new IllegalStateException("Empty not allowed. gID: " + calData.getGuildId())));
     }
 
     public static Mono<Calendar> getCalendarService(CalendarData calData) {
