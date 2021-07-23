@@ -11,9 +11,9 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author NovaFox161
@@ -26,7 +26,7 @@ import java.util.List;
 @SuppressWarnings("Duplicates")
 @Component
 public class NetworkInfo {
-    private final List<ConnectedClient> clients = new ArrayList<>();
+    private final List<ConnectedClient> clients = new CopyOnWriteArrayList<>();
 
     private int calCount;
     private int announcementCount;
@@ -46,7 +46,7 @@ public class NetworkInfo {
 
     //Getters
     public List<ConnectedClient> getClients() {
-        return new ArrayList<>(this.clients);
+        return new CopyOnWriteArrayList<>(this.clients);
     }
 
     public boolean doesClientExist(final int clientIndex) {
