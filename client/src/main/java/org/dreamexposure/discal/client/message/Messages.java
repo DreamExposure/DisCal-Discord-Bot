@@ -17,7 +17,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 
 /**
  * @author NovaFox161
@@ -44,10 +43,8 @@ public class Messages {
             .onErrorReturn(false);
     }
 
-    @SuppressWarnings("unchecked")
     public static List<String> getLangs() {
-
-        return new CopyOnWriteArrayList<String>(langs.keySet());
+        return new CopyOnWriteArrayList<>(langs.keySet());
     }
 
     public static boolean isSupported(String _value) {
@@ -99,81 +96,73 @@ public class Messages {
     //Message sending
     public static Mono<Message> sendMessage(String message, MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)))
+            .flatMap(c -> c.createMessage(message))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
+    public static Mono<Message> sendMessage(EmbedCreateSpec embed, MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)))
+            .flatMap(c -> c.createEmbed(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
+    public static Mono<Message> sendMessage(String message, EmbedCreateSpec embed, MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
+            .flatMap(c -> c.createMessage(message)
+                .withEmbed(embed)
+            )
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(String message, GuildMessageChannel channel) {
-        return channel.createMessage(spec -> spec.setContent(message))
+        return channel.createMessage(message)
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(Consumer<EmbedCreateSpec> embed, GuildMessageChannel channel) {
-        return channel.createMessage(spec -> spec.setEmbed(embed))
+    public static Mono<Message> sendMessage(EmbedCreateSpec embed, GuildMessageChannel channel) {
+        return channel.createEmbed(embed)
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            GuildMessageChannel channel) {
-        return channel.createMessage(spec -> spec.setContent(message).setEmbed(embed))
+    public static Mono<Message> sendMessage(String message, EmbedCreateSpec embed, GuildMessageChannel channel) {
+        return channel.createMessage(message).withEmbed(embed)
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     //Direct message sending
     public static Mono<Message> sendDirectMessage(String message, User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message)))
+            .flatMap(c -> c.createMessage(message))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendDirectMessage(Consumer<EmbedCreateSpec> embed, User user) {
+    public static Mono<Message> sendDirectMessage(EmbedCreateSpec embed, User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setEmbed(embed)))
+            .flatMap(c -> c.createEmbed(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
-    public static Mono<Message> sendDirectMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                                  User user) {
+    public static Mono<Message> sendDirectMessage(String message, EmbedCreateSpec embed, User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(spec -> spec.setContent(message).setEmbed(embed)))
+            .flatMap(c -> c.createMessage(message).withEmbed(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     //Message editing
     public static Mono<Message> editMessage(String message, Message original) {
-        return original
-            .edit(spec -> spec.setContent(message));
+        return original.edit().withContentOrNull(message);
     }
 
-    public static Mono<Message> editMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            Message original) {
-        return original
-            .edit(spec -> spec.setContent(message).setEmbed(embed));
+    public static Mono<Message> editMessage(String message, EmbedCreateSpec embed, Message original) {
+        return original.edit().withContentOrNull(message).withEmbedOrNull(embed);
     }
 
     public static Mono<Message> editMessage(String message, MessageCreateEvent event) {
-        return event.getMessage()
-            .edit(spec -> spec.setContent(message));
+        return event.getMessage().edit().withContentOrNull(message);
     }
 
-    public static Mono<Message> editMessage(String message, Consumer<EmbedCreateSpec> embed,
-                                            MessageCreateEvent event) {
-        return event.getMessage()
-            .edit(spec -> spec.setContent(message).setEmbed(embed));
+    public static Mono<Message> editMessage(String message, EmbedCreateSpec embed, MessageCreateEvent event) {
+        return event.getMessage().edit().withContentOrNull(message).withEmbedOrNull(embed);
     }
 
     //Message deleting

@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -33,7 +32,7 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("MagicNumber")
 public class EventMessageFormatter {
-    public static Mono<Consumer<EmbedCreateSpec>> getEventEmbed(Event event, int calNum, GuildSettings settings) {
+    public static Mono<EmbedCreateSpec> getEventEmbed(Event event, int calNum, GuildSettings settings) {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(new EventData())
@@ -51,16 +50,18 @@ public class EventMessageFormatter {
             .defaultIfEmpty("Error/Unknown");
 
         return Mono.zip(guild, data, sDate, sTime, eDate, eTime, img, timezone)
-            .map(TupleUtils.function((g, ed, startDate, startTime, endDate, endTime, hasImg, tz) -> spec -> {
+            .map(TupleUtils.function((g, ed, startDate, startTime, endDate, endTime, hasImg, tz) -> {
+                var builder = EmbedCreateSpec.builder();
+
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(g.getName(), BotSettings.BASE_URL.get(),
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.Event.Info.Title", settings));
+                builder.title(Messages.getMessage("Embed.Event.Info.Title", settings));
                 if (hasImg) {
-                    spec.setImage(ed.getImageLink());
+                    builder.image(ed.getImageLink());
                 }
                 if (event.getSummary() != null) {
                     String summary = event.getSummary();
@@ -68,7 +69,7 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, false);
+                    builder.addField(Messages.getMessage("Embed.Event.Info.Summary", settings), summary, false);
                 }
                 if (event.getDescription() != null) {
                     String description = event.getDescription();
@@ -76,45 +77,46 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, false);
+                    builder.addField(Messages.getMessage("Embed.Event.Info.Description", settings), description, false);
                 }
 
 
                 //Start time
-                spec.addField(Messages.getMessage("Embed.Event.Info.StartDate", settings), startDate, true);
-                spec.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
+                builder.addField(Messages.getMessage("Embed.Event.Info.StartDate", settings), startDate, true);
+                builder.addField(Messages.getMessage("Embed.Event.Info.StartTime", settings), startTime, true);
 
                 //Timezone so that start/end times are split up cleanly on discord
-                spec.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, false);
+                builder.addField(Messages.getMessage("Embed.Event.Info.TimeZone", settings), tz, false);
 
                 //End time
-                spec.addField(Messages.getMessage("Embed.Event.Info.EndDate", settings), endDate, true);
-                spec.addField(Messages.getMessage("Embed.Event.Info.EndTime", settings), endTime, true);
+                builder.addField(Messages.getMessage("Embed.Event.Info.EndDate", settings), endDate, true);
+                builder.addField(Messages.getMessage("Embed.Event.Info.EndTime", settings), endTime, true);
 
                 //Location handling
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
                         final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
                 //TODO: Add info on recurrence here.
-                spec.setUrl(event.getHtmlLink());
-                spec.setFooter(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
+                builder.url(event.getHtmlLink());
+                builder.footer(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
 
                 if (event.getColorId() != null) {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
-                    spec.setColor(ec.asColor());
+                    builder.color(ec.asColor());
                 } else {
-                    spec.setColor(GlobalVal.getDiscalColor());
+                    builder.color(GlobalVal.getDiscalColor());
                 }
+
+                return builder.build();
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getCondensedEventEmbed(Event event, int calNum,
-                                                                         GuildSettings settings) {
+    public static Mono<EmbedCreateSpec> getCondensedEventEmbed(Event event, int calNum, GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
             .defaultIfEmpty(new EventData())
@@ -126,16 +128,18 @@ public class EventMessageFormatter {
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
-            .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> spec -> {
+            .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> {
+                var builder = EmbedCreateSpec.builder();
+
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(g.getName(), BotSettings.BASE_URL.get(),
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.Event.Condensed.Title", settings));
+                builder.title(Messages.getMessage("Embed.Event.Condensed.Title", settings));
                 if (hasImg)
-                    spec.setThumbnail(ed.getImageLink());
+                    builder.thumbnail(ed.getImageLink());
 
                 if (event.getSummary() != null) {
                     String summary = event.getSummary();
@@ -143,31 +147,33 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, false);
+                    builder.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, false);
                 }
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startData, true);
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
+                builder.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startData, true);
+                builder.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
                         final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 }
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
-                spec.setUrl(event.getHtmlLink());
+                builder.addField(Messages.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
+                builder.url(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
-                    spec.setColor(ec.asColor());
+                    builder.color(ec.asColor());
                 } else {
-                    spec.setColor(GlobalVal.getDiscalColor());
+                    builder.color(GlobalVal.getDiscalColor());
                 }
+
+                return builder.build();
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getPreEventEmbed(PreEvent event, GuildSettings settings) {
+    public static Mono<EmbedCreateSpec> getPreEventEmbed(PreEvent event, GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<String> sDate = getHumanReadableDate(event.getStartDateTime(), event.getCalNumber(), false, settings);
         Mono<String> sTime = getHumanReadableTime(event.getStartDateTime(), event.getCalNumber(), false, settings);
@@ -178,17 +184,19 @@ public class EventMessageFormatter {
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, sDate, sTime, eDate, eTime, img)
-            .map(TupleUtils.function((g, startDate, startTime, endDate, endTime, hasImg) -> spec -> {
+            .map(TupleUtils.function((g, startDate, startTime, endDate, endTime, hasImg) -> {
+                var builder = EmbedCreateSpec.builder();
+
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(g.getName(), BotSettings.BASE_URL.get(),
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
                 if (hasImg)
-                    spec.setImage(event.getEventData().getImageLink());
+                    builder.image(event.getEventData().getImageLink());
                 if (event.getEditing())
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Id", settings), event.getEventId(), false);
 
                 if (event.getSummary() != null) {
                     String summary = event.getSummary();
@@ -196,9 +204,9 @@ public class EventMessageFormatter {
                         summary = summary.substring(0, 250);
                         summary = summary + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, false);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), summary, false);
                 } else {
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Summary", settings), "NOT SET", true);
                 }
                 if (event.getDescription() != null) {
                     String description = event.getDescription();
@@ -206,39 +214,41 @@ public class EventMessageFormatter {
                         description = description.substring(0, 500);
                         description = description + " (continues on Google Calendar View)";
                     }
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, false);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), description, false);
                 } else {
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Description", settings), "NOT SET", true);
                 }
                 if (event.getRecur()) {
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), event.getRecurrence().toHumanReadable(), false);
                 } else {
-                    spec.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
+                    builder.addField(Messages.getMessage("Embed.Event.Pre.Recurrence", settings), "N/a", true);
                 }
-                spec.addField(Messages.getMessage("Embed.Event.Pre.StartDate", settings), startDate, true);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.StartTime", settings), startTime, true);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimezone(), false);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.EndDate", settings), endDate, true);
-                spec.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
+                builder.addField(Messages.getMessage("Embed.Event.Pre.StartDate", settings), startDate, true);
+                builder.addField(Messages.getMessage("Embed.Event.Pre.StartTime", settings), startTime, true);
+                builder.addField(Messages.getMessage("Embed.Event.Pre.TimeZone", settings), event.getTimezone(), false);
+                builder.addField(Messages.getMessage("Embed.Event.Pre.EndDate", settings), endDate, true);
+                builder.addField(Messages.getMessage("Embed.Event.Pre.EndTime", settings), endTime, true);
 
                 if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
                     if (event.getLocation().length() > 300) {
                         final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
                     }
                 } else {
-                    spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
+                    builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), "N/a", true);
                 }
 
-                spec.setFooter(Messages.getMessage("Embed.Event.Pre.Key", settings), null);
-                spec.setColor(event.getColor().asColor());
+                builder.footer(Messages.getMessage("Embed.Event.Pre.Key", settings), null);
+                builder.color(event.getColor().asColor());
+
+                return builder.build();
             }));
     }
 
-    public static Mono<Consumer<EmbedCreateSpec>> getEventConfirmationEmbed(EventCreatorResponse ecr, int calNum,
-                                                                            GuildSettings settings) {
+    public static Mono<EmbedCreateSpec> getEventConfirmationEmbed(EventCreatorResponse ecr, int calNum,
+                                                                  GuildSettings settings) {
         Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), ecr.getEvent().getId())
             .defaultIfEmpty(new EventData())
@@ -250,39 +260,43 @@ public class EventMessageFormatter {
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
-            .map(TupleUtils.function((g, ed, d, t, hasImg) -> spec -> {
+            .map(TupleUtils.function((g, ed, d, t, hasImg) -> {
+                var builder = EmbedCreateSpec.builder();
+
                 if (settings.getBranded())
-                    spec.setAuthor(g.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(g.getName(), BotSettings.BASE_URL.get(),
                         g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.Event.Confirm.Title", settings));
+                builder.title(Messages.getMessage("Embed.Event.Confirm.Title", settings));
 
-                if (hasImg) spec.setImage(ed.getImageLink());
+                if (hasImg) builder.image(ed.getImageLink());
 
-                spec.addField(Messages.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), d, true);
-                spec.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), t, true);
+                builder.addField(Messages.getMessage("Embed.Event.Confirm.ID", settings), ecr.getEvent().getId(), false);
+                builder.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), d, true);
+                builder.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), t, true);
 
                 if (ecr.getEvent().getLocation() != null && !"".equalsIgnoreCase(ecr.getEvent().getLocation())) {
                     if (ecr.getEvent().getLocation().length() > 300) {
                         final String location = ecr.getEvent().getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
                     } else {
-                        spec.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings),
+                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings),
                             ecr.getEvent().getLocation(), false);
                     }
                 }
-                spec.setFooter(Messages.getMessage("Embed.Event.Confirm.Footer", settings), null);
-                spec.setUrl(ecr.getEvent().getHtmlLink());
+                builder.footer(Messages.getMessage("Embed.Event.Confirm.Footer", settings), null);
+                builder.url(ecr.getEvent().getHtmlLink());
 
                 if (ecr.getEvent().getColorId() != null) {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(ecr.getEvent().getColorId()));
-                    spec.setColor(ec.asColor());
+                    builder.color(ec.asColor());
                 } else {
-                    spec.setColor(GlobalVal.getDiscalColor());
+                    builder.color(GlobalVal.getDiscalColor());
                 }
+
+                return builder.build();
             }));
     }
 

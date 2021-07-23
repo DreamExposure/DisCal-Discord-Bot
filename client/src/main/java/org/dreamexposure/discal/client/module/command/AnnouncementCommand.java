@@ -25,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -377,8 +376,8 @@ public class AnnouncementCommand implements Command {
                     return DatabaseManager.INSTANCE.getAnnouncement(id, settings.getGuildID()).flatMap(a -> {
                         Mono<String> subNamesMono = event.getGuild()
                             .flatMap(g -> AnnouncementMessageFormatter.getSubscriberNames(a, g));
-                        Mono<Consumer<EmbedCreateSpec>> emMono = AnnouncementMessageFormatter
-                            .getFormatAnnouncementEmbed(a, settings);
+
+                        Mono<EmbedCreateSpec> emMono = AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings);
 
                         return Mono.zip(subNamesMono, emMono)
                             .flatMap(TupleUtils.function((subs, embed) -> Messages.sendMessage(subs, embed, event)));
@@ -564,21 +563,19 @@ public class AnnouncementCommand implements Command {
 
                         String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                         String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                        Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                            spec.setColor(GlobalVal.getDiscalColor());
 
-                            spec.setTitle("Subscribed the Following");
-
-                            spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
+                        var embed = EmbedCreateSpec.builder()
+                            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                            .color(GlobalVal.getDiscalColor())
+                            .title("Subscribed the Following")
+                            .description(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
                                 subMemString, settings)
                                 + GlobalVal.getLineBreak()
                                 + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
-                                subRoleString, settings));
-
-                            spec.setFooter(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
-                                a.getAnnouncementId().toString(), settings), null);
-                        };
+                                subRoleString, settings))
+                            .footer(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
+                                a.getAnnouncementId().toString(), settings), null)
+                            .build();
 
                         return DatabaseManager.INSTANCE.updateAnnouncement(a).thenReturn(embed);
                     }))
@@ -628,21 +625,18 @@ public class AnnouncementCommand implements Command {
 
                     String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                     String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                    Consumer<EmbedCreateSpec> embed = spec -> {
-                        spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                        spec.setColor(GlobalVal.getDiscalColor());
-
-                        spec.setTitle("Subscribed the Following");
-
-                        spec.setDescription(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
+                    var embed = EmbedCreateSpec.builder()
+                        .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                        .color(GlobalVal.getDiscalColor())
+                        .title("Subscribed the Following")
+                        .description(Messages.getMessage("Embed.Announcement.Subscribe.Users", "%users%",
                             subMemString, settings)
                             + GlobalVal.getLineBreak()
                             + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
-                            subRoleString, settings));
-
-                        spec.setFooter(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
-                            a.getAnnouncementId().toString(), settings), null);
-                    };
+                            subRoleString, settings))
+                        .footer(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
+                            a.getAnnouncementId().toString(), settings), null)
+                        .build();
 
                     return Mono.when(deleteUserMessage, deleteCreatorMessage).thenReturn(embed);
                 }))
@@ -836,21 +830,19 @@ public class AnnouncementCommand implements Command {
 
                         String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                         String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                        Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                            spec.setColor(GlobalVal.getDiscalColor());
-
-                            spec.setTitle("Unsubscribed the Following");
-
-                            spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
+                        var embed = EmbedCreateSpec.builder()
+                            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                            .color(GlobalVal.getDiscalColor())
+                            .title("Unsubscribed the Following")
+                            .description(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
                                 subMemString, settings)
                                 + GlobalVal.getLineBreak()
                                 + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
-                                subRoleString, settings));
+                                subRoleString, settings))
+                            .footer(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
+                                a.getAnnouncementId().toString(), settings), null)
+                            .build();
 
-                            spec.setFooter(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
-                                a.getAnnouncementId().toString(), settings), null);
-                        };
 
                         return DatabaseManager.INSTANCE.updateAnnouncement(a).thenReturn(embed);
                     }))
@@ -900,21 +892,19 @@ public class AnnouncementCommand implements Command {
 
                     String subMemString = subbedMembers.toString().replace("[", "").replace("]", "");
                     String subRoleString = subbedRoles.toString().replace("[", "").replace("]", "");
-                    Consumer<EmbedCreateSpec> embed = spec -> {
-                        spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                        spec.setColor(GlobalVal.getDiscalColor());
-
-                        spec.setTitle("Unsubscribed the Following");
-
-                        spec.setDescription(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
+                    var embed = EmbedCreateSpec.builder()
+                        .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                        .color(GlobalVal.getDiscalColor())
+                        .title("Unsubscribed the Following")
+                        .description(Messages.getMessage("Embed.Announcement.Unsubscribe.Users", "%users%",
                             subMemString, settings)
                             + GlobalVal.getLineBreak()
                             + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
-                            subRoleString, settings));
+                            subRoleString, settings))
+                        .footer(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
+                            a.getAnnouncementId().toString(), settings), null)
+                        .build();
 
-                        spec.setFooter(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
-                            a.getAnnouncementId().toString(), settings), null);
-                    };
 
                     return Mono.when(deleteUserMessage, deleteCreatorMessage).thenReturn(embed);
                 }))
@@ -952,23 +942,13 @@ public class AnnouncementCommand implements Command {
                         a.setType(type);
 
                         //Get the correct message to send depending on the type...
-                        String msg;
-                        switch (type) {
-                            case SPECIFIC:
-                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Specific", settings);
-                                break;
-                            case UNIVERSAL:
-                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Universal", settings);
-                                break;
-                            case COLOR:
-                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Color", settings);
-                                break;
-                            case RECUR:
-                                msg = Messages.getMessage("Creator.Announcement.Type.Success.Recur", settings);
-                                break;
-                            default:
-                                msg = "Type message somehow not handled. Ugh. Contact the devs please";
-                        }
+                        String msg = switch (type) {
+                            case SPECIFIC -> Messages.getMessage("Creator.Announcement.Type.Success.Specific", settings);
+                            case UNIVERSAL -> Messages.getMessage("Creator.Announcement.Type.Success.Universal", settings);
+                            case COLOR -> Messages.getMessage("Creator.Announcement.Type.Success.Color", settings);
+                            case RECUR -> Messages.getMessage("Creator.Announcement.Type.Success.Recur", settings);
+                            default -> "Type message somehow not handled. Ugh. Contact the devs please";
+                        };
 
                         //Okay, now we can return with the message...
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)

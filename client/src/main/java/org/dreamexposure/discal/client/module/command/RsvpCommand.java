@@ -19,7 +19,6 @@ import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 8/31/17.
@@ -406,7 +405,7 @@ public class RsvpCommand implements Command {
         }).then();
     }
 
-    private Mono<Consumer<EmbedCreateSpec>> getRsvpEmbed(final RsvpData data, final GuildSettings settings) {
+    private Mono<EmbedCreateSpec> getRsvpEmbed(final RsvpData data, final GuildSettings settings) {
         final Mono<Guild> guildMono = DisCalClient.getClient().getGuildById(settings.getGuildID()).cache();
 
         final Mono<List<Member>> onTimeMono = guildMono.flatMap(g -> UserUtils.getUsers(data.getGoingOnTime(), g));
@@ -419,21 +418,23 @@ public class RsvpCommand implements Command {
         });
 
         return Mono.zip(guildMono, onTimeMono, lateMono, undecidedMono, notGoingMono, rsvpRoleNameMono)
-            .map(TupleUtils.function((guild, onTime, late, undecided, notGoing, roleName) -> spec -> {
+            .map(TupleUtils.function((guild, onTime, late, undecided, notGoing, roleName) -> {
+                var builder = EmbedCreateSpec.builder();
+
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(guild.getName(), BotSettings.BASE_URL.get(),
                         guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.RSVP.List.Title", settings));
-                spec.addField("Event ID", data.getEventId(), false);
+                builder.title(Messages.getMessage("Embed.RSVP.List.Title", settings));
+                builder.addField("Event ID", data.getEventId(), false);
                 if (data.getLimit() > -1)
-                    spec.addField("Max Respondents", data.getCurrentCount() + "/" + data.getLimit(), true);
+                    builder.addField("Max Respondents", data.getCurrentCount() + "/" + data.getLimit(), true);
                 else
-                    spec.addField("Max Respondents", "Unlimited", true);
+                    builder.addField("Max Respondents", "Unlimited", true);
 
-                spec.addField("Role on RSVP", roleName, true);
+                builder.addField("Role on RSVP", roleName, true);
 
                 final StringBuilder onTimeBuilder = new StringBuilder();
                 for (final Member u : onTime) onTimeBuilder.append(u.getDisplayName()).append(", ");
@@ -448,27 +449,29 @@ public class RsvpCommand implements Command {
                 for (final Member u : notGoing) notGoingBuilder.append(u.getDisplayName()).append(", ");
 
                 if (onTimeBuilder.toString().isEmpty())
-                    spec.addField("On time", "N/a", true);
+                    builder.addField("On time", "N/a", true);
                 else
-                    spec.addField("On Time", onTimeBuilder.toString(), false);
+                    builder.addField("On Time", onTimeBuilder.toString(), false);
 
                 if (lateBuilder.toString().isEmpty())
-                    spec.addField("Late", "N/a", true);
+                    builder.addField("Late", "N/a", true);
                 else
-                    spec.addField("Late", lateBuilder.toString(), false);
+                    builder.addField("Late", lateBuilder.toString(), false);
 
                 if (unsureBuilder.toString().isEmpty())
-                    spec.addField("Unsure", "N/a", true);
+                    builder.addField("Unsure", "N/a", true);
                 else
-                    spec.addField("Unsure", unsureBuilder.toString(), false);
+                    builder.addField("Unsure", unsureBuilder.toString(), false);
 
                 if (notGoingBuilder.toString().isEmpty())
-                    spec.addField("Not Going", "N/a", true);
+                    builder.addField("Not Going", "N/a", true);
                 else
-                    spec.addField("Not Going", notGoingBuilder.toString(), false);
+                    builder.addField("Not Going", notGoingBuilder.toString(), false);
 
-                spec.setFooter(Messages.getMessage("Embed.RSVP.List.Footer", settings), null);
-                spec.setColor(GlobalVal.getDiscalColor());
+                builder.footer(Messages.getMessage("Embed.RSVP.List.Footer", settings), null);
+                builder.color(GlobalVal.getDiscalColor());
+
+                return builder.build();
             }));
     }
 }

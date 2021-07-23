@@ -32,8 +32,8 @@
         <kotlin.version>1.5.21</kotlin.version>
         <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
 
-        <discord4j.version>3.2.0-M3</discord4j.version>
-        <discord4j.stores.version>3.2.0</discord4j.stores.version>
+        <discord4j.version>3.2.0-RC1</discord4j.version>
+        <discord4j.stores.version>3.2.1</discord4j.stores.version>
 
         <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
         <thymeleaf.springsecurity.version>3.0.4.RELEASE</thymeleaf.springsecurity.version>

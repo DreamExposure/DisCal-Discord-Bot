@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -664,24 +663,23 @@ public class EventCommand implements Command {
 
                 if (args.length == 2) {
                     final String value = args[1];
-                    if ("list".equalsIgnoreCase(value) || "colors".equalsIgnoreCase(value)
-                        || "colours".equalsIgnoreCase(value)) {
-                        final Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    if ("list".equalsIgnoreCase(value) || "colors".equalsIgnoreCase(value) || "colours".equalsIgnoreCase(value)) {
+                        var builder = EmbedCreateSpec.builder()
+                            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                            .title("Available Colors")
+                            .url(BotSettings.BASE_URL.get() + "/docs/event/colors")
+                            .color(GlobalVal.getDiscalColor())
+                            .footer("Click Title for previews of the colors!", null);
 
-                            spec.setTitle("Available Colors");
-                            spec.setUrl(BotSettings.BASE_URL.get() + "/docs/event/colors");
-                            spec.setColor(GlobalVal.getDiscalColor());
-                            spec.setFooter("Click Title for previews of the colors!", null);
 
-                            for (final EventColor ec : EventColor.values()) {
-                                spec.addField(ec.name(), ec.getId() + "", true);
-                            }
-                        };
+                        for (final EventColor ec : EventColor.values()) {
+                            builder.addField(ec.name(), ec.getId() + "", true);
+                        }
 
                         return Mono.when(deleteUserMessage, deleteCreatorMessage)
                             .then(Messages.sendMessage("All Supported Colors. " +
-                                "Use either the name or ID in the command: `!event color <name/id>`", embed, event))
+                                    "Use either the name or ID in the command: `!event color <name/id>`", builder.build(),
+                                event))
                             .doOnNext(pre::setCreatorMessage);
                     } else {
                         if (EventColor.Companion.exists(value)) {
@@ -710,20 +708,19 @@ public class EventCommand implements Command {
                 }
             } else {
                 //Not in creator/editor, just default to listing the supported colors.
-                final Consumer<EmbedCreateSpec> embed = spec -> {
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                var builder = EmbedCreateSpec.builder()
+                    .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                    .title("Available Colors")
+                    .url(BotSettings.BASE_URL.get() + "/docs/event/colors")
+                    .color(GlobalVal.getDiscalColor())
+                    .footer("Click Title for previews of the colors!", null);
 
-                    spec.setTitle("Available Colors");
-                    spec.setUrl(BotSettings.BASE_URL.get() + "/docs/event/colors");
-                    spec.setColor(GlobalVal.getDiscalColor());
-                    spec.setFooter("Click Title for previews of the colors!", null);
 
-                    for (final EventColor ec : EventColor.values()) {
-                        spec.addField(ec.name(), ec.getId() + "", true);
-                    }
-                };
+                for (final EventColor ec : EventColor.values()) {
+                    builder.addField(ec.name(), ec.getId() + "", true);
+                }
                 return Messages.sendMessage("All Supported Colors. " +
-                    "Use either the name or ID in the command: `!event color <name/id>`", embed, event);
+                    "Use either the name or ID in the command: `!event color <name/id>`", builder.build(), event);
             }
         }).then();
     }

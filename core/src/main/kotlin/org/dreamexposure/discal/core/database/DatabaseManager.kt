@@ -9,7 +9,6 @@ import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
-import io.r2dbc.spi.ValidationDepth
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
@@ -28,6 +27,7 @@ import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.novautils.database.DatabaseSettings
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
+import java.time.Duration
 import java.util.*
 import java.util.function.Function
 
@@ -54,24 +54,14 @@ object DatabaseManager {
                 .build())
 
         val conf = ConnectionPoolConfiguration.builder(factory)
-                .maxSize(15)
+                .maxLifeTime(Duration.ofHours(1))
                 .build()
 
         pool = ConnectionPool(conf)
     }
 
     private fun <T> connect(connection: Function<Connection, Mono<T>>): Mono<T> {
-        return pool.create().flatMap { c ->
-            connection.apply(c).flatMap { item ->
-                Mono.from(c.validate(ValidationDepth.LOCAL)).flatMap { validate ->
-                    if (validate) {
-                        Mono.from(c.close()).thenReturn(item)
-                    } else {
-                        Mono.just(item)
-                    }
-                }
-            }
-        }
+        return Mono.usingWhen(pool.create(), connection::apply, Connection::close)
     }
 
     fun disconnectFromMySQL() = pool.dispose()
@@ -778,7 +768,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get announcements for guild", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getAnnouncements(guildId: Snowflake, type: AnnouncementType): Mono<List<Announcement>> {
@@ -816,7 +806,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get ann's for guild by type", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getAnnouncements(): Mono<List<Announcement>> {
@@ -828,7 +818,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
-                    val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
+                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
@@ -853,7 +843,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get all announcements", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getAnnouncements(type: AnnouncementType): Mono<List<Announcement>> {
@@ -866,7 +856,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
-                    val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
+                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
@@ -891,7 +881,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get announcements by type", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getEnabledAnnouncements(): Mono<List<Announcement>> {
@@ -903,7 +893,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
-                    val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
+                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
@@ -928,7 +918,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get enabled announcements", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getEnabledAnnouncements(guildId: Snowflake): Mono<List<Announcement>> {
@@ -965,7 +955,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get enabled ann's for guild", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getEnabledAnnouncements(announcementType: AnnouncementType): Mono<List<Announcement>> {
@@ -978,7 +968,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
-                    val guildId = Snowflake.of(row.get("GUILD_ID", String::class.java))
+                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
@@ -1003,7 +993,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get enabled ann's by type", it, this::class.java))
             }.onErrorReturn(mutableListOf())
-        }
+        }.defaultIfEmpty(mutableListOf())
     }
 
     fun getAnnouncementCount(): Mono<Int> {
@@ -1023,7 +1013,7 @@ object DatabaseManager {
             ).doOnError {
                 LogFeed.log(LogObject.forException("Failed to get announcement count", it, this::class.java))
             }.onErrorReturn(-1)
-        }
+        }.defaultIfEmpty(-1)
     }
 
     fun getCredentialData(credNumber: Int): Mono<GoogleCredentialData> {
@@ -1062,7 +1052,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete announcement", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteAnnouncementsForEvent(guildId: Snowflake, eventId: String): Mono<Boolean> {
@@ -1079,7 +1069,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete ann's for event", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteEventData(eventId: String): Mono<Boolean> {
@@ -1096,7 +1086,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete event data", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteAllEventData(guildId: Snowflake): Mono<Boolean> {
@@ -1113,7 +1103,7 @@ object DatabaseManager {
                         LogFeed.log(LogObject
                                 .forException("Failed to delete all event data for guild", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteAllAnnouncementData(guildId: Snowflake): Mono<Boolean> {
@@ -1129,7 +1119,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete all ann for guild", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteAllRsvpData(guildId: Snowflake): Mono<Boolean> {
@@ -1145,8 +1135,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete all rsvps for guild", it, this::class.java))
                     }.onErrorReturn(false)
-
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun removeRsvpRole(guildId: Snowflake, roleId: Snowflake): Mono<Boolean> {
@@ -1165,7 +1154,7 @@ object DatabaseManager {
                         LogFeed.log(LogObject
                                 .forException("Failed to update all rsvp with role for guild", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 
     fun deleteCalendar(data: CalendarData): Mono<Boolean> {
@@ -1182,7 +1171,7 @@ object DatabaseManager {
                     .doOnError {
                         LogFeed.log(LogObject.forException("Failed to delete calendar", it, this::class.java))
                     }.onErrorReturn(false)
-        }
+        }.defaultIfEmpty(false)
     }
 }
 

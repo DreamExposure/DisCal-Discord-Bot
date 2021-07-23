@@ -10,7 +10,6 @@ import org.dreamexposure.discal.core.utils.GlobalVal;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/3/2017.
@@ -63,22 +62,22 @@ public class HelpCommand implements Command {
     public Mono<Void> issueCommand(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return Mono.just(args).flatMap(ignore -> {
             if (args.length < 1) {
-                final Consumer<EmbedCreateSpec> embed = spec -> {
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                    spec.setTitle("DisCal Command Help");
-                    for (final Command c : CommandExecutor.getCommands()) {
-                        if (!c.getAliases().isEmpty()) {
-                            final String al = c.getAliases().toString();
-                            spec.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
-                        } else {
-                            spec.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
-                        }
+                var builder = EmbedCreateSpec.builder()
+                    .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                    .title("DisCal Command Help")
+                    .footer("Check out the official site for more command info!", null)
+                    .url(BotSettings.BASE_URL.get() + "/commands")
+                    .color(GlobalVal.getDiscalColor());
+
+                for (final Command c : CommandExecutor.getCommands()) {
+                    if (!c.getAliases().isEmpty()) {
+                        final String al = c.getAliases().toString();
+                        builder.addField(c.getCommand() + " " + al, c.getCommandInfo().getDescription(), true);
+                    } else {
+                        builder.addField(c.getCommand(), c.getCommandInfo().getDescription(), true);
                     }
-                    spec.setFooter("Check out the official site for more command info!", null);
-                    spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
-                    spec.setColor(GlobalVal.getDiscalColor());
-                };
-                return Messages.sendMessage(embed, event);
+                }
+                return Messages.sendMessage(builder.build(), event);
             } else if (args.length == 1) {
                 return CommandExecutor.getCommand(args[0])
                     .flatMap(cmd -> Messages.sendMessage(this.getCommandInfoEmbed(cmd), event));
@@ -96,43 +95,36 @@ public class HelpCommand implements Command {
     }
 
     //Embed formatters
-    private Consumer<EmbedCreateSpec> getCommandInfoEmbed(final Command cmd) {
-        return spec -> {
-            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-            spec.addField("Command", cmd.getCommand(), true);
-            spec.addField("Description", cmd.getCommandInfo().getDescription(), true);
-            spec.addField("Example", cmd.getCommandInfo().getExample(), true);
+    private EmbedCreateSpec getCommandInfoEmbed(final Command cmd) {
+        var builder = EmbedCreateSpec.builder()
+            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+            .addField("Command", cmd.getCommand(), true)
+            .addField("Description", cmd.getCommandInfo().getDescription(), true)
+            .addField("Example", cmd.getCommandInfo().getExample(), true)
+            .footer("<> = required | () = optional", null)
+            .url(BotSettings.BASE_URL.get() + "/commands")
+            .color(GlobalVal.getDiscalColor());
 
-            //Loop through sub commands
-            if (!cmd.getCommandInfo().getSubCommands().isEmpty()) {
-                String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
-                subs = subs.replace("[", "").replace("]", "");
-                spec.addField("Sub-Commands", subs, false);
-            }
 
-            spec.setFooter("<> = required | () = optional", null);
+        //Loop through sub commands
+        if (!cmd.getCommandInfo().getSubCommands().isEmpty()) {
+            String subs = cmd.getCommandInfo().getSubCommands().keySet().toString();
+            subs = subs.replace("[", "").replace("]", "");
+            builder.addField("Sub-Commands", subs, false);
+        }
 
-            spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
-
-            spec.setColor(GlobalVal.getDiscalColor());
-
-        };
+        return builder.build();
     }
 
-    private Consumer<EmbedCreateSpec> getSubCommandEmbed(final Command cmd, final String subCommand) {
-        return spec -> {
-            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-            spec.addField("Command", cmd.getCommand(), true);
-            spec.addField("Sub Command", subCommand, true);
-
-            spec.addField("Usage", cmd.getCommandInfo().getSubCommands().get(subCommand), false);
-
-            spec.setFooter("<> = required | () = optional", null);
-
-            spec.setUrl(BotSettings.BASE_URL.get() + "/commands");
-
-            spec.setColor(GlobalVal.getDiscalColor());
-
-        };
+    private EmbedCreateSpec getSubCommandEmbed(final Command cmd, final String subCommand) {
+        return EmbedCreateSpec.builder()
+            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+            .addField("Command", cmd.getCommand(), true)
+            .addField("Sub Command", subCommand, true)
+            .addField("Usage", cmd.getCommandInfo().getSubCommands().get(subCommand), false)
+            .footer("<> = required | () = optional", null)
+            .url(BotSettings.BASE_URL.get() + "/commands")
+            .color(GlobalVal.getDiscalColor())
+            .build();
     }
 }

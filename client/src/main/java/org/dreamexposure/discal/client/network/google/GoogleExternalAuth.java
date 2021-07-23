@@ -26,8 +26,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.function.Consumer;
-
 /**
  * @author NovaFox161
  * Date Created: 9/9/2018
@@ -72,19 +70,17 @@ public class GoogleExternalAuth {
                         final JSONObject codeResponse = new JSONObject(responseBody);
 
                         //Send DM to user with code.
-                        final Consumer<EmbedCreateSpec> embed = spec -> {
-                            spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-                            spec.setTitle(Messages.getMessage("Embed.AddCalendar.Code.Title", settings));
-
-                            spec.addField(
+                        var embed = EmbedCreateSpec.builder()
+                            .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                            .title(Messages.getMessage("Embed.AddCalendar.Code.Title", settings))
+                            .addField(
                                 Messages.getMessage("Embed.AddCalendar.Code.Code", settings),
                                 codeResponse.getString("user_code"),
-                                true);
-                            spec.setFooter(Messages.getMessage("Embed.AddCalendar.Code.Footer", settings), null);
-
-                            spec.setUrl(codeResponse.getString("verification_url"));
-                            spec.setColor(GlobalVal.getDiscalColor());
-                        };
+                                true)
+                            .footer(Messages.getMessage("Embed.AddCalendar.Code.Footer", settings), null)
+                            .url(codeResponse.getString("verification_url"))
+                            .color(GlobalVal.getDiscalColor())
+                            .build();
 
                         return event.getMessage().getAuthorAsMember().flatMap(user -> {
                             //Start timer to poll Google Cal for auth
@@ -194,28 +190,23 @@ public class GoogleExternalAuth {
                         return DatabaseManager.INSTANCE.updateCalendar(calData)
                             .then(CalendarWrapper.getUsersExternalCalendars(calData))
                             .flatMapMany(Flux::fromIterable)
-                            .map(i -> (Consumer<EmbedCreateSpec>) spec -> {
-                                spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-
-                                spec.setTitle(Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()));
-
-                                spec.addField(
+                            .map(i -> EmbedCreateSpec.builder()
+                                .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                                .title(Messages.getMessage("Embed.AddCalendar.List.Title", poll.getSettings()))
+                                .addField(
                                     Messages.getMessage("Embed.AddCalendar.List.Name", poll.getSettings()),
                                     i.getSummary(),
-                                    false);
-
-                                spec.addField(
+                                    false)
+                                .addField(
                                     Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.getSettings()),
                                     i.getTimeZone(),
-                                    false);
-
-                                spec.addField(
+                                    false)
+                                .addField(
                                     Messages.getMessage("Embed.AddCalendar.List.ID", poll.getSettings()),
                                     i.getId(),
-                                    false);
-
-                                spec.setColor(GlobalVal.getDiscalColor());
-                            })
+                                    false)
+                                .color(GlobalVal.getDiscalColor())
+                                .build())
                             .flatMap(em -> Messages.sendDirectMessage(em, poll.getUser()))
                             .switchIfEmpty(Messages.sendDirectMessage(
                                 Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", poll.getSettings()),

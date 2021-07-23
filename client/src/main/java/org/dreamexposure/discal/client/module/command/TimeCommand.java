@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.client.module.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
@@ -86,27 +87,30 @@ public class TimeCommand implements Command {
 
                 final String correctTime = fmt.format(ldt);
 
-                return event.getGuild().flatMap(guild ->
-                    Messages.sendMessage(embed -> {
-                        if (settings.getBranded()) {
-                            embed.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
-                                guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
-                        } else {
-                            embed.setAuthor("DisCal", BotSettings.BASE_URL.get(),
-                                GlobalVal.getIconUrl());
-                        }
+                return event.getGuild().map(guild -> {
+                    var builder = EmbedCreateSpec.builder();
+                    if (settings.getBranded()) {
+                        builder.author(guild.getName(), BotSettings.BASE_URL.get(),
+                            guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
+                    } else {
+                        builder.author("DisCal", BotSettings.BASE_URL.get(),
+                            GlobalVal.getIconUrl());
+                    }
 
-                        embed.setTitle(Messages.getMessage("Embed.Time.Title", settings));
+                    builder.title(Messages.getMessage("Embed.Time.Title", settings));
 
-                        embed.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false);
+                    builder.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false);
 
-                        embed.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
+                    builder.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.getTimeZone(), false);
 
-                        embed.setFooter(Messages.getMessage("Embed.Time.Footer", settings), null);
-                        embed.setUrl(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calData.getCalendarNumber()));
+                    builder.footer(Messages.getMessage("Embed.Time.Footer", settings), null);
+                    builder.url(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(),
+                        calData.getCalendarNumber()));
 
-                        embed.setColor(GlobalVal.getDiscalColor());
-                    }, event));
+                    builder.color(GlobalVal.getDiscalColor());
+
+                    return builder.build();
+                }).flatMap(embed -> Messages.sendMessage(embed, event));
             }))
             .switchIfEmpty(Messages.sendMessage(
                 Messages.getMessage("Creator.Calendar.NoCalendar", settings), event))

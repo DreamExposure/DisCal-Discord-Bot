@@ -10,12 +10,14 @@ import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
-import org.dreamexposure.discal.core.utils.*;
+import org.dreamexposure.discal.core.utils.ChannelUtils;
+import org.dreamexposure.discal.core.utils.GlobalVal;
+import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.dreamexposure.discal.core.utils.RoleUtils;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Created by Nova Fox on 1/5/2017.
@@ -90,37 +92,21 @@ public class DisCalCommand implements Command {
             if (args.length < 1) {
                 return this.moduleDisCalInfo(event, settings);
             } else {
-                switch (args[0].toLowerCase()) {
-                    case "discal":
-                        return this.moduleDisCalInfo(event, settings);
-                    case "settings":
-                        return this.moduleSettings(event, settings);
-                    case "role":
-                        return this.moduleControlRole(args, event, settings);
-                    case "channel":
-                        return this.moduleDisCalChannel(args, event, settings);
-                    case "simpleannouncement":
-                        return this.moduleSimpleAnnouncement(event, settings);
-                    case "dmannouncement":
-                    case "dmannouncements":
-                        return this.moduleDmAnnouncements(event, settings);
-                    case "language":
-                    case "lang":
-                        return this.moduleLanguage(args, event, settings);
-                    case "prefix":
-                        return this.modulePrefix(args, event, settings);
-                    case "invite":
-                        return this.moduleInvite(event, settings);
-                    case "dashboard":
-                        return this.moduleDashboard(event, settings);
-                    case "brand":
-                        return this.moduleBrand(event, settings);
-                    case "timeformat":
-                    case "twelvehour":
-                        return this.moduleTwelveHour(event, settings);
-                    default:
-                        return Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
-                }
+                return switch (args[0].toLowerCase()) {
+                    case "discal" -> this.moduleDisCalInfo(event, settings);
+                    case "settings" -> this.moduleSettings(event, settings);
+                    case "role" -> this.moduleControlRole(args, event, settings);
+                    case "channel" -> this.moduleDisCalChannel(args, event, settings);
+                    case "simpleannouncement" -> this.moduleSimpleAnnouncement(event, settings);
+                    case "dmannouncement", "dmannouncements" -> this.moduleDmAnnouncements(event, settings);
+                    case "language", "lang" -> this.moduleLanguage(args, event, settings);
+                    case "prefix" -> this.modulePrefix(args, event, settings);
+                    case "invite" -> this.moduleInvite(event, settings);
+                    case "dashboard" -> this.moduleDashboard(event, settings);
+                    case "brand" -> this.moduleBrand(event, settings);
+                    case "timeformat", "twelvehour" -> this.moduleTwelveHour(event, settings);
+                    default -> Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
+                };
             }
         }).then();
     }
@@ -131,25 +117,28 @@ public class DisCalCommand implements Command {
         final Mono<String> calCountMono = DatabaseManager.INSTANCE.getCalendarCount().map(i -> i + "");
         final Mono<String> annCountMono = DatabaseManager.INSTANCE.getAnnouncementCount().map(i -> i + "");
 
-        final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
-            .map(TupleUtils.function((guild, guilds, calendars, announcements) -> (EmbedCreateSpec spec) -> {
+        final Mono<EmbedCreateSpec> embedMono = Mono.zip(guildMono, guildCountMono, calCountMono, annCountMono)
+            .map(TupleUtils.function((guild, guilds, calendars, announcements) -> {
+                var builder = EmbedCreateSpec.builder()
+                    .title(Messages.getMessage("Embed.DisCal.Info.Title", settings))
+                    .addField(Messages.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true)
+                    .addField(Messages.getMessage("Embed.Discal.Info.Version", settings), GlobalVal.getVersion(), true)
+                    .addField(Messages.getMessage("Embed.DisCal.Info.Library", settings), GlobalVal.getD4jVersion(), false)
+                    .addField("Shard Index", Application.getShardIndex() + "/" + Application.getShardCount(), true)
+                    .addField(Messages.getMessage("Embed.DisCal.Info.TotalGuilds", settings), guilds, true)
+                    .addField(Messages.getMessage("Embed.DisCal.Info.TotalCalendars", settings), calendars, true)
+                    .addField(Messages.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), announcements, true)
+                    .footer(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null)
+                    .url(BotSettings.BASE_URL.get())
+                    .color(GlobalVal.getDiscalColor());
+
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(guild.getName(), BotSettings.BASE_URL.get(),
                         guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.DisCal.Info.Title", settings));
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.Developer", settings), "DreamExposure", true);
-                spec.addField(Messages.getMessage("Embed.Discal.Info.Version", settings), GlobalVal.getVersion(), true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.Library", settings), GlobalVal.getD4jVersion(), false);
-                spec.addField("Shard Index", Application.getShardIndex() + "/" + Application.getShardCount(), true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalGuilds", settings), guilds, true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalCalendars", settings), calendars, true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Info.TotalAnnouncements", settings), announcements, true);
-                spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
-                spec.setUrl(BotSettings.BASE_URL.get());
-                spec.setColor(GlobalVal.getDiscalColor());
+                return builder.build();
             }));
 
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
@@ -225,30 +214,34 @@ public class DisCalCommand implements Command {
         final Mono<String> dChanMono = guildMono.flatMap(g ->
             ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), g)).defaultIfEmpty("All Channels");
 
-        final Mono<Consumer<EmbedCreateSpec>> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
-            .map(TupleUtils.function((guild, dRole, dChannel) -> spec -> {
+        final Mono<EmbedCreateSpec> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
+            .map(TupleUtils.function((guild, dRole, dChannel) -> {
+                var builder = EmbedCreateSpec.builder()
+                    .title(Messages.getMessage("Embed.DisCal.Settings.Title", settings))
+                    .addField(Messages.getMessage("Embed.Discal.Settings.Role", settings), dRole, true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.Channel", settings), dChannel, false)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.SimpleAnn", settings),
+                        settings.getSimpleAnnouncements() + "", true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.Patron", settings), settings.getPatronGuild() + "", true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.Dev", settings), settings.getDevGuild() + "", true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.MaxCal", settings), settings.getMaxCalendars() + "", true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true)
+                    .addField(Messages.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true)
+                    //TODO: Add translations...
+                    .addField("Using Twelve Hour Format", settings.getTwelveHour() + "", true)
+                    .addField("Using Branding", settings.getBranded() + "", true)
+                    .footer(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox",
+                        null)
+                    .url(BotSettings.BASE_URL.get())
+                    .color(GlobalVal.getDiscalColor());
+
                 if (settings.getBranded())
-                    spec.setAuthor(guild.getName(), BotSettings.BASE_URL.get(),
+                    builder.author(guild.getName(), BotSettings.BASE_URL.get(),
                         guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
                 else
-                    spec.setAuthor("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
+                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
 
-                spec.setTitle(Messages.getMessage("Embed.DisCal.Settings.Title", settings));
-                spec.addField(Messages.getMessage("Embed.Discal.Settings.Role", settings), dRole, true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Channel", settings), dChannel, false);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.SimpleAnn", settings), settings.getSimpleAnnouncements() + "",
-                    true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Patron", settings), settings.getPatronGuild() + "", true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Dev", settings), settings.getDevGuild() + "", true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.MaxCal", settings), settings.getMaxCalendars() + "", true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true);
-                spec.addField(Messages.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true);
-                //TODO: Add translations...
-                spec.addField("Using Twelve Hour Format", settings.getTwelveHour() + "", true);
-                spec.addField("Using Branding", settings.getBranded() + "", true);
-                spec.setFooter(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox", null);
-                spec.setUrl(BotSettings.BASE_URL.get());
-                spec.setColor(GlobalVal.getDiscalColor());
+                return builder.build();
             }));
 
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
