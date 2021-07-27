@@ -77,7 +77,7 @@ public class TimeCommand implements Command {
     //TODO: Support multiple calendars
     private Mono<Void> calendarTime(final MessageCreateEvent event, final GuildSettings settings) {
         return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID())
-            .flatMap(calData -> CalendarWrapper.getCalendar(calData).flatMap(cal -> {
+            .flatMap(calData -> CalendarWrapper.INSTANCE.getCalendar(calData).flatMap(cal -> {
                 final LocalDateTime ldt = LocalDateTime.now(ZoneId.of(cal.getTimeZone()));
 
                 DateTimeFormatter fmt;

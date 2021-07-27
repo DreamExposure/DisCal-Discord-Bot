@@ -3,7 +3,7 @@ package org.dreamexposure.discal.client.module.command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.message.Messages;
-import org.dreamexposure.discal.client.network.google.GoogleExternalAuth;
+import org.dreamexposure.discal.client.network.google.GoogleExternalAuthHandler;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -87,7 +87,7 @@ public class AddCalendarCommand implements Command {
                             return Messages.sendMessage(
                                 Messages.getMessage("Creator.Calendar.HasCalendar", settings), event);
                         } else {
-                            return GoogleExternalAuth.getAuth().requestCode(event, settings)
+                            return GoogleExternalAuthHandler.INSTANCE.requestCode(event, settings)
                                 .then(Messages.sendMessage(
                                     Messages.getMessage("AddCalendar.Start", settings), event));
                         }
@@ -101,7 +101,7 @@ public class AddCalendarCommand implements Command {
                             && "N/a".equalsIgnoreCase(data.getEncryptedRefreshToken())) {
                             return Messages.sendMessage(Messages.getMessage("AddCalendar.Select.NotAuth", settings), event);
                         } else {
-                            return CalendarWrapper.getUsersExternalCalendars(data)
+                            return CalendarWrapper.INSTANCE.getUsersExternalCalendars(data)
                                 .flatMapMany(Flux::fromIterable)
                                 .any(c -> !c.isDeleted() && c.getId().equals(args[0]))
                                 .flatMap(valid -> {
@@ -109,7 +109,7 @@ public class AddCalendarCommand implements Command {
                                         final CalendarData newData = new CalendarData(
                                             data.getGuildId(), 1, CalendarHost.GOOGLE, args[0], args[0], true, 0,
                                             data.getPrivateKey(), data.getEncryptedAccessToken(),
-                                            data.getEncryptedRefreshToken());
+                                            data.getEncryptedRefreshToken(), data.getExpiresAt());
 
                                         //combine db calls and message send to be executed together async
                                         final Mono<Boolean> calInsert = DatabaseManager.INSTANCE.updateCalendar(newData);

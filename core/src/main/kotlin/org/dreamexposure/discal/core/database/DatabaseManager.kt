@@ -28,9 +28,11 @@ import org.dreamexposure.novautils.database.DatabaseSettings
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import java.time.Duration
+import java.time.Instant
 import java.util.*
 import java.util.function.Function
 
+//TODO: Support multi-cal on EventData, RsvpData, Announcement objects
 object DatabaseManager {
     private val settings: DatabaseSettings = DatabaseSettings(
             BotSettings.SQL_HOST.get(),
@@ -192,7 +194,7 @@ object DatabaseManager {
                     val updateCommand = """UPDATE ${Tables.CALENDARS.table} SET
                         CALENDAR_NUMBER = ?, HOST = ?, CALENDAR_ID = ?,
                         CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,
-                        PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?
+                        PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?, EXPIRES_AT
                         WHERE GUILD_ID = ?
                     """.trimMargin()
 
@@ -206,7 +208,8 @@ object DatabaseManager {
                             .bind(6, calData.privateKey)
                             .bind(7, calData.encryptedAccessToken)
                             .bind(8, calData.encryptedRefreshToken)
-                            .bind(9, calData.guildId.asString())
+                            .bind(9, calData.expiresAt.toEpochMilli())
+                            .bind(10, calData.guildId.asString())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -215,7 +218,7 @@ object DatabaseManager {
                     val insertCommand = """INSERT INTO ${Tables.CALENDARS.table}
                         (GUILD_ID, CALENDAR_NUMBER, HOST, CALENDAR_ID,
                         CALENDAR_ADDRESS, EXTERNAL, CREDENTIAL_ID,
-                        PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        PRIVATE_KEY, ACCESS_TOKEN, REFRESH_TOKEN, EXPIRES_AT) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
@@ -229,6 +232,7 @@ object DatabaseManager {
                             .bind(7, calData.privateKey)
                             .bind(8, calData.encryptedAccessToken)
                             .bind(9, calData.encryptedRefreshToken)
+                            .bind(10, calData.expiresAt.toEpochMilli())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -447,26 +451,28 @@ object DatabaseManager {
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.CREDS.table} SET
-                        REFRESH_TOKEN = ?, ACCESS_TOKEN = ?
+                        REFRESH_TOKEN = ?, ACCESS_TOKEN = ?, EXPIRES_AT = ?
                         WHERE CREDENTIAL_NUMBER = ?""".trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
                             .bind(0, credData.encryptedRefreshToken)
                             .bind(1, credData.encryptedAccessToken)
-                            .bind(2, credData.credentialNumber)
+                            .bind(2, credData.expiresAt.toEpochMilli())
+                            .bind(3, credData.credentialNumber)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
                             .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.CREDS.table}
-                        |(CREDENTIAL_NUMBER, REFRESH_TOKEN, ACCESS_TOKEN)
-                        |VALUES(?, ?, ?)""".trimMargin()
+                        |(CREDENTIAL_NUMBER, REFRESH_TOKEN, ACCESS_TOKEN, EXPIRES_AT)
+                        |VALUES(?, ?, ?, ?)""".trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
                             .bind(0, credData.credentialNumber)
                             .bind(1, credData.encryptedRefreshToken)
                             .bind(2, credData.encryptedAccessToken)
+                            .bind(3, credData.expiresAt.toEpochMilli())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -570,9 +576,10 @@ object DatabaseManager {
                     val privateKey = row["PRIVATE_KEY", String::class.java]!!
                     val accessToken = row["ACCESS_TOKEN", String::class.java]!!
                     val refreshToken = row["REFRESH_TOKEN", String::class.java]!!
+                    val expiresAt = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
-                            credId, privateKey, accessToken, refreshToken)
+                            credId, privateKey, accessToken, refreshToken, expiresAt)
                 }
             }.next().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)
@@ -601,9 +608,10 @@ object DatabaseManager {
                     val privateKey = row["PRIVATE_KEY", String::class.java]!!
                     val accessToken = row["ACCESS_TOKEN", String::class.java]!!
                     val refreshToken = row["REFRESH_TOKEN", String::class.java]!!
+                    val expiresAt = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
-                            credId, privateKey, accessToken, refreshToken)
+                            credId, privateKey, accessToken, refreshToken, expiresAt)
                 }
             }.collectList().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)
@@ -1027,8 +1035,9 @@ object DatabaseManager {
                 res.map { row, _ ->
                     val refresh = row["REFRESH_TOKEN", String::class.java]!!
                     val access = row["ACCESS_TOKEN", String::class.java]!!
+                    val expires = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
 
-                    GoogleCredentialData(credNumber, refresh, access)
+                    GoogleCredentialData(credNumber, refresh, access, expires)
                 }
             }.next().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)

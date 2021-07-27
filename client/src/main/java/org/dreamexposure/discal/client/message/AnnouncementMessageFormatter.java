@@ -109,7 +109,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.INSTANCE.getMainCalendar(a.getGuildId()))
-            .flatMap(cd -> EventWrapper.getEvent(cd, a.getEventId()))
+            .flatMap(cd -> EventWrapper.INSTANCE.getEvent(cd, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
@@ -179,7 +179,7 @@ public class AnnouncementMessageFormatter {
             .map(Announcement::getType)
             .filter(t -> t.equals(AnnouncementType.SPECIFIC))
             .flatMap(t -> DatabaseManager.INSTANCE.getCalendar(a.getGuildId(), calNum))
-            .flatMap(cd -> EventWrapper.getEvent(cd, a.getEventId()))
+            .flatMap(cd -> EventWrapper.INSTANCE.getEvent(cd, a.getEventId()))
             .defaultIfEmpty(new Event());
 
         Mono<EventData> eData = Mono.just(a)
@@ -251,7 +251,7 @@ public class AnnouncementMessageFormatter {
         Mono<String> startTime = EventMessageFormatter
             .getHumanReadableTime(event.getStart(), cd.getCalendarNumber(), false, settings);
 
-        Mono<String> timezone = CalendarWrapper.getCalendar(cd)
+        Mono<String> timezone = CalendarWrapper.INSTANCE.getCalendar(cd)
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("TZ Unknown/Error");
 

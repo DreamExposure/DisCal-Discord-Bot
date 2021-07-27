@@ -4,7 +4,6 @@ import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.network.google.Authorization
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
@@ -22,9 +21,6 @@ class DisCalWeb {
             val p = Properties()
             p.load(FileReader("settings.properties"))
             BotSettings.init(p)
-
-            //Start Google auth daemon
-            Authorization.getAuth().init()
 
             //Start up spring
             try {

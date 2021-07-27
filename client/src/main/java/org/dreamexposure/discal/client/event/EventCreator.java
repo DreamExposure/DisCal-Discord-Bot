@@ -48,7 +48,7 @@ public class EventCreator {
                     final PreEvent event = new PreEvent(settings.getGuildID(), calData.getCalendarNumber());
                     this.events.add(event);
 
-                    return CalendarWrapper.getCalendar(calData)
+                    return CalendarWrapper.INSTANCE.getCalendar(calData)
                         .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                         .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                         .flatMap(embed -> Messages.sendMessage(
@@ -70,7 +70,7 @@ public class EventCreator {
 
                     this.events.add(event);
 
-                    return CalendarWrapper.getCalendar(calData)
+                    return CalendarWrapper.INSTANCE.getCalendar(calData)
                         .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                         .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                         .flatMap(embed -> Messages.sendMessage(
@@ -87,12 +87,12 @@ public class EventCreator {
     public Mono<PreEvent> init(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
-                .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
+                .flatMap(calData -> EventWrapper.INSTANCE.getEvent(calData, eventId)
                     .flatMap(toCopy -> PreEvent.copy(settings.getGuildID(), toCopy, calData))
                     .flatMap(event -> {
                         this.events.add(event);
 
-                        return CalendarWrapper.getCalendar(calData)
+                        return CalendarWrapper.INSTANCE.getCalendar(calData)
                             .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                             .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                             .flatMap(embed -> Messages.sendMessage(
@@ -108,14 +108,14 @@ public class EventCreator {
     public Mono<PreEvent> edit(final MessageCreateEvent e, final String eventId, final GuildSettings settings) {
         if (!this.hasPreEvent(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), 1) //TODO: handle multiple calendars
-                .flatMap(calData -> EventWrapper.getEvent(calData, eventId)
+                .flatMap(calData -> EventWrapper.INSTANCE.getEvent(calData, eventId)
                     .flatMap(toEdit -> PreEvent.copy(settings.getGuildID(), toEdit, calData))
                     .flatMap(event -> {
                         event.setEditing(true);
 
                         this.events.add(event);
 
-                        return CalendarWrapper.getCalendar(calData)
+                        return CalendarWrapper.INSTANCE.getCalendar(calData)
                             .doOnNext(c -> event.setTimezone(c.getTimeZone()))
                             .flatMap(c -> EventMessageFormatter.getPreEventEmbed(event, settings))
                             .flatMap(embed -> Messages.sendMessage(
@@ -157,7 +157,7 @@ public class EventCreator {
                         if (!pre.getEditing()) {
                             event.setId(KeyGenerator.generateEventId());
 
-                            return EventWrapper.createEvent(calData, event)
+                            return EventWrapper.INSTANCE.createEvent(calData, event)
                                 .flatMap(confirmed -> {
                                     final EventCreatorResponse response = new EventCreatorResponse(true,
                                         confirmed, pre.getCreatorMessage(), false);
@@ -175,7 +175,7 @@ public class EventCreator {
                         } else {
                             event.setId(pre.getEventId());
 
-                            return EventWrapper.updateEvent(calData, event)
+                            return EventWrapper.INSTANCE.updateEvent(calData, event)
                                 .flatMap(confirmed -> {
                                     final EventCreatorResponse response = new EventCreatorResponse(true,
                                         confirmed, pre.getCreatorMessage(), true);

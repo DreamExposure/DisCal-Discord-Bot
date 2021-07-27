@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.`object`.network.google
 
 data class DisCalPoll(
-        var credNumber: Int,
+        val credNumber: Int,
         var interval: Int,
         val expiresIn: Int,
         var remainingSeconds: Int,

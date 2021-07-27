@@ -6,7 +6,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.CalendarMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost;
 import org.dreamexposure.discal.core.object.GuildSettings;
@@ -15,10 +14,10 @@ import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.calendar.PreCalendar;
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -65,7 +64,7 @@ public class CalendarCreator {
     public Mono<PreCalendar> edit(final MessageCreateEvent event, final GuildSettings settings) {
         if (!this.hasPreCalendar(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()).flatMap(data ->
-                CalendarWrapper.getCalendar(data)
+                CalendarWrapper.INSTANCE.getCalendar(data)
                     .flatMap(calendar -> {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
@@ -89,7 +88,7 @@ public class CalendarCreator {
     public Mono<PreCalendar> edit(final int calNumber, final MessageCreateEvent event, final GuildSettings settings) {
         if (!this.hasPreCalendar(settings.getGuildID())) {
             return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
-                CalendarWrapper.getCalendar(data)
+                CalendarWrapper.INSTANCE.getCalendar(data)
                     .flatMap(calendar -> {
                         final PreCalendar preCalendar = new PreCalendar(settings.getGuildID(), calendar, true);
                         preCalendar.setCalendarId(data.getCalendarAddress());
@@ -126,11 +125,9 @@ public class CalendarCreator {
                 //Randomly determine what credentials account the calendar will be assigned to.
                 // If creation fails, and the user retries, it will pick another random credential to use.
 
-                return CalendarAuth.credentialsCount().flatMap(credCount -> {
-                    final int credId = new Random().nextInt(credCount);
-
+                return GoogleAuthWrapper.INSTANCE.randomCredentialId().flatMap(credId -> {
                     if (!pre.getEditing()) {
-                        return CalendarWrapper.createCalendar(calendar, credId, settings.getGuildID())
+                        return CalendarWrapper.INSTANCE.createCalendar(calendar, credId, settings.getGuildID())
                             .flatMap(confirmed -> {
                                 final CalendarData data = new CalendarData(
                                     settings.getGuildID(),
@@ -149,7 +146,7 @@ public class CalendarCreator {
 
                                 return Mono.when(
                                     DatabaseManager.INSTANCE.updateCalendar(data),
-                                    AclRuleWrapper.insertRule(rule, data)
+                                    AclRuleWrapper.INSTANCE.insertRule(rule, data)
                                 )
                                     .then(Mono.fromRunnable(() -> this.terminate(settings.getGuildID())))
                                     .thenReturn(response);
@@ -157,7 +154,7 @@ public class CalendarCreator {
                     } else {
                         //Editing calendar...
                         calendar.setId(pre.getCalendarId());
-                        return CalendarWrapper.updateCalendar(calendar, pre.getCalendarData())
+                        return CalendarWrapper.INSTANCE.updateCalendar(calendar, pre.getCalendarData())
                             .flatMap(confirmed -> {
                                 final AclRule rule = new AclRule()
                                     .setScope(new AclRule.Scope().setType("default"))
@@ -166,7 +163,7 @@ public class CalendarCreator {
                                 final CalendarCreatorResponse response = new CalendarCreatorResponse(true, true,
                                     pre.getCreatorMessage(), confirmed);
 
-                                return AclRuleWrapper.insertRule(rule, pre.getCalendarData())
+                                return AclRuleWrapper.INSTANCE.insertRule(rule, pre.getCalendarData())
                                     .doOnNext(a -> this.terminate(settings.getGuildID()))
                                     .thenReturn(response);
                             }).defaultIfEmpty(new CalendarCreatorResponse(false, true, pre.getCreatorMessage(), null));

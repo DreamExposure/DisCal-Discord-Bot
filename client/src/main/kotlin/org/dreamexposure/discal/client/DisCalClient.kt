@@ -35,7 +35,6 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.network.google.Authorization
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -60,9 +59,6 @@ class DisCalClient {
             val p = Properties()
             p.load(FileReader("settings.properties"))
             BotSettings.init(p)
-
-            ///Start google authorization daemon
-            Authorization.getAuth().init()
 
             //Load lang files
             Messages.reloadLangs().subscribe()

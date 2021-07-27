@@ -7,6 +7,7 @@ import kotlinx.serialization.Transient
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import org.dreamexposure.novautils.crypto.KeyGenerator
+import java.time.Instant
 
 @Serializable
 data class CalendarData(
@@ -31,6 +32,8 @@ data class CalendarData(
         var encryptedAccessToken: String = "N/a",
         @Transient
         var encryptedRefreshToken: String = "N/a",
+        @Transient
+        var expiresAt: Instant = Instant.now()
 ) {
     constructor(guildId: Snowflake, calendarNumber: Int, host: CalendarHost, calendarId: String,
                 calendarAddress: String, credentialId: Int) :
@@ -43,4 +46,6 @@ data class CalendarData(
         @JvmStatic
         fun emptyExternal(guildId: Snowflake, host: CalendarHost) = CalendarData(guildId, external = true, host = host)
     }
+
+    fun expired() = Instant.now().isAfter(expiresAt)
 }

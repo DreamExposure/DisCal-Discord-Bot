@@ -6,7 +6,6 @@ import discord4j.rest.entity.RestGuild
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.calendar.CalendarAuth
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
@@ -14,6 +13,7 @@ import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
+import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -88,14 +88,12 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
 fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
     when (spec.host) {
         CalendarHost.GOOGLE -> {
-            return CalendarAuth.credentialsCount().flatMap { credCount ->
+            return GoogleAuthWrapper.randomCredentialId().flatMap { credId ->
                 val googleCal = GoogleCalendarModel()
 
                 googleCal.summary = spec.name
                 spec.description?.let { googleCal.description = it }
                 googleCal.timeZone = spec.timezone
-
-                val credId = Random().nextInt(credCount)
 
                 //Call google to create it
                 CalendarWrapper.createCalendar(googleCal, credId, this.id)

@@ -50,20 +50,20 @@ public class TimeUtils {
     @Deprecated
     public static Mono<Boolean> isInPast(final String eventId, final GuildSettings settings) {
         return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()).flatMap(data ->
-            EventWrapper.getEvent(data, eventId)
+            EventWrapper.INSTANCE.getEvent(data, eventId)
                 .map(TimeUtils::isInPast)
         );
     }
 
     public static Mono<Boolean> isInPast(final String eventId, final int calNumber, final GuildSettings settings) {
         return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
-            EventWrapper.getEvent(data, eventId)
+            EventWrapper.INSTANCE.getEvent(data, eventId)
                 .map(TimeUtils::isInPast)
         );
     }
 
     public static Mono<Boolean> isInPast(final String eventId, final CalendarData data) {
-        return EventWrapper.getEvent(data, eventId).map(TimeUtils::isInPast);
+        return EventWrapper.INSTANCE.getEvent(data, eventId).map(TimeUtils::isInPast);
     }
 
 

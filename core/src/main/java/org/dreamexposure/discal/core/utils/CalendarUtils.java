@@ -1,13 +1,10 @@
 package org.dreamexposure.discal.core.utils;
 
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.logger.LogFeed;
 import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
-
 import reactor.core.publisher.Mono;
 
 /**
@@ -16,9 +13,9 @@ import reactor.core.publisher.Mono;
  * For Project: DisCal-Discord-Bot
  */
 public class CalendarUtils {
-    //TODO: Make sure this supports multi calendar support
+    @Deprecated
     public static Mono<Boolean> deleteCalendar(final CalendarData data) {
-        return CalendarWrapper.deleteCalendar(data).then(
+        return CalendarWrapper.INSTANCE.deleteCalendar(data).then(
             Mono.when(
                 DatabaseManager.INSTANCE.deleteCalendar(data),
                 DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId()),
@@ -27,27 +24,5 @@ public class CalendarUtils {
             )).thenReturn(true)
             .doOnError(e -> LogFeed.log(LogObject.forException("Failed to delete calendar", e, CalendarUtils.class)))
             .onErrorReturn(false);
-    }
-
-    //TODO: Make sure this supports multi calendar support!!
-    public static Mono<Boolean> calendarExists(final CalendarData data) {
-        return CalendarWrapper.getCalendar(data)
-            .hasElement()
-            .onErrorResume(GoogleJsonResponseException.class, ge -> {
-                if (ge.getStatusCode() == GlobalVal.STATUS_GONE || ge.getStatusCode() == GlobalVal.STATUS_NOT_FOUND) {
-                    //Calendar does not exist... remove from db...
-                    return Mono.when(
-                        DatabaseManager.INSTANCE.deleteCalendar(data),
-                        DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId()),
-                        DatabaseManager.INSTANCE.deleteAllRsvpData(data.getGuildId()),
-                        DatabaseManager.INSTANCE.deleteAllAnnouncementData(data.getGuildId())
-                    ).thenReturn(false);
-                } else {
-                    LogFeed.log(LogObject
-                        .forException("Unknown google error when checking for calendar exist", ge,
-                            CalendarUtils.class));
-                    return Mono.just(false);
-                }
-            });
     }
 }

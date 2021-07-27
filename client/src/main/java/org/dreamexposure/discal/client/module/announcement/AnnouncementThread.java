@@ -6,7 +6,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
-import org.dreamexposure.discal.core.calendar.CalendarAuth;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.logger.LogFeed;
@@ -15,6 +14,7 @@ import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
+import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,10 +44,10 @@ public class AnnouncementThread {
 
     public Mono<Void> run() {
         //Get the credentials and cache them
-        Mono<Void> getCredsMono = CalendarAuth.credentialsCount()
+        Mono<Void> getCredsMono = GoogleAuthWrapper.INSTANCE.credentialsCount()
             .flatMapMany(i -> Flux.range(0, i))
             .map(index -> {
-                this.discalServices.put(index, CalendarAuth.getCalendarService(index).cache());
+                this.discalServices.put(index, GoogleAuthWrapper.INSTANCE.getCalendarService(index).cache());
                 return index;
             }).then();
 
@@ -96,7 +96,7 @@ public class AnnouncementThread {
                                             Calendar service) {
         switch (a.getType()) {
             case SPECIFIC:
-                return EventWrapper.getEvent(calData, a.getEventId())
+                return EventWrapper.INSTANCE.getEvent(calData, a.getEventId())
                     .switchIfEmpty(DatabaseManager.INSTANCE.deleteAnnouncement(a.getAnnouncementId().toString())
                         .then(Mono.empty())
                     ).flatMap(e -> this.inRangeSpecific(a, e)
@@ -234,7 +234,7 @@ public class AnnouncementThread {
     private Mono<Calendar> getService(CalendarData cd) {
         if (cd.getExternal()) {
             if (!this.customServices.containsKey(cd.getGuildId()))
-                this.customServices.put(cd.getGuildId(), CalendarAuth.getCalendarService(cd).cache());
+                this.customServices.put(cd.getGuildId(), GoogleAuthWrapper.INSTANCE.getCalendarService(cd).cache());
 
             return this.customServices.get(cd.getGuildId());
         }
@@ -243,7 +243,7 @@ public class AnnouncementThread {
 
     private Mono<List<Event>> getEvents(CalendarData cd, Calendar service) {
         if (!this.allEvents.containsKey(cd.getGuildId())) {
-            Mono<List<Event>> events = EventWrapper.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
+            Mono<List<Event>> events = EventWrapper.INSTANCE.getEvents(cd, service, 15, System.currentTimeMillis()).cache();
             this.allEvents.put(cd.getGuildId(), events);
         }
         return this.allEvents.get(cd.getGuildId());

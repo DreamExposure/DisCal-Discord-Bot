@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.`object`.network.google
+package org.dreamexposure.discal.core.`object`.google
 
 import kotlinx.serialization.Serializable
 

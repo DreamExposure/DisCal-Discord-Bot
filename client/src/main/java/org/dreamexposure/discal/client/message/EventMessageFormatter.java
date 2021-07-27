@@ -45,7 +45,7 @@ public class EventMessageFormatter {
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
         Mono<String> timezone = DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
-            .flatMap(CalendarWrapper::getCalendar)
+            .flatMap(CalendarWrapper.INSTANCE::getCalendar)
             .map(com.google.api.services.calendar.model.Calendar::getTimeZone)
             .defaultIfEmpty("Error/Unknown");
 
@@ -305,7 +305,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
-                        .flatMap(CalendarWrapper::getCalendar)
+                        .flatMap(CalendarWrapper.INSTANCE::getCalendar)
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");
@@ -331,7 +331,7 @@ public class EventMessageFormatter {
         return Mono.justOrEmpty(eventDateTime).flatMap(dateTime -> {
                 if (!preEvent) {
                     return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
-                        .flatMap(CalendarWrapper::getCalendar)
+                        .flatMap(CalendarWrapper.INSTANCE::getCalendar)
                         .map(com.google.api.services.calendar.model.Calendar::getTimeZone);
                 } else {
                     return Mono.just("UTC");

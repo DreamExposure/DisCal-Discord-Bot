@@ -6,8 +6,7 @@ import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
-import org.dreamexposure.discal.core.network.google.Authorization
-import org.dreamexposure.discal.server.network.google.GoogleAuth
+import org.dreamexposure.discal.server.network.google.GoogleInternalAuthHandler
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.novautils.database.DatabaseSettings
 import org.flywaydb.core.Flyway
@@ -55,13 +54,10 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
             //Handle database migrations
             handleMigrations(args.isNotEmpty() && args[0].equals("--repair", true))
 
-            //Start Google Authorization daemon
-            Authorization.getAuth().init()
-
             //Handle generating new google auth credentials for discal accounts
             if (args.size > 1 && args[0].equals("-forceNewAuth", true)) {
                 //This will automatically kill this instance once finished
-                GoogleAuth.requestCode(args[1].toInt()).subscribe()
+                GoogleInternalAuthHandler.requestCode(args[1].toInt()).subscribe()
             }
 
             //Start up spring

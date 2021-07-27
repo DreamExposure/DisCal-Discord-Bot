@@ -382,7 +382,7 @@ public class EventCommand implements Command {
             } else {
                 //Check if enough args and event exists...
                 if (args.length == 2) {
-                    return EventWrapper.getEvent(calendarData, args[1])
+                    return EventWrapper.INSTANCE.getEvent(calendarData, args[1])
                         .flatMap(e -> EventMessageFormatter.getEventEmbed(e, calendarData.getCalendarNumber(), settings))
                         .flatMap(em -> Messages.sendMessage(em, event))
                         .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Creator.Event.NotFound", settings), event));
