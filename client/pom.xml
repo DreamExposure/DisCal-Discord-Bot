@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-r2dbc</artifactId>
-            <version>5.3.5</version>
+            <version>${spring.r2dbc.version}</version>
         </dependency>
     </dependencies>
 

@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.wrapper.google
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.calendar.CalendarScopes
 import okhttp3.FormBody
 import okhttp3.Request
@@ -63,7 +63,8 @@ object GoogleAuthWrapper {
     }
 
     private fun buildService(credential: Credential): GoogleCalendarService {
-        return GoogleCalendarService.Builder(NetHttpTransport(), JacksonFactory.getDefaultInstance(), credential)
+
+        return GoogleCalendarService.Builder(NetHttpTransport(), GsonFactory.getDefaultInstance(), credential)
                 .setApplicationName("DisCal")
                 .build()
     }

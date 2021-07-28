@@ -102,14 +102,14 @@ public class Messages {
 
     public static Mono<Message> sendMessage(EmbedCreateSpec embed, MessageCreateEvent event) {
         return event.getMessage().getChannel()
-            .flatMap(c -> c.createEmbed(embed))
+            .flatMap(c -> c.createMessage(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(String message, EmbedCreateSpec embed, MessageCreateEvent event) {
         return event.getMessage().getChannel()
             .flatMap(c -> c.createMessage(message)
-                .withEmbed(embed)
+                .withEmbeds(embed)
             )
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
@@ -120,12 +120,12 @@ public class Messages {
     }
 
     public static Mono<Message> sendMessage(EmbedCreateSpec embed, GuildMessageChannel channel) {
-        return channel.createEmbed(embed)
+        return channel.createMessage(embed)
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendMessage(String message, EmbedCreateSpec embed, GuildMessageChannel channel) {
-        return channel.createMessage(message).withEmbed(embed)
+        return channel.createMessage(message).withEmbeds(embed)
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
@@ -138,13 +138,13 @@ public class Messages {
 
     public static Mono<Message> sendDirectMessage(EmbedCreateSpec embed, User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createEmbed(embed))
+            .flatMap(c -> c.createMessage(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
     public static Mono<Message> sendDirectMessage(String message, EmbedCreateSpec embed, User user) {
         return user.getPrivateChannel()
-            .flatMap(c -> c.createMessage(message).withEmbed(embed))
+            .flatMap(c -> c.createMessage(message).withEmbeds(embed))
             .onErrorResume(ClientException.class, e -> Mono.empty());
     }
 
@@ -154,7 +154,7 @@ public class Messages {
     }
 
     public static Mono<Message> editMessage(String message, EmbedCreateSpec embed, Message original) {
-        return original.edit().withContentOrNull(message).withEmbedOrNull(embed);
+        return original.edit().withContentOrNull(message).withEmbeds(embed);
     }
 
     public static Mono<Message> editMessage(String message, MessageCreateEvent event) {
@@ -162,7 +162,7 @@ public class Messages {
     }
 
     public static Mono<Message> editMessage(String message, EmbedCreateSpec embed, MessageCreateEvent event) {
-        return event.getMessage().edit().withContentOrNull(message).withEmbedOrNull(embed);
+        return event.getMessage().edit().withContentOrNull(message).withEmbeds(embed);
     }
 
     //Message deleting

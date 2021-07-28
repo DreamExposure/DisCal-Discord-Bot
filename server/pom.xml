@@ -26,13 +26,13 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>7.3.1</version>
+            <version>7.11.2</version>
         </dependency>
         <!--MySQL Driver-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.22</version>
+            <version>8.0.25</version>
             <scope>runtime</scope>
         </dependency>
         <!--top.gg API library-->
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-r2dbc</artifactId>
-            <version>5.3.5</version>
+            <version>${spring.r2dbc.version}</version>
         </dependency>
     </dependencies>
 

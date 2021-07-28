@@ -30,26 +30,27 @@
 
         <!--Versions-->
         <kotlin.version>1.5.21</kotlin.version>
-        <kotlinx.serialization.version>1.0.1</kotlinx.serialization.version>
+        <kotlinx.serialization.version>1.2.2</kotlinx.serialization.version>
 
-        <discord4j.version>3.2.0-RC1</discord4j.version>
+        <discord4j.version>3.2.0-RC2</discord4j.version>
         <discord4j.stores.version>3.2.1</discord4j.stores.version>
 
-        <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
+        <thymeleaf.version>3.0.12.RELEASE</thymeleaf.version>
         <thymeleaf.springsecurity.version>3.0.4.RELEASE</thymeleaf.springsecurity.version>
-        <thymeleaf.layout-dialect.version>2.5.1</thymeleaf.layout-dialect.version>
+        <thymeleaf.layout-dialect.version>2.5.3</thymeleaf.layout-dialect.version>
 
         <spring.version>2.5.2</spring.version>
         <spring.security.version>5.5.1</spring.security.version>
         <spring.session.version>2.5.1</spring.session.version>
+        <spring.r2dbc.version>5.3.9</spring.r2dbc.version>
         <spring.maven-plugin.version>2.4.0</spring.maven-plugin.version>
 
-        <google.client-api.core.version>1.31.1</google.client-api.core.version>
-        <google.client-api.calendar.version>v3-rev411-1.25.0</google.client-api.calendar.version>
-        <google.client-api.oauth.version>1.31.2</google.client-api.oauth.version>
+        <google.client-api.core.version>1.32.1</google.client-api.core.version>
+        <google.client-api.calendar.version>v3-rev20210708-1.32.1</google.client-api.calendar.version>
+        <google.client-api.oauth.version>1.31.5</google.client-api.oauth.version>
 
-        <r2dbc.mysql.version>0.8.1.RELEASE</r2dbc.mysql.version>
-        <r2dbc.pool.version>0.8.3.RELEASE</r2dbc.pool.version>
+        <r2dbc.mysql.version>0.8.2.RELEASE</r2dbc.mysql.version>
+        <r2dbc.pool.version>0.8.7.RELEASE</r2dbc.pool.version>
 
         <netty.version.forced>4.1.56.Final</netty.version.forced>
 
@@ -203,13 +204,13 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20201115</version>
+            <version>20210307</version>
         </dependency>
         <!--OkHTTP API-->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.9.0</version>
+            <version>4.9.1</version>
         </dependency>
         <!--Discord Webhook Library-->
         <dependency>
