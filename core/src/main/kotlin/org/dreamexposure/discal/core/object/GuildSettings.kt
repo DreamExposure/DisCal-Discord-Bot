@@ -36,7 +36,6 @@ data class GuildSettings(
     val dmAnnouncements: MutableList<String> = mutableListOf()
 
     companion object {
-        @JvmStatic
         fun empty(guildId: Snowflake) = GuildSettings(guildId)
     }
 

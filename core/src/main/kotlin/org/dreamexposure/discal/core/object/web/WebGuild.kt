@@ -53,7 +53,6 @@ data class WebGuild(
     val shard = GuildUtils.findShard(Snowflake.of(this.id))
 
     companion object {
-        @JvmStatic
         @Throws(BotNotInGuildException::class)
         fun fromGuild(g: RestGuild): Mono<WebGuild> {
             return g.data.flatMap { data: GuildUpdateData ->
@@ -101,7 +100,6 @@ data class WebGuild(
             }.switchIfEmpty(Mono.error(BotNotInGuildException()))
         }
 
-        @JvmStatic
         fun fromGuild(g: Guild): Mono<WebGuild> {
             val id = g.id.asLong()
             val name = g.name

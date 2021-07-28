@@ -28,7 +28,6 @@ object KeyGenerator {
         return "e${buff.toString(StandardCharsets.UTF_8)}"
     }
 
-    @JvmStatic
     fun generateAnnouncementId(): String {
         val secRand = SecureRandom()
         val buff = CharArray(9)

@@ -4,10 +4,13 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import java.util.*
 
 @SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
 class Application {
     companion object {
+        val instanceId: UUID = UUID.randomUUID()
+
         @JvmStatic
         fun getShardIndex(): String {
             /*

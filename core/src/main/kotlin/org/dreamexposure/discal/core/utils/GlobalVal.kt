@@ -40,10 +40,9 @@ object GlobalVal {
 
     const val discordCdnUrl = "https://cdn.discordapp.com"
 
-    @JvmStatic
     val JSON = "application/json; charset=utf-8".toMediaType()
 
-    @JvmStatic
+
     val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
     val JSON_FORMAT = Json { encodeDefaults = true }

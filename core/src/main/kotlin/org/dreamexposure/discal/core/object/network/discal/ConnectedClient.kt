@@ -32,7 +32,7 @@ data class ConnectedClient(
         val memUsed: Double = 0.0,
 
         @Transient
-        val pid: String = ""
+        val instanceId: UUID = UUID.randomUUID()
 ) {
     fun getLastKeepAliveHumanReadable(): String {
         val sdf = SimpleDateFormat("yyyy/MM/dd HH:mm:ss")

@@ -21,10 +21,6 @@ public class ReadyEventListener {
     public static Mono<Void> handle(final ReadyEvent event) {
         return event.getClient().getApplicationInfo()
             .doOnNext(info -> GlobalVal.setIconUrl(info.getIconUrl(Image.Format.PNG).get()))
-            .doOnNext(info ->
-                LogFeed.log(LogObject.forDebug("[ReadyEvent]",
-                    "Connection success! Session ID: " + event.getSessionId()))
-            )
             .doOnNext(info -> LogFeed.log(LogObject.forStatus("Ready Event Success!")))
             .then(Messages.reloadLangs())
             .onErrorResume(e -> {

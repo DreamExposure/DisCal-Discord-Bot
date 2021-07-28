@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -33,7 +34,7 @@ public class NetworkInfo {
     private int guildCount;
 
     private String uptime;
-    private String pid;
+    private UUID instanceId;
 
 
     public Mono<Void> update() {
@@ -135,18 +136,12 @@ public class NetworkInfo {
         return this.announcementCount;
     }
 
-    public String getUptimeLatest() {
-        this.uptime = TimeUtils.getHumanReadableUptime();
-
-        return this.uptime;
-    }
-
     public String getUptime() {
         return this.uptime;
     }
 
-    public String getPid() {
-        return this.pid;
+    public UUID getInstanceId() {
+        return this.instanceId;
     }
 
     //Setters
@@ -158,8 +153,8 @@ public class NetworkInfo {
         this.announcementCount = announcementCount;
     }
 
-    public void setPid(final String pid) {
-        this.pid = pid;
+    public void setInstanceId(final UUID instanceId) {
+        this.instanceId = instanceId;
     }
 
     public JSONObject toJson() {
@@ -167,8 +162,8 @@ public class NetworkInfo {
 
         json.put("api_version", this.getVersion());
         json.put("d4j_version", this.getD4JVersion());
-        json.put("api_uptime", this.getUptimeLatest());
-        json.put("api_pid", this.getPid());
+        json.put("api_uptime", TimeUtils.getHumanReadableUptime());
+        json.put("api_instance_id", this.instanceId);
         json.put("announcements", this.getAnnouncementCount());
         json.put("total_guilds", this.getTotalGuildCount());
         json.put("calendars", this.getCalendarCount());
@@ -184,7 +179,7 @@ public class NetworkInfo {
 
     public NetworkInfo fromJson(final JSONObject json) {
         this.uptime = json.getString("api_uptime");
-        this.pid = json.getString("api_pid");
+        this.instanceId = UUID.fromString(json.getString("api_instance_id"));
         this.announcementCount = json.getInt("announcements");
         this.guildCount = json.getInt("total_guilds");
         this.calCount = json.getInt("calendars");

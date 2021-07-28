@@ -29,7 +29,6 @@ import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThread
 import org.dreamexposure.discal.client.module.command.*
-import org.dreamexposure.discal.client.service.KeepAliveHandler
 import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -76,9 +75,7 @@ class DisCalClient {
             CommandExecutor.registerCommand(AnnouncementCommand())
             CommandExecutor.registerCommand(DevCommand())
 
-            //Start some of the daemon threads
-            KeepAliveHandler.startKeepAlive(60) // 60 seconds
-
+            //Start some daemon threads
             TimeManager.getManager().init()
 
             //Start Spring

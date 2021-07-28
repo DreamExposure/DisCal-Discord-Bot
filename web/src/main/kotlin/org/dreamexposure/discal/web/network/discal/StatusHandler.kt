@@ -3,7 +3,6 @@ package org.dreamexposure.discal.web.network.discal
 import com.google.api.client.http.HttpStatusCodes
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
@@ -31,7 +30,7 @@ object StatusHandler {
             if (response.code == HttpStatusCodes.STATUS_CODE_OK) {
                 return@map NetworkInfo().fromJson(JSONObject(response.body?.string()))
             } else {
-                return@map NetworkInfo() //Just return an empty object, its fine.
+                return@map NetworkInfo() //Just return an empty object, it's fine.
             }
         }.doOnError {
             LogFeed.log(LogObject.forException("[Status Request] Failed to get status", it, this.javaClass))

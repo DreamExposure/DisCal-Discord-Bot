@@ -43,7 +43,6 @@ data class CalendarData(
         @JvmStatic
         fun empty(guildId: Snowflake, host: CalendarHost) = CalendarData(guildId, host = host)
 
-        @JvmStatic
         fun emptyExternal(guildId: Snowflake, host: CalendarHost) = CalendarData(guildId, external = true, host = host)
     }
 

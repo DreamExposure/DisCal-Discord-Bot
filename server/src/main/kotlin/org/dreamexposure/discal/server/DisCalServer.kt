@@ -15,7 +15,6 @@ import org.flywaydb.core.internal.command.DbMigrate
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.builder.SpringApplicationBuilder
-import org.springframework.boot.system.ApplicationPid
 import org.springframework.stereotype.Component
 import java.io.FileReader
 import java.util.*
@@ -31,8 +30,8 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
         //Handle the rest of the bullshit
         Authentication.init()
 
-        //Save pid
-        networkInfo.pid = ApplicationPid().toString()
+        //Save instance ID
+        networkInfo.instanceId = Application.instanceId
         LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online!"))
     }
 
