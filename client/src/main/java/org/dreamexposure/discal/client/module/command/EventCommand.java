@@ -791,6 +791,7 @@ public class EventCommand implements Command {
                                 final EventData eventData = new EventData(
                                     settings.getGuildID(),
                                     preEvent.getEventId(),
+                                    1, //TODO: Support multi-cal (tho this whole shit show needs to be rewritten anyway)
                                     preEvent.getEndDateTime().getDateTime().getValue(),
                                     value
                                 );

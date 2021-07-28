@@ -19,6 +19,8 @@ data class RsvpData(
         val guildId: Snowflake,
         @SerialName("event_id")
         val eventId: String,
+        @SerialName("calendar_number")
+        val calendarNumber: Int = 1,
 ) {
     @SerialName("event_end")
     var eventEnd: Long = 0
@@ -42,54 +44,6 @@ data class RsvpData(
     val undecided: MutableList<String> = mutableListOf()
 
     //List string stuffs
-    fun getGoingOnTimeString(): String {
-        val sb = StringBuilder()
-        for ((i, s) in this.goingOnTime.withIndex()) {
-            if (s.isNotBlank()) {
-                if (i == 0) sb.append(s)
-                else sb.append(",").append(s)
-            }
-        }
-
-        return sb.toString()
-    }
-
-    fun getGoingLateString(): String {
-        val sb = StringBuilder()
-        for ((i, s) in this.goingLate.withIndex()) {
-            if (s.isNotBlank()) {
-                if (i == 0) sb.append(s)
-                else sb.append(",").append(s)
-            }
-        }
-
-        return sb.toString()
-    }
-
-    fun getNotGoingString(): String {
-        val sb = StringBuilder()
-        for ((i, s) in this.notGoing.withIndex()) {
-            if (s.isNotBlank()) {
-                if (i == 0) sb.append(s)
-                else sb.append(",").append(s)
-            }
-        }
-
-        return sb.toString()
-    }
-
-    fun getUndecidedString(): String {
-        val sb = StringBuilder()
-        for ((i, s) in this.undecided.withIndex()) {
-            if (s.isNotBlank()) {
-                if (i == 0) sb.append(s)
-                else sb.append(",").append(s)
-            }
-        }
-
-        return sb.toString()
-    }
-
     fun setGoingOnTimeFromString(strList: String) {
         this.goingOnTime += strList.split(",").filter(String::isNotBlank)
     }

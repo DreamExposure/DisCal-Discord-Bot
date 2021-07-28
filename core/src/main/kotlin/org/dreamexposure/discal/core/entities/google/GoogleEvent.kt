@@ -129,7 +129,7 @@ class GoogleEvent internal constructor(
                 event.recurrence.clear()
             }
         } else {
-            //Recur equals null, so its not changing whether or not its recurring, so handle if RRule changes only
+            //Recur equals null, so it's not changing whether its recurring, so handle if RRule changes only
             spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
         }
 
@@ -138,6 +138,7 @@ class GoogleEvent internal constructor(
             val data = EventData(
                     this.guildId,
                     confirmed.id,
+                    calendar.calendarNumber,
                     confirmed.end.dateTime.value,
                     spec.image ?: this.image
             )

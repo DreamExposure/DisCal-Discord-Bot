@@ -34,6 +34,9 @@ data class Announcement(
     var type = AnnouncementType.UNIVERSAL
     var modifier = AnnouncementModifier.BEFORE
 
+    @SerialName("calendar_number")
+    var calendarNumber: Int = 1
+
     @SerialName("event_id")
     var eventId: String = "N/a"
 
@@ -90,31 +93,6 @@ data class Announcement(
 
             return to
         }
-    }
-
-    fun getSubscriberRoleIdString(): String {
-        val subs = StringBuilder()
-
-        for ((i, sub) in this.subscriberRoleIds.withIndex()) {
-            if (sub.isNotBlank()) {
-                if (i == 0) subs.append(sub)
-                else subs.append(",").append(sub)
-            }
-        }
-
-        return subs.toString()
-    }
-
-    fun getSubscriberUserIdString(): String {
-        val subs = StringBuilder()
-        for ((i, sub) in this.subscriberUserIds.withIndex()) {
-            if (sub.isNotBlank()) {
-                if (i == 0) subs.append(sub)
-                else subs.append(",").append(sub)
-            }
-        }
-
-        return subs.toString()
     }
 
     fun setSubscriberRoleIdsFromString(subList: String) {

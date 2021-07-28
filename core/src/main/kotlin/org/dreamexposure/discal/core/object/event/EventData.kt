@@ -14,6 +14,9 @@ data class EventData(
         @SerialName("event_id")
         val eventId: String = "",
 
+        @SerialName("calendar_number")
+        val calendarNumber: Int = 1,
+
         @SerialName("event_end")
         val eventEnd: Long = 0,
 

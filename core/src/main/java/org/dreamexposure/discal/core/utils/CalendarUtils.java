@@ -18,9 +18,9 @@ public class CalendarUtils {
         return CalendarWrapper.INSTANCE.deleteCalendar(data).then(
             Mono.when(
                 DatabaseManager.INSTANCE.deleteCalendar(data),
-                DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId()),
-                DatabaseManager.INSTANCE.deleteAllRsvpData(data.getGuildId()),
-                DatabaseManager.INSTANCE.deleteAllAnnouncementData(data.getGuildId())
+                DatabaseManager.INSTANCE.deleteAllEventData(data.getGuildId(), data.getCalendarNumber()),
+                DatabaseManager.INSTANCE.deleteAllRsvpData(data.getGuildId(), data.getCalendarNumber()),
+                DatabaseManager.INSTANCE.deleteAllAnnouncementData(data.getGuildId(), data.getCalendarNumber())
             )).thenReturn(true)
             .doOnError(e -> LogFeed.log(LogObject.forException("Failed to delete calendar", e, CalendarUtils.class)))
             .onErrorReturn(false);

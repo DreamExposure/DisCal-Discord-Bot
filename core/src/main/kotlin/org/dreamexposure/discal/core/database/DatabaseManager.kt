@@ -24,6 +24,7 @@ import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.enums.event.EventColor.Companion.fromNameOrHexOrId
 import org.dreamexposure.discal.core.logger.LogFeed
 import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.novautils.database.DatabaseSettings
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
@@ -32,7 +33,6 @@ import java.time.Instant
 import java.util.*
 import java.util.function.Function
 
-//TODO: Support multi-cal on EventData, RsvpData, Announcement objects
 object DatabaseManager {
     private val settings: DatabaseSettings = DatabaseSettings(
             BotSettings.SQL_HOST.get(),
@@ -80,7 +80,7 @@ object DatabaseManager {
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """ UPDATE ${Tables.API.table} SET
-                                USER_ID = ?, BLOCKED = ?,
+                                USER_ID = ?, BLOCKED = ?
                                 WHERE API_KEY = ?
                                 """.trimMargin()
 
@@ -256,7 +256,7 @@ object DatabaseManager {
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.ANNOUNCEMENTS.table} SET
-                        SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,
+                        CALENDAR_NUMBER = ?, SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,
                         ANNOUNCEMENT_TYPE = ?, MODIFIER = ?, EVENT_ID = ?, EVENT_COLOR = ?,
                         HOURS_BEFORE = ?, MINUTES_BEFORE = ?,
                         INFO = ?, ENABLED = ?, INFO_ONLY = ?, PUBLISH = ?
@@ -264,48 +264,50 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, announcement.getSubscriberRoleIdString())
-                            .bind(1, announcement.getSubscriberUserIdString())
-                            .bind(2, announcement.announcementChannelId)
-                            .bind(3, announcement.type.name)
-                            .bind(4, announcement.modifier.name)
-                            .bind(5, announcement.eventId)
-                            .bind(6, announcement.eventColor.name)
-                            .bind(7, announcement.hoursBefore)
-                            .bind(8, announcement.minutesBefore)
-                            .bind(9, announcement.info)
-                            .bind(10, announcement.enabled)
-                            .bind(11, announcement.infoOnly)
-                            .bind(12, announcement.publish)
-                            .bind(13, announcement.announcementId.toString())
+                            .bind(0, announcement.calendarNumber)
+                            .bind(1, announcement.subscriberRoleIds.asStringList())
+                            .bind(2, announcement.subscriberUserIds.asStringList())
+                            .bind(3, announcement.announcementChannelId)
+                            .bind(4, announcement.type.name)
+                            .bind(5, announcement.modifier.name)
+                            .bind(6, announcement.eventId)
+                            .bind(7, announcement.eventColor.name)
+                            .bind(8, announcement.hoursBefore)
+                            .bind(9, announcement.minutesBefore)
+                            .bind(10, announcement.info)
+                            .bind(11, announcement.enabled)
+                            .bind(12, announcement.infoOnly)
+                            .bind(13, announcement.publish)
+                            .bind(14, announcement.announcementId.toString())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
                             .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.ANNOUNCEMENTS.table}
-                        (ANNOUNCEMENT_ID, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER,
+                        (ANNOUNCEMENT_ID, CALENDAR_NUMBER, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER,
                         CHANNEL_ID, ANNOUNCEMENT_TYPE, MODIFIER, EVENT_ID, EVENT_COLOR,
                         HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY, PUBLISH)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
                             .bind(0, announcement.announcementId.toString())
-                            .bind(1, announcement.guildId.asString())
-                            .bind(2, announcement.getSubscriberRoleIdString())
-                            .bind(3, announcement.getSubscriberUserIdString())
-                            .bind(4, announcement.announcementChannelId)
-                            .bind(5, announcement.type.name)
-                            .bind(6, announcement.modifier.name)
-                            .bind(7, announcement.eventId)
-                            .bind(8, announcement.eventColor.name)
-                            .bind(9, announcement.hoursBefore)
-                            .bind(10, announcement.minutesBefore)
-                            .bind(11, announcement.info)
-                            .bind(12, announcement.enabled)
-                            .bind(13, announcement.infoOnly)
-                            .bind(14, announcement.publish)
+                            .bind(1, announcement.calendarNumber)
+                            .bind(2, announcement.guildId.asString())
+                            .bind(3, announcement.subscriberRoleIds.asStringList())
+                            .bind(4, announcement.subscriberUserIds.asStringList())
+                            .bind(5, announcement.announcementChannelId)
+                            .bind(6, announcement.type.name)
+                            .bind(7, announcement.modifier.name)
+                            .bind(8, announcement.eventId)
+                            .bind(9, announcement.eventColor.name)
+                            .bind(10, announcement.hoursBefore)
+                            .bind(11, announcement.minutesBefore)
+                            .bind(12, announcement.info)
+                            .bind(13, announcement.enabled)
+                            .bind(14, announcement.infoOnly)
+                            .bind(15, announcement.publish)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -336,29 +338,31 @@ object DatabaseManager {
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.EVENTS.table} SET
-                        IMAGE_LINK = ?, EVENT_END = ?
+                        CALENDAR_NUMBER = ?, IMAGE_LINK = ?, EVENT_END = ?
                         WHERE EVENT_ID = ?
                     """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, data.imageLink)
-                            .bind(1, data.eventEnd)
-                            .bind(2, id)
+                            .bind(0, data.calendarNumber)
+                            .bind(1, data.imageLink)
+                            .bind(2, data.eventEnd)
+                            .bind(3, id)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
                             .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.EVENTS.table}
-                        (GUILD_ID, EVENT_ID, EVENT_END, IMAGE_LINK)
-                        VALUES(?, ?, ?, ?)
+                        (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, IMAGE_LINK)
+                        VALUES(?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
                             .bind(0, data.guildId.asString())
                             .bind(1, id)
-                            .bind(2, data.eventEnd)
-                            .bind(3, data.imageLink)
+                            .bind(2, data.calendarNumber)
+                            .bind(3, data.eventEnd)
+                            .bind(4, data.imageLink)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -384,24 +388,25 @@ object DatabaseManager {
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.RSVP.table} SET
-                        EVENT_END = ?, GOING_ON_TIME = ?, GOING_LATE = ?,
+                        CALENDAR_NUMBER = ?, EVENT_END = ?, GOING_ON_TIME = ?, GOING_LATE = ?,
                         NOT_GOING = ?, UNDECIDED = ?, RSVP_LIMIT = ?, RSVP_ROLE = ?
                         WHERE EVENT_ID = ?
                     """.trimMargin()
 
                     Mono.just(c.createStatement(updateCommand)
-                            .bind(0, data.eventEnd)
-                            .bind(1, data.getGoingOnTimeString())
-                            .bind(2, data.getGoingLateString())
-                            .bind(3, data.getNotGoingString())
-                            .bind(4, data.getUndecidedString())
-                            .bind(5, data.limit)
-                            .bind(7, data.eventId)
+                            .bind(0, data.calendarNumber)
+                            .bind(1, data.eventEnd)
+                            .bind(2, data.goingOnTime.asStringList())
+                            .bind(3, data.goingLate.asStringList())
+                            .bind(4, data.notGoing.asStringList())
+                            .bind(5, data.undecided.asStringList())
+                            .bind(6, data.limit)
+                            .bind(8, data.eventId)
                     ).doOnNext { statement ->
                         if (data.roleId == null)
-                            statement.bindNull(6, Long::class.java)
+                            statement.bindNull(7, Long::class.java)
                         else
-                            statement.bind(6, data.roleId!!.asString())
+                            statement.bind(7, data.roleId!!.asString())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -409,25 +414,26 @@ object DatabaseManager {
                             .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.RSVP.table}
-                        (GUILD_ID, EVENT_ID, EVENT_END, GOING_ON_TIME, GOING_LATE,
+                        (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, GOING_ON_TIME, GOING_LATE,
                         NOT_GOING, UNDECIDED, RSVP_LIMIT, RSVP_ROLE)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.just(c.createStatement(insertCommand)
                             .bind(0, data.guildId.asString())
                             .bind(1, data.eventId)
-                            .bind(2, data.eventEnd)
-                            .bind(3, data.getGoingOnTimeString())
-                            .bind(4, data.getGoingLateString())
-                            .bind(5, data.getNotGoingString())
-                            .bind(6, data.getUndecidedString())
-                            .bind(7, data.limit)
+                            .bind(2, data.calendarNumber)
+                            .bind(3, data.eventEnd)
+                            .bind(4, data.goingOnTime.asStringList())
+                            .bind(5, data.goingLate.asStringList())
+                            .bind(6, data.notGoing.asStringList())
+                            .bind(7, data.undecided.asStringList())
+                            .bind(8, data.limit)
                     ).doOnNext { statement ->
                         if (data.roleId == null)
-                            statement.bindNull(8, Long::class.java)
+                            statement.bindNull(9, Long::class.java)
                         else
-                            statement.bind(8, data.roleId!!.asString())
+                            statement.bind(9, data.roleId!!.asString())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -654,10 +660,11 @@ object DatabaseManager {
                 res.map { row, _ ->
 
                     val id = row["EVENT_ID", String::class.java]!!
+                    val calNum = row["CALENDAR_NUMBER", Int::class.java]!!
                     val end = row["EVENT_END", Long::class.java]!!
                     val img = row["IMAGE_LINK", String::class.java]!!
 
-                    EventData(guildId, id, end, img)
+                    EventData(guildId, id, calNum, end, img)
                 }
             }.next().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)
@@ -680,7 +687,9 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val data = RsvpData(guildId, eventId)
+                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]!!
+
+                    val data = RsvpData(guildId, eventId, calNumber)
 
                     data.eventEnd = row["EVENT_END", Long::class.java]!!
                     data.setGoingOnTimeFromString(row["GOING_ON_TIME", String::class.java]!!)
@@ -754,6 +763,7 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -792,6 +802,7 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -829,6 +840,7 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -867,6 +879,7 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -904,6 +917,7 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -941,6 +955,7 @@ object DatabaseManager {
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -979,6 +994,7 @@ object DatabaseManager {
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
@@ -1098,12 +1114,13 @@ object DatabaseManager {
         }.defaultIfEmpty(false)
     }
 
-    fun deleteAllEventData(guildId: Snowflake): Mono<Boolean> {
+    fun deleteAllEventData(guildId: Snowflake, calNumber: Int): Mono<Boolean> {
         return connect { c ->
-            val query = "DELETE FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ?"
+            val query = "DELETE FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
                     .bind(0, guildId.asString())
+                    .bind(1, calNumber)
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                     .hasElements()
@@ -1115,12 +1132,13 @@ object DatabaseManager {
         }.defaultIfEmpty(false)
     }
 
-    fun deleteAllAnnouncementData(guildId: Snowflake): Mono<Boolean> {
+    fun deleteAllAnnouncementData(guildId: Snowflake, calNumber: Int): Mono<Boolean> {
         return connect { c ->
-            val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ?"
+            val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
                     .bind(0, guildId.asString())
+                    .bind(1, calNumber)
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                     .hasElements()
@@ -1131,12 +1149,13 @@ object DatabaseManager {
         }.defaultIfEmpty(false)
     }
 
-    fun deleteAllRsvpData(guildId: Snowflake): Mono<Boolean> {
+    fun deleteAllRsvpData(guildId: Snowflake, calNumber: Int): Mono<Boolean> {
         return connect { c ->
-            val query = "DELETE FROM ${Tables.RSVP.table} WHERE GUILD_ID = ?"
+            val query = "DELETE FROM ${Tables.RSVP.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
                     .bind(0, guildId.asString())
+                    .bind(1, calNumber)
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                     .hasElements()

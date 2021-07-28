@@ -49,7 +49,7 @@ interface Calendar {
         get() = calendarData.calendarNumber
 
     /**
-     * Whether or not the calendar is "external" meaning it is owned by a user account.
+     * Whether the calendar is "external" meaning it is owned by a user account.
      * This does not indicate the service used to host the calendar, but whether it is owned by DisCal, or a user.
      */
     val external: Boolean
@@ -88,7 +88,7 @@ interface Calendar {
      * Attempts to delete the calendar and returns the result.
      * If an error occurs, it is emitted through the [Mono].
      *
-     * @return A [Mono] boolean telling whether or not the deletion was successful
+     * @return A [Mono] boolean telling whether the deletion was successful
      */
     fun delete(): Mono<Boolean>
 
@@ -97,7 +97,7 @@ interface Calendar {
      * If an error occurs, it is emitted through the [Mono].
      *
      * @param spec The details to update the calendar with
-     * @return A [Mono] where upon successful completion, returns an [UpdateCalendarResponse] with the new calendar
+     * @return A [Mono] whereupon successful completion, returns an [UpdateCalendarResponse] with the new calendar
      */
     fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse>
 
@@ -127,11 +127,11 @@ interface Calendar {
     fun getEventsInTimeRange(start: Instant, end: Instant): Flux<Event>
 
     /**
-     * Requests to retrieve all [events][Event] occurring withing the next 24 hour period from the supplied [Instant]
+     * Requests to retrieve all [events][Event] occurring withing the next 24-hour period from the supplied [Instant]
      * (inclusive).
      * If an error occurs, it is emitted through the [Flux]
      *
-     * @return A [Flux] of [events][Event] that are happening within the next 24 hour period from the start.
+     * @return A [Flux] of [events][Event] that are happening within the next 24-hour period from the start.
      */
     fun getEventsInNext24HourPeriod(start: Instant): Flux<Event> =
             getEventsInTimeRange(start, start.plus(1, ChronoUnit.DAYS))
@@ -140,7 +140,7 @@ interface Calendar {
      * Requests to retrieve all [events][Event] within the month starting at the supplied [Instant].
      * If an error occurs, it is emitted through the [Flux]
      *
-     * @return A [Flux] of [events][Event] that are happening in the supplied 1 month period.
+     * @return A [Flux] of [events][Event] that are happening in the supplied 1-month period.
      */
     fun getEventsInMonth(start: Instant, daysInMonth: Int): Flux<Event> =
             getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))

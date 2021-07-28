@@ -50,7 +50,7 @@ object GoogleAuthWrapper {
                 .next()
                 .flatMap(this::requestNewAccessToken)
                 .map(GoogleCredential()::setAccessToken)
-                .ofType(Credential::class.java) //Gotta cast down to the class it extends
+                .ofType(Credential::class.java) //Cast down to the class it extends
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
@@ -58,7 +58,7 @@ object GoogleAuthWrapper {
         return Mono.just(calData).filter { !"N/a".equals(calData.encryptedAccessToken, true) }
                 .flatMap(this::requestNewAccessToken)
                 .map(GoogleCredential()::setAccessToken)
-                .ofType(Credential::class.java) //Gotta cast down to the class it extends
+                .ofType(Credential::class.java) //Cast down to the class it extends
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
@@ -108,9 +108,9 @@ object GoogleAuthWrapper {
                         //User revoked access to calendar, delete our reference as they need to re-auth it.
                         return@flatMap Mono.`when`(
                                 DatabaseManager.deleteCalendar(calData),
-                                DatabaseManager.deleteAllEventData(calData.guildId),
-                                DatabaseManager.deleteAllRsvpData(calData.guildId),
-                                DatabaseManager.deleteAllAnnouncementData(calData.guildId)
+                                DatabaseManager.deleteAllEventData(calData.guildId, calData.calendarNumber),
+                                DatabaseManager.deleteAllRsvpData(calData.guildId, calData.calendarNumber),
+                                DatabaseManager.deleteAllAnnouncementData(calData.guildId, calData.calendarNumber)
                         ).then(Mono.empty())
                     } else {
                         LogFeed.log(LogObject.forDebug("[!DGC!] err requesting new access token.",

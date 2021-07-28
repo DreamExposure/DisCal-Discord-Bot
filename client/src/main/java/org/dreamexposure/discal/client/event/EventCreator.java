@@ -220,13 +220,15 @@ public class EventCreator {
     }
 
 
+    @Deprecated
     private EventData handleEventData(PreEvent pre, Event confirmed, GuildSettings settings) {
         try {
-            if (pre.getEventData() != null && pre.getEventData().shouldBeSaved()) {
+            if (pre.getEventData().shouldBeSaved()) {
 
                 return new EventData(
                     settings.getGuildID(),
                     confirmed.getId(),
+                    1, //TODO: Support multi-cal. Honestly this shouldn't even be used!!!
                     confirmed.getEnd().getDateTime().getValue(),
                     pre.getEventData().getImageLink()
                 );

@@ -43,9 +43,9 @@ class GoogleCalendar internal constructor(
         return CalendarWrapper.deleteCalendar(calendarData).then(
                 Mono.`when`(
                         DatabaseManager.deleteCalendar(calendarData),
-                        DatabaseManager.deleteAllEventData(guildId),
-                        DatabaseManager.deleteAllRsvpData(guildId),
-                        DatabaseManager.deleteAllAnnouncementData(guildId)
+                        DatabaseManager.deleteAllEventData(guildId, calendarNumber),
+                        DatabaseManager.deleteAllRsvpData(guildId, calendarNumber),
+                        DatabaseManager.deleteAllAnnouncementData(guildId, calendarNumber)
                 )).thenReturn(true)
                 .defaultIfEmpty(false)
     }
@@ -130,6 +130,7 @@ class GoogleCalendar internal constructor(
             val data = EventData(
                     this.guildId,
                     confirmed.id,
+                    calendarNumber,
                     spec.end.toEpochMilli(),
                     spec.image ?: ""
             )
