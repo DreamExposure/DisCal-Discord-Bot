@@ -1,20 +1,20 @@
 package org.dreamexposure.discal.core.utils;
 
-import java.awt.Image;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.Iterator;
-import java.util.function.Function;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import java.awt.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Iterator;
 
 /**
  * Created by Nova Fox on 11/10/17.
@@ -28,30 +28,29 @@ public class ImageUtils {
     //TODO: Also, find a better working solution for validating images since this fails too much
     public static Mono<Boolean> validate(final String url, final boolean allowGif) {
         return Mono.fromCallable(() -> {
-            final Image image = ImageIO.read(new URL(url));
-            return image != null;
-        })
+                final Image image = ImageIO.read(new URL(url));
+                return image != null;
+            })
             .subscribeOn(Schedulers.boundedElastic())
             .onErrorResume(IOException.class, e -> {
                 if (allowGif)
                     return validateGif(url);
                 else
                     return Mono.just(false);
-            });
+            })
+            .onErrorReturn(MalformedURLException.class, false)
+            .onErrorReturn(FileNotFoundException.class, false);
     }
 
-    @SuppressWarnings("BlockingMethodInNonBlockingContext")
     private static Mono<Boolean> validateGif(final String url) {
         return Mono.fromCallable(() -> {
-            final URLConnection connection = new URL(url).openConnection();
-            connection.setConnectTimeout(THREE_SECOND_TIMEOUT);
-            connection.setReadTimeout(THREE_SECOND_TIMEOUT);
-            final InputStream in = connection.getInputStream();
-
-            return readGif(in);
-        })
+                final URLConnection connection = new URL(url).openConnection();
+                connection.setConnectTimeout(THREE_SECOND_TIMEOUT);
+                connection.setReadTimeout(THREE_SECOND_TIMEOUT);
+                return connection.getInputStream();
+            })
             .subscribeOn(Schedulers.boundedElastic())
-            .flatMap(Function.identity())
+            .flatMap(ImageUtils::readGif)
             .map("gif"::equalsIgnoreCase);
     }
 
@@ -73,6 +72,8 @@ public class ImageUtils {
                 if (reader != null)
                     reader.dispose();
             }
+            if (reader == null)
+                return "invalid_file_type";
             return reader.getFormatName();
         }).subscribeOn(Schedulers.boundedElastic());
     }
