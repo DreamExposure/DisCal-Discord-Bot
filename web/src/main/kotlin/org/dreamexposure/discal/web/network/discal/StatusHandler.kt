@@ -27,7 +27,9 @@ object StatusHandler {
             return@fromCallable client.newCall(request).execute()
         }.map { response ->
             if (response.code == HttpStatusCodes.STATUS_CODE_OK) {
-                return@map NetworkInfo().fromJson(JSONObject(response.body?.string()))
+                val body = response.body?.string()
+                response.body?.close()
+                return@map NetworkInfo().fromJson(JSONObject(body))
             } else {
                 return@map NetworkInfo() //Just return an empty object, it's fine.
             }

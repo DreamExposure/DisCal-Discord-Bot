@@ -113,7 +113,7 @@ object DiscordAccountHandler {
             if (has) {
                 swe.session.map {
                     this.discordAccounts.remove(it.getRequiredAttribute("account"))
-                    it.attributes.remove("account")
+                    Mono.justOrEmpty(it.attributes.remove("account"))
                 }.then()
             } else Mono.empty()
         }
@@ -165,11 +165,13 @@ object DiscordAccountHandler {
                     if (response.isSuccessful) {
                         //TODO: Change to use kotlin serialization
                         val body = JSONObject(response.body?.string())
+                        response.body?.close()
 
                         return@map body.optString("key", "internal_error")
                     } else {
                         //Something didn't work, log and add "key" embed page knows how to handle
                         LOGGER.debug("Embed key fail ${response.body?.string()}")
+                        response.body?.close()
                         return@map "internal_error"
                     }
                 }

@@ -31,6 +31,7 @@ object GoogleExternalAuthHandler {
             if (response.code == GlobalVal.STATUS_SUCCESS) {
                 //Got code -- Send message with code, start auth poll
                 val successJson = JSONObject(response.body!!.string())
+                response.body?.close()
 
                 val embed = EmbedCreateSpec.builder()
                         .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
@@ -62,8 +63,10 @@ object GoogleExternalAuthHandler {
                 }
             } else {
                 //Bad response -- Log, send message
+                val body = response.body?.string()
+                response.body?.close()
                 LOGGER.debug(DEFAULT, "Error request access token | Status code: ${response.code} | ${response
-                        .message} | ${response.body?.string()}")
+                        .message} | $body")
 
                 event.message.authorAsMember.flatMap {
                     Messages.sendDirectMessage(
@@ -85,6 +88,7 @@ object GoogleExternalAuthHandler {
                 GlobalVal.STATUS_BAD_REQUEST, GlobalVal.STATUS_PRECONDITION_REQUIRED -> {
                     //See if auth is pending, if so, just reschedule...
                     val errorJson = JSONObject(response.body!!.string())
+                    response.body?.close()
                     when {
                         "authorization_pending".equals(errorJson.getString("error"), true) -> {
                             //Response pending
@@ -116,6 +120,7 @@ object GoogleExternalAuthHandler {
                 GlobalVal.STATUS_SUCCESS -> {
                     //Access granted -- Save creds, get calendars, list for user, cancel auth
                     val successJson = JSONObject(response.body!!.string())
+                    response.body?.close()
 
                     //Save creds
                     val calData = CalendarData.emptyExternal(poll.settings.guildID, CalendarHost.GOOGLE)
@@ -158,6 +163,7 @@ object GoogleExternalAuthHandler {
                     //Unknown error -- Log, send message, cancel poll
                     LOGGER.debug(DEFAULT, "Network error | poll failure" +
                             " | Status code: ${response.code} | ${response.message} | ${response.body?.string()}")
+                    response.body?.close()
 
                     Messages.sendDirectMessage(
                             Messages.getMessage("Notification.Error.Network", poll.settings), poll.user)

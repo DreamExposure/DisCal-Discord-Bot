@@ -46,7 +46,12 @@ class DiscordLoginHandler {
 
             return@fromCallable client.newCall(tokenRequest).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap {
-            Mono.fromCallable { JSONObject(it.body?.string()) }
+            Mono.fromCallable {
+                val json = JSONObject(it.body?.string())
+                it.body?.close()
+
+                json
+            }
         }.flatMap { info ->
             if (info.has("access_token")) {
                 //GET request for user info
@@ -72,7 +77,9 @@ class DiscordLoginHandler {
                 Mono.zip(dataResMono, guildResMono)
                         .flatMap(TupleUtils.function { userDataResponse, userGuildsResponse ->
                             val userInfo = JSONObject(userDataResponse.body?.string())
+                            userDataResponse.body?.close()
                             val guildsInfo = JSONArray(userGuildsResponse.body?.string())
+                            userGuildsResponse.body?.close()
 
                             //Saving session and access info into memory...
                             val model = DiscordAccountHandler.createDefaultModel()
@@ -130,6 +137,7 @@ class DiscordLoginHandler {
                                         //Handle response
                                         if (keyGrantResponse.isSuccessful) {
                                             val keyGrantResponseBody = JSONObject(keyGrantResponse.body?.string())
+                                            keyGrantResponse.body?.close()
                                             //API Key received
                                             model["key"] = keyGrantResponseBody.getString("key")
 
@@ -138,6 +146,7 @@ class DiscordLoginHandler {
                                         } else {
                                             //Something didn't work, just redirect back to login page
                                             LOGGER.debug("login issue | ${keyGrantResponse.body?.string()}")
+                                            keyGrantResponse.body?.close()
 
                                             Mono.just("redirect:/login")
                                         }

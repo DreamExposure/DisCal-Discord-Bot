@@ -19,6 +19,7 @@ object GoogleInternalAuthHandler {
     fun requestCode(credNumber: Int): Mono<Void> {
         return GoogleAuthWrapper.requestDeviceCode().flatMap { response ->
             val responseBody = response.body!!.string()
+            response.body?.close()
 
             if (response.code == GlobalVal.STATUS_SUCCESS) {
                 val codeResponse = JSONObject(responseBody)
@@ -48,6 +49,7 @@ object GoogleInternalAuthHandler {
     private fun pollForAuth(poll: InternalGoogleAuthPoll): Mono<Void> {
         return GoogleAuthWrapper.requestPollResponse(poll).flatMap { response ->
             val responseBody = response.body!!.string()
+            response.body?.close()
 
             when (response.code) {
                 GlobalVal.STATUS_FORBIDDEN -> {
