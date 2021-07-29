@@ -77,7 +77,7 @@ class UpdateEventEndpoint(val client: DiscordClient) {
 
                         event.update(spec)
                                 .filter { it.success }
-                                .map { it.new?.toJson() }
+                                .flatMap { Mono.justOrEmpty(it.new?.toJson()) }
                                 .map { JSONObject().put("event", it).put("message", "Success").toString() }
                                 .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
                                 .switchIfEmpty(responseMessage("Event update failed")
@@ -87,7 +87,7 @@ class UpdateEventEndpoint(val client: DiscordClient) {
                             .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
                     )
         }.onErrorResume(JSONException::class.java) {
-            it.printStackTrace()
+            LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")

@@ -77,7 +77,7 @@ class KeepAliveEndpoint(val networkInfo: NetworkInfo) {
             response.rawStatusCode = GlobalVal.STATUS_SUCCESS
             return@flatMap responseMessage("Success!")
         }.onErrorResume(SerializationException::class.java) {
-            it.printStackTrace()
+            LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")

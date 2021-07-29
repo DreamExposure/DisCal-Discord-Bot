@@ -66,7 +66,7 @@ class GetWebGuildEndpoint(val client: DiscordClient) {
             response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND
             return@onErrorResume responseMessage("Guild not connected to DisCal")
         }.onErrorResume(JSONException::class.java) {
-            it.printStackTrace()
+            LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")

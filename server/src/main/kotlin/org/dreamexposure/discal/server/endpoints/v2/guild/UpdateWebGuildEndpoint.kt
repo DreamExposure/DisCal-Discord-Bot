@@ -52,7 +52,7 @@ class UpdateWebGuildEndpoint(val client: DiscordClient) {
                     .then(responseMessage("Success"))
                     .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
         }.onErrorResume(JSONException::class.java) {
-            it.printStackTrace()
+            LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")

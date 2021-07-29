@@ -63,9 +63,7 @@ enum class BotSettings {
                 try {
                     it.value = properties.getProperty(it.name)
                 } catch (npe: NullPointerException) {
-                    println("NPE On settings property | name: ${it.name} | Value: ${it.value}")
-
-                    throw IllegalStateException("Settings not valid! Check console for more information")
+                    throw IllegalStateException("Settings not valid! Check console for more information", npe)
                 }
             }
         }
