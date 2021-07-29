@@ -22,9 +22,9 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.enums.event.EventColor.Companion.fromNameOrHexOrId
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
 import org.dreamexposure.discal.core.extensions.asStringList
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.novautils.database.DatabaseSettings
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
@@ -107,7 +107,7 @@ object DatabaseManager {
                             .thenReturn(true)
                 }
             }.doOnError {
-                LogFeed.log(LogObject.forException("Failed to update API Account", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to update API account", it)
             }.onErrorResume { Mono.just(false) }
         }
     }
@@ -175,7 +175,7 @@ object DatabaseManager {
                             .thenReturn(true)
                 }
             }.doOnError {
-                LogFeed.log(LogObject.forException("Failed to update guild settings", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to update guild settings", it)
             }.onErrorResume { Mono.just(false) }
         }
     }
@@ -239,7 +239,7 @@ object DatabaseManager {
                             .thenReturn(true)
                 }
             }.doOnError {
-                LogFeed.log(LogObject.forException("Failed to update calendar data", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to update calendar data", it)
             }.onErrorResume { Mono.just(false) }
         }
     }
@@ -314,7 +314,7 @@ object DatabaseManager {
                             .thenReturn(true)
                 }
             }.doOnError {
-                LogFeed.log(LogObject.forException("Failed to update announcement", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to update announcement", it)
             }.onErrorResume { Mono.just(false) }
         }
     }
@@ -368,7 +368,7 @@ object DatabaseManager {
                             .hasElements()
                             .thenReturn(true)
                 }.doOnError {
-                    LogFeed.log(LogObject.forException("Failed to update event data", it, this::class.java))
+                    LOGGER.error(DEFAULT, "Failed to update event data", it)
                 }.onErrorResume { Mono.just(false) }
             }
         }
@@ -440,7 +440,7 @@ object DatabaseManager {
                             .hasElements()
                             .thenReturn(true)
                 }.doOnError {
-                    LogFeed.log(LogObject.forException("Failed to update rsvp data", it, this::class.java))
+                    LOGGER.error(DEFAULT, "Failed to update rsvp data", it)
                 }.onErrorResume { Mono.just(false) }
             }
         }
@@ -484,7 +484,7 @@ object DatabaseManager {
                             .hasElements()
                             .thenReturn(true)
                 }.doOnError {
-                    LogFeed.log(LogObject.forException("Failed to update credential data", it, this::class.java))
+                    LOGGER.error(DEFAULT, "Failed to update credential data", it)
                 }.onErrorResume { Mono.just(false) }
             }
 
@@ -511,7 +511,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get API key data", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get API-key data", it)
             }.onErrorResume { Mono.empty() }
         }
     }
@@ -556,7 +556,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get guild settings", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get guild settings", it)
             }.onErrorReturn(GuildSettings.empty(guildId)).defaultIfEmpty(GuildSettings.empty(guildId))
         }
     }
@@ -591,7 +591,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get all guild calendars", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get all guild calendars", it)
             }.onErrorResume { Mono.empty() }
         }
     }
@@ -623,7 +623,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get all guild calendars", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get all guild calendars", it)
             }.onErrorReturn(mutableListOf())
         }
     }
@@ -643,7 +643,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get calendar count", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get calendar count", it)
             }.onErrorReturn(-1)
         }
     }
@@ -670,7 +670,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get event data", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get event data", it)
             }.onErrorResume {
                 Mono.empty()
             }.defaultIfEmpty(EventData(guildId, eventId = eventId))
@@ -708,7 +708,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get rsvp data", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get rsvp data", it)
             }.onErrorResume {
                 Mono.empty()
             }.defaultIfEmpty(RsvpData(guildId, eventId))
@@ -746,7 +746,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get announcement", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get announcement", it)
             }.onErrorResume { Mono.empty() }
         }
     }
@@ -784,7 +784,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get announcements for guild", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get announcements for guild", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -823,7 +823,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get ann's for guild by type", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get guild's announcements by type", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -861,7 +861,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get all announcements", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get all announcements", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -900,7 +900,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get announcements by type", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get announcements by type", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -938,7 +938,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get enabled announcements", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get enabled announcements", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -976,7 +976,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get enabled ann's for guild", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get guild's enabled announcements", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -1015,7 +1015,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get enabled ann's by type", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -1035,7 +1035,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get announcement count", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get announcement count", it)
             }.onErrorReturn(-1)
         }.defaultIfEmpty(-1)
     }
@@ -1059,7 +1059,7 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LogFeed.log(LogObject.forException("Failed to get enabled ann's by type", it, this::class.java))
+                LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
             }.onErrorResume { Mono.empty() }
         }
     }
@@ -1075,7 +1075,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete announcement", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete announcements", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1092,7 +1092,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete ann's for event", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete announcements for event", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1109,7 +1109,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete event data", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete event data", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1126,8 +1126,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject
-                                .forException("Failed to delete all event data for guild", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete all event data for guild", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1144,7 +1143,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete all ann for guild", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete all announcements for guild", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1161,7 +1160,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete all rsvps for guild", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete all rsvps for guild", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1179,8 +1178,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject
-                                .forException("Failed to update all rsvp with role for guild", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed update all rsvp with role for guild ", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
@@ -1197,7 +1195,7 @@ object DatabaseManager {
                     .hasElements()
                     .thenReturn(true)
                     .doOnError {
-                        LogFeed.log(LogObject.forException("Failed to delete calendar", it, this::class.java))
+                        LOGGER.error(DEFAULT, "Failed to delete calendar", it)
                     }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }

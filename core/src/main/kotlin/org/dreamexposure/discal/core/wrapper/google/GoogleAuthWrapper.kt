@@ -17,9 +17,9 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -114,21 +114,22 @@ object GoogleAuthWrapper {
                                 DatabaseManager.deleteAllAnnouncementData(calData.guildId, calData.calendarNumber)
                         ).then(Mono.empty())
                     } else {
-                        LogFeed.log(LogObject.forDebug("[!DGC!] err requesting new access token.",
-                                "Code: ${response.code} | ${response.message} | $errorBody"))
+                        LOGGER.debug(DEFAULT, "[!DGC!] err requesting new access token. Code: ${
+                            response
+                                    .code
+                        } | ${response.message} | $errorBody")
                         return@flatMap Mono.empty()
                     }
                 }
                 else -> {
                     //Failed to get OK. Send debug info...
-                    LogFeed.log(LogObject.forDebug("[!DGC!] Err requesting new access token. ",
-                            "Code: ${response.code} | ${response.message} | ${response.body?.string()}"))
+                    LOGGER.debug(DEFAULT, "[!DGC!] Err requesting new access token. Code: ${response.code} | ${response.message} | ${response.body?.string()}")
 
                     return@flatMap Mono.empty()
                 }
             }
         }.doOnError {
-            LogFeed.log(LogObject.forException("[!DGC!] Failed to request new access token", it, this.javaClass))
+            LOGGER.error("[!DGC!] Failed to request new access token", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -174,23 +175,23 @@ object GoogleAuthWrapper {
 
                     if ("invalid_grant".equals(errorBody.getString("error"), true)) {
                         //We revoked access to this account. Is this on purpose??
-                        LogFeed.log(LogObject.forDebug("[!DGC!] GOOGLE CALENDAR CREDENTIAL REFRESH FAILURE",
-                                "CredId: " + credential.credentialData.credentialNumber))
+                        LOGGER.debug(DEFAULT, "[!DGC!] GOOGLE CALENDAR CREDENTIAL REFRESH FAILURE CredId: " +
+                                "${credential.credentialData.credentialNumber}")
                     } else {
-                        LogFeed.log(LogObject.forDebug("[!DGC!] Error requesting new access token.",
-                                "Status code: ${response.code} | ${response.message} | $errorBody"))
+                        LOGGER.debug(DEFAULT, "[!DGC!] Error requesting new access token. Status code: " +
+                                "${response.code} | ${response.message} | $errorBody")
                     }
                     return@flatMap Mono.empty()
                 }
                 else -> {
                     //Failed to get OK. Send debug info.
-                    LogFeed.log(LogObject.forDebug("[!DGC!] Error requesting new access token.",
-                            "Status code: ${response.code} | ${response.message} | ${response.body?.string()}"))
+                    LOGGER.debug(DEFAULT, "[!DGC!] Error requesting new access token. Status code: ${response.code} |" +
+                            " ${response.message} | ${response.body?.string()}")
                     return@flatMap Mono.empty()
                 }
             }
         }.doOnError {
-            LogFeed.log(LogObject.forException("[!DGC!] Failed to request new access token", it, this.javaClass))
+            LOGGER.error(DEFAULT, "[!DGC!] Failed to request new access token", it)
         }.onErrorResume { Mono.empty() }
     }
 

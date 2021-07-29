@@ -3,9 +3,9 @@ package org.dreamexposure.discal.server.utils
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.web.AuthenticationState
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -25,7 +25,7 @@ object Authentication {
     fun authenticate(swe: ServerWebExchange): Mono<AuthenticationState> {
         //Check if correct method
         if (!swe.request.methodValue.equals("POST", true) || swe.request.methodValue.equals("GET", true)) {
-            LogFeed.log(LogObject.forDebug("Denied access", "Method ${swe.request.methodValue}"))
+            LOGGER.debug("Denied access | Method: ${swe.request.methodValue}")
             return Mono.just(AuthenticationState(false)
                     .status(GlobalVal.STATUS_NOT_ALLOWED)
                     .reason("Method not allowed")
@@ -90,10 +90,7 @@ object Authentication {
                 }
             }
         } else {
-            LogFeed.log(
-                    LogObject.forDebug("Attempted to use API without auth",
-                            "IP: ${swe.request.localAddress} | ${swe.request.remoteAddress}")
-            )
+            LOGGER.debug(DEFAULT, "Attempted to use API without auth | ${swe.request.remoteAddress}")
 
             return Mono.just(AuthenticationState(false)
                     .status(GlobalVal.STATUS_BAD_REQUEST)

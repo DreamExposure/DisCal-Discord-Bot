@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.JsonUtil;
 import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +15,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.dreamexposure.discal.core.utils.GlobalVal.getSTATUS;
 
 /**
  * @author NovaFox161
@@ -27,6 +29,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @SuppressWarnings("Duplicates")
 @Component
 public class NetworkInfo {
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
     private final List<ConnectedClient> clients = new CopyOnWriteArrayList<>();
 
     private int calCount;
@@ -70,9 +74,7 @@ public class NetworkInfo {
         this.clients.add(client);
         this.clients.sort(Comparator.comparingInt(ConnectedClient::getClientIndex));
 
-        LogFeed.log(LogObject
-            .forStatus("Client Connected to Network",
-                "Shard index of connected client: " + client.getClientIndex()));
+        LOGGER.info(getSTATUS(), "Client connected to network | Index: " + client.getClientIndex());
     }
 
     public void updateClient(ConnectedClient client) {
@@ -85,17 +87,16 @@ public class NetworkInfo {
     public void removeClient(final int clientIndex) {
         if (this.doesClientExist(clientIndex)) {
             this.clients.remove(this.getClient(clientIndex));
-            LogFeed.log(LogObject
-                .forStatus("Client Disconnected from Network",
-                    "Shard Index of Disconnected Client: " + clientIndex));
+
+            LOGGER.warn(getSTATUS(), "Client disconnected from network | Index: " + clientIndex);
         }
     }
 
     public void removeClient(final int clientIndex, final String reason) {
         if (this.doesClientExist(clientIndex)) {
             this.clients.remove(this.getClient(clientIndex));
-            LogFeed.log(LogObject
-                .forStatus("Client Disconnected from Network | Index: " + clientIndex, reason));
+
+            LOGGER.warn(getSTATUS(), "Client disconnected from network | Index: " + clientIndex + " | Reason: " + reason);
         }
     }
 

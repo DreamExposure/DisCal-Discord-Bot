@@ -7,27 +7,30 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.dreamexposure.discal.core.enums.announcement.AnnouncementType.SPECIFIC;
-import static reactor.function.TupleUtils.function;
+import static org.dreamexposure.discal.core.utils.GlobalVal.getDEFAULT;
 
 public class AnnouncementThread {
-    private final GatewayDiscordClient client;
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
+        private final GatewayDiscordClient client;
 
     private final Map<Snowflake, Mono<GuildSettings>> allSettings = new ConcurrentHashMap<>();
     private final Map<Snowflake, Mono<CalendarData>> calendars = new ConcurrentHashMap<>();
@@ -62,7 +65,7 @@ public class AnnouncementThread {
                     final Mono<Calendar> se = cd.flatMap(calData -> s.flatMap(gs -> this.getService(calData)));
 
                     return Mono.zip(s, cd, se)
-                        .flatMap(function((settings, calData, service) -> {
+                        .flatMap(TupleUtils.function((settings, calData, service) -> {
                             switch (a.getModifier()) {
                                 case BEFORE:
                                     return this.handleBeforeModifier(guild, a, settings, calData, service);
@@ -75,10 +78,10 @@ public class AnnouncementThread {
                             }
                         }));
                 })
-                .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error", e, AnnouncementThread.class)))
+                .doOnError(e -> LOGGER.error(getDEFAULT(), "Announcement error", e))
                 .onErrorResume(e -> Mono.empty())
             )
-            .doOnError(e -> LogFeed.log(LogObject.forException("Announcement Error", e, AnnouncementThread.class)))
+            .doOnError(e -> LOGGER.error(getDEFAULT(), "Announcement error", e))
             .onErrorResume(e -> Mono.empty())
             .doFinally(ignore -> {
                 this.allSettings.clear();
@@ -180,7 +183,7 @@ public class AnnouncementThread {
 
             if (difference < 0) {
                 //Event past, we can delete announcement depending on the type
-                if (a.getType() == SPECIFIC)
+                if (a.getType() == AnnouncementType.SPECIFIC)
                     return DatabaseManager.INSTANCE.deleteAnnouncement(a.getAnnouncementId().toString())
                         .thenReturn(false);
 
@@ -199,7 +202,7 @@ public class AnnouncementThread {
 
         if (difference < 0) {
             //Event past, we can delete announcement depending on the type
-            if (a.getType() == SPECIFIC)
+            if (a.getType() == AnnouncementType.SPECIFIC)
                 return false; //Shouldn't even be used for specific types...
 
             return false;

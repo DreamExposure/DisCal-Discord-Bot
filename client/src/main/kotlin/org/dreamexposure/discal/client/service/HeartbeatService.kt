@@ -8,8 +8,7 @@ import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
@@ -54,7 +53,7 @@ class HeartbeatService : ApplicationRunner {
                 }.flatMap {
                     Mono.fromCallable(HTTP_CLIENT.newCall(it)::execute)
                 }.doOnError {
-                    LogFeed.log(LogObject.forException("[Heartbeat]", "Failed to heartbeat", it, this.javaClass))
+                    LOGGER.error(GlobalVal.DEFAULT, "[Heartbeat] Failed to heartbeat", it)
                 }.onErrorResume { Mono.empty() }
                 .then()
 

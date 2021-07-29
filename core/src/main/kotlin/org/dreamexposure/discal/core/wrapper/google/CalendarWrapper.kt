@@ -4,8 +4,8 @@ import com.google.api.services.calendar.model.Calendar
 import com.google.api.services.calendar.model.CalendarListEntry
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
@@ -19,7 +19,7 @@ object CalendarWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar create failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Calendar create failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -32,7 +32,7 @@ object CalendarWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar patch failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Calendar patch failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -45,7 +45,7 @@ object CalendarWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar update failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Calendar update failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -58,7 +58,7 @@ object CalendarWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar get failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Calendar get failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -76,7 +76,7 @@ object CalendarWrapper {
                     }.subscribeOn(Schedulers.boundedElastic())
                 }.thenReturn(true)
                 .doOnError {
-                    LogFeed.log(LogObject.forException("G.Calendar delete failure", it, this.javaClass))
+                    LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Calendar delete failure", it)
                 }.onErrorReturn(false)
     }
 
@@ -91,7 +91,7 @@ object CalendarWrapper {
                         .items
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar external list failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] External calendar list failure", it)
         }.onErrorResume { Mono.empty() }
     }
 }

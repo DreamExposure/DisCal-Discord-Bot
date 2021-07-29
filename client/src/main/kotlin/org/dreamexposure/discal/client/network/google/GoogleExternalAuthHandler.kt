@@ -11,9 +11,9 @@ import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.GlobalVal.iconUrl
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
@@ -62,9 +62,8 @@ object GoogleExternalAuthHandler {
                 }
             } else {
                 //Bad response -- Log, send message
-                LogFeed.log(LogObject.forDebug(
-                        "Error request access token",
-                        "Status code: ${response.code} | ${response.message} | ${response.body?.string()}"))
+                LOGGER.debug(DEFAULT, "Error request access token | Status code: ${response.code} | ${response
+                        .message} | ${response.body?.string()}")
 
                 event.message.authorAsMember.flatMap {
                     Messages.sendDirectMessage(
@@ -99,8 +98,7 @@ object GoogleExternalAuthHandler {
                         }
                         else -> {
                             //Unknown error -- Log, send message, cancel poll
-                            LogFeed.log(LogObject.forDebug(
-                                    "[E.GCA] Poll failure", "Status: ${response.code} | ${response.message} | $errorJson"))
+                            LOGGER.debug(DEFAULT, "[E.GCA] Poll failure", "Status: ${response.code} | ${response.message} | $errorJson")
 
                             Messages.sendDirectMessage(Messages.getMessage("Notification.Error.Network", poll.settings),
                                     poll.user)
@@ -132,7 +130,7 @@ object GoogleExternalAuthHandler {
                             .flatMapMany { Flux.fromIterable(it) }
                             .map { cal ->
                                 EmbedCreateSpec.builder()
-                                        .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.iconUrl)
+                                        .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
                                         .title(Messages.getMessage("Embed.AddCalendar.List.Title", poll.settings))
                                         .addField(
                                                 Messages.getMessage("Embed.AddCalendar.List.Name", poll.settings),
@@ -146,7 +144,7 @@ object GoogleExternalAuthHandler {
                                                 Messages.getMessage("Embed.AddCalendar.List.ID", poll.settings),
                                                 cal.id,
                                                 false)
-                                        .color(GlobalVal.discalColor)
+                                        .color(discalColor)
                                         .build()
                             }.flatMap { Messages.sendDirectMessage(it, poll.user) }
                             .switchIfEmpty {
@@ -158,10 +156,8 @@ object GoogleExternalAuthHandler {
                 }
                 else -> {
                     //Unknown error -- Log, send message, cancel poll
-
-                    //Unknown network error...
-                    LogFeed.log(LogObject.forDebug("Network error; poll failure",
-                            "Status code: ${response.code} | ${response.message} | ${response.body?.string()}"))
+                    LOGGER.debug(DEFAULT, "Network error | poll failure" +
+                            " | Status code: ${response.code} | ${response.message} | ${response.body?.string()}")
 
                     Messages.sendDirectMessage(
                             Messages.getMessage("Notification.Error.Network", poll.settings), poll.user)
@@ -170,7 +166,7 @@ object GoogleExternalAuthHandler {
             }
         }.onErrorResume(Predicate.not(GoogleAuthCancelException::class::isInstance)) {
             //Other error -- Log, send message, cancel poll
-            LogFeed.log(LogObject.forException("Failed to poll for authorization to google account", it, this.javaClass))
+            LOGGER.error(DEFAULT, "Failed to poll for authorization to google account", it)
 
             Messages.sendDirectMessage(Messages.getMessage("Notification.Error.Unknown", poll.settings), poll.user)
                     .then(Mono.error(GoogleAuthCancelException()))

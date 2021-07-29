@@ -4,18 +4,22 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.module.command.CommandExecutor;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.dreamexposure.discal.core.utils.GlobalVal.getDEFAULT;
+
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class MessageCreateListener {
+    private final static Logger LOGGER = LoggerFactory.getLogger(MessageCreateListener.class);
+
     public static Mono<Void> handle(final MessageCreateEvent event) {
         return Mono.just(event.getMessage())
             .filter(message -> !message.getContent().isEmpty())
@@ -80,11 +84,8 @@ public class MessageCreateListener {
                         return Mono.empty();
                     }
                 }))
-            .doOnError(e -> LogFeed //Basically make sure we don't zombie
-                .log(LogObject.forException("Error Handling message event",
-                    event.getMessage().getContent(), e, MessageCreateListener.class)
-                )
-            ).onErrorResume(e -> Mono.empty())
+            .doOnError(e -> LOGGER.error(getDEFAULT(), "Error handle message event | " + event.getMessage().getContent(), e))
+            .onErrorResume(e -> Mono.empty())
             .then();
     }
 }

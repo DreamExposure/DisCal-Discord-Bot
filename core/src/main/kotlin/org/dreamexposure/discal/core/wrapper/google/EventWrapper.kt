@@ -5,8 +5,8 @@ import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
@@ -20,7 +20,7 @@ object EventWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event create fail cred: ${calData.credentialId}", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event create failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -33,7 +33,7 @@ object EventWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event patch fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event patch failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -46,7 +46,7 @@ object EventWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event update fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event update failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -76,7 +76,7 @@ object EventWrapper {
                         .items
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event list(1) fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event list(1) failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -94,7 +94,7 @@ object EventWrapper {
                     .execute().items
         }.subscribeOn(Schedulers.boundedElastic())
                 .doOnError {
-                    LogFeed.log(LogObject.forException("G.Event list(2) fail", it, this.javaClass))
+                    LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event list(2) failure", it)
                 }.onErrorResume { Mono.empty() }
     }
 
@@ -113,7 +113,7 @@ object EventWrapper {
                         .execute().items
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event list(3) fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event list(3) failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -131,7 +131,7 @@ object EventWrapper {
                         .execute().items
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event list(4) fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event list(4) failure", it)
         }.onErrorResume { Mono.empty() }
     }
 
@@ -145,12 +145,12 @@ object EventWrapper {
 
                 //Log error code if one happened
                 if (response.statusCode != HttpStatusCodes.STATUS_CODE_OK) {
-                    LogFeed.log(LogObject.forDebug("Event Delete Error | ${response.statusCode} | ${response.statusMessage}"))
+                    LOGGER.debug(GlobalVal.DEFAULT, "Event delete error | ${response.statusCode} | ${response.statusMessage}")
                 }
                 response.statusCode == HttpStatusCodes.STATUS_CODE_OK
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Event delete fail", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event delete failure", it)
         }.onErrorReturn(false)
     }
 }

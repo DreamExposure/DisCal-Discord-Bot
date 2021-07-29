@@ -5,15 +5,18 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.dreamexposure.discal.client.message.AnnouncementMessageFormatter;
 import org.dreamexposure.discal.client.message.Messages;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.announcement.AnnouncementCreatorResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static org.dreamexposure.discal.core.utils.GlobalVal.getDEFAULT;
 
 /**
  * Created by Nova Fox on 3/4/2017.
@@ -26,6 +29,8 @@ public class AnnouncementCreator {
     }
 
     private static final AnnouncementCreator instance;
+
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     private final List<Announcement> announcements = new CopyOnWriteArrayList<>();
 
     private AnnouncementCreator() {
@@ -67,7 +72,7 @@ public class AnnouncementCreator {
                         .doOnNext(a::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
                         .thenReturn(a)
-                        .doOnError(err -> LogObject.forException("Failed to copy", err, this.getClass()))
+                        .doOnError(err -> LOGGER.error(getDEFAULT(), "Failed to copy", err))
                         .onErrorResume(err -> Mono.empty());
                 });
         }
@@ -87,7 +92,7 @@ public class AnnouncementCreator {
                         .doOnNext(edit::setCreatorMessage)
                         .then(Messages.deleteMessage(e))
                         .thenReturn(edit)
-                        .doOnError(err -> LogObject.forException("Failed to init editor", err, this.getClass()))
+                        .doOnError(err -> LOGGER.error(getDEFAULT(), "Failed to init editor", err))
                         .onErrorResume(err -> Mono.empty());
                 });
         } else {

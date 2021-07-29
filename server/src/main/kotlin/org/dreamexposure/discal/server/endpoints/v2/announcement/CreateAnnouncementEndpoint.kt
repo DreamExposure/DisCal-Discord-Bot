@@ -8,8 +8,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.discord4j.createAnnouncement
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -83,7 +82,7 @@ class CreateAnnouncementEndpoint(val client: DiscordClient) {
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
-            LogFeed.log(LogObject.forException("[API-v2] create announcement err", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[API-v2] create announcement error", it)
 
             response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
             return@onErrorResume responseMessage("Internal Server Error")

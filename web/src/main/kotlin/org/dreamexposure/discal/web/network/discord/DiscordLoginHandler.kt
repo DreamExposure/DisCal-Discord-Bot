@@ -9,8 +9,7 @@ import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.timezone.GoodTimezone
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.json.JSONArray
@@ -138,9 +137,7 @@ class DiscordLoginHandler {
                                                     .thenReturn("redirect:/dashboard")
                                         } else {
                                             //Something didn't work, just redirect back to login page
-                                            LogFeed.log(
-                                                    LogObject.forDebug("login issue", keyGrantResponse.body?.string())
-                                            )
+                                            LOGGER.debug("login issue | ${keyGrantResponse.body?.string()}")
 
                                             Mono.just("redirect:/login")
                                         }
@@ -151,7 +148,7 @@ class DiscordLoginHandler {
                 return@flatMap Mono.just("redirect:/login")
             }
         }.doOnError {
-            LogFeed.log(LogObject.forException("[Login-Discord] Discord login failed", it, this.javaClass))
+            LOGGER.error("[Discord-login] Discord login failed", it)
         }
     }
 
@@ -178,7 +175,7 @@ class DiscordLoginHandler {
                         .then(DiscordAccountHandler.removeAccount(swe))
                         .thenReturn("redirect:/")
                         .doOnError {
-                            LogFeed.log(LogObject.forException("[Web] Discord logout fail", it, this.javaClass))
+                            LOGGER.error("[Web] Discord logout fail", it)
                         }.onErrorReturn("redirect:/")
             }
         }

@@ -4,8 +4,9 @@ import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.dreamexposure.discal.server.network.google.GoogleInternalAuthHandler
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.novautils.database.DatabaseSettings
@@ -32,12 +33,12 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
 
         //Save instance ID
         networkInfo.instanceId = Application.instanceId
-        LogFeed.log(LogObject.forStatus("Started Server/API", "Server and API are now online!"))
+        LOGGER.info(STATUS, "API is now online")
     }
 
     @PreDestroy
     fun onShutdown() {
-        LogFeed.log(LogObject.forStatus("API shutting down", "Server/API shutting down..."))
+        LOGGER.info(STATUS, "API shutting down.")
         Authentication.shutdown()
         DatabaseManager.disconnectFromMySQL()
     }
@@ -66,65 +67,59 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
                         .build()
                         .run(*args)
             } catch (e: Exception) {
-                e.printStackTrace()
-                LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE API'", e, DisCalServer::class.java))
+                LOGGER.error(DEFAULT, "'Spring error' by PANIC! at the API")
                 exitProcess(4)
             }
         }
-    }
-}
 
-private fun handleMigrations(repair: Boolean) {
-    val placeholders: Map<String, String> = mapOf(Pair("prefix", BotSettings.SQL_PREFIX.get()))
+        private fun handleMigrations(repair: Boolean) {
+            val placeholders: Map<String, String> = mapOf(Pair("prefix", BotSettings.SQL_PREFIX.get()))
 
-    val databaseSettings = DatabaseSettings(
-            BotSettings.SQL_HOST.get(),
-            BotSettings.SQL_PORT.get(),
-            BotSettings.SQL_DB.get(),
-            BotSettings.SQL_USER.get(),
-            BotSettings.SQL_PASS.get(),
-            BotSettings.SQL_PREFIX.get(),
-    )
-    val databaseInfo = NovaUtilsDatabaseManager.connectToMySQL(databaseSettings)
+            val databaseSettings = DatabaseSettings(
+                    BotSettings.SQL_HOST.get(),
+                    BotSettings.SQL_PORT.get(),
+                    BotSettings.SQL_DB.get(),
+                    BotSettings.SQL_USER.get(),
+                    BotSettings.SQL_PASS.get(),
+                    BotSettings.SQL_PREFIX.get(),
+            )
+            val databaseInfo = NovaUtilsDatabaseManager.connectToMySQL(databaseSettings)
 
-    try {
-        val flyway = Flyway.configure()
-                .dataSource(databaseInfo.source)
-                .cleanDisabled(true)
-                .baselineOnMigrate(true)
-                .table("${BotSettings.SQL_PREFIX.get()}schema_history")
-                .placeholders(placeholders)
-                .load()
+            try {
+                val flyway = Flyway.configure()
+                        .dataSource(databaseInfo.source)
+                        .cleanDisabled(true)
+                        .baselineOnMigrate(true)
+                        .table("${BotSettings.SQL_PREFIX.get()}schema_history")
+                        .placeholders(placeholders)
+                        .load()
 
-        //Validate?
-        flyway.validateWithResult().invalidMigrations.forEach { result ->
-            println("Invalid Migration: ${result.filepath}")
-            println("Version: ${result.version}")
-            println("Description: ${result.description}")
-            println("Details: ${result.errorDetails.errorMessage}")
+                //Validate?
+                flyway.validateWithResult().invalidMigrations.forEach { result ->
+                    println("Invalid Migration: ${result.filepath}")
+                    println("Version: ${result.version}")
+                    println("Description: ${result.description}")
+                    println("Details: ${result.errorDetails.errorMessage}")
+                }
+
+                var sm = 0
+                if (repair)
+                    flyway.repair()
+                else
+                    sm = flyway.migrate().migrationsExecuted
+
+                NovaUtilsDatabaseManager.disconnectFromMySQL(databaseInfo)
+                LOGGER.info(DEFAULT, "Migrations successful | $sm migrations applied!")
+            } catch (e: FlywayValidateException) {
+                LOGGER.error(DEFAULT, "Migrations failure (validate)", e)
+                exitProcess(3)
+            } catch (e: DbMigrate.FlywayMigrateException) {
+                LOGGER.error(DEFAULT, "Migrations failure", e)
+                exitProcess(3)
+            } catch (e: Exception) {
+                LOGGER.error(DEFAULT, "Migrations failures", e)
+                exitProcess(2)
+            }
         }
-
-        var sm = 0
-        if (repair)
-            flyway.repair()
-        else
-            sm = flyway.migrate().migrationsExecuted
-
-        NovaUtilsDatabaseManager.disconnectFromMySQL(databaseInfo)
-        LogFeed.log(LogObject.forDebug("Migrations Successful", "$sm migrations applied!"))
-    } catch (e: FlywayValidateException) {
-        LogFeed.log(LogObject.forException("Migrations failure (validate)", e, DisCalServer::class.java))
-        e.printStackTrace()
-        println("Migration Validate Error Message: ${e.errorCode}")
-        exitProcess(3)
-    } catch (e: DbMigrate.FlywayMigrateException) {
-        LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer::class.java))
-        e.printStackTrace()
-        println("Migration Error Message: ${e.migration.validate().errorMessage}")
-        exitProcess(3)
-    } catch (e: Exception) {
-        LogFeed.log(LogObject.forException("Migrations failure", e, DisCalServer::class.java))
-        e.printStackTrace()
-        exitProcess(2)
     }
 }

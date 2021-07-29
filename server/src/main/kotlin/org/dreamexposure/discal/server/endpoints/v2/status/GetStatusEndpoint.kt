@@ -2,8 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.status
 
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -37,7 +36,7 @@ class GetStatusEndpoint(val networkInfo: NetworkInfo) {
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
-            LogFeed.log(LogObject.forException("[API-v2] get status err", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[API-v2] get status error", it)
 
             response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
             return@onErrorResume responseMessage("Internal Server Error")

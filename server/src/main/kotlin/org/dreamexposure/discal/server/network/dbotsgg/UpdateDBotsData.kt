@@ -5,8 +5,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import org.springframework.boot.ApplicationArguments
@@ -38,7 +37,7 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
             client.newCall(request).execute()
         }.doOnNext { response ->
             if (response.code != GlobalVal.STATUS_SUCCESS) {
-                LogFeed.log(LogObject.forDebug("Failed to update DBots.gg stats", "Body: ${response.body?.string()}"))
+                LOGGER.debug("Failed to update DBots.gg stats | Body: ${response.body?.string()}")
             }
         }.onErrorResume {
             Mono.empty()

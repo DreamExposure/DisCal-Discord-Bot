@@ -7,12 +7,12 @@ import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.rest.http.client.ClientException;
 import org.dreamexposure.discal.core.file.ReadFile;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -28,18 +28,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Messages {
     private static JSONObject langs;
+    private final static Logger LOGGER = LoggerFactory.getLogger(Messages.class);
 
     //Lang handling
     public static Mono<Boolean> reloadLangs() {
         return ReadFile.readAllLangFiles()
             .doOnNext(l -> langs = l)
             .thenReturn(true)
-            .doOnError(e ->
-                LogFeed.log(LogObject.forException("[LANGS]",
-                    "Failed to reload lang files!",
-                    e,
-                    Messages.class)
-                ))
+            .doOnError(e -> LOGGER.error("[LANGS] Failed to reload lang files", e))
             .onErrorReturn(false);
     }
 

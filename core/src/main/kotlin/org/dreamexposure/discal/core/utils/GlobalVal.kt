@@ -6,6 +6,8 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.dreamexposure.discal.core.`object`.BotSettings
+import org.slf4j.Marker
+import org.slf4j.MarkerFactory
 import org.springframework.core.io.ClassPathResource
 import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PropertiesLoaderUtils
@@ -42,10 +44,14 @@ object GlobalVal {
 
     val JSON = "application/json; charset=utf-8".toMediaType()
 
-
     val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
     val JSON_FORMAT = Json { encodeDefaults = true }
+
+    @JvmStatic
+    val DEFAULT: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_DEFAULT")
+    @JvmStatic
+    val STATUS: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_STATUS")
 
     const val STATUS_SUCCESS = 200
     const val STATUS_BAD_REQUEST = 400

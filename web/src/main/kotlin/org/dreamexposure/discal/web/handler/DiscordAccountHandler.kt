@@ -4,8 +4,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import org.springframework.web.server.ServerWebExchange
@@ -170,13 +169,13 @@ object DiscordAccountHandler {
                         return@map body.optString("key", "internal_error")
                     } else {
                         //Something didn't work, log and add "key" embed page knows how to handle
-                        LogFeed.log(LogObject.forDebug("Embed key fail: ${response.body?.string()}"))
+                        LOGGER.debug("Embed key fail ${response.body?.string()}")
                         return@map "internal_error"
                     }
                 }
                 .doOnError {
                     //Something didn't work, log and add "key" embed page knows how to handle
-                    LogFeed.log(LogObject.forException("Embed key get failure", it, this.javaClass))
+                    LOGGER.error("Embed key get failure", it)
                 }
                 .onErrorReturn("internal_error")
     }

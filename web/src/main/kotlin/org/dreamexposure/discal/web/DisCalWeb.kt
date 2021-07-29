@@ -2,8 +2,9 @@ package org.dreamexposure.discal.web
 
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
@@ -30,18 +31,17 @@ class DisCalWeb {
                         .build()
                         .run(*args)
             } catch (e: Exception) {
-                e.printStackTrace()
-                LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! AT THE WEBSITE'", e, DisCalWeb::class.java))
+                LOGGER.error(DEFAULT, "`Spring error` by PANIC! at the Website", e)
                 exitProcess(4)
             }
 
-            LogFeed.log(LogObject.forStatus("Started", "Website is now online!"))
+            LOGGER.info(STATUS, "Website is not online")
         }
     }
 
     @PreDestroy
     fun onShutdown() {
-        LogFeed.log(LogObject.forStatus("Website shutting down", "Website shutting down..."))
+        LOGGER.info(STATUS, "Website shutting down")
         DiscordAccountHandler.shutdown()
     }
 }

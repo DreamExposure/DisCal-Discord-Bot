@@ -6,8 +6,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import reactor.core.publisher.Mono
@@ -33,7 +32,7 @@ object StatusHandler {
                 return@map NetworkInfo() //Just return an empty object, it's fine.
             }
         }.doOnError {
-            LogFeed.log(LogObject.forException("[Status Request] Failed to get status", it, this.javaClass))
+            LOGGER.error("[Status Request] Failed to get status", it)
         }.onErrorReturn(NetworkInfo()).defaultIfEmpty(NetworkInfo())
     }
 }

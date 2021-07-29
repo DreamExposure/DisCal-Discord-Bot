@@ -32,8 +32,9 @@ import org.dreamexposure.discal.client.module.command.*
 import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -85,8 +86,7 @@ class DisCalClient {
                         .build()
                         .run(*args)
             } catch (e: Exception) {
-                e.printStackTrace()
-                LogFeed.log(LogObject.forException("Spring error", "by 'PANIC! at the Client'", e, DisCalClient::class.java))
+                LOGGER.error(DEFAULT, "'Spring error' by PANIC! at the Bot", e)
                 exitProcess(4)
             }
 
@@ -121,7 +121,7 @@ class DisCalClient {
                                 .onBackpressureBuffer()
                                 .flatMap {
                                     AnnouncementThread(client).run().doOnError {
-                                        LogFeed.log(LogObject.forException("announcement err", it, this::class.java))
+                                        LOGGER.error("Announcement error", it)
                                     }.onErrorResume { Mono.empty() }
                                 }
 
@@ -133,7 +133,7 @@ class DisCalClient {
 
     @PreDestroy
     fun onShutdown() {
-        LogFeed.log(LogObject.forStatus("Shutting down shard", "Shutting down shard"))
+        LOGGER.info(STATUS, "Shutting down shard")
 
         TimeManager.getManager().shutdown()
         DatabaseManager.disconnectFromMySQL()

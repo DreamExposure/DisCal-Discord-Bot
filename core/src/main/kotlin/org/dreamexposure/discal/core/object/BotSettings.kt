@@ -43,8 +43,7 @@ enum class BotSettings {
     BASE_URL,
     API_URL,
 
-    DEBUG_WEBHOOK,
-    ERROR_WEBHOOK,
+    DEFAULT_WEBHOOK,
     STATUS_WEBHOOK,
 
     USE_REDIS_STORES,

@@ -1,9 +1,10 @@
 package org.dreamexposure.discal.core.file;
 
 import kotlin.text.Charsets;
-import org.dreamexposure.discal.core.logger.LogFeed;
-import org.dreamexposure.discal.core.logger.object.LogObject;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.util.FileCopyUtils;
@@ -18,6 +19,8 @@ import java.io.InputStreamReader;
  * For Project: DisCal-Discord-Bot
  */
 public class ReadFile {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadFile.class);
+
     public static Mono<JSONObject> readAllLangFiles() {
         return Mono.fromCallable(() -> {
             final JSONObject langs = new JSONObject();
@@ -41,7 +44,7 @@ public class ReadFile {
                         langs.put(json.getString("Language"), json);
                 }
             } catch (final Exception e) {
-                LogFeed.log(LogObject.forException("Failed to load lang files", e, ReadFile.class));
+                LOGGER.error(GlobalVal.getDEFAULT(), "Failed to load lang files", e);
             }
             return langs;
         }).subscribeOn(Schedulers.boundedElastic());

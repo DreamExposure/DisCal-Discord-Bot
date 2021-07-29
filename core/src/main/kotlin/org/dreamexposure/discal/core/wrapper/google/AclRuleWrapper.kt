@@ -2,8 +2,8 @@ package org.dreamexposure.discal.core.wrapper.google
 
 import com.google.api.services.calendar.model.AclRule
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.logger.LogFeed
-import org.dreamexposure.discal.core.logger.`object`.LogObject
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
@@ -17,7 +17,8 @@ object AclRuleWrapper {
                         .execute()
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
-            LogFeed.log(LogObject.forException("G.Calendar ACL insert failure", it, this.javaClass))
+            LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] ACLRule insert failure", it)
+
         }.onErrorResume { Mono.empty() }
     }
 }
