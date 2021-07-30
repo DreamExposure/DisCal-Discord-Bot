@@ -39,7 +39,7 @@ class HeartbeatService : ApplicationRunner {
                             memory = usedMemory(),
                             uptime = TimeUtils.getHumanReadableUptime(),
                             version = GlobalVal.version,
-                            d4jVersion = GlobalVal.version
+                            d4jVersion = GlobalVal.d4jVersion
                     )
 
                     val body = JSON_FORMAT.encodeToString(requestBody).toRequestBody(JSON)
