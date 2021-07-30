@@ -32,10 +32,13 @@
     <appender name="DISCAL_WEBHOOK" class="org.dreamexposure.discal.core.logger.DiscordWebhookAppender"/>
 
     <appender name="FILE_ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_FILE}.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>${LOG_DIR}/${ERROR_LOG_FILE}.%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <fileNamePattern>${LOG_DIR}/${ERROR_LOG_FILE}.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
 
             <!-- keep 30 days' worth of history capped at 2GB total size -->
             <maxHistory>30</maxHistory>
@@ -51,9 +54,7 @@
     <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DISCAL_WEBHOOK"/>
-    </root>
-
-    <root level="WARN">
         <appender-ref ref="FILE_ERROR_LOG"/>
     </root>
 </configuration>
+
