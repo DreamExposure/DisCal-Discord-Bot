@@ -29,11 +29,7 @@
         </encoder>
     </appender>
 
-    <appender name="DISCAL_WEBHOOK" class="org.dreamexposure.discal.core.logger.DiscordWebhookAppender">
-        <encoder>
-            <pattern>%msg</pattern>
-        </encoder>
-    </appender>
+    <appender name="DISCAL_WEBHOOK" class="org.dreamexposure.discal.core.logger.DiscordWebhookAppender"/>
 
     <appender name="FILE_ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}.log</file>

@@ -35,7 +35,7 @@ class DisCalWeb {
                 exitProcess(4)
             }
 
-            LOGGER.info(STATUS, "Website is not online")
+            LOGGER.info(STATUS, "Website is now online")
         }
     }
 

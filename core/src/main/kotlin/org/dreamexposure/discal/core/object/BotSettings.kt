@@ -27,8 +27,6 @@ enum class BotSettings {
     SHARD_COUNT,
     SHARD_INDEX,
 
-    LOG_FOLDER,
-
     D_BOTS_GG_TOKEN,
     TOP_GG_TOKEN,
 

@@ -10,7 +10,6 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
-import java.text.SimpleDateFormat
 
 class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private val defaultHook: WebhookClient?
@@ -39,7 +38,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val content = WebhookEmbedBuilder()
                 .setTitle(EmbedTitle("Status", null))
                 .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
-                .addField(EmbedField(false, "Time", SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(event.timeStamp)))
+                .addField(EmbedField(true, "Time", "<t:${event.timeStamp}:f>"))
                 .addField(EmbedField(false, "Thread", event.threadName))
                 .addField(EmbedField(true, "Level", event.level.levelStr))
                 .addField(EmbedField(true, "Logger", event.loggerName))
@@ -59,7 +58,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val content = WebhookEmbedBuilder()
                 .setTitle(EmbedTitle(event.level.levelStr, null))
                 .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
-                .addField(EmbedField(false, "Time", SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(event.timeStamp)))
+                .addField(EmbedField(true, "Time", "<t:${event.timeStamp}:f>"))
                 .addField(EmbedField(false, "Thread", event.threadName))
                 .addField(EmbedField(true, "Level", event.level.levelStr))
                 .addField(EmbedField(true, "Logger", event.loggerName))
