@@ -49,6 +49,7 @@ class DiscordLoginHandler {
             Mono.fromCallable {
                 val json = JSONObject(it.body?.string())
                 it.body?.close()
+                it.close()
 
                 json
             }
@@ -78,8 +79,10 @@ class DiscordLoginHandler {
                         .flatMap(TupleUtils.function { userDataResponse, userGuildsResponse ->
                             val userInfo = JSONObject(userDataResponse.body?.string())
                             userDataResponse.body?.close()
+                            userDataResponse.close()
                             val guildsInfo = JSONArray(userGuildsResponse.body?.string())
                             userGuildsResponse.body?.close()
+                            userGuildsResponse.close()
 
                             //Saving session and access info into memory...
                             val model = DiscordAccountHandler.createDefaultModel()
@@ -138,6 +141,7 @@ class DiscordLoginHandler {
                                         if (keyGrantResponse.isSuccessful) {
                                             val keyGrantResponseBody = JSONObject(keyGrantResponse.body?.string())
                                             keyGrantResponse.body?.close()
+                                            keyGrantResponse.close()
                                             //API Key received
                                             model["key"] = keyGrantResponseBody.getString("key")
 
@@ -147,6 +151,7 @@ class DiscordLoginHandler {
                                             //Something didn't work, just redirect back to login page
                                             LOGGER.debug("login issue | ${keyGrantResponse.body?.string()}")
                                             keyGrantResponse.body?.close()
+                                            keyGrantResponse.close()
 
                                             Mono.just("redirect:/login")
                                         }

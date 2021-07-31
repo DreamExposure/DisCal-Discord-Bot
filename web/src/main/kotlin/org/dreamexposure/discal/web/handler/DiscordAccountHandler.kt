@@ -166,12 +166,14 @@ object DiscordAccountHandler {
                         //TODO: Change to use kotlin serialization
                         val body = JSONObject(response.body?.string())
                         response.body?.close()
+                        response.close()
 
                         return@map body.optString("key", "internal_error")
                     } else {
                         //Something didn't work, log and add "key" embed page knows how to handle
                         LOGGER.debug("Embed key fail ${response.body?.string()}")
                         response.body?.close()
+                        response.close()
                         return@map "internal_error"
                     }
                 }

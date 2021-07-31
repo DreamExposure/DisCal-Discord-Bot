@@ -39,6 +39,7 @@ class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner 
             if (response.code != GlobalVal.STATUS_SUCCESS) {
                 LOGGER.debug("Failed to update DBots.gg stats | Body: ${response.body?.string()}")
                 response.body?.close()
+                response.close()
             }
         }.onErrorResume {
             Mono.empty()

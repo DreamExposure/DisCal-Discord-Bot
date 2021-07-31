@@ -4,6 +4,7 @@ import discord4j.core.GatewayDiscordClient
 import kotlinx.serialization.encodeToString
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.`object`.BotSettings
@@ -19,6 +20,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.core.scheduler.Schedulers
 import java.time.Duration
 import kotlin.math.roundToInt
 
@@ -52,6 +54,8 @@ class HeartbeatService : ApplicationRunner {
                             .build()
                 }.flatMap {
                     Mono.fromCallable(HTTP_CLIENT.newCall(it)::execute)
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .map(Response::close)
                 }.doOnError {
                     LOGGER.error(GlobalVal.DEFAULT, "[Heartbeat] Failed to heartbeat", it)
                 }.onErrorResume { Mono.empty() }

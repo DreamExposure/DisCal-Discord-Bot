@@ -97,6 +97,7 @@ object GoogleAuthWrapper {
                 GlobalVal.STATUS_SUCCESS -> {
                     val responseJson = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
 
                     //Update Db data and return
                     calData.encryptedAccessToken = encryption.encrypt(responseJson.getString("access_token"))
@@ -107,6 +108,7 @@ object GoogleAuthWrapper {
                 GlobalVal.STATUS_BAD_REQUEST -> {
                     val errorBody = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
 
                     if ("invalid_grant".equals(errorBody.getString("error"), true)) {
                         //User revoked access to calendar, delete our reference as they need to re-auth it.
@@ -117,10 +119,8 @@ object GoogleAuthWrapper {
                                 DatabaseManager.deleteAllAnnouncementData(calData.guildId, calData.calendarNumber)
                         ).then(Mono.empty())
                     } else {
-                        LOGGER.debug(DEFAULT, "[!DGC!] err requesting new access token. Code: ${
-                            response
-                                    .code
-                        } | ${response.message} | $errorBody")
+                        LOGGER.debug(DEFAULT, "[!DGC!] err requesting new access token. " +
+                                "Code: ${response.code} | ${response.message} | $errorBody")
                         return@flatMap Mono.empty()
                     }
                 }
@@ -128,6 +128,7 @@ object GoogleAuthWrapper {
                     //Failed to get OK. Send debug info...
                     LOGGER.debug(DEFAULT, "[!DGC!] Err requesting new access token. Code: ${response.code} | ${response.message} | ${response.body?.string()}")
                     response.body?.close()
+                    response.close()
 
                     return@flatMap Mono.empty()
                 }
@@ -167,6 +168,7 @@ object GoogleAuthWrapper {
                 GlobalVal.STATUS_SUCCESS -> {
                     val responseJson = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
 
                     //Update DB and return
                     credential.setAccessToken(responseJson.getString("access_token"))
@@ -178,6 +180,7 @@ object GoogleAuthWrapper {
                 GlobalVal.STATUS_BAD_REQUEST -> {
                     val errorBody = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
 
                     if ("invalid_grant".equals(errorBody.getString("error"), true)) {
                         //We revoked access to this account. Is this on purpose??
@@ -194,6 +197,7 @@ object GoogleAuthWrapper {
                     LOGGER.debug(DEFAULT, "[!DGC!] Error requesting new access token. Status code: ${response.code} |" +
                             " ${response.message} | ${response.body?.string()}")
                     response.body?.close()
+                    response.close()
                     return@flatMap Mono.empty()
                 }
             }

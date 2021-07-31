@@ -29,6 +29,7 @@ object StatusHandler {
             if (response.code == HttpStatusCodes.STATUS_CODE_OK) {
                 val body = response.body?.string()
                 response.body?.close()
+                response.close()
                 return@map NetworkInfo().fromJson(JSONObject(body))
             } else {
                 return@map NetworkInfo() //Just return an empty object, it's fine.

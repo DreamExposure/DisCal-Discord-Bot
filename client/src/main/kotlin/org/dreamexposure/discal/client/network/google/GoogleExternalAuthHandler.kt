@@ -32,6 +32,7 @@ object GoogleExternalAuthHandler {
                 //Got code -- Send message with code, start auth poll
                 val successJson = JSONObject(response.body!!.string())
                 response.body?.close()
+                response.close()
 
                 val embed = EmbedCreateSpec.builder()
                         .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
@@ -65,6 +66,7 @@ object GoogleExternalAuthHandler {
                 //Bad response -- Log, send message
                 val body = response.body?.string()
                 response.body?.close()
+                response.close()
                 LOGGER.debug(DEFAULT, "Error request access token | Status code: ${response.code} | ${response
                         .message} | $body")
 
@@ -89,6 +91,7 @@ object GoogleExternalAuthHandler {
                     //See if auth is pending, if so, just reschedule...
                     val errorJson = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
                     when {
                         "authorization_pending".equals(errorJson.getString("error"), true) -> {
                             //Response pending
@@ -121,6 +124,7 @@ object GoogleExternalAuthHandler {
                     //Access granted -- Save creds, get calendars, list for user, cancel auth
                     val successJson = JSONObject(response.body!!.string())
                     response.body?.close()
+                    response.close()
 
                     //Save creds
                     val calData = CalendarData.emptyExternal(poll.settings.guildID, CalendarHost.GOOGLE)
@@ -164,6 +168,7 @@ object GoogleExternalAuthHandler {
                     LOGGER.debug(DEFAULT, "Network error | poll failure" +
                             " | Status code: ${response.code} | ${response.message} | ${response.body?.string()}")
                     response.body?.close()
+                    response.close()
 
                     Messages.sendDirectMessage(
                             Messages.getMessage("Notification.Error.Network", poll.settings), poll.user)
