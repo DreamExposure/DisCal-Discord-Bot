@@ -32,7 +32,7 @@
         <kotlin.version>1.5.21</kotlin.version>
         <kotlinx.serialization.version>1.2.2</kotlinx.serialization.version>
 
-        <discord4j.version>3.2.0-RC2</discord4j.version>
+        <discord4j.version>3.2.0-SNAPSHOT</discord4j.version>
         <discord4j.stores.version>3.2.1</discord4j.stores.version>
 
         <thymeleaf.version>3.0.12.RELEASE</thymeleaf.version>
