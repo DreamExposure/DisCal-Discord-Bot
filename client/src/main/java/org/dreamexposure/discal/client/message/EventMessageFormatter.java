@@ -16,6 +16,8 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
@@ -32,9 +34,12 @@ import java.time.temporal.ChronoUnit;
  */
 @SuppressWarnings("MagicNumber")
 public class EventMessageFormatter {
+    private final static Logger LOGGER = LoggerFactory.getLogger(EventMessageFormatter.class);
+
     public static Mono<EmbedCreateSpec> getEventEmbed(Event event, int calNum, GuildSettings settings) {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
+            .doOnNext(e -> LOGGER.debug(GlobalVal.getDEFAULT(), "Event data present for " + event.getId()))
             .defaultIfEmpty(new EventData())
             .cache();
         Mono<String> sDate = getHumanReadableDate(event.getStart(), calNum, false, settings);
@@ -43,6 +48,7 @@ public class EventMessageFormatter {
         Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
+            .doOnNext(b -> LOGGER.debug(GlobalVal.getDEFAULT(), "Image present and validity: " + b))
             .defaultIfEmpty(false);
         Mono<String> timezone = DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
             .flatMap(CalendarWrapper.INSTANCE::getCalendar)
