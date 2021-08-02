@@ -39,7 +39,6 @@ public class EventMessageFormatter {
     public static Mono<EmbedCreateSpec> getEventEmbed(Event event, int calNum, GuildSettings settings) {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
-            .doOnNext(e -> LOGGER.debug(GlobalVal.getDEFAULT(), "Event data present for " + event.getId()))
             .defaultIfEmpty(new EventData())
             .cache();
         Mono<String> sDate = getHumanReadableDate(event.getStart(), calNum, false, settings);
@@ -48,7 +47,6 @@ public class EventMessageFormatter {
         Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
             .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
-            .doOnNext(b -> LOGGER.debug(GlobalVal.getDEFAULT(), "Image present and validity: " + b))
             .defaultIfEmpty(false);
         Mono<String> timezone = DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
             .flatMap(CalendarWrapper.INSTANCE::getCalendar)

@@ -649,12 +649,16 @@ object DatabaseManager {
     }
 
     fun getEventData(guildId: Snowflake, eventId: String): Mono<EventData> {
+        var eventIdLookup = eventId
+        if (eventId.contains("_"))
+            eventIdLookup = eventId.split("_")[0];
+
         return connect { c ->
             val query = "SELECT * FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ? AND EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
                     .bind(0, guildId.asString())
-                    .bind(1, eventId)
+                    .bind(1, eventIdLookup)
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -673,7 +677,7 @@ object DatabaseManager {
                 LOGGER.error(DEFAULT, "Failed to get event data", it)
             }.onErrorResume {
                 Mono.empty()
-            }.defaultIfEmpty(EventData(guildId, eventId = eventId))
+            }.defaultIfEmpty(EventData(guildId, eventId = eventIdLookup))
         }
     }
 
