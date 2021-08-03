@@ -651,7 +651,7 @@ object DatabaseManager {
     fun getEventData(guildId: Snowflake, eventId: String): Mono<EventData> {
         var eventIdLookup = eventId
         if (eventId.contains("_"))
-            eventIdLookup = eventId.split("_")[0];
+            eventIdLookup = eventId.split("_")[0]
 
         return connect { c ->
             val query = "SELECT * FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ? AND EVENT_ID = ?"
@@ -703,8 +703,8 @@ object DatabaseManager {
                     data.limit = row["RSVP_LIMIT", Int::class.java]!!
 
                     //Handle new rsvp role
-                    val roleId = row["RSVP_ROLE", Long::class.java]
-                    if (roleId != null) data.setRole(Snowflake.of(roleId))
+                    if (row.get("RSVP_ROLE") != null)
+                        data.setRole(Snowflake.of(row["RSVP_ROLE", Long::class.java]!!))
 
                     data
                 }
