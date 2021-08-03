@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.wrapper.google
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
@@ -8,6 +9,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.util.function.Predicate
 
 object EventWrapper {
     fun createEvent(calData: CalendarData, event: Event): Mono<Event> {
@@ -155,7 +157,7 @@ object EventWrapper {
                         return@fromCallable true
                     }
                     404, 410 -> {
-                        return@fromCallable  false
+                        return@fromCallable false
                     }
                     else -> {
                         //Log response data and return false as google sent an unexpected response code.
@@ -164,7 +166,11 @@ object EventWrapper {
                     }
                 }
             }.subscribeOn(Schedulers.boundedElastic())
-        }.doOnError {
+        }.doOnError(GoogleJsonResponseException::class.java) {
+            if (it.statusCode != 410 || it.statusCode != 404) {
+                LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event delete failure", it)
+            }
+        }.doOnError(Predicate.not(GoogleJsonResponseException::class.java::isInstance)) {
             LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event delete failure", it)
         }.onErrorReturn(false)
     }
