@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.wrapper.google
 
-import com.google.api.client.http.HttpStatusCodes
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
@@ -57,6 +56,12 @@ object EventWrapper {
                         .get(calData.calendarId, id)
                         .setQuotaUser(calData.guildId.asString())
                         .execute()
+            }.filter {
+                //Don't show "deleted" events
+                /*
+                See "status" flag: https://developers.google.com/calendar/api/v3/reference/events#resource
+                 */
+                !it.status.equals("cancelled", true)
             }.subscribeOn(Schedulers.boundedElastic())
         }.onErrorResume { Mono.empty() } //Can safely ignore this, the event just doesn't exist.
     }
@@ -143,11 +148,21 @@ object EventWrapper {
                         .setQuotaUser(calData.guildId.asString())
                         .executeUnparsed()
 
-                //Log error code if one happened
-                if (response.statusCode != HttpStatusCodes.STATUS_CODE_OK) {
-                    LOGGER.debug(GlobalVal.DEFAULT, "Event delete error | ${response.statusCode} | ${response.statusMessage}")
+                //Google sends 4 possible status codes, 200, 204, 404, 410.
+                // First 2 should be treated as successful, and the other 2 as not found.
+                when (response.statusCode) {
+                    200, 204 -> {
+                        return@fromCallable true
+                    }
+                    404, 410 -> {
+                        return@fromCallable  false
+                    }
+                    else -> {
+                        //Log response data and return false as google sent an unexpected response code.
+                        LOGGER.debug(GlobalVal.DEFAULT, "Event delete error | ${response.statusCode} | ${response.statusMessage}")
+                        return@fromCallable false
+                    }
                 }
-                response.statusCode == HttpStatusCodes.STATUS_CODE_OK
             }.subscribeOn(Schedulers.boundedElastic())
         }.doOnError {
             LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event delete failure", it)
