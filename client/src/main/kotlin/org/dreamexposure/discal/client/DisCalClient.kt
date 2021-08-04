@@ -7,6 +7,7 @@ import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
 import discord4j.core.event.domain.channel.TextChannelDeleteEvent
+import discord4j.core.event.domain.interaction.SlashCommandEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.role.RoleDeleteEvent
@@ -22,10 +23,7 @@ import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.client.listeners.discord.ChannelDeleteListener
-import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener
-import org.dreamexposure.discal.client.listeners.discord.ReadyEventListener
-import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener
+import org.dreamexposure.discal.client.listeners.discord.*
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThread
 import org.dreamexposure.discal.client.module.command.*
@@ -80,7 +78,7 @@ class DisCalClient {
             TimeManager.getManager().init()
 
             //Start Spring
-            try {
+            val spring = try {
                 SpringApplicationBuilder(Application::class.java)
                         .profiles(BotSettings.PROFILE.get())
                         .build()
@@ -117,6 +115,11 @@ class DisCalClient {
                                 .on(MessageCreateEvent::class.java, MessageCreateListener::handle)
                                 .then()
 
+                        val slashCommandListener = SlashCommandListener(spring)
+                        val onSlashCommand = client
+                                .on(SlashCommandEvent::class.java, slashCommandListener::handle)
+                                .then()
+
                         val startAnnouncement = Flux.interval(Duration.ofMinutes(5))
                                 .onBackpressureBuffer()
                                 .flatMap {
@@ -125,7 +128,7 @@ class DisCalClient {
                                     }.onErrorResume { Mono.empty() }
                                 }
 
-                        Mono.`when`(onReady, onTextChannelDelete, onRoleDelete, onCommand, startAnnouncement)
+                        Mono.`when`(onReady, onTextChannelDelete, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
                     }.block()
         }
     }

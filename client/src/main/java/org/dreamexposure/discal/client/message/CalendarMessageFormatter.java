@@ -22,6 +22,7 @@ public class CalendarMessageFormatter {
         return BotSettings.BASE_URL.get() + "/embed/" + guildId.asString() + "/calendar/1";
     }
 
+    @Deprecated
     public static String getCalendarLink(final Snowflake guildId, final int calNumber) {
         return BotSettings.BASE_URL.get() + "/embed/" + guildId.asString() + "/calendar/" + calNumber;
     }
@@ -54,6 +55,7 @@ public class CalendarMessageFormatter {
         });
     }
 
+    @Deprecated
     public static Mono<EmbedCreateSpec> getCalendarLinkEmbed(final Calendar cal, final int calNum, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> {
             var builder = EmbedCreateSpec.builder();

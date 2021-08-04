@@ -72,16 +72,16 @@ interface Calendar {
     val timezone: ZoneId
 
     /**
-     * Gets the link to the calendar on the official bot website.
-     *
-     * @return A link to view the calendar on the official bot website.
+     * The timezone's name, derived from the ZoneId timezone
      */
-    fun getLink(): String {
-        return if (BotSettings.PROFILE.get().equals("TEST", true))
-            "https://dev.discalbot.com/embed/${guildId.asString()}/calendar/$calendarNumber"
-        else
-            "https://dev.discalbot.com/embed/${guildId.asString()}/calendar/$calendarNumber"
-    }
+    val zoneName: String
+        get() = timezone.id
+
+    /**
+     * A link to view the calendar on the official discal website
+     */
+    val link: String
+        get() = "${BotSettings.BASE_URL.get()}/embed/${guildId.asString()}/calendar/$calendarNumber"
 
     //Reactive - Self
     /**
@@ -167,7 +167,7 @@ interface Calendar {
                 this.calendarAddress,
                 this.calendarNumber,
                 this.calendarData.host,
-                this.getLink(),
+                this.link,
                 this.name,
                 this.description,
                 this.timezone.id.replace("/", "___"),
@@ -186,6 +186,6 @@ interface Calendar {
                 .put("name", name)
                 .put("description", description)
                 .put("timezone", timezone)
-                .put("link", getLink())
+                .put("link", link)
     }
 }

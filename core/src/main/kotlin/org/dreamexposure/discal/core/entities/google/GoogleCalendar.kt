@@ -31,10 +31,10 @@ class GoogleCalendar internal constructor(
 ) : Calendar {
 
     override val name: String
-        get() = baseCalendar.summary
+        get() = baseCalendar.summary ?: ""
 
     override val description: String
-        get() = baseCalendar.description
+        get() = baseCalendar.description ?: ""
 
     override val timezone: ZoneId
         get() = ZoneId.of(baseCalendar.timeZone)
@@ -55,7 +55,7 @@ class GoogleCalendar internal constructor(
 
         spec.name?.let { content.summary = it }
         spec.description?.let { content.description = it }
-        spec.timezone?.let { content.timeZone = it }
+        spec.timezone?.let { content.timeZone = it.id }
 
         return CalendarWrapper.patchCalendar(content, this.calendarData)
                 .timeout(Duration.ofSeconds(30))
