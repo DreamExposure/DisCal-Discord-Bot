@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.network.discord
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import discord4j.common.JacksonResources
 import discord4j.discordjson.json.ApplicationCommandData
 import discord4j.discordjson.json.ApplicationCommandRequest
 import discord4j.rest.RestClient
@@ -17,6 +18,8 @@ class GlobalCommandRegistrar(
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments?) {
+        val d4jMapper = JacksonResources.createFromObjectMapper(objectMapper)
+
         val matcher = PathMatchingResourcePatternResolver()
         val applicationService = restClient.applicationService
         val applicationId = restClient.applicationId.block()!!
@@ -26,7 +29,7 @@ class GlobalCommandRegistrar(
 
         val commands = mutableMapOf<String, ApplicationCommandRequest>()
         for (res in matcher.getResources("commands/*.json")) {
-            val request = objectMapper.readValue<ApplicationCommandRequest>(res.inputStream)
+            val request = d4jMapper.objectMapper.readValue<ApplicationCommandRequest>(res.inputStream)
             commands[request.name()] = request
 
             if (discordCommands[request.name()] == null) {
