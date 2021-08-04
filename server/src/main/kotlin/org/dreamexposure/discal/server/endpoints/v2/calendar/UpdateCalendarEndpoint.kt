@@ -52,7 +52,7 @@ class UpdateCalendarEndpoint(val client: DiscordClient) {
                 if (body.has("timezone")) {
                     val tzRaw = body.getString("timezone")
                     if (TimeZoneUtils.isValid(tzRaw))
-                        spec = spec.copy(timezone = ZoneId.of(tzRaw).id)
+                        spec = spec.copy(timezone = ZoneId.of(tzRaw))
                 }
 
                 calendar.update(spec)
