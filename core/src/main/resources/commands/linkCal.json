@@ -1,9 +1,9 @@
 {
-  "name": "linkCal",
+  "name": "linkcal",
   "description": "Provides info and a link to the Guild's Calendar",
   "options": [
     {
-      "name": "Calendar Number",
+      "name": "number",
       "type": 4,
       "description": "The number of the calendar you wish to link (default 1)",
       "required": false
