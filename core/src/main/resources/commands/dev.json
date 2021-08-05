@@ -1,0 +1,81 @@
+{
+  "name": "dev",
+  "description": "A set of utility commands for the developers",
+  "options": [
+    {
+      "name": "patron",
+      "type": 1,
+      "description": "Toggles the patron status of a guild",
+      "required": false,
+      "options": [
+        {
+          "name": "guild",
+          "type": 4,
+          "description": "The ID of the guild to toggle",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "dev",
+      "type": 1,
+      "description": "Toggles the dev status of a guild",
+      "required": false,
+      "options": [
+        {
+          "name": "guild",
+          "type": 4,
+          "description": "The ID of the guild to toggle",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "maxcal",
+      "type": 1,
+      "description": "Changes the max calendars a guild may have",
+      "required": false,
+      "options": [
+        {
+          "name": "guild",
+          "type": 4,
+          "description": "The ID of the guild to change",
+          "required": true
+        },
+        {
+          "name": "amount",
+          "type": 4,
+          "description": "The max amount of calendars this guild may have",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "api-register",
+      "type": 1,
+      "required": false,
+      "options": [
+        {
+          "name": "user",
+          "type": 6,
+          "description": "The user who uses the API key being created",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "api-block",
+      "type": 1,
+      "required": false,
+      "options": [
+        {
+          "name": "key",
+          "type": 3,
+          "description": "The API key to block",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "default_permissions": true
+}

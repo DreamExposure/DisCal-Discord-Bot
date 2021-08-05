@@ -70,7 +70,6 @@ class DisCalClient {
             CommandExecutor.registerCommand(EventCommand())
             CommandExecutor.registerCommand(RsvpCommand())
             CommandExecutor.registerCommand(AnnouncementCommand())
-            CommandExecutor.registerCommand(DevCommand())
 
             //Start some daemon threads
             TimeManager.getManager().init()
