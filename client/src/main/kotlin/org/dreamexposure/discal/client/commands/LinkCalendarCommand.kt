@@ -10,11 +10,11 @@ import reactor.core.publisher.Mono
 
 @Component
 class LinkCalendarCommand : SlashCommand {
-    override val name = "linkCal"
+    override val name = "linkcal"
     override val ephemeral = false
 
     override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.getOption("Calendar Number"))
+        return Mono.justOrEmpty(event.getOption("number"))
                 .flatMap { Mono.justOrEmpty(it.value) }
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
