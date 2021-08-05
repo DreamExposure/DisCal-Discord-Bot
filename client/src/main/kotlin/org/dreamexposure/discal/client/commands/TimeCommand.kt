@@ -5,6 +5,7 @@ import discord4j.core.event.domain.interaction.SlashCommandEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -24,10 +25,7 @@ class TimeCommand : SlashCommand {
                       CalendarEmbed.getTimeEmbed(guild, settings, calNumber).flatMap {
                           Responder.followupEphemeral(event, it)
                       }
-                  }.switchIfEmpty(
-                        //TODO: i18n
-                        Responder.followupEphemeral(event, "Calendar not found. Perhaps you should create a new one?")
-                  )
+                  }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
               }.then()
     }
 }

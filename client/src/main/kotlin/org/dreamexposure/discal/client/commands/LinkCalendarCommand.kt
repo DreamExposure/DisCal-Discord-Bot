@@ -5,6 +5,7 @@ import discord4j.core.event.domain.interaction.SlashCommandEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -15,19 +16,16 @@ class LinkCalendarCommand : SlashCommand {
 
     override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.getOption("number"))
-                .flatMap { Mono.justOrEmpty(it.value) }
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .defaultIfEmpty(1)
-                .flatMap { calNumber ->
-                    event.interaction.guild.flatMap { guild ->
-                        CalendarEmbed.getLinkCalEmbed(guild, settings, calNumber).flatMap {
-                            Responder.followup(event, it)
-                        }
-                    }.switchIfEmpty(
-                            //TODO: i18n
-                            Responder.followup(event, "Calendar not found. Perhaps you should create a new one?")
-                    )
-                }.then()
+              .flatMap { Mono.justOrEmpty(it.value) }
+              .map(ApplicationCommandInteractionOptionValue::asLong)
+              .map(Long::toInt)
+              .defaultIfEmpty(1)
+              .flatMap { calNumber ->
+                  event.interaction.guild.flatMap { guild ->
+                      CalendarEmbed.getLinkCalEmbed(guild, settings, calNumber).flatMap {
+                          Responder.followup(event, it)
+                      }
+                  }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
+              }.then()
     }
 }

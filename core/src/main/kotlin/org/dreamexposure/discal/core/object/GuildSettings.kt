@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
+import java.util.*
 
 @Serializable
 data class GuildSettings(
@@ -54,5 +55,18 @@ data class GuildSettings(
 
     fun setDmAnnouncementsString(dm: String) {
         this.dmAnnouncements += dm.split(",").filter(String::isNotBlank)
+    }
+
+    //TODO: Remove when old translation system is dropped
+    fun getLocale(): Locale {
+
+        return when (lang) {
+            "ENGLISH" -> Locale.ENGLISH
+            "JAPANESE" -> Locale.JAPANESE
+            "PORTUGUESE" -> Locale.forLanguageTag("pt")
+            "SPANISH" -> Locale.forLanguageTag("es")
+            else -> Locale.ENGLISH
+        }
+
     }
 }

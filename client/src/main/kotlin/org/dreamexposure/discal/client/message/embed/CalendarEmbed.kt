@@ -2,34 +2,28 @@ package org.dreamexposure.discal.client.message.embed
 
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
-import discord4j.rest.util.Image
-import org.dreamexposure.discal.client.message.Messages
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
-import org.dreamexposure.discal.core.utils.GlobalVal.iconUrl
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-object CalendarEmbed {
+object CalendarEmbed : EmbedMaker {
     fun getLinkCalEmbed(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
         return guild.getCalendar(calNumber).map { cal ->
-            val builder = EmbedCreateSpec.builder()
+            val builder = defaultBuilder(guild, settings)
 
-            if (settings.branded)
-                builder.author(guild.name, BotSettings.BASE_URL.get(), guild.getIconUrl(Image.Format.PNG).orElse(iconUrl))
-            else
-                builder.author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
+            builder.title(getMessage("calendar", "link.title", settings))
+            builder.addField(getMessage("calendar", "link.field.name", settings), cal.name, false)
+            builder.addField(getMessage("calendar", "link.field.description", settings), cal.description, false)
+            builder.addField(getMessage("calendar", "link.field.timezone", settings), cal.zoneName, false)
 
-            builder.title(Messages.getMessage("Embed.Calendar.Link.Title", settings))
-            builder.addField(Messages.getMessage("Embed.Calendar.Link.Summary", settings), cal.name, true)
-            builder.addField(Messages.getMessage("Embed.Calendar.Link.Description", settings), cal.description, true)
-
-            builder.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.zoneName, false)
+            builder.addField(getMessage("calendar", "link.field.host", settings), cal.calendarData.host.name, true)
+            builder.addField(getMessage("calendar", "link.field.number", settings), "${cal.calendarNumber}", true)
+            builder.addField(getMessage("calendar", "link.field.id", settings), cal.calendarId, false)
             builder.url(cal.link)
-            builder.footer(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.calendarId, settings), null)
+            builder.footer(getMessage("calendar", "link.footer", settings), null)
             builder.color(discalColor)
 
             builder.build()
@@ -48,18 +42,12 @@ object CalendarEmbed {
 
 
             val correctTime = fmt.format(ldt)
+            val builder = defaultBuilder(guild, settings)
 
-            val builder = EmbedCreateSpec.builder()
-
-            if (settings.branded)
-                builder.author(guild.name, BotSettings.BASE_URL.get(), guild.getIconUrl(Image.Format.PNG).orElse(iconUrl))
-            else
-                builder.author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
-
-            builder.title(Messages.getMessage("Embed.Time.Title", settings))
-            builder.addField(Messages.getMessage("Embed.Time.Time", settings), correctTime, false)
-            builder.addField(Messages.getMessage("Embed.Time.TimeZone", settings), cal.zoneName, false)
-            builder.footer(Messages.getMessage("Embed.Time.Footer", settings), null)
+            builder.title(getMessage("time", "embed.title", settings))
+            builder.addField(getMessage("time", "embed.field.current", settings), correctTime, false)
+            builder.addField(getMessage("time", "embed.field.timezone", settings), cal.zoneName, false)
+            builder.footer(getMessage("time", "embed.footer", settings), null)
             builder.url(cal.link)
 
             builder.color(discalColor)
