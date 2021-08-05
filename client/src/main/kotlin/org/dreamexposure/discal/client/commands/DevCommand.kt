@@ -35,7 +35,7 @@ class DevCommand : SlashCommand {
 
     private fun patronSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
-              .map(ApplicationCommandInteractionOptionValue::asLong)
+              .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
               .flatMap { DatabaseManager.getSettings(it) }
               .doOnNext { settings.patronGuild = !settings.patronGuild }
@@ -51,7 +51,7 @@ class DevCommand : SlashCommand {
 
     private fun devSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
-              .map(ApplicationCommandInteractionOptionValue::asLong)
+              .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
               .flatMap { DatabaseManager.getSettings(it) }
               .doOnNext { settings.devGuild = !settings.devGuild }
@@ -67,7 +67,7 @@ class DevCommand : SlashCommand {
 
     private fun maxCalSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
-              .map(ApplicationCommandInteractionOptionValue::asLong)
+              .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
               .flatMap { DatabaseManager.getSettings(it) }
               .doOnNext {

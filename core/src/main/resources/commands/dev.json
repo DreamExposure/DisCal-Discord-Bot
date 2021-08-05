@@ -10,7 +10,7 @@
       "options": [
         {
           "name": "guild",
-          "type": 4,
+          "type": 3,
           "description": "The ID of the guild to toggle",
           "required": true
         }
@@ -24,7 +24,7 @@
       "options": [
         {
           "name": "guild",
-          "type": 4,
+          "type": 3,
           "description": "The ID of the guild to toggle",
           "required": true
         }
@@ -38,7 +38,7 @@
       "options": [
         {
           "name": "guild",
-          "type": 4,
+          "type": 3,
           "description": "The ID of the guild to change",
           "required": true
         },
