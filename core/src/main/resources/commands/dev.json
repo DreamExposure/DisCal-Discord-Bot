@@ -53,6 +53,7 @@
     {
       "name": "api-register",
       "type": 1,
+      "description": "Registers a new API key for the user",
       "required": false,
       "options": [
         {
@@ -66,6 +67,7 @@
     {
       "name": "api-block",
       "type": 1,
+      "description": "Sets an API key as blocked and prevents its use",
       "required": false,
       "options": [
         {
