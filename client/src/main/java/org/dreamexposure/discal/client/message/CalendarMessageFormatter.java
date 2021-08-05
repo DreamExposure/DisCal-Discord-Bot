@@ -23,11 +23,6 @@ public class CalendarMessageFormatter {
     }
 
     @Deprecated
-    public static String getCalendarLink(final Snowflake guildId, final int calNumber) {
-        return BotSettings.BASE_URL.get() + "/embed/" + guildId.asString() + "/calendar/" + calNumber;
-    }
-
-    @Deprecated
     public static Mono<EmbedCreateSpec> getCalendarLinkEmbed(final Calendar cal, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> {
             var builder = EmbedCreateSpec.builder();
@@ -55,33 +50,6 @@ public class CalendarMessageFormatter {
         });
     }
 
-    @Deprecated
-    public static Mono<EmbedCreateSpec> getCalendarLinkEmbed(final Calendar cal, final int calNum, final GuildSettings settings) {
-        return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> {
-            var builder = EmbedCreateSpec.builder();
-
-            if (settings.getBranded())
-                builder.author(g.getName(), BotSettings.BASE_URL.get(),
-                    g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
-            else
-                builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-
-            builder.title(Messages.getMessage("Embed.Calendar.Link.Title", settings));
-
-            if (cal.getSummary() != null)
-                builder.addField(Messages.getMessage("Embed.Calendar.Link.Summary", settings), cal.getSummary(), true);
-
-            if (cal.getDescription() != null)
-                builder.addField(Messages.getMessage("Embed.Calendar.Link.Description", settings), cal.getDescription(), true);
-
-            builder.addField(Messages.getMessage("Embed.Calendar.Link.TimeZone", settings), cal.getTimeZone(), false);
-            builder.url(CalendarMessageFormatter.getCalendarLink(settings.getGuildID(), calNum));
-            builder.footer(Messages.getMessage("Embed.Calendar.Link.CalendarId", "%id%", cal.getId(), settings), null);
-            builder.color(GlobalVal.getDiscalColor());
-
-            return builder.build();
-        });
-    }
 
     public static Mono<EmbedCreateSpec> getPreCalendarEmbed(final PreCalendar calendar, final GuildSettings settings) {
         return DisCalClient.getClient().getGuildById(settings.getGuildID()).map(g -> {
