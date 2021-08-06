@@ -45,7 +45,7 @@ class DevCommand : SlashCommand {
                         getMessage("patron.success", settings, settings.patronGuild.toString())
                   ))
               }.doOnError { LOGGER.error("[cmd] patron failure", it) }
-              .onErrorResume { Responder.followupEphemeral(event, "patron.failure.badId") }
+              .onErrorResume { Responder.followupEphemeral(event, getMessage("patron.failure.badId", settings)) }
               .then()
     }
 
@@ -61,7 +61,7 @@ class DevCommand : SlashCommand {
                         getMessage("dev.success", settings, settings.devGuild.toString())
                   ))
               }.doOnError { LOGGER.error("[cmd] dev failure", it) }
-              .onErrorResume { Responder.followupEphemeral(event, "dev.failure.badId") }
+              .onErrorResume { Responder.followupEphemeral(event, getMessage("dev.failure.badId", settings)) }
               .then()
     }
 
@@ -80,7 +80,7 @@ class DevCommand : SlashCommand {
                   ))
               }
               .onErrorResume {
-                  Responder.followupEphemeral(event, "maxcal.failure.badInput")
+                  Responder.followupEphemeral(event, getMessage("maxcal.failure.badInput", settings))
               }.then()
     }
 
@@ -119,7 +119,7 @@ class DevCommand : SlashCommand {
               .flatMap { Responder.followupEphemeral(event, getMessage("apiBlock.success", settings)) }
               .switchIfEmpty(Responder.followupEphemeral(event, getMessage("apiBlock.failure.notFound", settings)))
               .onErrorResume {
-                  Responder.followupEphemeral(event, "apiBlock.failure.other")
+                  Responder.followupEphemeral(event, getMessage("apiBlock.failure.other", settings))
               }.then()
     }
 }
