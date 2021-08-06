@@ -5,7 +5,8 @@
     {
       "name": "number",
       "type": 4,
-      "description": "The number of the calendar you wish to link (default 1)"
+      "description": "The number of the calendar you wish to link (default 1)",
+      "required": false
     }
   ],
   "default_permissions": true

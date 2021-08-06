@@ -38,7 +38,7 @@ class EventsCommand : SlashCommand {
 
         return Mono.zip(calNumMono, amountMono).flatMap(TupleUtils.function { calNumb, amount ->
             if (amount < 1 || amount > 15) {
-                Responder.followupEphemeral(event, getMessage("upcoming.failure.outOfRange", settings))
+                return@function Responder.followup(event, getMessage("upcoming.failure.outOfRange", settings))
             }
 
             event.interaction.guild.flatMap { guild ->
@@ -61,7 +61,7 @@ class EventsCommand : SlashCommand {
                                   }.then(Mono.just(""))
                         }
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
             }
         }).then()
     }
@@ -94,7 +94,7 @@ class EventsCommand : SlashCommand {
                                   }.then(Mono.just(""))
                               }
                           }
-                      }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                      }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
                   }
               }.then()
     }
@@ -127,7 +127,7 @@ class EventsCommand : SlashCommand {
                                   }.then(Mono.just(""))
                               }
                           }
-                      }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                      }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
                   }
               }.then()
     }

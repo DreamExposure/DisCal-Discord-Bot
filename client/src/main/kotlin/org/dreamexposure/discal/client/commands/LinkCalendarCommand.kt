@@ -25,7 +25,7 @@ class LinkCalendarCommand : SlashCommand {
                       CalendarEmbed.getLinkCalEmbed(guild, settings, calNumber).flatMap {
                           Responder.followup(event, it)
                       }
-                  }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                  }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
               }.then()
     }
 }
