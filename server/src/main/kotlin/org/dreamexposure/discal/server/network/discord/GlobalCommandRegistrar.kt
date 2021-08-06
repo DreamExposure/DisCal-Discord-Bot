@@ -6,6 +6,8 @@ import discord4j.common.JacksonResources
 import discord4j.discordjson.json.ApplicationCommandData
 import discord4j.discordjson.json.ApplicationCommandRequest
 import discord4j.rest.RestClient
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
@@ -27,12 +29,17 @@ class GlobalCommandRegistrar(
                 .collectMap(ApplicationCommandData::name)
                 .block()!!
 
+        var added = 0
+        var removed = 0
+        var updated = 0
+
         val commands = mutableMapOf<String, ApplicationCommandRequest>()
         for (res in matcher.getResources("commands/*.json")) {
             val request = d4jMapper.objectMapper.readValue<ApplicationCommandRequest>(res.inputStream)
             commands[request.name()] = request
 
             if (discordCommands[request.name()] == null) {
+                added++
                 applicationService.createGlobalApplicationCommand(applicationId, request).block()
             }
         }
@@ -41,6 +48,7 @@ class GlobalCommandRegistrar(
             val discordCommandId = discordCommand.id().toLong()
             val command = commands[discordCommandName]
             if (command == null) { // Removed command.json, delete global command
+                removed++
                 applicationService.deleteGlobalApplicationCommand(applicationId, discordCommandId).block()
                 continue
             }
@@ -50,8 +58,12 @@ class GlobalCommandRegistrar(
                     || discordCommand.defaultPermission() != command.defaultPermission()
 
             if (changed) {
+                updated++
                 applicationService.modifyGlobalApplicationCommand(applicationId, discordCommandId, command).block()
             }
         }
+
+        //Send log message with details on changes...
+        LOGGER.info(DEFAULT, "Slash commands: $added Added | $updated Updated | $removed Removed")
     }
 }

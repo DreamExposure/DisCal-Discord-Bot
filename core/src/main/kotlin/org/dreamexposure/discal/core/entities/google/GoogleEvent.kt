@@ -33,6 +33,9 @@ class GoogleEvent internal constructor(
     override val location: String
         get() = baseEvent.location.orEmpty()
 
+    override val link: String
+        get() = baseEvent.htmlLink.orEmpty()
+
     override val color: EventColor
         get() {
             return if (baseEvent.colorId != null && baseEvent.colorId.isNotEmpty())

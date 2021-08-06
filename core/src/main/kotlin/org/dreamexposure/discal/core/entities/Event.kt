@@ -58,6 +58,11 @@ interface Event {
     val location: String
 
     /**
+     * The link to view the event at
+     */
+    val link: String
+
+    /**
      * The color of the event. Used for visually identifying it in Discord embeds.
      * If no event color is assigned, it returns [EventColor.NONE] which is DisCal blue.
      */
@@ -74,7 +79,7 @@ interface Event {
     val end: Instant
 
     /**
-     * Whether or not the event is a recurring event.
+     * Whether the event is a recurring event.
      */
     val recur: Boolean
 

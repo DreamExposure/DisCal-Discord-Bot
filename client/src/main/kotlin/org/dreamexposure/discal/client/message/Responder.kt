@@ -24,6 +24,15 @@ object Responder {
         return sendFollowup(event, spec)
     }
 
+    fun followup(event: InteractionCreateEvent, message: String, embed: EmbedCreateSpec): Mono<MessageData> {
+        val spec = WebhookExecuteRequest.builder()
+              .content(message)
+              .addEmbed(embed.asRequest())
+              .build()
+
+        return sendFollowup(event, spec)
+    }
+
     fun followupEphemeral(event: InteractionCreateEvent, embed: EmbedCreateSpec): Mono<MessageData> {
         val spec = WebhookExecuteRequest.builder()
               .addEmbed(embed.asRequest())
@@ -40,6 +49,14 @@ object Responder {
         return sendFollowupEphemeral(event, spec)
     }
 
+    fun followupEphemeral(event: InteractionCreateEvent, message: String, embed: EmbedCreateSpec): Mono<MessageData> {
+        val spec = WebhookExecuteRequest.builder()
+              .content(message)
+              .addEmbed(embed.asRequest())
+              .build()
+
+        return sendFollowupEphemeral(event, spec)
+    }
 
     private fun sendFollowup(event: InteractionCreateEvent, request: WebhookExecuteRequest) =
           event.interactionResponse.createFollowupMessage(MultipartRequest.ofRequest(request))

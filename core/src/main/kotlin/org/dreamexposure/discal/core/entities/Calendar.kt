@@ -111,6 +111,15 @@ interface Calendar {
     fun getEvent(eventId: String): Mono<Event>
 
     /**
+     * Requests to retrieve all upcoming [events][Event]
+     * If an error occurs, it is emitted through the [Flux]
+     *
+     * @param amount The upper limit of how many events to retrieve
+     * @return A [Flux] of [events][Event] that are upcoming
+     */
+    fun getUpcomingEvents(amount: Int): Flux<Event>
+
+    /**
      * Requests to retrieve all ongoing [events][Event] (starting no more than 2 weeks ago).
      * If an error occurs, it is emitted through the [Flux]
      *

@@ -68,7 +68,7 @@ object EventWrapper {
         }.onErrorResume { Mono.empty() } //Can safely ignore this, the event just doesn't exist.
     }
 
-    fun getEvents(calData: CalendarData, amount: Int, start: Long): Mono<MutableList<Event>> {
+    fun getEvents(calData: CalendarData, amount: Int, start: Long): Mono<List<Event>> {
         return GoogleAuthWrapper.getCalendarService(calData).flatMap { service: Calendar ->
             Mono.fromCallable {
                 service.events()

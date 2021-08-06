@@ -77,6 +77,17 @@ class GoogleCalendar internal constructor(
         return GoogleEvent.get(this, eventId)
     }
 
+    override fun getUpcomingEvents(amount: Int): Flux<Event> {
+        return EventWrapper.getEvents(calendarData, amount, System.currentTimeMillis())
+              .flatMapMany { Flux.fromIterable(it) }
+              .flatMap { event ->
+                  DatabaseManager.getEventData(guildId, event.id)
+                        .map {
+                            GoogleEvent(this, it, event)
+                        }
+              }
+    }
+
     override fun getOngoingEvents(): Flux<Event> {
         val start = System.currentTimeMillis() - Duration.ofDays(14).toMillis() // 2 weeks ago
         val end = System.currentTimeMillis() + Duration.ofDays(1).toMillis() // One day from now
