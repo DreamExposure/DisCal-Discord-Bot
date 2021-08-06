@@ -5,8 +5,7 @@
     {
       "name": "number",
       "type": 4,
-      "description": "The number of the calendar you wish to use (default 1)",
-      "required": false
+      "description": "The number of the calendar you wish to use (default 1)"
     }
   ],
   "default_permissions": true

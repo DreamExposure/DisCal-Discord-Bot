@@ -6,19 +6,16 @@
       "name": "upcoming",
       "type": 1,
       "description": "Lists the next X upcoming events",
-      "required": false,
       "options": [
         {
           "name": "amount",
           "type": 4,
-          "description": "The amount of upcoming events to see. range: 1-15. Defaults to 1",
-          "required": false
+          "description": "The amount of upcoming events to see. range: 1-15. Defaults to 1"
         },
         {
           "name": "calendar",
           "type": 4,
-          "description": "The calendar to pull the events from. Defaults to 1",
-          "required": false
+          "description": "The calendar to pull the events from. Defaults to 1"
         }
       ]
     },
@@ -26,13 +23,11 @@
       "name": "ongoing",
       "type": 1,
       "description": "Lists the currently ongoing events",
-      "required": false,
       "options": [
         {
           "name": "calendar",
           "type": 4,
-          "description": "The calendar to pull the events from. Defaults to 1",
-          "required": false
+          "description": "The calendar to pull the events from. Defaults to 1"
         }
       ]
     },
@@ -40,13 +35,11 @@
       "name": "today",
       "type": 1,
       "description": "Lists the events occurring in the next 24 hours",
-      "required": false,
       "options": [
         {
           "name": "calendar",
           "type": 4,
-          "description": "The calendar to pull the events from. Defaults to 1",
-          "required": false
+          "description": "The calendar to pull the events from. Defaults to 1"
         }
       ]
     }

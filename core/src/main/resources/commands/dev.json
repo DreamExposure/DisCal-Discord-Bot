@@ -6,7 +6,6 @@
       "name": "patron",
       "type": 1,
       "description": "Toggles the patron status of a guild",
-      "required": false,
       "options": [
         {
           "name": "guild",
@@ -20,7 +19,6 @@
       "name": "dev",
       "type": 1,
       "description": "Toggles the dev status of a guild",
-      "required": false,
       "options": [
         {
           "name": "guild",
@@ -34,7 +32,6 @@
       "name": "maxcal",
       "type": 1,
       "description": "Changes the max calendars a guild may have",
-      "required": false,
       "options": [
         {
           "name": "guild",
@@ -54,7 +51,6 @@
       "name": "api-register",
       "type": 1,
       "description": "Registers a new API key for the user",
-      "required": false,
       "options": [
         {
           "name": "user",
@@ -68,7 +64,6 @@
       "name": "api-block",
       "type": 1,
       "description": "Sets an API key as blocked and prevents its use",
-      "required": false,
       "options": [
         {
           "name": "key",
