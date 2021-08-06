@@ -58,7 +58,7 @@ class EventsCommand : SlashCommand {
                                       Flux.fromIterable(events)
                                   }.flatMap {
                                       Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then()
+                                  }.then(Mono.just(""))
                         }
                     }
                 }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
@@ -74,7 +74,7 @@ class EventsCommand : SlashCommand {
                       guild.getCalendar(calNum).flatMap { cal ->
                           cal.getOngoingEvents().collectList().flatMap { events ->
                               if (events.isEmpty()) {
-                                  Responder.followupEphemeral(
+                                  Responder.followup(
                                         event,
                                         getMessage("ongoing.success.none", settings)
                                   )
@@ -91,10 +91,10 @@ class EventsCommand : SlashCommand {
                                       Flux.fromIterable(events)
                                   }.flatMap {
                                       Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then()
+                                  }.then(Mono.just(""))
                               }
                           }
-                      }
+                      }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
                   }
               }.then()
     }
@@ -107,7 +107,7 @@ class EventsCommand : SlashCommand {
                       guild.getCalendar(calNum).flatMap { cal ->
                           cal.getEventsInNext24HourPeriod(Instant.now()).collectList().flatMap { events ->
                               if (events.isEmpty()) {
-                                  Responder.followupEphemeral(
+                                  Responder.followup(
                                         event,
                                         getMessage("today.success.none", settings)
                                   )
@@ -124,10 +124,10 @@ class EventsCommand : SlashCommand {
                                       Flux.fromIterable(events)
                                   }.flatMap {
                                       Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then()
+                                  }.then(Mono.just(""))
                               }
                           }
-                      }
+                      }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
                   }
               }.then()
     }
