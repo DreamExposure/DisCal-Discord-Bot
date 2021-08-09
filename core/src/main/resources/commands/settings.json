@@ -1,0 +1,87 @@
+{
+  "name": "settings",
+  "description": "A set of commands for changing various bot settings",
+  "options": [
+    {
+      "name": "view",
+      "type": 1,
+      "description": "Displays the current settings for the bot in this guild",
+      "required": false
+    },
+    {
+      "name": "role",
+      "type": 1,
+      "description": "Sets the role required to use protected commands",
+      "required": false,
+      "options": [
+        {
+          "name": "role",
+          "type": 8,
+          "description": "The role required to use protected commands",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "announcement-style",
+      "type": 1,
+      "description": "Changes what style announcements will be posted as",
+      "required": false,
+      "options": [
+        {
+          "name": "style",
+          "type": 3,
+          "description": "The announcement style to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "full",
+              "value": "FULL"
+            },
+            {
+              "name": "simple",
+              "value": "SIMPLE"
+            },
+            {
+              "name": "event only",
+              "value": "EVENT"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "type": 1,
+      "description": "Changes what language the bot will use in responses.",
+      "required": false,
+      "options": [
+        {
+          "name": "lang",
+          "type": 3,
+          "description": "The language to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "English",
+              "value": "en"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "time-format",
+      "type": 1,
+      "description": "Toggles between 24-hour and 12-hour time formatting",
+      "required": false
+    },
+    {
+      "name": "branding",
+      "type": 1,
+      "description": "Toggles between using discal branding or your guild's name/image where possible",
+      "required": false
+    }
+  ],
+  "default_permissions": true
+}

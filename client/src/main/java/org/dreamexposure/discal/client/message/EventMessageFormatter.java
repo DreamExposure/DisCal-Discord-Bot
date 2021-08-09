@@ -16,8 +16,6 @@ import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.ImageUtils;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
@@ -34,8 +32,6 @@ import java.time.temporal.ChronoUnit;
  */
 @SuppressWarnings("MagicNumber")
 public class EventMessageFormatter {
-    private final static Logger LOGGER = LoggerFactory.getLogger(EventMessageFormatter.class);
-
     public static Mono<EmbedCreateSpec> getEventEmbed(Event event, int calNum, GuildSettings settings) {
         final Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
         Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
@@ -108,63 +104,6 @@ public class EventMessageFormatter {
                 //TODO: Add info on recurrence here.
                 builder.url(event.getHtmlLink());
                 builder.footer(Messages.getMessage("Embed.Event.Info.ID", "%id%", event.getId(), settings), null);
-
-                if (event.getColorId() != null) {
-                    final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
-                    builder.color(ec.asColor());
-                } else {
-                    builder.color(GlobalVal.getDiscalColor());
-                }
-
-                return builder.build();
-            }));
-    }
-
-    public static Mono<EmbedCreateSpec> getCondensedEventEmbed(Event event, int calNum, GuildSettings settings) {
-        Mono<Guild> guild = DisCalClient.getClient().getGuildById(settings.getGuildID());
-        Mono<EventData> data = DatabaseManager.INSTANCE.getEventData(settings.getGuildID(), event.getId())
-            .defaultIfEmpty(new EventData())
-            .cache();
-        Mono<String> date = getHumanReadableDate(event.getStart(), calNum, false, settings);
-        Mono<String> time = getHumanReadableTime(event.getStart(), 1, false, settings);
-        Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
-            .defaultIfEmpty(false);
-
-        return Mono.zip(guild, data, date, time, img)
-            .map(TupleUtils.function((g, ed, startData, startTime, hasImg) -> {
-                var builder = EmbedCreateSpec.builder();
-
-                if (settings.getBranded())
-                    builder.author(g.getName(), BotSettings.BASE_URL.get(),
-                        g.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
-                else
-                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-
-                builder.title(Messages.getMessage("Embed.Event.Condensed.Title", settings));
-                if (hasImg)
-                    builder.thumbnail(ed.getImageLink());
-
-                if (event.getSummary() != null) {
-                    String summary = event.getSummary();
-                    if (summary.length() > 250) {
-                        summary = summary.substring(0, 250);
-                        summary = summary + " (continues on Google Calendar View)";
-                    }
-                    builder.addField(Messages.getMessage("Embed.Event.Condensed.Summary", settings), summary, false);
-                }
-                builder.addField(Messages.getMessage("Embed.Event.Condensed.Date", settings), startData, true);
-                builder.addField(Messages.getMessage("Embed.Event.Condensed.Time", settings), startTime, true);
-                if (event.getLocation() != null && !"".equalsIgnoreCase(event.getLocation())) {
-                    if (event.getLocation().length() > 300) {
-                        final String location = event.getLocation().substring(0, 300).trim() + "... (cont. on Google Cal)";
-                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), location, false);
-                    } else {
-                        builder.addField(Messages.getMessage("Embed.Event.Confirm.Location", settings), event.getLocation(), false);
-                    }
-                }
-                builder.addField(Messages.getMessage("Embed.Event.Condensed.ID", settings), event.getId(), false);
-                builder.url(event.getHtmlLink());
 
                 if (event.getColorId() != null) {
                     final EventColor ec = EventColor.Companion.fromId(Integer.parseInt(event.getColorId()));
