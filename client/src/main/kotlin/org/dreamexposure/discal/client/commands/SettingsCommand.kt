@@ -61,10 +61,12 @@ class SettingsCommand : SlashCommand {
               .map { AnnouncementStyle.fromValue(it.asLong().toInt()) }
               .doOnNext { settings.announcementStyle = it }
               .flatMap { DatabaseManager.updateSettings(settings) }
-              .then(Responder.followupEphemeral(
-                    event,
-                    getMessage("style.success", settings, settings.announcementStyle.name)
-              )).then()
+              .flatMap {
+                  Responder.followupEphemeral(
+                        event,
+                        getMessage("style.success", settings, settings.announcementStyle.name)
+                  )
+              }.then()
     }
 
     private fun languageSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
@@ -83,10 +85,9 @@ class SettingsCommand : SlashCommand {
               .map { TimeFormat.fromValue(it.asLong().toInt()) }
               .doOnNext { settings.timeFormat = it }
               .flatMap { DatabaseManager.updateSettings(settings) }
-              .then(Responder.followupEphemeral(
-                    event,
-                    getMessage("format.success", settings, settings.timeFormat.name)
-              )).then()
+              .flatMap {
+                  Responder.followupEphemeral(event, getMessage("format.success", settings, settings.timeFormat.name))
+              }.then()
     }
 
     private fun brandingSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
