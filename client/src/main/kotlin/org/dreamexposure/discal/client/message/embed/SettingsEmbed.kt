@@ -1,20 +1,16 @@
 package org.dreamexposure.discal.client.message.embed
 
-import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Role
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.extensions.discord4j.getControlRole
 import reactor.core.publisher.Mono
 
 object SettingsEmbed : EmbedMaker {
 
     fun getView(guild: Guild, settings: GuildSettings): Mono<EmbedCreateSpec> {
-        val roleMono = guild.getRoleById(Snowflake.of(settings.controlRole))
-              .map(Role::getName)
-              .onErrorReturn("everyone") // This should be more efficient than looping through all roles
-
-        return roleMono.map { roleName ->
+        return guild.getControlRole().map(Role::getName).map { roleName ->
             defaultBuilder(guild, settings)
                   .title(getMessage("settings", "view.title", settings))
                   .addField(getMessage("settings", "view.field.role", settings), roleName, false)
