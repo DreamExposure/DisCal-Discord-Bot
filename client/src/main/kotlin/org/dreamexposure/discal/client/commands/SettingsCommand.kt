@@ -91,13 +91,16 @@ class SettingsCommand : SlashCommand {
 
     private fun brandingSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
         return if (settings.patronGuild) {
-            settings.branded = !settings.branded
-
-            DatabaseManager.updateSettings(settings)
-                  .then(Responder.followupEphemeral(
-                        event,
-                        getMessage("brand.success", settings, "${settings.branded}")
-                  )).then()
+            Mono.justOrEmpty(event.options[0].getOption("use"))
+                  .map { it.value.get() }
+                  .map(ApplicationCommandInteractionOptionValue::asBoolean)
+                  .doOnNext { settings.branded = it }
+                  .flatMap {
+                      DatabaseManager.updateSettings(settings).then(Responder.followupEphemeral(
+                            event,
+                            getMessage("brand.success", settings, "$it")
+                      ))
+                  }.then()
         } else {
             Responder.followupEphemeral(event, getCommonMsg("error.patronOnly", settings)).then()
         }

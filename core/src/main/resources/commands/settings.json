@@ -98,7 +98,15 @@
       "name": "branding",
       "type": 1,
       "description": "Toggles between using discal branding or your guild's name/image where possible",
-      "required": false
+      "required": false,
+      "options": [
+        {
+          "name": "use",
+          "type": 5,
+          "description": "Whether to use server branding",
+          "required": true
+        }
+      ]
     }
   ],
   "default_permissions": true
