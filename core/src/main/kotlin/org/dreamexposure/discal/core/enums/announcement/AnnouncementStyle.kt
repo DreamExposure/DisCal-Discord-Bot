@@ -1,5 +1,14 @@
 package org.dreamexposure.discal.core.enums.announcement
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+@Serializable(with = AnnouncementStyleAsIntSerializer::class)
 enum class AnnouncementStyle(val value: Int = 1) {
     FULL(1), SIMPLE(2), EVENT(3);
 
@@ -17,4 +26,12 @@ enum class AnnouncementStyle(val value: Int = 1) {
             }
         }
     }
+}
+
+object AnnouncementStyleAsIntSerializer : KSerializer<AnnouncementStyle> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("AnnouncementStyle", PrimitiveKind.INT)
+
+    override fun serialize(encoder: Encoder, value: AnnouncementStyle) = encoder.encodeInt(value.value)
+
+    override fun deserialize(decoder: Decoder): AnnouncementStyle = AnnouncementStyle.fromValue(decoder.decodeInt())
 }
