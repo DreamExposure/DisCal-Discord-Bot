@@ -3,6 +3,8 @@ package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 import discord4j.common.util.Snowflake
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
+import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
@@ -43,10 +45,10 @@ class UpdateGuildSettingsEndpoint {
                     val id = body.getString("discal_channel")
                     disChannel = if (id.equals("0") || id.equals("all", true)) "all" else id
                 }
-                val simpleAnn = body.optBoolean("simple_announcements", settings.simpleAnnouncements)
+                val aStyle = body.optInt("announcement_style", settings.announcementStyle.value)
                 val lang = body.optString("lang", settings.lang)
                 val prefix = body.optString("prefix", settings.prefix)
-                val twelveHour = body.optBoolean("twelve_hour", settings.twelveHour)
+                val timeFormat = body.optInt("time_format", settings.timeFormat.value)
                 var patronGuild = settings.patronGuild
                 var devGuild = settings.devGuild
                 var branded = settings.branded
@@ -60,18 +62,21 @@ class UpdateGuildSettingsEndpoint {
                     maxCals = body.optInt("max_calendars", maxCals)
                 }
 
-                val newSettings = settings.copy(controlRole = conRole, discalChannel = disChannel,
-                        simpleAnnouncements = simpleAnn, lang = lang,
-                        prefix = prefix, patronGuild = patronGuild,
-                        devGuild = devGuild, maxCalendars = maxCals,
-                        twelveHour = twelveHour, branded = branded
+                val newSettings = settings.copy(controlRole = conRole,
+                      discalChannel = disChannel,
+                      announcementStyle = AnnouncementStyle.fromValue(aStyle),
+                      timeFormat = TimeFormat.fromValue(timeFormat),
+                      lang = lang,
+                      prefix = prefix, patronGuild = patronGuild,
+                      devGuild = devGuild, maxCalendars = maxCals,
+                      branded = branded
                 )
 
                 DatabaseManager.updateSettings(newSettings)
-                        .then(responseMessage("Success"))
-                        .doOnNext {
-                            response.rawStatusCode = GlobalVal.STATUS_SUCCESS
-                        }
+                      .then(responseMessage("Success"))
+                      .doOnNext {
+                          response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+                      }
             }
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)

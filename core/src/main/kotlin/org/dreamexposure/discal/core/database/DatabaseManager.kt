@@ -19,9 +19,11 @@ import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.enums.event.EventColor.Companion.fromNameOrHexOrId
+import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
@@ -35,29 +37,29 @@ import java.util.function.Function
 
 object DatabaseManager {
     private val settings: DatabaseSettings = DatabaseSettings(
-            BotSettings.SQL_HOST.get(),
-            BotSettings.SQL_PORT.get(),
-            BotSettings.SQL_DB.get(),
-            BotSettings.SQL_USER.get(),
-            BotSettings.SQL_PASS.get(),
-            BotSettings.SQL_PREFIX.get())
+          BotSettings.SQL_HOST.get(),
+          BotSettings.SQL_PORT.get(),
+          BotSettings.SQL_DB.get(),
+          BotSettings.SQL_USER.get(),
+          BotSettings.SQL_PASS.get(),
+          BotSettings.SQL_PREFIX.get())
 
     private val pool: ConnectionPool
 
     init {
         val factory = ConnectionFactories.get(builder()
-                .option(DRIVER, "pool")
-                .option(PROTOCOL, "mysql")
-                .option(HOST, settings.hostname)
-                .option(PORT, settings.port.toInt())
-                .option(USER, settings.user)
-                .option(PASSWORD, settings.password)
-                .option(DATABASE, settings.database)
-                .build())
+              .option(DRIVER, "pool")
+              .option(PROTOCOL, "mysql")
+              .option(HOST, settings.hostname)
+              .option(PORT, settings.port.toInt())
+              .option(USER, settings.user)
+              .option(PASSWORD, settings.password)
+              .option(DATABASE, settings.database)
+              .build())
 
         val conf = ConnectionPoolConfiguration.builder(factory)
-                .maxLifeTime(Duration.ofHours(1))
-                .build()
+              .maxLifeTime(Duration.ofHours(1))
+              .build()
 
         pool = ConnectionPool(conf)
     }
@@ -73,8 +75,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.API.table} WHERE API_KEY = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, acc.APIKey)
-                    .execute()
+                  .bind(0, acc.APIKey)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -85,12 +87,12 @@ object DatabaseManager {
                                 """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, acc.userId)
-                            .bind(1, acc.blocked)
-                            .bind(2, acc.APIKey)
-                            .execute()
+                          .bind(0, acc.userId)
+                          .bind(1, acc.blocked)
+                          .bind(2, acc.APIKey)
+                          .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                            .thenReturn(true)
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.API.table}
                                 (USER_ID, API_KEY, BLOCKED, TIME_ISSUED)
@@ -98,13 +100,13 @@ object DatabaseManager {
                             """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, acc.userId)
-                            .bind(1, acc.APIKey)
-                            .bind(2, acc.blocked)
-                            .bind(3, acc.timeIssued)
-                            .execute()
+                          .bind(0, acc.userId)
+                          .bind(1, acc.APIKey)
+                          .bind(2, acc.blocked)
+                          .bind(3, acc.timeIssued)
+                          .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                            .thenReturn(true)
+                          .thenReturn(true)
                 }
             }.doOnError {
                 LOGGER.error(DEFAULT, "Failed to update API account", it)
@@ -119,60 +121,60 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.GUILD_SETTINGS.table} WHERE GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, settings.guildID.asString())
-                    .execute()
+                  .bind(0, settings.guildID.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.GUILD_SETTINGS.table} SET
-                                CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, SIMPLE_ANNOUNCEMENT = ?,
+                                CONTROL_ROLE = ?, DISCAL_CHANNEL = ?, ANNOUNCEMENT_STYLE = ?, TIME_FORMAT = ?,
                                 LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,
-                                MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?, 12_HOUR = ?,
+                                MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?,
                                 BRANDED = ? WHERE GUILD_ID = ?
                             """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, settings.controlRole)
-                            .bind(1, settings.discalChannel)
-                            .bind(2, settings.simpleAnnouncements)
-                            .bind(3, settings.lang)
-                            .bind(4, settings.prefix)
-                            .bind(5, settings.patronGuild)
-                            .bind(6, settings.devGuild)
-                            .bind(7, settings.maxCalendars)
-                            .bind(8, settings.getDmAnnouncementsString())
-                            .bind(9, settings.twelveHour)
-                            .bind(10, settings.branded)
-                            .bind(11, settings.guildID.asString())
-                            .execute()
+                          .bind(0, settings.controlRole)
+                          .bind(1, settings.discalChannel)
+                          .bind(2, settings.announcementStyle.value)
+                          .bind(3, settings.timeFormat.value)
+                          .bind(4, settings.lang)
+                          .bind(5, settings.prefix)
+                          .bind(6, settings.patronGuild)
+                          .bind(7, settings.devGuild)
+                          .bind(8, settings.maxCalendars)
+                          .bind(9, settings.getDmAnnouncementsString())
+                          .bind(10, settings.branded)
+                          .bind(11, settings.guildID.asString())
+                          .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                            .hasElement()
-                            .thenReturn(true)
+                          .hasElement()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.GUILD_SETTINGS.table}
-                                (GUILD_ID, CONTROL_ROLE, DISCAL_CHANNEL, SIMPLE_ANNOUNCEMENT, LANG, PREFIX,
-                                PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, 12_HOUR, BRANDED)
+                                (GUILD_ID, CONTROL_ROLE, DISCAL_CHANNEL, ANNOUNCEMENT_STYLE, TIME_FORMAT, LANG, PREFIX,
+                                PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, BRANDED)
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, settings.guildID.asString())
-                            .bind(1, settings.controlRole)
-                            .bind(2, settings.discalChannel)
-                            .bind(3, settings.simpleAnnouncements)
-                            .bind(4, settings.lang)
-                            .bind(5, settings.prefix)
-                            .bind(6, settings.patronGuild)
-                            .bind(7, settings.devGuild)
-                            .bind(8, settings.maxCalendars)
-                            .bind(9, settings.getDmAnnouncementsString())
-                            .bind(10, settings.twelveHour)
-                            .bind(11, settings.branded)
-                            .execute()
+                          .bind(0, settings.guildID.asString())
+                          .bind(1, settings.controlRole)
+                          .bind(2, settings.discalChannel)
+                          .bind(3, settings.announcementStyle.value)
+                          .bind(4, settings.timeFormat.value)
+                          .bind(5, settings.lang)
+                          .bind(6, settings.prefix)
+                          .bind(7, settings.patronGuild)
+                          .bind(8, settings.devGuild)
+                          .bind(9, settings.maxCalendars)
+                          .bind(10, settings.getDmAnnouncementsString())
+                          .bind(11, settings.branded)
+                          .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                            .hasElement()
-                            .thenReturn(true)
+                          .hasElement()
+                          .thenReturn(true)
                 }
             }.doOnError {
                 LOGGER.error(DEFAULT, "Failed to update guild settings", it)
@@ -185,8 +187,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.CALENDARS.table} WHERE GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, calData.guildId.asString())
-                    .execute()
+                  .bind(0, calData.guildId.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -199,21 +201,21 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, calData.calendarNumber)
-                            .bind(1, calData.host.name)
-                            .bind(2, calData.calendarId)
-                            .bind(3, calData.calendarAddress)
-                            .bind(4, calData.external)
-                            .bind(5, calData.credentialId)
-                            .bind(6, calData.privateKey)
-                            .bind(7, calData.encryptedAccessToken)
-                            .bind(8, calData.encryptedRefreshToken)
-                            .bind(9, calData.expiresAt.toEpochMilli())
-                            .bind(10, calData.guildId.asString())
-                            .execute()
+                          .bind(0, calData.calendarNumber)
+                          .bind(1, calData.host.name)
+                          .bind(2, calData.calendarId)
+                          .bind(3, calData.calendarAddress)
+                          .bind(4, calData.external)
+                          .bind(5, calData.credentialId)
+                          .bind(6, calData.privateKey)
+                          .bind(7, calData.encryptedAccessToken)
+                          .bind(8, calData.encryptedRefreshToken)
+                          .bind(9, calData.expiresAt.toEpochMilli())
+                          .bind(10, calData.guildId.asString())
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.CALENDARS.table}
                         (GUILD_ID, CALENDAR_NUMBER, HOST, CALENDAR_ID,
@@ -222,21 +224,21 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, calData.guildId.asString())
-                            .bind(1, calData.calendarNumber)
-                            .bind(2, calData.host.name)
-                            .bind(3, calData.calendarId)
-                            .bind(4, calData.calendarAddress)
-                            .bind(5, calData.external)
-                            .bind(6, calData.credentialId)
-                            .bind(7, calData.privateKey)
-                            .bind(8, calData.encryptedAccessToken)
-                            .bind(9, calData.encryptedRefreshToken)
-                            .bind(10, calData.expiresAt.toEpochMilli())
-                            .execute()
+                          .bind(0, calData.guildId.asString())
+                          .bind(1, calData.calendarNumber)
+                          .bind(2, calData.host.name)
+                          .bind(3, calData.calendarId)
+                          .bind(4, calData.calendarAddress)
+                          .bind(5, calData.external)
+                          .bind(6, calData.credentialId)
+                          .bind(7, calData.privateKey)
+                          .bind(8, calData.encryptedAccessToken)
+                          .bind(9, calData.encryptedRefreshToken)
+                          .bind(10, calData.expiresAt.toEpochMilli())
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 }
             }.doOnError {
                 LOGGER.error(DEFAULT, "Failed to update calendar data", it)
@@ -249,8 +251,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ANNOUNCEMENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, announcement.announcementId.toString())
-                    .execute()
+                  .bind(0, announcement.announcementId.toString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -264,25 +266,25 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, announcement.calendarNumber)
-                            .bind(1, announcement.subscriberRoleIds.asStringList())
-                            .bind(2, announcement.subscriberUserIds.asStringList())
-                            .bind(3, announcement.announcementChannelId)
-                            .bind(4, announcement.type.name)
-                            .bind(5, announcement.modifier.name)
-                            .bind(6, announcement.eventId)
-                            .bind(7, announcement.eventColor.name)
-                            .bind(8, announcement.hoursBefore)
-                            .bind(9, announcement.minutesBefore)
-                            .bind(10, announcement.info)
-                            .bind(11, announcement.enabled)
-                            .bind(12, announcement.infoOnly)
-                            .bind(13, announcement.publish)
-                            .bind(14, announcement.announcementId.toString())
-                            .execute()
+                          .bind(0, announcement.calendarNumber)
+                          .bind(1, announcement.subscriberRoleIds.asStringList())
+                          .bind(2, announcement.subscriberUserIds.asStringList())
+                          .bind(3, announcement.announcementChannelId)
+                          .bind(4, announcement.type.name)
+                          .bind(5, announcement.modifier.name)
+                          .bind(6, announcement.eventId)
+                          .bind(7, announcement.eventColor.name)
+                          .bind(8, announcement.hoursBefore)
+                          .bind(9, announcement.minutesBefore)
+                          .bind(10, announcement.info)
+                          .bind(11, announcement.enabled)
+                          .bind(12, announcement.infoOnly)
+                          .bind(13, announcement.publish)
+                          .bind(14, announcement.announcementId.toString())
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.ANNOUNCEMENTS.table}
                         (ANNOUNCEMENT_ID, CALENDAR_NUMBER, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER,
@@ -292,26 +294,26 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, announcement.announcementId.toString())
-                            .bind(1, announcement.calendarNumber)
-                            .bind(2, announcement.guildId.asString())
-                            .bind(3, announcement.subscriberRoleIds.asStringList())
-                            .bind(4, announcement.subscriberUserIds.asStringList())
-                            .bind(5, announcement.announcementChannelId)
-                            .bind(6, announcement.type.name)
-                            .bind(7, announcement.modifier.name)
-                            .bind(8, announcement.eventId)
-                            .bind(9, announcement.eventColor.name)
-                            .bind(10, announcement.hoursBefore)
-                            .bind(11, announcement.minutesBefore)
-                            .bind(12, announcement.info)
-                            .bind(13, announcement.enabled)
-                            .bind(14, announcement.infoOnly)
-                            .bind(15, announcement.publish)
-                            .execute()
+                          .bind(0, announcement.announcementId.toString())
+                          .bind(1, announcement.calendarNumber)
+                          .bind(2, announcement.guildId.asString())
+                          .bind(3, announcement.subscriberRoleIds.asStringList())
+                          .bind(4, announcement.subscriberUserIds.asStringList())
+                          .bind(5, announcement.announcementChannelId)
+                          .bind(6, announcement.type.name)
+                          .bind(7, announcement.modifier.name)
+                          .bind(8, announcement.eventId)
+                          .bind(9, announcement.eventColor.name)
+                          .bind(10, announcement.hoursBefore)
+                          .bind(11, announcement.minutesBefore)
+                          .bind(12, announcement.info)
+                          .bind(13, announcement.enabled)
+                          .bind(14, announcement.infoOnly)
+                          .bind(15, announcement.publish)
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 }
             }.doOnError {
                 LOGGER.error(DEFAULT, "Failed to update announcement", it)
@@ -331,8 +333,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.EVENTS.table} WHERE EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, id)
-                    .execute()
+                  .bind(0, id)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -343,14 +345,14 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, data.calendarNumber)
-                            .bind(1, data.imageLink)
-                            .bind(2, data.eventEnd)
-                            .bind(3, id)
-                            .execute()
+                          .bind(0, data.calendarNumber)
+                          .bind(1, data.imageLink)
+                          .bind(2, data.eventEnd)
+                          .bind(3, id)
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.EVENTS.table}
                         (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, IMAGE_LINK)
@@ -358,15 +360,15 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, data.guildId.asString())
-                            .bind(1, id)
-                            .bind(2, data.calendarNumber)
-                            .bind(3, data.eventEnd)
-                            .bind(4, data.imageLink)
-                            .execute()
+                          .bind(0, data.guildId.asString())
+                          .bind(1, id)
+                          .bind(2, data.calendarNumber)
+                          .bind(3, data.eventEnd)
+                          .bind(4, data.imageLink)
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update event data", it)
                 }.onErrorResume { Mono.just(false) }
@@ -381,8 +383,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.RSVP.table} WHERE EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, data.eventId)
-                    .execute()
+                  .bind(0, data.eventId)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -394,14 +396,14 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.just(c.createStatement(updateCommand)
-                            .bind(0, data.calendarNumber)
-                            .bind(1, data.eventEnd)
-                            .bind(2, data.goingOnTime.asStringList())
-                            .bind(3, data.goingLate.asStringList())
-                            .bind(4, data.notGoing.asStringList())
-                            .bind(5, data.undecided.asStringList())
-                            .bind(6, data.limit)
-                            .bind(8, data.eventId)
+                          .bind(0, data.calendarNumber)
+                          .bind(1, data.eventEnd)
+                          .bind(2, data.goingOnTime.asStringList())
+                          .bind(3, data.goingLate.asStringList())
+                          .bind(4, data.notGoing.asStringList())
+                          .bind(5, data.undecided.asStringList())
+                          .bind(6, data.limit)
+                          .bind(8, data.eventId)
                     ).doOnNext { statement ->
                         if (data.roleId == null)
                             statement.bindNull(7, Long::class.java)
@@ -410,8 +412,8 @@ object DatabaseManager {
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.RSVP.table}
                         (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, GOING_ON_TIME, GOING_LATE,
@@ -420,15 +422,15 @@ object DatabaseManager {
                     """.trimMargin()
 
                     Mono.just(c.createStatement(insertCommand)
-                            .bind(0, data.guildId.asString())
-                            .bind(1, data.eventId)
-                            .bind(2, data.calendarNumber)
-                            .bind(3, data.eventEnd)
-                            .bind(4, data.goingOnTime.asStringList())
-                            .bind(5, data.goingLate.asStringList())
-                            .bind(6, data.notGoing.asStringList())
-                            .bind(7, data.undecided.asStringList())
-                            .bind(8, data.limit)
+                          .bind(0, data.guildId.asString())
+                          .bind(1, data.eventId)
+                          .bind(2, data.calendarNumber)
+                          .bind(3, data.eventEnd)
+                          .bind(4, data.goingOnTime.asStringList())
+                          .bind(5, data.goingLate.asStringList())
+                          .bind(6, data.notGoing.asStringList())
+                          .bind(7, data.undecided.asStringList())
+                          .bind(8, data.limit)
                     ).doOnNext { statement ->
                         if (data.roleId == null)
                             statement.bindNull(9, Long::class.java)
@@ -437,8 +439,8 @@ object DatabaseManager {
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update rsvp data", it)
                 }.onErrorResume { Mono.just(false) }
@@ -450,8 +452,8 @@ object DatabaseManager {
         return connect { c ->
             val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
             Mono.from(c.createStatement(query)
-                    .bind(0, credData.credentialNumber)
-                    .execute()
+                  .bind(0, credData.credentialNumber)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
@@ -461,28 +463,28 @@ object DatabaseManager {
                         WHERE CREDENTIAL_NUMBER = ?""".trimMargin()
 
                     Mono.from(c.createStatement(updateCommand)
-                            .bind(0, credData.encryptedRefreshToken)
-                            .bind(1, credData.encryptedAccessToken)
-                            .bind(2, credData.expiresAt.toEpochMilli())
-                            .bind(3, credData.credentialNumber)
-                            .execute()
+                          .bind(0, credData.encryptedRefreshToken)
+                          .bind(1, credData.encryptedAccessToken)
+                          .bind(2, credData.expiresAt.toEpochMilli())
+                          .bind(3, credData.credentialNumber)
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.CREDS.table}
                         |(CREDENTIAL_NUMBER, REFRESH_TOKEN, ACCESS_TOKEN, EXPIRES_AT)
                         |VALUES(?, ?, ?, ?)""".trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                            .bind(0, credData.credentialNumber)
-                            .bind(1, credData.encryptedRefreshToken)
-                            .bind(2, credData.encryptedAccessToken)
-                            .bind(3, credData.expiresAt.toEpochMilli())
-                            .execute()
+                          .bind(0, credData.credentialNumber)
+                          .bind(1, credData.encryptedRefreshToken)
+                          .bind(2, credData.encryptedAccessToken)
+                          .bind(3, credData.expiresAt.toEpochMilli())
+                          .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                          .hasElements()
+                          .thenReturn(true)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update credential data", it)
                 }.onErrorResume { Mono.just(false) }
@@ -496,20 +498,20 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.API.table} WHERE API_KEY = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, APIKey)
-                    .execute()
+                  .bind(0, APIKey)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     UserAPIAccount(
-                            row["USER_ID", String::class.java]!!,
-                            APIKey,
-                            row["BLOCKED", Boolean::class.java]!!,
-                            row["TIME_ISSUED", Long::class.java]!!
+                          row["USER_ID", String::class.java]!!,
+                          APIKey,
+                          row["BLOCKED", Boolean::class.java]!!,
+                          row["TIME_ISSUED", Long::class.java]!!
                     )
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get API-key data", it)
             }.onErrorResume { Mono.empty() }
@@ -524,25 +526,25 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.GUILD_SETTINGS.table} WHERE GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val controlRole = row["CONTROL_ROLE", String::class.java]!!
                     val discalChannel = row["DISCAL_CHANNEL", String::class.java]!!
-                    val simpleAnnouncements = row["SIMPLE_ANNOUNCEMENT", Boolean::class.java]!!
+                    val announcementStyle = AnnouncementStyle.fromValue(row["ANNOUNCEMENT_STYLE", Int::class.java]!!)
+                    val timeFormat = TimeFormat.fromValue(row["TIME_FORMAT", Int::class.java]!!)
                     val lang = row["LANG", String::class.java]!!
                     val prefix = row["PREFIX", String::class.java]!!
                     val patron = row["PATRON_GUILD", Boolean::class.java]!!
                     val dev = row["DEV_GUILD", Boolean::class.java]!!
                     val maxCals = row["MAX_CALENDARS", Int::class.java]!!
                     val dmAnnouncementsString = row["DM_ANNOUNCEMENTS", String::class.java]!!
-                    val twelveHour = row["12_HOUR", Boolean::class.java]!!
                     val branded = row["BRANDED", Boolean::class.java]!!
 
                     val settings = GuildSettings(
-                            guildId, controlRole, discalChannel, simpleAnnouncements,
-                            lang, prefix, patron, dev, maxCals, twelveHour, branded
+                          guildId, controlRole, discalChannel, announcementStyle, timeFormat,
+                          lang, prefix, patron, dev, maxCals, branded
                     )
 
                     settings.setDmAnnouncementsString(dmAnnouncementsString)
@@ -553,8 +555,8 @@ object DatabaseManager {
                     settings
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get guild settings", it)
             }.onErrorReturn(GuildSettings.empty(guildId)).defaultIfEmpty(GuildSettings.empty(guildId))
@@ -568,9 +570,9 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.CALENDARS.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, calendarNumber)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, calendarNumber)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val calId = row["CALENDAR_ID", String::class.java]!!
@@ -585,11 +587,11 @@ object DatabaseManager {
                     val expiresAt = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
-                            credId, privateKey, accessToken, refreshToken, expiresAt)
+                          credId, privateKey, accessToken, refreshToken, expiresAt)
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get all guild calendars", it)
             }.onErrorResume { Mono.empty() }
@@ -601,8 +603,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.CALENDARS.table} WHERE GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val calId = row["CALENDAR_ID", String::class.java]!!
@@ -617,11 +619,11 @@ object DatabaseManager {
                     val expiresAt = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
 
                     CalendarData(guildId, calNumber, host, calId, calAddr, external,
-                            credId, privateKey, accessToken, refreshToken, expiresAt)
+                          credId, privateKey, accessToken, refreshToken, expiresAt)
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get all guild calendars", it)
             }.onErrorReturn(mutableListOf())
@@ -633,15 +635,15 @@ object DatabaseManager {
             val query = "SELECT COUNT(*) FROM ${Tables.CALENDARS.table}"
 
             Mono.from(c.createStatement(query)
-                    .execute()
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val calendars = row.get(0, Long::class.java)!!
                     return@map calendars.toInt()
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get calendar count", it)
             }.onErrorReturn(-1)
@@ -657,9 +659,9 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ? AND EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, eventIdLookup)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, eventIdLookup)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
 
@@ -671,8 +673,8 @@ object DatabaseManager {
                     EventData(guildId, id, calNum, end, img)
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get event data", it)
             }.onErrorResume {
@@ -686,9 +688,9 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.RSVP.table} WHERE GUILD_ID = ? AND EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, eventId)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, eventId)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val calNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -709,8 +711,8 @@ object DatabaseManager {
                     data
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get rsvp data", it)
             }.onErrorResume {
@@ -724,9 +726,9 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ? and ANNOUNCEMENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, announcementId.toString())
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, announcementId.toString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val a = Announcement(guildId, announcementId)
@@ -747,8 +749,8 @@ object DatabaseManager {
                     a
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get announcement", it)
             }.onErrorResume { Mono.empty() }
@@ -760,8 +762,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -785,8 +787,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get announcements for guild", it)
             }.onErrorReturn(mutableListOf())
@@ -798,9 +800,9 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, type.name)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, type.name)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -824,8 +826,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get guild's announcements by type", it)
             }.onErrorReturn(mutableListOf())
@@ -837,7 +839,7 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table}"
 
             Mono.from(c.createStatement(query)
-                    .execute()
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -862,8 +864,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get all announcements", it)
             }.onErrorReturn(mutableListOf())
@@ -875,8 +877,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ANNOUNCEMENT_TYPE = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, type.name)
-                    .execute()
+                  .bind(0, type.name)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -901,8 +903,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get announcements by type", it)
             }.onErrorReturn(mutableListOf())
@@ -914,7 +916,7 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ENABLED = 1"
 
             Mono.from(c.createStatement(query)
-                    .execute()
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -939,8 +941,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get enabled announcements", it)
             }.onErrorReturn(mutableListOf())
@@ -952,8 +954,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ENABLED = 1 and GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -977,8 +979,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get guild's enabled announcements", it)
             }.onErrorReturn(mutableListOf())
@@ -990,8 +992,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ENABLED = 1 and ANNOUNCEMENT_TYPE = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, announcementType.name)
-                    .execute()
+                  .bind(0, announcementType.name)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -1016,8 +1018,8 @@ object DatabaseManager {
                     a
                 }
             }.collectList().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
             }.onErrorReturn(mutableListOf())
@@ -1029,15 +1031,15 @@ object DatabaseManager {
             val query = "SELECT COUNT(*) FROM ${Tables.ANNOUNCEMENTS.table}"
 
             Mono.from(c.createStatement(query)
-                    .execute()
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcements = row[0, Long::class.java]!!
                     return@map announcements.toInt()
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get announcement count", it)
             }.onErrorReturn(-1)
@@ -1049,8 +1051,8 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.CREDS.table} WHERE CREDENTIAL_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, credNumber)
-                    .execute()
+                  .bind(0, credNumber)
+                  .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val refresh = row["REFRESH_TOKEN", String::class.java]!!
@@ -1060,8 +1062,8 @@ object DatabaseManager {
                     GoogleCredentialData(credNumber, refresh, access, expires)
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                  .filter(IllegalStateException::class::isInstance)
+                  .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
             }.onErrorResume { Mono.empty() }
@@ -1073,14 +1075,14 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE ANNOUNCEMENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, announcementId)
-                    .execute()
+                  .bind(0, announcementId)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete announcements", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete announcements", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1089,15 +1091,15 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE EVENT_ID = ? AND GUILD_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, eventId)
-                    .bind(1, guildId.asString())
-                    .execute()
+                  .bind(0, eventId)
+                  .bind(1, guildId.asString())
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete announcements for event", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete announcements for event", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1107,14 +1109,14 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.EVENTS.table} WHERE EVENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, eventId)
-                    .execute()
+                  .bind(0, eventId)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete event data", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete event data", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1123,15 +1125,15 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.EVENTS.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, calNumber)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, calNumber)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete all event data for guild", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete all event data for guild", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1140,15 +1142,15 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.ANNOUNCEMENTS.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, calNumber)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, calNumber)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete all announcements for guild", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete all announcements for guild", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1157,15 +1159,15 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.RSVP.table} WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, guildId.asString())
-                    .bind(1, calNumber)
-                    .execute()
+                  .bind(0, guildId.asString())
+                  .bind(1, calNumber)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete all rsvps for guild", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete all rsvps for guild", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1174,16 +1176,16 @@ object DatabaseManager {
             val query = "UPDATE ${Tables.RSVP.table} SET RSVP_ROLE = ? WHERE GUILD_ID = ? AND RSVP_ROLE = ?"
 
             Mono.from(c.createStatement(query)
-                    .bindNull(0, Long::class.java)
-                    .bind(1, guildId.asString())
-                    .bind(2, roleId.asString())
-                    .execute()
+                  .bindNull(0, Long::class.java)
+                  .bind(1, guildId.asString())
+                  .bind(2, roleId.asString())
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed update all rsvp with role for guild ", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed update all rsvp with role for guild ", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
@@ -1192,15 +1194,15 @@ object DatabaseManager {
             val query = "DELETE FROM ${Tables.CALENDARS.table} WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?"
 
             Mono.from(c.createStatement(query)
-                    .bind(0, data.guildId.asString())
-                    .bind(1, data.calendarAddress)
-                    .execute()
+                  .bind(0, data.guildId.asString())
+                  .bind(1, data.calendarAddress)
+                  .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete calendar", it)
-                    }.onErrorReturn(false)
+                  .hasElements()
+                  .thenReturn(true)
+                  .doOnError {
+                      LOGGER.error(DEFAULT, "Failed to delete calendar", it)
+                  }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 }

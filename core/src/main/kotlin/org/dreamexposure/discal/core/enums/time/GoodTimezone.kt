@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.enums.timezone
+package org.dreamexposure.discal.core.enums.time
 
 enum class GoodTimezone {
     Africa___Abidjan,

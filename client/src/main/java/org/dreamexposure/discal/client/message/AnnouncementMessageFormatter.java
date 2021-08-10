@@ -11,6 +11,7 @@ import discord4j.rest.util.Image;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle;
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType;
 import org.dreamexposure.discal.core.enums.event.EventColor;
 import org.dreamexposure.discal.core.object.BotSettings;
@@ -287,7 +288,7 @@ public class AnnouncementMessageFormatter {
                     embed.color(GlobalVal.getDiscalColor());
                 }
 
-                if (!settings.getSimpleAnnouncements()) {
+                if (settings.getAnnouncementStyle() == AnnouncementStyle.FULL) {
                     embed.footer(Messages.getMessage("Embed.Announcement.Announce.ID", "%id%",
                         a.getAnnouncementId().toString(), settings), null);
                 }
@@ -313,7 +314,7 @@ public class AnnouncementMessageFormatter {
                         }
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.Description", settings), description, true);
                     }
-                    if (!settings.getSimpleAnnouncements()) {
+                    if (settings.getAnnouncementStyle() == AnnouncementStyle.FULL) {
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.Date", settings), sDate, true);
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.Time", settings), sTime, true);
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.TimeZone", settings), tz, true);
@@ -331,7 +332,7 @@ public class AnnouncementMessageFormatter {
                         }
                     }
 
-                    if (!settings.getSimpleAnnouncements())
+                    if (settings.getAnnouncementStyle() == AnnouncementStyle.FULL)
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.EventID", settings), event.getId(), false);
                     if (!"None".equalsIgnoreCase(a.getInfo()) && !"".equalsIgnoreCase(a.getInfo()))
                         embed.addField(Messages.getMessage("Embed.Announcement.Announce.Info", settings), a.getInfo(), false);

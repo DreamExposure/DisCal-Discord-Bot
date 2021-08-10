@@ -30,21 +30,21 @@
       "options": [
         {
           "name": "style",
-          "type": 3,
+          "type": 4,
           "description": "The announcement style to use",
           "required": true,
           "choices": [
             {
-              "name": "full",
-              "value": "FULL"
+              "name": "Full",
+              "value": 1
             },
             {
-              "name": "simple",
-              "value": "SIMPLE"
+              "name": "Simple",
+              "value": 2
             },
             {
-              "name": "event only",
-              "value": "EVENT"
+              "name": "Event Only",
+              "value": 3
             }
           ]
         }
@@ -74,7 +74,25 @@
       "name": "time-format",
       "type": 1,
       "description": "Toggles between 24-hour and 12-hour time formatting",
-      "required": false
+      "required": false,
+      "options": [
+        {
+          "name": "format",
+          "type": 4,
+          "description": "The format to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "24 Hour",
+              "value": 1
+            },
+            {
+              "name": "12 Hour",
+              "value": 2
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "branding",

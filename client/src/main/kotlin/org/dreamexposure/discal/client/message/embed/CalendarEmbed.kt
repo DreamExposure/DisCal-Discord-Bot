@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.message.embed
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import reactor.core.publisher.Mono
@@ -35,7 +36,7 @@ object CalendarEmbed : EmbedMaker {
             val ldt = LocalDateTime.now(cal.timezone)
 
             val fmt: DateTimeFormatter =
-                  if (settings.twelveHour)
+                  if (settings.timeFormat == TimeFormat.TWELVE_HOUR)
                       DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a")
                   else
                       DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")

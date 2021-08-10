@@ -1,14 +1,17 @@
+import {TimeFormat} from "@/enums/TimeFormat";
+import {AnnouncementStyle} from "@/enums/AnnouncementStyle";
+
 export class GuildSettings {
     private _id: string;
     private _controlRole: string = "everyone";
     private _disCalChannel: string = "all";
-    private _hasSimpleAnnouncements: boolean = false;
+    private _announcementStyle: AnnouncementStyle = AnnouncementStyle.FULL;
     private _lang: string = "";
     private _prefix: string = "";
     private _isPatronGuild: boolean = false;
     private _isDevGuild: boolean = false;
     private _maxCalendars: number = 1;
-    private _usingTwelveHour: boolean = false;
+    private _timeFormat: TimeFormat = TimeFormat.TWENTY_FOUR_HOUR;
     private _isBranded: boolean = false;
 
     constructor(id: string) {
@@ -36,12 +39,12 @@ export class GuildSettings {
         this._disCalChannel = channel;
     }
 
-    get hasSimpleAnnouncements() {
-        return this._hasSimpleAnnouncements;
+    get announcementStyle() {
+        return this._announcementStyle;
     }
 
-    set hasSimpleAnnouncements(simpleAnnouncements) {
-        this._hasSimpleAnnouncements = simpleAnnouncements;
+    set announcementStyle(style) {
+        this._announcementStyle = style;
     }
 
     get lang() {
@@ -84,12 +87,12 @@ export class GuildSettings {
         this._maxCalendars = max;
     }
 
-    get usingTwelveHour() {
-        return this._usingTwelveHour;
+    get timeFormat() {
+        return this._timeFormat;
     }
 
-    set usingTwelveHour(using) {
-        this._usingTwelveHour = using;
+    set timeFormat(format) {
+        this._timeFormat = format;
     }
 
     get isBranded() {
@@ -106,13 +109,13 @@ export class GuildSettings {
             "guild_id": this.id,
             "control_role": this.controlRole,
             "discal_channel": this.disCalChannel,
-            "simple_announcement": this.hasSimpleAnnouncements,
+            "announcement_style": this.announcementStyle,
             "lang": this.lang,
             "prefix": this.prefix,
             "patron_guild": this.isPatronGuild,
             "dev_guild": this.isDevGuild,
             "max_calendars": this.maxCalendars,
-            "twelve_hour": this.usingTwelveHour,
+            "time_format": this.timeFormat,
             "branded": this.isBranded
         };
     }
@@ -121,13 +124,13 @@ export class GuildSettings {
         this._id = json.guild_id;
         this.controlRole = json.control_role;
         this.disCalChannel = json.discal_channel;
-        this.hasSimpleAnnouncements = json.simple_announcement;
+        this.announcementStyle = json.announcement_style;
         this.lang = json.lang;
         this.prefix = json.prefix;
         this.isPatronGuild = json.patron_guild;
         this.isDevGuild = json.dev_guild;
         this.maxCalendars = json.max_calendars;
-        this.usingTwelveHour = json.twelve_hour;
+        this.timeFormat = json.time_format;
         this.isBranded = json.branded;
 
         return this;

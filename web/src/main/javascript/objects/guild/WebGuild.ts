@@ -12,7 +12,7 @@ export class WebGuild {
     private _settings: GuildSettings = new GuildSettings("");
     private _botNick: string = "";
 
-    private _canManageServer: boolean = false;
+    private _elevatedAccess: boolean = false;
     private _hasDisCalRole: boolean = false;
 
     private readonly _roles: WebRole[] = [];
@@ -65,12 +65,12 @@ export class WebGuild {
         this._botNick = nick;
     }
 
-    get canManageServer() {
-        return this._canManageServer;
+    get hasElevatedAccess() {
+        return this._elevatedAccess;
     }
 
-    set canManageServer(manage) {
-        this._canManageServer = manage;
+    set hasElevatedAccess(access) {
+        this._elevatedAccess = access;
     }
 
     get hasDisCalRole() {
@@ -119,7 +119,7 @@ export class WebGuild {
             "id": this.id,
             "name": this.name,
             "settings": this.settings.toJson(),
-            "manage_server": this.canManageServer,
+            "elevated_access": this.hasElevatedAccess,
             "discal_role": this.hasDisCalRole,
             "calendar": this.calendar.toJson()
         };
@@ -170,7 +170,7 @@ export class WebGuild {
             this.botNick = json.bot_nick;
         }
 
-        this.canManageServer = json.manage_server;
+        this.hasElevatedAccess = json.elevated_access;
         this.hasDisCalRole = json.discal_role;
 
         for (let i = 0; i < json.roles.length; i++) {

@@ -13,7 +13,6 @@ import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.ChannelUtils;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.PermissionChecker;
-import org.dreamexposure.discal.core.utils.RoleUtils;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 
@@ -94,17 +93,11 @@ public class DisCalCommand implements Command {
             } else {
                 return switch (args[0].toLowerCase()) {
                     case "discal" -> this.moduleDisCalInfo(event, settings);
-                    case "settings" -> this.moduleSettings(event, settings);
-                    case "role" -> this.moduleControlRole(args, event, settings);
                     case "channel" -> this.moduleDisCalChannel(args, event, settings);
-                    case "simpleannouncement" -> this.moduleSimpleAnnouncement(event, settings);
                     case "dmannouncement", "dmannouncements" -> this.moduleDmAnnouncements(event, settings);
-                    case "language", "lang" -> this.moduleLanguage(args, event, settings);
                     case "prefix" -> this.modulePrefix(args, event, settings);
                     case "invite" -> this.moduleInvite(event, settings);
                     case "dashboard" -> this.moduleDashboard(event, settings);
-                    case "brand" -> this.moduleBrand(event, settings);
-                    case "timeformat", "twelvehour" -> this.moduleTwelveHour(event, settings);
                     default -> Messages.sendMessage(Messages.getMessage("Notification.Args.Invalid", settings), event);
                 };
             }
@@ -144,32 +137,6 @@ public class DisCalCommand implements Command {
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
 
-    private Mono<Void> moduleControlRole(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
-        return PermissionChecker.hasManageServerRole(event)
-            .filter(identity -> identity)
-            .flatMap(ignore -> {
-                if (args.length == 2) {
-                    final String roleName = args[1];
-                    if ("everyone".equalsIgnoreCase(roleName)) {
-                        settings.setControlRole("everyone");
-                        return DatabaseManager.INSTANCE.updateSettings(settings)
-                            .then(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Reset", settings), event));
-                    } else {
-                        return event.getGuild().flatMap(g -> RoleUtils.getRole(roleName, g)
-                            .doOnNext(r -> settings.setControlRole(r.getId().asString()))
-                            .flatMap(r ->
-                                DatabaseManager.INSTANCE.updateSettings(settings)
-                                    .then(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Set", "%role%",
-                                        r.getName(), settings), event))
-                            ).switchIfEmpty(Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Invalid", settings), event))
-                        );
-                    }
-                } else {
-                    return Messages.sendMessage(Messages.getMessage("DisCal.ControlRole.Specify", settings), event);
-                }
-            }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
-            .then();
-    }
 
     private Mono<Void> moduleDisCalChannel(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
@@ -196,55 +163,6 @@ public class DisCalCommand implements Command {
                 }
             }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
             .then();
-    }
-
-    private Mono<Void> moduleSimpleAnnouncement(final MessageCreateEvent event, final GuildSettings settings) {
-        return Mono.just(settings)
-            .doOnNext(s -> s.setSimpleAnnouncements(!s.getSimpleAnnouncements()))
-            .flatMap(DatabaseManager.INSTANCE::updateSettings)
-            .then(Messages.sendMessage(
-                Messages.getMessage("DisCal.SimpleAnnouncement", "%value%", settings.getSimpleAnnouncements() + "", settings)
-                , event))
-            .then();
-    }
-
-    private Mono<Void> moduleSettings(final MessageCreateEvent event, final GuildSettings settings) {
-        final Mono<Guild> guildMono = event.getGuild().cache();
-        final Mono<String> dRoleMono = RoleUtils.getRoleNameFromID(settings.getControlRole(), event).defaultIfEmpty("everyone");
-        final Mono<String> dChanMono = guildMono.flatMap(g ->
-            ChannelUtils.getChannelNameFromNameOrId(settings.getDiscalChannel(), g)).defaultIfEmpty("All Channels");
-
-        final Mono<EmbedCreateSpec> embedMono = Mono.zip(guildMono, dRoleMono, dChanMono)
-            .map(TupleUtils.function((guild, dRole, dChannel) -> {
-                var builder = EmbedCreateSpec.builder()
-                    .title(Messages.getMessage("Embed.DisCal.Settings.Title", settings))
-                    .addField(Messages.getMessage("Embed.Discal.Settings.Role", settings), dRole, true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.Channel", settings), dChannel, false)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.SimpleAnn", settings),
-                        settings.getSimpleAnnouncements() + "", true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.Patron", settings), settings.getPatronGuild() + "", true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.Dev", settings), settings.getDevGuild() + "", true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.MaxCal", settings), settings.getMaxCalendars() + "", true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.Language", settings), settings.getLang(), true)
-                    .addField(Messages.getMessage("Embed.DisCal.Settings.Prefix", settings), settings.getPrefix(), true)
-                    //TODO: Add translations...
-                    .addField("Using Twelve Hour Format", settings.getTwelveHour() + "", true)
-                    .addField("Using Branding", settings.getBranded() + "", true)
-                    .footer(Messages.getMessage("Embed.DisCal.Info.Patron", settings) + ": https://www.patreon.com/Novafox",
-                        null)
-                    .url(BotSettings.BASE_URL.get())
-                    .color(GlobalVal.getDiscalColor());
-
-                if (settings.getBranded())
-                    builder.author(guild.getName(), BotSettings.BASE_URL.get(),
-                        guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.getIconUrl()));
-                else
-                    builder.author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl());
-
-                return builder.build();
-            }));
-
-        return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
 
     private Mono<Void> moduleDmAnnouncements(final MessageCreateEvent event, final GuildSettings settings) {
@@ -284,68 +202,9 @@ public class DisCalCommand implements Command {
             .then();
     }
 
-    private Mono<Void> moduleLanguage(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
-        return PermissionChecker.hasManageServerRole(event)
-            .filter(identity -> identity)
-            .flatMap(ignore -> {
-                if (args.length == 2) {
-                    final String value = args[1];
-                    if (Messages.isSupported(value)) {
-                        final String valid = Messages.getValidLang(value);
-                        settings.setLang(valid);
-
-                        return DatabaseManager.INSTANCE.updateSettings(settings)
-                            .then(Messages.sendMessage(Messages.getMessage("DisCal.Lang.Success", settings), event));
-                    } else {
-                        final String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
-                        return Messages.sendMessage(
-                            Messages.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
-                    }
-                } else {
-                    final String langs = Messages.getLangs().toString().replace("[", "").replace("]", "");
-                    return Messages.sendMessage(
-                        Messages.getMessage("DisCal.Lang.Unsupported", "%values%", langs, settings), event);
-                }
-            })
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
-            .then();
-    }
-
     private Mono<Void> moduleInvite(final MessageCreateEvent event, final GuildSettings settings) {
         return Messages.sendMessage(Messages.getMessage("DisCal.InviteLink", "%link%",
             BotSettings.SUPPORT_INVITE.get(), settings), event).then();
-    }
-
-    private Mono<Void> moduleBrand(final MessageCreateEvent event, final GuildSettings settings) {
-        return PermissionChecker.hasManageServerRole(event)
-            .filter(identity -> identity)
-            .map(b -> settings.getPatronGuild())
-            .flatMap(isPatron -> {
-                if (isPatron) {
-                    settings.setBranded(!settings.getBranded());
-                    return DatabaseManager.INSTANCE.updateSettings(settings)
-                        .then(Messages.sendMessage(
-                            Messages.getMessage("DisCal.Brand", "%value%", settings.getBranded() + "", settings),
-                            event));
-                } else {
-                    return Messages.sendMessage(Messages.getMessage("Notification.Patron", settings), event);
-                }
-            })
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
-            .then();
-    }
-
-    private Mono<Void> moduleTwelveHour(MessageCreateEvent event, GuildSettings settings) {
-        return PermissionChecker.hasManageServerRole(event)
-            .filter(identity -> identity)
-            .then(Mono.just(settings))
-            .doOnNext(s -> s.setTwelveHour(!s.getTwelveHour()))
-            .flatMap(DatabaseManager.INSTANCE::updateSettings)
-            //TODO: Add translations
-            .then(Messages.sendMessage("Twelve hour time format use changed to: " + !settings.getTwelveHour(), event))
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings),
-                event))
-            .then();
     }
 
     private Mono<Void> moduleDashboard(final MessageCreateEvent event, final GuildSettings settings) {

@@ -3,35 +3,39 @@ package org.dreamexposure.discal.core.`object`
 import discord4j.common.util.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
+import org.dreamexposure.discal.core.enums.time.TimeFormat
+import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import java.util.*
 
 @Serializable
 data class GuildSettings(
-        @Serializable(with = SnowflakeAsStringSerializer::class)
+      @Serializable(with = SnowflakeAsStringSerializer::class)
         @SerialName("guild_id")
         val guildID: Snowflake,
 
-        @SerialName("control_role")
+      @SerialName("control_role")
         var controlRole: String = "everyone",
-        @SerialName("discal_channel")
+      @SerialName("discal_channel")
         var discalChannel: String = "all",
 
-        @SerialName("simple_announcement")
-        var simpleAnnouncements: Boolean = false,
-        var lang: String = "ENGLISH",
-        var prefix: String = "!",
+      @SerialName("announcement_style")
+        var announcementStyle: AnnouncementStyle = AnnouncementStyle.FULL,
+      @SerialName("time_format")
+        var timeFormat: TimeFormat = TimeFormat.TWENTY_FOUR_HOUR,
 
-        @SerialName("patron_guild")
+      var lang: String = "ENGLISH",
+      var prefix: String = "!",
+
+      @SerialName("patron_guild")
         var patronGuild: Boolean = false,
-        @SerialName("dev_guild")
+      @SerialName("dev_guild")
         var devGuild: Boolean = false,
-        @SerialName("max_calendars")
+      @SerialName("max_calendars")
         var maxCalendars: Int = 1,
 
-        @SerialName("twelve_hour")
-        var twelveHour: Boolean = true,
-        var branded: Boolean = false,
+      var branded: Boolean = false,
 ) {
     @SerialName("")
     val dmAnnouncements: MutableList<String> = mutableListOf()
@@ -40,18 +44,7 @@ data class GuildSettings(
         fun empty(guildId: Snowflake) = GuildSettings(guildId)
     }
 
-    fun getDmAnnouncementsString(): String {
-        val dm = StringBuilder()
-
-        for ((i, sub) in this.dmAnnouncements.withIndex()) {
-            if (sub.isNotBlank()) {
-                if (i == 0) dm.append(sub)
-                else dm.append(",").append(sub)
-            }
-        }
-
-        return dm.toString()
-    }
+    fun getDmAnnouncementsString() = this.dmAnnouncements.asStringList()
 
     fun setDmAnnouncementsString(dm: String) {
         this.dmAnnouncements += dm.split(",").filter(String::isNotBlank)

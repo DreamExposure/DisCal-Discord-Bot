@@ -8,6 +8,7 @@ import discord4j.rest.util.Image;
 import org.dreamexposure.discal.client.DisCalClient;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.enums.event.EventColor;
+import org.dreamexposure.discal.core.enums.time.TimeFormat;
 import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
@@ -282,8 +283,10 @@ public class EventMessageFormatter {
             }
         ).map(ZoneId::of).map(tz -> {
             DateTimeFormatter format;
-            if (settings.getTwelveHour()) format = DateTimeFormatter.ofPattern("hh:mm:ss a").withZone(tz);
-            else format = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(tz);
+            if (settings.getTimeFormat() == TimeFormat.TWELVE_HOUR)
+                format = DateTimeFormatter.ofPattern("hh:mm:ss a").withZone(tz);
+            else
+                format = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(tz);
 
             if (eventDateTime.getDateTime() != null) { //Date with time
                 return format.format(Instant.ofEpochMilli(eventDateTime.getDateTime().getValue()));

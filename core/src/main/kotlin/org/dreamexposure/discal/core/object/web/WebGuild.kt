@@ -36,8 +36,8 @@ data class WebGuild(
         @SerialName("bot_nick")
         val botNick: String? = null,
 
-        @SerialName("manage_server")
-        var manageServer: Boolean = false,
+        @SerialName("elevated_access")
+        var elevatedAccess: Boolean = false,
         @SerialName("discal_role")
         var discalRole: Boolean = false,
 
@@ -88,7 +88,7 @@ data class WebGuild(
 
                 Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
                         .map(TupleUtils.function { bn, s, r, wc, a, c ->
-                            WebGuild(id.asLong(), name, ico, s, bn, manageServer = false, discalRole = false, c).apply {
+                            WebGuild(id.asLong(), name, ico, s, bn, elevatedAccess = false, discalRole = false, c).apply {
                                 this.roles.addAll(r)
                                 this.channels.add(WebChannel.all(s))
                                 this.channels.addAll(wc)
@@ -131,7 +131,7 @@ data class WebGuild(
 
             return Mono.zip(botNick, settings, roles, channels, announcements, calendar)
                     .map(TupleUtils.function { bn, s, r, wc, a, c ->
-                        WebGuild(id, name, icon, s, bn, manageServer = false, discalRole = false, c).apply {
+                        WebGuild(id, name, icon, s, bn, elevatedAccess = false, discalRole = false, c).apply {
                             this.roles.addAll(r)
                             this.channels.add(WebChannel.all(s))
                             this.channels.addAll(wc)

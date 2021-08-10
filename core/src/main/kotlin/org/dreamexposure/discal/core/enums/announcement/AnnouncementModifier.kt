@@ -12,7 +12,7 @@ enum class AnnouncementModifier {
         }
 
         fun fromValue(value: String): AnnouncementModifier {
-            return when (value.toUpperCase()) {
+            return when (value.uppercase()) {
                 "DURING" -> DURING
                 "END" -> END
                 else -> BEFORE

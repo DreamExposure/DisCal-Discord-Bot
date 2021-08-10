@@ -13,7 +13,7 @@ enum class AnnouncementType {
         }
 
         fun fromValue(value: String): AnnouncementType {
-            return when (value.toUpperCase()) {
+            return when (value.uppercase()) {
                 "SPECIFIC" -> SPECIFIC
                 "COLOR" -> COLOR
                 "COLOUR" -> COLOR

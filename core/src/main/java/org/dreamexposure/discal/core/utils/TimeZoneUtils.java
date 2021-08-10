@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.utils;
 
-import org.dreamexposure.discal.core.enums.timezone.BadTimezone;
+import org.dreamexposure.discal.core.enums.time.BadTimezone;
 
 import java.time.ZoneId;
 
