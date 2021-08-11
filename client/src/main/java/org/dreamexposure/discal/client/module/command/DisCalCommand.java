@@ -59,21 +59,10 @@ public class DisCalCommand implements Command {
             "Used to configure DisCal",
             "!DisCal (function) (value)"
         );
-
-        info.getSubCommands().put("settings", "Displays the bot's settings.");
-        info.getSubCommands().put("role", "Sets the control role for the bot.");
         info.getSubCommands().put("channel", "Sets the channel bot commands can be used in.");
-        info.getSubCommands().put("simpleannouncement", "Removes \"Advanced\" info from announcements.");
-        info.getSubCommands().put("dmannouncement", "Allows the bot to DM a user an announcement.");
-        info.getSubCommands().put("dmannouncements", "Alias for \"dmAnnouncement\"");
-        info.getSubCommands().put("language", "Sets the bot's language.");
-        info.getSubCommands().put("lang", "Sets the bot's language.");
         info.getSubCommands().put("prefix", "Sets the bot's prefix.");
         info.getSubCommands().put("invite", "Displays an invite to the support guild.");
         info.getSubCommands().put("dashboard", "Displays the link to the web control dashboard.");
-        info.getSubCommands().put("brand", "Enables/Disables server branding.");
-        info.getSubCommands().put("twelveHour", "Changes between a 12-hour time format, or 24-hour time format");
-        info.getSubCommands().put("timeFormat", "Alias for \"twelveHour\"");
 
         return info;
     }
@@ -94,7 +83,6 @@ public class DisCalCommand implements Command {
                 return switch (args[0].toLowerCase()) {
                     case "discal" -> this.moduleDisCalInfo(event, settings);
                     case "channel" -> this.moduleDisCalChannel(args, event, settings);
-                    case "dmannouncement", "dmannouncements" -> this.moduleDmAnnouncements(event, settings);
                     case "prefix" -> this.modulePrefix(args, event, settings);
                     case "invite" -> this.moduleInvite(event, settings);
                     case "dashboard" -> this.moduleDashboard(event, settings);
@@ -137,7 +125,6 @@ public class DisCalCommand implements Command {
         return embedMono.flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
 
-
     private Mono<Void> moduleDisCalChannel(final String[] args, final MessageCreateEvent event, final GuildSettings settings) {
         return PermissionChecker.hasManageServerRole(event)
             .filter(identity -> identity)
@@ -162,25 +149,6 @@ public class DisCalCommand implements Command {
                     return Messages.sendMessage(Messages.getMessage("DisCal.Channel.Specify", settings), event);
                 }
             }).switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Perm.MANAGE_SERVER", settings), event))
-            .then();
-    }
-
-    private Mono<Void> moduleDmAnnouncements(final MessageCreateEvent event, final GuildSettings settings) {
-        return Mono.just(settings.getDevGuild())
-            .filter(identity -> identity)
-            .flatMap(b -> event.getMessage().getAuthorAsMember())
-            .flatMap(member -> {
-                if (settings.getDmAnnouncements().contains(member.getId().asString())) {
-                    settings.getDmAnnouncements().remove(member.getId().asString());
-                    return DatabaseManager.INSTANCE.updateSettings(settings)
-                        .then(Messages.sendMessage(Messages.getMessage("DisCal.DmAnnouncements.Off", settings), event));
-                } else {
-                    settings.getDmAnnouncements().add(member.getId().asString());
-                    return DatabaseManager.INSTANCE.updateSettings(settings)
-                        .then(Messages.sendMessage(Messages.getMessage("DisCal.DmAnnouncements.On", settings), event));
-                }
-            })
-            .switchIfEmpty(Messages.sendMessage(Messages.getMessage("Notification.Disabled", settings), event))
             .then();
     }
 
