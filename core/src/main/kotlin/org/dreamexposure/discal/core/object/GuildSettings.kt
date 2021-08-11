@@ -37,7 +37,7 @@ data class GuildSettings(
 
       var branded: Boolean = false,
 ) {
-    @SerialName("")
+    @SerialName("dm_announcements")
     val dmAnnouncements: MutableList<String> = mutableListOf()
 
     companion object {
