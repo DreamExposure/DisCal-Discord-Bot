@@ -32,7 +32,7 @@ class SettingsCommand : SlashCommand {
                     else -> Mono.empty() //Never can reach this, makes compiler happy.
                 }
             } else {
-                Responder.followupEphemeral(event, getCommonMsg("error.perms.manageServer", settings)).then()
+                Responder.followupEphemeral(event, getCommonMsg("error.perms.elevated", settings)).then()
             }
         }
     }
