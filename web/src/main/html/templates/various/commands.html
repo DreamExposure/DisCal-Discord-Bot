@@ -153,8 +153,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <nav
-                    class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
+            <nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -227,57 +226,28 @@
             <!-- Begin Page Content -->
             <div class="container-fluid">
                 <!--Start intro-->
-                <h1 class="text-center text-discal-blue">DisCal - About</h1>
+                <h1 class="text-center text-discal-blue">DisCal - Commands</h1>
 
-                <p class="text-center text-discord-full-white">
-                    Below is full documentation on DisCal commands.
-                    <br>
-                    <br>
-                    <br>
-
-                    This documentation includes the command, acceptable arguments, an example, and
-                    an explanation for each and every command DisCal has to offer.
-
-                    <br>
-                    <br>
-
-                    Since many commands have sub-commands and functions, this page will be split
-                    into sections for each.
-
-                    <br>
-                    <br>
-                    <br>
-
-                    <strong>
-                        [] = required argument, do not actually include this symbol in the command
-                    </strong>
-
-                    <br>
-
-                    <strong>
-                        () = optional argument, do not actually include this symbol in the command
-                    </strong>
+                <p class="text-discord-full-white">
+                    DisCal uses a simple-to-understand permission scheme for handling access to commands.
                 </p>
+                <dl class="text-discord-full-white">
+                    <dt>Elevated</dt>
+                    <dd>Requires ADMINISTRATOR or MANAGE_SERVER permission or guild owner</dd>
+
+                    <dt>Privileged</dt>
+                    <dd>Requires discal control role (default control role is @everyone)</dd>
+
+                    <dt>Everyone</dt>
+                    <dd>Everyone will be able to access (unless commands are disabled in the channel)</dd>
+
+                    <dt>Patron-Only</dt>
+                    <dd>Requires guild to be a patron-guild at the early access tier</dd>
+
+                    <dt>Dev-Only</dt>
+                    <dd>Only discal developers are able to use this command</dd>
+                </dl>
                 <!--End intro-->
-
-                <hr>
-
-                <!-- Start example images-->
-                <div class="image-wrapper" style="max-width: 900px; position: center;">
-                    <img src="/assets/img/examples/event_demo.gif"
-                         style="max-width: 300px; max-height: 300px; padding: 10px;"
-                         alt="Event Demo Gif">
-
-                    <img src="/assets/img/examples/calendar_demo.gif"
-                         style="max-width: 300px; max-height: 300px; padding: 10px;"
-                         alt="Calendar Demo Gif">
-
-                    <img src="/assets/img/examples/announcement_demo.gif"
-                         style="max-width: 300px; max-height: 300px; padding: 10px;"
-                         alt="Announcement Demo Gif">
-
-                </div>
-                <!--End example images-->
 
                 <hr>
 
@@ -286,98 +256,87 @@
                     <h2 class="text-center text-discal-blue">!calendar commands</h2>
                     <h3 class="text-center text-discal-blue">Alias: !cal !callador</h3>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">Calendar Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
+                        <!--Start calendar create command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">create</td>
+                            <td class="tb-flex-row" role="cell">Starts calendar Wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal create [name]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
-                        <!-- Start calendar create command-->
-                        <tr>
-                            <td>!cal create</td>
-                            <td>!cal create [name w/ spaces]</td>
-                            <td>!cal create cool calendar</td>
-                            <td>Starts the calendar creator</td>
+
+                        <!--Start calendar name command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">name</td>
+                            <td class="tb-flex-row" role="cell">Sets calendar's name</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal name [name]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar summary command-->
-                        <tr>
-                            <td>!cal summary</td>
-                            <td>!cal summary [summary w/ spaces]</td>
-                            <td>!cal summary cool calendar</td>
-                            <td>Sets the calendar's name/summary</td>
+
+                        <!--Start calendar description command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">description</td>
+                            <td class="tb-flex-row" role="cell">Sets calendar's description</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal description [desc]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar name command-->
-                        <tr>
-                            <td>!cal name</td>
-                            <td>!cal name [name w/ spaces]</td>
-                            <td>!cal name cool calendar</td>
-                            <td>Sets the calendar's name/summary</td>
+
+                        <!--Start calendar timezone command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">timezone</td>
+                            <td class="tb-flex-row" role="cell">Sets calendar's timezone</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal timezone [tz]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar description command-->
-                        <tr>
-                            <td>!cal description</td>
-                            <td>!cal description [desc. w/ spaces]</td>
-                            <td>!cal description my awesome calendar</td>
-                            <td>Sets the calendar's description</td>
+
+                        <!--Start calendar review command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">review</td>
+                            <td class="tb-flex-row" role="cell">Displays calendar properties</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal review</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar timezone command-->
-                        <tr>
-                            <td>!cal timezone</td>
-                            <td>!cal timezone [timezone]</td>
-                            <td>!cal timezone America/Chicago</td>
-                            <td>Sets the calendar's timezone.</td>
+
+                        <!--Start calendar confirm command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">confirm</td>
+                            <td class="tb-flex-row" role="cell">Commits the changes made in the wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal confirm</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar view command-->
-                        <tr>
-                            <td>!cal view</td>
-                            <td>!cal view</td>
-                            <td>!cal view</td>
-                            <td>Displays the calendar currently in the editor/creator</td>
+
+                        <!--Start calendar cancel command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">cancel</td>
+                            <td class="tb-flex-row" role="cell">Cancels the wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal cancel</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start calendar review command-->
-                        <tr>
-                            <td>!cal review</td>
-                            <td>!cal review</td>
-                            <td>!cal review</td>
-                            <td>Displays the calendar currently in the editor/creator</td>
+
+                        <!--Start calendar delete command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">delete</td>
+                            <td class="tb-flex-row" role="cell">Deletes the calendar</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal delete</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
-                        <!-- Start calendar confirm command-->
-                        <tr>
-                            <td>!cal confirm</td>
-                            <td>!cal confirm</td>
-                            <td>!cal confirm</td>
-                            <td>Confirms the creation/edits and updates on Google.</td>
-                        </tr>
-                        <!-- Start calendar cancel command-->
-                        <tr>
-                            <td>!cal cancel</td>
-                            <td>!cal cancel</td>
-                            <td>!cal cancel</td>
-                            <td>Cancels the creation/edits of a calendar</td>
-                        </tr>
-                        <!-- Start calendar delete command-->
-                        <tr>
-                            <td>!cal delete</td>
-                            <td>!cal delete</td>
-                            <td>!cal delete</td>
-                            <td>Deletes the calendar from your Guild and Google</td>
-                        </tr>
-                        <!-- Start calendar remove command-->
-                        <tr>
-                            <td>!cal remove</td>
-                            <td>!cal remove</td>
-                            <td>!cal remove</td>
-                            <td>Deletes the calendar from your Guild and Google</td>
-                        </tr>
-                        <!-- Start calendar edit command-->
-                        <tr>
-                            <td>!cal edit</td>
-                            <td>!cal edit</td>
-                            <td>!cal edit</td>
-                            <td>Allows you to edit the calendar</td>
+
+                        <!--Start calendar edit command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">edit</td>
+                            <td class="tb-flex-row" role="cell">Starts calendar edit wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!cal edit</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
                         </tbody>
                     </table>
@@ -388,176 +347,192 @@
 
                 <!-- Start event command-->
                 <div id="event">
-
                     <h2 class="text-center text-discal-blue">!event commands</h2>
                     <h3 class="text-center text-discal-blue">Aliases: !e</h3>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">Event Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
+                        <!--Start create command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">create</td>
+                            <td class="tb-flex-row" role="cell">Starts event wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event create (name)</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event create command-->
-                        <tr>
-                            <td>!event create</td>
-                            <td>!event create (name w/ spaces)</td>
-                            <td>!event create my cool event</td>
-                            <td>Start the event creator</td>
+
+                        <!--Start summary command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">summary</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's name</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event summary [name]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event summary command-->
-                        <tr>
-                            <td>!event summary</td>
-                            <td>!event summary [summary w/ spaces]</td>
-                            <td>!event summary my cool event</td>
-                            <td>Sets the event name/summary</td>
+
+                        <!--Start description command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">description</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's description</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event description [desc]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event description command-->
-                        <tr>
-                            <td>!event description</td>
-                            <td>!event description [desc. w/ spaces]</td>
-                            <td>!event description This is my super cool event</td>
-                            <td>Sets the event description</td>
+
+                        <!--Start start command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">start</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's start</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event start [yyyy/MM/dd-HH:mm:ss]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event start command-->
-                        <tr>
-                            <td>!event start</td>
-                            <td>!event start [yyyy/MM/dd-HH:mm:ss]</td>
-                            <td>!event start 2018/03/21-14:30:00</td>
-                            <td>Sets the event's start time (in 24 hour format)</td>
+
+                        <!--Start end command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">end</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's end</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event end [yyyy/MM/dd-HH:mm:ss]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event end command-->
-                        <tr>
-                            <td>!event end</td>
-                            <td>!event end [yyyy/MM/dd-HH:mm:ss]</td>
-                            <td>!event end 2018/03/21-20:00:00</td>
-                            <td>Sets the event's end time (in 24 hour format)</td>
-                        </tr>
-                        <!-- Start event color command-->
-                        <tr>
-                            <td>!event color</td>
-                            <td>!event color [color]</td>
-                            <td>!event color GREEN</td>
-                            <td>Set's the event's <a href="/docs/events/event-colors">Color</a></td>
-                        </tr>
-                        <tr>
-                            <td>!event colour</td>
-                            <td>Alias of 'color' See above</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <!-- Start event location command-->
-                        <tr>
-                            <td>!event location</td>
-                            <td>!event location [location]</td>
-                            <td>!event location Room 253</td>
-                            <td>Sets the event's location</td>
-                        </tr>
-                        <!-- Start event image command-->
-                        <tr>
-                            <td>!event image</td>
-                            <td>!event image [link]</td>
-                            <td>!event image https://life.has-destroyed.me/CoXnNvOVq.jpg</td>
-                            <td>Sets the event's image. Must be a valid link to image directly.
-                                <strong>.gif support is Patron only!</strong>
+
+                        <!--Start color command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">color</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's <a href="/docs/events/event-colors">
+                                Color</a>
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event color (color)</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event review command-->
-                        <tr>
-                            <td>!event review</td>
-                            <td>!event review</td>
-                            <td>!event review</td>
-                            <td>Displays the event currently in the creator/editor</td>
+
+                        <!--Start colour command-->
+                        <tr class="flex-table tb-optional" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">colour</td>
+                            <td class="tb-flex-row" role="cell">Alias of color</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event colour (colour)</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event confirm command-->
-                        <tr>
-                            <td>!event confirm</td>
-                            <td>!event confirm</td>
-                            <td>!event confirm</td>
-                            <td>Confirms the event's creation/edit.</td>
+
+                        <!--Start location command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">location</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's location</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event location [location]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event cancel command-->
-                        <tr>
-                            <td>!event cancel</td>
-                            <td>!event cancel</td>
-                            <td>!event cancel</td>
-                            <td>Cancels the event creation/edits.</td>
+
+                        <!--Start image command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">image</td>
+                            <td class="tb-flex-row" role="cell">Sets the event's image</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event image [link]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged, gif support patron-only</td>
                         </tr>
-                        <!-- Start event recur command-->
-                        <tr>
-                            <td>!event recur</td>
-                            <td>!event recur [true/false]</td>
-                            <td>!event recur true</td>
-                            <td>Set's whether or not the event will recur</td>
+
+                        <!--Start review command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">review</td>
+                            <td class="tb-flex-row" role="cell">Displays event properties</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event review</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event freq command-->
-                        <tr>
-                            <td>!event freq</td>
-                            <td>!event freq [frequency]</td>
-                            <td>!event freq DAILY</td>
-                            <td>Set's the event recurrence frequency to DAILY. Valid options:
-                                DAILY, WEEKLY, MONTHLY, YEARLY
+
+                        <!--Start confirm command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">confirm</td>
+                            <td class="tb-flex-row" role="cell">Commits changes made in the wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event confirm</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start cancel command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">cancel</td>
+                            <td class="tb-flex-row" role="cell">Cancels the wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event cancel</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start recur command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">recur</td>
+                            <td class="tb-flex-row" role="cell">Toggles whether the event recurs</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event recur [true/false]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start frequency command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">frequency</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the frequency the event recurs at.
+                                Valid options: DAILY, WEEKLY, MONTHLY, YEARLY
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event freq [frequency]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event count command-->
-                        <tr>
-                            <td>!event count</td>
-                            <td>!event count [count]</td>
-                            <td>!event count -1</td>
-                            <td>Sets how many times the event will recur. (Use 0 or -1 for
-                                infinite)
+
+                        <!--Start count command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">count</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets how many times the event recurs.
+                                0 or -1 for infinite.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event count [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event interval command-->
-                        <tr>
-                            <td>!event interval</td>
-                            <td>!event interval [interval]</td>
-                            <td>!event interval 2</td>
-                            <td>Sets the recurrence interval. 1 is every time
-                                (according to frequency), 2 means every other time, etc etc
+
+                        <!--Start interval command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">interval</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the interval the event recurs at.
+                                Ex: 1 for every period, 2 for every other period, etc.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event interval [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event edit command-->
-                        <tr>
-                            <td>!event edit</td>
-                            <td>!event edit [event ID]</td>
-                            <td>!event edit eihctjdgmf</td>
-                            <td>Starts the event editor for the specified event</td>
+
+                        <!--Start edit command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">edit</td>
+                            <td class="tb-flex-row" role="cell">Starts event edit wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event edit [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event copy command-->
-                        <tr>
-                            <td>!event copy</td>
-                            <td>!event copy [event ID]</td>
-                            <td>!event copy eihctjdgmf</td>
-                            <td>Copies the specified event details into a new event creator</td>
+
+                        <!--Start copy command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">copy</td>
+                            <td class="tb-flex-row" role="cell">Copies an existing event's details to new event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event copy [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start event view command-->
-                        <tr>
-                            <td>!event view</td>
-                            <td>!event view [event ID]</td>
-                            <td>!event view eihctjdgmf</td>
-                            <td>Displays the specified event's details.</td>
+
+                        <!--Start view command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">view</td>
+                            <td class="tb-flex-row" role="cell">Displays an event's details</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event view [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!-- Start event delete command-->
-                        <tr>
-                            <td>!event delete</td>
-                            <td>!event delete [event ID]</td>
-                            <td>!event delete eihctjdgmf</td>
-                            <td>Deletes the specified event</td>
-                        </tr>
-                        <!-- Start event remove command-->
-                        <tr>
-                            <td>!event remove</td>
-                            <td>!event remove [event ID]</td>
-                            <td>!event remove eihctjdgmf</td>
-                            <td>Deletes the specified event</td>
+
+                        <!--Start delete command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">delete</td>
+                            <td class="tb-flex-row" role="cell">Deletes an event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!event delete [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!--End event command-->
 
@@ -565,41 +540,44 @@
 
                 <!-- Start events commands-->
                 <div id="events">
-                    <h2 class="text-center text-discal-blue">All Other Commands</h2>
+                    <h2 class="text-center text-discal-blue">/events command</h2>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">/events Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
+                        <!--Start upcoming command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">upcoming</td>
+                            <td class="tb-flex-row" role="cell">Lists the next X upcoming events</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/events upcoming [number] (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start events command-->
-                        <tr>
-                            <td>!events</td>
-                            <td>!events (amount)</td>
-                            <td>!events 2</td>
-                            <td>Displays up to the specified amount of upcoming events</td>
+
+                        <!--Start ongoing command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">ongoing</td>
+                            <td class="tb-flex-row" role="cell">Lists the currently ongoing events</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/events ongoing (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start events today-->
-                        <tr>
-                            <td>!events today</td>
-                            <td>!events today</td>
-                            <td>!events today</td>
-                            <td>Displays the events upcoming in the next 24 hour period</td>
-                        </tr>
-                        <!--Start events now-->
-                        <tr>
-                            <td>!events now OR !events current OR !events ongoing</td>
-                            <td>!events now</td>
-                            <td>!events now</td>
-                            <td>Displays all events that are ongoing currently</td>
+
+                        <!--Start today command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">today</td>
+                            <td class="tb-flex-row" role="cell">Lists the events occurring in the next 24 hours</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/events today (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!-- End events commands-->
 
@@ -610,77 +588,89 @@
 
                     <h2 class="text-center text-discal-blue">!rsvp commands</h2>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">___ Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
+                        <!--Start ontime command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">ontime</td>
+                            <td class="tb-flex-row" role="cell">RSVPs as going to the event on time</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp ontime [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start rsvp ontime command-->
-                        <tr>
-                            <td>!rsvp ontime</td>
-                            <td>!rsvp ontime [Event ID]</td>
-                            <td>!rsvp ontime eihctjdgmf</td>
-                            <td>RSVPs as going to the event on time.</td>
+
+                        <!--Start late command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">late</td>
+                            <td class="tb-flex-row" role="cell">RSVPs as going to the event, but arriving late</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp late [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start rsvp late command-->
-                        <tr>
-                            <td>!rsvp late</td>
-                            <td>!rsvp late [Event ID]</td>
-                            <td>!rsvp late eihctjdgmf</td>
-                            <td>RSVPs as going to the event, but arriving late.</td>
+
+                        <!--Start not command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">not</td>
+                            <td class="tb-flex-row" role="cell">RSVPs as not going to the event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp not [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start rsvp not command-->
-                        <tr>
-                            <td>!rsvp not</td>
-                            <td>!rsvp not [Event ID]</td>
-                            <td>!rsvp not eihctjdgmf</td>
-                            <td>RSVPs as not going to the event.</td>
+
+                        <!--Start unsure command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">unsure</td>
+                            <td class="tb-flex-row" role="cell">RSVPs as unsure if you will be able to attend</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp unsure [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start rsvp unsure command-->
-                        <tr>
-                            <td>!rsvp unsure</td>
-                            <td>!rsvp unsure [Event ID]</td>
-                            <td>!rsvp unsure eihctjdgmf</td>
-                            <td>RSVPs as unsure about whether or not you will attend.
+
+                        <!--Start remove command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">remove</td>
+                            <td class="tb-flex-row" role="cell">Removes your RSVP status from the event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp remove [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
+                        <!--Start list command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">list</td>
+                            <td class="tb-flex-row" role="cell">Lists who has RSVPed to the event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp list [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
+                        <!--Start limit command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">limit</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the max number of people allowed to attend.
+                                -1 to disable the limit.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp limit [event-id] [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!--Start rsvp remove command-->
-                        <tr>
-                            <td>!rsvp remove</td>
-                            <td>!rsvp remove [Event ID]</td>
-                            <td>!rsvp remove eihctjdgmf</td>
-                            <td>Removes your RSVP status from the event.</td>
-                        </tr>
-                        <!--Start rsvp list command-->
-                        <tr>
-                            <td>!rsvp list</td>
-                            <td>!rsvp list [Event ID]</td>
-                            <td>!rsvp list eihctjdgmf</td>
-                            <td>Lists the users who have RSVPed to the event.</td>
-                        </tr>
-                        <!--Start rsvp limit command-->
-                        <tr>
-                            <td>!rsvp limit</td>
-                            <td>!rsvp limit [Event ID] 5</td>
-                            <td>!rsvp list eihctjdgmf 5</td>
-                            <td>Sets a limit of how many people can RSVP to the event. -1 to disable</td>
-                        </tr>
-                        <!--Start rsvp role command-->
-                        <tr>
-                            <td>!rsvp role</td>
-                            <td>!rsvp role [Event ID] [role-id-or-name]</td>
-                            <td>!rsvp role Peeps</td>
-                            <td>Sets the role assigned when RSVPing to the event. "none" to disable/remove
-                                <strong>Patron only!</strong>
+
+                        <!--Start role command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">role</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the role assigned when RSVPed to the event.
+                                "None" to disable
+                                *Note: these roles are currently not automatically removed.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!rsvp role [event-id] [role-name]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged, patron-only</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!--End RSVP command-->
 
@@ -693,191 +683,221 @@
                         Aliases: !announcements !announce !alert !alerts !a !ann
                     </h3>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">Announcement Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
+                        <!--Start create command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">create</td>
+                            <td class="tb-flex-row" role="cell">Starts the announcement create wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a create</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement create command-->
-                        <tr>
-                            <td>!a create</td>
-                            <td>!a create</td>
-                            <td>!a create</td>
-                            <td>Starts the announcement creator</td>
-                        </tr>
-                        <!-- Start announcement type command-->
-                        <tr>
-                            <td>!a type</td>
-                            <td>!a type [type]</td>
-                            <td>!a type UNIVERSAL</td>
-                            <td>Sets the announcement type. Valid types:
-                                UNIVERSAL, SPECIFIC, COLOR, RECUR
+
+                        <!--Start type command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">type</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the announcement type.
+                                Valid types: UNIVERSAL, SPECIFIC, COLOR, RECUR
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a type [type]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement event command-->
-                        <tr>
-                            <td>!a event</td>
-                            <td>!a event [event-id]</td>
-                            <td>!a event eihctjdgmf</td>
-                            <td>Sets the announcement's event.
-                                <strong>ONLY needed when using SPECIFIC or RECUR</strong>
+
+                        <!--Start event command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">event</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the announcement's event.
+                                Only needed when using SPECIFIC or RECUR types.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a event [event-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement color command-->
-                        <tr>
-                            <td>!a color</td>
-                            <td>!a color [color]</td>
-                            <td>!a color BLUE</td>
-                            <td>Sets the announcement's color
-                                <strong>ONLY needed when using COLOR</strong>
+
+                        <!--Start color command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">color</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the announcement's color.
+                                Only needed when using COLOR type.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a color [color]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <tr>
-                            <td>!a colour</td>
-                            <td>Alias of 'color' see above</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-                        <!-- Start announcement channel command-->
-                        <tr>
-                            <td>!a channel</td>
-                            <td>!a channel [channel-name]</td>
-                            <td>!a channel announcements</td>
-                            <td>Sets the announcement's channel to post in.</td>
-                        </tr>
-                        <!-- Start announcement minutes command-->
-                        <tr>
-                            <td>!a minutes</td>
-                            <td>!a minutes [minutes]</td>
-                            <td>!a minutes 30</td>
-                            <td>Sets the minutes before the event to announce. Added to hours</td>
-                        </tr>
-                        <!-- Start announcement hours command-->
-                        <tr>
-                            <td>!a hours</td>
-                            <td>!a hours [hours]</td>
-                            <td>!a hours 2</td>
-                            <td>Sets the hours before the event to announce. Added to minutes</td>
-                        </tr>
-                        <!-- Start announcement info command-->
-                        <tr>
-                            <td>!a info</td>
-                            <td>!a info [your info here]</td>
-                            <td>!a info So much info, so little space</td>
-                            <td>Sets the additional info to be posted as part of the announcement
+
+                        <!--Start colour command-->
+                        <tr class="flex-table tb-optional" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">colour</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the announcement's colour.
+                                Only needed when using COLOR type.
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a colour [colour]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement infoOnly command-->
-                        <tr>
-                            <td>!a infoOnly</td>
-                            <td>!a infoOnly</td>
-                            <td>!a infoOnly</td>
-                            <td>Sets the announcement to ONLY display the additional info set.</td>
+
+                        <!--Start channel command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">channel</td>
+                            <td class="tb-flex-row" role="cell">Set's the channel it will be posted to</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a channel [channel-name]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement list command-->
-                        <tr>
-                            <td>!a publish</td>
-                            <td>!a publish</td>
-                            <td>!a publish</td>
-                            <td>Toggles whether the announcement will "publish" or repost in news channels
-                                <strong>Patron only!</strong>
+
+                        <!--Start minutes command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">minutes</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the minutes before the event to announce.
+                                Added to hours
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a minutes [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement review command-->
-                        <tr>
-                            <td>!a review</td>
-                            <td>!a review</td>
-                            <td>!a review</td>
-                            <td>Displays info about the announcement being edited/created.</td>
-                        </tr>
-                        <!-- Start announcement confirm command-->
-                        <tr>
-                            <td>!a confirm</td>
-                            <td>!a confirm</td>
-                            <td>!a confirm</td>
-                            <td>Confirms the creation/edits and updates the database.</td>
-                        </tr>
-                        <!-- Start announcement cancel command-->
-                        <tr>
-                            <td>!a cancel</td>
-                            <td>!a cancel</td>
-                            <td>!a cancel</td>
-                            <td>Cancels the creation/edits on the announcement.</td>
-                        </tr>
-                        <!-- Start announcement edit command-->
-                        <tr>
-                            <td>!a edit</td>
-                            <td>!a edit [announcement-ID]</td>
-                            <td>!a edit d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Starts the editor for the specified announcement</td>
-                        </tr>
-                        <!-- Start announcement copy command-->
-                        <tr>
-                            <td>!a copy</td>
-                            <td>!a copy [announcement-ID]</td>
-                            <td>!a copy d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Copies the specified announcement's details to a new announcement
+
+                        <!--Start hours command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">hours</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the hours before the event to announce.
+                                Added to minutes
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a hours [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement delete command-->
-                        <tr>
-                            <td>!a delete</td>
-                            <td>!a delete [announcement-ID]</td>
-                            <td>!a delete d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Deletes the specified announcement</td>
+
+                        <!--Start info command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">info</td>
+                            <td class="tb-flex-row" role="cell">Sets the additional info to be posted along with
+                                the event</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a info [text]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement enable command-->
-                        <tr>
-                            <td>!a enable</td>
-                            <td>!a enable [announcement-ID]</td>
-                            <td>!a enable d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Sets the announcement to be enabled, so it is posted.</td>
+
+                        <!--Start infoOnly command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">infoOnly</td>
+                            <td class="tb-flex-row" role="cell">Sets if the announcement should only post with info</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a infoOnly</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement disable command-->
-                        <tr>
-                            <td>!a disable</td>
-                            <td>!a disable [announcement-ID]</td>
-                            <td>!a disable d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Sets the announcement to be disabled, so it is not posted.</td>
+
+                        <!--Start publish command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">public</td>
+                            <td class="tb-flex-row" role="cell">Toggles if the announcement should be cross-posted</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a publish</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged, patron-only</td>
                         </tr>
-                        <!-- Start announcement view command-->
-                        <tr>
-                            <td>!a view</td>
-                            <td>!a view [announcement-ID]</td>
-                            <td>!a view d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Displays the specified announcement's details</td>
+
+                        <!--Start review command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">review</td>
+                            <td class="tb-flex-row" role="cell">Displays announcement properties</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a review</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement list command-->
-                        <tr>
-                            <td>!a list</td>
-                            <td>!a list [Amount or "all"]</td>
-                            <td>!a list 10</td>
-                            <td>Lists the specified amount of announcements view quick viewing</td>
+
+                        <!--Start confirm command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">confirm</td>
+                            <td class="tb-flex-row" role="cell">Commits the changes made in the wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a confirm</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement sub command-->
-                        <tr>
-                            <td>!a sub</td>
-                            <td>!a sub [announcement-ID] (user(s) and/or role(s))</td>
-                            <td>!a sub d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Subscribes yourself OR the specified users/roles to the announcement
-                            </td>
+
+                        <!--Start cancel command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">cancel</td>
+                            <td class="tb-flex-row" role="cell">Cancels the announcement wizard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a cancel</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
-                        <!-- Start announcement unsub command-->
-                        <tr>
-                            <td>!a unsub</td>
-                            <td>!a unsub [announcement-ID] (user(s) and/or role(s))</td>
-                            <td>!a unsub d9b0ab8d-7b1e-4f3f-aaa8-0a8399e3fc8c</td>
-                            <td>Unsubscribes yourself OR the specified users/roles to the
-                                announcement
-                            </td>
+
+                        <!--Start edit command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">edit</td>
+                            <td class="tb-flex-row" role="cell">Starts the announcement editor</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a edit [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start copy command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">copy</td>
+                            <td class="tb-flex-row" role="cell">Copies an existing announcement to a new one</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a copy [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start delete command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">delete</td>
+                            <td class="tb-flex-row" role="cell">Deletes an announcement</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a delete [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start enable command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">enable</td>
+                            <td class="tb-flex-row" role="cell">Enables an announcement</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a enable [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start disable command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">disable</td>
+                            <td class="tb-flex-row" role="cell">Disables an announcement</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a disable [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start view command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">view</td>
+                            <td class="tb-flex-row" role="cell">Displays an announcement's properties</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a view [announcement-id]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
+                        <!--Start list command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">list</td>
+                            <td class="tb-flex-row" role="cell">Lists announcements</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a list [number]</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
+                        <!--Start sub command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">sub</td>
+                            <td class="tb-flex-row" role="cell">Subscribes to an announcement to be pinged</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a sub [announcement-id] (users/roles)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
+                        <!--Start unsub command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">unsub</td>
+                            <td class="tb-flex-row" role="cell">Unsubscribes to an announcement to be pinged</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!a unsub [announcement-id] (users/roles)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!-- End announcement command-->
 
@@ -887,105 +907,133 @@
                 <div id="discal">
                     <h2 class="text-center text-discal-blue">!discal commands</h2>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">DisCal Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
-                        </tr>
                         <!--Start discal command-->
-                        <tr>
-                            <td>!discal</td>
-                            <td>!discal</td>
-                            <td>!discal</td>
-                            <td>Displays DisCal's bot information</td>
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">discal</td>
+                            <td class="tb-flex-row" role="cell">Displays the bot's information</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!discal</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start discal settings command-->
-                        <tr>
-                            <td>!discal settings</td>
-                            <td>!discal settings</td>
-                            <td>!discal settings</td>
-                            <td>Displays the guild's settings for DisCal (like prefix)</td>
+
+                        <!--Start prefix command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">prefix</td>
+                            <td class="tb-flex-row" role="cell">Changes the bot's prefix</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!discal prefix [prefix]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
-                        <!--Start discal prefix command-->
-                        <tr>
-                            <td>!discal prefix</td>
-                            <td>!discal prefix [prefix]</td>
-                            <td>!discal prefix $$</td>
-                            <td>Changes DisCal's prefix.<strong>Mentioning DisCal will always work
-                                no matter the prefix</strong>
-                            </td>
+
+                        <!--Start channel command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">channel</td>
+                            <td class="tb-flex-row" role="cell">Sets the channel the bot can be used in</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!discal channel [channel]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
-                        <!--Start discal role command-->
-                        <tr>
-                            <td>!discal role</td>
-                            <td>!discal role [role-name]</td>
-                            <td>!discal role controllers</td>
-                            <td>Sets the role (or higher) users must have in order to use certain
-                                DisCal commands. <strong>Reset with "!discal role everyone"</strong>
-                            </td>
+
+                        <!--Start invite command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">invite</td>
+                            <td class="tb-flex-row" role="cell">Displays an invite link to the support server</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!discal invite</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start discal channel command-->
-                        <tr>
-                            <td>!discal channel</td>
-                            <td>!discal channel [channel-name]</td>
-                            <td>!discal channel discal-control</td>
-                            <td>Sets the channel DisCal can respond in.
-                                <strong>Reset with "!discal channel all"</strong>
-                            </td>
-                        </tr>
-                        <!--Start discal simpleAnnouncement command-->
-                        <tr>
-                            <td>!discal simpleAnnouncement</td>
-                            <td>!discal simpleAnnouncement</td>
-                            <td>!discal simpleAnnouncement</td>
-                            <td>Makes announcements appear more user friendly</td>
-                        </tr>
-                        <!--Start discal brand command-->
-                        <tr>
-                            <td>!discal brand</td>
-                            <td>!discal brand</td>
-                            <td>!discal brand</td>
-                            <td>Uses the guild's name in DisCal embeds.
-                                <strong>Patron only!</strong>
-                            </td>
-                        </tr>
-                        <!--Start discal simpleAnnouncement command-->
-                        <tr>
-                            <td>!discal timeFormat</td>
-                            <td>!discal timeFormat</td>
-                            <td>!discal timeFormat</td>
-                            <td>Toggles between using the 12-hour time format or 24-hour time format.</td>
-                        </tr>
-                        <!--Start discal lang command-->
-                        <tr>
-                            <td>!discal lang</td>
-                            <td>!discal lang [language]</td>
-                            <td>!discal lang english</td>
-                            <td>Set's DisCal's language</td>
-                        </tr>
-                        <!--Start discal invite command-->
-                        <tr>
-                            <td>!discal invite</td>
-                            <td>!discal invite</td>
-                            <td>!discal invite</td>
-                            <td>Displays the invite link to DisCal's Support Guild.</td>
-                        </tr>
-                        <!--Start discal dashboard command-->
-                        <tr>
-                            <td>!discal dashboard</td>
-                            <td>!discal dashboard</td>
-                            <td>!discal dashboard</td>
-                            <td>Displays the link to the Control dashboard on DisCal's website.</td>
+
+                        <!--Start dashboard command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">dashboard</td>
+                            <td class="tb-flex-row" role="cell">Displays a link to the guild's discal dashboard</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!discal dashboard</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!--End discal command-->
+
+                <hr>
+
+                <!-- Start settings commands-->
+                <div id="settings">
+                    <h2 class="text-center text-discal-blue">/settings command</h2>
+
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">/settings Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <!--Start view command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">view</td>
+                            <td class="tb-flex-row" role="cell">
+                                Displays the current settings for the bot in the guild
+                            </td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings view</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start role command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">role</td>
+                            <td class="tb-flex-row" role="cell">Sets the role required to use privileged commands</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings role [role]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start announcement-style command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">announcement-style</td>
+                            <td class="tb-flex-row" role="cell">Changes what style announcements will be posted as</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings announcement-style [style]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start language command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">language</td>
+                            <td class="tb-flex-row" role="cell">Changes what language the bot will use in responses</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings language [lang]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start time-format command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">time-format</td>
+                            <td class="tb-flex-row" role="cell">Change what format to display date/time when needed</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings time-format [format]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start branding command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">branding</td>
+                            <td class="tb-flex-row" role="cell">
+                                Toggles between using discal branding or the guild's name/image where possible
+                            </td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings branding [true/false]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated, patron-only</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- End settings commands-->
 
                 <hr>
 
@@ -993,66 +1041,52 @@
                 <div id="other">
                     <h2 class="text-center text-discal-blue">All Other Commands</h2>
 
-                    <table style="border-color: #bcbcbc"
-                           border="#bcbcbc" cellpadding="4" cellspacing="0">
+                    <table class="flex-table-container" role="table" aria-label="Calendar Commands">
+                        <caption class="no-display">Other Commands</caption>
+                        <thead>
+                        <tr class="flex-table header" role="rowgroup">
+                            <th class="tb-flex-row first" role="columnheader">Command</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Description</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Usage</th>
+                            <th class="tb-flex-row tb-optional" role="columnheader">Access</th>
+                        </tr>
+                        </thead>
                         <tbody>
-                        <tr>
-                            <th>Command</th>
-                            <th>Acceptable Arguments</th>
-                            <th>Example</th>
-                            <th>Description</th>
-                        </tr>
                         <!--Start linkCal command-->
-                        <tr>
-                            <td>!linkCal</td>
-                            <td>!linkCal</td>
-                            <td>!linkCal</td>
-                            <td>Displays the server's calendar info AND provides a link to
-                                view in browser
-                            </td>
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">linkcal</td>
+                            <td class="tb-flex-row" role="cell">Provides info and a link to the Guild's Calendar</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/linkcal (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
+
                         <!--Start time command-->
-                        <tr>
-                            <td>!time</td>
-                            <td>!time</td>
-                            <td>!time</td>
-                            <td>Displays the current time of the calendar in the
-                                calendar's timezone
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">time</td>
+                            <td class="tb-flex-row" role="cell">
+                                Displays the current time as seen by the calendar's timezone
                             </td>
+                            <td class="tb-flex-row tb-usage" role="cell">/time (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
-                        <!--Start events command-->
-                        <tr>
-                            <td>!events</td>
-                            <td>!events (amount)</td>
-                            <td>!events 2</td>
-                            <td>Displays up to the specified amount of upcoming events</td>
+
+                        <!--Start addCal command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">addCal</td>
+                            <td class="tb-flex-row" role="cell">Starts the process to add a pre-existing calendar</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!addCal (calendar-id)</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated, patron-only</td>
                         </tr>
-                        <!--Start events today-->
-                        <tr>
-                            <td>!events today</td>
-                            <td>!events today</td>
-                            <td>!events today</td>
-                            <td>Displays the events upcoming in the next 24 hour period</td>
-                        </tr>
-                        <!--Start events now-->
-                        <tr>
-                            <td>!events now OR !events current OR !events ongoing</td>
-                            <td>!events now</td>
-                            <td>!events now</td>
-                            <td>Displays all events that are ongoing currently</td>
-                        </tr>
+
                         <!--Start help command-->
-                        <tr>
-                            <td>!help</td>
-                            <td>!help (command) (sub-command)</td>
-                            <td>!help event create</td>
-                            <td>Displays help information for the specified
-                                commands/sub commands
-                            </td>
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">help</td>
+                            <td class="tb-flex-row" role="cell">Displays help information and links</td>
+                            <td class="tb-flex-row tb-usage" role="cell">!help (command) (subcommand)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
                         </tbody>
                     </table>
-
                 </div>
                 <!-- End other commands-->
 

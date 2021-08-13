@@ -11,13 +11,13 @@
     {
       "name": "role",
       "type": 1,
-      "description": "Sets the role required to use protected commands",
+      "description": "Sets the role required to use privileged commands",
       "required": false,
       "options": [
         {
           "name": "role",
           "type": 8,
-          "description": "The role required to use protected commands",
+          "description": "The role required to use privileged commands",
           "required": true
         }
       ]
@@ -73,7 +73,7 @@
     {
       "name": "time-format",
       "type": 1,
-      "description": "Toggles between 24-hour and 12-hour time formatting",
+      "description": "Changes how date/time is formatted when required",
       "required": false,
       "options": [
         {

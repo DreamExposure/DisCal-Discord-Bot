@@ -1,0 +1,100 @@
+@import "../variables";
+
+caption.no-display {
+  display: none;
+}
+
+.flex-table-container {
+  margin: 1em auto;
+  width: 90%;
+  max-width: 1200px; //Might need to change this depending on how it looks
+  border-collapse: collapse;
+}
+
+td {
+  border: 1px solid $discord-full-white;
+  padding: 0.5em;
+}
+
+th {
+  background: $discal-light-gray;
+  color: $discal-not-black;
+  padding: 0.5em;
+  border: 1px solid $discal-light-gray;
+}
+
+.tb-flex-row {
+  width: 25%;
+  border: none;
+}
+
+.tb-flex-row, .tb-flex-cell {
+  text-align: left;
+}
+
+.tb-command {
+  color: $discord-blurple;
+  text-align: center;
+}
+
+.tb-usage {
+  color: $discord-greyple;
+  opacity: 50%;
+}
+
+.tb-access {
+  color: $discal-red;
+}
+
+tr.flex-table {
+  border-left: solid 1px $discal-light-gray;
+  border-right: solid 1px $discal-light-gray;
+  border-bottom: solid 1px $discal-light-gray;
+}
+
+th.tb-flex-row.first {
+  text-align: center;
+}
+
+@media only screen and (max-width: 767px) {
+  th, td {
+    width: auto;
+    display: block;
+    border: 0;
+  }
+
+  th {
+    border-left: solid 1px $discal-light-gray;
+    border-right: solid 1px $discal-light-gray;
+    border-bottom: solid 1px $discal-light-gray;
+  }
+
+  td {
+    border-left: solid 1px $discord-full-white;
+    border-right: solid 1px $discord-full-white;
+  }
+
+  .flex-table {
+    border-bottom: solid 1px $discord-full-white;
+  }
+
+  .tb-flex-row {
+    width: 100%;
+  }
+
+  .tb-command {
+    text-align: left;
+  }
+
+  th.tb-flex-row.first {
+    text-align: left;
+  }
+
+  .tb-optional {
+    display: none;
+  }
+
+  .tb-access {
+    display: none;
+  }
+}
