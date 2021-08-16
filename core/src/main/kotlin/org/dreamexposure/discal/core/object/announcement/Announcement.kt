@@ -52,6 +52,7 @@ data class Announcement(
 
     var enabled = true
 
+    @Deprecated(message = "Info only support is dropping in favor of a guild-wide announcement-style")
     @SerialName("info_only")
     var infoOnly = false
     var publish = false
