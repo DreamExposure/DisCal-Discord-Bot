@@ -14,7 +14,6 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
-import org.dreamexposure.discal.core.utils.TimeUtils
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -39,7 +38,7 @@ class HeartbeatService : ApplicationRunner {
                             expectedClients = Application.getShardCount(),
                             guildCount = guildCount,
                             memory = usedMemory(),
-                            uptime = TimeUtils.getHumanReadableUptime(),
+                            uptime = Application.getHumanReadableUptime(),
                             version = GlobalVal.version,
                             d4jVersion = GlobalVal.d4jVersion
                     )

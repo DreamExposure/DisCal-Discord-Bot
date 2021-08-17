@@ -4,6 +4,8 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import java.lang.management.ManagementFactory
+import java.time.Duration
 import java.util.*
 
 @SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
@@ -41,6 +43,17 @@ class Application {
             val shardCount = System.getenv("SHARD_COUNT")
             return shardCount?.toInt() ?: //Fall back to config
             BotSettings.SHARD_COUNT.get().toInt()
+        }
+
+        @JvmStatic
+        fun getHumanReadableUptime(): String {
+            val mxBean = ManagementFactory.getRuntimeMXBean()
+
+            val rawDuration = System.currentTimeMillis() - mxBean.startTime
+            val duration = Duration.ofMillis(rawDuration)
+
+            return "%d days, %d hours, %d minutes, %d seconds%n"
+                  .format(duration.toDays(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
         }
     }
 }

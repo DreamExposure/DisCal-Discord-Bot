@@ -5,7 +5,6 @@ import discord4j.rest.util.Color
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 import org.springframework.core.io.ClassPathResource
@@ -34,9 +33,6 @@ object GlobalVal {
 
     @JvmStatic
     val discalColor: Color = Color.of(56, 138, 237)
-
-    @JvmStatic
-    val discalDashboardLink = "${BotSettings.BASE_URL.get()}/dashboard"
 
     const val discordApiUrl = "https://discord.com/api/v6"
 

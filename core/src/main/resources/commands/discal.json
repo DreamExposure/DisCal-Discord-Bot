@@ -1,0 +1,5 @@
+{
+  "name": "discal",
+  "description": "A set of commands providing information about the DisCal bot",
+  "default_permissions": true
+}

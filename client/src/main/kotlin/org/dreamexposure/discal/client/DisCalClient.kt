@@ -63,7 +63,6 @@ class DisCalClient {
 
             //Register commands
             CommandExecutor.registerCommand(HelpCommand())
-            CommandExecutor.registerCommand(DisCalCommand())
             CommandExecutor.registerCommand(CalendarCommand())
             CommandExecutor.registerCommand(AddCalendarCommand())
             CommandExecutor.registerCommand(EventCommand())

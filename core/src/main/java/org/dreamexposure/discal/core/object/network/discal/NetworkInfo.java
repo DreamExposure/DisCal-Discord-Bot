@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
+import org.dreamexposure.discal.Application;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.JsonUtil;
@@ -163,7 +164,7 @@ public class NetworkInfo {
 
         json.put("api_version", this.getVersion());
         json.put("d4j_version", this.getD4JVersion());
-        json.put("api_uptime", TimeUtils.getHumanReadableUptime());
+        json.put("api_uptime", Application.getHumanReadableUptime());
         json.put("api_instance_id", this.instanceId);
         json.put("announcements", this.getAnnouncementCount());
         json.put("total_guilds", this.getTotalGuildCount());
