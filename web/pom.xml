@@ -140,7 +140,7 @@
                 <executions>
                     <execution>
                         <id>NPM project install</id>
-                        <phase>initialize</phase>
+                        <phase>pre-clean</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
