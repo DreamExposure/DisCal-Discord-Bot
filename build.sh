@@ -9,6 +9,9 @@ docker build -t rg.nl-ams.scw.cloud/dreamexposure/discal-client:latest --file cl
 
 docker build -t rg.nl-ams.scw.cloud/dreamexposure/discal-web:latest --file web/Dockerfile ./web
 
+# Delete dangling
+docker image prune -f
+
 # deploy docker images
 docker push rg.nl-ams.scw.cloud/dreamexposure/discal-server:latest
 docker push rg.nl-ams.scw.cloud/dreamexposure/discal-client:latest

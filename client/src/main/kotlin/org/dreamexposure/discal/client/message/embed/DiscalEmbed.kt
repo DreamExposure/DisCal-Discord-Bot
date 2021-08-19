@@ -22,13 +22,12 @@ object DiscalEmbed : EmbedMaker {
                   defaultBuilder(guild, settings)
                         .color(GlobalVal.discalColor)
                         .title(getMessage("discal", "info.title", settings))
-                        .addField(getMessage("discal", "info.field.dev", settings), "DreamExposure", true)
-                        .addField(getMessage("discal", "info.field.version", settings), GlobalVal.version, true)
+                        .addField(getMessage("discal", "info.field.version", settings), GlobalVal.version, false)
                         .addField(getMessage("discal", "info.field.library", settings), GlobalVal.d4jVersion, false)
                         .addField(getMessage("discal", "info.field.shard", settings), formattedIndex(), true)
                         .addField(getMessage("discal", "info.field.guilds", settings), "$guilds", true)
                         .addField(
-                              getMessage("discord", "info.field.uptime", settings),
+                              getMessage("discal", "info.field.uptime", settings),
                               Application.getHumanReadableUptime(),
                               false
                         ).addField(getMessage("discal", "info.field.calendars", settings), "$cal", true)
@@ -38,6 +37,7 @@ object DiscalEmbed : EmbedMaker {
                                     "info.field.links.value",
                                     settings,
                                     "${BotSettings.BASE_URL.get()}/commands",
+                                    BotSettings.SUPPORT_INVITE.get(),
                                     BotSettings.INVITE_URL.get(),
                                     "https://www.patreon.com/Novafox"
                               ),
