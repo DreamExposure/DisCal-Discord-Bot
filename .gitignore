@@ -19,3 +19,4 @@ web/src/main/html/static/vendor/
 **/META-INF/
 /node_modules/
 /.docker/
+/.gradle/
