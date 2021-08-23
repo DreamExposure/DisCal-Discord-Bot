@@ -25,10 +25,14 @@ jobs:
           java-version: '16'
           distribution: 'adopt'
 
+      # Validate gradle wrapper
+      - name: Validate Gradle
+        uses: gradle/wrapper-validation-action@v1
+
       # Build project and have jib push images to private container registry
       - name: Build with Gradle
         env:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
           BUILD_NUMBER: $GITHUB_RUN_NUMBER
-        run: gradlew clean build jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+        run: ./gradlew clean build jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
