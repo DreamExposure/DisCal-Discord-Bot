@@ -1,10 +1,9 @@
 package org.dreamexposure.discal.core.object.network.discal;
 
 import org.dreamexposure.discal.Application;
+import org.dreamexposure.discal.GitProperty;
 import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.utils.GlobalVal;
 import org.dreamexposure.discal.core.utils.JsonUtil;
-import org.dreamexposure.discal.core.utils.TimeUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -102,11 +101,11 @@ public class NetworkInfo {
     }
 
     public String getVersion() {
-        return GlobalVal.getVersion();
+        return GitProperty.DISCAL_VERSION.getValue();
     }
 
     public String getD4JVersion() {
-        return GlobalVal.getD4jVersion();
+        return GitProperty.DISCAL_VERSION_D4J.getValue();
     }
 
     public int getTotalGuildCount() {

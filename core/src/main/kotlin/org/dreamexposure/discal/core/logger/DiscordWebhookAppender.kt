@@ -6,6 +6,7 @@ import club.minnced.discord.webhook.WebhookClient
 import club.minnced.discord.webhook.send.WebhookEmbed.*
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
@@ -44,7 +45,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
                 .addField(EmbedField(true, "Thread", event.threadName))
                 .setDescription(event.formattedMessage)
                 .setColor(GlobalVal.discalColor.rgb)
-                .setFooter(EmbedFooter("v${GlobalVal.version}", null))
+                .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
 
         if (event.throwableProxy != null) {
             content.addField(EmbedField(false, "Error Message", event.throwableProxy.message))
@@ -64,7 +65,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
                 .addField(EmbedField(true, "Thread", event.threadName))
                 .setDescription(event.formattedMessage)
                 .setColor(GlobalVal.discalColor.rgb)
-                .setFooter(EmbedFooter("v${GlobalVal.version}", null))
+                .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
 
         if (event.throwableProxy != null) {
             content.addField(EmbedField(false, "Error Message", event.throwableProxy.message))

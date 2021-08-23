@@ -1,17 +1,18 @@
-
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.21"
     java
 
-    kotlin("plugin.spring") version "1.5.21"
-    id("org.springframework.boot") version ("2.5.2")
+    //kotlin
+    kotlin("jvm") version "1.5.21"
+    kotlin("plugin.serialization") version "1.5.21"
+    kotlin("plugin.spring") version "1.5.21" apply false
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.21" apply false
 
-    id("com.gorylenko.gradle-git-properties") version "2.3.1"
+    //Other
+    id("org.springframework.boot") version ("2.5.2") apply false
+    id("com.gorylenko.gradle-git-properties") version "2.3.1" apply false
+    id("com.google.cloud.tools.jib") version "3.1.4" apply false
 }
 
 buildscript {
@@ -21,15 +22,20 @@ buildscript {
 }
 
 val discord4jVersion = "3.2.0-SNAPSHOT" //Has to be here to show up in git properties task
+@Suppress("UNUSED_VARIABLE")
 allprojects {
+    //Project props
     group = "org.dreamexposure.discal"
     version = "4.1.2-SNAPSHOT"
     description = "DisCal"
 
+    //Plugins
     apply(plugin = "java")
+    apply(plugin = "kotlin")
 
+    //Compiler nonsense
     java.sourceCompatibility = JavaVersion.VERSION_16
-
+    java.targetCompatibility = JavaVersion.VERSION_16
 
     //Versions
     val kotlinVersion by ext("1.5.21")
@@ -72,7 +78,9 @@ allprojects {
         //Boms
         implementation(platform("io.projectreactor:reactor-bom:$reactorBomVersion"))
 
-        //Kotlinx Deps
+        //Kotlin Deps
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
 
         //Forced stuff
@@ -108,29 +116,23 @@ allprojects {
         //Spring
         implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
         implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:$springVersion")
-
     }
 }
 
-gitProperties {
-    extProperty = "gitPropertiesExt"
-
-    val versionName = if (System.getenv("BUILD_NUMBER") != null) {
-        "$version.b${System.getenv("BUILD_NUMBER")}"
-    } else {
-        "$version.d${System.currentTimeMillis().div(1000)}" //Seconds since epoch
+subprojects {
+    tasks {
+        withType<KotlinCompile> {
+            kotlinOptions {
+                freeCompilerArgs = listOf("-Xjsr305=strict")
+                jvmTarget = targetCompatibility
+            }
+        }
     }
-
-    customProperty("discal.version", versionName)
-    customProperty("discal.version.d4j", discord4jVersion)
 }
 
-val kotlinSrcDir: File = buildDir.resolve("src/main/kotlin")
 kotlin {
-
     sourceSets {
         all {
-            kotlin.srcDir(kotlinSrcDir)
             languageSettings {
                 useExperimentalAnnotation("kotlinx.serialization.InternalSerializationApi")
             }
@@ -138,54 +140,3 @@ kotlin {
     }
 }
 
-tasks {
-    generateGitProperties {
-        doLast {
-            @Suppress("UNCHECKED_CAST")
-            val gitProperties = ext[gitProperties.extProperty] as Map<String, String>
-            val enumPairs = gitProperties.mapKeys { it.key.replace('.', '_').toUpperCase() }
-
-            val enumBuilder = TypeSpec.enumBuilder("GitProperty")
-                  .primaryConstructor(
-                        com.squareup.kotlinpoet.FunSpec.constructorBuilder()
-                              .addParameter("value", String::class)
-                              .build()
-                  )
-
-            val enums = enumPairs.entries.fold(enumBuilder) { accumulator, (key, value) ->
-                accumulator.addEnumConstant(
-                      key, TypeSpec.anonymousClassBuilder()
-                      .addSuperclassConstructorParameter("%S", value)
-                      .build()
-                )
-            }
-
-            val enumFile = FileSpec.builder("org.dreamexposure.discal", "GitProperty")
-                  .addType(
-                        enums // https://github.com/square/kotlinpoet#enums
-                              .addProperty(
-                                    PropertySpec.builder("value", String::class)
-                                          .initializer("value")
-                                          .build()
-                              )
-                              .build()
-                  )
-                  .build()
-
-            enumFile.writeTo(kotlinSrcDir)
-        }
-    }
-
-    withType<KotlinCompile> {
-        dependsOn(generateGitProperties)
-
-        kotlinOptions {
-            freeCompilerArgs = listOf("-Xjsr305=strict")
-            jvmTarget = targetCompatibility
-        }
-    }
-
-    bootJar {
-        duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    }
-}

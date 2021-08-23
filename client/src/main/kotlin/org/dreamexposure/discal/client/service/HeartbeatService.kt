@@ -6,6 +6,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
@@ -39,8 +40,8 @@ class HeartbeatService : ApplicationRunner {
                             guildCount = guildCount,
                             memory = usedMemory(),
                             uptime = Application.getHumanReadableUptime(),
-                            version = GlobalVal.version,
-                            d4jVersion = GlobalVal.d4jVersion
+                            version = GitProperty.DISCAL_VERSION.value,
+                            d4jVersion = GitProperty.DISCAL_VERSION_D4J.value
                     )
 
                     val body = JSON_FORMAT.encodeToString(requestBody).toRequestBody(JSON)

@@ -3,9 +3,9 @@ package org.dreamexposure.discal.client.service
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -55,7 +55,7 @@ class StatusChanger: ApplicationRunner {
                             .replace("{calendars}", calendars.toString())
                             .replace("{announcements}", announcements.toString())
                             .replace("{shards}", Application.getShardCount().toString())
-                            .replace("{version}", GlobalVal.version)
+                            .replace("{version}", GitProperty.DISCAL_VERSION.value)
 
 
                     DisCalClient.client!!.updatePresence(ClientPresence.online(ClientActivity.playing(status)))
