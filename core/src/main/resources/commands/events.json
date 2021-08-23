@@ -49,6 +49,32 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "range",
+      "type": 1,
+      "description": "Lists the events in the specified range",
+      "required": false,
+      "options": [
+        {
+          "name": "start",
+          "type": 3,
+          "description": "Start date. Specified as yyyy/MM/dd",
+          "required": true
+        },
+        {
+          "name": "end",
+          "type": 3,
+          "description": "End data. Specified as yyyy/MM/dd",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to pull the events from. Defaults to 1",
+          "required": false
+        }
+      ]
     }
   ],
   "default_permissions": true

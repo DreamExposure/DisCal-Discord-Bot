@@ -11,6 +11,9 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @Component
 class EventsCommand : SlashCommand {
@@ -22,6 +25,7 @@ class EventsCommand : SlashCommand {
             "upcoming" -> upcomingEventsSubcommand(event, settings)
             "ongoing" -> ongoingEventsSubcommand(event, settings)
             "today" -> eventsTodaySubcommand(event, settings)
+            "range" -> eventsRangeSubcommand(event, settings)
             else -> Mono.empty() //Never can reach this, makes compiler happy.
         }
     }
@@ -130,5 +134,66 @@ class EventsCommand : SlashCommand {
                       }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
                   }
               }.then()
+    }
+
+    private fun eventsRangeSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+        val gMono = event.interaction.guild.cache()
+
+        val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
+              .map { it.asLong().toInt() }
+              .defaultIfEmpty(1)
+              .flatMap { num ->
+                  gMono.flatMap {
+                      it.getCalendar(num)
+                  }
+              }.cache()
+
+        val sMono = Mono.justOrEmpty(event.options[0].getOption("start").flatMap { it.value })
+              .map { it.asString() }
+              .flatMap { value ->
+                  calMono.map {
+                      val formatter = DateTimeFormatter.ofPattern("yyy/DD/mm V")
+
+                      ZonedDateTime.parse("$value ${it.timezone.id}", formatter)
+                  }
+              }.map(ZonedDateTime::toInstant)
+
+        val eMono = Mono.justOrEmpty(event.options[0].getOption("end").flatMap { it.value })
+              .map { it.asString() }
+              .flatMap { value ->
+                  calMono.map {
+                      val formatter = DateTimeFormatter.ofPattern("yyy/DD/mm V")
+
+                      ZonedDateTime.parse("$value ${it.timezone.id}", formatter)
+                  }
+              }.map(ZonedDateTime::toInstant)
+
+        return Mono.zip(gMono, calMono, sMono, eMono).flatMap(
+              TupleUtils.function { guild, cal, start, end ->
+                  cal.getEventsInTimeRange(start, end).collectList().flatMap { events ->
+                      if (events.isEmpty()) {
+                          Responder.followup(event, getMessage("range.success.none", settings))
+                      } else if (events.size == 1) {
+                          Responder.followup(
+                                event,
+                                getMessage("range.success.one", settings),
+                                EventEmbed.getFull(guild, settings, events[0]))
+                      } else if (events.size > 15) {
+                          Responder.followup(
+                                event,
+                                getMessage("range.success.tooMany", settings, "${events.size}", cal.link)
+                          )
+                      } else {
+                          Responder.followup(event, getMessage("range.success.many", settings, "${events.size}"))
+                                .flatMapMany {
+                                    Flux.fromIterable(events)
+                                }.flatMap {
+                                    Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
+                                }.then(Mono.just(""))
+                      }
+                  }
+              }).onErrorResume(DateTimeParseException::class.java) {
+            Responder.followup(event, getCommonMsg("error.format.date", settings))
+        }.then()
     }
 }
