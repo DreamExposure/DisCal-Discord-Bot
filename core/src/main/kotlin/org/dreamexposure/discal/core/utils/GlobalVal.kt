@@ -7,18 +7,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
-import org.springframework.core.io.ClassPathResource
-import org.springframework.core.io.Resource
-import org.springframework.core.io.support.PropertiesLoaderUtils
-import java.io.IOException
 
 object GlobalVal {
-    @JvmStatic
-    val version: String
-
-    @JvmStatic
-    val d4jVersion: String
-
     @JvmStatic
     var iconUrl: String = ""
 
@@ -60,20 +50,4 @@ object GlobalVal {
     const val STATUS_PRECONDITION_REQUIRED = 428
     const val STATUS_RATE_LIMITED = 429
     const val STATUS_INTERNAL_ERROR = 500
-
-    init {
-        var version1: String
-        var d4jVersion1: String
-        try {
-            val resource: Resource = ClassPathResource("/application.properties")
-            val p = PropertiesLoaderUtils.loadProperties(resource)
-            version1 = p.getProperty("application.version")
-            d4jVersion1 = "Discord4J v" + p.getProperty("library.discord4j.version")
-        } catch (e: IOException) {
-            version1 = "Unknown"
-            d4jVersion1 = "Unknown"
-        }
-        version = version1
-        d4jVersion = d4jVersion1
-    }
 }

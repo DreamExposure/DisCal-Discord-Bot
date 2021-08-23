@@ -3,6 +3,8 @@ package org.dreamexposure.discal.client.message.embed
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty.DISCAL_VERSION
+import org.dreamexposure.discal.GitProperty.DISCAL_VERSION_D4J
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
@@ -22,8 +24,8 @@ object DiscalEmbed : EmbedMaker {
                   defaultBuilder(guild, settings)
                         .color(GlobalVal.discalColor)
                         .title(getMessage("discal", "info.title", settings))
-                        .addField(getMessage("discal", "info.field.version", settings), GlobalVal.version, false)
-                        .addField(getMessage("discal", "info.field.library", settings), GlobalVal.d4jVersion, false)
+                        .addField(getMessage("discal", "info.field.version", settings), DISCAL_VERSION.value, false)
+                        .addField(getMessage("discal", "info.field.library", settings), DISCAL_VERSION_D4J.value, false)
                         .addField(getMessage("discal", "info.field.shard", settings), formattedIndex(), true)
                         .addField(getMessage("discal", "info.field.guilds", settings), "$guilds", true)
                         .addField(

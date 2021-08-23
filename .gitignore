@@ -8,14 +8,13 @@ hs_err_pid*
 /src/test/
 **/target/
 **/build
-web/src/main/html/static/assets/js/
-web/src/main/html/static/assets/css/
-web/src/main/html/static/vendor/
-
-/src/main/resources/client_secret.json
+web/src/main/resources/static/assets/js/
+web/src/main/resources/static/assets/css/
+web/src/main/resources/static/vendor/
 
 **/*.iml
 **/dependency-reduced-pom.xml
 **/META-INF/
 /node_modules/
 /.docker/
+/.gradle/

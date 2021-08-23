@@ -32,7 +32,7 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>,
 
     private var ctx: ApplicationContext? = null
 
-    override fun setApplicationContext(context: ApplicationContext?) {
+    override fun setApplicationContext(context: ApplicationContext) {
         ctx = context
     }
 
