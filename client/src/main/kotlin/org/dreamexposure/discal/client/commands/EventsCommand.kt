@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
@@ -152,9 +153,9 @@ class EventsCommand : SlashCommand {
               .map { it.asString() }
               .flatMap { value ->
                   calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(it.timezone)
+                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
 
-                      ZonedDateTime.parse(value, formatter)
+                      LocalDate.parse(value, formatter).atStartOfDay(it.timezone)
                   }
               }.map(ZonedDateTime::toInstant)
 
@@ -162,9 +163,10 @@ class EventsCommand : SlashCommand {
               .map { it.asString() }
               .flatMap { value ->
                   calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(it.timezone)
+                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
 
-                      ZonedDateTime.parse(value, formatter)
+                      //At end of day
+                      LocalDate.parse(value, formatter).plusDays(1).atStartOfDay(it.timezone)
                   }
               }.map(ZonedDateTime::toInstant)
 
