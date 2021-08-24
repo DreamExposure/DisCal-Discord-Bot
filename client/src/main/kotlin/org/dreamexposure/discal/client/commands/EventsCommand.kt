@@ -192,8 +192,9 @@ class EventsCommand : SlashCommand {
                                 }.then(Mono.just(""))
                       }
                   }
-              }).onErrorResume(DateTimeParseException::class.java) {
-            Responder.followup(event, getCommonMsg("error.format.date", settings))
-        }.then()
+              }).switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
+              .onErrorResume(DateTimeParseException::class.java) {
+                  Responder.followup(event, getCommonMsg("error.format.date", settings))
+              }.then()
     }
 }
