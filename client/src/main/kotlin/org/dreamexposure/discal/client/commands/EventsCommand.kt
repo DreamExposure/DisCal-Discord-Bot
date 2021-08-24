@@ -152,7 +152,7 @@ class EventsCommand : SlashCommand {
               .map { it.asString() }
               .flatMap { value ->
                   calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyy/DD/mm").withZone(it.timezone)
+                      val formatter = DateTimeFormatter.ofPattern("yyyy/DD/mm").withZone(it.timezone)
 
                       ZonedDateTime.parse(value, formatter)
                   }
@@ -162,7 +162,7 @@ class EventsCommand : SlashCommand {
               .map { it.asString() }
               .flatMap { value ->
                   calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyy/DD/mm").withZone(it.timezone)
+                      val formatter = DateTimeFormatter.ofPattern("yyyy/DD/mm").withZone(it.timezone)
 
                       ZonedDateTime.parse(value, formatter)
                   }
