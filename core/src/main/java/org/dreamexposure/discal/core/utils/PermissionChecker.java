@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.RoleData;
@@ -139,17 +138,6 @@ public class PermissionChecker {
                 .reduce(0L, (perm, accumulator) -> accumulator | perm)
                 .map(PermissionSet::of)
                 .map(pred::test)
-        );
-    }
-
-    public static Mono<Boolean> isCorrectChannel(final MessageCreateEvent event, final GuildSettings settings) {
-        if ("all".equalsIgnoreCase(settings.getDiscalChannel()))
-            return Mono.just(true);
-
-        return Mono.from(event.getMessage().getChannel()
-            .map(Channel::getId)
-            .map(snowflake -> snowflake.equals(Snowflake.of(settings.getDiscalChannel())))
-            .onErrorResume(e -> Mono.just(true)) //If channel not found, allow.
         );
     }
 

@@ -9,14 +9,10 @@ import discord4j.rest.http.client.ClientException;
 import org.dreamexposure.discal.core.file.ReadFile;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.utils.GlobalVal;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author NovaFox161
@@ -31,6 +27,7 @@ public class Messages {
     private final static Logger LOGGER = LoggerFactory.getLogger(Messages.class);
 
     //Lang handling
+    @Deprecated
     public static Mono<Boolean> reloadLangs() {
         return ReadFile.readAllLangFiles()
             .doOnNext(l -> langs = l)
@@ -39,28 +36,7 @@ public class Messages {
             .onErrorReturn(false);
     }
 
-    public static List<String> getLangs() {
-        return new CopyOnWriteArrayList<>(langs.keySet());
-    }
-
-    public static boolean isSupported(String _value) {
-        JSONArray names = langs.names();
-        for (int i = 0; i < names.length(); i++) {
-            if (_value.equalsIgnoreCase(names.getString(i)))
-                return true;
-        }
-        return false;
-    }
-
-    public static String getValidLang(String _value) {
-        JSONArray names = langs.names();
-        for (int i = 0; i < names.length(); i++) {
-            if (_value.equalsIgnoreCase(names.getString(i)))
-                return names.getString(i);
-        }
-        return "ENGLISH";
-    }
-
+    @Deprecated
     public static String getMessage(String key, GuildSettings settings) {
         JSONObject messages;
 
@@ -75,6 +51,7 @@ public class Messages {
             return "***FAILSAFE MESSAGE*** MESSAGE NOT FOUND!! Message requested: " + key;
     }
 
+    @Deprecated
     public static String getMessage(String key, String var, String replace, GuildSettings settings) {
         JSONObject messages;
 

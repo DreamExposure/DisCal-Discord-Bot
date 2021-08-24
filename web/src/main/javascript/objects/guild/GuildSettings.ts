@@ -4,7 +4,6 @@ import {AnnouncementStyle} from "@/enums/AnnouncementStyle";
 export class GuildSettings {
     private _id: string;
     private _controlRole: string = "everyone";
-    private _disCalChannel: string = "all";
     private _announcementStyle: AnnouncementStyle = AnnouncementStyle.FULL;
     private _lang: string = "";
     private _prefix: string = "";
@@ -29,14 +28,6 @@ export class GuildSettings {
 
     set controlRole(role) {
         this._controlRole = role;
-    }
-
-    get disCalChannel() {
-        return this._disCalChannel;
-    }
-
-    set disCalChannel(channel) {
-        this._disCalChannel = channel;
     }
 
     get announcementStyle() {
@@ -108,7 +99,6 @@ export class GuildSettings {
         return {
             "guild_id": this.id,
             "control_role": this.controlRole,
-            "discal_channel": this.disCalChannel,
             "announcement_style": this.announcementStyle,
             "lang": this.lang,
             "prefix": this.prefix,
@@ -123,7 +113,6 @@ export class GuildSettings {
     fromJson(json: any) {
         this._id = json.guild_id;
         this.controlRole = json.control_role;
-        this.disCalChannel = json.discal_channel;
         this.announcementStyle = json.announcement_style;
         this.lang = json.lang;
         this.prefix = json.prefix;

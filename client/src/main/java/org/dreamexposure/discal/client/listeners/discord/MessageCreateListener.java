@@ -5,7 +5,6 @@ import discord4j.core.object.entity.Message;
 import org.dreamexposure.discal.client.module.command.CommandExecutor;
 import org.dreamexposure.discal.core.database.DatabaseManager;
 import org.dreamexposure.discal.core.object.BotSettings;
-import org.dreamexposure.discal.core.utils.PermissionChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -31,54 +30,45 @@ public class MessageCreateListener {
             .flatMap(content ->
                 DatabaseManager.INSTANCE.getSettings(event.getGuildId().get()).flatMap(settings -> {
                     if (content.startsWith(settings.getPrefix())) {
-                        return Mono.from(PermissionChecker.isCorrectChannel(event, settings))
-                            .filter(correct -> correct)
-                            .flatMap(ignore -> {
-                                final String[] cmdAndArgs = content.trim().split("\\s+");
-                                if (cmdAndArgs.length > 1) {
-                                    //command with args
-                                    final String cmd = cmdAndArgs[0].replace(settings.getPrefix(), "");
-                                    final List<String> args = Arrays.asList(cmdAndArgs).subList(1, cmdAndArgs.length);
+                        final String[] cmdAndArgs = content.trim().split("\\s+");
+                        if (cmdAndArgs.length > 1) {
+                            //command with args
+                            final String cmd = cmdAndArgs[0].replace(settings.getPrefix(), "");
+                            final List<String> args = Arrays.asList(cmdAndArgs).subList(1, cmdAndArgs.length);
 
-                                    //issue command
-                                    return CommandExecutor.issueCommand(cmd, args, event, settings);
-                                } else if (cmdAndArgs.length == 1) {
-                                    //Only command, no args
-                                    final String cmd = cmdAndArgs[0].replace(settings.getPrefix(), "");
+                            //issue command
+                            return CommandExecutor.issueCommand(cmd, args, event, settings);
+                        } else if (cmdAndArgs.length == 1) {
+                            //Only command, no args
+                            final String cmd = cmdAndArgs[0].replace(settings.getPrefix(), "");
 
-                                    //Issue command
-                                    return CommandExecutor.issueCommand(cmd, new ArrayList<>(), event, settings);
-                                }
-                                return Mono.empty();
-                            });
-
+                            //Issue command
+                            return CommandExecutor.issueCommand(cmd, new ArrayList<>(), event, settings);
+                        }
+                        return Mono.empty();
                     } else if (!event.getMessage().mentionsEveryone()
                         && !content.contains("@here")
                         && (content.startsWith("<@" + BotSettings.ID.get() + ">")
                         || content.startsWith("<@!" + BotSettings.ID.get() + ">"))) {
-                        return Mono.from(PermissionChecker.isCorrectChannel(event, settings))
-                            .filter(correct -> correct)
-                            .flatMap(ignore -> {
-                                final String[] cmdAndArgs = content.split("\\s+");
-                                if (cmdAndArgs.length > 2) {
-                                    //DisCal mentioned with command and args
-                                    final String cmd = cmdAndArgs[1];
-                                    final List<String> args = Arrays.asList(cmdAndArgs).subList(2, cmdAndArgs.length);
+                        final String[] cmdAndArgs = content.split("\\s+");
+                        if (cmdAndArgs.length > 2) {
+                            //DisCal mentioned with command and args
+                            final String cmd = cmdAndArgs[1];
+                            final List<String> args = Arrays.asList(cmdAndArgs).subList(2, cmdAndArgs.length);
 
-                                    //issue command
-                                    return CommandExecutor.issueCommand(cmd, args, event, settings);
-                                } else if (cmdAndArgs.length == 2) {
-                                    //DisCal mentioned with command and no args
-                                    final String cmd = cmdAndArgs[1];
-                                    //Issue command
-                                    return CommandExecutor.issueCommand(cmd, new ArrayList<>(), event, settings);
-                                } else if (cmdAndArgs.length == 1) {
-                                    //DisCal mentioned, nothing else
-                                    return CommandExecutor.issueCommand("DisCal", new ArrayList<>(), event, settings);
-                                }
+                            //issue command
+                            return CommandExecutor.issueCommand(cmd, args, event, settings);
+                        } else if (cmdAndArgs.length == 2) {
+                            //DisCal mentioned with command and no args
+                            final String cmd = cmdAndArgs[1];
+                            //Issue command
+                            return CommandExecutor.issueCommand(cmd, new ArrayList<>(), event, settings);
+                        } else if (cmdAndArgs.length == 1) {
+                            //DisCal mentioned, nothing else
+                            return CommandExecutor.issueCommand("DisCal", new ArrayList<>(), event, settings);
+                        }
 
-                                return Mono.empty();
-                            });
+                        return Mono.empty();
                     } else {
                         //Bot not mentioned, and this is not a command, ignore this
                         return Mono.empty();

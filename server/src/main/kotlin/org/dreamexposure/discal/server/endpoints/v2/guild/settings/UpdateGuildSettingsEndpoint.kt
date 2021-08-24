@@ -40,11 +40,6 @@ class UpdateGuildSettingsEndpoint {
             DatabaseManager.getSettings(guildId).flatMap { settings ->
                 //Handle various things that are allowed to change
                 val conRole = body.optString("control_role", settings.controlRole)
-                var disChannel = settings.discalChannel
-                if (body.has("discal_channel")) {
-                    val id = body.getString("discal_channel")
-                    disChannel = if (id.equals("0") || id.equals("all", true)) "all" else id
-                }
                 val aStyle = body.optInt("announcement_style", settings.announcementStyle.value)
                 val lang = body.optString("lang", settings.lang)
                 val prefix = body.optString("prefix", settings.prefix)
@@ -63,7 +58,6 @@ class UpdateGuildSettingsEndpoint {
                 }
 
                 val newSettings = settings.copy(controlRole = conRole,
-                      discalChannel = disChannel,
                       announcementStyle = AnnouncementStyle.fromValue(aStyle),
                       timeFormat = TimeFormat.fromValue(timeFormat),
                       lang = lang,

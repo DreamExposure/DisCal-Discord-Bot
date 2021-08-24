@@ -25,23 +25,23 @@ import reactor.function.TupleUtils
 
 @Serializable
 data class WebGuild(
-        @Serializable(with = LongAsStringSerializer::class)
-        val id: Long,
-        val name: String,
-        @SerialName("icon_url")
-        val iconUrl: String? = null,
+      @Serializable(with = LongAsStringSerializer::class)
+      val id: Long,
+      val name: String,
+      @SerialName("icon_url")
+      val iconUrl: String? = null,
 
-        val settings: GuildSettings,
+      val settings: GuildSettings,
 
-        @SerialName("bot_nick")
-        val botNick: String? = null,
+      @SerialName("bot_nick")
+      val botNick: String? = null,
 
-        @SerialName("elevated_access")
-        var elevatedAccess: Boolean = false,
-        @SerialName("discal_role")
-        var discalRole: Boolean = false,
+      @SerialName("elevated_access")
+      var elevatedAccess: Boolean = false,
+      @SerialName("discal_role")
+      var discalRole: Boolean = false,
 
-        val calendar: WebCalendar
+      val calendar: WebCalendar
 ) {
     val roles: MutableList<WebRole> = mutableListOf()
     val channels: MutableList<WebChannel> = mutableListOf()
@@ -61,11 +61,11 @@ data class WebGuild(
                 val ico = data.icon().orElse("")
 
                 val botNick = g.member(Snowflake.of(BotSettings.ID.get()))
-                        .data
-                        .map(MemberData::nick)
-                        .map { Possible.flatOpt(it) }
-                        .flatMap { justOrEmpty(it) }
-                        .defaultIfEmpty("DisCal")
+                      .data
+                      .map(MemberData::nick)
+                      .map { Possible.flatOpt(it) }
+                      .flatMap { justOrEmpty(it) }
+                      .defaultIfEmpty("DisCal")
 
                 val settings = DatabaseManager.getSettings(id).cache()
 
@@ -73,28 +73,26 @@ data class WebGuild(
                     g.roles.map { role -> WebRole.fromRole(role, s) }
                 }.collectList()
 
-                val webChannels = settings.flatMapMany { s ->
-                    g.channels.ofType(GuildMessageChannel::class.java)
-                            .map { channel -> WebChannel.fromChannel(channel, s) }
-                }.collectList()
+                val webChannels = g.channels.ofType(GuildMessageChannel::class.java)
+                      .map { channel -> WebChannel.fromChannel(channel) }
+                      .collectList()
 
                 val announcements = DatabaseManager.getAnnouncements(id)
 
                 val calendar = settings.flatMap { s ->
                     DatabaseManager.getMainCalendar(id)
-                            .flatMap { d -> WebCalendar.fromCalendar(d, s) }
+                          .flatMap { d -> WebCalendar.fromCalendar(d, s) }
                 }.defaultIfEmpty(WebCalendar.empty())
 
 
                 Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
-                        .map(TupleUtils.function { bn, s, r, wc, a, c ->
-                            WebGuild(id.asLong(), name, ico, s, bn, elevatedAccess = false, discalRole = false, c).apply {
-                                this.roles.addAll(r)
-                                this.channels.add(WebChannel.all(s))
-                                this.channels.addAll(wc)
-                                this.announcements.addAll(a)
-                            }
-                        })
+                      .map(TupleUtils.function { bn, s, r, wc, a, c ->
+                          WebGuild(id.asLong(), name, ico, s, bn, elevatedAccess = false, discalRole = false, c).apply {
+                              this.roles.addAll(r)
+                              this.channels.addAll(wc)
+                              this.announcements.addAll(a)
+                          }
+                      })
             }.onErrorResume(ClientException::class.java) {
                 Mono.error(BotNotInGuildException())
             }.switchIfEmpty(Mono.error(BotNotInGuildException()))
@@ -106,9 +104,9 @@ data class WebGuild(
             val icon = g.getIconUrl(Image.Format.PNG).orElse(null)
 
             val botNick = g.getMemberById(Snowflake.of(BotSettings.ID.get()))
-                    .map(Member::getNickname)
-                    .flatMap { justOrEmpty(it) }
-                    .defaultIfEmpty("DisCal")
+                  .map(Member::getNickname)
+                  .flatMap { justOrEmpty(it) }
+                  .defaultIfEmpty("DisCal")
 
             val settings = DatabaseManager.getSettings(g.id).cache()
 
@@ -116,28 +114,26 @@ data class WebGuild(
                 g.roles.map { role -> WebRole.fromRole(role, s) }
             }.collectList()
 
-            val channels = settings.flatMapMany { s ->
-                g.channels
-                        .ofType(GuildMessageChannel::class.java)
-                        .map { channel -> WebChannel.fromChannel(channel, s) }
-            }.collectList()
+            val channels = g.channels
+                  .ofType(GuildMessageChannel::class.java)
+                  .map { channel -> WebChannel.fromChannel(channel) }
+                  .collectList()
 
             val announcements = DatabaseManager.getAnnouncements(g.id)
 
             val calendar = settings.flatMap { s ->
                 DatabaseManager.getMainCalendar(Snowflake.of(id))
-                        .flatMap { d -> WebCalendar.fromCalendar(d, s) }
+                      .flatMap { d -> WebCalendar.fromCalendar(d, s) }
             }
 
             return Mono.zip(botNick, settings, roles, channels, announcements, calendar)
-                    .map(TupleUtils.function { bn, s, r, wc, a, c ->
-                        WebGuild(id, name, icon, s, bn, elevatedAccess = false, discalRole = false, c).apply {
-                            this.roles.addAll(r)
-                            this.channels.add(WebChannel.all(s))
-                            this.channels.addAll(wc)
-                            this.announcements.addAll(a)
-                        }
-                    })
+                  .map(TupleUtils.function { bn, s, r, wc, a, c ->
+                      WebGuild(id, name, icon, s, bn, elevatedAccess = false, discalRole = false, c).apply {
+                          this.roles.addAll(r)
+                          this.channels.addAll(wc)
+                          this.announcements.addAll(a)
+                      }
+                  })
         }
     }
 }

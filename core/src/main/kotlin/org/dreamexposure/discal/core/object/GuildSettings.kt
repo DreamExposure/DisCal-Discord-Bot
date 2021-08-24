@@ -17,8 +17,6 @@ data class GuildSettings(
 
       @SerialName("control_role")
         var controlRole: String = "everyone",
-      @SerialName("discal_channel")
-        var discalChannel: String = "all",
 
       @SerialName("announcement_style")
         var announcementStyle: AnnouncementStyle = AnnouncementStyle.FULL,

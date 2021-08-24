@@ -5,112 +5,100 @@ import {TaskType} from "@/enums/TaskType";
 import jqXHR = JQuery.jqXHR;
 
 export class GuildSettingsUpdateRequest implements AsyncTask {
-	private readonly guildId: string;
+    private readonly guildId: string;
 
-	readonly callback: TaskCallback;
+    readonly callback: TaskCallback;
 
-	apiKey: string = "";
-	apiUrl: string = "";
+    apiKey: string = "";
+    apiUrl: string = "";
 
-	private _controlRole: string = "";
-	private _discalChannel: string = "";
-	private _simpleAnnouncements: boolean = false;
-	private _lang: string = "";
-	private _prefix: string = "";
+    private _controlRole: string = "";
+    private _simpleAnnouncements: boolean = false;
+    private _lang: string = "";
+    private _prefix: string = "";
 
-	//Booleans for confirming what gets sent to API...
-	private updateSimpleAnnouncements: boolean = false;
+    //Booleans for confirming what gets sent to API...
+    private updateSimpleAnnouncements: boolean = false;
 
-	constructor(guildId: string, callback: TaskCallback) {
-		this.guildId = guildId;
-		this.callback = callback;
-	}
+    constructor(guildId: string, callback: TaskCallback) {
+        this.guildId = guildId;
+        this.callback = callback;
+    }
 
-	provideApiDetails(apiKey: string, apiUrl: string): void {
-		this.apiKey = apiKey;
-		this.apiUrl = apiUrl;
-	}
+    provideApiDetails(apiKey: string, apiUrl: string): void {
+        this.apiKey = apiKey;
+        this.apiUrl = apiUrl;
+    }
 
-	//Setter/getter pairs
-	set controlRole(role: string) {
-		this._controlRole = role;
-	}
+    //Setter/getter pairs
+    set controlRole(role: string) {
+        this._controlRole = role;
+    }
 
-	get controlRole() {
-		return this._controlRole;
-	}
+    get controlRole() {
+        return this._controlRole;
+    }
 
-	set discalChannel(channel: string) {
-		this._discalChannel = channel;
-	}
+    set simpleAnnouncements(use: boolean) {
+        this._simpleAnnouncements = use;
+    }
 
-	get discalChannel() {
-		return this._discalChannel;
-	}
+    get simpleAnnouncements() {
+        return this._simpleAnnouncements;
+    }
 
-	set simpleAnnouncements(use: boolean) {
-		this._simpleAnnouncements = use;
-	}
+    set lang(lang: string) {
+        this._lang = lang;
+    }
 
-	get simpleAnnouncements() {
-		return this._simpleAnnouncements;
-	}
+    get lang() {
+        return this._lang;
+    }
 
-	set lang(lang: string) {
-		this._lang = lang;
-	}
+    set prefix(prefix: string) {
+        this._prefix = prefix;
+    }
 
-	get lang() {
-		return this._lang;
-	}
-
-	set prefix(prefix: string) {
-		this._prefix = prefix;
-	}
-
-	get prefix() {
-		return this._prefix;
-	}
+    get prefix() {
+        return this._prefix;
+    }
 
 
-	execute(): void {
-		let bodyRaw: any = {
-			"guild_id": this.guildId,
-		};
+    execute(): void {
+        let bodyRaw: any = {
+            "guild_id": this.guildId,
+        };
 
-		if (this.controlRole.length > 0) {
-			bodyRaw.control_role = this.controlRole;
-		}
-		if (this.discalChannel.length > 0) {
-			bodyRaw.discal_channel = this.discalChannel;
-		}
-		if (this.updateSimpleAnnouncements) {
-			bodyRaw.simple_announcements = this.simpleAnnouncements;
-		}
-		if (this.lang.length > 0) {
-			bodyRaw.lang = this.lang;
-		}
-		if (this.prefix.length > 0) {
-			bodyRaw.prefix = this.prefix;
-		}
+        if (this.controlRole.length > 0) {
+            bodyRaw.control_role = this.controlRole;
+        }
+        if (this.updateSimpleAnnouncements) {
+            bodyRaw.simple_announcements = this.simpleAnnouncements;
+        }
+        if (this.lang.length > 0) {
+            bodyRaw.lang = this.lang;
+        }
+        if (this.prefix.length > 0) {
+            bodyRaw.prefix = this.prefix;
+        }
 
 
-		$.ajax({
-			url: this.apiUrl + "/v2/guild/settings/update",
-			headers: {
-				"Content-Type": "application/json",
-				"Authorization": this.apiKey
-			},
-			method: "POST",
-			dataType: "json",
-			data: JSON.stringify(bodyRaw),
-			success: function (json: any) {
-				let status = new NetworkCallStatus(true, TaskType.GUILD_SETTINGS_UPDATE);
-				status.code = 200;
-				status.body = json;
-				status.message = json.message;
+        $.ajax({
+            url: this.apiUrl + "/v2/guild/settings/update",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": this.apiKey
+            },
+            method: "POST",
+            dataType: "json",
+            data: JSON.stringify(bodyRaw),
+            success: function (json: any) {
+                let status = new NetworkCallStatus(true, TaskType.GUILD_SETTINGS_UPDATE);
+                status.code = 200;
+                status.body = json;
+                status.message = json.message;
 
-				this.onComplete(status);
+                this.onComplete(status);
 
             }.bind(this),
             error: function (jqXHR: jqXHR) {

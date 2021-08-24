@@ -1,16 +1,15 @@
 export class WebChannel {
-	private _id: string = "";
-	private _name: string = "";
-	private _isDisCalChannel: boolean = false;
+    private _id: string = "";
+    private _name: string = "";
 
-	constructor() {
-	}
+    constructor() {
+    }
 
-	//Getter/setter pairs
+    //Getter/setter pairs
 
-	get id() {
-		return this._id;
-	}
+    get id() {
+        return this._id;
+    }
 
     set id(id) {
         this._id = id;
@@ -24,27 +23,17 @@ export class WebChannel {
         this._name = name;
     }
 
-    get isDisCalChannel() {
-        return this._isDisCalChannel;
-    }
-
-    set isDisCalChannel(isDisCalChannel) {
-        this._isDisCalChannel = isDisCalChannel;
-    }
-
     //Json conversions
     toJson() {
         return {
             "id": this.id,
-            "name": this.name,
-            "discal_channel": this.isDisCalChannel
+            "name": this.name
         };
     }
 
     fromJson(json: any) {
         this.id = json.id;
         this.name = json.name;
-        this.isDisCalChannel = json.discal_channel;
 
         return this;
     }

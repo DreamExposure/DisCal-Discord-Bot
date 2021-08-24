@@ -135,6 +135,7 @@ kotlin {
         all {
             languageSettings {
                 useExperimentalAnnotation("kotlinx.serialization.InternalSerializationApi")
+                useExperimentalAnnotation("kotlin.RequiresOptIn")
             }
         }
     }

@@ -6,7 +6,6 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
-import discord4j.core.event.domain.channel.TextChannelDeleteEvent
 import discord4j.core.event.domain.interaction.SlashCommandEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
@@ -23,7 +22,10 @@ import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.client.listeners.discord.*
+import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener
+import org.dreamexposure.discal.client.listeners.discord.ReadEventListener
+import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener
+import org.dreamexposure.discal.client.listeners.discord.SlashCommandListener
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThread
 import org.dreamexposure.discal.client.module.command.*
@@ -94,13 +96,9 @@ class DisCalClient {
                         DisCalClient.client = client
 
                         //Register listeners
-                        val onReady = client.on(ReadyEvent::class.java)
-                                .flatMap(ReadyEventListener::handle)
-                                .then()
-
-                        val onTextChannelDelete = client
-                                .on(TextChannelDeleteEvent::class.java, ChannelDeleteListener::handle)
-                                .then()
+                        val onReady = client
+                              .on(ReadyEvent::class.java, ReadEventListener::handle)
+                              .then()
 
                         val onRoleDelete = client
                                 .on(RoleDeleteEvent::class.java, RoleDeleteListener::handle)
@@ -123,7 +121,7 @@ class DisCalClient {
                                     }.onErrorResume { Mono.empty() }
                                 }
 
-                        Mono.`when`(onReady, onTextChannelDelete, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
+                        Mono.`when`(onReady, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
                     }.block()
         }
     }
