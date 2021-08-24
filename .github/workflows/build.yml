@@ -34,5 +34,4 @@ jobs:
         env:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
-          BUILD_NUMBER: $GITHUB_RUN_NUMBER
         run: ./gradlew clean build jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
