@@ -7,7 +7,6 @@ import org.dreamexposure.discal.core.`object`.web.WebGuild
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.file.ReadFile
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 
@@ -47,17 +45,11 @@ class GetWebGuildEndpoint(val client: DiscordClient) {
 
                 val elevatedMono = member.hasElevatedPermissions()
                 val discalRoleMono = member.hasControlRole()
-                val langsMono = ReadFile.readAllLangFiles()
-                        .map { it.keySet() }
-                        .flatMapMany { Flux.fromIterable(it) }
-                        .map { it as String }
-                        .collectList()
 
-                Mono.zip(elevatedMono, discalRoleMono, langsMono)
-                        .map(TupleUtils.function { elevated, discalRole, langs ->
+                Mono.zip(elevatedMono, discalRoleMono)
+                        .map(TupleUtils.function { elevated, discalRole ->
                             wg.elevatedAccess = elevated
                             wg.discalRole = discalRole
-                            wg.availableLangs.addAll(langs)
 
                             wg
                         }).map { GlobalVal.JSON_FORMAT.encodeToString(it) }

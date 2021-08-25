@@ -68,7 +68,6 @@ class DisCalClient {
             CommandExecutor.registerCommand(CalendarCommand())
             CommandExecutor.registerCommand(AddCalendarCommand())
             CommandExecutor.registerCommand(EventCommand())
-            CommandExecutor.registerCommand(RsvpCommand())
             CommandExecutor.registerCommand(AnnouncementCommand())
 
             //Start some daemon threads

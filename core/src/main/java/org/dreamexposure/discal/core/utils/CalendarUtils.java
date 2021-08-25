@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@Deprecated
 public class CalendarUtils {
     private final static Logger LOGGER = LoggerFactory.getLogger(CalendarUtils.class);
 

@@ -1,0 +1,179 @@
+{
+  "name": "rsvp",
+  "description": "A set of commands allowing RSVP functionality",
+  "options": [
+    {
+      "name": "ontime",
+      "type": 1,
+      "description": "RSVPs you as attending the event on time",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "late",
+      "type": 1,
+      "description": "RSVPs you as attending the event late",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "not-going",
+      "type": 1,
+      "description": "RSVPs you as not attending the event",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "unsure",
+      "type": 1,
+      "description": "RSVPs you as unsure if you will be attending the event",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "remove",
+      "type": 1,
+      "description": "Removes your previous RSVP status from the event",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are removing your RSVP from",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "type": 1,
+      "description": "Lists who has RSVPed to the event",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event to list RSVPs of",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "limit",
+      "type": 1,
+      "description": "Sets a limit of how many people may attend the event",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "limit",
+          "type": 4,
+          "description": "The max number of attendees. `-1` to disable the limit",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "role",
+      "type": 1,
+      "description": "Sets the role assigned when a member RSVPs as attending the event. *Not automatically removed",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The event you are RSVPing to",
+          "required": true
+        },
+        {
+          "name": "role",
+          "type": 8,
+          "description": "The role to assign. `@everyone` to disable role assignment.",
+          "required": true
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the event is from. Defaults to 1",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "default_permissions": true
+}

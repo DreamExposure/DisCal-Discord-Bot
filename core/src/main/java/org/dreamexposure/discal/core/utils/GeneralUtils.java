@@ -8,6 +8,7 @@ import java.util.Random;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@Deprecated
 public class GeneralUtils {
     /**
      * Gets the contents of the message at a set offset.

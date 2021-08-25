@@ -117,6 +117,17 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
         implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:$springVersion")
     }
+
+    kotlin {
+        sourceSets {
+            all {
+                languageSettings {
+                    useExperimentalAnnotation("kotlinx.serialization.InternalSerializationApi")
+                    useExperimentalAnnotation("kotlin.RequiresOptIn")
+                }
+            }
+        }
+    }
 }
 
 subprojects {
@@ -125,17 +136,6 @@ subprojects {
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
                 jvmTarget = targetCompatibility
-            }
-        }
-    }
-}
-
-kotlin {
-    sourceSets {
-        all {
-            languageSettings {
-                useExperimentalAnnotation("kotlinx.serialization.InternalSerializationApi")
-                useExperimentalAnnotation("kotlin.RequiresOptIn")
             }
         }
     }

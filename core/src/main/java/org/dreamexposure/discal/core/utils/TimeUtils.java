@@ -1,14 +1,7 @@
 package org.dreamexposure.discal.core.utils;
 
 import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-import org.dreamexposure.discal.core.database.DatabaseManager;
-import org.dreamexposure.discal.core.object.GuildSettings;
-import org.dreamexposure.discal.core.object.calendar.CalendarData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
-import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
-import reactor.core.publisher.Mono;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +16,7 @@ import java.util.TimeZone;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@Deprecated
 public class TimeUtils {
     public static boolean isInPast(final String dateRaw, final TimeZone timezone) {
         try {
@@ -36,33 +30,6 @@ public class TimeUtils {
             return true;
         }
     }
-
-    private static boolean isInPast(final Event event) {
-        if (event.getStart().getDateTime() != null)
-            return event.getStart().getDateTime().getValue() <= System.currentTimeMillis();
-        else
-            return event.getStart().getDate().getValue() <= System.currentTimeMillis();
-    }
-
-    @Deprecated
-    public static Mono<Boolean> isInPast(final String eventId, final GuildSettings settings) {
-        return DatabaseManager.INSTANCE.getMainCalendar(settings.getGuildID()).flatMap(data ->
-            EventWrapper.INSTANCE.getEvent(data, eventId)
-                .map(TimeUtils::isInPast)
-        );
-    }
-
-    public static Mono<Boolean> isInPast(final String eventId, final int calNumber, final GuildSettings settings) {
-        return DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNumber).flatMap(data ->
-            EventWrapper.INSTANCE.getEvent(data, eventId)
-                .map(TimeUtils::isInPast)
-        );
-    }
-
-    public static Mono<Boolean> isInPast(final String eventId, final CalendarData data) {
-        return EventWrapper.INSTANCE.getEvent(data, eventId).map(TimeUtils::isInPast);
-    }
-
 
     public static boolean hasEndBeforeStart(final String endRaw, final TimeZone timezone, final PreEvent event) {
         if (event.getStartDateTime() != null) {
@@ -118,20 +85,5 @@ public class TimeUtils {
             .toInstant()
             .toEpochMilli()
         );
-    }
-
-    public static Instant convertToInstant(EventDateTime edt, ZoneId tz) {
-        if (edt.getDateTime() != null) {
-            return Instant.ofEpochMilli(edt.getDateTime().getValue());
-        } else {
-            return Instant.ofEpochMilli(edt.getDate().getValue())
-                .plus(1, ChronoUnit.DAYS)
-                .atZone(tz)
-                .truncatedTo(ChronoUnit.DAYS)
-                .toLocalDate()
-                .atStartOfDay()
-                .atZone(tz)
-                .toInstant();
-        }
     }
 }

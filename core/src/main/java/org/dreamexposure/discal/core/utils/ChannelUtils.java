@@ -10,19 +10,12 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@Deprecated
 public class ChannelUtils {
     public static Mono<Boolean> channelExists(final String nameOrId, final MessageCreateEvent event) {
         final String name = nameOrId.replace("#", "");
         return event.getGuild()
             .flatMapMany(Guild::getChannels)
-            .ofType(GuildMessageChannel.class)
-            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
-            .hasElements();
-    }
-
-    public static Mono<Boolean> channelExists(final String nameOrId, final Guild guild) {
-        final String name = nameOrId.replace("#", "");
-        return guild.getChannels()
             .ofType(GuildMessageChannel.class)
             .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .hasElements();
@@ -35,18 +28,5 @@ public class ChannelUtils {
             .ofType(GuildMessageChannel.class)
             .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
             .next();
-    }
-
-    public static Mono<GuildMessageChannel> getChannelFromNameOrId(final String nameOrId, final Guild guild) {
-        final String name = nameOrId.replace("#", "");
-        return guild.getChannels()
-            .ofType(GuildMessageChannel.class)
-            .filter(channel -> channel.getName().equalsIgnoreCase(name) || channel.getId().asString().equals(name))
-            .next();
-    }
-
-    public static Mono<String> getChannelNameFromNameOrId(final String nameOrId, final Guild guild) {
-        return getChannelFromNameOrId(nameOrId, guild)
-            .map(GuildMessageChannel::getName);
     }
 }

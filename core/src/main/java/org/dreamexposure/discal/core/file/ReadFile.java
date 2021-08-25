@@ -18,6 +18,7 @@ import java.io.InputStreamReader;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@Deprecated
 public class ReadFile {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReadFile.class);
 

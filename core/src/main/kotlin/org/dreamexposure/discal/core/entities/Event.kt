@@ -12,7 +12,7 @@ import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -84,7 +84,7 @@ interface Event {
     val recur: Boolean
 
     /**
-     * The rules of the recurring event. Contains the RRule an human readable information on how the event will recur
+     * The rules of the recurring event. Contains the RRule an human-readable information on how the event will recur
      */
     val recurrence: Recurrence
 
@@ -130,6 +130,8 @@ interface Event {
      */
     fun getRsvp(): Mono<RsvpData> = DatabaseManager.getRsvpData(guildId, eventId)
 
+    fun updateRsvp(rsvp: RsvpData) = DatabaseManager.updateRsvpData(rsvp)
+
     /**
      * Attempts to update the event and returns the result.
      * If an error occurs, it is emitted through the [Mono].
@@ -143,10 +145,17 @@ interface Event {
      * Attempts to delete the event and returns the result.
      * If an error occurs, it is emitted through the [Mono].
      *
-     * @return A [Mono] containing whether or not the delete succeeded.
+     * @return A [Mono] containing whether delete succeeded.
      */
     fun delete(): Mono<Boolean>
 
+    fun isOngoing(): Boolean = start.isBefore(Instant.now()) && end.isAfter(Instant.now())
+
+    fun isOver(): Boolean = end.isBefore(Instant.now())
+
+    fun isStarted() = start.isBefore(Instant.now())
+
+    //Json bullshit
     fun toJson(): JSONObject {
         return JSONObject()
                 .put("guild_id", guildId)
@@ -160,7 +169,7 @@ interface Event {
                 .put("is_parent", !eventId.contains("_"))
                 .put("color", color.name)
                 .put("recur", recur)
-                .put("recurrence", JSONObject(GlobalVal.JSON_FORMAT.encodeToString(recurrence)))
+                .put("recurrence", JSONObject(JSON_FORMAT.encodeToString(recurrence)))
                 .put("rrule", recurrence.toRRule())
                 .put("image", eventData.imageLink)
     }

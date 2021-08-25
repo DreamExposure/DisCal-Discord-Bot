@@ -13,7 +13,7 @@ import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.utils.TimeUtils
+import org.dreamexposure.discal.core.extensions.google.asInstant
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper
@@ -94,8 +94,8 @@ class GoogleCalendar internal constructor(
 
         return EventWrapper.getEvents(calendarData, start, end)
                 .flatMapMany { Flux.fromIterable(it) }
-                .filter { TimeUtils.convertToInstant(it.start, timezone).toEpochMilli() < System.currentTimeMillis() }
-                .filter { TimeUtils.convertToInstant(it.end, timezone).toEpochMilli() > System.currentTimeMillis() }
+                .filter { it.start.asInstant(timezone).isBefore(Instant.now()) }
+                .filter { it.end.asInstant(timezone).isAfter(Instant.now()) }
                 .flatMap { event ->
                     DatabaseManager.getEventData(guildId, event.id)
                             .map { GoogleEvent(this, it, event) }

@@ -1,17 +1,17 @@
 package org.dreamexposure.discal.core.utils;
 
+import discord4j.common.util.Snowflake;
 import org.dreamexposure.discal.core.database.DatabaseManager;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
-
-import discord4j.common.util.Snowflake;
-import reactor.core.publisher.Mono;
 
 /**
  * Created by Nova Fox on 11/10/17.
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal-Discord-Bot
  */
+@Deprecated
 public class AnnouncementUtils {
     /**
      * Checks if the announcement exists.

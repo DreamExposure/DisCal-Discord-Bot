@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.extensions.discord4j
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Role
 import discord4j.rest.entity.RestGuild
 import discord4j.rest.http.client.ClientException
@@ -119,6 +120,20 @@ fun Guild.getControlRole(): Mono<Role> {
                   }
         }
     }
+}
+
+fun Guild.getMemberFromStringId(id: String): Mono<Member> {
+    return Mono.just(id)
+          .filter(String::isNotEmpty)
+          .filter { it.matches(Regex("[0-9]+")) }
+          .map(Snowflake::of)
+          .flatMap(this::getMemberById)
+          .onErrorResume { Mono.empty() }
+}
+
+fun Guild.getMembersFromId(ids: List<String>): Flux<Member> {
+    return Flux.fromIterable(ids)
+          .flatMap(this::getMemberFromStringId)
 }
 
 fun Guild.getRestGuild(): RestGuild {

@@ -13,12 +13,12 @@ import discord4j.rest.util.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
+import org.dreamexposure.discal.Application.Companion.getShardCount
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
-import org.dreamexposure.discal.core.utils.GuildUtils
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.justOrEmpty
 import reactor.function.TupleUtils
@@ -50,7 +50,7 @@ data class WebGuild(
     @SerialName("available_langs")
     val availableLangs: MutableList<String> = mutableListOf()
 
-    val shard = GuildUtils.findShard(Snowflake.of(this.id))
+    val shard = (id shr 22) % getShardCount()
 
     companion object {
         @Throws(BotNotInGuildException::class)

@@ -1,12 +1,8 @@
 package org.dreamexposure.discal.core.utils;
 
-import java.util.List;
-
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -14,16 +10,8 @@ import reactor.core.publisher.Mono;
  * Website: www.cloudcraftgaming.com
  * For Project: DisCal
  */
+@Deprecated
 public class UserUtils {
-
-    public static Mono<Snowflake> getUserId(final String toLookFor, final Message message) {
-        return message.getGuild().flatMap(g -> getUserId(toLookFor, g));
-    }
-
-    public static Mono<Snowflake> getUserId(final String toLookFor, final Guild guild) {
-        return getUser(toLookFor, guild).map(Member::getId);
-    }
-
     public static Mono<Member> getUser(String toLookFor, final Guild guild) {
         if (toLookFor.isEmpty())
             return Mono.empty();
@@ -48,20 +36,12 @@ public class UserUtils {
             .onErrorResume(e -> Mono.empty()); //User not found, we don't care about the error in this case.
     }
 
+    @Deprecated
     public static Mono<Member> getUserFromID(final String id, final Guild guild) {
         return Mono.just(id)
             .filter(s -> !s.isEmpty())
             .filter(s -> s.matches("[0-9]+"))
             .flatMap(s -> guild.getMemberById(Snowflake.of(s))
                 .onErrorResume(e -> Mono.empty()));
-    }
-
-    public static Mono<List<Member>> getUsers(final List<String> userIds, final Guild guild) {
-        return Flux.fromIterable(userIds)
-            .filter(s -> !s.isEmpty())
-            .filter(s -> s.matches("[0-9]+"))
-            .flatMap(s -> getUserFromID(s, guild)
-                .onErrorResume(e -> Mono.empty()))
-            .collectList();
     }
 }

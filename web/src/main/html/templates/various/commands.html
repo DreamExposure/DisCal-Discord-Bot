@@ -596,10 +596,10 @@
                 <!--Start rsvp command-->
                 <div id="rsvp">
 
-                    <h2 class="text-center text-discal-blue">!rsvp commands</h2>
+                    <h2 class="text-center text-discal-blue">/rsvp commands</h2>
 
                     <table class="flex-table-container" role="table" aria-label="Calendar Commands">
-                        <caption class="no-display">___ Commands</caption>
+                        <caption class="no-display">RSVP Commands</caption>
                         <thead>
                         <tr class="flex-table header" role="rowgroup">
                             <th class="tb-flex-row first" role="columnheader">Command</th>
@@ -613,7 +613,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">ontime</td>
                             <td class="tb-flex-row" role="cell">RSVPs as going to the event on time</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp ontime [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp ontime [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -621,7 +621,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">late</td>
                             <td class="tb-flex-row" role="cell">RSVPs as going to the event, but arriving late</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp late [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp late [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -629,7 +629,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">not</td>
                             <td class="tb-flex-row" role="cell">RSVPs as not going to the event</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp not [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp not-going [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -637,7 +637,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">unsure</td>
                             <td class="tb-flex-row" role="cell">RSVPs as unsure if you will be able to attend</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp unsure [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp unsure [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -645,7 +645,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">remove</td>
                             <td class="tb-flex-row" role="cell">Removes your RSVP status from the event</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp remove [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp remove [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -653,7 +653,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">list</td>
                             <td class="tb-flex-row" role="cell">Lists who has RSVPed to the event</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp list [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp list [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -664,7 +664,7 @@
                                 Sets the max number of people allowed to attend.
                                 -1 to disable the limit.
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp limit [event-id] [number]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp limit [event-id] [limit] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -673,11 +673,11 @@
                             <td class="tb-flex-row tb-command" role="cell">role</td>
                             <td class="tb-flex-row" role="cell">
                                 Sets the role assigned when RSVPed to the event.
-                                "None" to disable
+                                "@everyone" to disable
                                 *Note: these roles are currently not automatically removed.
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!rsvp role [event-id] [role-name]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged, patron-only</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/rsvp role [event-id] [role] (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated, patron-only</td>
                         </tr>
                         </tbody>
                     </table>

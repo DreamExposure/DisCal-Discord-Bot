@@ -2,11 +2,11 @@ package org.dreamexposure.discal.server.endpoints.v2.rsvp
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.RoleUtils
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -55,9 +55,10 @@ class UpdateRsvpEndpoint(val client: DiscordClient) {
                     } else {
                         val roleId = Snowflake.of(jsonBody.getString("role_id"))
 
-                        RoleUtils.roleExists(client, guildId, roleId)
-                                .filter { it }
-                                .flatMap { rsvp.setRole(roleId, client) }
+                        client.getRoleById(guildId, roleId).data
+                              .transform(ClientException.emptyOnStatus(GlobalVal.STATUS_NOT_FOUND))
+                              .hasElement()
+                              .then(rsvp.setRole(roleId, client))
                     }
                 }
 

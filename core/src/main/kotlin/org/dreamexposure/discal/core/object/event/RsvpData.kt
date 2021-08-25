@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Role
-import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,6 +25,9 @@ data class RsvpData(
     var eventEnd: Long = 0
 
     var limit: Int = -1
+        set(value) {
+            field = value.coerceAtLeast(-1)
+        }
 
     @Serializable(with = SnowflakeAsStringSerializer::class)
     @SerialName("role_id")
@@ -63,7 +65,7 @@ data class RsvpData(
     fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size
 
     fun hasRoom(userId: String): Boolean {
-        return if (limit == -1 || getCurrentCount() + 1 <= limit) true
+        return if (limit < 0 || getCurrentCount() + 1 <= limit) true
         //Check if they are in a list that counts toward limit, if true, that means they will fit in the event
         else goingOnTime.contains(userId) || goingLate.contains(userId)
     }
@@ -103,8 +105,6 @@ data class RsvpData(
             Mono.`when`(removeOnTimeRoles, removeLateRole).doFinally { this.setRole(null) }
         }
     }
-
-    fun clearRole(event: MessageCreateEvent) = clearRole(event.client.rest())
 
     //Functions
     fun removeCompletely(userId: String, client: DiscordClient): Mono<Void> {
