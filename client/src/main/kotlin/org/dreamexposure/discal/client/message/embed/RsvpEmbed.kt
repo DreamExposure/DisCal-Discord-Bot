@@ -54,7 +54,7 @@ object RsvpEmbed : EmbedMaker {
         return Mono.zip(rsvpMono, roleMono, onTimeMono, lateMono, undecidedMono, notMono)
               .map(TupleUtils.function { rsvp, role, onTime, late, undecided, notGoing ->
                   val limitValue = if (rsvp.limit < 0) {
-                      getMessage("rsvp", "list.field.limit.value", settings, "${rsvp.limit}")
+                      getMessage("rsvp", "list.field.limit.value", settings, "${rsvp.getCurrentCount()}")
                   } else "${rsvp.getCurrentCount()}/${rsvp.limit}"
 
                   defaultBuilder(guild, settings)
