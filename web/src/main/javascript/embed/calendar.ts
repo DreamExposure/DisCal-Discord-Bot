@@ -16,7 +16,6 @@ import {Event} from "@/objects/event/Event";
 import moment from "moment-timezone";
 import {EventColor, eventColorClass} from "@/enums/EventColor";
 import {EventFrequency} from "@/enums/EventFrequency";
-import {humanFriendlyHostName} from "@/enums/CalendarHost";
 import {GuildSettingsGetRequest} from "@/network/guild/settings/GuildSettingsGetRequest";
 import {GuildSettings} from "@/objects/guild/GuildSettings";
 import {TimeFormat} from "@/enums/TimeFormat";
@@ -54,14 +53,6 @@ export class EmbedCalendarRunner implements TaskCallback {
             ],
             themeSystem: 'bootstrap',
             initialView: 'dayGridMonth',
-            customButtons: {
-                viewGoogle: {
-                    text: 'View on ' + humanFriendlyHostName(this.calendarData.host),
-                    click: () => {
-                        window.open(this.calendarData.link, "_blank");
-                    },
-                }
-            },
             headerToolbar: {
                 start: 'prev,next,today',
                 center: 'title',
