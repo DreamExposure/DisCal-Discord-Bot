@@ -243,7 +243,7 @@ class RsvpCommand : SlashCommand {
                         }
                     }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
                 }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getMessage("error.perms.privileged", settings)))
+            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.perms.privileged", settings)))
         }).then()
     }
 
@@ -264,7 +264,7 @@ class RsvpCommand : SlashCommand {
 
         return Mono.zip(gMono, mMono, cMono, eMono, rMono).flatMap(function { guild, member, calNum, eventId, role ->
             if (!settings.patronGuild || !settings.devGuild) {
-                return@function Responder.followupEphemeral(event, getMessage("error.patronOnly", settings))
+                return@function Responder.followupEphemeral(event, getCommonMsg("error.patronOnly", settings))
             }
 
             member.hasElevatedPermissions().filter { it }.flatMap {
