@@ -1,0 +1,5 @@
+{
+  "name": "help",
+  "description": "Displays help information for DisCal",
+  "default_permissions": true
+}

@@ -64,7 +64,6 @@ class DisCalClient {
             Messages.reloadLangs().subscribe()
 
             //Register commands
-            CommandExecutor.registerCommand(HelpCommand())
             CommandExecutor.registerCommand(CalendarCommand())
             CommandExecutor.registerCommand(AddCalendarCommand())
             CommandExecutor.registerCommand(EventCommand())
