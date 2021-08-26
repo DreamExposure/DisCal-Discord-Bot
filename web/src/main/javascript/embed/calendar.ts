@@ -16,6 +16,10 @@ import {Event} from "@/objects/event/Event";
 import moment from "moment-timezone";
 import {EventColor, eventColorClass} from "@/enums/EventColor";
 import {EventFrequency} from "@/enums/EventFrequency";
+import {humanFriendlyHostName} from "@/enums/CalendarHost";
+import {GuildSettingsGetRequest} from "@/network/guild/settings/GuildSettingsGetRequest";
+import {GuildSettings} from "@/objects/guild/GuildSettings";
+import {TimeFormat} from "@/enums/TimeFormat";
 
 export class EmbedCalendarRunner implements TaskCallback {
     private initialTimezone: string = 'local';
@@ -30,6 +34,9 @@ export class EmbedCalendarRunner implements TaskCallback {
     private readonly apiUrl;
 
     private calendarData: WebCalendar = new WebCalendar();
+    private settings?: GuildSettings;
+
+    private ready: Boolean = false;
 
     constructor(key: string, url: string) {
         this.guildId = window.location.pathname.split("/")[2];
@@ -49,9 +56,9 @@ export class EmbedCalendarRunner implements TaskCallback {
             initialView: 'dayGridMonth',
             customButtons: {
                 viewGoogle: {
-                    text: 'View on Google',
+                    text: 'View on ' + humanFriendlyHostName(this.calendarData.host),
                     click: () => {
-                        window.open("https://calendar.google.com/calendar/embed?src=" + this.calendarData.id, "_blank");
+                        window.open(this.calendarData.link, "_blank");
                     },
                 }
             },
@@ -71,7 +78,7 @@ export class EmbedCalendarRunner implements TaskCallback {
                 hour: '2-digit',
                 minute: '2-digit',
                 omitZeroMinute: true,
-                hour12: true, //TODO: Support guild setting for this...
+                hour12: this.settings?.timeFormat == TimeFormat.TWELVE_HOUR || true, //default to 12-hour if not init.
                 timeZoneName: 'short'
             },
             eventDidMount: (info) => {
@@ -153,13 +160,17 @@ export class EmbedCalendarRunner implements TaskCallback {
     private init() {
         if (this.apiKey === "internal_error") {
             alert("Failed to get a read-only API key to display your calendar.\nIf you keep receiving this error," +
-                " please contact the developers.");
+                " please contact the developers in our help server.");
         } else {
             //Request calendar information
             let calReq = new CalendarGetRequest(this.guildId, this.calNumber, this);
             calReq.provideApiDetails(this.apiKey, this.apiUrl);
 
+            let settingsReq = new GuildSettingsGetRequest(this.guildId, this)
+            settingsReq.provideApiDetails(this.apiKey, this.apiUrl)
+
             //Execute the calls
+            settingsReq.execute();
             calReq.execute();
         }
     }
@@ -170,9 +181,27 @@ export class EmbedCalendarRunner implements TaskCallback {
                 case TaskType.CALENDAR_GET: {
                     this.calendarData = new WebCalendar().fromJson(status.body);
 
-                    //Hide loading UI and show calendar...
-                    ElementUtil.hideLoader();
-                    this.calendar?.render();
+                    if (this.ready) {
+                        //Hide loading UI and show calendar...
+                        ElementUtil.hideLoader();
+                        this.calendar?.render();
+                    }
+                    //Set this after the check, as the second request to complete will trigger this due to race cond.
+                    this.ready = true;
+
+
+                    break;
+                }
+                case TaskType.GUILD_SETTINGS_GET: {
+                    this.settings = new GuildSettings(this.guildId).fromJson(status.body)
+
+                    if (this.ready) {
+                        //Hide loading UI and show calendar...
+                        ElementUtil.hideLoader();
+                        this.calendar?.render();
+                    }
+                    //Set this after the check, as the second request to complete will trigger this due to race cond.
+                    this.ready = true;
 
                     break;
                 }
