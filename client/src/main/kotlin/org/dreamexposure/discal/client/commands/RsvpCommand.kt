@@ -301,7 +301,7 @@ class RsvpCommand : SlashCommand {
                         }
                     }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
                 }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getMessage("error.perms.elevated", settings)))
+            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.perms.elevated", settings)))
         }).then()
     }
 }
