@@ -18,7 +18,7 @@
     <logger name="dev.miku.r2dbc.mysql" level="INFO"/>
 
     <!-- Filters -->
-    <turboFilter class="org.dreamexposure.discal.filter.GatewayEventFilter">
+    <turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">
         <Exclude>PRESENCE_UPDATE,GUILD_CREATE,GUILD_MEMBERS_CHUNK</Exclude>
     </turboFilter>
 

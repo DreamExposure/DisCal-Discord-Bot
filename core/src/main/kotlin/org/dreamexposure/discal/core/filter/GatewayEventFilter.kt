@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.filter
+package org.dreamexposure.discal.core.filter
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
@@ -14,9 +14,9 @@ class GatewayEventFilter : TurboFilter() {
     private var exclude: String? = null
     private var includedEvents: List<String>? = null
     private var excludedEvents: List<String>? = null
-    override fun decide(marker: Marker, logger: Logger, level: Level, format: String,
-                        params: Array<Any>?, t: Throwable): FilterReply {
-        if (params != null && logger.name.startsWith("discord4j.gateway.inbound")) {
+    override fun decide(marker: Marker?, logger: Logger?, level: Level?, format: String?,
+                        params: Array<Any>?, t: Throwable?): FilterReply {
+        if (params != null && logger!!.name.startsWith("discord4j.gateway.inbound")) {
             for (param in params) {
                 if (param is GatewayPayload<*>) {
                     if (Opcode.DISPATCH == param.op) {
