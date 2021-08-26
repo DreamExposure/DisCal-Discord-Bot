@@ -56,7 +56,7 @@ export class EmbedCalendarRunner implements TaskCallback {
             headerToolbar: {
                 start: 'prev,next,today',
                 center: 'title',
-                end: 'dayGridMonth,timeGridWeek,timeGridDay viewGoogle'
+                end: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
             navLinks: true,
             nowIndicator: true,
