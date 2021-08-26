@@ -9,7 +9,6 @@ import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.extensions.discord4j.getMembersFromId
-import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 
@@ -29,28 +28,28 @@ object RsvpEmbed : EmbedMaker {
               .map(Member::getUsername)
               .collectList()
               .map(MutableList<String>::asStringList)
-              .map { if (it.isNotEmpty()) "N/a" else it }
+              .map { it.ifEmpty { "N/a" } }
 
         val lateMono = rsvpMono
               .flatMapMany { guild.getMembersFromId(it.goingLate) }
               .map(Member::getUsername)
               .collectList()
               .map(MutableList<String>::asStringList)
-              .map { if (it.isNotEmpty()) "N/a" else it }
+              .map { it.ifEmpty { "N/a" } }
 
         val undecidedMono = rsvpMono
               .flatMapMany { guild.getMembersFromId(it.undecided) }
               .map(Member::getUsername)
               .collectList()
               .map(MutableList<String>::asStringList)
-              .map { if (it.isNotEmpty()) "N/a" else it }
+              .map { it.ifEmpty { "N/a" } }
 
         val notMono = rsvpMono
               .flatMapMany { guild.getMembersFromId(it.notGoing) }
               .map(Member::getUsername)
               .collectList()
               .map(MutableList<String>::asStringList)
-              .map { if (it.isNotEmpty()) "N/a" else it }
+              .map { it.ifEmpty { "N/a" } }
 
         return Mono.zip(rsvpMono, roleMono, onTimeMono, lateMono, undecidedMono, notMono)
               .map(TupleUtils.function { rsvp, role, onTime, late, undecided, notGoing ->
@@ -59,7 +58,7 @@ object RsvpEmbed : EmbedMaker {
                   } else "${rsvp.getCurrentCount()}/${rsvp.limit}"
 
                   defaultBuilder(guild, settings)
-                        .color(GlobalVal.discalColor)
+                        .color(event.color.asColor())
                         .title(getMessage("rsvp", "list.title", settings))
                         .addField(getMessage("rsvp", "list.field.event", settings), rsvp.eventId, false)
                         .addField(getMessage("rsvp", "list.field.limit", settings), limitValue, true)
