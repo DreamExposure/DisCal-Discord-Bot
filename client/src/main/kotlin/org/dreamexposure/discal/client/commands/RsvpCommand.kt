@@ -50,7 +50,7 @@ class RsvpCommand : SlashCommand {
                               .flatMap { it.removeCompletely(member).thenReturn(it) }
                               .flatMap { it.addGoingOnTime(member).thenReturn(it) }
                               .flatMap { calEvent.updateRsvp(it) }
-                              .then(RsvpEmbed.list(guild, settings, calEvent))
+                              .flatMap { RsvpEmbed.list(guild, settings, calEvent) }
                               .flatMap {
                                   Responder.followupEphemeral(event, getMessage("onTime.success", settings), it)
                               }.switchIfEmpty(Responder.followupEphemeral(
@@ -84,7 +84,7 @@ class RsvpCommand : SlashCommand {
                               .flatMap { it.removeCompletely(member).thenReturn(it) }
                               .flatMap { it.addGoingLate(member).thenReturn(it) }
                               .flatMap { calEvent.updateRsvp(it) }
-                              .then(RsvpEmbed.list(guild, settings, calEvent))
+                              .flatMap { RsvpEmbed.list(guild, settings, calEvent) }
                               .flatMap {
                                   Responder.followupEphemeral(event, getMessage("late.success", settings), it)
                               }.switchIfEmpty(Responder.followupEphemeral(
