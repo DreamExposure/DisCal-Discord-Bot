@@ -31,10 +31,10 @@ class GoogleCalendar internal constructor(
 ) : Calendar {
 
     override val name: String
-        get() = baseCalendar.summary ?: ""
+        get() = baseCalendar.summary.orEmpty()
 
     override val description: String
-        get() = baseCalendar.description ?: ""
+        get() = baseCalendar.description.orEmpty()
 
     override val timezone: ZoneId
         get() = ZoneId.of(baseCalendar.timeZone)
@@ -143,7 +143,7 @@ class GoogleCalendar internal constructor(
                     confirmed.id,
                     calendarNumber,
                     spec.end.toEpochMilli(),
-                    spec.image ?: ""
+                    spec.image.orEmpty()
             )
 
             return@flatMap DatabaseManager.updateEventData(data)

@@ -25,13 +25,23 @@ fun RestGuild.getSettings(): Mono<GuildSettings> = DatabaseManager.getSettings(t
 
 //Calendars
 /**
- * Attempts to request whether or not this [Guild] has at least one [Calendar].
+ * Attempts to request whether this [Guild] has at least one [Calendar].
  * If an error occurs, it is emitted through the [Mono]
  *
- * @return A [Mono] containing whether or not this [Guild] has a [Calendar].
+ * @return A [Mono] containing whether this [Guild] has a [Calendar].
  */
 fun RestGuild.hasCalendar(): Mono<Boolean> {
     return DatabaseManager.getAllCalendars(this.id).map(List<CalendarData>::isNotEmpty)
+}
+
+fun RestGuild.canAddCalendar(): Mono<Boolean> {
+    return getAllCalendars()
+          .count()
+          .map(Long::toInt)
+          .flatMap { current ->
+              if (current == 0) Mono.just(true)
+              else getSettings().map { current < it.maxCalendars }
+          }
 }
 
 /**
@@ -51,13 +61,8 @@ fun RestGuild.getMainCalendar(): Mono<Calendar> = this.getCalendar(1)
  * returned.
  */
 fun RestGuild.getCalendar(calNumber: Int): Mono<Calendar> {
-    return DatabaseManager.getCalendar(this.id, calNumber).flatMap {
-        when (it.host) {
-            CalendarHost.GOOGLE -> {
-                return@flatMap GoogleCalendar.get(it)
-            }
-        }
-    }
+    return DatabaseManager.getCalendar(this.id, calNumber)
+          .flatMap(Calendar.Companion::from)
 }
 
 /**
@@ -68,14 +73,8 @@ fun RestGuild.getCalendar(calNumber: Int): Mono<Calendar> {
  */
 fun RestGuild.getAllCalendars(): Flux<Calendar> {
     return DatabaseManager.getAllCalendars(this.id)
-            .flatMapMany { Flux.fromIterable(it) }
-            .flatMap {
-                when (it.host) {
-                    CalendarHost.GOOGLE -> {
-                        return@flatMap GoogleCalendar.get(it)
-                    }
-                }
-            }
+          .flatMapMany { Flux.fromIterable(it) }
+          .flatMap(Calendar.Companion::from)
 }
 
 /**
@@ -97,26 +96,26 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
 
                 //Call google to create it
                 CalendarWrapper.createCalendar(googleCal, credId, this.id)
-                        .timeout(Duration.ofSeconds(30))
-                        .flatMap { confirmed ->
-                            val data = CalendarData(
-                                    this.id,
-                                    spec.calNumber,
-                                    CalendarHost.GOOGLE,
-                                    confirmed.id,
-                                    confirmed.id,
-                                    credId
-                            )
+                      .timeout(Duration.ofSeconds(30))
+                      .flatMap { confirmed ->
+                          val data = CalendarData(
+                                this.id,
+                                spec.calNumber,
+                                CalendarHost.GOOGLE,
+                                confirmed.id,
+                                confirmed.id,
+                                credId
+                          )
 
-                            val rule = AclRule()
-                                    .setScope(AclRule.Scope().setType("default"))
-                                    .setRole("reader")
+                          val rule = AclRule()
+                                .setScope(AclRule.Scope().setType("default"))
+                                .setRole("reader")
 
-                            Mono.`when`(
-                                    DatabaseManager.updateCalendar(data),
-                                    AclRuleWrapper.insertRule(rule, data)
-                            ).thenReturn(GoogleCalendar(data, confirmed))
-                        }
+                          Mono.`when`(
+                                DatabaseManager.updateCalendar(data),
+                                AclRuleWrapper.insertRule(rule, data)
+                          ).thenReturn(GoogleCalendar(data, confirmed))
+                      }
             }
         }
     }
@@ -128,7 +127,7 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
  * If an error occurs, it is emitted through the Mono.
  *
  * @param id The ID of the announcement to check for
- * @return A Mono, where upon successful completion, returns a boolean as to if the announcement exists or not
+ * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
  */
 fun RestGuild.announcementExists(id: UUID): Mono<Boolean> = this.getAnnouncement(id).hasElement()
 
@@ -149,7 +148,7 @@ fun RestGuild.getAnnouncement(id: UUID): Mono<Announcement> = DatabaseManager.ge
  */
 fun RestGuild.getAllAnnouncements(): Flux<Announcement> {
     return DatabaseManager.getAnnouncements(this.id)
-            .flatMapMany { Flux.fromIterable(it) }
+          .flatMapMany { Flux.fromIterable(it) }
 }
 
 /**
@@ -160,7 +159,7 @@ fun RestGuild.getAllAnnouncements(): Flux<Announcement> {
  */
 fun RestGuild.getEnabledAnnouncements(): Flux<Announcement> {
     return DatabaseManager.getEnabledAnnouncements(this.id)
-            .flatMapMany { Flux.fromIterable(it) }
+          .flatMapMany { Flux.fromIterable(it) }
 }
 
 fun RestGuild.createAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)

@@ -5,9 +5,11 @@ import discord4j.core.`object`.entity.Guild
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.web.WebCalendar
+import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -143,7 +145,7 @@ interface Calendar {
      * @return A [Flux] of [events][Event] that are happening within the next 24-hour period from the start.
      */
     fun getEventsInNext24HourPeriod(start: Instant): Flux<Event> =
-            getEventsInTimeRange(start, start.plus(1, ChronoUnit.DAYS))
+          getEventsInTimeRange(start, start.plus(1, ChronoUnit.DAYS))
 
     /**
      * Requests to retrieve all [events][Event] within the month starting at the supplied [Instant].
@@ -152,7 +154,7 @@ interface Calendar {
      * @return A [Flux] of [events][Event] that are happening in the supplied 1-month period.
      */
     fun getEventsInMonth(start: Instant, daysInMonth: Int): Flux<Event> =
-            getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
+          getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
 
     /**
      * Requests to create an event with the supplied information.
@@ -172,29 +174,46 @@ interface Calendar {
      */
     fun toWebCalendar(): WebCalendar {
         return WebCalendar(
-                this.calendarId,
-                this.calendarAddress,
-                this.calendarNumber,
-                this.calendarData.host,
-                this.link,
-                this.name,
-                this.description,
-                this.timezone.id.replace("/", "___"),
-                this.external
+              this.calendarId,
+              this.calendarAddress,
+              this.calendarNumber,
+              this.calendarData.host,
+              this.link,
+              this.name,
+              this.description,
+              this.timezone.id.replace("/", "___"),
+              this.external
         )
     }
 
     fun toJson(): JSONObject {
         return JSONObject()
-                .put("guild_id", guildId.asString())
-                .put("calendar_id", calendarId)
-                .put("calendar_address", calendarAddress)
-                .put("calendar_number", calendarNumber)
-                .put("host", calendarData.host.name)
-                .put("external", external)
-                .put("name", name)
-                .put("description", description)
-                .put("timezone", timezone)
-                .put("link", link)
+              .put("guild_id", guildId.asString())
+              .put("calendar_id", calendarId)
+              .put("calendar_address", calendarAddress)
+              .put("calendar_number", calendarNumber)
+              .put("host", calendarData.host.name)
+              .put("external", external)
+              .put("name", name)
+              .put("description", description)
+              .put("timezone", timezone)
+              .put("link", link)
+    }
+
+    companion object {
+        /**
+         * Requests to retrieve the [Calendar] from the provided [CalendarData]
+         * If an error occurs, it is emitted through the [Mono]
+         *
+         * @param data The data object for the Calendar to be built with
+         * @return A [Mono] containing the [Calendar], if it does not exist, [empty][Mono.empty] is returned.
+         */
+        fun from(data: CalendarData): Mono<Calendar> {
+            when (data.host) {
+                CalendarHost.GOOGLE -> {
+                    return GoogleCalendar.get(data)
+                }
+            }
+        }
     }
 }

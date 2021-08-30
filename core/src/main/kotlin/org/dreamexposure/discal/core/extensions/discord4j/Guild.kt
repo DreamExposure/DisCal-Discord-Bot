@@ -28,6 +28,8 @@ fun Guild.getSettings(): Mono<GuildSettings> = getRestGuild().getSettings()
  */
 fun Guild.hasCalendar(): Mono<Boolean> = getRestGuild().hasCalendar()
 
+fun Guild.canAddCalendar(): Mono<Boolean> = getRestGuild().canAddCalendar()
+
 /**
  * Attempts to retrieve this [Guild]'s main [Calendar] (calendar 1, this guild's first/primary calendar)
  * If an error occurs, it is emitted through the [Mono]
@@ -69,7 +71,7 @@ fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> = getRestGuil
  * If an error occurs, it is emitted through the Mono.
  *
  * @param id The ID of the announcement to check for
- * @return A Mono, where upon successful completion, returns a boolean as to if the announcement exists or not
+ * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
  */
 fun Guild.announcementExists(id: UUID): Mono<Boolean> = getRestGuild().announcementExists(id)
 

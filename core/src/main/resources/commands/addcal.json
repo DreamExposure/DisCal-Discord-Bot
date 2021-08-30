@@ -1,0 +1,5 @@
+{
+  "name": "addcal",
+  "description": "Used to add an external (already existing) calendar to DisCal",
+  "default_permissions": true
+}
