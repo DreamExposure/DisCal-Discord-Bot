@@ -647,6 +647,27 @@ object DatabaseManager {
         }
     }
 
+    fun getCalendarCount(guildId: Snowflake): Mono<Int> {
+        return connect { c ->
+            val query = "SELECT COUNT(*) FROM ${Tables.CALENDARS.table} WHERE GUILD_ID = ?"
+
+            Mono.from(c.createStatement(query)
+                .bind(0, guildId.asString())
+                .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val calendars = row.get(0, Long::class.java)!!
+                    return@map calendars.toInt()
+                }
+            }.next().retryWhen(Retry.max(3)
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get calendar count", it)
+            }.onErrorReturn(-1)
+        }
+    }
+
     fun getEventData(guildId: Snowflake, eventId: String): Mono<EventData> {
         var eventIdLookup = eventId
         if (eventId.contains("_"))
