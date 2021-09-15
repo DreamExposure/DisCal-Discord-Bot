@@ -53,7 +53,7 @@ class GlobalCommandRegistrar(
                 continue
             }
 
-            val changed = discordCommand.description() != command.description()
+            val changed = discordCommand.description() != command.description().toOptional().orElse("")
                     || discordCommand.options() != command.options()
                     || discordCommand.defaultPermission() != command.defaultPermission()
 
