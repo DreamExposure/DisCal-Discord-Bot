@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.network.discord
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import discord4j.common.JacksonResources
 import discord4j.discordjson.json.ApplicationCommandData
@@ -15,12 +14,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class GlobalCommandRegistrar(
-        private val objectMapper: ObjectMapper,
         private val restClient: RestClient
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments?) {
-        val d4jMapper = JacksonResources.createFromObjectMapper(objectMapper)
+        val d4jMapper = JacksonResources.create()
 
         val matcher = PathMatchingResourcePatternResolver()
         val applicationService = restClient.applicationService
@@ -53,11 +51,7 @@ class GlobalCommandRegistrar(
                 continue
             }
 
-            val changed = discordCommand.description() != command.description().toOptional().orElse("")
-                    || discordCommand.options() != command.options()
-                    || discordCommand.defaultPermission() != command.defaultPermission()
-
-            if (changed) {
+            if (hasChanged(discordCommand, command)) {
                 updated++
                 applicationService.modifyGlobalApplicationCommand(applicationId, discordCommandId, command).block()
             }
@@ -65,5 +59,18 @@ class GlobalCommandRegistrar(
 
         //Send log message with details on changes...
         LOGGER.info(DEFAULT, "Slash commands: $added Added | $updated Updated | $removed Removed")
+    }
+
+    private fun hasChanged(discordCommand: ApplicationCommandData, command: ApplicationCommandRequest): Boolean {
+        //Check description
+        if (!discordCommand.description().equals(command.description())) return true
+
+        //Check default perm
+        val dCommandPerm = discordCommand.defaultPermission().toOptional().orElse(true)
+        val commandPerm = command.defaultPermission().toOptional().orElse(true)
+        if (dCommandPerm != commandPerm) return true
+
+        //Check options
+        return !discordCommand.options().equals(command.options())
     }
 }
