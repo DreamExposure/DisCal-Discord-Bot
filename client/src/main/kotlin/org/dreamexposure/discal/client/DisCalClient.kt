@@ -6,7 +6,7 @@ import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.role.RoleDeleteEvent
@@ -108,7 +108,7 @@ class DisCalClient {
 
                         val slashCommandListener = SlashCommandListener(spring)
                         val onSlashCommand = client
-                                .on(SlashCommandEvent::class.java, slashCommandListener::handle)
+                                .on(ChatInputInteractionEvent::class.java, slashCommandListener::handle)
                                 .then()
 
                         val startAnnouncement = Flux.interval(Duration.ofMinutes(5))

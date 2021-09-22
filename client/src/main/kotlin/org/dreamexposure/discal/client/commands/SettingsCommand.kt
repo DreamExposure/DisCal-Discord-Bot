@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.SettingsEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -18,7 +18,7 @@ class SettingsCommand : SlashCommand {
     override val name = "settings"
     override val ephemeral = true
 
-    override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //Check if user has permission to use this
         return event.interaction.member.get().hasElevatedPermissions().flatMap { hasPerm ->
             if (hasPerm) {
@@ -37,14 +37,14 @@ class SettingsCommand : SlashCommand {
         }
     }
 
-    private fun viewSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun viewSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return event.interaction.guild
               .flatMap { SettingsEmbed.getView(it, settings) }
               .flatMap { Responder.followup(event, it) }
               .then()
     }
 
-    private fun roleSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun roleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("role"))
               .map { it.value.get() }
               .flatMap(ApplicationCommandInteractionOptionValue::asRole)
@@ -55,7 +55,7 @@ class SettingsCommand : SlashCommand {
               }.then()
     }
 
-    private fun announcementStyleSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("style"))
               .map { it.value.get() }
               .map { AnnouncementStyle.fromValue(it.asLong().toInt()) }
@@ -69,7 +69,7 @@ class SettingsCommand : SlashCommand {
               }.then()
     }
 
-    private fun languageSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("lang"))
               .map { it.value.get() }
               .map(ApplicationCommandInteractionOptionValue::asString)
@@ -79,7 +79,7 @@ class SettingsCommand : SlashCommand {
               .then()
     }
 
-    private fun timeFormatSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("format"))
               .map { it.value.get() }
               .map { TimeFormat.fromValue(it.asLong().toInt()) }
@@ -90,7 +90,7 @@ class SettingsCommand : SlashCommand {
               }.then()
     }
 
-    private fun brandingSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return if (settings.patronGuild) {
             Mono.justOrEmpty(event.options[0].getOption("use"))
                   .map { it.value.get() }

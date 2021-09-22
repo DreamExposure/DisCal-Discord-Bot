@@ -62,8 +62,13 @@ class GlobalCommandRegistrar(
     }
 
     private fun hasChanged(discordCommand: ApplicationCommandData, command: ApplicationCommandRequest): Boolean {
+        //Check type
+        val dCommandType = discordCommand.type().toOptional().orElse(1)
+        val commandType = command.type().toOptional().orElse(1)
+        if (dCommandType != commandType) return true
+
         //Check description
-        if (!discordCommand.description().equals(command.description())) return true
+        if (!discordCommand.description().equals(command.description().toOptional().orElse(""))) return true
 
         //Check default perm
         val dCommandPerm = discordCommand.defaultPermission().toOptional().orElse(true)

@@ -2,7 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -17,7 +17,7 @@ class AddCalCommand : SlashCommand {
     override val name = "addcal"
     override val ephemeral = true
 
-    override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //TODO: Remove dev-only and switch to patron-only once this is completed
         return if (settings.devGuild) {
             Mono.justOrEmpty(event.interaction.member)

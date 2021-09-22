@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord
 
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 class SlashCommandListener(applicationContext: ApplicationContext) {
     private val cmds = applicationContext.getBeansOfType(SlashCommand::class.java).values
 
-    fun handle(event: SlashCommandEvent): Mono<Void> {
+    fun handle(event: ChatInputInteractionEvent): Mono<Void> {
         if (!event.interaction.guildId.isPresent) {
             return event.reply("Commands not supported in DMs.")
         }

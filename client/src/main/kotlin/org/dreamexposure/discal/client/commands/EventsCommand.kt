@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -21,7 +21,7 @@ class EventsCommand : SlashCommand {
     override val name = "events"
     override val ephemeral = false
 
-    override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return when (event.options[0].name) {
             "upcoming" -> upcomingEventsSubcommand(event, settings)
             "ongoing" -> ongoingEventsSubcommand(event, settings)
@@ -31,7 +31,7 @@ class EventsCommand : SlashCommand {
         }
     }
 
-    private fun upcomingEventsSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //Determine which calendar they want to use...
         val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
               .map { it.asLong().toInt() }
@@ -71,7 +71,7 @@ class EventsCommand : SlashCommand {
         }).then()
     }
 
-    private fun ongoingEventsSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
               .map { it.asLong().toInt() }
               .defaultIfEmpty(1).flatMap { calNum ->
@@ -104,7 +104,7 @@ class EventsCommand : SlashCommand {
               }.then()
     }
 
-    private fun eventsTodaySubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
               .map { it.asLong().toInt() }
               .defaultIfEmpty(1).flatMap { calNum ->
@@ -137,7 +137,7 @@ class EventsCommand : SlashCommand {
               }.then()
     }
 
-    private fun eventsRangeSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val gMono = event.interaction.guild.cache()
 
         val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })

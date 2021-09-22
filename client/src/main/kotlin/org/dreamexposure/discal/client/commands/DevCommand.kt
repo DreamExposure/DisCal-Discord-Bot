@@ -2,7 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.event.domain.interaction.SlashCommandEvent
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
@@ -18,7 +18,7 @@ class DevCommand : SlashCommand {
     override val name = "dev"
     override val ephemeral = true
 
-    override fun handle(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         if (!GlobalVal.devUserIds.contains(event.interaction.user.id)) {
             return Responder.followupEphemeral(event, getMessage("error.notDeveloper", settings)).then()
         }
@@ -33,7 +33,7 @@ class DevCommand : SlashCommand {
         }
     }
 
-    private fun patronSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun patronSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
               .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
@@ -49,7 +49,7 @@ class DevCommand : SlashCommand {
               .then()
     }
 
-    private fun devSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun devSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
               .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
@@ -65,7 +65,7 @@ class DevCommand : SlashCommand {
               .then()
     }
 
-    private fun maxCalSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun maxCalSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("guild").flatMap { it.value })
               .map(ApplicationCommandInteractionOptionValue::asString)
               .map(Snowflake::of)
@@ -84,7 +84,7 @@ class DevCommand : SlashCommand {
               }.then()
     }
 
-    private fun apiRegisterSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun apiRegisterSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("user").flatMap { it.value })
               .flatMap(ApplicationCommandInteractionOptionValue::asUser)
               .flatMap { user ->
@@ -109,7 +109,7 @@ class DevCommand : SlashCommand {
               .then()
     }
 
-    private fun apiBlockSubcommand(event: SlashCommandEvent, settings: GuildSettings): Mono<Void> {
+    private fun apiBlockSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("key").flatMap { it.value })
               .map(ApplicationCommandInteractionOptionValue::asString)
               .flatMap(DatabaseManager::getAPIAccount)
