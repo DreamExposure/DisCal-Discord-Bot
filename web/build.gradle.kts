@@ -1,3 +1,5 @@
+
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -58,23 +60,44 @@ jib {
     container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 
+// The weird OS checks are because of windows. See this SO answer: https://stackoverflow.com/a/53428540
+
 tasks {
     create<Exec>("npm") {
+        var npm = "npm"
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            npm = "npm.cmd"
+        }
+
         workingDir("..")
-        commandLine("npm", "ci")
+        commandLine(npm, "ci")
     }
 
     create<Exec>("cleanWeb") {
-        commandLine("gulp", "clean:all")
+        var gulp = "gulp"
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            gulp = "gulp.cmd"
+        }
+        commandLine(gulp, "clean:all")
     }
 
     create<Exec>("compileCSS") {
-        commandLine("gulp", "build")
+        var gulp = "gulp"
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            gulp = "gulp.cmd"
+        }
+
+        commandLine(gulp, "build")
     }
 
     create<Exec>("compileTypescript") {
+        var webpack = "webpack"
+        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+            webpack = "webpack.cmd"
+        }
+
         workingDir("..")
-        commandLine("webpack")
+        commandLine(webpack)
     }
 
     clean {
