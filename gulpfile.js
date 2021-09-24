@@ -1,5 +1,5 @@
 let gulp = require('gulp');
-let sass = require('gulp-sass');
+let sass = require('gulp-sass')(require('sass'));
 let header = require('gulp-header');
 let cleanCSS = require('gulp-clean-css');
 let rename = require("gulp-rename");
