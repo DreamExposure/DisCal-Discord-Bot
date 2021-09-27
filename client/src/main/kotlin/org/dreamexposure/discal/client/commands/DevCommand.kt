@@ -3,11 +3,11 @@ package org.dreamexposure.discal.client.commands
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.crypto.KeyGenerator.csRandomAlphaNumericString
 import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.stereotype.Component
@@ -20,7 +20,7 @@ class DevCommand : SlashCommand {
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         if (!GlobalVal.devUserIds.contains(event.interaction.user.id)) {
-            return Responder.followupEphemeral(event, getMessage("error.notDeveloper", settings)).then()
+            return event.followupEphemeral(getMessage("error.notDeveloper", settings)).then()
         }
 
         return when (event.options[0].name) {
@@ -40,12 +40,11 @@ class DevCommand : SlashCommand {
               .flatMap { DatabaseManager.getSettings(it) }
               .doOnNext { settings.patronGuild = !settings.patronGuild }
               .flatMap {
-                  DatabaseManager.updateSettings(it).then(Responder.followupEphemeral(
-                        event,
-                        getMessage("patron.success", settings, settings.patronGuild.toString())
+                  DatabaseManager.updateSettings(it).then(event.followupEphemeral(
+                      getMessage("patron.success", settings, settings.patronGuild.toString())
                   ))
               }.doOnError { LOGGER.error("[cmd] patron failure", it) }
-              .onErrorResume { Responder.followupEphemeral(event, getMessage("patron.failure.badId", settings)) }
+              .onErrorResume { event.followupEphemeral(getMessage("patron.failure.badId", settings)) }
               .then()
     }
 
@@ -56,12 +55,11 @@ class DevCommand : SlashCommand {
               .flatMap { DatabaseManager.getSettings(it) }
               .doOnNext { settings.devGuild = !settings.devGuild }
               .flatMap {
-                  DatabaseManager.updateSettings(it).then(Responder.followupEphemeral(
-                        event,
+                  DatabaseManager.updateSettings(it).then(event.followupEphemeral(
                         getMessage("dev.success", settings, settings.devGuild.toString())
                   ))
               }.doOnError { LOGGER.error("[cmd] dev failure", it) }
-              .onErrorResume { Responder.followupEphemeral(event, getMessage("dev.failure.badId", settings)) }
+              .onErrorResume { event.followupEphemeral(getMessage("dev.failure.badId", settings)) }
               .then()
     }
 
@@ -74,13 +72,12 @@ class DevCommand : SlashCommand {
                   val amount = event.options[0].getOption("amount").get().value.get().asLong().toInt()
                   it.maxCalendars = amount
               }.flatMap {
-                  DatabaseManager.updateSettings(it).then(Responder.followupEphemeral(
-                        event,
+                  DatabaseManager.updateSettings(it).then(event.followupEphemeral(
                         getMessage("maxcal.success", settings, settings.maxCalendars.toString())
                   ))
               }
               .onErrorResume {
-                  Responder.followupEphemeral(event, getMessage("maxcal.failure.badInput", settings))
+                  event.followupEphemeral(getMessage("maxcal.failure.badInput", settings))
               }.then()
     }
 
@@ -97,15 +94,12 @@ class DevCommand : SlashCommand {
 
                   DatabaseManager.updateAPIAccount(acc).flatMap { success ->
                       if (success) {
-                          Responder.followupEphemeral(
-                                event,
-                                getMessage("apiRegister.success", settings, acc.APIKey)
-                          )
+                          event.followupEphemeral(getMessage("apiRegister.success", settings, acc.APIKey))
                       } else {
-                          Responder.followupEphemeral(event, getMessage("apiRegister.failure.unable", settings))
+                          event.followupEphemeral(getMessage("apiRegister.failure.unable", settings))
                       }
                   }
-              }.switchIfEmpty(Responder.followupEphemeral(event, getMessage("apiRegister.failure.empty", settings)))
+              }.switchIfEmpty(event.followupEphemeral(getMessage("apiRegister.failure.empty", settings)))
               .then()
     }
 
@@ -116,10 +110,10 @@ class DevCommand : SlashCommand {
               .map {
                   it.copy(blocked = true)
               }.flatMap(DatabaseManager::updateAPIAccount)
-              .flatMap { Responder.followupEphemeral(event, getMessage("apiBlock.success", settings)) }
-              .switchIfEmpty(Responder.followupEphemeral(event, getMessage("apiBlock.failure.notFound", settings)))
+              .flatMap { event.followupEphemeral(getMessage("apiBlock.success", settings)) }
+              .switchIfEmpty(event.followupEphemeral(getMessage("apiBlock.failure.notFound", settings)))
               .onErrorResume {
-                  Responder.followupEphemeral(event, getMessage("apiBlock.failure.other", settings))
+                  event.followupEphemeral(getMessage("apiBlock.failure.other", settings))
               }.then()
     }
 }

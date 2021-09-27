@@ -17,17 +17,17 @@ class SlashCommandListener(applicationContext: ApplicationContext) {
         }
 
         return Flux.fromIterable(cmds)
-                .filter { it.name == event.commandName }
-                .next()
-                .flatMap { command ->
-                    val mono =
-                            if (command.ephemeral) event.acknowledgeEphemeral()
-                            else event.acknowledge()
+            .filter { it.name == event.commandName }
+            .next()
+            .flatMap { command ->
+                val mono =
+                    if (command.ephemeral) event.deferReply().withEphemeral(true)
+                    else event.deferReply()
 
-                    mono.then(DatabaseManager.getSettings(event.interaction.guildId.get()))
-                            .flatMap { command.handle(event, it) }
-                }.doOnError {
-                    LOGGER.error("Unhandled slash command error", it)
-                }.onErrorResume { Mono.empty() }
+                mono.then(DatabaseManager.getSettings(event.interaction.guildId.get()))
+                    .flatMap { command.handle(event, it) }
+            }.doOnError {
+                LOGGER.error("Unhandled slash command error", it)
+            }.onErrorResume { Mono.empty() }
     }
 }

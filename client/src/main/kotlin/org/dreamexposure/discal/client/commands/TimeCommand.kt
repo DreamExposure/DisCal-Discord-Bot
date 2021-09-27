@@ -2,9 +2,9 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -23,9 +23,9 @@ class TimeCommand : SlashCommand {
               .flatMap { calNumber ->
                   event.interaction.guild.flatMap { guild ->
                       CalendarEmbed.getTimeEmbed(guild, settings, calNumber).flatMap {
-                          Responder.followupEphemeral(event, it)
+                          event.followupEphemeral(it)
                       }
-                  }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                  }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
               }.then()
     }
 }

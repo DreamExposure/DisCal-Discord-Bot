@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.enums.event
 
+import java.util.*
+
 enum class EventFrequency {
     DAILY, WEEKLY, MONTHLY, YEARLY;
 
@@ -12,7 +14,7 @@ enum class EventFrequency {
         }
 
         fun fromValue(value: String): EventFrequency {
-            return when (value.toUpperCase()) {
+            return when (value.uppercase(Locale.getDefault())) {
                 "WEEKLY" -> WEEKLY
                 "MONTHLY" -> MONTHLY
                 "YEARLY" -> YEARLY

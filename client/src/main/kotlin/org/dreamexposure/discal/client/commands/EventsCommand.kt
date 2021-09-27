@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.client.commands
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -34,169 +34,159 @@ class EventsCommand : SlashCommand {
     private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //Determine which calendar they want to use...
         val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-              .map { it.asLong().toInt() }
-              .defaultIfEmpty(1)
+            .map { it.asLong().toInt() }
+            .defaultIfEmpty(1)
 
         val amountMono = Mono.justOrEmpty(event.options[0].getOption("amount").flatMap { it.value })
-              .map { it.asLong().toInt() }
-              .defaultIfEmpty(1)
+            .map { it.asLong().toInt() }
+            .defaultIfEmpty(1)
 
         return Mono.zip(calNumMono, amountMono).flatMap(TupleUtils.function { calNumb, amount ->
             if (amount < 1 || amount > 15) {
-                return@function Responder.followup(event, getMessage("upcoming.failure.outOfRange", settings))
+                return@function event.followup(getMessage("upcoming.failure.outOfRange", settings))
             }
 
             event.interaction.guild.flatMap { guild ->
                 guild.getCalendar(calNumb).flatMap { cal ->
                     cal.getUpcomingEvents(amount).collectList().flatMap { events ->
                         if (events.isEmpty()) {
-                            Responder.followup(event, getMessage("upcoming.success.none", settings))
+                            event.followup(getMessage("upcoming.success.none", settings))
                         } else if (events.size == 1) {
-                            Responder.followup(
-                                  event,
-                                  getMessage("upcoming.success.one", settings),
-                                  EventEmbed.getFull(guild, settings, events[0])
+                            event.followup(
+                                getMessage("upcoming.success.one", settings),
+                                EventEmbed.getFull(guild, settings, events[0])
                             )
                         } else {
-                            Responder.followup(event, getMessage("upcoming.success.many", settings, "${events.size}"))
-                                  .flatMapMany {
-                                      Flux.fromIterable(events)
-                                  }.flatMap {
-                                      Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then(Mono.just(""))
+                            event.followup(
+                                getMessage("upcoming.success.many", settings, "${events.size}")
+                            ).flatMapMany {
+                                Flux.fromIterable(events)
+                            }.flatMap {
+                                event.followup(EventEmbed.getCondensed(guild, settings, it))
+                            }.then(Mono.just(""))
                         }
                     }
-                }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
             }
         }).then()
     }
 
     private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-              .map { it.asLong().toInt() }
-              .defaultIfEmpty(1).flatMap { calNum ->
-                  event.interaction.guild.flatMap { guild ->
-                      guild.getCalendar(calNum).flatMap { cal ->
-                          cal.getOngoingEvents().collectList().flatMap { events ->
-                              if (events.isEmpty()) {
-                                  Responder.followup(
-                                        event,
-                                        getMessage("ongoing.success.none", settings)
-                                  )
-                              } else if (events.size == 1) {
-                                  Responder.followup(
-                                        event,
-                                        getMessage("ongoing.success.one", settings),
-                                        EventEmbed.getFull(guild, settings, events[0])
-                                  )
-                              } else {
-                                  Responder.followup(event,
-                                        getMessage("ongoing.success.many", settings, "${events.size}")
-                                  ).flatMapMany {
-                                      Flux.fromIterable(events)
-                                  }.flatMap {
-                                      Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then(Mono.just(""))
-                              }
-                          }
-                      }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
-                  }
-              }.then()
+            .map { it.asLong().toInt() }
+            .defaultIfEmpty(1).flatMap { calNum ->
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calNum).flatMap { cal ->
+                        cal.getOngoingEvents().collectList().flatMap { events ->
+                            if (events.isEmpty()) {
+                                event.followup(getMessage("ongoing.success.none", settings))
+                            } else if (events.size == 1) {
+                                event.followup(
+                                    getMessage("ongoing.success.one", settings),
+                                    EventEmbed.getFull(guild, settings, events[0])
+                                )
+                            } else {
+                                event.followup(
+                                    getMessage("ongoing.success.many", settings, "${events.size}")
+                                ).flatMapMany {
+                                    Flux.fromIterable(events)
+                                }.flatMap {
+                                    event.followup(EventEmbed.getCondensed(guild, settings, it))
+                                }.then(Mono.just(""))
+                            }
+                        }
+                    }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            }.then()
     }
 
     private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-              .map { it.asLong().toInt() }
-              .defaultIfEmpty(1).flatMap { calNum ->
-                  event.interaction.guild.flatMap { guild ->
-                      guild.getCalendar(calNum).flatMap { cal ->
-                          cal.getEventsInNext24HourPeriod(Instant.now()).collectList().flatMap { events ->
-                              if (events.isEmpty()) {
-                                  Responder.followup(
-                                        event,
-                                        getMessage("today.success.none", settings)
-                                  )
-                              } else if (events.size == 1) {
-                                  Responder.followup(
-                                        event,
-                                        getMessage("today.success.one", settings),
-                                        EventEmbed.getFull(guild, settings, events[0])
-                                  )
-                              } else {
-                                  Responder.followup(event,
-                                        getMessage("today.success.many", settings, "${events.size}")
-                                  ).flatMapMany {
-                                      Flux.fromIterable(events)
-                                  }.flatMap {
-                                      Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                  }.then(Mono.just(""))
-                              }
-                          }
-                      }.switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
-                  }
-              }.then()
+            .map { it.asLong().toInt() }
+            .defaultIfEmpty(1).flatMap { calNum ->
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calNum).flatMap { cal ->
+                        cal.getEventsInNext24HourPeriod(Instant.now()).collectList().flatMap { events ->
+                            if (events.isEmpty()) {
+                                event.followup(getMessage("today.success.none", settings))
+                            } else if (events.size == 1) {
+                                event.followup(
+                                    getMessage("today.success.one", settings),
+                                    EventEmbed.getFull(guild, settings, events[0])
+                                )
+                            } else {
+                                event.followup(
+                                    getMessage("today.success.many", settings, "${events.size}")
+                                ).flatMapMany {
+                                    Flux.fromIterable(events)
+                                }.flatMap {
+                                    event.followup(EventEmbed.getCondensed(guild, settings, it))
+                                }.then(Mono.just(""))
+                            }
+                        }
+                    }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            }.then()
     }
 
     private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val gMono = event.interaction.guild.cache()
 
         val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-              .map { it.asLong().toInt() }
-              .defaultIfEmpty(1)
-              .flatMap { num ->
-                  gMono.flatMap {
-                      it.getCalendar(num)
-                  }
-              }.cache()
+            .map { it.asLong().toInt() }
+            .defaultIfEmpty(1)
+            .flatMap { num ->
+                gMono.flatMap {
+                    it.getCalendar(num)
+                }
+            }.cache()
 
         val sMono = Mono.justOrEmpty(event.options[0].getOption("start").flatMap { it.value })
-              .map { it.asString() }
-              .flatMap { value ->
-                  calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+            .map { it.asString() }
+            .flatMap { value ->
+                calMono.map {
+                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
 
-                      LocalDate.parse(value, formatter).atStartOfDay(it.timezone)
-                  }
-              }.map(ZonedDateTime::toInstant)
+                    LocalDate.parse(value, formatter).atStartOfDay(it.timezone)
+                }
+            }.map(ZonedDateTime::toInstant)
 
         val eMono = Mono.justOrEmpty(event.options[0].getOption("end").flatMap { it.value })
-              .map { it.asString() }
-              .flatMap { value ->
-                  calMono.map {
-                      val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+            .map { it.asString() }
+            .flatMap { value ->
+                calMono.map {
+                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
 
-                      //At end of day
-                      LocalDate.parse(value, formatter).plusDays(1).atStartOfDay(it.timezone)
-                  }
-              }.map(ZonedDateTime::toInstant)
+                    //At end of day
+                    LocalDate.parse(value, formatter).plusDays(1).atStartOfDay(it.timezone)
+                }
+            }.map(ZonedDateTime::toInstant)
 
         return Mono.zip(gMono, calMono, sMono, eMono).flatMap(
-              TupleUtils.function { guild, cal, start, end ->
-                  cal.getEventsInTimeRange(start, end).collectList().flatMap { events ->
-                      if (events.isEmpty()) {
-                          Responder.followup(event, getMessage("range.success.none", settings))
-                      } else if (events.size == 1) {
-                          Responder.followup(
-                                event,
-                                getMessage("range.success.one", settings),
-                                EventEmbed.getFull(guild, settings, events[0]))
-                      } else if (events.size > 15) {
-                          Responder.followup(
-                                event,
-                                getMessage("range.success.tooMany", settings, "${events.size}", cal.link)
-                          )
-                      } else {
-                          Responder.followup(event, getMessage("range.success.many", settings, "${events.size}"))
-                                .flatMapMany {
-                                    Flux.fromIterable(events)
-                                }.flatMap {
-                                    Responder.followup(event, EventEmbed.getCondensed(guild, settings, it))
-                                }.then(Mono.just(""))
-                      }
-                  }
-              }).switchIfEmpty(Responder.followup(event, getCommonMsg("error.notFound.calendar", settings)))
-              .onErrorResume(DateTimeParseException::class.java) {
-                  Responder.followup(event, getCommonMsg("error.format.date", settings))
-              }.then()
+            TupleUtils.function { guild, cal, start, end ->
+                cal.getEventsInTimeRange(start, end).collectList().flatMap { events ->
+                    if (events.isEmpty()) {
+                        event.followup(getMessage("range.success.none", settings))
+                    } else if (events.size == 1) {
+                        event.followup(
+                            getMessage("range.success.one", settings),
+                            EventEmbed.getFull(guild, settings, events[0])
+                        )
+                    } else if (events.size > 15) {
+                        event.followup(getMessage("range.success.tooMany", settings, "${events.size}", cal.link))
+                    } else {
+                        event.followup(
+                            getMessage("range.success.many", settings, "${events.size}")
+                        ).flatMapMany {
+                            Flux.fromIterable(events)
+                        }.flatMap {
+                            event.followup(EventEmbed.getCondensed(guild, settings, it))
+                        }.then(Mono.just(""))
+                    }
+                }
+            }).switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+            .onErrorResume(DateTimeParseException::class.java) {
+                event.followup(getCommonMsg("error.format.date", settings))
+            }.then()
     }
 }

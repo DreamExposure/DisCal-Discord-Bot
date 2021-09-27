@@ -3,10 +3,10 @@ package org.dreamexposure.discal.client.commands
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.extensions.discord4j.canAddCalendar
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -24,12 +24,12 @@ class AddCalCommand : SlashCommand {
                   .filterWhen(Member::hasElevatedPermissions).flatMap {
                       //Check if a calendar can be added since non-premium only allows 1 calendar.
                       event.interaction.guild.filterWhen(Guild::canAddCalendar).flatMap {
-                          Responder.followupEphemeral(event, getMessage("response.start", settings, getLink(settings)))
-                      }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.calendar.max", settings)))
-                  }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.perms.elevated", settings)))
+                          event.followupEphemeral(getMessage("response.start", settings, getLink(settings)))
+                      }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
+                  }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
                   .then()
         } else {
-            Responder.followupEphemeral(event, getCommonMsg("error.disabled", settings)).then()
+            event.followupEphemeral(getCommonMsg("error.disabled", settings)).then()
         }
     }
 

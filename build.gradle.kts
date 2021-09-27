@@ -21,7 +21,7 @@ buildscript {
     }
 }
 
-val discord4jVersion = "3.2.0-SNAPSHOT" //Has to be here to show up in git properties task
+val discord4jVersion = "3.2.0" //Has to be here to show up in git properties task
 @Suppress("UNUSED_VARIABLE")
 allprojects {
     //Project props

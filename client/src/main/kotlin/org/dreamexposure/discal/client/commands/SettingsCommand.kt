@@ -2,12 +2,13 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.SettingsEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.time.TimeFormat
+import org.dreamexposure.discal.core.extensions.discord4j.followup
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -32,7 +33,7 @@ class SettingsCommand : SlashCommand {
                     else -> Mono.empty() //Never can reach this, makes compiler happy.
                 }
             } else {
-                Responder.followupEphemeral(event, getCommonMsg("error.perms.elevated", settings)).then()
+                event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)).then()
             }
         }
     }
@@ -40,7 +41,7 @@ class SettingsCommand : SlashCommand {
     private fun viewSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return event.interaction.guild
               .flatMap { SettingsEmbed.getView(it, settings) }
-              .flatMap { Responder.followup(event, it) }
+              .flatMap(event::followup)
               .then()
     }
 
@@ -50,8 +51,9 @@ class SettingsCommand : SlashCommand {
               .flatMap(ApplicationCommandInteractionOptionValue::asRole)
               .doOnNext { settings.controlRole = it.id.asString() }
               .flatMap { role ->
-                  DatabaseManager.updateSettings(settings)
-                        .then(Responder.followupEphemeral(event, getMessage("role.success", settings, role.name)))
+                  DatabaseManager.updateSettings(settings).then(
+                      event.followupEphemeral(getMessage("role.success", settings, role.name))
+                  )
               }.then()
     }
 
@@ -62,10 +64,7 @@ class SettingsCommand : SlashCommand {
               .doOnNext { settings.announcementStyle = it }
               .flatMap { DatabaseManager.updateSettings(settings) }
               .flatMap {
-                  Responder.followupEphemeral(
-                        event,
-                        getMessage("style.success", settings, settings.announcementStyle.name)
-                  )
+                  event.followupEphemeral(getMessage("style.success", settings, settings.announcementStyle.name))
               }.then()
     }
 
@@ -75,7 +74,7 @@ class SettingsCommand : SlashCommand {
               .map(ApplicationCommandInteractionOptionValue::asString)
               .doOnNext { settings.lang = it }
               .flatMap { DatabaseManager.updateSettings(settings) }
-              .then(Responder.followupEphemeral(event, getMessage("lang.success", settings)))
+              .then(event.followupEphemeral(getMessage("lang.success", settings)))
               .then()
     }
 
@@ -86,7 +85,7 @@ class SettingsCommand : SlashCommand {
               .doOnNext { settings.timeFormat = it }
               .flatMap { DatabaseManager.updateSettings(settings) }
               .flatMap {
-                  Responder.followupEphemeral(event, getMessage("format.success", settings, settings.timeFormat.name))
+                  event.followupEphemeral(getMessage("format.success", settings, settings.timeFormat.name))
               }.then()
     }
 
@@ -97,13 +96,12 @@ class SettingsCommand : SlashCommand {
                   .map(ApplicationCommandInteractionOptionValue::asBoolean)
                   .doOnNext { settings.branded = it }
                   .flatMap {
-                      DatabaseManager.updateSettings(settings).then(Responder.followupEphemeral(
-                            event,
-                            getMessage("brand.success", settings, "$it")
-                      ))
+                      DatabaseManager.updateSettings(settings).then(
+                          event.followupEphemeral(getMessage("brand.success", settings, "$it"))
+                      )
                   }.then()
         } else {
-            Responder.followupEphemeral(event, getCommonMsg("error.patronOnly", settings)).then()
+            event.followupEphemeral(getCommonMsg("error.patronOnly", settings)).then()
         }
     }
 }

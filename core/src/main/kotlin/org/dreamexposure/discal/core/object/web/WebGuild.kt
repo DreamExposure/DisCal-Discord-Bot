@@ -19,6 +19,7 @@ import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
+import org.dreamexposure.discal.core.extensions.discord4j.getMainCalendar
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.justOrEmpty
 import reactor.function.TupleUtils
@@ -41,6 +42,7 @@ data class WebGuild(
       @SerialName("discal_role")
       var discalRole: Boolean = false,
 
+      //TODO: Support multi-cal
       val calendar: WebCalendar
 ) {
     val roles: MutableList<WebRole> = mutableListOf()
@@ -79,10 +81,10 @@ data class WebGuild(
 
                 val announcements = DatabaseManager.getAnnouncements(id)
 
-                val calendar = settings.flatMap { s ->
-                    DatabaseManager.getMainCalendar(id)
-                          .flatMap { d -> WebCalendar.fromCalendar(d, s) }
-                }.defaultIfEmpty(WebCalendar.empty())
+                //TODO: Support multi-cal
+                val calendar = g.getMainCalendar()
+                    .map { it.toWebCalendar() }
+                    .defaultIfEmpty(WebCalendar.empty())
 
 
                 Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
@@ -121,10 +123,10 @@ data class WebGuild(
 
             val announcements = DatabaseManager.getAnnouncements(g.id)
 
-            val calendar = settings.flatMap { s ->
-                DatabaseManager.getMainCalendar(Snowflake.of(id))
-                      .flatMap { d -> WebCalendar.fromCalendar(d, s) }
-            }
+            //TODO: Support multi-cal
+            val calendar = g.getMainCalendar()
+                .map { it.toWebCalendar() }
+                .defaultIfEmpty(WebCalendar.empty())
 
             return Mono.zip(botNick, settings, roles, channels, announcements, calendar)
                   .map(TupleUtils.function { bn, s, r, wc, a, c ->

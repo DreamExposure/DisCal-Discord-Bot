@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.client.commands
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.client.message.Responder
 import org.dreamexposure.discal.client.message.embed.RsvpEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
@@ -52,16 +52,13 @@ class RsvpCommand : SlashCommand {
                               .flatMap { calEvent.updateRsvp(it) }
                               .flatMap { RsvpEmbed.list(guild, settings, calEvent) }
                               .flatMap {
-                                  Responder.followupEphemeral(event, getMessage("onTime.success", settings), it)
-                              }.switchIfEmpty(Responder.followupEphemeral(
-                                    event,
-                                    getMessage("onTime.failure.limit", settings)
-                              ))
+                                  event.followupEphemeral(getMessage("onTime.success", settings), it)
+                              }.switchIfEmpty(event.followupEphemeral(getMessage("onTime.failure.limit", settings)))
                     } else {
-                        Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -86,16 +83,13 @@ class RsvpCommand : SlashCommand {
                               .flatMap { calEvent.updateRsvp(it) }
                               .flatMap { RsvpEmbed.list(guild, settings, calEvent) }
                               .flatMap {
-                                  Responder.followupEphemeral(event, getMessage("late.success", settings), it)
-                              }.switchIfEmpty(Responder.followupEphemeral(
-                                    event,
-                                    getMessage("late.failure.limit", settings)
-                              ))
+                                  event.followupEphemeral(getMessage("late.success", settings), it)
+                              }.switchIfEmpty(event.followupEphemeral(getMessage("late.failure.limit", settings)))
                     } else {
-                        Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -119,13 +113,13 @@ class RsvpCommand : SlashCommand {
                               .flatMap { calEvent.updateRsvp(it) }
                               .then(RsvpEmbed.list(guild, settings, calEvent))
                               .flatMap {
-                                  Responder.followupEphemeral(event, getMessage("unsure.success", settings), it)
+                                  event.followupEphemeral(getMessage("unsure.success", settings), it)
                               }
                     } else {
-                        Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -149,13 +143,13 @@ class RsvpCommand : SlashCommand {
                               .flatMap { calEvent.updateRsvp(it) }
                               .then(RsvpEmbed.list(guild, settings, calEvent))
                               .flatMap {
-                                  Responder.followupEphemeral(event, getMessage("notGoing.success", settings), it)
+                                  event.followupEphemeral(getMessage("notGoing.success", settings), it)
                               }
                     } else {
-                        Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -178,13 +172,13 @@ class RsvpCommand : SlashCommand {
                               .flatMap { calEvent.updateRsvp(it) }
                               .then(RsvpEmbed.list(guild, settings, calEvent))
                               .flatMap {
-                                  Responder.followupEphemeral(event, getMessage("remove.success", settings), it)
+                                  event.followupEphemeral(getMessage("remove.success", settings), it)
                               }
                     } else {
-                        Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -201,9 +195,9 @@ class RsvpCommand : SlashCommand {
                 cal.getEvent(eventId).flatMap { calEvent ->
                     calEvent.getRsvp()
                           .then(RsvpEmbed.list(guild, settings, calEvent))
-                          .flatMap { Responder.followupEphemeral(event, it) }
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
+                          .flatMap { event.followupEphemeral(it) }
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }).then()
     }
 
@@ -232,18 +226,14 @@ class RsvpCommand : SlashCommand {
                                   .flatMap { calEvent.updateRsvp(it) }
                                   .then(RsvpEmbed.list(guild, settings, calEvent))
                                   .flatMap {
-                                      Responder.followupEphemeral(
-                                            event,
-                                            getMessage("limit.success", settings, "$limit"),
-                                            it
-                                      )
+                                      event.followupEphemeral(getMessage("limit.success", settings, "$limit"), it)
                                   }
                         } else {
-                            Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                            event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                         }
-                    }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.perms.privileged", settings)))
+                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
         }).then()
     }
 
@@ -264,7 +254,7 @@ class RsvpCommand : SlashCommand {
 
         return Mono.zip(gMono, mMono, cMono, eMono, rMono).flatMap(function { guild, member, calNum, eventId, role ->
             if (!settings.patronGuild || !settings.devGuild) {
-                return@function Responder.followupEphemeral(event, getCommonMsg("error.patronOnly", settings))
+                return@function event.followupEphemeral(getCommonMsg("error.patronOnly", settings))
             }
 
             member.hasElevatedPermissions().filter { it }.flatMap {
@@ -277,19 +267,14 @@ class RsvpCommand : SlashCommand {
                                           .then(calEvent.updateRsvp(rsvp))
                                           .then(RsvpEmbed.list(guild, settings, calEvent))
                                           .flatMap {
-                                              Responder.followupEphemeral(
-                                                    event,
-                                                    getMessage("role.success.remove", settings),
-                                                    it
-                                              )
+                                              event.followupEphemeral(getMessage("role.success.remove", settings), it)
                                           }
                                 } else {
                                     rsvp.setRole(role)
                                           .then(calEvent.updateRsvp(rsvp))
                                           .then(RsvpEmbed.list(guild, settings, calEvent))
                                           .flatMap {
-                                              Responder.followupEphemeral(
-                                                    event,
+                                              event.followupEphemeral(
                                                     getMessage("role.success.set", settings, role.name),
                                                     it
                                               )
@@ -297,11 +282,11 @@ class RsvpCommand : SlashCommand {
                                 }
                             }
                         } else {
-                            Responder.followupEphemeral(event, getCommonMsg("error.event.ended", settings))
+                            event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                         }
-                    }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.event", settings)))
-                }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(Responder.followupEphemeral(event, getCommonMsg("error.perms.elevated", settings)))
+                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
         }).then()
     }
 }
