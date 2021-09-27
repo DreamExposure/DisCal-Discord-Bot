@@ -36,8 +36,14 @@ jobs:
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
         run: ./gradlew clean build jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
 
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
       # Have K8S pull latest images for dev pods
-      - name: Trigger dev deploy
+      - name: Trigger deploy
         uses: Consensys/kubernetes-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
