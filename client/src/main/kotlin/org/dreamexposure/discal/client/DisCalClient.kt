@@ -22,7 +22,7 @@ import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.client.listeners.discord.MessageCreateListener
+import org.dreamexposure.discal.client.listeners.discord.BotMentionListener
 import org.dreamexposure.discal.client.listeners.discord.ReadEventListener
 import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener
 import org.dreamexposure.discal.client.listeners.discord.SlashCommandListener
@@ -103,7 +103,11 @@ class DisCalClient {
                                 .then()
 
                         val onCommand = client
-                                .on(MessageCreateEvent::class.java, MessageCreateListener::handle)
+                                .on(MessageCreateEvent::class.java, BotMentionListener::handle)
+                                .then()
+
+                        val onMention = client
+                                .on(MessageCreateEvent::class.java, BotMentionListener::handle)
                                 .then()
 
                         val slashCommandListener = SlashCommandListener(spring)
@@ -119,7 +123,7 @@ class DisCalClient {
                                     }.onErrorResume { Mono.empty() }
                                 }
 
-                        Mono.`when`(onReady, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
+                        Mono.`when`(onReady, onRoleDelete, onCommand, onMention, onSlashCommand, startAnnouncement)
                     }.block()
         }
     }

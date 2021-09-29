@@ -17,7 +17,7 @@ import static org.dreamexposure.discal.core.utils.GlobalVal.getDEFAULT;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class MessageCreateListener {
-    private final static Logger LOGGER = LoggerFactory.getLogger(MessageCreateListener.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(BotMentionListener.class);
 
     public static Mono<Void> handle(final MessageCreateEvent event) {
         return Mono.just(event.getMessage())
