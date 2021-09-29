@@ -98,6 +98,8 @@ class WarningCommand implements Command {
 
     @Override
     public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        return Messages.sendMessage("This command has been moved. Please use the slash command version by typing `/`", event).then();
+        return Messages.sendMessage(
+            "This command has been moved. Please use the slash command version by typing `/` " +
+                "\n Visit: https://discalbot.com/commands for more command details.", event).then();
     }
 }
