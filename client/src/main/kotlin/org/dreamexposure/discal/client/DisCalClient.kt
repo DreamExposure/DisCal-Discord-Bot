@@ -22,10 +22,7 @@ import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.client.listeners.discord.BotMentionListener
-import org.dreamexposure.discal.client.listeners.discord.ReadEventListener
-import org.dreamexposure.discal.client.listeners.discord.RoleDeleteListener
-import org.dreamexposure.discal.client.listeners.discord.SlashCommandListener
+import org.dreamexposure.discal.client.listeners.discord.*
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.announcement.AnnouncementThread
 import org.dreamexposure.discal.client.module.command.*
@@ -103,7 +100,7 @@ class DisCalClient {
                                 .then()
 
                         val onCommand = client
-                                .on(MessageCreateEvent::class.java, BotMentionListener::handle)
+                                .on(MessageCreateEvent::class.java, MessageCreateListener::handle)
                                 .then()
 
                         val onMention = client
