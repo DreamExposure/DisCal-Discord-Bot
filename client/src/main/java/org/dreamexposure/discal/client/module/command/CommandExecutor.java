@@ -46,10 +46,10 @@ public class CommandExecutor {
             args = new String[0];
         }
 
-
-
-        return Mono.from(getCommand(cmd)
-            .flatMap(c -> c.issueCommand(args, event, settings)));
+        if (movedCommands.contains(cmd)) {
+            return new WarningCommand().issueCommand(args, event, settings);
+        } else
+            return getCommand(cmd).flatMap(c -> c.issueCommand(args,event, settings));
     }
 
     /**
