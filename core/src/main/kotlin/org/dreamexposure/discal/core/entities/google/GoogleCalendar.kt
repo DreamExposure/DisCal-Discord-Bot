@@ -39,6 +39,9 @@ class GoogleCalendar internal constructor(
     override val timezone: ZoneId
         get() = ZoneId.of(baseCalendar.timeZone)
 
+    override val hostLink: String
+        get() = "https://calendar.google.com/calendar/embed?src=$calendarId"
+
     override fun delete(): Mono<Boolean> {
         return CalendarWrapper.deleteCalendar(calendarData).then(
                 Mono.`when`(

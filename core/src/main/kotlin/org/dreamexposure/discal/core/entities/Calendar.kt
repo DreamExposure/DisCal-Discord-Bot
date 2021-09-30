@@ -85,6 +85,11 @@ interface Calendar {
     val link: String
         get() = "${BotSettings.BASE_URL.get()}/embed/${guildId.asString()}/calendar/$calendarNumber"
 
+    /**
+     * A link to view the calendar on the host's website (e.g. google.com)
+     */
+    val hostLink: String
+
     //Reactive - Self
     /**
      * Attempts to delete the calendar and returns the result.
@@ -179,6 +184,7 @@ interface Calendar {
               this.calendarNumber,
               this.calendarData.host,
               this.link,
+              this.hostLink,
               this.name,
               this.description,
               this.timezone.id.replace("/", "___"),
@@ -193,6 +199,7 @@ interface Calendar {
               .put("calendar_address", calendarAddress)
               .put("calendar_number", calendarNumber)
               .put("host", calendarData.host.name)
+              .put("host_link", hostLink)
               .put("external", external)
               .put("name", name)
               .put("description", description)

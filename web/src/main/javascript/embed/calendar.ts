@@ -19,6 +19,7 @@ import {EventFrequency} from "@/enums/EventFrequency";
 import {GuildSettingsGetRequest} from "@/network/guild/settings/GuildSettingsGetRequest";
 import {GuildSettings} from "@/objects/guild/GuildSettings";
 import {TimeFormat} from "@/enums/TimeFormat";
+import {humanFriendlyHostName} from "@/enums/CalendarHost";
 
 export class EmbedCalendarRunner implements TaskCallback {
     private initialTimezone: string = 'local';
@@ -53,10 +54,18 @@ export class EmbedCalendarRunner implements TaskCallback {
             ],
             themeSystem: 'bootstrap',
             initialView: 'dayGridMonth',
+            customButtons: {
+                viewHost: {
+                    text: 'View on ' + humanFriendlyHostName(this.calendarData.host),
+                    click: () => {
+                        window.open(this.calendarData.hostLink, '_blank')
+                    }
+                }
+            },
             headerToolbar: {
                 start: 'prev,next,today',
                 center: 'title',
-                end: 'dayGridMonth,timeGridWeek,timeGridDay'
+                end: 'dayGridMonth,timeGridWeek,timeGridDay viewHost'
             },
             navLinks: true,
             nowIndicator: true,

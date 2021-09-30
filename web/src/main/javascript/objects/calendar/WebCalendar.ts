@@ -10,6 +10,7 @@ export class WebCalendar {
     private _timezone: string = "";
     private _host: CalendarHost = CalendarHost.GOOGLE;
     private _link: string = "";
+    private _hostLink: string = "";
 
     constructor() {
     }
@@ -76,7 +77,15 @@ export class WebCalendar {
     }
 
     set link(link) {
-        this._link = link
+        this._link = link;
+    }
+
+    get hostLink() {
+        return this._hostLink;
+    }
+
+    set hostLink(link) {
+        this._hostLink = link;
     }
 
     get isExternal() {
@@ -99,6 +108,7 @@ export class WebCalendar {
             "timezone": this.timezone,
             "host": CalendarHost[this.host],
             "link": this.link,
+            "host_link": this.hostLink,
         };
 
         if (this.description != null) {
@@ -118,6 +128,7 @@ export class WebCalendar {
         this.timezone = json.timezone;
         this.host = (<any>CalendarHost)[json.host];
         this.link = json.link;
+        this.hostLink = json.host_link;
 
         return this;
     }
