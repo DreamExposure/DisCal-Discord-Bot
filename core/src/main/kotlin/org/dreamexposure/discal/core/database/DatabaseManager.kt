@@ -194,7 +194,7 @@ object DatabaseManager {
                     val updateCommand = """UPDATE ${Tables.CALENDARS.table} SET
                         CALENDAR_NUMBER = ?, HOST = ?, CALENDAR_ID = ?,
                         CALENDAR_ADDRESS = ?, EXTERNAL = ?, CREDENTIAL_ID = ?,
-                        PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?, EXPIRES_AT
+                        PRIVATE_KEY = ?, ACCESS_TOKEN = ?, REFRESH_TOKEN = ?, EXPIRES_AT = ?
                         WHERE GUILD_ID = ?
                     """.trimMargin()
 
