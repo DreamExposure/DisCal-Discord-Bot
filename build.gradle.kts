@@ -26,7 +26,7 @@ val discord4jVersion = "3.2.0" //Has to be here to show up in git properties tas
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.1.3-SNAPSHOT"
+    version = "4.1.2"
     description = "DisCal"
 
     //Plugins

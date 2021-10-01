@@ -234,6 +234,7 @@ public class AnnouncementThread {
         return this.calendars.get(a.getGuildId());
     }
 
+    //TODO: Just redo like literally everything
     private Mono<Calendar> getService(CalendarData cd) {
         if (cd.getExternal()) {
             if (!this.customServices.containsKey(cd.getGuildId()))
@@ -241,7 +242,7 @@ public class AnnouncementThread {
 
             return this.customServices.get(cd.getGuildId());
         }
-        return this.discalServices.get(cd.getCredentialId());
+        return GoogleAuthWrapper.INSTANCE.getCalendarService(cd.getCredentialId());
     }
 
     private Mono<List<Event>> getEvents(CalendarData cd, Calendar service) {
