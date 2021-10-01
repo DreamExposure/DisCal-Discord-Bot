@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.network.discord
 import com.fasterxml.jackson.module.kotlin.readValue
 import discord4j.common.JacksonResources
 import discord4j.discordjson.json.ApplicationCommandData
+import discord4j.discordjson.json.ApplicationCommandOptionData
 import discord4j.discordjson.json.ApplicationCommandRequest
 import discord4j.rest.RestClient
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -68,7 +69,7 @@ class GlobalCommandRegistrar(
         if (dCommandType != commandType) return true
 
         //Check description
-        if (!discordCommand.description().equals(command.description().toOptional().orElse(""))) return true
+        if (discordCommand.description() != command.description().toOptional().orElse("")) return true
 
         //Check default perm
         val dCommandPerm = discordCommand.defaultPermission().toOptional().orElse(true)
@@ -76,6 +77,52 @@ class GlobalCommandRegistrar(
         if (dCommandPerm != commandPerm) return true
 
         //Check options
-        return !discordCommand.options().equals(command.options())
+        val discordOptions = discordCommand.options().toOptional().orElse(emptyList())
+        val commandOptions = command.options().toOptional().orElse(emptyList())
+
+        //This is messy and recursive but it should work
+        return !optionsEqual(discordOptions, commandOptions)
+    }
+
+    private fun optionsEqual(options1: List<ApplicationCommandOptionData>, options2: List<ApplicationCommandOptionData>): Boolean {
+        if (options1.isEmpty() && options2.isEmpty()) return true // No sub-options, they're equal
+        if (options1.size != options2.size) return false // Lists are different sizes, must update
+
+        //Loop through options and compare recursively
+        for ((index, opt1) in options1.withIndex()) {
+            val compare = optionsEqual(opt1, options2[index])
+            if (!compare) return false // Sub-options don't equal, return and update.
+        }
+
+        //If we make it here, everything should be equal
+        return true
+    }
+
+    //Returns false if not matching
+    private fun optionsEqual(option1: ApplicationCommandOptionData, option2: ApplicationCommandOptionData): Boolean {
+        //compare type
+        if (option1.type() != option2.type()) return false
+
+        //compare name
+        if (option1.name() != option2.name()) return false
+
+        //compare description
+        if (option1.description() != option2.description()) return false
+
+        //compare required bool
+        if (option1.required().toOptional().orElse(false) != option2.required().toOptional().orElse(false)) return false
+
+        //TODO: compare channel types -- have to wait for d4j 3.2.1
+
+        //compare choices
+        if (option1.choices().toOptional().orElse(emptyList()).equals(option2.choices().toOptional().orElse(emptyList())))
+            return false
+
+        //compare sub-options
+        val subOpts1 = option1.options().toOptional().orElse(emptyList())
+        val subOpts2 = option2.options().toOptional().orElse(emptyList())
+
+        //Recursive!!!!!!!
+        return optionsEqual(subOpts1, subOpts2);
     }
 }
