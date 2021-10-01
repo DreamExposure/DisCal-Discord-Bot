@@ -120,7 +120,7 @@ class DisCalClient {
                                     }.onErrorResume { Mono.empty() }
                                 }
 
-                        Mono.`when`(onReady, onRoleDelete, onCommand, onMention, onSlashCommand, startAnnouncement)
+                        Mono.`when`(onReady, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
                     }.block()
         }
     }
