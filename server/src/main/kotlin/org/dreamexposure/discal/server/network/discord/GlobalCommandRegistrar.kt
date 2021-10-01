@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.network.discord
 import com.fasterxml.jackson.module.kotlin.readValue
 import discord4j.common.JacksonResources
 import discord4j.discordjson.json.ApplicationCommandData
+import discord4j.discordjson.json.ApplicationCommandOptionChoiceData
 import discord4j.discordjson.json.ApplicationCommandOptionData
 import discord4j.discordjson.json.ApplicationCommandRequest
 import discord4j.rest.RestClient
@@ -90,8 +91,7 @@ class GlobalCommandRegistrar(
 
         //Loop through options and compare recursively
         for ((index, opt1) in options1.withIndex()) {
-            val compare = optionsEqual(opt1, options2[index])
-            if (!compare) return false // Sub-options don't equal, return and update.
+            if (!optionsEqual(opt1, options2[index])) return false // sub-opts don't match. needs to be updated
         }
 
         //If we make it here, everything should be equal
@@ -115,14 +115,33 @@ class GlobalCommandRegistrar(
         //TODO: compare channel types -- have to wait for d4j 3.2.1
 
         //compare choices
-        if (option1.choices().toOptional().orElse(emptyList()).equals(option2.choices().toOptional().orElse(emptyList())))
-            return false
+        val choices1 = option1.choices().toOptional().orElse(emptyList())
+        val choices2 = option2.choices().toOptional().orElse(emptyList())
+
+        if (!choicesEqual(choices1, choices2)) return false
 
         //compare sub-options
         val subOpts1 = option1.options().toOptional().orElse(emptyList())
         val subOpts2 = option2.options().toOptional().orElse(emptyList())
 
         //Recursive!!!!!!!
-        return optionsEqual(subOpts1, subOpts2);
+        return optionsEqual(subOpts1, subOpts2)
+    }
+
+    private fun choicesEqual(choices1: List<ApplicationCommandOptionChoiceData>, choices2: List<ApplicationCommandOptionChoiceData>): Boolean {
+        if (choices1.isEmpty() && choices2.isEmpty()) return true //both empty, both equal
+
+        if (choices1.size != choices2.size) return false //sizes don't match, needs updating
+
+        //Compare the choices one-by-one...
+        for ((index, c1) in choices1.withIndex()) {
+            val c2 = choices2[index]
+
+            if (c1.name() != c2.name()) return false //names not equal
+            if (c1.value() != c2.value()) return false //values not equal
+        }
+
+        //If we get here, they must be equal
+        return true
     }
 }
