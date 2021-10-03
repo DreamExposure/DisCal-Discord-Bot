@@ -3,9 +3,9 @@
   "description": "Displays the current time as seen by the calendar's timezone",
   "options": [
     {
-      "name": "number",
+      "name": "calendar",
       "type": 4,
-      "description": "The number of the calendar you wish to use (default 1)",
+      "description": "The calendar to pull the time from. Defaults to 1",
       "required": false
     }
   ],

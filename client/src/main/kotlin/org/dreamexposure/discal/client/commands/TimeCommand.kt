@@ -15,7 +15,7 @@ class TimeCommand : SlashCommand {
     override val ephemeral = true
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.getOption("number"))
+        return Mono.justOrEmpty(event.getOption("calendar"))
               .flatMap { Mono.justOrEmpty(it.value) }
               .map(ApplicationCommandInteractionOptionValue::asLong)
               .map(Long::toInt)
