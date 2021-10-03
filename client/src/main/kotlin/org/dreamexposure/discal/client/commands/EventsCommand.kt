@@ -61,7 +61,7 @@ class EventsCommand : SlashCommand {
                                 getMessage("upcoming.success.many", settings, "${events.size}")
                             ).flatMapMany {
                                 Flux.fromIterable(events)
-                            }.flatMap {
+                            }.concatMap {
                                 event.followup(EventEmbed.getCondensed(guild, settings, it))
                             }.then(Mono.just(""))
                         }
@@ -90,7 +90,7 @@ class EventsCommand : SlashCommand {
                                     getMessage("ongoing.success.many", settings, "${events.size}")
                                 ).flatMapMany {
                                     Flux.fromIterable(events)
-                                }.flatMap {
+                                }.concatMap {
                                     event.followup(EventEmbed.getCondensed(guild, settings, it))
                                 }.then(Mono.just(""))
                             }
@@ -119,7 +119,7 @@ class EventsCommand : SlashCommand {
                                     getMessage("today.success.many", settings, "${events.size}")
                                 ).flatMapMany {
                                     Flux.fromIterable(events)
-                                }.flatMap {
+                                }.concatMap {
                                     event.followup(EventEmbed.getCondensed(guild, settings, it))
                                 }.then(Mono.just(""))
                             }
@@ -179,7 +179,7 @@ class EventsCommand : SlashCommand {
                             getMessage("range.success.many", settings, "${events.size}")
                         ).flatMapMany {
                             Flux.fromIterable(events)
-                        }.flatMap {
+                        }.concatMap {
                             event.followup(EventEmbed.getCondensed(guild, settings, it))
                         }.then(Mono.just(""))
                     }
