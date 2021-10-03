@@ -87,24 +87,6 @@ object EventWrapper {
         }.onErrorResume { Mono.empty() }
     }
 
-    @Deprecated(message = "Deprecated, do not use service directly")
-    fun getEvents(calData: CalendarData, service: Calendar, amount: Int, start: Long): Mono<List<Event>> {
-        return Mono.fromCallable {
-            service.events()
-                    .list(calData.calendarId)
-                    .setMaxResults(amount)
-                    .setTimeMin(DateTime(start))
-                    .setOrderBy("startTime")
-                    .setSingleEvents(true)
-                    .setShowDeleted(false)
-                    .setQuotaUser(calData.guildId.asString())
-                    .execute().items
-        }.subscribeOn(Schedulers.boundedElastic())
-                .doOnError {
-                    LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event list(2) failure", it)
-                }.onErrorResume { Mono.empty() }
-    }
-
     fun getEvents(calData: CalendarData, amount: Int, start: Long, end: Long): Mono<List<Event>> {
         return GoogleAuthWrapper.getCalendarService(calData).flatMap { service: Calendar ->
             Mono.fromCallable {
