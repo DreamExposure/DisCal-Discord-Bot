@@ -97,7 +97,6 @@ public class AnnouncementCommand implements Command {
         info.getSubCommands().put("info", "Sets an additional info.");
         info.getSubCommands().put("enable", "Enables or Disables the announcement (alias for `disable`)");
         info.getSubCommands().put("disable", "Enables or Disables the announcement (alias for `enable`)");
-        info.getSubCommands().put("infoOnly", "Allows for setting an announcement to ONLY display the 'extra info'");
         info.getSubCommands().put("publish", "Allows for the event to be published if posted in a news channel");
 
         return info;
@@ -174,8 +173,6 @@ public class AnnouncementCommand implements Command {
                     case "disable":
                     case "disabled":
                         return this.moduleEnable(args, event, settings);
-                    case "infoonly":
-                        return this.moduleInfoOnly(args, event, settings);
                     case "channel":
                         return this.moduleChannel(args, event, settings);
                     case "color":
@@ -574,7 +571,7 @@ public class AnnouncementCommand implements Command {
                                 + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
                                 subRoleString, settings))
                             .footer(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
-                                a.getAnnouncementId().toString(), settings), null)
+                                a.getId().toString(), settings), null)
                             .build();
 
                         return DatabaseManager.INSTANCE.updateAnnouncement(a).thenReturn(embed);
@@ -635,7 +632,7 @@ public class AnnouncementCommand implements Command {
                             + Messages.getMessage("Embed.Announcement.Subscribe.Roles", "%roles%",
                             subRoleString, settings))
                         .footer(Messages.getMessage("Embed.Announcement.Subscribe.Footer", "%id%",
-                            a.getAnnouncementId().toString(), settings), null)
+                            a.getId().toString(), settings), null)
                         .build();
 
                     return Mono.when(deleteUserMessage, deleteCreatorMessage).thenReturn(embed);
@@ -840,7 +837,7 @@ public class AnnouncementCommand implements Command {
                                 + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
                                 subRoleString, settings))
                             .footer(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
-                                a.getAnnouncementId().toString(), settings), null)
+                                a.getId().toString(), settings), null)
                             .build();
 
 
@@ -902,7 +899,7 @@ public class AnnouncementCommand implements Command {
                             + Messages.getMessage("Embed.Announcement.Unsubscribe.Roles", "%roles%",
                             subRoleString, settings))
                         .footer(Messages.getMessage("Embed.Announcement.Unsubscribe.Footer", "%id%",
-                            a.getAnnouncementId().toString(), settings), null)
+                            a.getId().toString(), settings), null)
                         .build();
 
 
@@ -1241,41 +1238,6 @@ public class AnnouncementCommand implements Command {
                 });
             } else {
                 return Messages.sendMessage(Messages.getMessage("Announcement.Enable.Specify", settings), event);
-            }
-        }).then();
-    }
-
-    private Mono<Void> moduleInfoOnly(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        return Mono.defer(() -> {
-            if (AnnouncementCreator.getCreator().hasAnnouncement(settings.getGuildID())) {
-                Announcement a = AnnouncementCreator.getCreator().getAnnouncement(settings.getGuildID());
-
-                Mono<Void> deleteUserMessage = Messages.deleteMessage(event);
-                Mono<Void> deleteCreatorMessage = Messages.deleteMessage(a.getCreatorMessage());
-
-                return Mono.when(deleteUserMessage, deleteCreatorMessage)
-                    .then(AnnouncementMessageFormatter.getFormatAnnouncementEmbed(a, settings))
-                    .flatMap(em -> Messages.sendMessage(
-                        Messages.getMessage("Announcement.InfoOnly.Creator", settings), em, event))
-                    .doOnNext(a::setCreatorMessage);
-            } else if (args.length == 2) {
-                return AnnouncementUtils.announcementExists(args[1], settings.getGuildID()).flatMap(exists -> {
-                    if (exists) {
-                        UUID id = UUID.fromString(args[1]);
-                        AtomicBoolean io = new AtomicBoolean(false); //This has got to be tested...
-                        return DatabaseManager.INSTANCE.getAnnouncement(id, settings.getGuildID())
-                            .doOnNext(a -> a.setInfoOnly(!a.getInfoOnly()))
-                            .doOnNext(a -> io.set(a.getInfoOnly()))
-                            .flatMap(DatabaseManager.INSTANCE::updateAnnouncement)
-                            .map(i -> Messages.getMessage("Announcement.InfoOnly.Success", "%value%", io.get() + "", settings))
-                            .flatMap(msg -> Messages.sendMessage(msg, event));
-                    } else {
-                        return Messages.sendMessage(
-                            Messages.getMessage("Creator.Announcement.CannotFind.Announcement", settings), event);
-                    }
-                });
-            } else {
-                return Messages.sendMessage(Messages.getMessage("Announcement.InfoOnly.Specify", settings), event);
             }
         }).then();
     }

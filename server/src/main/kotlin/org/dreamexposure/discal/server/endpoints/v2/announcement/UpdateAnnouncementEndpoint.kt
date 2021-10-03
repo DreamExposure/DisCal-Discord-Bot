@@ -50,7 +50,6 @@ class UpdateAnnouncementEndpoint(val client: DiscordClient) {
                 ann.hoursBefore = body.optInt("hours", ann.hoursBefore)
                 ann.minutesBefore = body.optInt("hours", ann.minutesBefore)
                 ann.info = body.optString("info", ann.info)
-                ann.infoOnly = body.optBoolean("info_only", ann.infoOnly)
                 ann.enabled = body.optBoolean("enabled", ann.enabled)
                 ann.publish = body.optBoolean("publish", ann.publish)
 

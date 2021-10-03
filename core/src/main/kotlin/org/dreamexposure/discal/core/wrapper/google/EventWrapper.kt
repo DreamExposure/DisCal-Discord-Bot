@@ -69,7 +69,7 @@ object EventWrapper {
     }
 
     fun getEvents(calData: CalendarData, amount: Int, start: Long): Mono<List<Event>> {
-        return GoogleAuthWrapper.getCalendarService(calData).flatMap { service: Calendar ->
+        return GoogleAuthWrapper.getCalendarService(calData).flatMap { service ->
             Mono.fromCallable {
                 service.events()
                         .list(calData.calendarId)
