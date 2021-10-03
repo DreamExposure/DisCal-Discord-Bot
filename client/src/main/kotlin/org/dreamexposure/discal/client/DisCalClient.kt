@@ -24,7 +24,6 @@ import io.lettuce.core.RedisURI
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.listeners.discord.*
 import org.dreamexposure.discal.client.message.Messages
-import org.dreamexposure.discal.client.module.announcement.AnnouncementThread
 import org.dreamexposure.discal.client.module.command.*
 import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
@@ -34,10 +33,8 @@ import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.io.FileReader
-import java.time.Duration
 import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
@@ -112,15 +109,7 @@ class DisCalClient {
                                 .on(ChatInputInteractionEvent::class.java, slashCommandListener::handle)
                                 .then()
 
-                        val startAnnouncement = Flux.interval(Duration.ofMinutes(5))
-                                .onBackpressureBuffer()
-                                .flatMap {
-                                    AnnouncementThread(client).run().doOnError {
-                                        LOGGER.error("Announcement error", it)
-                                    }.onErrorResume { Mono.empty() }
-                                }
-
-                        Mono.`when`(onReady, onRoleDelete, onCommand, onSlashCommand, startAnnouncement)
+                        Mono.`when`(onReady, onRoleDelete, onCommand, onSlashCommand)
                     }.block()
         }
     }

@@ -19,8 +19,7 @@ data class Announcement(
         val guildId: Snowflake,
 ) {
     @Serializable(with = UUIDasStringSerializer::class)
-    @SerialName("id")
-    var announcementId: UUID = UUID.randomUUID()
+    var id: UUID = UUID.randomUUID()
         private set
 
     @SerialName("subscriber_roles")
@@ -52,9 +51,6 @@ data class Announcement(
 
     var enabled = true
 
-    @Deprecated(message = "Info only support is dropping in favor of a guild-wide announcement-style")
-    @SerialName("info_only")
-    var infoOnly = false
     var publish = false
 
     //Stuff for wizards
@@ -68,14 +64,14 @@ data class Announcement(
     var lastEdit = System.currentTimeMillis()
 
     constructor(guildId: Snowflake, announcementId: UUID) : this(guildId) {
-        this.announcementId = announcementId
+        this.id = announcementId
     }
 
     companion object {
         fun copy(from: Announcement, copyId: Boolean = false): Announcement {
             val to = from.copy()
             if (copyId)
-                to.announcementId = UUID.randomUUID()
+                to.id = UUID.randomUUID()
 
             //Copy all the other params...
             to.subscriberRoleIds.addAll(from.subscriberRoleIds)
@@ -89,7 +85,6 @@ data class Announcement(
             to.minutesBefore = from.minutesBefore
             to.info = from.info
             to.enabled = from.enabled
-            to.infoOnly = from.infoOnly
             to.publish = to.publish
 
             return to

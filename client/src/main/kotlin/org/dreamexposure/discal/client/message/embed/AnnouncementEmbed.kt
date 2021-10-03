@@ -6,6 +6,7 @@ import discord4j.core.`object`.entity.channel.GuildChannel
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
@@ -14,6 +15,16 @@ import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 
 object AnnouncementEmbed : EmbedMaker {
+    fun determine(ann: Announcement, event: Event, guild: Guild): Mono<EmbedCreateSpec> {
+        return guild.getSettings().flatMap { settings ->
+            when (settings.announcementStyle) {
+                AnnouncementStyle.FULL -> full(ann, event, guild)
+                AnnouncementStyle.SIMPLE -> simple(ann, event, guild)
+                AnnouncementStyle.EVENT -> event(ann, event, guild)
+            }
+        }
+    }
+
     fun full(ann: Announcement, event: Event, guild: Guild): Mono<EmbedCreateSpec> {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
@@ -52,7 +63,7 @@ object AnnouncementEmbed : EmbedMaker {
                 builder.image(event.image)
             }
 
-            builder.footer(getMessage("announcement", "full.footer", settings, ann.announcementId.toString()), null)
+            builder.footer(getMessage("announcement", "full.footer", settings, ann.id.toString()), null)
 
             builder.build()
         }
@@ -84,7 +95,7 @@ object AnnouncementEmbed : EmbedMaker {
                 builder.image(event.image)
             }
 
-            builder.footer(getMessage("announcement", "simple.footer", settings, ann.announcementId.toString()), null)
+            builder.footer(getMessage("announcement", "simple.footer", settings, ann.id.toString()), null)
 
             builder.build()
         }
@@ -127,7 +138,7 @@ object AnnouncementEmbed : EmbedMaker {
                 builder.image(event.image)
             }
 
-            builder.footer(getMessage("announcement", "event.footer", settings, ann.announcementId.toString()), null)
+            builder.footer(getMessage("announcement", "event.footer", settings, ann.id.toString()), null)
 
             builder.build()
         }
@@ -137,7 +148,7 @@ object AnnouncementEmbed : EmbedMaker {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
                   .title(getMessage("announcement", "con.title", settings))
-                  .addField(getMessage("announcement", "con.field.id", settings), ann.announcementId.toString(), false)
+                  .addField(getMessage("announcement", "con.field.id", settings), ann.id.toString(), false)
                   .addField(getMessage("announcement", "con.field.time", settings), condensedTime(ann), true)
                   .addField(getMessage("announcement", "con.field.enabled", settings), "${ann.enabled}", true)
                   .footer(getMessage("announcement", "con.footer", settings, ann.type.name, ann.modifier.name), null)
@@ -180,7 +191,7 @@ object AnnouncementEmbed : EmbedMaker {
             } else
                 builder.color(GlobalVal.discalColor)
 
-            builder.addField(getMessage("announcement", "view.field.id", settings), ann.announcementId.toString(), false)
+            builder.addField(getMessage("announcement", "view.field.id", settings), ann.id.toString(), false)
                   .addField(getMessage("announcement", "view.field.enabled", settings), "${ann.enabled}", true)
                   .addField(getMessage("announcement", "view.field.publish", settings), "${ann.publish}", true)
                   .build()

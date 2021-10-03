@@ -249,7 +249,7 @@ object DatabaseManager {
             val query = "SELECT * FROM ${Tables.ANNOUNCEMENTS.table} WHERE ANNOUNCEMENT_ID = ?"
 
             Mono.from(c.createStatement(query)
-                  .bind(0, announcement.announcementId.toString())
+                  .bind(0, announcement.id.toString())
                   .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
@@ -259,7 +259,7 @@ object DatabaseManager {
                         CALENDAR_NUMBER = ?, SUBSCRIBERS_ROLE = ?, SUBSCRIBERS_USER = ?, CHANNEL_ID = ?,
                         ANNOUNCEMENT_TYPE = ?, MODIFIER = ?, EVENT_ID = ?, EVENT_COLOR = ?,
                         HOURS_BEFORE = ?, MINUTES_BEFORE = ?,
-                        INFO = ?, ENABLED = ?, INFO_ONLY = ?, PUBLISH = ?
+                        INFO = ?, ENABLED = ?, PUBLISH = ?
                         WHERE ANNOUNCEMENT_ID = ?
                     """.trimMargin()
 
@@ -276,9 +276,8 @@ object DatabaseManager {
                           .bind(9, announcement.minutesBefore)
                           .bind(10, announcement.info)
                           .bind(11, announcement.enabled)
-                          .bind(12, announcement.infoOnly)
-                          .bind(13, announcement.publish)
-                          .bind(14, announcement.announcementId.toString())
+                          .bind(12, announcement.publish)
+                          .bind(13, announcement.id.toString())
                           .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                           .hasElements()
@@ -287,12 +286,12 @@ object DatabaseManager {
                     val insertCommand = """INSERT INTO ${Tables.ANNOUNCEMENTS.table}
                         (ANNOUNCEMENT_ID, CALENDAR_NUMBER, GUILD_ID, SUBSCRIBERS_ROLE, SUBSCRIBERS_USER,
                         CHANNEL_ID, ANNOUNCEMENT_TYPE, MODIFIER, EVENT_ID, EVENT_COLOR,
-                        HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, INFO_ONLY, PUBLISH)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        HOURS_BEFORE, MINUTES_BEFORE, INFO, ENABLED, PUBLISH)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.from(c.createStatement(insertCommand)
-                          .bind(0, announcement.announcementId.toString())
+                          .bind(0, announcement.id.toString())
                           .bind(1, announcement.calendarNumber)
                           .bind(2, announcement.guildId.asString())
                           .bind(3, announcement.subscriberRoleIds.asStringList())
@@ -306,8 +305,7 @@ object DatabaseManager {
                           .bind(11, announcement.minutesBefore)
                           .bind(12, announcement.info)
                           .bind(13, announcement.enabled)
-                          .bind(14, announcement.infoOnly)
-                          .bind(15, announcement.publish)
+                          .bind(14, announcement.publish)
                           .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                           .hasElements()
@@ -761,7 +759,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -799,7 +796,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -838,7 +834,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -876,7 +871,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -915,7 +909,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -953,7 +946,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -991,7 +983,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a
@@ -1030,7 +1021,6 @@ object DatabaseManager {
                     a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
                     a.info = row["INFO", String::class.java]!!
                     a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.infoOnly = row["INFO_ONLY", Boolean::class.java]!!
                     a.publish = row["PUBLISH", Boolean::class.java]!!
 
                     a

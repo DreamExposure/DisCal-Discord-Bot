@@ -59,7 +59,6 @@ class CreateAnnouncementEndpoint(val client: DiscordClient) {
             announcement.minutesBefore = body.optInt("minutes", 0)
 
             announcement.info = body.optString("info", "N/a")
-            announcement.infoOnly = body.optBoolean("info_only", false)
 
             announcement.publish = body.optBoolean("publish", false)
 
