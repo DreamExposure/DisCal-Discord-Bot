@@ -1,0 +1,159 @@
+package org.dreamexposure.discal.client.commands
+
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import org.dreamexposure.discal.client.message.embed.CalendarEmbed
+import org.dreamexposure.discal.client.wizards.CalendarWizard
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.extensions.discord4j.followup
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.utils.TimeZoneUtils
+import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
+import reactor.function.TupleUtils
+import java.time.ZoneId
+
+//TODO: Add permissions checking for commands. forgot to do that so far
+@Component
+class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
+    override val name = "calendar"
+    override val ephemeral = true
+
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        return when (event.options[0].name) {
+            "create" -> create(event, settings)
+            "name" -> name(event, settings)
+            "description" -> description(event, settings)
+            "timezone" -> timezone(event, settings)
+            "review" -> review(event, settings)
+            "confirm" -> confirm(event, settings)
+            "cancel" -> cancel(event, settings)
+            "delete" -> delete(event, settings)
+            "edit" -> edit(event, settings)
+            else -> Mono.empty() //Never can reach this, makes compiler happy.
+        }
+    }
+
+    private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val guildMono = event.interaction.guild
+
+        val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
+            .map { it.asString() }
+
+        val hostMono = Mono.justOrEmpty(event.options[0].getOption("host").flatMap { it.value })
+            .map { CalendarHost.valueOf(it.asString()) }
+            .defaultIfEmpty(CalendarHost.GOOGLE)
+
+        return if (wizard.get(settings.guildID) == null) {
+            //Start calendar wizard
+            Mono.zip(guildMono, nameMono, hostMono)
+                .flatMap(TupleUtils.function { guild, name, host ->
+                    val pre = PreCalendar.new(settings.guildID, host, name)
+                    wizard.start(pre)
+
+                    event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
+                }).then()
+        } else {
+            guildMono.flatMap {
+                event.followupEphemeral(
+                    getMessage("error.wizard.started", settings),
+                    CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!)
+                )
+            }.then()
+        }
+    }
+
+    private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val guildMono = event.interaction.guild
+
+        val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
+            .map { it.asString() }
+
+        val pre = wizard.get(settings.guildID)
+        return if (pre != null) {
+            Mono.zip(guildMono, nameMono).flatMap(TupleUtils.function { guild, name ->
+                pre.name = name
+
+                event.followupEphemeral(getMessage("name.success", settings), CalendarEmbed.pre(guild, settings, pre))
+            }).then()
+        } else {
+            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then();
+        }
+    }
+
+    private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val guildMono = event.interaction.guild
+
+        val descMono = Mono.justOrEmpty(event.options[0].getOption("description").flatMap { it.value })
+            .map { it.asString() }
+
+        val pre = wizard.get(settings.guildID)
+        return if (pre != null) {
+            Mono.zip(guildMono, descMono).flatMap<Any>(TupleUtils.function { guild, desc ->
+                pre.description = desc
+
+                event.followupEphemeral(
+                    getMessage("description.success", settings),
+                    CalendarEmbed.pre(guild, settings, pre)
+                )
+            }).then()
+        } else {
+            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
+        }
+    }
+
+    private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val guildMono = event.interaction.guild
+
+        val tzMono = Mono.justOrEmpty(event.options[0].getOption("timezone").flatMap { it.value })
+            .map { it.asString() }
+
+        val pre = wizard.get(settings.guildID)
+        return if (pre != null) {
+            Mono.zip(guildMono, tzMono).flatMap(TupleUtils.function { guild, timezone ->
+                if (TimeZoneUtils.isValid(timezone)) {
+                    pre.timezone = ZoneId.of(timezone)
+
+                    event.followupEphemeral(
+                        getMessage("timezone.success", settings),
+                        CalendarEmbed.pre(guild, settings, pre)
+                    )
+                } else {
+                    event.followupEphemeral(getMessage("timezone.failure.invalid", settings))
+                }
+            }).then()
+        } else {
+            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
+        }
+    }
+
+    private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val pre = wizard.get(settings.guildID)
+        return if (pre != null) {
+            event.interaction.guild.flatMap {
+                event.followupEphemeral(CalendarEmbed.pre(it, settings, pre))
+            }.then()
+        } else {
+            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
+        }
+    }
+
+    private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        TODO("Not yet implemented")
+    }
+
+    private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        wizard.remove(settings.guildID)
+
+        return event.followupEphemeral(getMessage("cancel.success", settings)).then();
+    }
+
+    private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        TODO("Not yet implemented")
+    }
+
+    private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        TODO("Not yet implemented")
+    }
+}
