@@ -102,7 +102,7 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
 
                 googleCal.summary = spec.name
                 spec.description?.let { googleCal.description = it }
-                googleCal.timeZone = spec.timezone
+                googleCal.timeZone = spec.timezone.id
 
                 //Call google to create it
                 CalendarWrapper.createCalendar(googleCal, credId, this.id)

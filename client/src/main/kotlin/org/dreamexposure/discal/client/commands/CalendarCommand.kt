@@ -35,6 +35,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
         }
     }
 
+    //TODO: Check if guild can create a new calendar
     private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val guildMono = event.interaction.guild
 
@@ -104,14 +105,12 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val guildMono = event.interaction.guild
-
         val tzMono = Mono.justOrEmpty(event.options[0].getOption("timezone").flatMap { it.value })
             .map { it.asString() }
 
         val pre = wizard.get(settings.guildID)
         return if (pre != null) {
-            Mono.zip(guildMono, tzMono).flatMap(TupleUtils.function { guild, timezone ->
+            Mono.zip(event.interaction.guild, tzMono).flatMap(TupleUtils.function { guild, timezone ->
                 if (TimeZoneUtils.isValid(timezone)) {
                     pre.timezone = ZoneId.of(timezone)
 
@@ -140,6 +139,26 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val pre = wizard.get(settings.guildID)
+        return if (pre != null) {
+            event.interaction.guild.flatMap { guild ->
+                if (!pre.editing) {
+                    // New calendar
+                } else {
+                    // Editing
+                    pre.calendar?.update(pre.updateSpec()).flatMap { response ->
+                        if (response.success) {
+                             event.followupEphemeral(getMessage("confirm.success.edit", settings), CalendarEmbed.)
+                        } else {
+
+                        }
+                    }
+                }
+            }
+
+        } else {
+            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
+        }
         TODO("Not yet implemented")
     }
 

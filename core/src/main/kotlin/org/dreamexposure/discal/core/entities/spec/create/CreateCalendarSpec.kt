@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.entities.spec.create
 
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import java.time.ZoneId
 
 data class CreateCalendarSpec(
         val host: CalendarHost,
@@ -11,5 +12,5 @@ data class CreateCalendarSpec(
 
         val description: String? = null,
 
-        val timezone: String,
+        val timezone: ZoneId,
 )
