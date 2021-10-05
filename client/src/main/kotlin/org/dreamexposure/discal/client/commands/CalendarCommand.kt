@@ -2,25 +2,24 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import discord4j.core.`object`.entity.Guild
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.InteractionReplyEditSpec
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.client.wizards.CalendarWizard
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
+import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.extensions.discord4j.createCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.followup
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.extensions.discord4j.*
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.TimeZoneUtils
+import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 import java.time.ZoneId
 
 //TODO: Go through other command classes and stop wrapping options in monos because I'm dumb
-//TODO: Add permissions checking for commands. forgot to do that so far
 @Component
 class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     override val name = "calendar"
@@ -41,180 +40,199 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
         }
     }
 
-    //TODO: Check if guild can create a new calendar
     private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val name = event.options[0].getOption("name")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
 
         val host = event.options[0].getOption("host")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .map(CalendarHost::valueOf)
-                .orElse(CalendarHost.GOOGLE)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(CalendarHost::valueOf)
+            .orElse(CalendarHost.GOOGLE)
 
-        return if (wizard.get(settings.guildID) == null) {
-            //Start calendar wizard
-            event.interaction.guild.flatMap { guild ->
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            if (wizard.get(settings.guildID) == null) {
+                //Start calendar wizard
                 val pre = PreCalendar.new(settings.guildID, host, name)
                 wizard.start(pre)
 
-                event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
-            }.then()
-        } else {
-            event.interaction.guild.flatMap {
-                event.followupEphemeral(
-                        getMessage("error.wizard.started", settings),
-                        CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!)
-                )
-            }.then()
-        }
+                event.interaction.guild
+                    .filterWhen(Guild::canAddCalendar)
+                    .map { CalendarEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("create.success", settings)) }
+                    .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
+            } else {
+                event.interaction.guild
+                    .map { CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val guildMono = event.interaction.guild
+        val name = event.options[0].getOption("name")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
 
-        //FIXME
-        val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
-                .map { it.asString() }
-
-        val pre = wizard.get(settings.guildID)
-        return if (pre != null) {
-            Mono.zip(guildMono, nameMono).flatMap(TupleUtils.function { guild, name ->
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
                 pre.name = name
-
-                event.followupEphemeral(getMessage("name.success", settings), CalendarEmbed.pre(guild, settings, pre))
-            }).then()
-        } else {
-            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then();
-        }
+                event.interaction.guild
+                    .map { CalendarEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("name.success", settings), it) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val guildMono = event.interaction.guild
+        val desc = event.options[0].getOption("description")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
 
-        //FIXME
-        val descMono = Mono.justOrEmpty(event.options[0].getOption("description").flatMap { it.value })
-                .map { it.asString() }
-
-        val pre = wizard.get(settings.guildID)
-        return if (pre != null) {
-            Mono.zip(guildMono, descMono).flatMap<Any>(TupleUtils.function { guild, desc ->
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
                 pre.description = desc
-
-                event.followupEphemeral(
-                        getMessage("description.success", settings),
-                        CalendarEmbed.pre(guild, settings, pre)
-                )
-            }).then()
-        } else {
-            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
-        }
+                event.interaction.guild
+                    .map { CalendarEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("description.success", settings)) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        //FIXME
-        val tzMono = Mono.justOrEmpty(event.options[0].getOption("timezone").flatMap { it.value })
-                .map { it.asString() }
+        val timezone = event.options[0].getOption("timezone")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
 
-        val pre = wizard.get(settings.guildID)
-        return if (pre != null) {
-            Mono.zip(event.interaction.guild, tzMono).flatMap(TupleUtils.function { guild, timezone ->
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
                 if (TimeZoneUtils.isValid(timezone)) {
                     pre.timezone = ZoneId.of(timezone)
 
-                    event.followupEphemeral(
-                            getMessage("timezone.success", settings),
-                            CalendarEmbed.pre(guild, settings, pre)
-                    )
+                    event.interaction.guild
+                        .map { CalendarEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("timezone.success", settings)) }
                 } else {
                     event.followupEphemeral(getMessage("timezone.failure.invalid", settings))
                 }
-            }).then()
-        } else {
-            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
-        }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val pre = wizard.get(settings.guildID)
-        return if (pre != null) {
-            event.interaction.guild.flatMap {
-                event.followupEphemeral(CalendarEmbed.pre(it, settings, pre))
-            }.then()
-        } else {
-            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
-        }
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                event.interaction.guild.flatMap {
+                    event.followupEphemeral(CalendarEmbed.pre(it, settings, pre))
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val pre = wizard.get(settings.guildID)
-        return if (pre != null) {
-            if (!pre.hasRequiredValues()) {
-                event.followupEphemeral(getMessage("confirm.failure.missing", settings))
-            }
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                if (!pre.hasRequiredValues()) {
+                    event.followupEphemeral(getMessage("confirm.failure.missing", settings))
+                }
 
-            event.editReply(InteractionReplyEditSpec.builder()
-                    .contentOrNull(getMessage("confirm.pending", settings))
-                    .build()
-            ).then(event.interaction.guild.flatMap { guild ->
-                if (!pre.editing) {
-                    // New calendar
-                    guild.createCalendar(pre.createSpec()).flatMap {
-                        event.followupEphemeral(
+                event.editReply(
+                    InteractionReplyEditSpec.builder()
+                        .contentOrNull(getMessage("confirm.pending", settings))
+                        .build()
+                ).then(event.interaction.guild.flatMap { guild ->
+                    if (!pre.editing) {
+                        // New calendar
+                        guild.createCalendar(pre.createSpec()).flatMap {
+                            event.followupEphemeral(
                                 getMessage("confirm.success.create", settings),
                                 CalendarEmbed.link(guild, settings, it)
-                        )
-                    }.doOnError {
-                        LOGGER.error("Create calendar with command failure", it)
-                    }.onErrorResume {
-                        event.followupEphemeral(getMessage("confirm.failure.create", settings))
-                    }
-                } else {
-                    // Editing
-                    pre.calendar!!.update(pre.updateSpec()).flatMap { response ->
-                        if (response.success) {
-                            event.followupEphemeral(
-                                    getMessage("confirm.success.edit", settings),
-                                    CalendarEmbed.link(guild, settings, response.new!!)
                             )
-                        } else {
-                            event.followupEphemeral(getMessage("confirm.failure.edit", settings))
+                        }.doOnError {
+                            LOGGER.error("Create calendar with command failure", it)
+                        }.onErrorResume {
+                            event.followupEphemeral(getMessage("confirm.failure.create", settings))
                         }
+                    } else {
+                        // Editing
+                        pre.calendar!!.update(pre.updateSpec())
+                            .filter(UpdateCalendarResponse::success)
+                            .map { CalendarEmbed.link(guild, settings, it.new!!) }
+                            .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings)) }
+                            .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
-                }
-            }).then()
-        } else {
-            event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
-        }
+                })
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        wizard.remove(settings.guildID)
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            wizard.remove(settings.guildID)
 
-        return event.followupEphemeral(getMessage("cancel.success", settings)).then();
+            event.followupEphemeral(getMessage("cancel.success", settings))
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
-
-        TODO("Not yet implemented")
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            event.interaction.guild
+                .flatMap { it.getCalendar(calendarNumber) }
+                .flatMap { it.delete() }
+                .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
+                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        //Determine which calendar they want to use...
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
-        TODO("Not yet implemented")
+        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+            if (wizard.get(settings.guildID) == null) {
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calendarNumber)
+                        .map { PreCalendar.edit(it) }
+                        .doOnNext { wizard.start(it) }
+                        .map { CalendarEmbed.pre(guild, settings, it) }
+                        .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
+                        .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            } else {
+                event.interaction.guild
+                    .map { CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))).then()
     }
 }
