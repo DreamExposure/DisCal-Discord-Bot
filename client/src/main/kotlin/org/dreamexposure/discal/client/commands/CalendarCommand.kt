@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.`object`.command.ApplicationCommandInteractionOption
+import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.InteractionReplyEditSpec
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
@@ -17,6 +19,7 @@ import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 import java.time.ZoneId
 
+//TODO: Go through other command classes and stop wrapping options in monos because I'm dumb
 //TODO: Add permissions checking for commands. forgot to do that so far
 @Component
 class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
@@ -40,26 +43,27 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
 
     //TODO: Check if guild can create a new calendar
     private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val guildMono = event.interaction.guild
+        val name = event.options[0].getOption("name")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asString)
+                .get()
 
-        val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
-                .map { it.asString() }
-
-        val hostMono = Mono.justOrEmpty(event.options[0].getOption("host").flatMap { it.value })
-                .map { CalendarHost.valueOf(it.asString()) }
-                .defaultIfEmpty(CalendarHost.GOOGLE)
+        val host = event.options[0].getOption("host")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asString)
+                .map(CalendarHost::valueOf)
+                .orElse(CalendarHost.GOOGLE)
 
         return if (wizard.get(settings.guildID) == null) {
             //Start calendar wizard
-            Mono.zip(guildMono, nameMono, hostMono)
-                    .flatMap(TupleUtils.function { guild, name, host ->
-                        val pre = PreCalendar.new(settings.guildID, host, name)
-                        wizard.start(pre)
+            event.interaction.guild.flatMap { guild ->
+                val pre = PreCalendar.new(settings.guildID, host, name)
+                wizard.start(pre)
 
-                        event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
-                    }).then()
+                event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
+            }.then()
         } else {
-            guildMono.flatMap {
+            event.interaction.guild.flatMap {
                 event.followupEphemeral(
                         getMessage("error.wizard.started", settings),
                         CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!)
@@ -71,6 +75,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val guildMono = event.interaction.guild
 
+        //FIXME
         val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
                 .map { it.asString() }
 
@@ -89,6 +94,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val guildMono = event.interaction.guild
 
+        //FIXME
         val descMono = Mono.justOrEmpty(event.options[0].getOption("description").flatMap { it.value })
                 .map { it.asString() }
 
@@ -108,6 +114,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         val tzMono = Mono.justOrEmpty(event.options[0].getOption("timezone").flatMap { it.value })
                 .map { it.asString() }
 
@@ -190,9 +197,11 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-                .map { it.asLong().toInt() }
-                .defaultIfEmpty(1)
+        val calendarNumber = event.options[0].getOption("calendar")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asLong)
+                .map(Long::toInt)
+                .orElse(1)
 
 
         TODO("Not yet implemented")
@@ -200,9 +209,11 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //Determine which calendar they want to use...
-        val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-                .map { it.asLong().toInt() }
-                .defaultIfEmpty(1)
+        val calendarNumber = event.options[0].getOption("calendar")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asLong)
+                .map(Long::toInt)
+                .orElse(1)
 
         TODO("Not yet implemented")
     }
