@@ -37,7 +37,7 @@ fun RestGuild.hasCalendar(): Mono<Boolean> {
 
 fun RestGuild.canAddCalendar(): Mono<Boolean> {
     //Always check the live database and bypass cache
-    return DatabaseManager.getCalendarCount()
+    return DatabaseManager.getCalendarCount(this.id)
         .flatMap { current ->
             if (current == 0) Mono.just(true)
             else getSettings().map { current < it.maxCalendars }

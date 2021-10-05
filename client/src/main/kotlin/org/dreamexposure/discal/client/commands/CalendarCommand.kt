@@ -1,13 +1,16 @@
 package org.dreamexposure.discal.client.commands
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import discord4j.core.spec.InteractionReplyEditSpec
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.client.wizards.CalendarWizard
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.extensions.discord4j.createCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.TimeZoneUtils
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -40,26 +43,26 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
         val guildMono = event.interaction.guild
 
         val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
-            .map { it.asString() }
+                .map { it.asString() }
 
         val hostMono = Mono.justOrEmpty(event.options[0].getOption("host").flatMap { it.value })
-            .map { CalendarHost.valueOf(it.asString()) }
-            .defaultIfEmpty(CalendarHost.GOOGLE)
+                .map { CalendarHost.valueOf(it.asString()) }
+                .defaultIfEmpty(CalendarHost.GOOGLE)
 
         return if (wizard.get(settings.guildID) == null) {
             //Start calendar wizard
             Mono.zip(guildMono, nameMono, hostMono)
-                .flatMap(TupleUtils.function { guild, name, host ->
-                    val pre = PreCalendar.new(settings.guildID, host, name)
-                    wizard.start(pre)
+                    .flatMap(TupleUtils.function { guild, name, host ->
+                        val pre = PreCalendar.new(settings.guildID, host, name)
+                        wizard.start(pre)
 
-                    event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
-                }).then()
+                        event.followup(getMessage("create.success", settings), CalendarEmbed.pre(guild, settings, pre))
+                    }).then()
         } else {
             guildMono.flatMap {
                 event.followupEphemeral(
-                    getMessage("error.wizard.started", settings),
-                    CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!)
+                        getMessage("error.wizard.started", settings),
+                        CalendarEmbed.pre(it, settings, wizard.get(settings.guildID)!!)
                 )
             }.then()
         }
@@ -69,7 +72,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
         val guildMono = event.interaction.guild
 
         val nameMono = Mono.justOrEmpty(event.options[0].getOption("name").flatMap { it.value })
-            .map { it.asString() }
+                .map { it.asString() }
 
         val pre = wizard.get(settings.guildID)
         return if (pre != null) {
@@ -87,7 +90,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
         val guildMono = event.interaction.guild
 
         val descMono = Mono.justOrEmpty(event.options[0].getOption("description").flatMap { it.value })
-            .map { it.asString() }
+                .map { it.asString() }
 
         val pre = wizard.get(settings.guildID)
         return if (pre != null) {
@@ -95,8 +98,8 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                 pre.description = desc
 
                 event.followupEphemeral(
-                    getMessage("description.success", settings),
-                    CalendarEmbed.pre(guild, settings, pre)
+                        getMessage("description.success", settings),
+                        CalendarEmbed.pre(guild, settings, pre)
                 )
             }).then()
         } else {
@@ -106,7 +109,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
 
     private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val tzMono = Mono.justOrEmpty(event.options[0].getOption("timezone").flatMap { it.value })
-            .map { it.asString() }
+                .map { it.asString() }
 
         val pre = wizard.get(settings.guildID)
         return if (pre != null) {
@@ -115,8 +118,8 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                     pre.timezone = ZoneId.of(timezone)
 
                     event.followupEphemeral(
-                        getMessage("timezone.success", settings),
-                        CalendarEmbed.pre(guild, settings, pre)
+                            getMessage("timezone.success", settings),
+                            CalendarEmbed.pre(guild, settings, pre)
                     )
                 } else {
                     event.followupEphemeral(getMessage("timezone.failure.invalid", settings))
@@ -141,24 +144,40 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val pre = wizard.get(settings.guildID)
         return if (pre != null) {
-            event.interaction.guild.flatMap { guild ->
+            if (!pre.hasRequiredValues()) {
+                event.followupEphemeral(getMessage("confirm.failure.missing", settings))
+            }
+
+            event.editReply(InteractionReplyEditSpec.builder()
+                    .contentOrNull(getMessage("confirm.pending", settings))
+                    .build()
+            ).then(event.interaction.guild.flatMap { guild ->
                 if (!pre.editing) {
                     // New calendar
-                    Mono.empty()
+                    guild.createCalendar(pre.createSpec()).flatMap {
+                        event.followupEphemeral(
+                                getMessage("confirm.success.create", settings),
+                                CalendarEmbed.link(guild, settings, it)
+                        )
+                    }.doOnError {
+                        LOGGER.error("Create calendar with command failure", it)
+                    }.onErrorResume {
+                        event.followupEphemeral(getMessage("confirm.failure.create", settings))
+                    }
                 } else {
                     // Editing
                     pre.calendar!!.update(pre.updateSpec()).flatMap { response ->
                         if (response.success) {
                             event.followupEphemeral(
-                                getMessage("confirm.success.edit", settings),
-                                CalendarEmbed.link(guild, settings, response.new!!)
+                                    getMessage("confirm.success.edit", settings),
+                                    CalendarEmbed.link(guild, settings, response.new!!)
                             )
                         } else {
                             event.followupEphemeral(getMessage("confirm.failure.edit", settings))
                         }
                     }
                 }
-            }.then()
+            }).then()
         } else {
             event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
         }
@@ -171,10 +190,20 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
+                .map { it.asLong().toInt() }
+                .defaultIfEmpty(1)
+
+
         TODO("Not yet implemented")
     }
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //Determine which calendar they want to use...
+        val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
+                .map { it.asLong().toInt() }
+                .defaultIfEmpty(1)
+
         TODO("Not yet implemented")
     }
 }
