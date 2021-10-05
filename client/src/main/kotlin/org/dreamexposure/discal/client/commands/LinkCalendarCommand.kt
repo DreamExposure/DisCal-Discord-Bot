@@ -22,7 +22,7 @@ class LinkCalendarCommand : SlashCommand {
             .defaultIfEmpty(1)
             .flatMap { calNumber ->
                 event.interaction.guild.flatMap { guild ->
-                    CalendarEmbed.getLinkCalEmbed(guild, settings, calNumber)
+                    CalendarEmbed.link(guild, settings, calNumber)
                         .flatMap(event::followup)
                 }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
             }.then()

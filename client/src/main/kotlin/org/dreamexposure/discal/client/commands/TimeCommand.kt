@@ -22,7 +22,7 @@ class TimeCommand : SlashCommand {
               .defaultIfEmpty(1)
               .flatMap { calNumber ->
                   event.interaction.guild.flatMap { guild ->
-                      CalendarEmbed.getTimeEmbed(guild, settings, calNumber).flatMap {
+                      CalendarEmbed.time(guild, settings, calNumber).flatMap {
                           event.followupEphemeral(it)
                       }
                   }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))

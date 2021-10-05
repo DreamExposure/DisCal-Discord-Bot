@@ -144,22 +144,24 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             event.interaction.guild.flatMap { guild ->
                 if (!pre.editing) {
                     // New calendar
+                    Mono.empty()
                 } else {
                     // Editing
-                    pre.calendar?.update(pre.updateSpec()).flatMap { response ->
+                    pre.calendar!!.update(pre.updateSpec()).flatMap { response ->
                         if (response.success) {
-                             event.followupEphemeral(getMessage("confirm.success.edit", settings), CalendarEmbed.)
+                            event.followupEphemeral(
+                                getMessage("confirm.success.edit", settings),
+                                CalendarEmbed.link(guild, settings, response.new!!)
+                            )
                         } else {
-
+                            event.followupEphemeral(getMessage("confirm.failure.edit", settings))
                         }
                     }
                 }
-            }
-
+            }.then()
         } else {
             event.followupEphemeral(getMessage("error.wizard.notStarted", settings)).then()
         }
-        TODO("Not yet implemented")
     }
 
     private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {

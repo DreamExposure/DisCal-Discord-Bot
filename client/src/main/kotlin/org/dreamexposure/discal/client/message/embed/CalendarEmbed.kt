@@ -4,6 +4,7 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
+import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
@@ -12,27 +13,30 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object CalendarEmbed : EmbedMaker {
-    fun getLinkCalEmbed(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
-        return guild.getCalendar(calNumber).map { cal ->
-            val builder = defaultBuilder(guild, settings)
-
-            builder.title(getMessage("calendar", "link.title", settings))
-            builder.addField(getMessage("calendar", "link.field.name", settings), cal.name, false)
-            builder.addField(getMessage("calendar", "link.field.description", settings), cal.description, false)
-            builder.addField(getMessage("calendar", "link.field.timezone", settings), cal.zoneName, false)
-
-            builder.addField(getMessage("calendar", "link.field.host", settings), cal.calendarData.host.name, true)
-            builder.addField(getMessage("calendar", "link.field.number", settings), "${cal.calendarNumber}", true)
-            builder.addField(getMessage("calendar", "link.field.id", settings), cal.calendarId, false)
-            builder.url(cal.link)
-            builder.footer(getMessage("calendar", "link.footer", settings), null)
-            builder.color(discalColor)
-
-            builder.build()
+    fun link(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
+        return guild.getCalendar(calNumber).map {
+            link(guild, settings, it)
         }
     }
 
-    fun getTimeEmbed(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
+    fun link(guild: Guild, settings: GuildSettings, calendar: Calendar): EmbedCreateSpec {
+        return defaultBuilder(guild, settings)
+            .title(getMessage("calendar", "link.title", settings))
+            .addField(getMessage("calendar", "link.field.name", settings), calendar.name, false)
+            .addField(getMessage("calendar", "link.field.description", settings), calendar.description, false)
+            .addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
+
+            .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
+            .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
+            .addField(getMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
+            .url(calendar.link)
+            .footer(getMessage("calendar", "link.footer", settings), null)
+            .color(discalColor)
+            .build()
+    }
+
+
+    fun time(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
         return guild.getCalendar(calNumber).map { cal ->
             val ldt = LocalDateTime.now(cal.timezone)
 
