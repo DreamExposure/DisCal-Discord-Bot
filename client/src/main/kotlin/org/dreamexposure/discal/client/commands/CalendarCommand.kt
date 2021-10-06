@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import java.time.ZoneId
 
-//TODO: Go through other command classes and stop wrapping options in monos because I'm dumb
 @Component
 class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     override val name = "calendar"
