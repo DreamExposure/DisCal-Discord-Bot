@@ -6,7 +6,6 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import discord4j.core.spec.InteractionReplyEditSpec
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.client.wizards.CalendarWizard
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -156,11 +155,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                     event.followupEphemeral(getMessage("confirm.failure.missing", settings))
                 }
 
-                event.editReply(
-                    InteractionReplyEditSpec.builder()
-                        .contentOrNull(getMessage("confirm.pending", settings))
-                        .build()
-                ).then(event.interaction.guild.flatMap { guild ->
+                event.interaction.guild.flatMap { guild ->
                     if (!pre.editing) {
                         // New calendar
                         guild.createCalendar(pre.createSpec()).flatMap {
@@ -181,7 +176,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                             .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
                             .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
-                })
+                }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
