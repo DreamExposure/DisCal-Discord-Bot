@@ -5,6 +5,7 @@ import com.google.api.services.calendar.model.AclRule
 import com.google.api.services.calendar.model.EventDateTime
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
+import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
@@ -43,6 +44,9 @@ class GoogleCalendar internal constructor(
         get() = "https://calendar.google.com/calendar/embed?src=$calendarId"
 
     override fun delete(): Mono<Boolean> {
+        //Delete self from cache
+        DiscalCache.removeCalendar(guildId, calendarNumber)
+
         return CalendarWrapper.deleteCalendar(calendarData).then(
                 Mono.`when`(
                         DatabaseManager.deleteCalendar(calendarData),
@@ -67,10 +71,14 @@ class GoogleCalendar internal constructor(
                             .setScope(AclRule.Scope().setType("default"))
                             .setRole("reader")
 
+                    val new = GoogleCalendar(this.calendarData, confirmed)
+                    //Update cache
+                    DiscalCache.putCalendar(new)
+
                     return@flatMap AclRuleWrapper.insertRule(rule, this.calendarData)
                             .thenReturn(UpdateCalendarResponse(
                                     old = this,
-                                    new = GoogleCalendar(this.calendarData, confirmed),
+                                    new = new,
                                     success = true)
                             )
                 }.defaultIfEmpty(UpdateCalendarResponse(old = this, success = false))

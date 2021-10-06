@@ -42,4 +42,9 @@ object DiscalCache {
             calendars[calendar.guildId] = map
         }
     }
+
+    fun removeCalendar(guildId: Snowflake, calNum: Int) {
+        if (calendars.containsKey(guildId))
+            calendars[guildId]!!.remove(calNum)
+    }
 }

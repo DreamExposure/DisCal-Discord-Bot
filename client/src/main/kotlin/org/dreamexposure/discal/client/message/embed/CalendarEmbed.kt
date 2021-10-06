@@ -20,12 +20,15 @@ object CalendarEmbed : EmbedMaker {
     }
 
     fun link(guild: Guild, settings: GuildSettings, calendar: Calendar): EmbedCreateSpec {
-        return defaultBuilder(guild, settings)
+        val builder = defaultBuilder(guild, settings)
             .title(getMessage("calendar", "link.title", settings))
-            .addField(getMessage("calendar", "link.field.name", settings), calendar.name.ifEmpty { "\u200B" }, false)
-            .addField(getMessage("calendar", "link.field.description", settings), calendar.description.ifEmpty { "\u200B" }, false)
-            .addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
+        //Handle optional fields
+        if (calendar.name.isNotEmpty())
+            builder.addField(getMessage("calendar", "link.field.name", settings), calendar.name, false)
+        if (calendar.description.isNotEmpty())
+            builder.addField(getMessage("calendar", "link.field.description", settings), calendar.description, false)
 
+        return builder.addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
             .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
             .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
             .addField(getMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
@@ -66,8 +69,11 @@ object CalendarEmbed : EmbedMaker {
         val builder = defaultBuilder(guild, settings)
             .title(getMessage("calendar", "wizard.title", settings))
             .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name, false)
-            .addField(getMessage("calendar", "wizard.field.description", settings), preCal.description.ifEmpty { "\u200B" }, false)
-            .addField(getMessage("calendar", "wizard.field.timezone", settings), preCal.timezone?.id ?: "UNSET", true)
+            .addField(
+                getMessage("calendar", "wizard.field.description", settings),
+                preCal.description.ifEmpty { "\u200B" },
+                false
+            ).addField(getMessage("calendar", "wizard.field.timezone", settings), preCal.timezone?.id ?: "UNSET", true)
             .addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
             .footer(getMessage("calendar", "wizard.footer", settings), null)
 
