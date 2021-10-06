@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.commands
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Guild
+import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.InteractionReplyEditSpec
@@ -52,7 +53,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(CalendarHost::valueOf)
             .orElse(CalendarHost.GOOGLE)
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             if (wizard.get(settings.guildID) == null) {
                 //Start calendar wizard
                 val pre = PreCalendar.new(settings.guildID, host, name)
