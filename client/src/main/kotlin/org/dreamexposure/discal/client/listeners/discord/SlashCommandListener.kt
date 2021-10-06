@@ -32,7 +32,7 @@ class SlashCommandListener(applicationContext: ApplicationContext) {
             }.doOnError {
                 LOGGER.error("Unhandled slash command error", it)
             }.onErrorResume {
-                Mono.empty()
+                event.followupEphemeral("An unknown error has occurred. Please try again and/or contact DisCal support.")
             }.then()
     }
 }
