@@ -8,7 +8,6 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.dreamexposure.discal.server.network.google.GoogleInternalAuthHandler
-import org.dreamexposure.discal.server.utils.Authentication
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -23,9 +22,6 @@ import kotlin.system.exitProcess
 class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
-        //Handle the rest of the bullshit
-        Authentication.init()
-
         //Save instance ID
         networkInfo.instanceId = Application.instanceId
         LOGGER.info(STATUS, "API is now online")
@@ -34,7 +30,6 @@ class DisCalServer(val networkInfo: NetworkInfo) : ApplicationRunner {
     @PreDestroy
     fun onShutdown() {
         LOGGER.info(STATUS, "API shutting down.")
-        Authentication.shutdown()
         DatabaseManager.disconnectFromMySQL()
     }
 

@@ -20,7 +20,8 @@ public class CommandExecutor {
     private static final List<Command> commands = new ArrayList<>();
 
     private static final List<String> movedCommands = List.of(
-        "help", "discal", "time", "linkcal", "calendarlink", "callink", "linkcallador", "events", "rsvp", "dev"
+        "help", "discal", "time", "linkcal", "calendarlink", "callink", "linkcallador", "events",
+        "rsvp", "dev", "calendar", "cal", "callador"
     );
 
     private CommandExecutor() {

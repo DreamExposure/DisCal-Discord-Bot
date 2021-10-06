@@ -37,7 +37,7 @@ fun RestGuild.hasCalendar(): Mono<Boolean> {
 
 fun RestGuild.canAddCalendar(): Mono<Boolean> {
     //Always check the live database and bypass cache
-    return DatabaseManager.getCalendarCount()
+    return DatabaseManager.getCalendarCount(this.id)
         .flatMap { current ->
             if (current == 0) Mono.just(true)
             else getSettings().map { current < it.maxCalendars }
@@ -102,7 +102,7 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
 
                 googleCal.summary = spec.name
                 spec.description?.let { googleCal.description = it }
-                googleCal.timeZone = spec.timezone
+                googleCal.timeZone = spec.timezone.id
 
                 //Call google to create it
                 CalendarWrapper.createCalendar(googleCal, credId, this.id)

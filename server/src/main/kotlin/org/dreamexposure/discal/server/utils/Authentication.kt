@@ -7,16 +7,19 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.concurrent.timerTask
 
+//TODO: Use DI and make this an application runner as well
 object Authentication {
-    //TODO: Don't use timer, use flux interval instead eventually
-    private var timer: Timer? = null
+    init {
+        Flux.interval(Duration.ofHours(1))
+            .map { handleExpiredKeys() }
+            .subscribe()
+    }
 
     //TODO: Switch to atomic containing immutable map eventually
     private val tempKeys: ConcurrentMap<String, Long> = ConcurrentHashMap()
@@ -111,18 +114,6 @@ object Authentication {
     fun saveReadOnlyKey(key: String) {
         if (!readOnlyKeys.containsKey(key))
             readOnlyKeys[key] = System.currentTimeMillis() + Duration.ofHours(1).toMillis()
-    }
-
-    fun init() {
-        timer = Timer(true)
-
-        timer?.schedule(timerTask {
-            handleExpiredKeys()
-        }, Duration.ofHours(1).toMillis())
-    }
-
-    fun shutdown() {
-        if (timer != null) timer?.cancel()
     }
 
     private fun handleExpiredKeys() {

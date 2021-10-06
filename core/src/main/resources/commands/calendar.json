@@ -1,0 +1,121 @@
+{
+  "name": "calendar",
+  "description": "Commands for creating and modifying calendars",
+  "options": [
+    {
+      "name": "create",
+      "type": 1,
+      "description": "Starts the calendar creation wizard",
+      "required": false,
+      "options": [
+        {
+          "name": "name",
+          "type": 3,
+          "description": "The name of the new calendar",
+          "required": true
+        },
+        {
+          "name": "host",
+          "type": 3,
+          "description": "The 3rd party host for the calendar",
+          "required": false,
+          "choices": [
+            {
+              "name": "Google",
+              "value": "GOOGLE"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "name",
+      "type": 1,
+      "description": "Sets the calendar's name in the wizard",
+      "required": false,
+      "options": [
+        {
+          "name": "name",
+          "type": 3,
+          "description": "The new name of the calendar",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "description",
+      "type": 1,
+      "description": "Sets the calendar's description in the wizard",
+      "required": false,
+      "options": [
+        {
+          "name": "description",
+          "type": 3,
+          "description": "The new description of the calendar",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "timezone",
+      "type": 1,
+      "description": "Sets the calendar's timezone in the wizard",
+      "required": false,
+      "options": [
+        {
+          "name": "timezone",
+          "type": 3,
+          "description": "The new timezone of the calendar",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "type": 1,
+      "description": "Displays the properties of the calendar in the wizard",
+      "required": false
+    },
+    {
+      "name": "confirm",
+      "type": 1,
+      "description": "Commits the changes made in the wizard",
+      "required": false
+    },
+    {
+      "name": "cancel",
+      "type": 1,
+      "description": "Cancels the wizard",
+      "required": false
+    },
+    {
+      "name": "delete",
+      "type": 1,
+      "description": "Deletes the calendar",
+      "required": false,
+      "options": [
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to delete. Defaults to 1",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "edit",
+      "type": 1,
+      "description": "Edits an existing calendar",
+      "required": false,
+      "options": [
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to edit. Defaults to 1",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "default_permissions": true
+}

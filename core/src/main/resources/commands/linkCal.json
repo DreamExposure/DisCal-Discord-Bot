@@ -3,9 +3,9 @@
   "description": "Provides info and a link to the Guild's Calendar",
   "options": [
     {
-      "name": "number",
+      "name": "calendar",
       "type": 4,
-      "description": "The number of the calendar you wish to link (default 1)",
+      "description": "The calendar to display. Defaults to 1",
       "required": false
     }
   ],

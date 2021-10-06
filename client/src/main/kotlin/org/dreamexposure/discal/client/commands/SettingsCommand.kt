@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.SettingsEmbed
@@ -58,48 +59,60 @@ class SettingsCommand : SlashCommand {
     }
 
     private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.options[0].getOption("style"))
-              .map { it.value.get() }
-              .map { AnnouncementStyle.fromValue(it.asLong().toInt()) }
-              .doOnNext { settings.announcementStyle = it }
-              .flatMap { DatabaseManager.updateSettings(settings) }
-              .flatMap {
-                  event.followupEphemeral(getMessage("style.success", settings, settings.announcementStyle.name))
-              }.then()
+        val announcementStyle = event.options[0].getOption("style")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(AnnouncementStyle::fromValue)
+            .get()
+
+        settings.announcementStyle = announcementStyle
+
+        return DatabaseManager.updateSettings(settings)
+            .flatMap { event.followupEphemeral(getMessage("style.success", settings, announcementStyle.name)) }
+            .then()
     }
 
     private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.options[0].getOption("lang"))
-              .map { it.value.get() }
-              .map(ApplicationCommandInteractionOptionValue::asString)
-              .doOnNext { settings.lang = it }
-              .flatMap { DatabaseManager.updateSettings(settings) }
-              .then(event.followupEphemeral(getMessage("lang.success", settings)))
-              .then()
+        val lang = event.options[0].getOption("lang")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
+
+        settings.lang = lang
+
+        return DatabaseManager.updateSettings(settings)
+            .flatMap { event.followupEphemeral(getMessage("lang.success", settings)) }
+            .then()
     }
 
     private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.options[0].getOption("format"))
-              .map { it.value.get() }
-              .map { TimeFormat.fromValue(it.asLong().toInt()) }
-              .doOnNext { settings.timeFormat = it }
-              .flatMap { DatabaseManager.updateSettings(settings) }
-              .flatMap {
-                  event.followupEphemeral(getMessage("format.success", settings, settings.timeFormat.name))
-              }.then()
+        val timeFormat = event.options[0].getOption("format")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(TimeFormat::fromValue)
+            .get()
+
+        settings.timeFormat = timeFormat
+
+        return DatabaseManager.updateSettings(settings)
+            .flatMap { event.followupEphemeral(getMessage("format.success", settings, timeFormat.name)) }
+            .then()
     }
 
     private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return if (settings.patronGuild) {
-            Mono.justOrEmpty(event.options[0].getOption("use"))
-                  .map { it.value.get() }
-                  .map(ApplicationCommandInteractionOptionValue::asBoolean)
-                  .doOnNext { settings.branded = it }
-                  .flatMap {
-                      DatabaseManager.updateSettings(settings).then(
-                          event.followupEphemeral(getMessage("brand.success", settings, "$it"))
-                      )
-                  }.then()
+            val useBranding = event.options[0].getOption("use")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asBoolean)
+                .get()
+
+            settings.branded = useBranding
+
+            DatabaseManager.updateSettings(settings)
+                .flatMap { event.followupEphemeral(getMessage("brand.success", settings, "$useBranding")) }
+                .then()
         } else {
             event.followupEphemeral(getCommonMsg("error.patronOnly", settings)).then()
         }

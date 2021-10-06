@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
@@ -15,17 +16,16 @@ class TimeCommand : SlashCommand {
     override val ephemeral = true
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.getOption("calendar"))
-              .flatMap { Mono.justOrEmpty(it.value) }
-              .map(ApplicationCommandInteractionOptionValue::asLong)
-              .map(Long::toInt)
-              .defaultIfEmpty(1)
-              .flatMap { calNumber ->
-                  event.interaction.guild.flatMap { guild ->
-                      CalendarEmbed.getTimeEmbed(guild, settings, calNumber).flatMap {
-                          event.followupEphemeral(it)
-                      }
-                  }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-              }.then()
+        val calendarNumber = event.getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
+
+        return event.interaction.guild.flatMap { guild ->
+            CalendarEmbed.time(guild, settings, calendarNumber).flatMap {
+                event.followupEphemeral(it)
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings))).then()
     }
 }
