@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
@@ -15,16 +16,15 @@ class LinkCalendarCommand : SlashCommand {
     override val ephemeral = false
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
-        return Mono.justOrEmpty(event.getOption("number"))
-            .flatMap { Mono.justOrEmpty(it.value) }
+        val calendarNumber = event.options[0].getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .defaultIfEmpty(1)
-            .flatMap { calNumber ->
-                event.interaction.guild.flatMap { guild ->
-                    CalendarEmbed.link(guild, settings, calNumber)
-                        .flatMap(event::followup)
-                }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-            }.then()
+            .orElse(1)
+
+        return event.interaction.guild.flatMap { guild ->
+            CalendarEmbed.link(guild, settings, calendarNumber)
+                .flatMap(event::followup)
+        }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings))).then()
     }
 }

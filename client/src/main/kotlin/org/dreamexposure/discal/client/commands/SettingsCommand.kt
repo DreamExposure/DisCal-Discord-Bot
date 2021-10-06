@@ -46,6 +46,7 @@ class SettingsCommand : SlashCommand {
     }
 
     private fun roleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("role"))
               .map { it.value.get() }
               .flatMap(ApplicationCommandInteractionOptionValue::asRole)
@@ -58,6 +59,7 @@ class SettingsCommand : SlashCommand {
     }
 
     private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("style"))
               .map { it.value.get() }
               .map { AnnouncementStyle.fromValue(it.asLong().toInt()) }
@@ -69,6 +71,7 @@ class SettingsCommand : SlashCommand {
     }
 
     private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("lang"))
               .map { it.value.get() }
               .map(ApplicationCommandInteractionOptionValue::asString)
@@ -79,6 +82,7 @@ class SettingsCommand : SlashCommand {
     }
 
     private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("format"))
               .map { it.value.get() }
               .map { TimeFormat.fromValue(it.asLong().toInt()) }
@@ -91,6 +95,7 @@ class SettingsCommand : SlashCommand {
 
     private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         return if (settings.patronGuild) {
+            //FIXME
             Mono.justOrEmpty(event.options[0].getOption("use"))
                   .map { it.value.get() }
                   .map(ApplicationCommandInteractionOptionValue::asBoolean)
