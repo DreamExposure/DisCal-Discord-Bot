@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.extensions.discord4j
 
 import discord4j.common.util.Snowflake
 import discord4j.discordjson.Id
-import discord4j.discordjson.json.GuildUpdateData
 import discord4j.discordjson.json.MemberData
 import discord4j.discordjson.json.RoleData
 import discord4j.rest.entity.RestMember
@@ -13,14 +12,19 @@ import reactor.core.publisher.Mono
 import java.util.function.Predicate
 
 fun RestMember.hasPermissions(pred: Predicate<PermissionSet>): Mono<Boolean> {
-    return this.data.flatMap { memberData ->
-        this.guild().data.map(GuildUpdateData::roles)
-              .flatMapMany { Flux.fromIterable(it) }
-              .filter { memberData.roles().contains(it.id()) }
-              .map(RoleData::permissions)
-              .reduce(0L) { perm: Long, accumulator: Long -> accumulator or perm }
-              .map(PermissionSet::of)
-              .map(pred::test)
+    return this.guild().data.flatMap { guildData ->
+        if (guildData.ownerId().asLong() == this.id.asLong()) {
+            Mono.just(true)
+        } else {
+            this.data.flatMap { memberData ->
+                Flux.fromIterable(guildData.roles())
+                    .filter { memberData.roles().contains(it.id()) }
+                    .map(RoleData::permissions)
+                    .reduce(0L) { perm: Long, accumulator: Long -> accumulator or perm }
+                    .map(PermissionSet::of)
+                    .map(pred::test)
+            }
+        }
     }
 }
 
