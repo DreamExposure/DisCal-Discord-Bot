@@ -20,14 +20,13 @@ class AddCalCommand : SlashCommand {
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //TODO: Remove dev-only and switch to patron-only once this is completed
         return if (settings.devGuild) {
-            Mono.justOrEmpty(event.interaction.member)
-                  .filterWhen(Member::hasElevatedPermissions).flatMap {
-                      //Check if a calendar can be added since non-premium only allows 1 calendar.
-                      event.interaction.guild.filterWhen(Guild::canAddCalendar).flatMap {
-                          event.followupEphemeral(getMessage("response.start", settings, getLink(settings)))
-                      }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
-                  }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
-                  .then()
+            Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+                //Check if a calendar can be added since non-premium only allows 1 calendar.
+                event.interaction.guild.filterWhen(Guild::canAddCalendar).flatMap {
+                    event.followupEphemeral(getMessage("response.start", settings, getLink(settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
+                .then()
         } else {
             event.followupEphemeral(getCommonMsg("error.disabled", settings)).then()
         }

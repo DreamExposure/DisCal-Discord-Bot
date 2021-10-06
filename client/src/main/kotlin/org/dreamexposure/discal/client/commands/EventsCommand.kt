@@ -33,10 +33,12 @@ class EventsCommand : SlashCommand {
 
     private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         //Determine which calendar they want to use...
+        //FIXME
         val calNumMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
             .map { it.asLong().toInt() }
             .defaultIfEmpty(1)
 
+        //FIXME
         val amountMono = Mono.justOrEmpty(event.options[0].getOption("amount").flatMap { it.value })
             .map { it.asLong().toInt() }
             .defaultIfEmpty(1)
@@ -72,6 +74,7 @@ class EventsCommand : SlashCommand {
     }
 
     private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
             .map { it.asLong().toInt() }
             .defaultIfEmpty(1).flatMap { calNum ->
@@ -101,6 +104,7 @@ class EventsCommand : SlashCommand {
     }
 
     private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+        //FIXME
         return Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
             .map { it.asLong().toInt() }
             .defaultIfEmpty(1).flatMap { calNum ->
@@ -132,6 +136,7 @@ class EventsCommand : SlashCommand {
     private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
         val gMono = event.interaction.guild.cache()
 
+        //FIXME
         val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
             .map { it.asLong().toInt() }
             .defaultIfEmpty(1)
@@ -141,6 +146,7 @@ class EventsCommand : SlashCommand {
                 }
             }.cache()
 
+        //FIXME
         val sMono = Mono.justOrEmpty(event.options[0].getOption("start").flatMap { it.value })
             .map { it.asString() }
             .flatMap { value ->
@@ -151,6 +157,7 @@ class EventsCommand : SlashCommand {
                 }
             }.map(ZonedDateTime::toInstant)
 
+        //FIXME
         val eMono = Mono.justOrEmpty(event.options[0].getOption("end").flatMap { it.value })
             .map { it.asString() }
             .flatMap { value ->
