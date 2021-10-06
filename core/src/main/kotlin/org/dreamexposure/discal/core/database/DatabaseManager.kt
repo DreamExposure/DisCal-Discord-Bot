@@ -663,7 +663,7 @@ object DatabaseManager {
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get calendar count", it)
             }.onErrorReturn(-1)
-        }
+        }.defaultIfEmpty(0)
     }
 
     fun getEventData(guildId: Snowflake, eventId: String): Mono<EventData> {
