@@ -103,7 +103,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                 pre.description = desc
                 event.interaction.guild
                     .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(getMessage("description.success", settings)) }
+                    .flatMap { event.followupEphemeral(getMessage("description.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -125,7 +125,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
 
                     event.interaction.guild
                         .map { CalendarEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("timezone.success", settings)) }
+                        .flatMap { event.followupEphemeral(getMessage("timezone.success", settings), it) }
                 } else {
                     event.followupEphemeral(getMessage("timezone.failure.invalid", settings))
                 }
@@ -178,7 +178,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                         pre.calendar!!.update(pre.updateSpec())
                             .filter(UpdateCalendarResponse::success)
                             .map { CalendarEmbed.link(guild, settings, it.new!!) }
-                            .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings)) }
+                            .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
                             .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
                 })
