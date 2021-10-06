@@ -55,12 +55,12 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             if (wizard.get(settings.guildID) == null) {
                 //Start calendar wizard
                 val pre = PreCalendar.new(settings.guildID, host, name)
-                wizard.start(pre)
 
                 event.interaction.guild
                     .filterWhen(Guild::canAddCalendar)
+                    .doOnNext { wizard.start(pre) } //only start wizard if another calendar can be added
                     .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(getMessage("create.success", settings)) }
+                    .flatMap { event.followupEphemeral(getMessage("create.success", settings), it) }
                     .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
             } else {
                 event.interaction.guild
