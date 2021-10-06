@@ -17,7 +17,7 @@ class LinkCalendarCommand : SlashCommand {
     override val ephemeral = false
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val calendarNumber = event.options[0].getOption("calendar")
+        val calendarNumber = event.getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
