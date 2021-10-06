@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.SettingsEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -20,7 +21,7 @@ class SettingsCommand : SlashCommand {
     override val name = "settings"
     override val ephemeral = true
 
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         //Check if user has permission to use this
         return event.interaction.member.get().hasElevatedPermissions().flatMap { hasPerm ->
             if (hasPerm) {
@@ -34,19 +35,18 @@ class SettingsCommand : SlashCommand {
                     else -> Mono.empty() //Never can reach this, makes compiler happy.
                 }
             } else {
-                event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)).then()
+                event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))
             }
         }
     }
 
-    private fun viewSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun viewSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return event.interaction.guild
               .flatMap { SettingsEmbed.getView(it, settings) }
               .flatMap(event::followup)
-              .then()
     }
 
-    private fun roleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun roleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return Mono.justOrEmpty(event.options[0].getOption("role"))
               .map { it.value.get() }
               .flatMap(ApplicationCommandInteractionOptionValue::asRole)
@@ -55,10 +55,10 @@ class SettingsCommand : SlashCommand {
                   DatabaseManager.updateSettings(settings).then(
                       event.followupEphemeral(getMessage("role.success", settings, role.name))
                   )
-              }.then()
+              }
     }
 
-    private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val announcementStyle = event.options[0].getOption("style")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -70,10 +70,9 @@ class SettingsCommand : SlashCommand {
 
         return DatabaseManager.updateSettings(settings)
             .flatMap { event.followupEphemeral(getMessage("style.success", settings, announcementStyle.name)) }
-            .then()
     }
 
-    private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val lang = event.options[0].getOption("lang")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -83,10 +82,9 @@ class SettingsCommand : SlashCommand {
 
         return DatabaseManager.updateSettings(settings)
             .flatMap { event.followupEphemeral(getMessage("lang.success", settings)) }
-            .then()
     }
 
-    private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val timeFormat = event.options[0].getOption("format")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -98,10 +96,9 @@ class SettingsCommand : SlashCommand {
 
         return DatabaseManager.updateSettings(settings)
             .flatMap { event.followupEphemeral(getMessage("format.success", settings, timeFormat.name)) }
-            .then()
     }
 
-    private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return if (settings.patronGuild) {
             val useBranding = event.options[0].getOption("use")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -112,9 +109,8 @@ class SettingsCommand : SlashCommand {
 
             DatabaseManager.updateSettings(settings)
                 .flatMap { event.followupEphemeral(getMessage("brand.success", settings, "$useBranding")) }
-                .then()
         } else {
-            event.followupEphemeral(getCommonMsg("error.patronOnly", settings)).then()
+            event.followupEphemeral(getCommonMsg("error.patronOnly", settings))
         }
     }
 }

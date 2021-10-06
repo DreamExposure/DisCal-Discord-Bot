@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
@@ -18,9 +19,9 @@ class DevCommand : SlashCommand {
     override val name = "dev"
     override val ephemeral = true
 
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         if (!GlobalVal.devUserIds.contains(event.interaction.user.id)) {
-            return event.followupEphemeral(getMessage("error.notDeveloper", settings)).then()
+            return event.followupEphemeral(getMessage("error.notDeveloper", settings))
         }
 
         return when (event.options[0].name) {
@@ -33,7 +34,7 @@ class DevCommand : SlashCommand {
         }
     }
 
-    private fun patronSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun patronSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
@@ -47,10 +48,9 @@ class DevCommand : SlashCommand {
                 )
             }.doOnError { LOGGER.error("[cmd] patron failure", it) }
             .onErrorResume { event.followupEphemeral(getMessage("patron.failure.badId", settings)) }
-            .then()
     }
 
-    private fun devSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun devSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
@@ -64,10 +64,9 @@ class DevCommand : SlashCommand {
                 )
             }.doOnError { LOGGER.error("[cmd] dev failure", it) }
             .onErrorResume { event.followupEphemeral(getMessage("dev.failure.badId", settings)) }
-            .then()
     }
 
-    private fun maxCalSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun maxCalSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
@@ -84,10 +83,10 @@ class DevCommand : SlashCommand {
             }
             .onErrorResume {
                 event.followupEphemeral(getMessage("maxcal.failure.badInput", settings))
-            }.then()
+            }
     }
 
-    private fun apiRegisterSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun apiRegisterSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return Mono.justOrEmpty(event.options[0].getOption("user").flatMap { it.value })
             .flatMap(ApplicationCommandInteractionOptionValue::asUser)
             .flatMap { user ->
@@ -106,10 +105,9 @@ class DevCommand : SlashCommand {
                     }
                 }
             }.switchIfEmpty(event.followupEphemeral(getMessage("apiRegister.failure.empty", settings)))
-            .then()
     }
 
-    private fun apiBlockSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun apiBlockSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return Mono.justOrEmpty(event.options[0].getOption("key").flatMap { it.value })
             .map(ApplicationCommandInteractionOptionValue::asString)
             .flatMap(DatabaseManager::getAPIAccount)
@@ -120,6 +118,6 @@ class DevCommand : SlashCommand {
             .switchIfEmpty(event.followupEphemeral(getMessage("apiBlock.failure.notFound", settings)))
             .onErrorResume {
                 event.followupEphemeral(getMessage("apiBlock.failure.other", settings))
-            }.then()
+            }
     }
 }

@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -23,7 +24,7 @@ class EventsCommand : SlashCommand {
     override val name = "events"
     override val ephemeral = false
 
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return when (event.options[0].name) {
             "upcoming" -> upcomingEventsSubcommand(event, settings)
             "ongoing" -> ongoingEventsSubcommand(event, settings)
@@ -33,7 +34,7 @@ class EventsCommand : SlashCommand {
         }
     }
 
-    private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -48,7 +49,7 @@ class EventsCommand : SlashCommand {
 
 
         if (amount < 1 || amount > 15) {
-            return event.followup(getMessage("upcoming.failure.outOfRange", settings)).then()
+            return event.followup(getMessage("upcoming.failure.outOfRange", settings))
         }
 
         return event.interaction.guild.flatMap { guild ->
@@ -68,14 +69,14 @@ class EventsCommand : SlashCommand {
                             Flux.fromIterable(events)
                         }.concatMap {
                             event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.then(Mono.just(""))
+                        }.last()
                     }
                 }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings))).then()
+            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
         }
     }
 
-    private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -99,14 +100,14 @@ class EventsCommand : SlashCommand {
                             Flux.fromIterable(events)
                         }.concatMap {
                             event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.then(Mono.just(""))
+                        }.last()
                     }
                 }
             }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-        }.then()
+        }
     }
 
-    private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -130,14 +131,14 @@ class EventsCommand : SlashCommand {
                             Flux.fromIterable(events)
                         }.concatMap {
                             event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.then(Mono.just(""))
+                        }.last()
                     }
                 }
             }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-        }.then()
+        }
     }
 
-    private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val gMono = event.interaction.guild.cache()
 
         val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
@@ -189,12 +190,12 @@ class EventsCommand : SlashCommand {
                             Flux.fromIterable(events)
                         }.concatMap {
                             event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.then(Mono.just(""))
+                        }.last()
                     }
                 }
             }).switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
             .onErrorResume(DateTimeParseException::class.java) {
                 event.followup(getCommonMsg("error.format.date", settings))
-            }.then()
+            }
     }
 }

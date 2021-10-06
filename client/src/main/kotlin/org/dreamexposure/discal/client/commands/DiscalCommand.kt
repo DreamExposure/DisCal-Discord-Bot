@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.DiscalEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -12,10 +13,9 @@ class DiscalCommand : SlashCommand {
     override val name = "discal"
     override val ephemeral = false
 
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return event.interaction.guild
               .flatMap(DiscalEmbed::info)
               .flatMap(event::followup)
-              .then()
     }
 }

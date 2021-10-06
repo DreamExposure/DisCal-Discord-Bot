@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
+import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -17,7 +18,7 @@ class AddCalCommand : SlashCommand {
     override val name = "addcal"
     override val ephemeral = true
 
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Void> {
+    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         //TODO: Remove dev-only and switch to patron-only once this is completed
         return if (settings.devGuild) {
             Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
@@ -26,9 +27,8 @@ class AddCalCommand : SlashCommand {
                     event.followupEphemeral(getMessage("response.start", settings, getLink(settings)))
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
             }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
-                .then()
         } else {
-            event.followupEphemeral(getCommonMsg("error.disabled", settings)).then()
+            event.followupEphemeral(getCommonMsg("error.disabled", settings))
         }
     }
 
