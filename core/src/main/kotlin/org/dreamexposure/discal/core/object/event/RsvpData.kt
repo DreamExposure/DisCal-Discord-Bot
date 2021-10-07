@@ -13,13 +13,13 @@ import reactor.core.publisher.Mono
 
 @Serializable
 data class RsvpData(
-        @Serializable(with = SnowflakeAsStringSerializer::class)
-        @SerialName("guild_id")
-        val guildId: Snowflake,
-        @SerialName("event_id")
-        val eventId: String,
-        @SerialName("calendar_number")
-        val calendarNumber: Int = 1,
+    @Serializable(with = SnowflakeAsStringSerializer::class)
+    @SerialName("guild_id")
+    val guildId: Snowflake,
+    @SerialName("event_id")
+    val eventId: String,
+    @SerialName("calendar_number")
+    val calendarNumber: Int = 1,
 ) {
     @SerialName("event_end")
     var eventEnd: Long = 0
@@ -109,61 +109,61 @@ data class RsvpData(
     //Functions
     fun removeCompletely(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)
-                .doOnNext(goingOnTime::remove)
-                .doOnNext(goingLate::remove)
-                .doOnNext(notGoing::remove)
-                .doOnNext(undecided::remove)
-                .flatMap {
-                    if (roleId != null) {
-                        removeRole(it, roleId!!, "Removed RSVP to event with ID: $eventId", client)
-                    } else Mono.empty()
-                }.then()
+            .doOnNext { goingOnTime.removeAll { it == userId } }
+            .doOnNext { goingLate.removeAll { it == userId } }
+            .doOnNext { notGoing.removeAll { it == userId } }
+            .doOnNext { undecided.removeAll { it == userId } }
+            .flatMap {
+                if (roleId != null) {
+                    removeRole(it, roleId!!, "Removed RSVP to event with ID: $eventId", client)
+                } else Mono.empty()
+            }.then()
     }
 
     fun removeCompletely(member: Member): Mono<Void> = removeCompletely(member.id.asString(), member.client.rest())
 
     fun addGoingOnTime(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)
-                .doOnNext(goingOnTime::add)
-                .flatMap {
-                    if (roleId != null) {
-                        addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
-                    } else Mono.empty()
-                }.then()
+            .doOnNext(goingOnTime::add)
+            .flatMap {
+                if (roleId != null) {
+                    addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
+                } else Mono.empty()
+            }.then()
     }
 
     fun addGoingOnTime(member: Member): Mono<Void> = addGoingOnTime(member.id.asString(), member.client.rest())
 
     fun addGoingLate(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)
-                .doOnNext(goingLate::add)
-                .flatMap {
-                    if (roleId != null) {
-                        addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
-                    } else Mono.empty()
-                }.then()
+            .doOnNext(goingLate::add)
+            .flatMap {
+                if (roleId != null) {
+                    addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
+                } else Mono.empty()
+            }.then()
     }
 
     fun addGoingLate(member: Member): Mono<Void> = addGoingLate(member.id.asString(), member.client.rest())
 
     fun shouldBeSaved(): Boolean {
         return this.goingOnTime.isNotEmpty()
-                || this.goingLate.isNotEmpty()
-                || this.notGoing.isNotEmpty()
-                || this.undecided.isNotEmpty()
-                || limit != -1
-                || roleId != null
+              || this.goingLate.isNotEmpty()
+              || this.notGoing.isNotEmpty()
+              || this.undecided.isNotEmpty()
+              || limit != -1
+              || roleId != null
     }
 
     private fun addRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
         return client.getGuildById(this.guildId)
-                .addMemberRole(Snowflake.of(userId), roleId, reason)
-                .onErrorResume(ClientException::class.java) { Mono.empty() }
+            .addMemberRole(Snowflake.of(userId), roleId, reason)
+            .onErrorResume(ClientException::class.java) { Mono.empty() }
     }
 
     private fun removeRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
         return client.getGuildById(this.guildId)
-                .removeMemberRole(Snowflake.of(userId), roleId, reason)
-                .onErrorResume(ClientException::class.java) { Mono.empty() }
+            .removeMemberRole(Snowflake.of(userId), roleId, reason)
+            .onErrorResume(ClientException::class.java) { Mono.empty() }
     }
 }
