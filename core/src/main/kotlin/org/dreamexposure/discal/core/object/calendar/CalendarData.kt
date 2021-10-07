@@ -34,7 +34,7 @@ data class CalendarData(
         var encryptedRefreshToken: String = "N/a",
         @Transient
         var expiresAt: Instant = Instant.now()
-) {
+): Comparable<CalendarData> {
     constructor(guildId: Snowflake, calendarNumber: Int, host: CalendarHost, calendarId: String,
                 calendarAddress: String, credentialId: Int) :
             this(guildId, calendarNumber, host, calendarId, calendarAddress, false, credentialId)
@@ -47,4 +47,10 @@ data class CalendarData(
     }
 
     fun expired() = Instant.now().isAfter(expiresAt)
+
+    override fun compareTo(other: CalendarData): Int {
+        if (this.calendarNumber > other.calendarNumber) return 1
+        if (this.calendarNumber < other.calendarNumber) return -1
+        return 0
+    }
 }

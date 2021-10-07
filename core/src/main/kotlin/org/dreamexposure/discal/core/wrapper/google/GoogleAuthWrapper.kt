@@ -112,12 +112,8 @@ object GoogleAuthWrapper {
 
                     if ("invalid_grant".equals(errorBody.getString("error"), true)) {
                         //User revoked access to calendar, delete our reference as they need to re-auth it.
-                        return@flatMap Mono.`when`(
-                                DatabaseManager.deleteCalendar(calData),
-                                DatabaseManager.deleteAllEventData(calData.guildId, calData.calendarNumber),
-                                DatabaseManager.deleteAllRsvpData(calData.guildId, calData.calendarNumber),
-                                DatabaseManager.deleteAllAnnouncementData(calData.guildId, calData.calendarNumber)
-                        ).then(Mono.empty())
+                        return@flatMap DatabaseManager.deleteCalendarAndRelatedData(calData)
+                            .then(Mono.empty())
                     } else {
                         LOGGER.debug(DEFAULT, "[!DGC!] err requesting new access token. " +
                                 "Code: ${response.code} | ${response.message} | $errorBody")

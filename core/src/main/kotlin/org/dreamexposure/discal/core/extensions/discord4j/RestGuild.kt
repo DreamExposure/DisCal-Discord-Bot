@@ -44,6 +44,12 @@ fun RestGuild.canAddCalendar(): Mono<Boolean> {
         }
 }
 
+fun RestGuild.determineNextCalendarNumber(): Mono<Int> {
+    return DatabaseManager.getAllCalendars(this.id)
+        .map(List<CalendarData>::size)
+        .map { it + 1 }
+}
+
 /**
  * Attempts to retrieve this [Guild]'s main [Calendar] (calendar 1, this guild's first/primary calendar)
  * If an error occurs, it is emitted through the [Mono]

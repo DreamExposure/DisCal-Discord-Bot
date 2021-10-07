@@ -45,16 +45,11 @@ class GoogleCalendar internal constructor(
 
     override fun delete(): Mono<Boolean> {
         //Delete self from cache
-        DiscalCache.removeCalendar(guildId, calendarNumber)
+        DiscalCache.handleCalendarDelete(guildId)
 
-        return CalendarWrapper.deleteCalendar(calendarData).then(
-                Mono.`when`(
-                        DatabaseManager.deleteCalendar(calendarData),
-                        DatabaseManager.deleteAllEventData(guildId, calendarNumber),
-                        DatabaseManager.deleteAllRsvpData(guildId, calendarNumber),
-                        DatabaseManager.deleteAllAnnouncementData(guildId, calendarNumber)
-                )).thenReturn(true)
-                .defaultIfEmpty(false)
+        return CalendarWrapper.deleteCalendar(calendarData)
+            .then(DatabaseManager.deleteCalendarAndRelatedData(calendarData))
+            .thenReturn(true)
     }
 
     override fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse> {

@@ -43,8 +43,12 @@ object DiscalCache {
         }
     }
 
-    fun removeCalendar(guildId: Snowflake, calNum: Int) {
-        if (calendars.containsKey(guildId))
-            calendars[guildId]!!.remove(calNum)
+    fun handleCalendarDelete(guildId: Snowflake) {
+        removeCalendars(guildId)
+        //Eventually other cached things will be here, like events, rsvp data, etc
+    }
+
+    fun removeCalendars(guildId: Snowflake) {
+        calendars.remove(guildId)
     }
 }

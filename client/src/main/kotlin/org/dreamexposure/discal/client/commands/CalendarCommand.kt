@@ -158,16 +158,18 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
                 event.interaction.guild.flatMap { guild ->
                     if (!pre.editing) {
                         // New calendar
-                        guild.createCalendar(pre.createSpec()).flatMap {
-                            event.followupEphemeral(
-                                getMessage("confirm.success.create", settings),
-                                CalendarEmbed.link(guild, settings, it)
-                            )
-                        }.doOnError {
-                            LOGGER.error("Create calendar with command failure", it)
-                        }.onErrorResume {
-                            event.followupEphemeral(getMessage("confirm.failure.create", settings))
-                        }
+                        pre.createSpec(guild)
+                            .flatMap(guild::createCalendar)
+                            .flatMap {
+                                event.followupEphemeral(
+                                    getMessage("confirm.success.create", settings),
+                                    CalendarEmbed.link(guild, settings, it)
+                                )
+                            }.doOnError {
+                                LOGGER.error("Create calendar with command failure", it)
+                            }.onErrorResume {
+                                event.followupEphemeral(getMessage("confirm.failure.create", settings))
+                            }
                     } else {
                         // Editing
                         pre.calendar!!.update(pre.updateSpec())

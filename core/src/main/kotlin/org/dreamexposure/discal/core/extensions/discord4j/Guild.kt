@@ -30,6 +30,8 @@ fun Guild.hasCalendar(): Mono<Boolean> = getRestGuild().hasCalendar()
 
 fun Guild.canAddCalendar(): Mono<Boolean> = getRestGuild().canAddCalendar()
 
+fun Guild.determineNextCalendarNumber(): Mono<Int> = getRestGuild().determineNextCalendarNumber()
+
 /**
  * Attempts to retrieve this [Guild]'s main [Calendar] (calendar 1, this guild's first/primary calendar)
  * If an error occurs, it is emitted through the [Mono]

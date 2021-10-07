@@ -1,10 +1,13 @@
 package org.dreamexposure.discal.core.`object`.calendar
 
 import discord4j.common.util.Snowflake
+import discord4j.core.`object`.entity.Guild
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.extensions.discord4j.determineNextCalendarNumber
+import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.ZoneId
 
@@ -28,10 +31,8 @@ data class PreCalendar private constructor(
         return this.name.isNotEmpty() && this.timezone != null
     }
 
-    fun createSpec(): CreateCalendarSpec {
-        // TODO: Determine calendar number...
-
-        return CreateCalendarSpec(host, 1, name, description, timezone!!)
+    fun createSpec(guild: Guild): Mono<CreateCalendarSpec> {
+        return guild.determineNextCalendarNumber().map { CreateCalendarSpec(host, it, name, description, timezone!!) }
     }
 
     fun updateSpec() = UpdateCalendarSpec(name, description, timezone)
