@@ -108,16 +108,13 @@ data class RsvpData(
 
     //Functions
     fun removeCompletely(userId: String, client: DiscordClient): Mono<Void> {
-        return Mono.just(userId)
-            .doOnNext { goingOnTime.removeAll { it == userId } }
-            .doOnNext { goingLate.removeAll { it == userId } }
-            .doOnNext { notGoing.removeAll { it == userId } }
-            .doOnNext { undecided.removeAll { it == userId } }
-            .flatMap {
-                if (roleId != null) {
-                    removeRole(it, roleId!!, "Removed RSVP to event with ID: $eventId", client)
-                } else Mono.empty()
-            }.then()
+        goingOnTime.removeAll { userId == it }
+        goingLate.removeAll { userId == it }
+        notGoing.removeAll { userId == it }
+        undecided.removeAll { userId == it }
+
+        return if (roleId != null) removeRole(userId, roleId!!, "Removed RSVP to event with ID $eventId", client)
+        else Mono.empty()
     }
 
     fun removeCompletely(member: Member): Mono<Void> = removeCompletely(member.id.asString(), member.client.rest())
@@ -129,7 +126,7 @@ data class RsvpData(
                 if (roleId != null) {
                     addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
                 } else Mono.empty()
-            }.then()
+            }
     }
 
     fun addGoingOnTime(member: Member): Mono<Void> = addGoingOnTime(member.id.asString(), member.client.rest())
@@ -141,7 +138,7 @@ data class RsvpData(
                 if (roleId != null) {
                     addRole(it, roleId!!, "RSVP'd to event with ID: $eventId", client)
                 } else Mono.empty()
-            }.then()
+            }
     }
 
     fun addGoingLate(member: Member): Mono<Void> = addGoingLate(member.id.asString(), member.client.rest())
