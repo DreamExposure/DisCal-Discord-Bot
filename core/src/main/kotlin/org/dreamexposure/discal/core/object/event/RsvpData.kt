@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Serializable
 data class RsvpData(
@@ -35,15 +36,15 @@ data class RsvpData(
         private set
 
     @SerialName("on_time")
-    val goingOnTime: MutableList<String> = mutableListOf()
+    val goingOnTime: MutableList<String> = CopyOnWriteArrayList()
 
     @SerialName("late")
-    val goingLate: MutableList<String> = mutableListOf()
+    val goingLate: MutableList<String> = CopyOnWriteArrayList()
 
     @SerialName("not_going")
-    val notGoing: MutableList<String> = mutableListOf()
+    val notGoing: MutableList<String> = CopyOnWriteArrayList()
 
-    val undecided: MutableList<String> = mutableListOf()
+    val undecided: MutableList<String> = CopyOnWriteArrayList()
 
     //List string stuffs
     fun setGoingOnTimeFromString(strList: String) {
