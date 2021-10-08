@@ -186,13 +186,12 @@ class RsvpCommand : SlashCommand {
                 cal.getEvent(eventId).flatMap { calEvent ->
                     if (!calEvent.isOver()) {
                         val member = event.interaction.member.get()
-                        calEvent.getRsvp()
-                            .flatMap { it.removeCompletely(member).thenReturn(it) }
-                            .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                            .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                            .flatMap {
-                                event.followupEphemeral(getMessage("remove.success", settings), it)
-                            }
+                        calEvent.getRsvp().flatMap { rsvp ->
+                            rsvp.removeCompletely(member)
+                                .then(calEvent.updateRsvp(rsvp))
+                                .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                .flatMap { event.followupEphemeral(getMessage("remove.success", settings), it) }
+                        }
                     } else {
                         event.followupEphemeral(getCommonMsg("error.event.ended", settings))
                     }
