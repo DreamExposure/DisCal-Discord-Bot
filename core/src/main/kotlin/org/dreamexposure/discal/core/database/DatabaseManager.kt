@@ -387,8 +387,6 @@ object DatabaseManager {
     }
 
     fun updateRsvpData(data: RsvpData): Mono<Boolean> {
-        if (!data.shouldBeSaved()) return Mono.just(false)
-
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_RSVP_BY_GUILD)
@@ -426,7 +424,7 @@ object DatabaseManager {
                     }.flatMapMany(Result::getRowsUpdated)
                         .hasElements()
                         .thenReturn(true)
-                } else {
+                } else if (data.shouldBeSaved()) {
                     val insertCommand = """INSERT INTO ${Tables.RSVP}
                         (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, GOING_ON_TIME, GOING_LATE,
                         NOT_GOING, UNDECIDED, RSVP_LIMIT, RSVP_ROLE)
@@ -454,6 +452,8 @@ object DatabaseManager {
                     }.flatMapMany(Result::getRowsUpdated)
                         .hasElements()
                         .thenReturn(true)
+                } else {
+                    Mono.just(false)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update rsvp data", it)
                 }.onErrorResume { Mono.just(false) }
@@ -1151,28 +1151,28 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.FULL_CALENDAR_DELETE) //Monolith 8 statement query
-                      // calendar delete bindings
+                    // calendar delete bindings
                     .bind(0, calendarData.calendarAddress)
                     .bind(1, calendarData.guildId.asString())
-                      // event delete bindings
+                    // event delete bindings
                     .bind(2, calendarData.guildId.asString())
                     .bind(3, calendarData.calendarNumber)
-                      // rsvp delete bindings
+                    // rsvp delete bindings
                     .bind(4, calendarData.guildId.asString())
                     .bind(5, calendarData.calendarNumber)
-                      // announcement delete bindings
+                    // announcement delete bindings
                     .bind(6, calendarData.guildId.asString())
                     .bind(7, calendarData.calendarNumber)
-                      // decrement calendar bindings
+                    // decrement calendar bindings
                     .bind(8, calendarData.calendarNumber)
                     .bind(9, calendarData.guildId.asString())
-                      // decrement event bindings
+                    // decrement event bindings
                     .bind(10, calendarData.calendarNumber)
                     .bind(11, calendarData.guildId.asString())
-                      // decrement rsvp bindings
+                    // decrement rsvp bindings
                     .bind(12, calendarData.calendarNumber)
                     .bind(13, calendarData.guildId.asString())
-                      // decrement announcement bindings
+                    // decrement announcement bindings
                     .bind(14, calendarData.calendarNumber)
                     .bind(15, calendarData.guildId.asString())
                     .execute()
