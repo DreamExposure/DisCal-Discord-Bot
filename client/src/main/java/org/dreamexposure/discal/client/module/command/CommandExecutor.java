@@ -1,10 +1,15 @@
 package org.dreamexposure.discal.client.module.command;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.RestClient;
 import org.dreamexposure.discal.client.message.Messages;
+import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.command.CommandInfo;
 import org.dreamexposure.discal.core.utils.GeneralUtils;
+import org.dreamexposure.discal.core.utils.GlobalVal;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -50,7 +55,7 @@ public class CommandExecutor {
         if (movedCommands.contains(cmd)) {
             return new WarningCommand().issueCommand(args, event, settings);
         } else
-            return getCommand(cmd).flatMap(c -> c.issueCommand(args,event, settings));
+            return getCommand(cmd).flatMap(c -> c.issueCommand(args, event, settings));
     }
 
     /**
@@ -99,8 +104,55 @@ class WarningCommand implements Command {
 
     @Override
     public Mono<Void> issueCommand(String[] args, MessageCreateEvent event, GuildSettings settings) {
-        return Messages.sendMessage(
-            "This command has been moved. Please use the slash command version by typing `/` " +
-                "\n Visit: https://discalbot.com/commands for more command details.", event).then();
+        //Check if slash commands are enabled in this server.
+        RestClient restClient = event.getClient().getRestClient();
+        //noinspection OptionalGetWithoutIsPresent (always present)
+        Snowflake guildId = event.getGuildId().get();
+
+        return restClient.getApplicationId().flatMapMany(appId ->
+                restClient.getApplicationService().getGuildApplicationCommands(appId, guildId.asLong())
+            ).collectList()
+            .thenReturn(true)
+            .onErrorReturn(false)
+            .map(hasAppCommands -> {
+                var builder = EmbedCreateSpec.builder()
+                    .author("DisCal", BotSettings.BASE_URL.get(), GlobalVal.getIconUrl())
+                    .color(GlobalVal.getDiscalColor())
+                    .title("DisCal Bot");
+
+                if (hasAppCommands) {
+                    builder.description(
+                        String.format(enabledMessage,
+                            BotSettings.BASE_URL.get() + "/commands",
+                            BotSettings.SUPPORT_INVITE.get()
+                        )
+                    );
+                } else {
+                    builder.description(
+                        String.format(disabledMessage,
+                            BotSettings.INVITE_URL.get(),
+                            BotSettings.BASE_URL.get() + "/commands",
+                            BotSettings.SUPPORT_INVITE.get()
+                        )
+                    );
+                }
+
+                return builder.build();
+            }).flatMap(embed -> Messages.sendMessage(embed, event)).then();
     }
+
+    private final String enabledMessage = """
+        This command has been converted to a [Slash Command](https://discord.com/blog/slash-commands-are-here).
+                
+                
+        For more information on commands, check out our [Commands Page](%s).
+        For support, [join our server](%s).""";
+
+    private final String disabledMessage = """
+        This command has been converted to a [Slash Command](https://discord.com/blog/slash-commands-are-here), but they aren't enabled in this guild! A guild admin can [click here to enable them](%s);
+        
+        
+        For more information on commands, check out our [Commands Page](%s).
+        For support, [join our server](%s).""\";
+        """;
 }
