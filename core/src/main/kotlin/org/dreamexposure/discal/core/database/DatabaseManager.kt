@@ -329,8 +329,6 @@ object DatabaseManager {
     }
 
     fun updateEventData(data: EventData): Mono<Boolean> {
-        if (!data.shouldBeSaved()) return Mono.just(false)
-
         val id = if (data.eventId.contains("_"))
             data.eventId.split("_")[0]
         else
@@ -362,7 +360,7 @@ object DatabaseManager {
                     ).flatMapMany(Result::getRowsUpdated)
                         .hasElements()
                         .thenReturn(true)
-                } else {
+                } else if (data.shouldBeSaved()) {
                     val insertCommand = """INSERT INTO ${Tables.EVENTS}
                         (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, IMAGE_LINK)
                         VALUES(?, ?, ?, ?, ?)
@@ -379,6 +377,8 @@ object DatabaseManager {
                     ).flatMapMany(Result::getRowsUpdated)
                         .hasElements()
                         .thenReturn(true)
+                } else {
+                    Mono.just(false)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update event data", it)
                 }.onErrorResume { Mono.just(false) }
