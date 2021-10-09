@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
+import org.dreamexposure.discal.core.utils.getCommonMsg
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -71,10 +72,12 @@ object CalendarEmbed : EmbedMaker {
             .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name, false)
             .addField(
                 getMessage("calendar", "wizard.field.description", settings),
-                preCal.description.ifEmpty { "\u200B" },
+                preCal.description.ifEmpty { getCommonMsg("embed.unset", settings) },
                 false
-            ).addField(getMessage("calendar", "wizard.field.timezone", settings), preCal.timezone?.id ?: "UNSET", true)
-            .addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
+            ).addField(getMessage("calendar", "wizard.field.timezone", settings),
+                preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),
+                true
+            ).addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
             .footer(getMessage("calendar", "wizard.footer", settings), null)
 
         if (preCal.editing)
