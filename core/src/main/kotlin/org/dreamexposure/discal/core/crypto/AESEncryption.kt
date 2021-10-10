@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.core.crypto
 
 import org.apache.commons.codec.binary.Base64
-import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -27,7 +26,7 @@ class AESEncryption(privateKey: String) {
     fun encrypt(data: String): String {
         return try {
             this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val encrypted = this.cipher?.doFinal(data.toByteArray(Charset.defaultCharset()))
+            val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
 
             Base64.encodeBase64String(encrypted)
         } catch (ignore: Exception) {
