@@ -46,6 +46,7 @@ object GoogleAuthWrapper {
                 .cache()
     }
 
+    //FIXME: occasionally ends up empty here
     private fun authorize(credentialId: Int): Mono<Credential> {
         return CREDENTIALS
                 .filter { it.credentialData.credentialNumber == credentialId }

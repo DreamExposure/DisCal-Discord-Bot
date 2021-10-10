@@ -61,13 +61,15 @@ object DatabaseManager {
                 .build()
         )
 
-        val conf = ConnectionPoolConfiguration.builder(factory)
+        val conf = ConnectionPoolConfiguration.builder()
+            .connectionFactory(factory)
             .maxLifeTime(Duration.ofHours(1))
             .build()
 
         pool = ConnectionPool(conf)
     }
 
+    //FIXME: attempt to fix constant open/close of connections
     private fun <T> connect(connection: Function<Connection, Mono<T>>): Mono<T> {
         return Mono.usingWhen(pool.create(), connection::apply, Connection::close)
     }
@@ -1152,8 +1154,8 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.FULL_CALENDAR_DELETE) //Monolith 8 statement query
                     // calendar delete bindings
-                    .bind(0, calendarData.calendarAddress)
-                    .bind(1, calendarData.guildId.asString())
+                    .bind(0, calendarData.guildId.asString())
+                    .bind(1, calendarData.calendarNumber)
                     // event delete bindings
                     .bind(2, calendarData.guildId.asString())
                     .bind(3, calendarData.calendarNumber)
@@ -1309,7 +1311,7 @@ private object Queries {
 
     @Language("MySQL")
     val DELETE_CALENDAR = """DELETE FROM ${Tables.CALENDARS} 
-        WHERE GUILD_ID = ? AND CALENDAR_ADDRESS = ?
+        WHERE GUILD_ID = ? AND calendar_number = ?
         """.trimMargin()
 
     @Language("MySQL")
