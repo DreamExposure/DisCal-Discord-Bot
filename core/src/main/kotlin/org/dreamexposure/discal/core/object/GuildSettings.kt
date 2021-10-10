@@ -19,7 +19,7 @@ data class GuildSettings(
         var controlRole: String = "everyone",
 
       @SerialName("announcement_style")
-        var announcementStyle: AnnouncementStyle = AnnouncementStyle.FULL,
+        var announcementStyle: AnnouncementStyle = AnnouncementStyle.EVENT,
       @SerialName("time_format")
         var timeFormat: TimeFormat = TimeFormat.TWENTY_FOUR_HOUR,
 
