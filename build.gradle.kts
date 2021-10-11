@@ -90,7 +90,6 @@ allprojects {
         implementation("io.netty:netty-all:$nettyVersion")
         //Forcing reactor version
         implementation("io.projectreactor:reactor-core")
-        implementation("org.dreamexposure:NovaUtils:1.0.0-SNAPSHOT")
 
         //Google apis
         implementation("com.google.api-client:google-api-client:$googleCoreVersion")

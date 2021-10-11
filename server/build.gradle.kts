@@ -16,6 +16,7 @@ dependencies {
     //Database stuff
     implementation("org.flywaydb:flyway-core:7.11.2")
     implementation("mysql:mysql-connector-java:8.0.25")
+    implementation("com.zaxxer:HikariCP:5.0.0")
 
     //Top gg lib
     implementation("org.discordbots:DBL-Java-Library:2.0.1")
