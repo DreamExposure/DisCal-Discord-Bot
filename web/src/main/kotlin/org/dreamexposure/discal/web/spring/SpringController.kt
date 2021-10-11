@@ -9,10 +9,10 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Controller
-class SpringController {
+class SpringController(private val accountHandler: DiscordAccountHandler) {
     @RequestMapping("/", "/home")
     fun home(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("index")
@@ -20,7 +20,7 @@ class SpringController {
 
     @RequestMapping("/about")
     fun about(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("various/about")
@@ -28,7 +28,7 @@ class SpringController {
 
     @RequestMapping("/commands")
     fun commands(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("various/commands")
@@ -36,7 +36,7 @@ class SpringController {
 
     @RequestMapping("/lazy-discal")
     fun lazyDisCal(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("various/lazy-discal")
@@ -44,7 +44,7 @@ class SpringController {
 
     @RequestMapping("/setup")
     fun setup(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("various/setup")
@@ -52,7 +52,7 @@ class SpringController {
 
     @RequestMapping("/status")
     fun status(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .doOnNext { model.remove("status") }
@@ -64,12 +64,12 @@ class SpringController {
     //Account pages
     @RequestMapping("/login")
     fun accountLogin(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.hasAccount(swe)
+        return accountHandler.hasAccount(swe)
                 .flatMap { has ->
                     if (has) {
                         return@flatMap Mono.just("redirect:/dashboard")
                     } else {
-                        return@flatMap DiscordAccountHandler.getAccount(swe)
+                        return@flatMap accountHandler.getAccount(swe)
                                 .doOnNext { model.clear() }
                                 .doOnNext(model::putAll)
                                 .thenReturn("account/login")
@@ -80,7 +80,7 @@ class SpringController {
     //Dashboard pages
     @RequestMapping("/dashboard")
     fun dashboard(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("dashboard/dashboard")
@@ -88,12 +88,12 @@ class SpringController {
 
     @RequestMapping("/dashboard/{id}")
     fun dashboardGuild(model: MutableMap<String, Any>, swe: ServerWebExchange, @PathVariable id: String): Mono<String> {
-        return DiscordAccountHandler.hasAccount(swe)
+        return accountHandler.hasAccount(swe)
                 .flatMap { has ->
                     if (!has) {
                         return@flatMap Mono.just("redirect:/dashboard")
                     } else {
-                        return@flatMap DiscordAccountHandler.getAccount(swe)
+                        return@flatMap accountHandler.getAccount(swe)
                                 .doOnNext { model.clear() }
                                 .doOnNext(model::putAll)
                                 .doOnNext { model["dashboard_selected_id"] = id }
@@ -105,12 +105,12 @@ class SpringController {
     @RequestMapping("/dashboard/{id}/calendar")
     fun dashboardCalendar(model: MutableMap<String, Any>, swe: ServerWebExchange, @PathVariable id: String):
             Mono<String> {
-        return DiscordAccountHandler.hasAccount(swe)
+        return accountHandler.hasAccount(swe)
                 .flatMap { has ->
                     if (!has) {
                         return@flatMap Mono.just("redirect:/dashboard")
                     } else {
-                        return@flatMap DiscordAccountHandler.getAccount(swe)
+                        return@flatMap accountHandler.getAccount(swe)
                                 .doOnNext { model.clear() }
                                 .doOnNext(model::putAll)
                                 .doOnNext { model["dashboard_selected_id"] = id }
@@ -131,7 +131,7 @@ class SpringController {
     @RequestMapping("/embed/{id}/calendar/{num}")
     fun embedCalendarWithNum(model: MutableMap<String, Any>, swe: ServerWebExchange, @PathVariable id: String,
                              @PathVariable num: String): Mono<String> {
-        return DiscordAccountHandler.getEmbedAccount(swe)
+        return accountHandler.getEmbedAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("embed/calendar")
@@ -143,7 +143,7 @@ class SpringController {
     // Docs -- Misc
     @RequestMapping("/docs/event/colors")
     fun docsEventsEventColors(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/event/event-colors")
@@ -152,7 +152,7 @@ class SpringController {
     // Docs -- API Main
     @RequestMapping("/docs/api/overview")
     fun docsApiOverview(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/overview")
@@ -160,7 +160,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/errors")
     fun docsApiErrors(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/errors")
@@ -169,7 +169,7 @@ class SpringController {
     // Docs -- API v2
     @RequestMapping("/docs/api/v2/announcement")
     fun docsApiV2Announcement(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/announcement")
@@ -177,7 +177,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/v2/calendar")
     fun docsApiV2Calendar(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/calendar")
@@ -185,7 +185,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/v2/events")
     fun docsApiV2Events(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/events")
@@ -193,7 +193,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/v2/guild")
     fun docsApiV2Guild(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/guild")
@@ -201,7 +201,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/v2/rsvp")
     fun docsApiV2Rsvp(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/rsvp")
@@ -209,7 +209,7 @@ class SpringController {
 
     @RequestMapping("/docs/api/v2/status")
     fun docsApiV2Status(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("docs/api/v2/status")
@@ -218,7 +218,7 @@ class SpringController {
     //Policy pages
     @RequestMapping("/policy/privacy")
     fun privacyPolicy(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("policy/privacy")
@@ -226,7 +226,7 @@ class SpringController {
 
     @RequestMapping("/policy/tos")
     fun termsOfService(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("policy/tos")
@@ -235,7 +235,7 @@ class SpringController {
     //Error pages -- I actually reference this so need to make the mappings
     @RequestMapping("/400")
     fun badRequest(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("error/400")
@@ -243,7 +243,7 @@ class SpringController {
 
     @RequestMapping("/404")
     fun notFound(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("error/404")
@@ -251,7 +251,7 @@ class SpringController {
 
     @RequestMapping("/500")
     fun internalError(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe)
+        return accountHandler.getAccount(swe)
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .thenReturn("error/500")

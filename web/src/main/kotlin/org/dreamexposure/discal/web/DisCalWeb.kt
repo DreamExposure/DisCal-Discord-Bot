@@ -5,7 +5,6 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
-import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
 import java.io.FileReader
@@ -15,6 +14,11 @@ import kotlin.system.exitProcess
 
 @Component
 class DisCalWeb {
+    @PreDestroy
+    fun onShutdown() {
+        LOGGER.info(STATUS, "Website shutting down")
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
@@ -25,7 +29,6 @@ class DisCalWeb {
 
             //Start up spring
             try {
-                DiscordAccountHandler.init()
                 SpringApplicationBuilder(Application::class.java)
                         .profiles(BotSettings.PROFILE.get())
                         .build()
@@ -37,11 +40,5 @@ class DisCalWeb {
 
             LOGGER.info(STATUS, "Website is now online")
         }
-    }
-
-    @PreDestroy
-    fun onShutdown() {
-        LOGGER.info(STATUS, "Website shutting down")
-        DiscordAccountHandler.shutdown()
     }
 }
