@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import java.lang.management.ManagementFactory
 import java.time.Duration
 import java.util.*
+import kotlin.math.roundToInt
 
 @SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
 class Application {
@@ -47,13 +48,26 @@ class Application {
 
         @JvmStatic
         fun getHumanReadableUptime(): String {
-            val mxBean = ManagementFactory.getRuntimeMXBean()
-
-            val rawDuration = System.currentTimeMillis() - mxBean.startTime
-            val duration = Duration.ofMillis(rawDuration)
+            val duration = getUptime()
 
             return "%d days, %d hours, %d minutes, %d seconds%n"
                   .format(duration.toDays(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
+        }
+
+        fun getUptime(): Duration {
+            val mxBean = ManagementFactory.getRuntimeMXBean()
+
+            val rawDuration = System.currentTimeMillis() - mxBean.startTime
+            return Duration.ofMillis(rawDuration)
+        }
+
+        fun getMemoryUsedInMb(): Double {
+            val totalMemory = Runtime.getRuntime().totalMemory()
+            val freeMemory = Runtime.getRuntime().freeMemory()
+
+            val raw = (totalMemory - freeMemory) / (1024 * 1024).toDouble()
+
+            return (raw * 100).roundToInt().toDouble() / 100
         }
     }
 }

@@ -7,6 +7,8 @@ import org.dreamexposure.discal.GitProperty
 import java.text.SimpleDateFormat
 import java.util.*
 
+//FIXME: Remove
+@Deprecated(message = "Use new network tracking data classes")
 @Serializable
 data class ConnectedClient(
       @SerialName("index")

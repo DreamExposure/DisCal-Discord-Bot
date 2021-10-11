@@ -24,6 +24,7 @@ import reactor.core.scheduler.Schedulers
 import java.time.Duration
 import kotlin.math.roundToInt
 
+//FIXME: Redo
 @Component
 class HeartbeatService : ApplicationRunner {
 

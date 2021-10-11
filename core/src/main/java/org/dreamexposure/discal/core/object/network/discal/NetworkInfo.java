@@ -27,6 +27,8 @@ import static org.dreamexposure.discal.core.utils.GlobalVal.getSTATUS;
  * Contact: nova@dreamexposure.org
  */
 @SuppressWarnings("Duplicates")
+//FIXME: Remove
+@Deprecated
 @Component
 public class NetworkInfo {
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());

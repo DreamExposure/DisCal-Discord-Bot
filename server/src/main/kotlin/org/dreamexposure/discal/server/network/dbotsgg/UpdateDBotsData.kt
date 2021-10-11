@@ -4,9 +4,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.server.network.discal.NetworkManager
 import org.json.JSONObject
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -16,13 +16,13 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 
 @Component
-class UpdateDBotsData(private val networkInfo: NetworkInfo) : ApplicationRunner {
+class UpdateDBotsData(private val networkManager: NetworkManager) : ApplicationRunner {
 
     private fun update(): Mono<Void> {
         return Mono.fromCallable {
             val json = JSONObject()
-                    .put("guildCount", networkInfo.totalGuildCount)
-                    .put("shardCount", networkInfo.expectedClientCount)
+                    .put("guildCount", networkManager.getStatus().totalGuilds)
+                    .put("shardCount", networkManager.getStatus().expectedShardCount)
 
             val client = OkHttpClient()
 

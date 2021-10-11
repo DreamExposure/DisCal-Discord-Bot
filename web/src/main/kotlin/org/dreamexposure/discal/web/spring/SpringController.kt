@@ -50,6 +50,7 @@ class SpringController {
                 .thenReturn("various/setup")
     }
 
+    //FIXME: This needs to be redone...
     @RequestMapping("/status")
     fun status(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
         return DiscordAccountHandler.getAccount(swe)

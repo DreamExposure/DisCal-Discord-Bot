@@ -11,6 +11,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
 import reactor.core.publisher.Mono
 
+//FIXME: Redo this
 object StatusHandler {
     fun getLatestStatusInfo(): Mono<NetworkInfo> {
         return Mono.fromCallable {
