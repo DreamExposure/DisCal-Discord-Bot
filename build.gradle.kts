@@ -4,10 +4,10 @@ plugins {
     java
 
     //kotlin
-    kotlin("jvm") version "1.5.21"
-    kotlin("plugin.serialization") version "1.5.21"
-    kotlin("plugin.spring") version "1.5.21" apply false
-    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.21" apply false
+    kotlin("jvm") version "1.5.31"
+    kotlin("plugin.serialization") version "1.5.31"
+    kotlin("plugin.spring") version "1.5.31" apply false
+    id("org.jetbrains.kotlin.plugin.allopen") version "1.5.31" apply false
 
     //Other
     id("org.springframework.boot") version ("2.5.2") apply false
@@ -38,8 +38,8 @@ allprojects {
     java.targetCompatibility = JavaVersion.VERSION_16
 
     //Versions
-    val kotlinVersion by ext("1.5.21")
-    val kotlinxSerializationVersion by ext("1.2.2")
+    val kotlinVersion by ext("1.5.31")
+    val kotlinxSerializationVersion by ext("1.3.0-RC")
 
     val discord4jVersion by ext(discord4jVersion)
     val discord4jStoresVersion by ext("3.2.1")
@@ -122,8 +122,8 @@ allprojects {
         sourceSets {
             all {
                 languageSettings {
-                    useExperimentalAnnotation("kotlinx.serialization.InternalSerializationApi")
-                    useExperimentalAnnotation("kotlin.RequiresOptIn")
+                    optIn("kotlinx.serialization.ExperimentalSerializationApi")
+                    optIn("kotlin.RequiresOptIn")
                 }
             }
         }

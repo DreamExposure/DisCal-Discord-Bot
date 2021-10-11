@@ -20,3 +20,5 @@ web/src/main/resources/static/vendor/
 /.gradle/
 
 **/.DS_STORE
+**/bin/
+**/.settings/
