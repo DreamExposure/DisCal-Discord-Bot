@@ -14,7 +14,6 @@ class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()
 
-        @JvmStatic
         fun getShardIndex(): String {
             /*
             This fucking sucks. So k8s doesn't expose the pod ordinal for a pod in a stateful set
@@ -39,19 +38,10 @@ class Application {
             }
         }
 
-        @JvmStatic
         fun getShardCount(): Int {
             val shardCount = System.getenv("SHARD_COUNT")
             return shardCount?.toInt() ?: //Fall back to config
             BotSettings.SHARD_COUNT.get().toInt()
-        }
-
-        @JvmStatic
-        fun getHumanReadableUptime(): String {
-            val duration = getUptime()
-
-            return "%d days, %d hours, %d minutes, %d seconds%n"
-                  .format(duration.toDays(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
         }
 
         fun getUptime(): Duration {

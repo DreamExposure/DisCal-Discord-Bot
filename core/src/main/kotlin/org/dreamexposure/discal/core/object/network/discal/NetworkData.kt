@@ -35,4 +35,7 @@ data class NetworkData(
         botStatus.forEach { guilds += it.guilds }
         return guilds
     }
+
+    @Suppress("unused") //Used in thymeleaf status page
+    fun getCurrentShardCount() = botStatus.size
 }

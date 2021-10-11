@@ -5,18 +5,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.network.discal.NetworkInfo
+import org.dreamexposure.discal.core.`object`.network.discal.NetworkData
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.GlobalVal
-import org.json.JSONObject
+import org.dreamexposure.discal.core.utils.GlobalVal.JSON
+import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import reactor.core.publisher.Mono
 
-//FIXME: Redo this
 object StatusHandler {
-    fun getLatestStatusInfo(): Mono<NetworkInfo> {
+    fun getLatestStatusInfo(): Mono<NetworkData> {
         return Mono.fromCallable {
             val client = OkHttpClient()
-            val body = "".toRequestBody(GlobalVal.JSON)
+            val body = "".toRequestBody(JSON)
 
             val request = Request.Builder()
                     .url("${BotSettings.API_URL.get()}/v2/status/get")
@@ -31,12 +30,12 @@ object StatusHandler {
                 val body = response.body?.string()
                 response.body?.close()
                 response.close()
-                return@map NetworkInfo().fromJson(JSONObject(body))
+                return@map JSON_FORMAT.decodeFromString(NetworkData.serializer(), body!!)
             } else {
-                return@map NetworkInfo() //Just return an empty object, it's fine.
+                return@map NetworkData() //Just return an empty object, it's fine.
             }
         }.doOnError {
             LOGGER.error("[Status Request] Failed to get status", it)
-        }.onErrorReturn(NetworkInfo()).defaultIfEmpty(NetworkInfo())
+        }.onErrorReturn(NetworkData()).defaultIfEmpty(NetworkData())
     }
 }
