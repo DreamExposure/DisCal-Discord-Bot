@@ -18,3 +18,5 @@ web/src/main/resources/static/vendor/
 /node_modules/
 /.docker/
 /.gradle/
+
+**/.DS_STORE
