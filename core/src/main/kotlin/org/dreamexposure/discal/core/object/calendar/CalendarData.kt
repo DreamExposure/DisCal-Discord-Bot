@@ -4,35 +4,35 @@ import discord4j.common.util.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
-import org.dreamexposure.novautils.crypto.KeyGenerator
 import java.time.Instant
 
 @Serializable
 data class CalendarData(
-        @Serializable(with = SnowflakeAsStringSerializer::class)
+    @Serializable(with = SnowflakeAsStringSerializer::class)
         @SerialName("guild_id")
         val guildId: Snowflake = Snowflake.of(0),
-        @SerialName("calendar_number")
+    @SerialName("calendar_number")
         val calendarNumber: Int = 1,
-        val host: CalendarHost,
-        @SerialName("calendar_id")
+    val host: CalendarHost,
+    @SerialName("calendar_id")
         val calendarId: String = "primary",
-        @SerialName("calendar_address")
+    @SerialName("calendar_address")
         val calendarAddress: String = "primary",
-        val external: Boolean = false,
+    val external: Boolean = false,
 
         //secure values that should not be serialized
-        @Transient
+    @Transient
         val credentialId: Int = 0,
-        @Transient
+    @Transient
         var privateKey: String = KeyGenerator.csRandomAlphaNumericString(16),
-        @Transient
+    @Transient
         var encryptedAccessToken: String = "N/a",
-        @Transient
+    @Transient
         var encryptedRefreshToken: String = "N/a",
-        @Transient
+    @Transient
         var expiresAt: Instant = Instant.now()
 ): Comparable<CalendarData> {
     constructor(guildId: Snowflake, calendarNumber: Int, host: CalendarHost, calendarId: String,

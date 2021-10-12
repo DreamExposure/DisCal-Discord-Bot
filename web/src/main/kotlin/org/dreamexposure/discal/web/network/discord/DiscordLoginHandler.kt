@@ -24,7 +24,7 @@ import reactor.function.TupleUtils
 import java.util.*
 
 @Controller
-class DiscordLoginHandler {
+class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
     @GetMapping("/account/login")
     fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<String> {
         val client = OkHttpClient()
@@ -85,7 +85,7 @@ class DiscordLoginHandler {
                             userGuildsResponse.close()
 
                             //Saving session and access info into memory...
-                            val model = DiscordAccountHandler.createDefaultModel()
+                            val model = accountHandler.createDefaultModel()
                             model["logged_in"] = true
                             model["good_timezones"] = GoodTimezone.values()
                             model["announcement_types"] = AnnouncementType.values()
@@ -145,7 +145,7 @@ class DiscordLoginHandler {
                                             //API Key received
                                             model["key"] = keyGrantResponseBody.getString("key")
 
-                                            DiscordAccountHandler.addAccount(model, swe)
+                                            accountHandler.addAccount(model, swe)
                                                     .thenReturn("redirect:/dashboard")
                                         } else {
                                             //Something didn't work, just redirect back to login page
@@ -168,7 +168,7 @@ class DiscordLoginHandler {
 
     @GetMapping("/logout")
     fun handleLogout(swe: ServerWebExchange): Mono<String> {
-        return DiscordAccountHandler.getAccount(swe).flatMap { model ->
+        return accountHandler.getAccount(swe).flatMap { model ->
             if (!model.containsKey("key")) {
                 //User isn't logged in, just redirect to home page
                 return@flatMap Mono.just("redirect:/")
@@ -186,7 +186,7 @@ class DiscordLoginHandler {
 
                 return@flatMap Mono.fromCallable(client.newCall(logoutRequest)::execute)
                         .subscribeOn(Schedulers.boundedElastic())
-                        .then(DiscordAccountHandler.removeAccount(swe))
+                        .then(accountHandler.removeAccount(swe))
                         .thenReturn("redirect:/")
                         .doOnError {
                             LOGGER.error("[Web] Discord logout fail", it)

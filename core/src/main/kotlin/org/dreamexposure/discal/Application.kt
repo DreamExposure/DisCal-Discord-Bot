@@ -7,13 +7,13 @@ import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import java.lang.management.ManagementFactory
 import java.time.Duration
 import java.util.*
+import kotlin.math.roundToInt
 
 @SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
 class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()
 
-        @JvmStatic
         fun getShardIndex(): String {
             /*
             This fucking sucks. So k8s doesn't expose the pod ordinal for a pod in a stateful set
@@ -38,22 +38,26 @@ class Application {
             }
         }
 
-        @JvmStatic
         fun getShardCount(): Int {
             val shardCount = System.getenv("SHARD_COUNT")
             return shardCount?.toInt() ?: //Fall back to config
             BotSettings.SHARD_COUNT.get().toInt()
         }
 
-        @JvmStatic
-        fun getHumanReadableUptime(): String {
+        fun getUptime(): Duration {
             val mxBean = ManagementFactory.getRuntimeMXBean()
 
             val rawDuration = System.currentTimeMillis() - mxBean.startTime
-            val duration = Duration.ofMillis(rawDuration)
+            return Duration.ofMillis(rawDuration)
+        }
 
-            return "%d days, %d hours, %d minutes, %d seconds%n"
-                  .format(duration.toDays(), duration.toHoursPart(), duration.toMinutesPart(), duration.toSecondsPart())
+        fun getMemoryUsedInMb(): Double {
+            val totalMemory = Runtime.getRuntime().totalMemory()
+            val freeMemory = Runtime.getRuntime().freeMemory()
+
+            val raw = (totalMemory - freeMemory) / (1024 * 1024).toDouble()
+
+            return (raw * 100).roundToInt().toDouble() / 100
         }
     }
 }
