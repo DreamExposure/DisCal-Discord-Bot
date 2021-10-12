@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
 import java.time.Duration
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Component
 class NetworkManager : ApplicationRunner {
@@ -57,6 +58,9 @@ class NetworkManager : ApplicationRunner {
     }
 
     private fun doRestart(bot: BotInstanceData): Mono<Void> {
+        //Gotta actually see if it needs to be restarted
+
+
         if (!BotSettings.USE_RESTART_SERVICE.get().equals("true", true)) {
             status.botStatus.removeIf { it.shardIndex == bot.shardIndex }
             LOGGER.warn(STATUS, "Client disconnected from network | Index: ${bot.shardIndex} | Reason: Restart service not active!")
@@ -70,6 +74,7 @@ class NetworkManager : ApplicationRunner {
         Flux.interval(Duration.ofMinutes(1))
                 .flatMap { updateAndReturnStatus() } //Update local status every minute
                 .flatMapIterable(NetworkData::botStatus)
+                .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                 .flatMap(this::doRestart)
                 .subscribe()
     }
