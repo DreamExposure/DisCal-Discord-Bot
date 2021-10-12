@@ -244,7 +244,7 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Expected Client Count: ' + ${status.expectedClientCount}">
+                   th:text="'Expected Client Count: ' + ${status.expectedShardCount}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
@@ -252,7 +252,7 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Total Guilds: ' + ${status.totalGuildCount}">
+                   th:text="'Total Guilds: ' + ${status.totalGuilds}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
@@ -270,22 +270,23 @@
 
                 <!--Start Website Status-->
                 <h2 class="text-center text-discal-blue">Website</h2>
+                <th:block th:if="${status.websiteStatus != null}">
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Version: ' + ${status.websiteStatus.version}">
+                    </p>
 
-                <p class="text-left text-discord-full-white"
-                   th:text="'Version: ' + ${status.websiteStatus.version}">
-                </p>
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
+                    </p>
 
-                <p class="text-left text-discord-full-white"
-                   th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
-                </p>
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Uptime: ' + ${status.websiteStatus.uptime.humanReadable}">
+                    </p>
 
-                <p class="text-left text-discord-full-white"
-                   th:text="'Uptime: ' + ${status.websiteStatus.uptime.humanReadable}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Last Heartbeat: ' + ${status.websiteStatus.humanReadableHeartbeat}">
-                </p>
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Last Heartbeat: ' + ${status.websiteStatus.humanReadableHeartbeat}">
+                    </p>
+                </th:block>
 
                 <br>
                 <!--End Website Status-->
@@ -301,7 +302,7 @@
 
                     <div th:id="'client-' + ${client.shardIndex}">
                         <h3 class="text-left text-discord-full-white"
-                            th:text="'Client Index: ' + ${client.shardIndex}"></h3>
+                            th:text="'Shard Index: ' + ${client.shardIndex}"></h3>
 
                         <p class="text-left text-discord-full-white"
                            th:text="'Version: ' + ${client.instanceData.version}">

@@ -13,7 +13,7 @@ data class NetworkData(
         var totalAnnouncements: Int = 0,
 
         @SerialName("api_status")
-        var apiStatus: InstanceData? = null,
+        var apiStatus: InstanceData = InstanceData(),
 
         @SerialName("website_status")
         var websiteStatus: InstanceData? = null,
