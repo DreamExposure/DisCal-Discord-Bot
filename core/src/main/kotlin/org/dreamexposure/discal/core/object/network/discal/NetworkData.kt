@@ -38,4 +38,16 @@ data class NetworkData(
 
     @Suppress("unused") //Used in thymeleaf status page
     fun getCurrentShardCount() = botStatus.size
+
+    @Suppress("unused") //Used in thymeleaf status page
+    fun getTotalMemoryInGb(): Double {
+        var totalMemMb = 0.0
+
+        totalMemMb += apiStatus.memory
+        totalMemMb += websiteStatus?.memory ?: 0.0
+
+        botStatus.forEach { totalMemMb+= it.instanceData.memory }
+
+        return totalMemMb / 1024 // convert to GB
+    }
 }

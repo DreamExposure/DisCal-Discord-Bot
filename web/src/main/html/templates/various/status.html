@@ -153,8 +153,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <nav
-                    class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
+            <nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -228,6 +227,38 @@
             <div class="container-fluid">
                 <h1 class="text-center text-discal-blue">DisCal Network and Services Status</h1>
 
+                <!--Start Network Statistics -->
+                <h2 class="text-center text-discal-blue">Network Statistics</h2>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Total Guilds: ' + ${status.totalGuilds}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Total Calendars: ' + ${status.totalCalendars}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Total Announcements: ' + ${status.totalAnnouncements}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Connected Clients: ' + ${status.currentShardCount}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Expected Client Count: ' + ${status.expectedShardCount}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                    th:text="'Total Memory Usage: ' + ${status.TotalMemoryInGb} + 'GB'">
+                </p>
+
+                <br>
+                <!-- End network statistics -->
+
+                <hr>
+
                 <!--Start API Status-->
                 <h2 class="text-center text-discal-blue">API</h2>
 
@@ -240,27 +271,11 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Connected Clients: ' + ${status.currentShardCount}">
+                   th:text="'Uptime: ' + ${status.apiStatus.humanReadableUptime}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Expected Client Count: ' + ${status.expectedShardCount}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Uptime: ' + ${status.uptime.humanReadable}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Guilds: ' + ${status.totalGuilds}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Calendars: ' + ${status.totalCalendars}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Announcements: ' + ${status.totalAnnouncements}">
+                   th:text="'Last Heartbeat: ' + ${status.apiStatus.humanReadableHeartbeat}">
                 </p>
 
                 <br>
@@ -280,7 +295,7 @@
                     </p>
 
                     <p class="text-left text-discord-full-white"
-                       th:text="'Uptime: ' + ${status.websiteStatus.uptime.humanReadable}">
+                       th:text="'Uptime: ' + ${status.websiteStatus.humanReadableUptime}">
                     </p>
 
                     <p class="text-left text-discord-full-white"
@@ -325,7 +340,7 @@
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Uptime: ' + ${client.instanceData.uptime.humanReadable}">
+                           th:text="'Uptime: ' + ${client.instanceData.humanReadableUptime}">
                         </p>
 
                         <p class="text-left text-discord-full-white"

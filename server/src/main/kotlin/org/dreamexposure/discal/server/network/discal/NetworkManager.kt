@@ -50,7 +50,7 @@ class NetworkManager : ApplicationRunner {
                 TupleUtils.function { calCount, annCount ->
                     status.totalCalendars = calCount
                     status.totalAnnouncements = annCount
-                    status.apiStatus = status.apiStatus?.copy(lastHeartbeat = Instant.now())
+                    status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now())
 
                     status.copy()
                 }

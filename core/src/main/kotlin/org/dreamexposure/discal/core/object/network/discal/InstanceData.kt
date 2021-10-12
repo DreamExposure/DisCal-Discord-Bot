@@ -4,6 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
+import org.dreamexposure.discal.core.extensions.getHumanReadable
 import org.dreamexposure.discal.core.serializers.DurationAsStringSerializer
 import org.dreamexposure.discal.core.serializers.InstantAsStringSerializer
 import java.time.Duration
@@ -39,4 +40,7 @@ data class InstanceData(
 
         return "$formatter.format(lastHeartbeat) UTC"
     }
+
+    @Suppress("unused") //Used in thymeleaf status page
+    fun getHumanReadableUptime(): String = uptime.getHumanReadable()
 }
