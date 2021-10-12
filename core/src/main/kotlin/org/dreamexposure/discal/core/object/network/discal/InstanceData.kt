@@ -38,7 +38,7 @@ data class InstanceData(
             .ofPattern("yyyy/MM/dd HH:mm:ss")
             .withZone(ZoneId.of("UTC"))
 
-        return "$formatter.format(lastHeartbeat) UTC"
+        return "${formatter.format(lastHeartbeat)} UTC"
     }
 
     @Suppress("unused") //Used in thymeleaf status page

@@ -251,7 +251,7 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                    th:text="'Total Memory Usage: ' + ${status.TotalMemoryInGb} + 'GB'">
+                    th:text="'Total Memory Usage: ' + ${status.totalMemoryInGb} + 'GB'">
                 </p>
 
                 <br>
@@ -268,6 +268,10 @@
 
                 <p class="text-left text-discord-full-white"
                    th:text="'Discord4J Version: ' + ${status.apiStatus.d4jVersion}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'RAM Used: ' + ${status.apiStatus.memory} + 'MB'">
                 </p>
 
                 <p class="text-left text-discord-full-white"
@@ -292,6 +296,10 @@
 
                     <p class="text-left text-discord-full-white"
                        th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'RAM Used: ' + ${status.websiteStatus.memory} + 'MB'">
                     </p>
 
                     <p class="text-left text-discord-full-white"

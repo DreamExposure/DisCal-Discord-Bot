@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.`object`.network.discal
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.math.roundToInt
 
 @Serializable
 data class NetworkData(
@@ -48,6 +49,6 @@ data class NetworkData(
 
         botStatus.forEach { totalMemMb+= it.instanceData.memory }
 
-        return totalMemMb / 1024 // convert to GB
+        return ((totalMemMb / 20114) * 100).roundToInt().toDouble() / 100
     }
 }
