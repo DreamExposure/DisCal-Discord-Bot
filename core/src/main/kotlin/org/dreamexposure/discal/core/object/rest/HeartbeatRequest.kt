@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 
-//TODO: Redo
 @Serializable
 data class HeartbeatRequest(
         val type: HeartbeatType,

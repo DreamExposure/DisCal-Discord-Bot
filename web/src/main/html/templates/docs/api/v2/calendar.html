@@ -226,8 +226,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <nav
-                    class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
+            <nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -268,23 +267,23 @@
 
                     <!-- Nav Item - User Information -->
                     <li th:if="${logged_in}" class="nav-item dropdown no-arrow">
-						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-						   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
-							<img class="img-profile rounded-circle" th:src="${pfp}"
-								 alt="pfp">
-						</a>
-						<!-- Dropdown - User Information -->
-						<div class="dropdown-menu dropdown-menu-right shadow
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="mr-2 d-lg-inline  small" th:text="${username}"></span>
+                            <img class="img-profile rounded-circle" th:src="${pfp}"
+                                 alt="pfp">
+                        </a>
+                        <!-- Dropdown - User Information -->
+                        <div class="dropdown-menu dropdown-menu-right shadow
 						animated--grow-in bg-discal-not-black"
-							 aria-labelledby="userDropdown">
-							<a class="dropdown-item text-discord-full-white" href="#"
-							   data-toggle="modal" data-target="#logoutModal">
-								<i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
-								Logout
-							</a>
-						</div>
-					</li>
+                             aria-labelledby="userDropdown">
+                            <a class="dropdown-item text-discord-full-white" href="#"
+                               data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
                     <li th:unless="${logged_in}" class="nav-item">
                         <a class="nav-link text-discord-full-white" href="/login">
                             <i class="fas fa-sign-in-alt fa-sm fa-fw mr-2"></i>
@@ -481,7 +480,7 @@
                     </tr>
                     <tr>
                         <td>guild_id</td>
-						<td>string</td>
+                        <td>string</td>
                         <td>The Guild ID</td>
                         <td>True</td>
                     </tr>
@@ -597,7 +596,7 @@
                     </tr>
                     <tr>
                         <td>guild_id</td>
-						<td>string</td>
+                        <td>string</td>
                         <td>The Guild ID</td>
                         <td>True</td>
                     </tr>
@@ -698,7 +697,7 @@
                     </tr>
                     <tr>
                         <td>guild_id</td>
-						<td>string</td>
+                        <td>string</td>
                         <td>The Guild ID</td>
                         <td>True</td>
                     </tr>
@@ -775,30 +774,30 @@
 
 <!-- Logout Modal-->
 <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog"
-	 aria-labelledby="exampleModalLabel"
-	 aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content bg-discal-not-black">
-			<div class="modal-header">
-				<h5 class="modal-title text-discal-blue" id="exampleModalLabel">Ready to Leave?</h5>
-				<button class="close" type="button" data-dismiss="modal" aria-label="Close">
-					<span class="text-discal-red" aria-hidden="true">×</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<p class="text-left text-discord-full-white">
-					Select "Logout" below if you are ready to end your current session.
-				</p>
-			</div>
-			<div class="modal-footer">
-				<button class="btn btn-discal-dark-gray text-discord-full-white"
-						type="button" data-dismiss="modal">Cancel
-				</button>
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content bg-discal-not-black">
+            <div class="modal-header">
+                <h5 class="modal-title text-discal-blue" id="exampleModalLabel">Ready to Leave?</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span class="text-discal-red" aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-left text-discord-full-white">
+                    Select "Logout" below if you are ready to end your current session.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-discal-dark-gray text-discord-full-white"
+                        type="button" data-dismiss="modal">Cancel
+                </button>
 
-				<a class="btn btn-discal-red text-discord-full-white" href="/logout">Logout</a>
-			</div>
-		</div>
-	</div>
+                <a class="btn btn-discal-red text-discord-full-white" href="/logout">Logout</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Bootstrap core JavaScript-->

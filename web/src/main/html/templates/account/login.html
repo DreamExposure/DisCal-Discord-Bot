@@ -7,35 +7,35 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="The Ultimate Discord Calendar Bot">
+    <meta name="description" content="The Ultimate Discord Calendar Bot">
 
-	<meta property="og:title" content="DisCal"/>
-	<meta property="og:url" content="https://www.discalbot.com"/>
-	<meta property="og:description" content="The Ultimate Discord Calendar Bot"/>
-	<meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
+    <meta property="og:title" content="DisCal"/>
+    <meta property="og:url" content="https://www.discalbot.com"/>
+    <meta property="og:description" content="The Ultimate Discord Calendar Bot"/>
+    <meta property="og:image" content="/assets/images/logos/Dark/Opaque/Logo%20Dark%20+bg.png">
 
-	<!-- ****** faviconit.com favicons ****** -->
-	<link rel="shortcut icon" href="/assets/img/favicon/favicon.ico">
-	<link rel="icon" sizes="16x16 32x32 64x64" href="/assets/img/favicon.ico">
-	<link rel="icon" type="image/png" sizes="196x196" href="/assets/img/favicon/favicon-192.png">
-	<link rel="icon" type="image/png" sizes="160x160" href="/assets/img/favicon/favicon-160.png">
-	<link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon/favicon-96.png">
-	<link rel="icon" type="image/png" sizes="64x64" href="/assets/img/favicon/favicon-64.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon/favicon-32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon/favicon-16.png">
-	<link rel="apple-touch-icon" href="/assets/img/favicon/favicon-57.png">
-	<link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/favicon-114.png">
-	<link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/favicon-72.png">
-	<link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicon/favicon-144.png">
-	<link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicon/favicon-60.png">
-	<link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicon/favicon-120.png">
-	<link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicon/favicon-76.png">
-	<link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicon/favicon-152.png">
-	<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon/favicon-180.png">
-	<meta name="msapplication-TileColor" content="#FFFFFF">
-	<meta name="msapplication-TileImage" content="/assets/img/favicon/favicon-144.png">
-	<meta name="msapplication-config" content="/assets/img/favicon/browserconfig.xml">
-	<!-- ****** faviconit.com favicons ****** -->
+    <!-- ****** faviconit.com favicons ****** -->
+    <link rel="shortcut icon" href="/assets/img/favicon/favicon.ico">
+    <link rel="icon" sizes="16x16 32x32 64x64" href="/assets/img/favicon.ico">
+    <link rel="icon" type="image/png" sizes="196x196" href="/assets/img/favicon/favicon-192.png">
+    <link rel="icon" type="image/png" sizes="160x160" href="/assets/img/favicon/favicon-160.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/img/favicon/favicon-96.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="/assets/img/favicon/favicon-64.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/favicon/favicon-16.png">
+    <link rel="apple-touch-icon" href="/assets/img/favicon/favicon-57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/img/favicon/favicon-114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/img/favicon/favicon-72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/assets/img/favicon/favicon-144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/assets/img/favicon/favicon-60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/img/favicon/favicon-120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/favicon/favicon-76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/img/favicon/favicon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/favicon/favicon-180.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="/assets/img/favicon/favicon-144.png">
+    <meta name="msapplication-config" content="/assets/img/favicon/browserconfig.xml">
+    <!-- ****** faviconit.com favicons ****** -->
 
     <title>DisCal - Login</title>
 
@@ -66,14 +66,15 @@
                         <div class="col-lg-6">
                             <div class="p-5">
                                 <div class="text-center">
-									<h1 class="h4 text-discord-full-white mb-4"><strong>Welcome Back!</strong></h1>
+                                    <h1 class="h4 text-discord-full-white mb-4"><strong>Welcome Back!</strong></h1>
                                 </div>
                                 <hr>
                                 <form class="user">
                                     <a th:href="'https://discordapp.com/oauth2/authorize?client_id=' +
                                      ${bot_id} +
                                      '&scope=guilds+identify&permissions=0&response_type=code&redirect_uri=' +
-                                     ${redirect_uri}" class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white">
+                                     ${redirect_uri}"
+                                       class="bg-discord-blurple btn btn-discord btn-user btn-block text-discord-full-white">
                                         <i class="fab fa-discord fa-fw"></i> Login with Discord
                                     </a>
                                 </form>

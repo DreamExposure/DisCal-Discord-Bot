@@ -243,11 +243,7 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Connected Clients: ' + ${status.currentShardCount}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Expected Client Count: ' + ${status.expectedShardCount}">
+                   th:text="'Connected Clients: ' + ${status.currentShardCount} + '/' + ${status.expectedShardCount}">
                 </p>
 
                 <p class="text-left text-discord-full-white"

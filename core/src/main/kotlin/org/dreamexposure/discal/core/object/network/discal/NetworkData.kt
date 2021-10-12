@@ -49,6 +49,6 @@ data class NetworkData(
 
         botStatus.forEach { totalMemMb+= it.instanceData.memory }
 
-        return ((totalMemMb / 20114) * 100).roundToInt().toDouble() / 100
+        return ((totalMemMb / 1024) * 100).roundToInt().toDouble() / 100
     }
 }
