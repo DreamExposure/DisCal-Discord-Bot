@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import reactor.core.publisher.Mono
@@ -25,9 +26,9 @@ object CalendarEmbed : EmbedMaker {
             .title(getMessage("calendar", "link.title", settings))
         //Handle optional fields
         if (calendar.name.isNotEmpty())
-            builder.addField(getMessage("calendar", "link.field.name", settings), calendar.name, false)
+            builder.addField(getMessage("calendar", "link.field.name", settings), calendar.name.toMarkdown(), false)
         if (calendar.description.isNotEmpty())
-            builder.addField(getMessage("calendar", "link.field.description", settings), calendar.description, false)
+            builder.addField(getMessage("calendar", "link.field.description", settings), calendar.description.toMarkdown(), false)
 
         return builder.addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
             .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
@@ -69,10 +70,10 @@ object CalendarEmbed : EmbedMaker {
     fun pre(guild: Guild, settings: GuildSettings, preCal: PreCalendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
             .title(getMessage("calendar", "wizard.title", settings))
-            .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name, false)
+            .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name.toMarkdown(), false)
             .addField(
                 getMessage("calendar", "wizard.field.description", settings),
-                preCal.description.ifEmpty { getCommonMsg("embed.unset", settings) },
+                preCal.description.ifEmpty { getCommonMsg("embed.unset", settings) }.toMarkdown(),
                 false
             ).addField(getMessage("calendar", "wizard.field.timezone", settings),
                 preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),

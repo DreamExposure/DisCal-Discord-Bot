@@ -112,6 +112,8 @@ allprojects {
 
         implementation("club.minnced:discord-webhooks:0.5.7")
 
+        implementation("io.github.furstenheim:copy_down:1.0")
+
         //Spring
         implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
         implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:$springVersion")
