@@ -784,7 +784,7 @@ public class EventCommand implements Command {
                                 Messages.getMessage("Creator.Event.Attachment.Delete", settings), em, event))
                             .doOnNext(pre::setCreatorMessage);
                     } else {
-                        return ImageUtils.validate(value, settings.getPatronGuild()).flatMap(valid -> {
+                        return ImageValidator.validate(value, settings.getPatronGuild()).flatMap(valid -> {
                             if (valid) {
                                 final PreEvent preEvent = EventCreator.getCreator().getPreEvent(settings.getGuildID());
 

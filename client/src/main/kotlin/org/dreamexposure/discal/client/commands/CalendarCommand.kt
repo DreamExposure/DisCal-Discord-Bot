@@ -13,8 +13,8 @@ import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.discord4j.*
+import org.dreamexposure.discal.core.extensions.isValidTimezone
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.TimeZoneUtils
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -119,7 +119,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
 
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
-                if (TimeZoneUtils.isValid(timezone)) {
+                if (timezone.isValidTimezone()) {
                     pre.timezone = ZoneId.of(timezone)
 
                     event.interaction.guild

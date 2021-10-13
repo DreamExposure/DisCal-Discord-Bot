@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.enums.time
 
+@Suppress("unused", "EnumEntryName", "SpellCheckingInspection")
 enum class BadTimezone {
     America_Adak,
     America_Atka,
@@ -93,5 +94,16 @@ enum class BadTimezone {
     Antarctica_Macquarie,
     Asia_Anadyr,
     Pacific_Chatham,
-    America_Detroit
+    America_Detroit;
+
+    companion object {
+        fun isBad(value: String): Boolean {
+            return try {
+                valueOf(value.replace("/".toRegex(), "_"))
+                true
+            } catch (ignore: IllegalArgumentException) {
+                false
+            }
+        }
+    }
 }

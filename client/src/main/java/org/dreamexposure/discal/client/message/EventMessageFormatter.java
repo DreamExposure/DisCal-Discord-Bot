@@ -15,7 +15,7 @@ import org.dreamexposure.discal.core.object.event.EventCreatorResponse;
 import org.dreamexposure.discal.core.object.event.EventData;
 import org.dreamexposure.discal.core.object.event.PreEvent;
 import org.dreamexposure.discal.core.utils.GlobalVal;
-import org.dreamexposure.discal.core.utils.ImageUtils;
+import org.dreamexposure.discal.core.utils.ImageValidator;
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
@@ -43,7 +43,7 @@ public class EventMessageFormatter {
         Mono<String> eDate = getHumanReadableDate(event.getEnd(), calNum, false, settings);
         Mono<String> eTime = getHumanReadableTime(event.getEnd(), calNum, false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
+            .flatMap(d -> ImageValidator.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
         Mono<String> timezone = DatabaseManager.INSTANCE.getCalendar(settings.getGuildID(), calNum)
             .flatMap(CalendarWrapper.INSTANCE::getCalendar)
@@ -124,7 +124,7 @@ public class EventMessageFormatter {
         Mono<String> eDate = getHumanReadableDate(event.getEndDateTime(), event.getCalNumber(), false, settings);
         Mono<String> eTime = getHumanReadableTime(event.getEndDateTime(), event.getCalNumber(), false, settings);
         Mono<Boolean> img = Mono.justOrEmpty(event.getEventData()).filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
+            .flatMap(d -> ImageValidator.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, sDate, sTime, eDate, eTime, img)
@@ -200,7 +200,7 @@ public class EventMessageFormatter {
         Mono<String> date = getHumanReadableDate(ecr.getEvent().getStart(), calNum, false, settings);
         Mono<String> time = getHumanReadableTime(ecr.getEvent().getStart(), calNum, false, settings);
         Mono<Boolean> img = data.filter(EventData::shouldBeSaved)
-            .flatMap(d -> ImageUtils.validate(d.getImageLink(), settings.getPatronGuild()))
+            .flatMap(d -> ImageValidator.validate(d.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, data, date, time, img)
