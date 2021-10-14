@@ -7,7 +7,11 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
+import org.springframework.boot.ApplicationArguments
+import org.springframework.boot.ApplicationRunner
+import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
@@ -15,26 +19,10 @@ import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
-import kotlin.concurrent.timerTask
 
-object DiscordAccountHandler {
-    //TODO: Don't use timer, instead use Reactor's repeating task thingy
-    private var timer: Timer? = null
-
-    //TODO: Switch to atomic containing immutable maps eventually
+@Component
+class DiscordAccountHandler: ApplicationRunner {
     private val discordAccounts: ConcurrentMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
-
-    fun init() {
-        timer = Timer(true)
-
-        timer?.schedule(timerTask {
-            removeTimedOutAccounts()
-        }, Duration.ofMinutes(30).toMillis())
-    }
-
-    fun shutdown() {
-        timer?.cancel()
-    }
 
     fun hasAccount(swe: ServerWebExchange): Mono<Boolean> {
         return swe.session.map { session ->
@@ -182,5 +170,11 @@ object DiscordAccountHandler {
                     LOGGER.error("Embed key get failure", it)
                 }
                 .onErrorReturn("internal_error")
+    }
+
+    override fun run(args: ApplicationArguments?) {
+        Flux.interval(Duration.ofMinutes(30))
+            .map { removeTimedOutAccounts() }
+            .subscribe()
     }
 }

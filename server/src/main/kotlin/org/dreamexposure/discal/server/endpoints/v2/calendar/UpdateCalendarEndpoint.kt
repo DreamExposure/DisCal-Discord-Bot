@@ -5,9 +5,9 @@ import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.isValidTimezone
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.TimeZoneUtils
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -51,7 +51,7 @@ class UpdateCalendarEndpoint(val client: DiscordClient) {
                 }
                 if (body.has("timezone")) {
                     val tzRaw = body.getString("timezone")
-                    if (TimeZoneUtils.isValid(tzRaw))
+                    if (tzRaw.isValidTimezone())
                         spec = spec.copy(timezone = ZoneId.of(tzRaw))
                 }
 

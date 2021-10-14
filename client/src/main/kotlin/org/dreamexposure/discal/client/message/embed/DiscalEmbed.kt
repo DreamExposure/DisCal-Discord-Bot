@@ -8,6 +8,7 @@ import org.dreamexposure.discal.GitProperty.DISCAL_VERSION_D4J
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
+import org.dreamexposure.discal.core.extensions.getHumanReadable
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
@@ -30,7 +31,7 @@ object DiscalEmbed : EmbedMaker {
                         .addField(getMessage("discal", "info.field.guilds", settings), "$guilds", true)
                         .addField(
                               getMessage("discal", "info.field.uptime", settings),
-                              Application.getHumanReadableUptime(),
+                              Application.getUptime().getHumanReadable(),
                               false
                         ).addField(getMessage("discal", "info.field.calendars", settings), "$cal", true)
                         .addField(getMessage("discal", "info.field.announcements", settings), "$ann", true)

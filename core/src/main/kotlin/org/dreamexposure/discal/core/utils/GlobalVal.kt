@@ -2,9 +2,13 @@ package org.dreamexposure.discal.core.utils
 
 import discord4j.common.util.Snowflake
 import discord4j.rest.util.Color
+import io.github.furstenheim.CodeBlockStyle
+import io.github.furstenheim.CopyDown
+import io.github.furstenheim.OptionsBuilder
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import org.jsoup.safety.Whitelist
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 
@@ -34,9 +38,28 @@ object GlobalVal {
 
     val JSON_FORMAT = Json { encodeDefaults = true }
 
+    val HTML_WHITELIST: Whitelist
+        get() {
+            return Whitelist.basic()
+                    .preserveRelativeLinks(false)
+                    .removeAttributes("sub", "sup", "small")
+        }
+
+    val MARKDOWN_CONVERTER: CopyDown
+        get() {
+            return CopyDown(OptionsBuilder.anOptions()
+                    .withStrongDelimiter("**")
+                    .withEmDelimiter("*")
+                    .withFence("```")
+                    .withHr("---")
+                    .withCodeBlockStyle(CodeBlockStyle.FENCED)
+                    .build()
+            )
+        }
+
     @JvmStatic
     val DEFAULT: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_DEFAULT")
-    @JvmStatic
+
     val STATUS: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_STATUS")
 
     const val STATUS_SUCCESS = 200

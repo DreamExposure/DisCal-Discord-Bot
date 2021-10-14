@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
+import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
@@ -32,9 +33,9 @@ object AnnouncementEmbed : EmbedMaker {
                   .title(getMessage("announcement", "full.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "full.field.name", settings), event.name, false)
+                builder.addField(getMessage("announcement", "full.field.name", settings), event.name.toMarkdown(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "full.field.desc", settings), event.description, false)
+                builder.addField(getMessage("announcement", "full.field.desc", settings), event.description.toMarkdown(), false)
 
             builder.addField(
                   getMessage("announcement", "full.field.start", settings),
@@ -47,10 +48,10 @@ object AnnouncementEmbed : EmbedMaker {
                   true
             )
 
-            builder.addField(getMessage("announcement", "full.field.location", settings), event.location, false)
+            builder.addField(getMessage("announcement", "full.field.location", settings), event.location.toMarkdown(), false)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
-                builder.addField(getMessage("announcement", "full.field.info", settings), ann.info, false)
+                builder.addField(getMessage("announcement", "full.field.info", settings), ann.info.toMarkdown(), false)
 
             builder.addField(
                   getMessage("announcement", "full.field.calendar", settings),
@@ -76,9 +77,9 @@ object AnnouncementEmbed : EmbedMaker {
                   .title(getMessage("announcement", "simple.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "simple.field.name", settings), event.name, false)
+                builder.addField(getMessage("announcement", "simple.field.name", settings), event.name.toMarkdown(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "simple.field.desc", settings), event.description, false)
+                builder.addField(getMessage("announcement", "simple.field.desc", settings), event.description.toMarkdown(), false)
 
             builder.addField(
                   getMessage("announcement", "simple.field.start", settings),
@@ -86,7 +87,7 @@ object AnnouncementEmbed : EmbedMaker {
                   true
             )
 
-            builder.addField(getMessage("announcement", "simple.field.location", settings), event.location, false)
+            builder.addField(getMessage("announcement", "simple.field.location", settings), event.location.toMarkdown(), false)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
                 builder.addField(getMessage("announcement", "simple.field.info", settings), ann.info, false)
@@ -108,9 +109,9 @@ object AnnouncementEmbed : EmbedMaker {
                   .title(getMessage("announcement", "event.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "event.field.name", settings), event.name, false)
+                builder.addField(getMessage("announcement", "event.field.name", settings), event.name.toMarkdown(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "event.field.desc", settings), event.description, false)
+                builder.addField(getMessage("announcement", "event.field.desc", settings), event.description.toMarkdown(), false)
 
             builder.addField(
                   getMessage("announcement", "event.field.start", settings),
@@ -122,7 +123,7 @@ object AnnouncementEmbed : EmbedMaker {
                   event.end.asDiscordTimestamp(),
                   true
             )
-            builder.addField(getMessage("announcement", "event.field.location", settings), event.location, false)
+            builder.addField(getMessage("announcement", "event.field.location", settings), event.location.toMarkdown(), false)
 
             builder.addField(
                   getMessage("announcement", "event.field.calendar", settings),
@@ -132,7 +133,7 @@ object AnnouncementEmbed : EmbedMaker {
             builder.addField(getMessage("announcement", "event.field.event", settings), event.eventId, true)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
-                builder.addField(getMessage("announcement", "event.field.info", settings), ann.info, false)
+                builder.addField(getMessage("announcement", "event.field.info", settings), ann.info.toMarkdown(), false)
 
             if (event.image.isNotEmpty()) {
                 builder.image(event.image)
@@ -178,7 +179,7 @@ object AnnouncementEmbed : EmbedMaker {
                   .addField(getMessage("announcement", "view.field.minutes", settings), "${ann.minutesBefore}", true)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true)) {
-                builder.addField(getMessage("announcement", "view.field.info", settings), ann.info, false)
+                builder.addField(getMessage("announcement", "view.field.info", settings), ann.info.toMarkdown(), false)
             }
 
             builder.addField(getMessage("announcement", "view.field.calendar", settings), "${ann.calendarNumber}", true)

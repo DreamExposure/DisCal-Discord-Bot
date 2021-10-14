@@ -1,4 +1,3 @@
-
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -9,14 +8,14 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
-val thymeleafVersion: String by ext
-val thymeleafSecurityVersion: String by ext
-val thymeleafLayoutVersion: String by ext
+val thymeleafVersion: String by properties
+val thymeleafSecurityVersion: String by properties
+val thymeleafLayoutVersion: String by properties
 
-val springVersion: String by ext
-val springSecurityVersion: String by ext
-val springSessionVersion: String by ext
-val springR2Version: String by ext
+val springVersion: String by properties
+val springSecurityVersion: String by properties
+val springSessionVersion: String by properties
+val springR2Version: String by properties
 
 dependencies {
     api(project(":core"))
@@ -55,7 +54,8 @@ jib {
     if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
 
     to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-web:$imageVersion"
-    from.image = "adoptopenjdk/openjdk16:alpine-jre"
+    val baseImage: String by properties
+    from.image = baseImage
 
     container.creationTime = "USE_CURRENT_TIMESTAMP"
 }

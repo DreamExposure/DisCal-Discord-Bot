@@ -15,10 +15,7 @@ import org.dreamexposure.discal.core.object.BotSettings;
 import org.dreamexposure.discal.core.object.GuildSettings;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
 import org.dreamexposure.discal.core.object.event.EventData;
-import org.dreamexposure.discal.core.utils.GlobalVal;
-import org.dreamexposure.discal.core.utils.ImageUtils;
-import org.dreamexposure.discal.core.utils.RoleUtils;
-import org.dreamexposure.discal.core.utils.UserUtils;
+import org.dreamexposure.discal.core.utils.*;
 import org.dreamexposure.discal.core.wrapper.google.EventWrapper;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +46,7 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
+            .flatMap(ed -> ImageValidator.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
         return Mono.zip(guild, channelName, eData, img)
@@ -115,7 +112,7 @@ public class AnnouncementMessageFormatter {
             .defaultIfEmpty(new EventData()).cache();
 
         Mono<Boolean> img = eData.filter(EventData::shouldBeSaved)
-            .flatMap(ed -> ImageUtils.validate(ed.getImageLink(), settings.getPatronGuild()))
+            .flatMap(ed -> ImageValidator.validate(ed.getImageLink(), settings.getPatronGuild()))
             .defaultIfEmpty(false);
 
 

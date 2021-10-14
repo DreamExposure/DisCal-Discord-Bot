@@ -27,7 +27,6 @@ import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
-import org.dreamexposure.novautils.database.DatabaseSettings
 import org.intellij.lang.annotations.Language
 import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
@@ -37,15 +36,6 @@ import java.util.*
 import java.util.function.Function
 
 object DatabaseManager {
-    private val settings: DatabaseSettings = DatabaseSettings(
-        BotSettings.SQL_HOST.get(),
-        BotSettings.SQL_PORT.get(),
-        BotSettings.SQL_DB.get(),
-        BotSettings.SQL_USER.get(),
-        BotSettings.SQL_PASS.get(),
-        BotSettings.SQL_PREFIX.get()
-    )
-
     private val pool: ConnectionPool
 
     init {
@@ -53,11 +43,11 @@ object DatabaseManager {
             builder()
                 .option(DRIVER, "pool")
                 .option(PROTOCOL, "mysql")
-                .option(HOST, settings.hostname)
-                .option(PORT, settings.port.toInt())
-                .option(USER, settings.user)
-                .option(PASSWORD, settings.password)
-                .option(DATABASE, settings.database)
+                .option(HOST, BotSettings.SQL_HOST.get())
+                .option(PORT, BotSettings.SQL_PORT.get().toInt())
+                .option(USER, BotSettings.SQL_USER.get())
+                .option(PASSWORD, BotSettings.SQL_PASS.get())
+                .option(DATABASE, BotSettings.SQL_DB.get())
                 .build()
         )
 

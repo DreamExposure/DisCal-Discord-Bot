@@ -153,8 +153,7 @@
         <div id="content">
 
             <!-- Topbar -->
-            <nav
-                    class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
+            <nav class="navbar navbar-expand navbar-dark bg-discal-blue topbar mb-4 static-top shadow">
 
                 <!-- Sidebar Toggle (Topbar) -->
                 <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -203,7 +202,7 @@
                         </a>
                         <!-- Dropdown - User Information -->
                         <div class="dropdown-menu dropdown-menu-right shadow
-						animated--grow-in bg-discal-not-black"
+                            animated--grow-in bg-discal-not-black"
                              aria-labelledby="userDropdown">
                             <a class="dropdown-item text-discord-full-white" href="#"
                                data-toggle="modal" data-target="#logoutModal">
@@ -228,95 +227,116 @@
             <div class="container-fluid">
                 <h1 class="text-center text-discal-blue">DisCal Network and Services Status</h1>
 
-                <!--Start Server Status-->
-                <h2 class="text-center text-discal-blue">Server</h2>
+                <!--Start Network Statistics -->
+                <h2 class="text-center text-discal-blue">Network Statistics</h2>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Version: ' + ${status.version}">
+                   th:text="'Total Guilds: ' + ${status.totalGuilds}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Discord4J Version: ' + ${status.d4JVersion}">
+                   th:text="'Total Calendars: ' + ${status.totalCalendars}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Connected Clients: ' + ${status.clientCount}">
+                   th:text="'Total Announcements: ' + ${status.totalAnnouncements}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Expected Client Count: ' + ${status.expectedClientCount}">
-
+                   th:text="'Connected Clients: ' + ${status.currentShardCount} + '/' + ${status.expectedShardCount}">
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                   th:text="'Uptime: ' + ${status.uptime}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Guilds: ' + ${status.totalGuildCount}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Calendars: ' + ${status.calendarCount}">
-                </p>
-
-                <p class="text-left text-discord-full-white"
-                   th:text="'Total Announcements: ' + ${status.announcementCount}">
+                    th:text="'Total Memory Usage: ' + ${status.totalMemoryInGb} + 'GB'">
                 </p>
 
                 <br>
-                <!--End Server Status-->
+                <!-- End network statistics -->
 
                 <hr>
 
                 <!--Start API Status-->
-                <br>
-
                 <h2 class="text-center text-discal-blue">API</h2>
 
-                <p class="text-left text-discord-full-white">
-                    Uptime: Not yet tracked
+                <p class="text-left text-discord-full-white"
+                   th:text="'Version: ' + ${status.apiStatus.version}">
                 </p>
 
-                <p class="text-left text-discord-full-white">
-                    Ping: Not yet tracked
+                <p class="text-left text-discord-full-white"
+                   th:text="'Discord4J Version: ' + ${status.apiStatus.d4jVersion}">
                 </p>
 
-                <p class="text-left text-discord-full-white">
-                    Requests Processed: not yet tracked
+                <p class="text-left text-discord-full-white"
+                   th:text="'RAM Used: ' + ${status.apiStatus.memory} + 'MB'">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Uptime: ' + ${status.apiStatus.humanReadableUptime}">
+                </p>
+
+                <p class="text-left text-discord-full-white"
+                   th:text="'Last Heartbeat: ' + ${status.apiStatus.humanReadableHeartbeat}">
                 </p>
 
                 <br>
                 <!--End API Status-->
 
+                <hr>
+
+                <!--Start Website Status-->
+                <h2 class="text-center text-discal-blue">Website</h2>
+                <th:block th:if="${status.websiteStatus != null}">
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Version: ' + ${status.websiteStatus.version}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'RAM Used: ' + ${status.websiteStatus.memory} + 'MB'">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Uptime: ' + ${status.websiteStatus.humanReadableUptime}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Last Heartbeat: ' + ${status.websiteStatus.humanReadableHeartbeat}">
+                    </p>
+                </th:block>
+
+                <br>
+                <!--End Website Status-->
 
                 <hr>
 
-                <!--Start Client Statuses-->
+                <!--Start Bot Statuses-->
                 <br>
 
                 <h2 class="text-center text-discal-blue">Clients</h2>
 
-                <th:block th:each="client : ${status.clients}">
+                <th:block th:each="client : ${status.botStatus}">
 
-                    <div th:id="'client-' + ${client.clientIndex}">
+                    <div th:id="'client-' + ${client.shardIndex}">
                         <h3 class="text-left text-discord-full-white"
-                            th:text="'Client Index: ' + ${client.clientIndex}"></h3>
+                            th:text="'Shard Index: ' + ${client.shardIndex}"></h3>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Version: ' + ${client.version}">
+                           th:text="'Version: ' + ${client.instanceData.version}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Discord4J Version: ' + ${client.d4jVersion}">
+                           th:text="'Discord4J Version: ' + ${client.instanceData.d4jVersion}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Guilds: ' + ${client.connectedServers}">
+                           th:text="'Guilds: ' + ${client.guilds}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'RAM Used: ' + ${client.memUsed} + 'MB'">
+                           th:text="'RAM Used: ' + ${client.instanceData.memory} + 'MB'">
                         </p>
 
                         <p class="text-left text-discord-full-white">
@@ -324,21 +344,12 @@
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Uptime: ' + ${client.uptime}">
+                           th:text="'Uptime: ' + ${client.instanceData.humanReadableUptime}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Last KeepAlive: ' + ${client.lastKeepAliveHumanReadable}">
+                           th:text="'Last Heartbeat: ' + ${client.instanceData.humanReadableHeartbeat}">
                         </p>
-
-                        <p class="text-left text-discord-full-white">
-                            Announcement Service: Not yet tracked
-                        </p>
-
-                        <p class="text-left text-discord-full-white">
-                            Creator Cleaner Service: Not yet tracked
-                        </p>
-
                     </div>
 
                     <br>

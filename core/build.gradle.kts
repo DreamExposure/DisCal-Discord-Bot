@@ -12,8 +12,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen")
 }
 
-val discord4jVersion: String by ext
-val discord4jStoresVersion: String by ext
+val discord4jVersion: String by properties
+val discord4jStoresVersion: String by properties
 val kotlinSrcDir: File = buildDir.resolve("core/src/main/kotlin")
 
 dependencies {

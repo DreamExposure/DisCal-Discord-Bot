@@ -5,20 +5,26 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by ext
-val springSecurityVersion: String by ext
-val springSessionVersion: String by ext
-val springR2Version: String by ext
+val springVersion: String by properties
+val springSecurityVersion: String by properties
+val springSessionVersion: String by properties
+val springR2Version: String by properties
+val flywayVersion: String by properties
+val mysqlConnectorVersion: String by properties
+val hikariVersion: String by properties
+val dblVersion: String by properties
+val jacksonKotlinModVersion: String by properties
 
 dependencies {
     api(project(":core"))
 
     //Database stuff
-    implementation("org.flywaydb:flyway-core:7.11.2")
-    implementation("mysql:mysql-connector-java:8.0.25")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("mysql:mysql-connector-java:$mysqlConnectorVersion")
+    implementation("com.zaxxer:HikariCP:$hikariVersion")
 
     //Top gg lib
-    implementation("org.discordbots:DBL-Java-Library:2.0.1")
+    implementation("org.discordbots:DBL-Java-Library:$dblVersion")
 
     //Spring libs
     implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
@@ -27,7 +33,7 @@ dependencies {
     implementation("org.springframework:spring-r2dbc:$springR2Version")
 
     //jackson for kotlin
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinModVersion")
 }
 
 kotlin {
@@ -43,7 +49,9 @@ jib {
     if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
 
     to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-server:$imageVersion"
-    from.image = "adoptopenjdk/openjdk16:alpine-jre"
+    val baseImage: String by properties
+    from.image = baseImage
+
     container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 

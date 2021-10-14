@@ -54,6 +54,7 @@ class GoogleCalendar internal constructor(
 
     override fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse> {
         val content = GoogleCalendarModel()
+        content.id = this.calendarId
 
         spec.name?.let { content.summary = it }
         spec.description?.let { content.description = it }
