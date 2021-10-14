@@ -1,105 +1,77 @@
 package org.dreamexposure.discal.core.`object`.event
 
-import com.google.api.services.calendar.model.Event
-import com.google.api.services.calendar.model.EventDateTime
 import discord4j.common.util.Snowflake
-import discord4j.core.`object`.entity.Message
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
+import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.utils.TimeUtils
-import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
-import reactor.core.publisher.Mono
+import java.time.Instant
 import java.time.ZoneId
 
 @Suppress("DataClassPrivateConstructor")
 data class PreEvent private constructor(
         val guildId: Snowflake,
-        val eventId: String,
+        val eventId: String? = null,
         val calNumber: Int,
+        val timezone: ZoneId,
+        val editing: Boolean = false,
 ) {
-    //fields
-    var summary: String? = null
+    var name: String? = null
+
     var description: String? = null
-    var startDateTime: EventDateTime? = null
-    var endDateTime: EventDateTime? = null
 
-    var timezone = "Unknown"
+    var start: Instant? = null
+    var end: Instant? = null
 
-    var color = EventColor.NONE
+    var color: EventColor = EventColor.NONE
 
     var location: String? = null
 
-    var recur = false
-    var recurrence = Recurrence()
+    var image: String? = null
 
-    var eventData = EventData(this.guildId)
+    var recurrence: Recurrence? = null
 
-    //Wizards
-    var editing = false
-    var creatorMessage: Message? = null
-    var lastEdit = System.currentTimeMillis()
+    var event: Event? = null
 
-    //Constructors
-    constructor(guildId: Snowflake, calNumber: Int) : this(guildId, "N/a", calNumber)
+    var lastEdit: Instant = Instant.now()
 
-    private constructor(guildId: Snowflake, e: Event, calData: CalendarData) : this(guildId, e.id, calData
-            .calendarNumber) {
-        try {
-            this.color = EventColor.fromNameOrHexOrId(e.colorId)
-        } catch (ignore: NullPointerException) {
-            this.color = EventColor.NONE
-        }
 
-        if (e.recurrence != null && e.recurrence.isNotEmpty()) {
-            this.recur = true
-            this.recurrence = Recurrence.fromRRule(e.recurrence[0])
-        }
+    fun hasRequiredValues(): Boolean {
+        return this.start != null
+                && this.end != null
+    }
 
-        if (e.summary != null) this.summary = e.summary
-        if (e.description != null) this.description = e.description
-        if (e.location != null) this.location = e.location
+    fun createSpec(): CreateEventSpec {
+        return CreateEventSpec(
+                name = name,
+                description = description,
+                start = start!!,
+                end = end!!,
+                color = color,
+                location = location,
+                image = image,
+                recur = recurrence != null,
+                recurrence = recurrence,
+        )
+    }
 
-        if (e.start.date == null)
-            this.startDateTime = e.start
-
-        if (e.end.date == null)
-            this.endDateTime = e.end
-
-        if (e.start.timeZone != null) this.timezone = e.start.timeZone
+    fun updateSpec(): UpdateEventSpec {
+        return UpdateEventSpec(
+                name = name,
+                description = description,
+                start = start,
+                end = end,
+                color = color,
+                location = location,
+                image = image,
+                recur = recurrence != null,
+                recurrence = recurrence,
+        )
     }
 
     companion object {
-        @JvmStatic
-        fun copy(guildId: Snowflake, e: Event, calData: CalendarData): Mono<PreEvent> {
-            return CalendarWrapper.getCalendar(calData)
-                    .map { ZoneId.of(it.timeZone) }
-                    .map { tz ->
-                        val event = PreEvent(guildId, e, calData)
-                        event.timezone = tz.id
+        //TODO: new function
 
-                        if (e.start.date != null) {
-                            event.startDateTime = EventDateTime()
-                            event.startDateTime!!.dateTime = TimeUtils.doTimeShiftBullshit(e.start.date, tz)
-                        }
-                        if (e.end.date != null) {
-                            event.endDateTime = EventDateTime()
-                            event.endDateTime!!.dateTime = TimeUtils.doTimeShiftBullshit(e.end.date, tz)
-                        }
-
-                        return@map event
-                    }
-                    .flatMap { event ->
-                        DatabaseManager.getEventData(guildId, event.eventId)
-                                .switchIfEmpty(Mono.just(EventData(guildId, event.eventId)))
-                                .doOnNext {
-                                    event.eventData = it
-                                }
-                                .thenReturn(event)
-                    }
-        }
+        //TODO: edit function
     }
-
-    //Functions
-    fun hasRequiredValues(): Boolean = this.startDateTime != null && this.endDateTime != null
 }

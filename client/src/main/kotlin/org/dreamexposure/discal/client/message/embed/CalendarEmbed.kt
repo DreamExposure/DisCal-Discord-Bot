@@ -72,7 +72,7 @@ object CalendarEmbed : EmbedMaker {
             .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name, false)
             .addField(
                 getMessage("calendar", "wizard.field.description", settings),
-                preCal.description.ifEmpty { getCommonMsg("embed.unset", settings) },
+                preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings) } ?: getCommonMsg("embed.unset", settings),
                 false
             ).addField(getMessage("calendar", "wizard.field.timezone", settings),
                 preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),

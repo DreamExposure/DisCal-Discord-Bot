@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import java.time.Duration
+import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -26,7 +27,11 @@ class CalendarWizard {
 
     private val active = ConcurrentHashMap<Snowflake, PreCalendar>()
 
-    fun get(id: Snowflake): PreCalendar? = active[id]
+    fun get(id: Snowflake): PreCalendar? {
+        val p = active[id]
+        if (p != null) p.lastEdit = Instant.now()
+        return p
+    }
 
     fun start(pre: PreCalendar): PreCalendar? = active.put(pre.guildId, pre)
 

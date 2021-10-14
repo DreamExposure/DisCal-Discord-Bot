@@ -18,7 +18,7 @@ data class PreCalendar private constructor(
         var name: String,
         val editing: Boolean = false
 ) {
-    var description: String = ""
+    var description: String? = null
 
     var timezone: ZoneId? = null
 
