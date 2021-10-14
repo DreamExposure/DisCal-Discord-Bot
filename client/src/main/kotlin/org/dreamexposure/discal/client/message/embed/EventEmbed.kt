@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.message.embed
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.toMarkdown
@@ -51,5 +52,9 @@ object EventEmbed : EmbedMaker {
             builder.thumbnail(event.image)
 
         return builder.build()
+    }
+
+    fun pre(guild: Guild, settings: GuildSettings, preEvent: PreEvent): EmbedCreateSpec {
+        TODO()
     }
 }
