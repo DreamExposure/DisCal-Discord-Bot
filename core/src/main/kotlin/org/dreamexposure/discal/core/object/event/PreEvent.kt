@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.`object`.event
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import org.dreamexposure.discal.core.`object`.Pre
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
@@ -14,12 +15,12 @@ import java.time.ZoneId
 
 @Suppress("DataClassPrivateConstructor")
 data class PreEvent private constructor(
-        val guildId: Snowflake,
+        override val guildId: Snowflake,
         val eventId: String? = null,
         val calNumber: Int,
         val timezone: ZoneId,
         val editing: Boolean = false,
-) {
+): Pre(guildId) {
     var name: String? = null
 
     var description: String? = null
@@ -36,8 +37,6 @@ data class PreEvent private constructor(
     var recurrence: Recurrence? = null
 
     var event: Event? = null
-
-    var lastEdit: Instant = Instant.now()
 
 
     fun hasRequiredValues(): Boolean {
@@ -118,7 +117,6 @@ data class PreEvent private constructor(
                         guildId = event.guildId,
                         calNumber = targetCal.calendarNumber,
                         timezone = targetCal.timezone,
-                        editing = true
                 )
 
                 pre.name = event.name

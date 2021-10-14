@@ -7,7 +7,7 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
-import org.dreamexposure.discal.client.wizards.CalendarWizard
+import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 import java.time.ZoneId
 
 @Component
-class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
+class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
     override val name = "calendar"
     override val ephemeral = true
 

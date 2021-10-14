@@ -2,30 +2,27 @@ package org.dreamexposure.discal.core.`object`.calendar
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import org.dreamexposure.discal.core.`object`.Pre
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.discord4j.determineNextCalendarNumber
 import reactor.core.publisher.Mono
-import java.time.Instant
 import java.time.ZoneId
 
 @Suppress("DataClassPrivateConstructor")
 data class PreCalendar private constructor(
-        val guildId: Snowflake,
+        override val guildId: Snowflake,
         val host: CalendarHost,
         var name: String,
         val editing: Boolean = false
-) {
+): Pre(guildId) {
     var description: String? = null
 
     var timezone: ZoneId? = null
 
     var calendar: Calendar? = null
-
-    var lastEdit: Instant = Instant.now()
-
 
     fun hasRequiredValues(): Boolean {
         return this.name.isNotEmpty() && this.timezone != null
