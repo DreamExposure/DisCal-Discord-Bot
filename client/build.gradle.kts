@@ -5,10 +5,10 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by ext
-val springSecurityVersion: String by ext
-val springSessionVersion: String by ext
-val springR2Version: String by ext
+val springVersion: String by properties
+val springSecurityVersion: String by properties
+val springSessionVersion: String by properties
+val springR2Version: String by properties
 
 dependencies {
     api(project(":core"))
@@ -32,7 +32,9 @@ jib {
     if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
 
     to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-client:$imageVersion"
-    from.image = "adoptopenjdk/openjdk16:alpine-jre"
+    val baseImage: String by properties
+    from.image = baseImage
+
     container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 
