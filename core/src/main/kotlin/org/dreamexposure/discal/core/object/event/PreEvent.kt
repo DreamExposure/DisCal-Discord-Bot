@@ -104,10 +104,10 @@ data class PreEvent private constructor(
             return pre
         }
 
-        fun copy(guild: Guild, event: Event, calNum: Int = event.calendar.calendarNumber): Mono<PreEvent> {
+        fun copy(guild: Guild, event: Event, targetCalNum: Int): Mono<PreEvent> {
             val calMono: Mono<Calendar> =
-                    if (calNum != event.calendar.calendarNumber) {
-                        guild.getCalendar(calNum).defaultIfEmpty(event.calendar)
+                    if (targetCalNum != event.calendar.calendarNumber) {
+                        guild.getCalendar(targetCalNum).defaultIfEmpty(event.calendar)
                     } else {
                         Mono.just(event.calendar)
                     }

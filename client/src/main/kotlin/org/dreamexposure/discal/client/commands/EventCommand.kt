@@ -9,17 +9,21 @@ import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.event.PreEvent
+import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
+import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.utils.ImageValidator
+import org.dreamexposure.discal.core.extensions.isValidImage
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
+@Suppress("DuplicatedCode")
 @Component
 class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
     override val name = "event"
@@ -117,7 +121,6 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
-    @Suppress("DuplicatedCode")
     private fun start(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val year = event.options[0].getOption("year")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -148,7 +151,6 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
         TODO("Not yet implemented")
     }
 
-    @Suppress("DuplicatedCode")
     private fun end(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val year = event.options[0].getOption("year")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -227,18 +229,15 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
-                ImageValidator.validate(image, settings.patronGuild || settings.devGuild).flatMap { valid ->
-                    if (valid) {
-                        pre.image = image
-                        event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("image.success", settings), it) }
-                    } else {
-                        event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("image.failure", settings), it) }
-                    }
-                }
+                Mono.just(image).filterWhen { it.isValidImage(settings.patronGuild || settings.devGuild) }.flatMap {
+                    pre.image = image
+                    event.interaction.guild
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("image.success", settings), it) }
+                }.switchIfEmpty(event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("image.failure", settings), it) }
+                )
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -270,7 +269,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
     }
 
     private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 event.interaction.guild.flatMap {
@@ -283,15 +282,49 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
     }
 
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                if (!pre.hasRequiredValues()) {
+                    event.followupEphemeral(getMessage("confirm.failure.missing", settings))
+                }
+
+                event.interaction.guild.flatMap { guild ->
+                    if (!pre.editing) {
+                        // New event
+                        guild.getCalendar(pre.calNumber)
+                                .flatMap { it.createEvent(pre.createSpec()) }
+                                .flatMap {
+                                    event.followupEphemeral(
+                                            getMessage("confirm.success.create", settings),
+                                            EventEmbed.getFull(guild, settings, it)
+                                    )
+                                }.doOnError {
+                                    LOGGER.error("Create event with command failure", it)
+                                }.onErrorResume {
+                                    event.followupEphemeral(getMessage("confirm.failure.create", settings))
+                                }
+                    } else {
+                        // Editing
+                        pre.event!!.update(pre.updateSpec())
+                                .filter(UpdateEventResponse::success)
+                                .map { EventEmbed.getFull(guild, settings, it.new!!) }
+                                .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
+                                .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
+                    }
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             wizard.remove(settings.guildID)
 
             event.followupEphemeral(getMessage("cancel.success", settings))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -305,7 +338,24 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .map(Long::toInt)
                 .orElse(1)
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            if (wizard.get(settings.guildID) == null) {
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calendarNumber).flatMap { calendar ->
+                        calendar.getEvent(eventId)
+                                .map { PreEvent.edit(it) }
+                                .doOnNext { wizard.start(it) }
+                                .map { EventEmbed.pre(guild, settings, it) }
+                                .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
+                                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            } else {
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun copy(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -324,8 +374,24 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .map(Long::toInt)
                 .orElse(calendarNumber)
 
-
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            if (wizard.get(settings.guildID) == null) {
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calendarNumber).flatMap { calendar ->
+                        calendar.getEvent(eventId)
+                                .flatMap { PreEvent.copy(guild, it, targetCalendarNumber) }
+                                .doOnNext { wizard.start(it) }
+                                .map { EventEmbed.pre(guild, settings, it) }
+                                .flatMap { event.followupEphemeral(getMessage("copy.success", settings), it) }
+                                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            } else {
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -339,7 +405,13 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .map(Long::toInt)
                 .orElse(1)
 
-        TODO("Not yet implemented")
+        return event.interaction.guild.flatMap { guild ->
+            guild.getCalendar(calendarNumber).flatMap { calendar ->
+                calendar.getEvent(eventId).flatMap { calEvent ->
+                    event.followup(EventEmbed.getFull(guild, settings, calEvent))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+        }
     }
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -353,6 +425,13 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .map(Long::toInt)
                 .orElse(1)
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            event.interaction.guild.flatMap { it.getCalendar(calendarNumber) }.flatMap { calendar ->
+                calendar.getEvent(eventId)
+                        .flatMap(Event::delete)
+                        .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
+                        .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 }

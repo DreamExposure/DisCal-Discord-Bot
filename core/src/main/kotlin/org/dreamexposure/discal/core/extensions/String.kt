@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.extensions
 
 import org.dreamexposure.discal.core.enums.time.BadTimezone
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.ImageValidator
 import org.jsoup.Jsoup
 import java.time.ZoneId
 
@@ -20,3 +21,5 @@ fun String.isValidTimezone(): Boolean {
         false
     }
 }
+
+fun String.isValidImage(allowGif: Boolean) = ImageValidator.validate(this, allowGif)
