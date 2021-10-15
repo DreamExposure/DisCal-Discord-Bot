@@ -529,8 +529,8 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
             guild.getCalendar(calendarNumber).flatMap { calendar ->
                 calendar.getEvent(eventId).flatMap { calEvent ->
                     event.interaction.channel.flatMap {
-                        // Create message instead of followup
-                        event.interactionResponse.deleteInitialResponse().then(
+                        // Create message so others can see
+                        event.followupEphemeral(getMessage("view.success", settings)).then(
                                 it.createMessage(EventEmbed.getFull(guild, settings, calEvent))
                         )
                     }
