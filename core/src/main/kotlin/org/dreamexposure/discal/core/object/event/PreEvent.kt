@@ -73,9 +73,9 @@ data class PreEvent private constructor(
     }
 
     companion object {
-        fun new(guildId: Snowflake, calendar: Calendar): PreEvent {
+        fun new(calendar: Calendar): PreEvent {
             return PreEvent(
-                    guildId = guildId,
+                    guildId = calendar.guildId,
                     calNumber = calendar.calendarNumber,
                     timezone = calendar.timezone,
                     editing = false,

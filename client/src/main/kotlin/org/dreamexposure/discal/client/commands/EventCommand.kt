@@ -2,14 +2,26 @@ package org.dreamexposure.discal.client.commands
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Wizard
+import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
+import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
+import org.dreamexposure.discal.core.utils.ImageValidator
+import org.dreamexposure.discal.core.utils.getCommonMsg
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
-class EventCommand: SlashCommand {
+@Component
+class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
     override val name = "event"
     override val ephemeral = true
 
@@ -47,7 +59,24 @@ class EventCommand: SlashCommand {
                 .map(Long::toInt)
                 .orElse(1)
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            if (wizard.get(settings.guildID) == null) {
+                event.interaction.guild.flatMap { guild ->
+                    guild.getCalendar(calendarNumber).flatMap { cal ->
+                        val pre = PreEvent.new(cal)
+                        pre.name = name
+                        wizard.start(pre)
+
+                        event.followupEphemeral(getMessage("create.success", settings), EventEmbed.pre(guild, settings, pre))
+                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+                }
+            } else {
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings)) }
+            }
+
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -56,7 +85,17 @@ class EventCommand: SlashCommand {
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                pre.name = name
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("name.success", settings), it) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -65,7 +104,17 @@ class EventCommand: SlashCommand {
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                pre.description = description
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("description.success", settings), it) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     @Suppress("DuplicatedCode")
@@ -137,7 +186,17 @@ class EventCommand: SlashCommand {
                 .map(EventColor.Companion::fromId)
                 .get()
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                pre.color = color
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("color.success", settings), it) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun location(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -146,7 +205,17 @@ class EventCommand: SlashCommand {
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                pre.location = location
+                event.interaction.guild
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("location.success", settings), it) }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun image(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -155,7 +224,25 @@ class EventCommand: SlashCommand {
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .get()
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                ImageValidator.validate(image, settings.patronGuild || settings.devGuild).flatMap { valid ->
+                    if (valid) {
+                        pre.image = image
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("image.success", settings), it) }
+                    } else {
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("image.failure", settings), it) }
+                    }
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun recur(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -183,7 +270,16 @@ class EventCommand: SlashCommand {
     }
 
     private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                event.interaction.guild.flatMap {
+                    event.followupEphemeral(EventEmbed.pre(it, settings, pre))
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -191,7 +287,11 @@ class EventCommand: SlashCommand {
     }
 
     private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+            wizard.remove(settings.guildID)
+
+            event.followupEphemeral(getMessage("cancel.success", settings))
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
     }
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
