@@ -7,8 +7,8 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
-import org.dreamexposure.discal.client.wizards.CalendarWizard
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono
 import java.time.ZoneId
 
 @Component
-class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
+class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
     override val name = "calendar"
     override val ephemeral = true
 
@@ -77,7 +77,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 pre.name = name
@@ -96,7 +96,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 pre.description = desc
@@ -115,8 +115,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
-
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 if (timezone.isValidTimezone()) {
@@ -135,7 +134,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 event.interaction.guild.flatMap {
@@ -148,7 +147,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 if (!pre.hasRequiredValues()) {
@@ -186,7 +185,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
     }
 
     private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             wizard.remove(settings.guildID)
 
             event.followupEphemeral(getMessage("cancel.success", settings))
@@ -200,7 +199,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(Long::toInt)
             .orElse(1)
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             event.interaction.guild
                 .flatMap { it.getCalendar(calendarNumber) }
                 .flatMap { it.delete() }
@@ -216,7 +215,7 @@ class CalendarCommand(val wizard: CalendarWizard) : SlashCommand {
             .map(Long::toInt)
             .orElse(1)
 
-        return event.interaction.member.get().hasElevatedPermissions().filter { it }.flatMap {
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
             if (wizard.get(settings.guildID) == null) {
                 event.interaction.guild.flatMap { guild ->
                     guild.getCalendar(calendarNumber)

@@ -9,9 +9,9 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable(with = TimeFormatAsIntSerializer::class)
-enum class TimeFormat(val value: Int = 1) {
-    TWENTY_FOUR_HOUR(1),
-    TWELVE_HOUR(2);
+enum class TimeFormat(val value: Int = 1, val full: String, val date: String, val time: String) {
+    TWENTY_FOUR_HOUR(1, "LLLL dd yyyy '@' HH:mm", "yyyy/MM/dd", "HH:mm"),
+    TWELVE_HOUR(2, "LLLL dd yyyy '@' hh:mm a", "yyyy/MM/dd hh:mm a", "hh:mm a");
 
     companion object {
         fun isValid(i: Int): Boolean {

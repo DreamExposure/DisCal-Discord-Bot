@@ -23,21 +23,25 @@ object CalendarEmbed : EmbedMaker {
 
     fun link(guild: Guild, settings: GuildSettings, calendar: Calendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-            .title(getMessage("calendar", "link.title", settings))
+                .title(getMessage("calendar", "link.title", settings))
         //Handle optional fields
         if (calendar.name.isNotEmpty())
             builder.addField(getMessage("calendar", "link.field.name", settings), calendar.name.toMarkdown(), false)
         if (calendar.description.isNotEmpty())
-            builder.addField(getMessage("calendar", "link.field.description", settings), calendar.description.toMarkdown(), false)
+            builder.addField(
+                    getMessage("calendar", "link.field.description", settings),
+                    calendar.description.toMarkdown(),
+                    false
+            )
 
         return builder.addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
-            .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
-            .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
-            .addField(getMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
-            .url(calendar.link)
-            .footer(getMessage("calendar", "link.footer", settings), null)
-            .color(discalColor)
-            .build()
+                .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
+                .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
+                .addField(getMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
+                .url(calendar.link)
+                .footer(getMessage("calendar", "link.footer", settings), null)
+                .color(discalColor)
+                .build()
     }
 
 
@@ -46,10 +50,10 @@ object CalendarEmbed : EmbedMaker {
             val ldt = LocalDateTime.now(cal.timezone)
 
             val fmt: DateTimeFormatter =
-                if (settings.timeFormat == TimeFormat.TWELVE_HOUR)
-                    DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a")
-                else
-                    DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+                    if (settings.timeFormat == TimeFormat.TWELVE_HOUR)
+                        DateTimeFormatter.ofPattern("yyyy/MM/dd hh:mm:ss a")
+                    else
+                        DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 
 
             val correctTime = fmt.format(ldt)
@@ -69,17 +73,18 @@ object CalendarEmbed : EmbedMaker {
 
     fun pre(guild: Guild, settings: GuildSettings, preCal: PreCalendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-            .title(getMessage("calendar", "wizard.title", settings))
-            .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name.toMarkdown(), false)
-            .addField(
-                getMessage("calendar", "wizard.field.description", settings),
-                preCal.description.ifEmpty { getCommonMsg("embed.unset", settings) }.toMarkdown(),
-                false
-            ).addField(getMessage("calendar", "wizard.field.timezone", settings),
-                preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),
-                true
-            ).addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
-            .footer(getMessage("calendar", "wizard.footer", settings), null)
+                .title(getMessage("calendar", "wizard.title", settings))
+                .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name.toMarkdown(), false)
+                .addField(
+                        getMessage("calendar", "wizard.field.description", settings),
+                        preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings) }?.toMarkdown()
+                                ?: getCommonMsg("embed.unset", settings),
+                        false
+                ).addField(getMessage("calendar", "wizard.field.timezone", settings),
+                        preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),
+                        true
+                ).addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
+                .footer(getMessage("calendar", "wizard.footer", settings), null)
 
         if (preCal.editing)
             builder.addField(getMessage("calendar", "wizard.field.id", settings), preCal.calendar!!.calendarId, false)

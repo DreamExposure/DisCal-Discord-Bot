@@ -345,11 +345,10 @@
 
                 <!-- Start event command-->
                 <div id="event">
-                    <h2 class="text-center text-discal-blue">!event commands</h2>
-                    <h3 class="text-center text-discal-blue">Aliases: !e</h3>
+                    <h2 class="text-center text-discal-blue">/event commands</h2>
 
                     <table class="flex-table-container" role="table" aria-label="Calendar Commands">
-                        <caption class="no-display">Event Commands</caption>
+                        <caption class="no-display">/event Commands</caption>
                         <thead>
                         <tr class="flex-table header" role="rowgroup">
                             <th class="tb-flex-row first" role="columnheader">Command</th>
@@ -363,15 +362,15 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">create</td>
                             <td class="tb-flex-row" role="cell">Starts event wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event create (name)</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event create (name) (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
                         <!--Start summary command-->
                         <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">summary</td>
+                            <td class="tb-flex-row tb-command" role="cell">name</td>
                             <td class="tb-flex-row" role="cell">Sets the event's name</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event summary [name]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event name [name]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -379,7 +378,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">description</td>
                             <td class="tb-flex-row" role="cell">Sets the event's description</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event description [desc]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event description [desc]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -387,7 +386,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">start</td>
                             <td class="tb-flex-row" role="cell">Sets the event's start</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event start [yyyy/MM/dd-HH:mm:ss]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event start [yyyy] [MM] [dd] [hh] [mm]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -395,7 +394,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">end</td>
                             <td class="tb-flex-row" role="cell">Sets the event's end</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event end [yyyy/MM/dd-HH:mm:ss]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event end [yyyy] [MM] [dd] [hh] [mm]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -405,15 +404,7 @@
                             <td class="tb-flex-row" role="cell">Sets the event's <a href="/docs/events/event-colors">
                                 Color</a>
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event color (color)</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start colour command-->
-                        <tr class="flex-table tb-optional" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">colour</td>
-                            <td class="tb-flex-row" role="cell">Alias of color</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event colour (colour)</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event color [color]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -421,7 +412,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">location</td>
                             <td class="tb-flex-row" role="cell">Sets the event's location</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event location [location]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event location [location]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -429,15 +420,25 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">image</td>
                             <td class="tb-flex-row" role="cell">Sets the event's image</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event image [link]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event image [link]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged, gif support patron-only</td>
+                        </tr>
+
+                        <!--Start recur command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">recur</td>
+                            <td class="tb-flex-row" role="cell">Toggles whether the event recurs</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /event recur (enable) (freq) (interval) (count)
+                            </td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
                         <!--Start review command-->
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">review</td>
                             <td class="tb-flex-row" role="cell">Displays event properties</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event review</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event review</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -445,7 +446,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">confirm</td>
                             <td class="tb-flex-row" role="cell">Commits changes made in the wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event confirm</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event confirm</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -453,48 +454,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">cancel</td>
                             <td class="tb-flex-row" role="cell">Cancels the wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event cancel</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start recur command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">recur</td>
-                            <td class="tb-flex-row" role="cell">Toggles whether the event recurs</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event recur [true/false]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start frequency command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">frequency</td>
-                            <td class="tb-flex-row" role="cell">
-                                Sets the frequency the event recurs at.
-                                Valid options: DAILY, WEEKLY, MONTHLY, YEARLY
-                            </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event freq [frequency]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start count command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">count</td>
-                            <td class="tb-flex-row" role="cell">
-                                Sets how many times the event recurs.
-                                0 or -1 for infinite.
-                            </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event count [number]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start interval command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">interval</td>
-                            <td class="tb-flex-row" role="cell">
-                                Sets the interval the event recurs at.
-                                Ex: 1 for every period, 2 for every other period, etc.
-                            </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event interval [number]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event cancel</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -502,7 +462,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">edit</td>
                             <td class="tb-flex-row" role="cell">Starts event edit wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event edit [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event edit [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -510,7 +470,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">copy</td>
                             <td class="tb-flex-row" role="cell">Copies an existing event's details to new event</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event copy [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event copy [event-id] (calendar) (target)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -518,7 +478,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">view</td>
                             <td class="tb-flex-row" role="cell">Displays an event's details</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event view [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event view [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
@@ -526,7 +486,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">delete</td>
                             <td class="tb-flex-row" role="cell">Deletes an event</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!event delete [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event delete [event-id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
                         </tbody>
