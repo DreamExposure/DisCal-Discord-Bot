@@ -14,7 +14,6 @@ import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
-import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
@@ -195,7 +194,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         // Event end cannot be before event start
                         event.interaction.guild
                                 .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("start.failure.afterEnd", settings), it)}
+                                .flatMap { event.followupEphemeral(getMessage("start.failure.afterEnd", settings), it) }
                     }
                 }
             } else {
@@ -275,7 +274,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         // Event start cannot be after event end
                         event.interaction.guild
                                 .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("end.failure.beforeStart", settings), it)}
+                                .flatMap { event.followupEphemeral(getMessage("end.failure.beforeStart", settings), it) }
                     }
                 }
             } else {
@@ -529,7 +528,12 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
         return event.interaction.guild.flatMap { guild ->
             guild.getCalendar(calendarNumber).flatMap { calendar ->
                 calendar.getEvent(eventId).flatMap { calEvent ->
-                    event.followup(EventEmbed.getFull(guild, settings, calEvent))
+                    event.interaction.channel.flatMap {
+                        // Create message instead of followup
+                        event.interactionResponse.deleteInitialResponse().then(
+                                it.createMessage(EventEmbed.getFull(guild, settings, calEvent))
+                        )
+                    }
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
             }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }
