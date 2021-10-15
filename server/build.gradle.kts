@@ -12,7 +12,6 @@ val springR2Version: String by properties
 val flywayVersion: String by properties
 val mysqlConnectorVersion: String by properties
 val hikariVersion: String by properties
-val dblVersion: String by properties
 val jacksonKotlinModVersion: String by properties
 
 dependencies {
@@ -22,9 +21,6 @@ dependencies {
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("mysql:mysql-connector-java:$mysqlConnectorVersion")
     implementation("com.zaxxer:HikariCP:$hikariVersion")
-
-    //Top gg lib
-    implementation("org.discordbots:DBL-Java-Library:$dblVersion")
 
     //Spring libs
     implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")

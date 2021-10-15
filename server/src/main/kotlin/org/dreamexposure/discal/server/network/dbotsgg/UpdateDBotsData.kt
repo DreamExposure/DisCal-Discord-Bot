@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.network.dbotsgg
 
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.`object`.BotSettings
@@ -24,8 +23,6 @@ class UpdateDBotsData(private val networkManager: NetworkManager) : ApplicationR
                     .put("guildCount", networkManager.getStatus().totalGuilds)
                     .put("shardCount", networkManager.getStatus().expectedShardCount)
 
-            val client = OkHttpClient()
-
             val body = json.toString().toRequestBody(GlobalVal.JSON)
             val request = Request.Builder()
                     .url("https://discord.bots.gg/api/v1/bots/265523588918935552/stats")
@@ -34,7 +31,7 @@ class UpdateDBotsData(private val networkManager: NetworkManager) : ApplicationR
                     .header("Content-Type", "application/json")
                     .build()
 
-            client.newCall(request).execute()
+            GlobalVal.HTTP_CLIENT.newCall(request).execute()
         }.doOnNext { response ->
             if (response.code != GlobalVal.STATUS_SUCCESS) {
                 LOGGER.debug("Failed to update DBots.gg stats | Body: ${response.body?.string()}")
