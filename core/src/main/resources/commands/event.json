@@ -128,7 +128,7 @@
           "name": "hour",
           "type": 4,
           "description": "The hour of the start date",
-          "required": true,
+          "required": false,
           "choices": [
             {
               "name": "00",
@@ -232,7 +232,7 @@
           "name": "minute",
           "type": 4,
           "description": "The minute of the start date",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -314,7 +314,7 @@
           "name": "hour",
           "type": 4,
           "description": "The hour of the start date",
-          "required": true,
+          "required": false,
           "choices": [
             {
               "name": "00",
@@ -418,7 +418,7 @@
           "name": "minute",
           "type": 4,
           "description": "The minute of the start date",
-          "required": true
+          "required": false
         }
       ]
     },
