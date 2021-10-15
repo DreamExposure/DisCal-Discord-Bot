@@ -1,9 +1,7 @@
 package org.dreamexposure.discal.client.service;
 
 import org.dreamexposure.discal.client.announcement.AnnouncementCreator;
-import org.dreamexposure.discal.client.event.EventCreator;
 import org.dreamexposure.discal.core.object.announcement.Announcement;
-import org.dreamexposure.discal.core.object.event.PreEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +17,7 @@ public class CreatorCleaner extends TimerTask {
     public void run() {
         final long target = 60 * 1000 * 60; //60 minutes
 
-        final List<PreEvent> events = new ArrayList<>();
         final List<Announcement> ans = new ArrayList<>();
-
-        //Run through event creator
-        for (final PreEvent event : EventCreator.getCreator().getAllPreEvents()) {
-            final long difference = System.currentTimeMillis() - event.getLastEdit();
-
-            if (difference <= target) {
-                //Last edited 60+ minutes ago, delete from creator and free up RAM.
-                events.add(event);
-            }
-        }
 
         //Run through announcement creator
         for (final Announcement an : AnnouncementCreator.getCreator().getAllAnnouncements()) {
@@ -42,9 +29,6 @@ public class CreatorCleaner extends TimerTask {
             }
         }
 
-        for (final PreEvent e : events) {
-            EventCreator.getCreator().terminate(e.getGuildId());
-        }
         for (final Announcement a : ans) {
             AnnouncementCreator.getCreator().terminate(a.getGuildId());
         }

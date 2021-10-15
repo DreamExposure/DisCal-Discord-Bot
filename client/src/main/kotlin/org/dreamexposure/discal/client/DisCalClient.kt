@@ -27,7 +27,6 @@ import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand
 import org.dreamexposure.discal.client.module.command.AnnouncementCommand
 import org.dreamexposure.discal.client.module.command.CommandExecutor
-import org.dreamexposure.discal.client.module.command.EventCommand
 import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -62,7 +61,6 @@ class DisCalClient {
 
             //Register commands
             CommandExecutor.registerCommand(AddCalendarCommand())
-            CommandExecutor.registerCommand(EventCommand())
             CommandExecutor.registerCommand(AnnouncementCommand())
 
             //Start some daemon threads

@@ -9,6 +9,7 @@ import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.event.PreEvent
+import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -22,6 +23,8 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import java.time.*
+import java.time.temporal.ChronoUnit
 
 @Suppress("DuplicatedCode")
 @Component
@@ -126,16 +129,19 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
                 .get()
         val month = event.options[0].getOption("month")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map(Month::of)
                 .get()
         val day = event.options[0].getOption("day")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
                 .get()
         val hour = event.options[0].getOption("hour")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -146,9 +152,56 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(0).coerceAtMost(59) }
                 .orElse(0)
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                //Build date time object
+                val start = ZonedDateTime.of(
+                        LocalDateTime.of(year, month, day, hour, minute),
+                        pre.timezone
+                ).toInstant()
+
+                if (pre.end == null) {
+                    pre.start = start
+                    pre.end = start.plus(1, ChronoUnit.HOURS) // Add default end time to 1 hour after start.
+                    if (pre.start!!.isAfter(Instant.now())) {
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
+                    } else {
+                        // scheduled for the past, allow but add a warning.
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
+                    }
+                } else {
+                    // Event end already set, make sure everything is in order
+                    if (pre.end!!.isAfter(start)) {
+                        pre.start = start
+                        if (pre.start!!.isAfter(Instant.now())) {
+                            event.interaction.guild
+                                    .map { EventEmbed.pre(it, settings, pre) }
+                                    .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
+                        } else {
+                            // scheduled for the past, allow but add a warning.
+                            event.interaction.guild
+                                    .map { EventEmbed.pre(it, settings, pre) }
+                                    .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
+                        }
+                    } else {
+                        // Event end cannot be before event start
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("start.failure.afterEnd", settings), it)}
+                    }
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun end(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -156,16 +209,19 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
                 .get()
         val month = event.options[0].getOption("month")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map(Month::of)
                 .get()
         val day = event.options[0].getOption("day")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
                 .get()
         val hour = event.options[0].getOption("hour")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -176,8 +232,56 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
+                .map { it.coerceAtLeast(0).coerceAtMost(59) }
                 .orElse(0)
-        TODO("Not yet implemented")
+
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                //Build date time object
+                val end = ZonedDateTime.of(
+                        LocalDateTime.of(year, month, day, hour, minute),
+                        pre.timezone
+                ).toInstant()
+
+                if (pre.start == null) {
+                    pre.end = end
+                    pre.start = end.minus(1, ChronoUnit.HOURS) // Add default start time to 1 hour before end.
+                    if (pre.end!!.isAfter(Instant.now())) {
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
+                    } else {
+                        // scheduled for the past, allow but add a warning.
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
+                    }
+                } else {
+                    // Event start already set, make sure everything is in order
+                    if (pre.start!!.isBefore(end)) {
+                        pre.end = end
+                        if (pre.end!!.isAfter(Instant.now())) {
+                            event.interaction.guild
+                                    .map { EventEmbed.pre(it, settings, pre) }
+                                    .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
+                        } else {
+                            // scheduled for the past, allow but add a warning.
+                            event.interaction.guild
+                                    .map { EventEmbed.pre(it, settings, pre) }
+                                    .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
+                        }
+                    } else {
+                        // Event start cannot be after event end
+                        event.interaction.guild
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("end.failure.beforeStart", settings), it)}
+                    }
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun color(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
@@ -265,7 +369,24 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .map(Long::toInt)
                 .orElse(-1)
 
-        TODO("Not yet implemented")
+        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            val pre = wizard.get(settings.guildID)
+            if (pre != null) {
+                if (shouldRecur) {
+                    pre.recurrence = Recurrence(frequency, interval, count)
+                    event.interaction.guild
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("recur.success.enable", settings), it) }
+                } else {
+                    pre.recurrence = null
+                    event.interaction.guild
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("recur.success.disable", settings), it) }
+                }
+            } else {
+                event.followupEphemeral(getMessage("error.wizard.notStart", settings))
+            }
+        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
