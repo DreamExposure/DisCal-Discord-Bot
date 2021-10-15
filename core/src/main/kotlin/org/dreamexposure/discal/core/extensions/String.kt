@@ -6,13 +6,15 @@ import org.dreamexposure.discal.core.utils.ImageValidator
 import org.jsoup.Jsoup
 import java.time.ZoneId
 
-fun String.sanitize(): String {
-    return Jsoup.clean(this, GlobalVal.HTML_WHITELIST)
-}
+fun String.embedTitleSafe(): String = this.substring(0, (256).coerceAtMost(this.length))
 
-fun String.toMarkdown(): String {
-    return GlobalVal.MARKDOWN_CONVERTER.convert(this.sanitize())
-}
+fun String.embedDescriptionSafe(): String = this.substring(0, (4096).coerceAtMost(this.length))
+
+fun String.embedFieldSafe(): String = this.substring(0, (1024).coerceAtMost(this.length))
+
+fun String.sanitize(): String = Jsoup.clean(this, GlobalVal.HTML_WHITELIST)
+
+fun String.toMarkdown(): String = GlobalVal.MARKDOWN_CONVERTER.convert(this.sanitize())
 
 fun String.isValidTimezone(): Boolean {
     return try {

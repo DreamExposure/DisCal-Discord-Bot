@@ -7,6 +7,9 @@ import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
+import org.dreamexposure.discal.core.extensions.embedFieldSafe
+import org.dreamexposure.discal.core.extensions.embedTitleSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -23,16 +26,11 @@ object CalendarEmbed : EmbedMaker {
 
     fun link(guild: Guild, settings: GuildSettings, calendar: Calendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .title(getMessage("calendar", "link.title", settings))
         //Handle optional fields
-        if (calendar.name.isNotEmpty())
-            builder.addField(getMessage("calendar", "link.field.name", settings), calendar.name.toMarkdown(), false)
-        if (calendar.description.isNotEmpty())
-            builder.addField(
-                    getMessage("calendar", "link.field.description", settings),
-                    calendar.description.toMarkdown(),
-                    false
-            )
+        if (calendar.name.isNotBlank())
+            builder.title(calendar.name.toMarkdown().embedTitleSafe())
+        if (calendar.description.isNotBlank())
+            builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
 
         return builder.addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
                 .addField(getMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
@@ -74,10 +72,13 @@ object CalendarEmbed : EmbedMaker {
     fun pre(guild: Guild, settings: GuildSettings, preCal: PreCalendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
                 .title(getMessage("calendar", "wizard.title", settings))
-                .addField(getMessage("calendar", "wizard.field.name", settings), preCal.name.toMarkdown(), false)
-                .addField(
+                .addField(getMessage(
+                        "calendar", "wizard.field.name", settings),
+                        preCal.name.toMarkdown().embedFieldSafe(),
+                        false
+                ).addField(
                         getMessage("calendar", "wizard.field.description", settings),
-                        preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings) }?.toMarkdown()
+                        preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings) }?.toMarkdown()?.embedFieldSafe()
                                 ?: getCommonMsg("embed.unset", settings),
                         false
                 ).addField(getMessage("calendar", "wizard.field.timezone", settings),

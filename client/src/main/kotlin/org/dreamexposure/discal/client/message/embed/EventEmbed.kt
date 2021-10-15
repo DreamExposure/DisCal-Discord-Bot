@@ -5,28 +5,28 @@ import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
-import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
-import org.dreamexposure.discal.core.extensions.humanReadableFull
-import org.dreamexposure.discal.core.extensions.toMarkdown
+import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
 object EventEmbed : EmbedMaker {
     fun getFull(guild: Guild, settings: GuildSettings, event: Event): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .title(getMessage("event", "full.title", settings))
                 .footer(getMessage("event", "full.footer", settings, event.eventId), null)
                 .color(event.color.asColor())
 
-        if (event.name.isNotEmpty())
-            builder.addField(getMessage("event", "full.field.name", settings), event.name.toMarkdown(), false)
-        if (event.description.isNotEmpty())
-            builder.addField(getMessage("event", "full.field.desc", settings), event.description.toMarkdown(), false)
+        if (event.name.isNotBlank())
+            builder.title(event.name.toMarkdown().embedTitleSafe())
+        if (event.description.isNotBlank())
+            builder.description(event.description.toMarkdown().embedDescriptionSafe())
 
         builder.addField(getMessage("event", "full.field.start", settings), event.start.asDiscordTimestamp(), true)
         builder.addField(getMessage("event", "full.field.end", settings), event.end.asDiscordTimestamp(), true)
 
-        if (event.location.isNotEmpty())
-            builder.addField(getMessage("event", "full.field.location", settings), event.location.toMarkdown(), false)
+        if (event.location.isNotBlank()) builder.addField(
+                getMessage("event", "full.field.location", settings),
+                event.location.toMarkdown().embedFieldSafe(),
+                false
+        )
 
         builder.addField(getMessage("event", "full.field.cal", settings), "${event.calendar.calendarNumber}", false)
 
@@ -38,19 +38,21 @@ object EventEmbed : EmbedMaker {
 
     fun getCondensed(guild: Guild, settings: GuildSettings, event: Event): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .title(getMessage("event", "con.title", settings))
                 .footer(getMessage("event", "con.footer", settings, event.eventId), null)
                 .color(event.color.asColor())
 
-        if (event.name.isNotEmpty())
-            builder.addField(getMessage("event", "con.field.name", settings), event.name.toMarkdown(), false)
+        if (event.name.isNotBlank())
+            builder.title(event.name.toMarkdown().embedTitleSafe())
 
         builder.addField(getMessage("event", "con.field.start", settings), event.start.asDiscordTimestamp(), true)
 
-        if (event.location.isNotEmpty())
-            builder.addField(getMessage("event", "con.field.location", settings), event.location.toMarkdown(), false)
+        if (event.location.isNotBlank()) builder.addField(
+                getMessage("event", "con.field.location", settings),
+                event.location.toMarkdown().embedFieldSafe(),
+                false
+        )
 
-        if (event.image.isNotEmpty())
+        if (event.image.isNotBlank())
             builder.thumbnail(event.image)
 
         return builder.build()
@@ -62,9 +64,11 @@ object EventEmbed : EmbedMaker {
                 .footer(getMessage("event", "wizard.footer", settings), null)
                 .color(event.color.asColor())
 
-        if (!event.name.isNullOrBlank())
-            builder.addField(getMessage("event", "wizard.field.name", settings), event.name!!.toMarkdown(), false)
-        else builder.addField(
+        if (!event.name.isNullOrBlank()) builder.addField(
+                getMessage("event", "wizard.field.name", settings),
+                event.name!!.toMarkdown().embedFieldSafe(),
+                false
+        ) else builder.addField(
                 getMessage("event", "wizard.field.name", settings),
                 getCommonMsg("embed.unset", settings),
                 false
@@ -72,7 +76,7 @@ object EventEmbed : EmbedMaker {
 
         if (!event.description.isNullOrBlank()) builder.addField(
                 getMessage("event", "wizard.field.desc", settings),
-                event.description!!.toMarkdown(),
+                event.description!!.toMarkdown().embedFieldSafe(),
                 false
         ) else builder.addField(
                 getMessage("event", "wizard.field.desc", settings),
@@ -82,7 +86,7 @@ object EventEmbed : EmbedMaker {
 
         if (!event.location.isNullOrBlank()) builder.addField(
                 getMessage("event", "wizard.field.location", settings),
-                event.location!!.toMarkdown(),
+                event.location!!.toMarkdown().embedFieldSafe(),
                 false
         ) else builder.addField(
                 getMessage("event", "wizard.field.location", settings),
