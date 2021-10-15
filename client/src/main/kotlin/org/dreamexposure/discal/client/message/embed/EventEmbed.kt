@@ -126,6 +126,9 @@ object EventEmbed : EmbedMaker {
             builder.addField(getMessage("event", "wizard.field.id", settings), event.eventId!!, true)
         builder.addField(getMessage("event", "wizard.field.calendar", settings), event.calNumber.toString(), true)
 
+        if (event.image != null)
+            builder.image(event.image!!)
+
         return builder.build()
     }
 }

@@ -519,7 +519,7 @@
       "type": 1,
       "description": "Set's the event's recurrence in the wizard",
       "required": false,
-      "option": [
+      "options": [
         {
           "name": "recur",
           "type": 5,

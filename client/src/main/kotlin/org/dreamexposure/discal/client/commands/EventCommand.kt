@@ -424,7 +424,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                                     LOGGER.error("Create event with command failure", it)
                                 }.onErrorResume {
                                     event.followupEphemeral(getMessage("confirm.failure.create", settings))
-                                }
+                                }.switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.create", settings)))
                     } else {
                         // Editing
                         pre.event!!.update(pre.updateSpec())
