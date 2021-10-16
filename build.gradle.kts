@@ -43,7 +43,6 @@ allprojects {
 
     val googleCoreVersion: String by properties
     val googleCalendarVersion: String by properties
-    val googleOauthVersion: String by properties
 
     val r2MysqlVersion: String by properties
     val r2PoolVersion: String by properties
@@ -87,7 +86,7 @@ allprojects {
         //Google apis
         implementation("com.google.api-client:google-api-client:$googleCoreVersion")
         implementation("com.google.apis:google-api-services-calendar:$googleCalendarVersion")
-        implementation("com.google.oauth-client:google-oauth-client-jetty:$googleOauthVersion") {
+        implementation("com.google.oauth-client:google-oauth-client-jetty:$googleCoreVersion") {
             exclude(group = "org.mortbay.jetty", module = "servlet-api")
         }
         //r2dbc
