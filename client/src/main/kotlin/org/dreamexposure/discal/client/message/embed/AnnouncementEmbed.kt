@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
+import org.dreamexposure.discal.core.extensions.embedFieldSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
@@ -29,34 +30,34 @@ object AnnouncementEmbed : EmbedMaker {
     fun full(ann: Announcement, event: Event, guild: Guild): Mono<EmbedCreateSpec> {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
-                  .color(event.color.asColor())
-                  .title(getMessage("announcement", "full.title", settings))
+                    .color(event.color.asColor())
+                    .title(getMessage("announcement", "full.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "full.field.name", settings), event.name.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "full.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "full.field.desc", settings), event.description.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "full.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
-                  getMessage("announcement", "full.field.start", settings),
-                  event.start.asDiscordTimestamp(),
-                  true
+                    getMessage("announcement", "full.field.start", settings),
+                    event.start.asDiscordTimestamp(),
+                    true
             )
             builder.addField(
-                  getMessage("announcement", "full.field.end", settings),
-                  event.end.asDiscordTimestamp(),
-                  true
+                    getMessage("announcement", "full.field.end", settings),
+                    event.end.asDiscordTimestamp(),
+                    true
             )
 
-            builder.addField(getMessage("announcement", "full.field.location", settings), event.location.toMarkdown(), false)
+            builder.addField(getMessage("announcement", "full.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
-                builder.addField(getMessage("announcement", "full.field.info", settings), ann.info.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "full.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
-                  getMessage("announcement", "full.field.calendar", settings),
-                  "${event.calendar.calendarNumber}",
-                  true
+                    getMessage("announcement", "full.field.calendar", settings),
+                    "${event.calendar.calendarNumber}",
+                    true
             )
             builder.addField(getMessage("announcement", "full.field.event", settings), event.eventId, true)
 
@@ -73,24 +74,24 @@ object AnnouncementEmbed : EmbedMaker {
     fun simple(ann: Announcement, event: Event, guild: Guild): Mono<EmbedCreateSpec> {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
-                  .color(event.color.asColor())
-                  .title(getMessage("announcement", "simple.title", settings))
+                    .color(event.color.asColor())
+                    .title(getMessage("announcement", "simple.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "simple.field.name", settings), event.name.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "simple.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "simple.field.desc", settings), event.description.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "simple.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
-                  getMessage("announcement", "simple.field.start", settings),
-                  event.start.asDiscordTimestamp(),
-                  true
+                    getMessage("announcement", "simple.field.start", settings),
+                    event.start.asDiscordTimestamp(),
+                    true
             )
 
-            builder.addField(getMessage("announcement", "simple.field.location", settings), event.location.toMarkdown(), false)
+            builder.addField(getMessage("announcement", "simple.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
-                builder.addField(getMessage("announcement", "simple.field.info", settings), ann.info, false)
+                builder.addField(getMessage("announcement", "simple.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
             if (event.image.isNotEmpty()) {
                 builder.image(event.image)
@@ -105,35 +106,35 @@ object AnnouncementEmbed : EmbedMaker {
     fun event(ann: Announcement, event: Event, guild: Guild): Mono<EmbedCreateSpec> {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
-                  .color(event.color.asColor())
-                  .title(getMessage("announcement", "event.title", settings))
+                    .color(event.color.asColor())
+                    .title(getMessage("announcement", "event.title", settings))
 
             if (event.name.isNotEmpty())
-                builder.addField(getMessage("announcement", "event.field.name", settings), event.name.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "event.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
             if (event.description.isNotEmpty())
-                builder.addField(getMessage("announcement", "event.field.desc", settings), event.description.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "event.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
-                  getMessage("announcement", "event.field.start", settings),
-                  event.start.asDiscordTimestamp(),
-                  true
+                    getMessage("announcement", "event.field.start", settings),
+                    event.start.asDiscordTimestamp(),
+                    true
             )
             builder.addField(
-                  getMessage("announcement", "event.field.end", settings),
-                  event.end.asDiscordTimestamp(),
-                  true
+                    getMessage("announcement", "event.field.end", settings),
+                    event.end.asDiscordTimestamp(),
+                    true
             )
-            builder.addField(getMessage("announcement", "event.field.location", settings), event.location.toMarkdown(), false)
+            builder.addField(getMessage("announcement", "event.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
-                  getMessage("announcement", "event.field.calendar", settings),
-                  "${event.calendar.calendarNumber}",
-                  true
+                    getMessage("announcement", "event.field.calendar", settings),
+                    "${event.calendar.calendarNumber}",
+                    true
             )
             builder.addField(getMessage("announcement", "event.field.event", settings), event.eventId, true)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
-                builder.addField(getMessage("announcement", "event.field.info", settings), ann.info.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "event.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
             if (event.image.isNotEmpty()) {
                 builder.image(event.image)
@@ -148,11 +149,11 @@ object AnnouncementEmbed : EmbedMaker {
     fun condensed(ann: Announcement, guild: Guild): Mono<EmbedCreateSpec> {
         return guild.getSettings().map { settings ->
             val builder = defaultBuilder(guild, settings)
-                  .title(getMessage("announcement", "con.title", settings))
-                  .addField(getMessage("announcement", "con.field.id", settings), ann.id.toString(), false)
-                  .addField(getMessage("announcement", "con.field.time", settings), condensedTime(ann), true)
-                  .addField(getMessage("announcement", "con.field.enabled", settings), "${ann.enabled}", true)
-                  .footer(getMessage("announcement", "con.footer", settings, ann.type.name, ann.modifier.name), null)
+                    .title(getMessage("announcement", "con.title", settings))
+                    .addField(getMessage("announcement", "con.field.id", settings), ann.id.toString(), false)
+                    .addField(getMessage("announcement", "con.field.time", settings), condensedTime(ann), true)
+                    .addField(getMessage("announcement", "con.field.enabled", settings), "${ann.enabled}", true)
+                    .footer(getMessage("announcement", "con.footer", settings, ann.type.name, ann.modifier.name), null)
 
             if (ann.type == AnnouncementType.COLOR)
                 builder.color(ann.eventColor.asColor())
@@ -165,21 +166,21 @@ object AnnouncementEmbed : EmbedMaker {
 
     fun view(ann: Announcement, guild: Guild): Mono<EmbedCreateSpec> {
         val channelMono = guild
-              .getChannelById(Snowflake.of(ann.announcementChannelId))
-              .map(GuildChannel::getName)
+                .getChannelById(Snowflake.of(ann.announcementChannelId))
+                .map(GuildChannel::getName)
 
 
         return Mono.zip(guild.getSettings(), channelMono).map(TupleUtils.function { settings, channel ->
             val builder = defaultBuilder(guild, settings)
-                  .title(getMessage("announcement", "view.title", settings))
-                  .addField(getMessage("announcement", "view.field.type", settings), ann.type.name, true)
-                  .addField(getMessage("announcement", "view.field.modifier", settings), ann.modifier.name, true)
-                  .addField(getMessage("announcement", "view.field.channel", settings), channel, false)
-                  .addField(getMessage("announcement", "view.field.hours", settings), "${ann.hoursBefore}", true)
-                  .addField(getMessage("announcement", "view.field.minutes", settings), "${ann.minutesBefore}", true)
+                    .title(getMessage("announcement", "view.title", settings))
+                    .addField(getMessage("announcement", "view.field.type", settings), ann.type.name, true)
+                    .addField(getMessage("announcement", "view.field.modifier", settings), ann.modifier.name, true)
+                    .addField(getMessage("announcement", "view.field.channel", settings), channel, false)
+                    .addField(getMessage("announcement", "view.field.hours", settings), "${ann.hoursBefore}", true)
+                    .addField(getMessage("announcement", "view.field.minutes", settings), "${ann.minutesBefore}", true)
 
             if (ann.info.isNotEmpty() || !ann.info.equals("None", true)) {
-                builder.addField(getMessage("announcement", "view.field.info", settings), ann.info.toMarkdown(), false)
+                builder.addField(getMessage("announcement", "view.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
             }
 
             builder.addField(getMessage("announcement", "view.field.calendar", settings), "${ann.calendarNumber}", true)
@@ -193,9 +194,9 @@ object AnnouncementEmbed : EmbedMaker {
                 builder.color(GlobalVal.discalColor)
 
             builder.addField(getMessage("announcement", "view.field.id", settings), ann.id.toString(), false)
-                  .addField(getMessage("announcement", "view.field.enabled", settings), "${ann.enabled}", true)
-                  .addField(getMessage("announcement", "view.field.publish", settings), "${ann.publish}", true)
-                  .build()
+                    .addField(getMessage("announcement", "view.field.enabled", settings), "${ann.enabled}", true)
+                    .addField(getMessage("announcement", "view.field.publish", settings), "${ann.publish}", true)
+                    .build()
         })
     }
 
