@@ -88,7 +88,7 @@ public class AnnouncementMessageFormatter {
 
                 embed.addField(Messages.getMessage("Embed.Announcement.Info.Enabled", settings), a.getEnabled() + "", true);
                 if (settings.getDevGuild() || settings.getPatronGuild())
-                    embed.addField("Publishable", a.getType() + "", true);
+                    embed.addField("Publishable", a.getPublish() + "", true);
 
                 return embed.build();
             }));
