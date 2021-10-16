@@ -358,6 +358,14 @@
                         </tr>
                         </thead>
                         <tbody>
+                        <!--Start view command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">view</td>
+                            <td class="tb-flex-row" role="cell">Displays an event's details</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event view [event-id] (calendar)</td>
+                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
+                        </tr>
+
                         <!--Start create command-->
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">create</td>
@@ -386,7 +394,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">start</td>
                             <td class="tb-flex-row" role="cell">Sets the event's start</td>
-                            <td class="tb-flex-row tb-usage" role="cell">/event start [yyyy] [MM] [dd] [hh] [mm]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event start [yyyy] [MM] [dd] (hh) (mm)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -394,7 +402,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">end</td>
                             <td class="tb-flex-row" role="cell">Sets the event's end</td>
-                            <td class="tb-flex-row tb-usage" role="cell">/event end [yyyy] [MM] [dd] [hh] [mm]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/event end [yyyy] [MM] [dd] (hh) (mm)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -472,14 +480,6 @@
                             <td class="tb-flex-row" role="cell">Copies an existing event's details to new event</td>
                             <td class="tb-flex-row tb-usage" role="cell">/event copy [event-id] (calendar) (target)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start view command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">view</td>
-                            <td class="tb-flex-row" role="cell">Displays an event's details</td>
-                            <td class="tb-flex-row tb-usage" role="cell">/event view [event-id] (calendar)</td>
-                            <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
                         <!--Start delete command-->
