@@ -1336,17 +1336,26 @@ private object Queries {
 }
 
 private object Tables {
-    val API = "${BotSettings.SQL_PREFIX.get()}api"
+    /* The language annotations are there because IntelliJ is dumb and assumes this needs to be proper MySQL */
 
-    val GUILD_SETTINGS = "${BotSettings.SQL_PREFIX.get()}guild_settings"
+    @Language("Kotlin")
+    const val API: String = "api"
 
-    val CALENDARS = "${BotSettings.SQL_PREFIX.get()}calendars"
+    @Language("Kotlin")
+    const val GUILD_SETTINGS = "guild_settings"
 
-    val ANNOUNCEMENTS = "${BotSettings.SQL_PREFIX.get()}announcements"
+    @Language("Kotlin")
+    const val CALENDARS = "calendars"
 
-    val EVENTS = "${BotSettings.SQL_PREFIX.get()}events"
+    @Language("Kotlin")
+    const val ANNOUNCEMENTS = "announcements"
 
-    val RSVP = "${BotSettings.SQL_PREFIX.get()}rsvp"
+    @Language("Kotlin")
+    const val EVENTS = "events"
 
-    val CREDS = "${BotSettings.SQL_PREFIX.get()}credentials"
+    @Language("Kotlin")
+    const val RSVP = "rsvp"
+
+    @Language("Kotlin")
+    const val CREDS = "credentials"
 }
