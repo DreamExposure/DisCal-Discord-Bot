@@ -703,8 +703,8 @@ object DatabaseManager {
                 LOGGER.error(DEFAULT, "Failed to get event data", it)
             }.onErrorResume {
                 Mono.empty()
-            }.defaultIfEmpty(EventData(guildId, eventId = eventIdLookup))
-        }
+            }
+        }.defaultIfEmpty(EventData(guildId, eventId = eventIdLookup))
     }
 
     fun getRsvpData(guildId: Snowflake, eventId: String): Mono<RsvpData> {
