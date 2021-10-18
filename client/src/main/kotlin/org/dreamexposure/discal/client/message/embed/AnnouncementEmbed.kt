@@ -33,9 +33,9 @@ object AnnouncementEmbed : EmbedMaker {
                     .color(event.color.asColor())
                     .title(getMessage("announcement", "full.title", settings))
 
-            if (event.name.isNotEmpty())
+            if (event.name.isNotBlank())
                 builder.addField(getMessage("announcement", "full.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
-            if (event.description.isNotEmpty())
+            if (event.description.isNotBlank())
                 builder.addField(getMessage("announcement", "full.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
@@ -49,9 +49,10 @@ object AnnouncementEmbed : EmbedMaker {
                     true
             )
 
-            builder.addField(getMessage("announcement", "full.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
+            if (event.location.isNotBlank())
+                builder.addField(getMessage("announcement", "full.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
-            if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
+            if (ann.info.isNotBlank() && !ann.info.equals("None", true))
                 builder.addField(getMessage("announcement", "full.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
@@ -61,9 +62,8 @@ object AnnouncementEmbed : EmbedMaker {
             )
             builder.addField(getMessage("announcement", "full.field.event", settings), event.eventId, true)
 
-            if (event.image.isNotEmpty()) {
+            if (event.image.isNotBlank())
                 builder.image(event.image)
-            }
 
             builder.footer(getMessage("announcement", "full.footer", settings, ann.id.toString()), null)
 
@@ -77,9 +77,9 @@ object AnnouncementEmbed : EmbedMaker {
                     .color(event.color.asColor())
                     .title(getMessage("announcement", "simple.title", settings))
 
-            if (event.name.isNotEmpty())
+            if (event.name.isNotBlank())
                 builder.addField(getMessage("announcement", "simple.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
-            if (event.description.isNotEmpty())
+            if (event.description.isNotBlank())
                 builder.addField(getMessage("announcement", "simple.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
@@ -88,14 +88,14 @@ object AnnouncementEmbed : EmbedMaker {
                     true
             )
 
-            builder.addField(getMessage("announcement", "simple.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
+            if (event.location.isNotBlank())
+                builder.addField(getMessage("announcement", "simple.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
-            if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
+            if (ann.info.isNotBlank() && !ann.info.equals("None", true))
                 builder.addField(getMessage("announcement", "simple.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
-            if (event.image.isNotEmpty()) {
+            if (event.image.isNotEmpty())
                 builder.image(event.image)
-            }
 
             builder.footer(getMessage("announcement", "simple.footer", settings, ann.id.toString()), null)
 
@@ -109,9 +109,9 @@ object AnnouncementEmbed : EmbedMaker {
                     .color(event.color.asColor())
                     .title(getMessage("announcement", "event.title", settings))
 
-            if (event.name.isNotEmpty())
+            if (event.name.isNotBlank())
                 builder.addField(getMessage("announcement", "event.field.name", settings), event.name.toMarkdown().embedFieldSafe(), false)
-            if (event.description.isNotEmpty())
+            if (event.description.isNotBlank())
                 builder.addField(getMessage("announcement", "event.field.desc", settings), event.description.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
@@ -124,7 +124,9 @@ object AnnouncementEmbed : EmbedMaker {
                     event.end.asDiscordTimestamp(),
                     true
             )
-            builder.addField(getMessage("announcement", "event.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
+
+            if (event.location.isNotBlank())
+                builder.addField(getMessage("announcement", "event.field.location", settings), event.location.toMarkdown().embedFieldSafe(), false)
 
             builder.addField(
                     getMessage("announcement", "event.field.calendar", settings),
@@ -133,10 +135,10 @@ object AnnouncementEmbed : EmbedMaker {
             )
             builder.addField(getMessage("announcement", "event.field.event", settings), event.eventId, true)
 
-            if (ann.info.isNotEmpty() || !ann.info.equals("None", true))
+            if (ann.info.isNotBlank() && !ann.info.equals("None", true))
                 builder.addField(getMessage("announcement", "event.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
 
-            if (event.image.isNotEmpty()) {
+            if (event.image.isNotBlank()) {
                 builder.image(event.image)
             }
 
@@ -179,7 +181,7 @@ object AnnouncementEmbed : EmbedMaker {
                     .addField(getMessage("announcement", "view.field.hours", settings), "${ann.hoursBefore}", true)
                     .addField(getMessage("announcement", "view.field.minutes", settings), "${ann.minutesBefore}", true)
 
-            if (ann.info.isNotEmpty() || !ann.info.equals("None", true)) {
+            if (ann.info.isNotBlank() && !ann.info.equals("None", true)) {
                 builder.addField(getMessage("announcement", "view.field.info", settings), ann.info.toMarkdown().embedFieldSafe(), false)
             }
 
