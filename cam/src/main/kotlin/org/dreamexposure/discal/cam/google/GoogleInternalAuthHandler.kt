@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.server.network.google
+package org.dreamexposure.discal.cam.google
 
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
@@ -8,7 +8,6 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import org.json.JSONObject
 import reactor.core.publisher.Mono
@@ -27,7 +26,7 @@ object GoogleInternalAuthHandler {
 
                 val url = codeResponse.getString("verification_url")
                 val code = codeResponse.getString("user_code")
-                LOGGER.debug(DEFAULT, "[!GDC!] DisCal Google Cred Auth $credNumber", "$url | $code")
+                LOGGER.debug(GlobalVal.DEFAULT, "[!GDC!] DisCal Google Cred Auth $credNumber", "$url | $code")
 
                 val poll = InternalGoogleAuthPoll(
                         credNumber,
@@ -39,7 +38,7 @@ object GoogleInternalAuthHandler {
 
                 GoogleAuthWrapper.scheduleOAuthPoll(poll)
             } else {
-                LOGGER.debug(DEFAULT, "Error request access token Status code: ${response.code} | ${response.message}" +
+                LOGGER.debug(GlobalVal.DEFAULT, "Error request access token Status code: ${response.code} | ${response.message}" +
                         " | $responseBody")
 
                 Mono.empty()
@@ -56,7 +55,7 @@ object GoogleInternalAuthHandler {
             when (response.code) {
                 GlobalVal.STATUS_FORBIDDEN -> {
                     //Handle access denied
-                    LOGGER.debug(DEFAULT, "[!GDC!] Access denied for credential: ${poll.credNumber}")
+                    LOGGER.debug(GlobalVal.DEFAULT, "[!GDC!] Access denied for credential: ${poll.credNumber}")
 
                     Mono.error<GoogleAuthCancelException>(GoogleAuthCancelException())
                 }
@@ -71,12 +70,12 @@ object GoogleInternalAuthHandler {
                         }
                         aprError.optString("error").equals("expired_token", true) -> {
                             //Token expired, auth is cancelled
-                            LOGGER.debug(DEFAULT, "[!GDC!] token expired.")
+                            LOGGER.debug(GlobalVal.DEFAULT, "[!GDC!] token expired.")
 
                             Mono.error(GoogleAuthCancelException())
                         }
                         else -> {
-                            LOGGER.debug(DEFAULT, "[!GDC!] Poll Failure! Status code: ${response.code}" +
+                            LOGGER.debug(GlobalVal.DEFAULT, "[!GDC!] Poll Failure! Status code: ${response.code}" +
                                     " | ${response.message} | $responseBody")
 
                             Mono.error(GoogleAuthCancelException())
@@ -105,7 +104,7 @@ object GoogleInternalAuthHandler {
                 }
                 else -> {
                     //Unknown network error...
-                    LOGGER.debug(DEFAULT, "[!GDC!] Network error; poll failure Status code: ${response.code} " +
+                    LOGGER.debug(GlobalVal.DEFAULT, "[!GDC!] Network error; poll failure Status code: ${response.code} " +
                             "| ${response.message} | $responseBody")
 
                     Mono.error(GoogleAuthCancelException())

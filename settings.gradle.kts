@@ -22,4 +22,4 @@ pluginManagement {
 
 rootProject.name = "DisCal"
 
-include("core", "client", "server", "web")
+include("core", "client", "server", "web", "cam")
