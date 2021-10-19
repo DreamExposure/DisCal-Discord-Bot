@@ -13,7 +13,6 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.http.HttpStatus
-import org.springframework.web.reactive.config.CorsRegistry
 import org.springframework.web.reactive.config.EnableWebFlux
 import org.springframework.web.reactive.config.WebFluxConfigurer
 
@@ -23,14 +22,6 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>, 
 
     override fun customize(factory: ConfigurableWebServerFactory?) {
         factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
-    }
-
-    override fun addCorsMappings(registry: CorsRegistry) {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "OPTIONS")
-                .allowedHeaders("Authorization", "Content-Type")
-                .maxAge(600)
     }
 
 
