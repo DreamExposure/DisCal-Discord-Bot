@@ -8,7 +8,7 @@ import java.time.Instant
 data class DisCalGoogleCredential(
         val credentialData: GoogleCredentialData,
 ) {
-    val aes: AESEncryption = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
+    private val aes: AESEncryption = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
 
     fun getRefreshToken() = aes.decrypt(credentialData.encryptedRefreshToken)
 

@@ -10,7 +10,6 @@ import reactor.core.publisher.Mono
 
 @RestController
 class GetEndpoint {
-
     @GetMapping("get", produces = ["application/json"])
     fun get(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guildId: Snowflake?): Mono<CredentialData> {
         if (guildId != null) {

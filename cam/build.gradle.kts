@@ -1,17 +1,14 @@
 plugins {
+    kotlin("plugin.serialization")
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("org.jetbrains.kotlin.plugin.allopen")
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by properties
 val springSecurityVersion: String by properties
 val springSessionVersion: String by properties
 val springR2Version: String by properties
-val flywayVersion: String by properties
-val mysqlConnectorVersion: String by properties
-val hikariVersion: String by properties
 val jacksonKotlinModVersion: String by properties
 
 dependencies {
