@@ -17,6 +17,7 @@ object GlobalVal {
     var iconUrl: String = ""
 
     @JvmStatic
+    @Deprecated(message = "Using linebreak char should be sufficient")
     val lineBreak: String = System.getProperty("line.separator")
 
     @JvmStatic

@@ -52,17 +52,25 @@ object GoogleAuth {
         }
     }
 
-    fun requestNewAccessToken(credential: DisCalGoogleCredential): Mono<CredentialData> {
-        if (!credential.expired()) {
-            return Mono.just(CredentialData(credential.getAccessToken(), credential.credentialData.expiresAt))
-        }
+    fun requestNewAccessToken(credentialId: Int): Mono<CredentialData> {
+        return CREDENTIALS
+                .filter { it.credentialData.credentialNumber == credentialId }
+                .next()
+                .flatMap { credential ->
+                    if (!credential.expired()) {
+                        return@flatMap Mono.just(
+                                CredentialData(credential.getAccessToken(), credential.credentialData.expiresAt)
+                        )
+                    }
 
-        return doAccessTokenRequest(credential.getRefreshToken()).flatMap { data ->
-            credential.setAccessToken(data.accessToken)
-            credential.credentialData.expiresAt = data.validUntil
+                    doAccessTokenRequest(credential.getRefreshToken()).flatMap { data ->
+                        credential.setAccessToken(data.accessToken)
+                        credential.credentialData.expiresAt = data.validUntil
 
-            DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(data)
-        }
+                        DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(data)
+                    }
+                }
+
     }
 
     private fun doAccessTokenRequest(refreshToken: String): Mono<CredentialData> {
@@ -105,7 +113,7 @@ object GoogleAuth {
                 }
                 else -> {
                     // Failed to get OK. Send debug info
-                    LOGGER.debug(DEFAULT,"[Google] Error requesting new access token | ${response.code} " +
+                    LOGGER.debug(DEFAULT, "[Google] Error requesting new access token | ${response.code} " +
                             "| ${response.message} | ${response.body?.string()}")
                     response.body?.close()
                     response.close()

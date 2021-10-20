@@ -38,16 +38,16 @@ fun RestGuild.hasCalendar(): Mono<Boolean> {
 fun RestGuild.canAddCalendar(): Mono<Boolean> {
     //Always check the live database and bypass cache
     return DatabaseManager.getCalendarCount(this.id)
-        .flatMap { current ->
-            if (current == 0) Mono.just(true)
-            else getSettings().map { current < it.maxCalendars }
-        }
+            .flatMap { current ->
+                if (current == 0) Mono.just(true)
+                else getSettings().map { current < it.maxCalendars }
+            }
 }
 
 fun RestGuild.determineNextCalendarNumber(): Mono<Int> {
     return DatabaseManager.getAllCalendars(this.id)
-        .map(List<CalendarData>::size)
-        .map { it + 1 }
+            .map(List<CalendarData>::size)
+            .map { it + 1 }
 }
 
 /**
@@ -72,8 +72,8 @@ fun RestGuild.getCalendar(calNumber: Int): Mono<Calendar> {
     if (cal != null) return Mono.just(cal)
 
     return DatabaseManager.getCalendar(this.id, calNumber)
-        .flatMap(Calendar.Companion::from)
-        .doOnNext(DiscalCache::putCalendar)
+            .flatMap(Calendar.Companion::from)
+            .doOnNext(DiscalCache::putCalendar)
 }
 
 /**
@@ -88,9 +88,9 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
     if (cals != null) return Flux.fromIterable(cals)
 
     return DatabaseManager.getAllCalendars(this.id)
-        .flatMapMany { Flux.fromIterable(it) }
-        .flatMap(Calendar.Companion::from)
-        .doOnNext(DiscalCache::putCalendar)
+            .flatMapMany { Flux.fromIterable(it) }
+            .flatMap(Calendar.Companion::from)
+            .doOnNext(DiscalCache::putCalendar)
 }
 
 /**
@@ -101,9 +101,10 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
  * @return A [Mono] containing the newly created [Calendar]
  */
 fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
-    when (spec.host) {
-        CalendarHost.GOOGLE -> {
-            return GoogleAuthWrapper.randomCredentialId().flatMap { credId ->
+    return Mono.defer {
+        when (spec.host) {
+            CalendarHost.GOOGLE -> {
+                val credId = GoogleAuthWrapper.randomCredentialId()
                 val googleCal = GoogleCalendarModel()
 
                 googleCal.summary = spec.name
@@ -112,27 +113,27 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
 
                 //Call google to create it
                 CalendarWrapper.createCalendar(googleCal, credId, this.id)
-                    .timeout(Duration.ofSeconds(30))
-                    .flatMap { confirmed ->
-                        val data = CalendarData(
-                            this.id,
-                            spec.calNumber,
-                            CalendarHost.GOOGLE,
-                            confirmed.id,
-                            confirmed.id,
-                            credId
-                        )
+                        .timeout(Duration.ofSeconds(30))
+                        .flatMap { confirmed ->
+                            val data = CalendarData(
+                                    guildId = this.id,
+                                    calendarNumber = spec.calNumber,
+                                    host = CalendarHost.GOOGLE,
+                                    calendarId = confirmed.id,
+                                    calendarAddress = confirmed.id,
+                                    credentialId = credId
+                            )
 
-                        val rule = AclRule()
-                            .setScope(AclRule.Scope().setType("default"))
-                            .setRole("reader")
+                            val rule = AclRule()
+                                    .setScope(AclRule.Scope().setType("default"))
+                                    .setRole("reader")
 
-                        Mono.`when`(
-                            DatabaseManager.updateCalendar(data),
-                            AclRuleWrapper.insertRule(rule, data)
-                        ).thenReturn(GoogleCalendar(data, confirmed))
-                            .doOnNext(DiscalCache::putCalendar)
-                    }
+                            Mono.`when`(
+                                    DatabaseManager.updateCalendar(data),
+                                    AclRuleWrapper.insertRule(rule, data)
+                            ).thenReturn(GoogleCalendar(data, confirmed))
+                                    .doOnNext(DiscalCache::putCalendar)
+                        }
             }
         }
     }
@@ -165,7 +166,7 @@ fun RestGuild.getAnnouncement(id: UUID): Mono<Announcement> = DatabaseManager.ge
  */
 fun RestGuild.getAllAnnouncements(): Flux<Announcement> {
     return DatabaseManager.getAnnouncements(this.id)
-        .flatMapMany { Flux.fromIterable(it) }
+            .flatMapMany { Flux.fromIterable(it) }
 }
 
 /**
@@ -176,7 +177,7 @@ fun RestGuild.getAllAnnouncements(): Flux<Announcement> {
  */
 fun RestGuild.getEnabledAnnouncements(): Flux<Announcement> {
     return DatabaseManager.getEnabledAnnouncements(this.id)
-        .flatMapMany { Flux.fromIterable(it) }
+            .flatMapMany { Flux.fromIterable(it) }
 }
 
 fun RestGuild.createAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)

@@ -1,57 +1,41 @@
-@file:Suppress("DEPRECATION")
-
 package org.dreamexposure.discal.core.wrapper.google
 
 import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.http.HttpStatusCodes
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.calendar.CalendarScopes
 import okhttp3.FormBody
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import okhttp3.Response
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.google.ClientData
 import org.dreamexposure.discal.core.`object`.google.GoogleAuthPoll
-import org.dreamexposure.discal.core.crypto.AESEncryption
+import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
+import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
+import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
-import org.json.JSONObject
-import reactor.core.publisher.Flux
+import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
+import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
-import java.time.Instant
 import kotlin.random.Random
-import kotlin.system.exitProcess
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuthWrapper {
     private val clientData = ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get())
-    private val CREDENTIALS: Flux<DisCalGoogleCredential>
 
-    init {
-        val credCount = BotSettings.CREDENTIALS_COUNT.get().toInt()
-        CREDENTIALS = Flux.range(0, credCount)
-                .flatMap(DatabaseManager::getCredentialData)
-                .map(::DisCalGoogleCredential)
-                .doOnError { exitProcess(1) }
-                .cache()
-    }
-
-    //FIXME: occasionally ends up empty here
     private fun authorize(credentialId: Int): Mono<Credential> {
-        return CREDENTIALS
-                .filter { it.credentialData.credentialNumber == credentialId }
-                .next()
-                .flatMap(this::requestNewAccessToken)
+        return getAccessToken(credentialId)
                 .map(GoogleCredential()::setAccessToken)
                 .ofType(Credential::class.java) //Cast down to the class it extends
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
@@ -59,7 +43,7 @@ object GoogleAuthWrapper {
 
     private fun authorize(calData: CalendarData): Mono<Credential> {
         return Mono.just(calData).filter { !"N/a".equals(calData.encryptedAccessToken, true) }
-                .flatMap(this::requestNewAccessToken)
+                .flatMap(this::getAccessToken)
                 .map(GoogleCredential()::setAccessToken)
                 .ofType(Credential::class.java) //Cast down to the class it extends
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
@@ -72,135 +56,83 @@ object GoogleAuthWrapper {
                 .build()
     }
 
-    private fun requestNewAccessToken(calData: CalendarData, encryption: AESEncryption): Mono<String> {
-        //Check expire time, if fine, we can just pass the access_token right back without any requests.
-        if (!calData.expired()) {
-            return Mono.just(encryption.decrypt(calData.encryptedAccessToken))
-        }
-
+    private fun getAccessToken(credentialId: Int): Mono<String> {
         return Mono.fromCallable {
-            val body = FormBody.Builder()
-                    .addEncoded("client_id", clientData.clientId)
-                    .addEncoded("client_secret", clientData.clientSecret)
-                    .addEncoded("refresh_token", encryption.decrypt(calData.encryptedRefreshToken))
-                    .addEncoded("grant_type", "refresh_token")
+            val url = "TODO".toHttpUrlOrNull()!!.newBuilder()
+                    .addQueryParameter("host", CalendarHost.GOOGLE.name)
+                    .addQueryParameter("id", credentialId.toString())
                     .build()
 
             val request = Request.Builder()
-                    .url("https://www.googleapis.com/oauth2/v4/token")
-                    .post(body)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .get()
+                    .url(url)
                     .build()
 
-            GlobalVal.HTTP_CLIENT.newCall(request).execute()
+            HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
             when (response.code) {
-                GlobalVal.STATUS_SUCCESS -> {
-                    val responseJson = JSONObject(response.body!!.string())
+                HttpStatusCodes.STATUS_CODE_OK -> {
+                    val data = JSON_FORMAT.decodeFromString(CredentialData.serializer(), response.body!!.string())
                     response.body?.close()
                     response.close()
 
-                    //Update Db data and return
-                    calData.encryptedAccessToken = encryption.encrypt(responseJson.getString("access_token"))
-                    calData.expiresAt = Instant.now().plusSeconds(responseJson.getLong("expires_in"))
-
-                    DatabaseManager.updateCalendar(calData).thenReturn(responseJson.getString("access_token"))
-                }
-                GlobalVal.STATUS_BAD_REQUEST -> {
-                    val errorBody = JSONObject(response.body!!.string())
-                    response.body?.close()
-                    response.close()
-
-                    if ("invalid_grant".equals(errorBody.getString("error"), true)) {
-                        //User revoked access to calendar, delete our reference as they need to re-auth it.
-                        return@flatMap DatabaseManager.deleteCalendarAndRelatedData(calData)
-                            .then(Mono.empty())
-                    } else {
-                        LOGGER.debug(DEFAULT, "[!DGC!] err requesting new access token. " +
-                                "Code: ${response.code} | ${response.message} | $errorBody")
-                        return@flatMap Mono.empty()
-                    }
+                    Mono.just(data.accessToken)
                 }
                 else -> {
-                    //Failed to get OK. Send debug info...
-                    LOGGER.debug(DEFAULT, "[!DGC!] Err requesting new access token. Code: ${response.code} | ${response.message} | ${response.body?.string()}")
+                    val error = JSON_FORMAT.decodeFromString(RestError.serializer(), response.body!!.string())
                     response.body?.close()
                     response.close()
 
-                    return@flatMap Mono.empty()
+                    // Log because this really shouldn't be happening
+                    LOGGER.debug(DEFAULT, "[Google] Error requesting access token from CAM for Int. | $error")
+                    Mono.empty()
                 }
             }
-        }.doOnError {
-            LOGGER.error("[!DGC!] Failed to request new access token", it)
-        }.onErrorResume { Mono.empty() }
-    }
-
-    private fun requestNewAccessToken(calData: CalendarData): Mono<String> {
-        return requestNewAccessToken(calData, AESEncryption(calData.privateKey))
-    }
-
-    private fun requestNewAccessToken(credential: DisCalGoogleCredential): Mono<String> {
-        //Check expire time, if fine, we can just pass the access_token right back without any requests.
-        if (!credential.expired()) {
-            return Mono.just(credential.getAccessToken())
         }
+    }
 
+    private fun getAccessToken(calData: CalendarData): Mono<String> {
         return Mono.fromCallable {
-            val body = FormBody.Builder()
-                    .addEncoded("client_id", this.clientData.clientId)
-                    .addEncoded("client_secret", this.clientData.clientSecret)
-                    .addEncoded("refresh_token", credential.getRefreshToken())
-                    .addEncoded("grant_type", "refresh_token")
+            val url = "TODO".toHttpUrlOrNull()!!.newBuilder()
+                    .addQueryParameter("host", calData.host.name)
+                    .addQueryParameter("guild", calData.guildId.asString())
+                    .addQueryParameter("id", calData.calendarNumber.toString())
                     .build()
 
             val request = Request.Builder()
-                    .url("https://www.googleapis.com/oauth2/v4/token")
-                    .post(body)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .url(url)
+                    .get()
                     .build()
 
-            GlobalVal.HTTP_CLIENT.newCall(request).execute()
+            HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
             when (response.code) {
-                GlobalVal.STATUS_SUCCESS -> {
-                    val responseJson = JSONObject(response.body!!.string())
+                HttpStatusCodes.STATUS_CODE_OK -> {
+                    val data = JSON_FORMAT.decodeFromString(CredentialData.serializer(), response.body!!.string())
                     response.body?.close()
                     response.close()
 
-                    //Update DB and return
-                    credential.setAccessToken(responseJson.getString("access_token"))
-                    credential.credentialData.expiresAt = Instant.now().plusSeconds(responseJson.getLong("expires_in"))
-                    DatabaseManager.updateCredentialData(credential.credentialData)
-                            .thenReturn(responseJson.getString
-                            ("access_token"))
-                }
-                GlobalVal.STATUS_BAD_REQUEST -> {
-                    val errorBody = JSONObject(response.body!!.string())
-                    response.body?.close()
-                    response.close()
-
-                    if ("invalid_grant".equals(errorBody.getString("error"), true)) {
-                        //We revoked access to this account. Is this on purpose??
-                        LOGGER.debug(DEFAULT, "[!DGC!] GOOGLE CALENDAR CREDENTIAL REFRESH FAILURE CredId: " +
-                                "${credential.credentialData.credentialNumber}")
-                    } else {
-                        LOGGER.debug(DEFAULT, "[!DGC!] Error requesting new access token. Status code: " +
-                                "${response.code} | ${response.message} | $errorBody")
-                    }
-                    return@flatMap Mono.empty()
+                    Mono.just(data.accessToken)
                 }
                 else -> {
-                    //Failed to get OK. Send debug info.
-                    LOGGER.debug(DEFAULT, "[!DGC!] Error requesting new access token. Status code: ${response.code} |" +
-                            " ${response.message} | ${response.body?.string()}")
+                    val error = JSON_FORMAT.decodeFromString(RestError.serializer(), response.body!!.string())
                     response.body?.close()
                     response.close()
-                    return@flatMap Mono.empty()
+
+                    when (error.code) {
+                        RestError.Code.ACCESS_REVOKED -> {
+                            // Delete calendar, user MUST reauthorize discal as the refresh token isn't valid.
+                            DatabaseManager.deleteCalendarAndRelatedData(calData).then(Mono.empty())
+                        }
+                        else -> {
+                            //An unknown/unsupported error has occurred, log and return empty, upstream can handle this
+                            LOGGER.debug(DEFAULT, "[Google] Error requesting access token from CAM for Ext. | $error")
+                            Mono.empty()
+                        }
+                    }
                 }
             }
-        }.doOnError {
-            LOGGER.error(DEFAULT, "[!DGC!] Failed to request new access token", it)
-        }.onErrorResume { Mono.empty() }
+        }
     }
 
     fun getCalendarService(calData: CalendarData): Mono<GoogleCalendarService> {
@@ -219,16 +151,7 @@ object GoogleAuthWrapper {
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
-    fun getAllDisCalServices(): Flux<GoogleCalendarService> {
-        return credentialsCount()
-                .flatMapMany { Flux.range(0, it) }
-                .flatMap(this::getCalendarService)
-                .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
-    }
-
-    fun credentialsCount(): Mono<Int> = CREDENTIALS.count().map(Long::toInt)
-
-    fun randomCredentialId(): Mono<Int> = credentialsCount().map(Random::nextInt)
+    fun randomCredentialId() = Random.nextInt(BotSettings.CREDENTIALS_COUNT.get().toInt())
 
     fun requestDeviceCode(): Mono<Response> {
         return Mono.fromCallable {
@@ -243,7 +166,7 @@ object GoogleAuthWrapper {
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build()
 
-            GlobalVal.HTTP_CLIENT.newCall(request).execute()
+            HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic())
     }
 
@@ -262,7 +185,7 @@ object GoogleAuthWrapper {
                     .header("Content-Type", "application/x-www-form-urlencoded")
                     .build()
 
-            GlobalVal.HTTP_CLIENT.newCall(request).execute()
+            HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic())
     }
 

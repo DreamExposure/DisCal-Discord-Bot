@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.cam.conf
+package org.dreamexposure.discal.cam.spring
 
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
