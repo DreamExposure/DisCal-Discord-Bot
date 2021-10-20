@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.google.ClientData
 import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
+import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
@@ -38,7 +39,17 @@ object GoogleAuth {
     }
 
     fun requestNewAccessToken(calendarData: CalendarData): Mono<CredentialData> {
-        TODO()
+        val aes = AESEncryption(calendarData.privateKey)
+        if (!calendarData.expired()) {
+            return Mono.just(CredentialData(aes.decrypt(calendarData.encryptedAccessToken), calendarData.expiresAt))
+        }
+
+        return doAccessTokenRequest(aes.decrypt(calendarData.encryptedRefreshToken)).flatMap { data ->
+            calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
+            calendarData.expiresAt = data.validUntil
+
+            DatabaseManager.updateCalendar(calendarData).thenReturn(data)
+        }
     }
 
     fun requestNewAccessToken(credential: DisCalGoogleCredential): Mono<CredentialData> {
