@@ -4,27 +4,16 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryOptions
 import org.dreamexposure.discal.core.`object`.BotSettings
-import org.springframework.boot.web.server.ConfigurableWebServerFactory
-import org.springframework.boot.web.server.ErrorPage
-import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
-import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.config.EnableWebFlux
-import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
-class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>, WebFluxConfigurer {
-
-    override fun customize(factory: ConfigurableWebServerFactory?) {
-        factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
-    }
-
-
+class WebFluxConfig {
     @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()

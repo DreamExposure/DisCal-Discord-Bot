@@ -3,18 +3,14 @@ package org.dreamexposure.discal.core.`object`.rest
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RestError(
-        val code: Code,
-        val message: String = code.message,
+enum class RestError(
+        val code: Int,
+        val message: String,
 ) {
-    enum class Code(
-            val value: Int,
-            val message: String,
-    ) {
-        INTERNAL_SERVER_ERROR(0, "Internal Server Error"),
-        BAD_REQUEST(1, "Bad request"),
+    INTERNAL_SERVER_ERROR(0, "Internal Server Error"),
+    BAD_REQUEST(1, "Bad request"),
 
 
-        ACCESS_REVOKED(1001, "Access to resource revoked"),
-    }
+    ACCESS_REVOKED(1001, "Access to resource revoked"),
+    NOT_FOUND(1002, "Resource not found"),
 }

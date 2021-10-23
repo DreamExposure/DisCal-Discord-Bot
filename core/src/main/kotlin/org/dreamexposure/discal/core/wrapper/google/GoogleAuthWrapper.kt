@@ -119,8 +119,8 @@ object GoogleAuthWrapper {
                     response.body?.close()
                     response.close()
 
-                    when (error.code) {
-                        RestError.Code.ACCESS_REVOKED -> {
+                    when (error) {
+                        RestError.ACCESS_REVOKED -> {
                             // Delete calendar, user MUST reauthorize discal as the refresh token isn't valid.
                             DatabaseManager.deleteCalendarAndRelatedData(calData).then(Mono.empty())
                         }
