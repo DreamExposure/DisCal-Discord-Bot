@@ -5,6 +5,7 @@ import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.springframework.beans.TypeMismatchException
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
@@ -15,6 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.server.MethodNotAllowedException
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
@@ -24,6 +26,23 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
     override fun handle(exchange: ServerWebExchange, throwable: Throwable): Mono<Void> {
         //Handle exceptions we have codes for
         val restError: RestError = when (throwable) {
+            is ResponseStatusException -> {
+                when (throwable.status) {
+                    HttpStatus.NOT_FOUND -> {
+                        exchange.response.statusCode = HttpStatus.NOT_FOUND
+                        RestError.NOT_FOUND
+                    }
+                    HttpStatus.BAD_REQUEST -> {
+                        exchange.response.statusCode = HttpStatus.BAD_REQUEST
+                        RestError.BAD_REQUEST
+                    }
+                    else -> {
+                        LOGGER.error("[GlobalErrorHandler] Unhandled ResponseStatusException", throwable)
+                        exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
+                        RestError.INTERNAL_SERVER_ERROR
+                    }
+                }
+            }
             is AccessRevokedException -> {
                 exchange.response.statusCode = HttpStatus.FORBIDDEN
                 RestError.ACCESS_REVOKED
@@ -41,6 +60,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 RestError.NOT_FOUND
             }
             else -> { // Something we have no special case for
+                LOGGER.error("[GlobalErrorHandler] Unhandled exception", throwable)
                 exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                 RestError.INTERNAL_SERVER_ERROR
             }
