@@ -4,8 +4,11 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
+import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
+import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.springframework.beans.TypeMismatchException
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
@@ -37,11 +40,19 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                         RestError.BAD_REQUEST
                     }
                     else -> {
-                        LOGGER.error("[GlobalErrorHandler] Unhandled ResponseStatusException", throwable)
+                        LOGGER.error(DEFAULT, "[GlobalErrorHandler] Unhandled ResponseStatusException", throwable)
                         exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                         RestError.INTERNAL_SERVER_ERROR
                     }
                 }
+            }
+            is TeaPotException -> {
+                exchange.response.statusCode = HttpStatus.I_AM_A_TEAPOT
+                RestError.TEAPOT
+            }
+            is AuthenticationException -> {
+                exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+                RestError.UNAUTHORIZED
             }
             is AccessRevokedException -> {
                 exchange.response.statusCode = HttpStatus.FORBIDDEN
@@ -60,7 +71,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 RestError.NOT_FOUND
             }
             else -> { // Something we have no special case for
-                LOGGER.error("[GlobalErrorHandler] Unhandled exception", throwable)
+                LOGGER.error(DEFAULT, "[GlobalErrorHandler] Unhandled exception", throwable)
                 exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                 RestError.INTERNAL_SERVER_ERROR
             }

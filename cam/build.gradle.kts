@@ -6,7 +6,6 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
-val springSecurityVersion: String by properties
 val springSessionVersion: String by properties
 val springR2Version: String by properties
 val jacksonKotlinModVersion: String by properties
@@ -16,8 +15,6 @@ dependencies {
 
     //Spring libs
     implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
-    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
     implementation("org.springframework:spring-r2dbc:$springR2Version")
 
     //jackson for kotlin

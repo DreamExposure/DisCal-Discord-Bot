@@ -13,6 +13,8 @@ enum class RestError(
 ) {
     INTERNAL_SERVER_ERROR(0, "Internal Server Error"),
     BAD_REQUEST(1, "Bad request"),
+    UNAUTHORIZED(2, "Unauthorized"),
+    TEAPOT(3, "I'm a teapot"),
 
 
     ACCESS_REVOKED(1001, "Access to resource revoked"),

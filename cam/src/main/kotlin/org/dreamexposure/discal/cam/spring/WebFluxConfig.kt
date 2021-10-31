@@ -10,10 +10,12 @@ import org.springframework.data.redis.connection.RedisPassword
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.web.reactive.config.EnableWebFlux
+import org.springframework.web.reactive.config.WebFluxConfigurer
 
 @Configuration
 @EnableWebFlux
-class WebFluxConfig {
+class WebFluxConfig: WebFluxConfigurer {
+
     @Bean(name = ["redisDatasource"])
     fun redisConnectionFactory(): LettuceConnectionFactory {
         val rsc = RedisStandaloneConfiguration()
