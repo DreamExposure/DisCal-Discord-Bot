@@ -8,7 +8,7 @@ import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
-import org.springframework.web.reactive.HandlerMapping
+import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentMap
 
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
-class SecurityWebFilter : WebFilter {
+class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebFilter {
     private val tempKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
     private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
 
@@ -32,20 +32,17 @@ class SecurityWebFilter : WebFilter {
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        //FIXME: Seems to be null
-        val handler = exchange.attributes[HandlerMapping.BEST_MATCHING_HANDLER_ATTRIBUTE] as HandlerMethod
-
-        if (handler.hasMethodAnnotation(Authentication::class.java)) {
-            val annotation = handler.getMethodAnnotation(Authentication::class.java)!!
-
-            return authenticate(exchange).flatMap { grantedLevel ->
-                if (grantedLevel < annotation.access)
-                    Mono.error(AuthenticationException("Insufficient permissions to access this resource."))
-                else chain.filter(exchange)
-            }
-        }
-
-        return chain.filter(exchange)
+        return handlerMapping.getHandler(exchange).cast(HandlerMethod::class.java)
+                .filter { it.hasMethodAnnotation(Authentication::class.java) }
+                .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
+                .map { it.getMethodAnnotation(Authentication::class.java)!! }
+                .map(Authentication::access)
+                .filter { it != Authentication.AccessLevel.PUBLIC } //if public, we don't need to check headers
+                .flatMap { requiredAccess ->
+                    authenticate(exchange)
+                            .filter { it < requiredAccess }
+                            .then(Mono.error<Void>(AuthenticationException("Insufficient access level")))
+                }.then(chain.filter(exchange))
     }
 
     fun saveTempKey(key: String, expireAt: Instant) {

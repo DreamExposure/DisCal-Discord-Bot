@@ -6,6 +6,7 @@ annotation class Authentication(
         val access: AccessLevel
 ) {
     enum class AccessLevel {
+        PUBLIC,
         READ,
         WRITE,
         ADMIN,
