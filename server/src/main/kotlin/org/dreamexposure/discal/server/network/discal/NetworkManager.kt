@@ -23,6 +23,16 @@ class NetworkManager : ApplicationRunner {
 
     fun getStatus() = status.copy()
 
+    fun handleCam(data: InstanceData) {
+        val existing = status.camStatus
+        if (existing == null)
+            LOGGER.info(STATUS, "CAM now connected")
+        else if (existing.instanceId != data.instanceId)
+            LOGGER.info(STATUS, "CAM instance ID changed")
+
+        status.camStatus = data
+    }
+
     fun handleWebsite(data: InstanceData) {
         val existing = status.websiteStatus
         if (existing == null)

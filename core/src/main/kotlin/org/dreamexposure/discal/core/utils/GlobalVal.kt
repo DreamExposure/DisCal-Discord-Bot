@@ -17,6 +17,7 @@ object GlobalVal {
     var iconUrl: String = ""
 
     @JvmStatic
+    @Deprecated(message = "Using linebreak char should be sufficient")
     val lineBreak: String = System.getProperty("line.separator")
 
     @JvmStatic
@@ -36,7 +37,10 @@ object GlobalVal {
 
     val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
-    val JSON_FORMAT = Json { encodeDefaults = true }
+    val JSON_FORMAT = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
 
     val HTML_WHITELIST: Whitelist
         get() {

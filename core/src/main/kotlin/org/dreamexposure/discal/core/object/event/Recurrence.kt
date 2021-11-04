@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.`object`.event
 
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.enums.event.EventFrequency
-import org.dreamexposure.discal.core.utils.GlobalVal
 
 @Serializable
 data class Recurrence(
@@ -51,9 +50,9 @@ data class Recurrence(
     }
 
     fun toHumanReadable(): String {
-        val read = "Frequency: ${this.frequency.name}${GlobalVal.lineBreak}Interval: ${this.interval}"
+        val read = "Frequency: ${this.frequency.name}\nInterval: ${this.interval}"
 
-        return if (this.count < 1) "$read${GlobalVal.lineBreak} Amount: Infinite"
-        else "$read${GlobalVal.lineBreak} Amount: ${this.count}"
+        return if (this.count < 1) "$read$\nAmount: Infinite"
+        else "$read$\nAmount: ${this.count}"
     }
 }

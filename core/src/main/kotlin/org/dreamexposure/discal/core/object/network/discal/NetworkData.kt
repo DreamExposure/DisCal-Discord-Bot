@@ -19,6 +19,9 @@ data class NetworkData(
         @SerialName("website_status")
         var websiteStatus: InstanceData? = null,
 
+        @SerialName("cam_status")
+        var camStatus: InstanceData? = null,
+
         @SerialName("bot_status")
         val botStatus: MutableList<BotInstanceData> = CopyOnWriteArrayList()
 ) {
@@ -46,6 +49,7 @@ data class NetworkData(
 
         totalMemMb += apiStatus.memory
         totalMemMb += websiteStatus?.memory ?: 0.0
+        totalMemMb += camStatus?.memory ?: 0.0
 
         botStatus.forEach { totalMemMb+= it.instanceData.memory }
 

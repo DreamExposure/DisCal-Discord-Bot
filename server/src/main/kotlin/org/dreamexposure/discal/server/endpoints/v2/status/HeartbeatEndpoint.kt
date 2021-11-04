@@ -39,6 +39,7 @@ class HeartbeatEndpoint(val networkManager: NetworkManager) {
             when (body.type) {
                 HeartbeatType.BOT -> networkManager.handleBot(body.botInstanceData!!)
                 HeartbeatType.WEBSITE -> networkManager.handleWebsite(body.instanceData!!)
+                HeartbeatType.CAM -> networkManager.handleCam(body.instanceData!!)
             }
 
             response.rawStatusCode = GlobalVal.STATUS_SUCCESS

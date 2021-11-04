@@ -17,5 +17,5 @@ data class HeartbeatRequest(
 )
 
 enum class HeartbeatType {
-    BOT, WEBSITE
+    BOT, WEBSITE, CAM,
 }

@@ -48,6 +48,18 @@ Patrons and supporters on the $5/month plans get access to work in progress and 
 * Better translation support (Right now using the JSON files is really messy and hard to maintain)
 * And so much more!
 
+# 📦 Modules & Services
+* Core
+    * The central inner workings shared across other modules
+* Server
+    * The backend API responsible for network health monitoring and houses the RESTful API
+* Client
+    * Does all the heavy lifting. This is the discord bot and runs a single shard per instance
+* Web
+    * The official website. This houses all the frontend code and handles logging in with Discord for the Dashboard
+* C.A.M
+    * The Central Authentication Manager. This service maintains the credentials for services used by DisCal
+
 # 🧰 Technologies
 
 DisCal is primarily written in Java with a TypeScript powered web-frontend. We use the following technologies throughout
