@@ -33,6 +33,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 when (throwable.status) {
                     HttpStatus.NOT_FOUND -> {
                         exchange.response.statusCode = HttpStatus.NOT_FOUND
+                        LOGGER.trace("404 exchange | Path: ${exchange.request.path}")
                         RestError.NOT_FOUND
                     }
                     HttpStatus.BAD_REQUEST -> {

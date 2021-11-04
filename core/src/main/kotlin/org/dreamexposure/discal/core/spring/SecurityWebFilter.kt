@@ -4,6 +4,7 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
+import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.stereotype.Component
@@ -33,6 +34,7 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return handlerMapping.getHandler(exchange).cast(HandlerMethod::class.java)
+                .switchIfEmpty(Mono.error(EmptyNotAllowedException())) // Don't apply custom filter if this is not on a method
                 .filter { it.hasMethodAnnotation(Authentication::class.java) }
                 .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
                 .map { it.getMethodAnnotation(Authentication::class.java)!! }
@@ -42,7 +44,8 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                     authenticate(exchange)
                             .filter { it < requiredAccess }
                             .then(Mono.error<Void>(AuthenticationException("Insufficient access level")))
-                }.then(chain.filter(exchange))
+                }.onErrorResume(EmptyNotAllowedException::class.java) { Mono.empty() }
+                .then(chain.filter(exchange))
     }
 
     fun saveTempKey(key: String, expireAt: Instant) {
