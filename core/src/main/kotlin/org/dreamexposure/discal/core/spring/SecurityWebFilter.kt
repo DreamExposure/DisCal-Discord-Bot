@@ -43,7 +43,9 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 .flatMap { requiredAccess ->
                     authenticate(exchange)
                             .filter { it < requiredAccess }
-                            .then(Mono.error<Void>(AuthenticationException("Insufficient access level")))
+                            .flatMap {
+                                Mono.error<Void>(AuthenticationException("Insufficient access level!"))
+                            }
                 }.onErrorResume(EmptyNotAllowedException::class.java) { Mono.empty() }
                 .then(chain.filter(exchange))
     }
@@ -80,7 +82,8 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
             }
 
             val authHeader = exchange.request.headers["Authorization"]!![0]
-            return@defer when { // I'm a teapot
+            return@defer when {
+                // I'm a teapot
                 authHeader.equals("teapot", true) -> {
                     Mono.error(TeaPotException())
                 }
