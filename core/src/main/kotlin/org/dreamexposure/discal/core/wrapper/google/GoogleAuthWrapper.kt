@@ -58,7 +58,7 @@ object GoogleAuthWrapper {
 
     private fun getAccessToken(credentialId: Int): Mono<String> {
         return Mono.fromCallable {
-            val url = "${BotSettings.CAM_URL.get()}/v1/get".toHttpUrlOrNull()!!.newBuilder()
+            val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                     .addQueryParameter("host", CalendarHost.GOOGLE.name)
                     .addQueryParameter("id", credentialId.toString())
                     .build()
@@ -93,7 +93,7 @@ object GoogleAuthWrapper {
 
     private fun getAccessToken(calData: CalendarData): Mono<String> {
         return Mono.fromCallable {
-            val url = "${BotSettings.CAM_URL.get()}/v1/get".toHttpUrlOrNull()!!.newBuilder()
+            val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                     .addQueryParameter("host", calData.host.name)
                     .addQueryParameter("guild", calData.guildId.asString())
                     .addQueryParameter("id", calData.calendarNumber.toString())
