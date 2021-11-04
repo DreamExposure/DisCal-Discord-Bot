@@ -283,6 +283,31 @@
 
                 <hr>
 
+                <!--Start CAM Status-->
+                <h2 class="text-center text-discal-blue">Central Auth</h2>
+                <th:block th:if="${status.camStatus != null}">
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Version: ' + ${status.camStatus.version}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'RAM Used: ' + ${status.camStatus.memory} + 'MB'">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Uptime: ' + ${status.camStatus.humanReadableUptime}">
+                    </p>
+
+                    <p class="text-left text-discord-full-white"
+                       th:text="'Last Heartbeat: ' + ${status.camStatus.humanReadableHeartbeat}">
+                    </p>
+                </th:block>
+
+                <br>
+                <!--End CAM Status-->
+
+                <hr>
+
                 <!--Start Website Status-->
                 <h2 class="text-center text-discal-blue">Website</h2>
                 <th:block th:if="${status.websiteStatus != null}">
