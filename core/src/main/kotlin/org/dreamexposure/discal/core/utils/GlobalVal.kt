@@ -37,7 +37,10 @@ object GlobalVal {
 
     val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
-    val JSON_FORMAT = Json { encodeDefaults = true }
+    val JSON_FORMAT = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+    }
 
     val HTML_WHITELIST: Whitelist
         get() {

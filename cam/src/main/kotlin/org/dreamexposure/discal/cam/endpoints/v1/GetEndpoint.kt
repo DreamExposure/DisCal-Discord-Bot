@@ -6,7 +6,6 @@ import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +26,7 @@ class GetEndpoint {
                 CalendarHost.GOOGLE -> {
                     if (guild == null) {
                         // Internal (owned by DisCal, should never go bad)
-                        GoogleAuth.requestNewAccessToken(id).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
+                        GoogleAuth.requestNewAccessToken(id)
                     } else {
                         // External (owned by user)
                         DatabaseManager.getCalendar(guild, id).flatMap(GoogleAuth::requestNewAccessToken)

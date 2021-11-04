@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
+import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
@@ -52,7 +53,6 @@ object GoogleAuth {
         }
     }
 
-    //FIXME: returning empty, should never be able to return empty!!
     fun requestNewAccessToken(credentialId: Int): Mono<CredentialData> {
         return CREDENTIALS
                 .filter { it.credentialData.credentialNumber == credentialId }
@@ -70,7 +70,7 @@ object GoogleAuth {
 
                         DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(data)
                     }
-                }
+                }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
 
     }
 
