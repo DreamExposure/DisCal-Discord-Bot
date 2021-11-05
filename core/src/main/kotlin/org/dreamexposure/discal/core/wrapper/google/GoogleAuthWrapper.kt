@@ -63,8 +63,8 @@ object GoogleAuthWrapper {
                     .addQueryParameter("id", credentialId.toString())
                     .build()
 
-            val request = Request.Builder()
-                    .get()
+            val request = Request.Builder().get()
+                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                     .url(url)
                     .build()
 
@@ -99,9 +99,9 @@ object GoogleAuthWrapper {
                     .addQueryParameter("id", calData.calendarNumber.toString())
                     .build()
 
-            val request = Request.Builder()
+            val request = Request.Builder().get()
+                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                     .url(url)
-                    .get()
                     .build()
 
             HTTP_CLIENT.newCall(request).execute()
