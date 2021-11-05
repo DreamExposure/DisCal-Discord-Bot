@@ -104,6 +104,8 @@ object GoogleAuth {
                     response.body?.close()
                     response.close()
 
+                    LOGGER.error("[Google] Int Cred bad Request: $body")
+
                     if (body.error == "invalid_grant") {
                         LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")
                         Mono.error<CredentialData>(AccessRevokedException())

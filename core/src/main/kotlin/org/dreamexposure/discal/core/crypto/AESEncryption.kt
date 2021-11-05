@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.core.crypto
 
 import org.apache.commons.codec.binary.Base64
+import org.dreamexposure.discal.core.logger.LOGGER
 import java.nio.charset.StandardCharsets
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 class AESEncryption(privateKey: String) {
-    //Public key, its fine if this is here, I don't even have access to private keys
     @Suppress("SpellCheckingInspection")
     private val key1: String = "E4B39r8F57F1Csde"
 
@@ -29,7 +29,8 @@ class AESEncryption(privateKey: String) {
             val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
 
             Base64.encodeBase64String(encrypted)
-        } catch (ignore: Exception) {
+        } catch (e: Exception) {
+            LOGGER.error("Encrypt failure", e)
             "FAILURE"
         }
     }
@@ -40,7 +41,8 @@ class AESEncryption(privateKey: String) {
             val decryptedBytes = this.cipher?.doFinal(Base64.decodeBase64(encryptedData))
 
             return String(decryptedBytes!!)
-        } catch (ignore: Exception) {
+        } catch (e: Exception) {
+            LOGGER.error("Decrypt failure", e)
             "FAILURE"
         }
     }

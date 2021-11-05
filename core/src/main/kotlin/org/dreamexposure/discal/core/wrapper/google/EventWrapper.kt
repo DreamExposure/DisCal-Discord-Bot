@@ -4,7 +4,9 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
+import org.apache.http.HttpStatus
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
@@ -59,12 +61,28 @@ object EventWrapper {
                         .setQuotaUser(calData.guildId.asString())
                         .execute()
             }.filter {
+                //TODO: Maybe delete certain announcements out of the database if its cancelled??
                 //Don't show "deleted" events
                 /*
                 See "status" flag: https://developers.google.com/calendar/api/v3/reference/events#resource
                  */
                 !it.status.equals("cancelled", true)
             }.subscribeOn(Schedulers.boundedElastic())
+        }.onErrorResume(GoogleJsonResponseException::class.java) {
+            return@onErrorResume when (it.statusCode) {
+                HttpStatus.SC_GONE -> {
+                    // The event is gone. Sometimes google will return this if the event is deleted.
+                    DatabaseManager.deleteAnnouncementsForEvent(calData.guildId, id).then(Mono.empty())
+                }
+                HttpStatus.SC_NOT_FOUND -> {
+                    // Event not found. Was this ever an event?
+                    DatabaseManager.deleteAnnouncementsForEvent(calData.guildId, id).then(Mono.empty())
+                }
+                else -> {
+                    LOGGER.error(GlobalVal.DEFAULT, "[G.Cal] Event get failure", it)
+                    Mono.empty()
+                }
+            }
         }.onErrorResume { Mono.empty() } //Can safely ignore this, the event just doesn't exist.
     }
 

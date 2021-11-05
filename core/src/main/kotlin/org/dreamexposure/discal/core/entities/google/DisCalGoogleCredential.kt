@@ -9,16 +9,30 @@ data class DisCalGoogleCredential(
         val credentialData: GoogleCredentialData,
 ) {
     private val aes: AESEncryption = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
+    private var access: String? = null
+    private var refresh: String? = null
 
-    fun getRefreshToken() = aes.decrypt(credentialData.encryptedRefreshToken)
+    fun getRefreshToken(): String {
+        if (refresh == null)
+            refresh = aes.decrypt(credentialData.encryptedRefreshToken)
 
-    fun getAccessToken() = aes.decrypt(credentialData.encryptedAccessToken)
+        return refresh!!
+    }
+
+    fun getAccessToken(): String {
+        if (access == null)
+            access = aes.decrypt(credentialData.encryptedAccessToken)
+
+        return access!!
+    }
 
     fun setRefreshToken(token: String) {
+        refresh = token
         credentialData.encryptedRefreshToken = aes.encrypt(token)
     }
 
     fun setAccessToken(token: String) {
+        access = token
         credentialData.encryptedAccessToken = aes.encrypt(token)
     }
 
