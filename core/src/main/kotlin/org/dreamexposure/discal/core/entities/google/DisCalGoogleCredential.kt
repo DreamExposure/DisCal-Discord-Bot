@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.entities.google
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
 import org.dreamexposure.discal.core.crypto.AESEncryption
+import reactor.core.publisher.Mono
 import java.time.Instant
 
 data class DisCalGoogleCredential(
@@ -31,9 +32,12 @@ data class DisCalGoogleCredential(
         credentialData.encryptedRefreshToken = aes.encrypt(token)
     }
 
-    fun setAccessToken(token: String) {
+    fun setAccessToken(token: String): Mono<Void> {
         access = token
-        credentialData.encryptedAccessToken = aes.encrypt(token)
+        //credentialData.encryptedAccessToken = aes.encrypt(token)
+        return aes.encryptReactive(token)
+                .doOnNext { credentialData.encryptedAccessToken = it }
+                .then()
     }
 
     fun expired() = Instant.now().isAfter(credentialData.expiresAt)

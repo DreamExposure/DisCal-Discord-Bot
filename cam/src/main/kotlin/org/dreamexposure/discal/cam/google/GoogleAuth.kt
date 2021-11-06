@@ -47,10 +47,10 @@ object GoogleAuth {
         }
 
         return doAccessTokenRequest(aes.decrypt(calendarData.encryptedRefreshToken)).flatMap { data ->
-            calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
+            //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
             calendarData.expiresAt = data.validUntil
 
-            DatabaseManager.updateCalendar(calendarData).thenReturn(data)
+            aes.encryptReactive(data.accessToken).then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
         }
     }
 
