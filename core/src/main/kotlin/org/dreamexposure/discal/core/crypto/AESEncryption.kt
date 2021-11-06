@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.crypto
 
 import org.apache.commons.codec.binary.Base64
+import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.logger.LOGGER
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -35,7 +36,7 @@ class AESEncryption(privateKey: String) {
             LOGGER.error("Encrypt failure", it)
         }.doOnError {
             Mono.error<Void>(IllegalStateException("Encrypt Failure", it))
-        }.subscribeOn(Schedulers.single())
+        }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
     fun decryptReactive(data: String): Mono<String> {
@@ -48,7 +49,7 @@ class AESEncryption(privateKey: String) {
             LOGGER.error("Decrypt failure", it)
         }.doOnError {
             Mono.error<Void>(IllegalStateException("Decrypt Failure", it))
-        }.subscribeOn(Schedulers.single())
+        }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
     @Deprecated("Use reactive version")

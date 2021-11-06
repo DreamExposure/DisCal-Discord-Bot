@@ -66,12 +66,10 @@ object GoogleAuth {
                         )
                     }
 
-                    doAccessTokenRequest(credential.getRefreshToken()).flatMap { data ->
-                        credential.setAccessToken(data.accessToken)
-                        credential.credentialData.expiresAt = data.validUntil
-
-                        DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(data)
-                    }
+                    doAccessTokenRequest(credential.getRefreshToken())
+                            .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
+                            .doOnNext { credential.credentialData.expiresAt = it.validUntil }
+                            .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }
                 }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
 
     }
