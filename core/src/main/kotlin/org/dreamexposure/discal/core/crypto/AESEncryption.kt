@@ -25,25 +25,27 @@ class AESEncryption(privateKey: String) {
 
     fun encrypt(data: String): String {
         return try {
+            //FIXME: Race condition?
             this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
             val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
 
             Base64.encodeBase64String(encrypted)
         } catch (e: Exception) {
             LOGGER.error("Encrypt failure", e)
-            "FAILURE"
+            throw IllegalStateException("Encrypt Failure", e)
         }
     }
 
     fun decrypt(encryptedData: String): String {
         return try {
+            //FIXME: race condition?
             this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
             val decryptedBytes = this.cipher?.doFinal(Base64.decodeBase64(encryptedData))
 
-            return String(decryptedBytes!!)
+            String(decryptedBytes!!)
         } catch (e: Exception) {
             LOGGER.error("Decrypt failure", e)
-            "FAILURE"
+            throw IllegalStateException("Decrypt Failure", e)
         }
     }
 }

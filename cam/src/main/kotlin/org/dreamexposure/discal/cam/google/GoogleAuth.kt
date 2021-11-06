@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
+import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
@@ -57,6 +58,7 @@ object GoogleAuth {
         return CREDENTIALS
                 .filter { it.credentialData.credentialNumber == credentialId }
                 .next()
+                .switchIfEmpty(Mono.error(NotFoundException()))
                 .flatMap { credential ->
                     if (!credential.expired()) {
                         return@flatMap Mono.just(

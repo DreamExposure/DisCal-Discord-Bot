@@ -62,8 +62,12 @@ object EventWrapper {
                         .execute()
             }.filter {
                 //TODO: Maybe delete certain announcements out of the database if its cancelled??
-                //Don't show "deleted" events
                 /*
+                Don't show "deleted" events
+
+                Google has a couple conditions that are possible when an event is cancelled.
+                - if its part of a recurring set, data should not be deleted, otherwise it should be.
+
                 See "status" flag: https://developers.google.com/calendar/api/v3/reference/events#resource
                  */
                 !it.status.equals("cancelled", true)
