@@ -41,16 +41,21 @@ object GoogleAuth {
     }
 
     fun requestNewAccessToken(calendarData: CalendarData): Mono<CredentialData> {
-        val aes = AESEncryption(calendarData.privateKey)
-        if (!calendarData.expired()) {
-            return Mono.just(CredentialData(aes.decrypt(calendarData.encryptedAccessToken), calendarData.expiresAt))
-        }
+        return Mono.just(AESEncryption(calendarData.privateKey)).flatMap { aes ->
+            if (!calendarData.expired()) {
+                return@flatMap aes.decrypt(calendarData.encryptedAccessToken)
+                        .map { CredentialData(it, calendarData.expiresAt) }
+            }
 
-        return doAccessTokenRequest(aes.decrypt(calendarData.encryptedRefreshToken)).flatMap { data ->
-            //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
-            calendarData.expiresAt = data.validUntil
+            aes.decrypt(calendarData.encryptedRefreshToken)
+                    .flatMap(this::doAccessTokenRequest)
+                    .flatMap { data ->
+                        //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
+                        calendarData.expiresAt = data.validUntil
 
-            aes.encryptReactive(data.accessToken).then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
+                        aes.encryptReactive(data.accessToken)
+                                .then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
+                    }
         }
     }
 
@@ -61,12 +66,12 @@ object GoogleAuth {
                 .switchIfEmpty(Mono.error(NotFoundException()))
                 .flatMap { credential ->
                     if (!credential.expired()) {
-                        return@flatMap Mono.just(
-                                CredentialData(credential.getAccessToken(), credential.credentialData.expiresAt)
-                        )
+                        return@flatMap credential.getAccessToken()
+                                .map { CredentialData(it, credential.credentialData.expiresAt) }
                     }
 
-                    doAccessTokenRequest(credential.getRefreshToken())
+                    credential.getRefreshToken()
+                            .flatMap(this::doAccessTokenRequest)
                             .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
                             .doOnNext { credential.credentialData.expiresAt = it.validUntil }
                             .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }

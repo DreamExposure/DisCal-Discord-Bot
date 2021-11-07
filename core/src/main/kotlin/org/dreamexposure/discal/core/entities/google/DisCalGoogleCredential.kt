@@ -13,23 +13,24 @@ data class DisCalGoogleCredential(
     private var access: String? = null
     private var refresh: String? = null
 
-    fun getRefreshToken(): String {
-        if (refresh == null)
-            refresh = aes.decrypt(credentialData.encryptedRefreshToken)
-
-        return refresh!!
+    fun getRefreshToken(): Mono<String> {
+       if (refresh != null) return Mono.justOrEmpty(refresh)
+        return aes.decrypt(credentialData.encryptedRefreshToken)
+                .doOnNext { refresh = it }
     }
 
-    fun getAccessToken(): String {
-        if (access == null)
-            access = aes.decrypt(credentialData.encryptedAccessToken)
-
-        return access!!
+    fun getAccessToken(): Mono<String> {
+        //if (access != null) return Mono.justOrEmpty(access)
+        return aes.decrypt(credentialData.encryptedAccessToken)
+                .doOnNext { access = it }
     }
 
-    fun setRefreshToken(token: String) {
+    fun setRefreshToken(token: String): Mono<Void> {
         refresh = token
-        credentialData.encryptedRefreshToken = aes.encrypt(token)
+        //credentialData.encryptedRefreshToken = aes.encrypt(token)
+        return aes.encryptReactive(token)
+                .doOnNext { credentialData.encryptedRefreshToken = it }
+                .then()
     }
 
     fun setAccessToken(token: String): Mono<Void> {

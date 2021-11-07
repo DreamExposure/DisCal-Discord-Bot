@@ -34,12 +34,12 @@ class AESEncryption(privateKey: String) {
             Base64.encodeBase64String(encrypted)
         }.doOnError {
             LOGGER.error("Encrypt failure", it)
-        }.doOnError {
-            Mono.error<Void>(IllegalStateException("Encrypt Failure", it))
+        }.onErrorResume {
+            Mono.error(IllegalStateException("Encrypt Failure", it))
         }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
-    fun decryptReactive(data: String): Mono<String> {
+    fun decrypt(data: String): Mono<String> {
         return Mono.fromCallable {
             this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
             val decrypted = this.cipher?.doFinal(Base64.decodeBase64(data))
@@ -47,8 +47,8 @@ class AESEncryption(privateKey: String) {
             String(decrypted!!, StandardCharsets.UTF_8)
         }.doOnError {
             LOGGER.error("Decrypt failure", it)
-        }.doOnError {
-            Mono.error<Void>(IllegalStateException("Decrypt Failure", it))
+        }.onErrorResume {
+            Mono.error(IllegalStateException("Decrypt Failure", it))
         }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
@@ -62,20 +62,6 @@ class AESEncryption(privateKey: String) {
             Base64.encodeBase64String(encrypted)
         } catch (e: Exception) {
             throw IllegalStateException("Encrypt Failure", e)
-        }
-    }
-
-    @Deprecated("Use reactive version")
-    fun decrypt(encryptedData: String): String {
-        return try {
-            //FIXME: race condition?
-            this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val decryptedBytes = this.cipher?.doFinal(Base64.decodeBase64(encryptedData))
-
-            String(decryptedBytes!!)
-        } catch (e: Exception) {
-            LOGGER.error("Decrypt failure", e)
-            throw IllegalStateException("Decrypt Failure", e)
         }
     }
 }
