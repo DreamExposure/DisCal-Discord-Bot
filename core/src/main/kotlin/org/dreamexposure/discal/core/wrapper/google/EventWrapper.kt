@@ -60,17 +60,16 @@ object EventWrapper {
                         .get(calData.calendarId, id)
                         .setQuotaUser(calData.guildId.asString())
                         .execute()
-            }.filter {
-                //TODO: Maybe delete certain announcements out of the database if its cancelled??
+            }.filterWhen {
                 /*
                 Don't show "deleted" events
 
-                Google has a couple conditions that are possible when an event is cancelled.
-                - if its part of a recurring set, data should not be deleted, otherwise it should be.
-
                 See "status" flag: https://developers.google.com/calendar/api/v3/reference/events#resource
                  */
-                !it.status.equals("cancelled", true)
+                if (it.status.equals("cancelled", true)) {
+                    // Delete any announcements tied to it.
+                    DatabaseManager.deleteAnnouncementsForEvent(calData.guildId, id).thenReturn(false)
+                } else Mono.just(true)
             }.subscribeOn(Schedulers.boundedElastic())
         }.onErrorResume(GoogleJsonResponseException::class.java) {
             return@onErrorResume when (it.statusCode) {

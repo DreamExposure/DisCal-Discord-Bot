@@ -53,7 +53,7 @@ object GoogleAuth {
                         //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
                         calendarData.expiresAt = data.validUntil
 
-                        aes.encryptReactive(data.accessToken)
+                        aes.encrypt(data.accessToken)
                                 .then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
                     }
         }

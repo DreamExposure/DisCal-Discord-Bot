@@ -95,8 +95,8 @@ object GoogleInternalAuthHandler {
                     val aprGrant = JSONObject(responseBody)
                     val aes = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
 
-                    val refreshMono = aes.encryptReactive(aprGrant.getString("refresh_token"))
-                    val accessMono = aes.encryptReactive(aprGrant.getString("access_token"))
+                    val refreshMono = aes.encrypt(aprGrant.getString("refresh_token"))
+                    val accessMono = aes.encrypt(aprGrant.getString("access_token"))
 
                     Mono.zip(refreshMono, accessMono).flatMap<GoogleAuthCancelException?>(TupleUtils.function { refresh, access ->
                         val expiresAt = Instant.now().plusSeconds(aprGrant.getLong("expires_in"))

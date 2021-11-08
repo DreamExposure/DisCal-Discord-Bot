@@ -26,7 +26,7 @@ class AESEncryption(privateKey: String) {
         }
     }
 
-    fun encryptReactive(data: String): Mono<String> {
+    fun encrypt(data: String): Mono<String> {
         return Mono.fromCallable {
             this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
             val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
@@ -50,18 +50,5 @@ class AESEncryption(privateKey: String) {
         }.onErrorResume {
             Mono.error(IllegalStateException("Decrypt Failure", it))
         }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
-    }
-
-    @Deprecated("Use reactive version")
-    fun encrypt(data: String): String {
-        return try {
-            //FIXME: Race condition?
-            this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
-
-            Base64.encodeBase64String(encrypted)
-        } catch (e: Exception) {
-            throw IllegalStateException("Encrypt Failure", e)
-        }
     }
 }

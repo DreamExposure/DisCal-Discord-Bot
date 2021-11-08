@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpStatusCodes
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.calendar.CalendarScopes
+import discord4j.common.util.Snowflake
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
@@ -27,12 +28,16 @@ import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuthWrapper {
     private val clientData = ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get())
+
+    private val discalTokens: MutableMap<Int, CredentialData> = ConcurrentHashMap()
+    private val externalTokens: MutableMap<Snowflake, CredentialData> = ConcurrentHashMap()
 
     private fun authorize(credentialId: Int): Mono<Credential> {
         return getAccessToken(credentialId)
@@ -57,6 +62,11 @@ object GoogleAuthWrapper {
     }
 
     private fun getAccessToken(credentialId: Int): Mono<String> {
+        val token = discalTokens[credentialId]
+        if (token != null && !token.isExpired()) {
+            return Mono.just(token.accessToken)
+        }
+
         return Mono.fromCallable {
             val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                     .addQueryParameter("host", CalendarHost.GOOGLE.name)
@@ -76,6 +86,7 @@ object GoogleAuthWrapper {
                     response.body?.close()
                     response.close()
 
+                    discalTokens[credentialId] = data
                     Mono.just(data.accessToken)
                 }
                 else -> {
@@ -92,6 +103,11 @@ object GoogleAuthWrapper {
     }
 
     private fun getAccessToken(calData: CalendarData): Mono<String> {
+        val token = externalTokens[calData.guildId]
+        if (token != null && !token.isExpired()) {
+            return Mono.just(token.accessToken)
+        }
+
         return Mono.fromCallable {
             val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                     .addQueryParameter("host", calData.host.name)
@@ -112,6 +128,7 @@ object GoogleAuthWrapper {
                     response.body?.close()
                     response.close()
 
+                    externalTokens[calData.guildId] = data
                     Mono.just(data.accessToken)
                 }
                 else -> {

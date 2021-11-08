@@ -20,7 +20,7 @@ data class DisCalGoogleCredential(
     }
 
     fun getAccessToken(): Mono<String> {
-        //if (access != null) return Mono.justOrEmpty(access)
+        if (access != null) return Mono.justOrEmpty(access)
         return aes.decrypt(credentialData.encryptedAccessToken)
                 .doOnNext { access = it }
     }
@@ -28,7 +28,7 @@ data class DisCalGoogleCredential(
     fun setRefreshToken(token: String): Mono<Void> {
         refresh = token
         //credentialData.encryptedRefreshToken = aes.encrypt(token)
-        return aes.encryptReactive(token)
+        return aes.encrypt(token)
                 .doOnNext { credentialData.encryptedRefreshToken = it }
                 .then()
     }
@@ -36,7 +36,7 @@ data class DisCalGoogleCredential(
     fun setAccessToken(token: String): Mono<Void> {
         access = token
         //credentialData.encryptedAccessToken = aes.encrypt(token)
-        return aes.encryptReactive(token)
+        return aes.encrypt(token)
                 .doOnNext { credentialData.encryptedAccessToken = it }
                 .then()
     }

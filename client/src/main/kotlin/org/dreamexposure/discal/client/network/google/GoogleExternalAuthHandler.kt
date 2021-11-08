@@ -21,6 +21,7 @@ import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.function.TupleUtils
 import java.time.Instant
 import java.util.function.Predicate
 
@@ -67,8 +68,10 @@ object GoogleExternalAuthHandler {
                 val body = response.body?.string()
                 response.body?.close()
                 response.close()
-                LOGGER.debug(DEFAULT, "Error request access token | Status code: ${response.code} | ${response
-                        .message} | $body")
+                LOGGER.debug(DEFAULT, "Error request access token | Status code: ${response.code} | ${
+                    response
+                            .message
+                } | $body")
 
                 event.message.authorAsMember.flatMap {
                     Messages.sendDirectMessage(
@@ -130,38 +133,45 @@ object GoogleExternalAuthHandler {
                     val calData = CalendarData.emptyExternal(poll.settings.guildID, CalendarHost.GOOGLE)
                     val encryption = AESEncryption(calData.privateKey)
 
-                    calData.encryptedAccessToken = encryption.encrypt(successJson.getString("access_token"))
-                    calData.encryptedRefreshToken = encryption.encrypt(successJson.getString("refresh_token"))
-                    calData.expiresAt = Instant.now().plusSeconds(successJson.getLong("expires_in"))
 
-                    DatabaseManager.updateCalendar(calData)
-                            .then(CalendarWrapper.getUsersExternalCalendars(calData))
-                            .flatMapMany { Flux.fromIterable(it) }
-                            .map { cal ->
-                                EmbedCreateSpec.builder()
-                                        .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
-                                        .title(Messages.getMessage("Embed.AddCalendar.List.Title", poll.settings))
-                                        .addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.Name", poll.settings),
-                                                cal.summary,
-                                                false)
-                                        .addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.settings),
-                                                cal.timeZone,
-                                                false)
-                                        .addField(
-                                                Messages.getMessage("Embed.AddCalendar.List.ID", poll.settings),
-                                                cal.id,
-                                                false)
-                                        .color(discalColor)
-                                        .build()
-                            }.flatMap { Messages.sendDirectMessage(it, poll.user) }
-                            .switchIfEmpty {
-                                Messages.sendDirectMessage(
-                                        Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", poll.settings),
-                                        poll.user
-                                )
-                            }.then(Mono.error(GoogleAuthCancelException()))
+                    val accessMono = encryption.encrypt(successJson.getString("access_token"))
+                    val refreshMono = encryption.encrypt(successJson.getString("refresh_token"))
+
+                    Mono.zip(accessMono, refreshMono).flatMap(TupleUtils.function { access, refresh ->
+                        calData.encryptedAccessToken = access
+                        calData.encryptedRefreshToken = refresh
+                        calData.expiresAt = Instant.now().plusSeconds(successJson.getLong("expires_in"))
+
+
+                        DatabaseManager.updateCalendar(calData)
+                                .then(CalendarWrapper.getUsersExternalCalendars(calData))
+                                .flatMapMany { Flux.fromIterable(it) }
+                                .map { cal ->
+                                    EmbedCreateSpec.builder()
+                                            .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
+                                            .title(Messages.getMessage("Embed.AddCalendar.List.Title", poll.settings))
+                                            .addField(
+                                                    Messages.getMessage("Embed.AddCalendar.List.Name", poll.settings),
+                                                    cal.summary,
+                                                    false)
+                                            .addField(
+                                                    Messages.getMessage("Embed.AddCalendar.List.TimeZone", poll.settings),
+                                                    cal.timeZone,
+                                                    false)
+                                            .addField(
+                                                    Messages.getMessage("Embed.AddCalendar.List.ID", poll.settings),
+                                                    cal.id,
+                                                    false)
+                                            .color(discalColor)
+                                            .build()
+                                }.flatMap { Messages.sendDirectMessage(it, poll.user) }
+                                .switchIfEmpty {
+                                    Messages.sendDirectMessage(
+                                            Messages.getMessage("AddCalendar.Auth.Poll.Failure.ListCalendars", poll.settings),
+                                            poll.user
+                                    )
+                                }.then(Mono.error(GoogleAuthCancelException()))
+                    })
                 }
                 else -> {
                     //Unknown error -- Log, send message, cancel poll
