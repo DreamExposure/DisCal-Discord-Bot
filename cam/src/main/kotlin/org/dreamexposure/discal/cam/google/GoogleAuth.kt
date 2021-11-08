@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
+import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
@@ -40,16 +41,21 @@ object GoogleAuth {
     }
 
     fun requestNewAccessToken(calendarData: CalendarData): Mono<CredentialData> {
-        val aes = AESEncryption(calendarData.privateKey)
-        if (!calendarData.expired()) {
-            return Mono.just(CredentialData(aes.decrypt(calendarData.encryptedAccessToken), calendarData.expiresAt))
-        }
+        return Mono.just(AESEncryption(calendarData.privateKey)).flatMap { aes ->
+            if (!calendarData.expired()) {
+                return@flatMap aes.decrypt(calendarData.encryptedAccessToken)
+                        .map { CredentialData(it, calendarData.expiresAt) }
+            }
 
-        return doAccessTokenRequest(aes.decrypt(calendarData.encryptedRefreshToken)).flatMap { data ->
-            calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
-            calendarData.expiresAt = data.validUntil
+            aes.decrypt(calendarData.encryptedRefreshToken)
+                    .flatMap(this::doAccessTokenRequest)
+                    .flatMap { data ->
+                        //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
+                        calendarData.expiresAt = data.validUntil
 
-            DatabaseManager.updateCalendar(calendarData).thenReturn(data)
+                        aes.encrypt(data.accessToken)
+                                .then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
+                    }
         }
     }
 
@@ -57,19 +63,18 @@ object GoogleAuth {
         return CREDENTIALS
                 .filter { it.credentialData.credentialNumber == credentialId }
                 .next()
+                .switchIfEmpty(Mono.error(NotFoundException()))
                 .flatMap { credential ->
                     if (!credential.expired()) {
-                        return@flatMap Mono.just(
-                                CredentialData(credential.getAccessToken(), credential.credentialData.expiresAt)
-                        )
+                        return@flatMap credential.getAccessToken()
+                                .map { CredentialData(it, credential.credentialData.expiresAt) }
                     }
 
-                    doAccessTokenRequest(credential.getRefreshToken()).flatMap { data ->
-                        credential.setAccessToken(data.accessToken)
-                        credential.credentialData.expiresAt = data.validUntil
-
-                        DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(data)
-                    }
+                    credential.getRefreshToken()
+                            .flatMap(this::doAccessTokenRequest)
+                            .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
+                            .doOnNext { credential.credentialData.expiresAt = it.validUntil }
+                            .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }
                 }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
 
     }
@@ -103,6 +108,8 @@ object GoogleAuth {
                     val body = JSON_FORMAT.decodeFromString(ErrorData.serializer(), response.body!!.string())
                     response.body?.close()
                     response.close()
+
+                    LOGGER.error("[Google] Int Cred bad Request: $body")
 
                     if (body.error == "invalid_grant") {
                         LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")

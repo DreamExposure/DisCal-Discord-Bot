@@ -13,4 +13,6 @@ data class CredentialData(
         @SerialName("valid_until")
         @Serializable(with = InstantAsStringSerializer::class)
         val validUntil: Instant
-)
+) {
+    fun isExpired(): Boolean = Instant.now().isAfter(validUntil)
+}

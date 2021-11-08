@@ -6,8 +6,6 @@ import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -33,8 +31,6 @@ class GetEndpoint {
                     }
                 }
             }
-        }.doOnError {
-            LOGGER.error(DEFAULT, "Access token grant failure", it)
         }
     }
 }

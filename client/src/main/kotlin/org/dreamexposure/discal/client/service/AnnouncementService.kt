@@ -76,8 +76,8 @@ class AnnouncementService : ApplicationRunner {
             SPECIFIC -> {
                 return getCalendar(guild, announcement)
                     .flatMap { it.getEvent(announcement.eventId) }
-                      //Event announcement is tied to was deleted
-                    .switchIfEmpty(DatabaseManager.deleteAnnouncement(announcement.id.toString()).then(Mono.empty()))
+                      //Event announcement is tied to was deleted -- This should now be handled at a lower level
+                    //.switchIfEmpty(DatabaseManager.deleteAnnouncement(announcement.id.toString()).then(Mono.empty()))
                     .filterWhen { isInRange(announcement, it) }
                     .flatMap { sendAnnouncement(guild, announcement, it) }
                       // Delete specific announcement after posted
