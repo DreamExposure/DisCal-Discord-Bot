@@ -182,8 +182,8 @@ class AnnouncementService : ApplicationRunner {
 
         val roleMentions = Flux.fromIterable(announcement.subscriberRoleIds)
             .flatMap {
-                if (it.equals("everyone", true)) guild.everyoneRole.map(Role::getMention)
-                else if (it.equals("here", true)) Mono.just("here")
+                if (it.equals("everyone", true)) Mono.just("@everyone")
+                else if (it.equals("here", true)) Mono.just("@here")
                 else guild.getRoleById(Snowflake.of(it)).map(Role::getMention)
             }
             .onErrorReturn("")
