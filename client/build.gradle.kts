@@ -6,7 +6,6 @@ plugins {
 }
 
 val springVersion: String by properties
-val springSecurityVersion: String by properties
 val springSessionVersion: String by properties
 val springR2Version: String by properties
 
@@ -14,8 +13,6 @@ dependencies {
     api(project(":core"))
 
     implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
-    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
     implementation("org.springframework:spring-r2dbc:$springR2Version")
 }
 

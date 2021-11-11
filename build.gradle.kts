@@ -59,7 +59,6 @@ allprojects {
     repositories {
         mavenCentral()
 
-        maven("https://emily.dreamexposure.org/artifactory/dreamexposure-public/")
         maven("https://kotlin.bintray.com/kotlinx")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://repo.spring.io/milestone")

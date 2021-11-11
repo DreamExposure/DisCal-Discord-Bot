@@ -13,7 +13,6 @@ val thymeleafSecurityVersion: String by properties
 val thymeleafLayoutVersion: String by properties
 
 val springVersion: String by properties
-val springSecurityVersion: String by properties
 val springSessionVersion: String by properties
 val springR2Version: String by properties
 
@@ -29,8 +28,6 @@ dependencies {
     //Spring
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf:$springVersion")
     implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
-    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
 }
 
 kotlin {
