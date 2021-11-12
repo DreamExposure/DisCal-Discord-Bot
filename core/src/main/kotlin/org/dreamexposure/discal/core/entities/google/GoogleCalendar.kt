@@ -87,7 +87,7 @@ class GoogleCalendar internal constructor(
     override fun getUpcomingEvents(amount: Int): Flux<Event> {
         return EventWrapper.getEvents(calendarData, amount, System.currentTimeMillis())
               .flatMapMany { Flux.fromIterable(it) }
-              .flatMap { event ->
+              .concatMap { event ->
                   DatabaseManager.getEventData(guildId, event.id)
                         .map {
                             GoogleEvent(this, it, event)
@@ -103,7 +103,7 @@ class GoogleCalendar internal constructor(
                 .flatMapMany { Flux.fromIterable(it) }
                 .filter { it.start.asInstant(timezone).isBefore(Instant.now()) }
                 .filter { it.end.asInstant(timezone).isAfter(Instant.now()) }
-                .flatMap { event ->
+                .concatMap { event ->
                     DatabaseManager.getEventData(guildId, event.id)
                             .map { GoogleEvent(this, it, event) }
                 }
@@ -112,7 +112,7 @@ class GoogleCalendar internal constructor(
     override fun getEventsInTimeRange(start: Instant, end: Instant): Flux<Event> {
         return EventWrapper.getEvents(calendarData, start.toEpochMilli(), end.toEpochMilli())
                 .flatMapMany { Flux.fromIterable(it) }
-                .flatMap { event ->
+                .concatMap { event ->
                     DatabaseManager.getEventData(guildId, event.id)
                             .map {
                                 GoogleEvent(this, it, event)
