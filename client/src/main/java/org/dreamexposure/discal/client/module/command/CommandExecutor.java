@@ -149,10 +149,9 @@ class WarningCommand implements Command {
         For support, [join our server](%s).""";
 
     private final String disabledMessage = """
-        This command has been converted to a [Slash Command](https://discord.com/blog/slash-commands-are-here), but they aren't enabled in this guild! A guild admin can [click here to enable them](%s);
+        This command has been converted to a [Slash Command](https://discord.com/blog/slash-commands-are-here), but they aren't enabled in this guild! A guild admin can [click here to enable them](%s).
         
         
         For more information on commands, check out our [Commands Page](%s).
-        For support, [join our server](%s).""\";
-        """;
+        For support, [join our server](%s).""";
 }
