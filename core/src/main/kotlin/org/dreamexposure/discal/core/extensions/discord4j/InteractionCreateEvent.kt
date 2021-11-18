@@ -1,12 +1,12 @@
 package org.dreamexposure.discal.core.extensions.discord4j
 
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.InteractionCreateEvent
+import discord4j.core.event.domain.interaction.DeferrableInteractionEvent
 import discord4j.core.spec.EmbedCreateSpec
 import discord4j.core.spec.InteractionFollowupCreateSpec
 import reactor.core.publisher.Mono
 
-fun InteractionCreateEvent.followup(embed: EmbedCreateSpec): Mono<Message> {
+fun DeferrableInteractionEvent.followup(embed: EmbedCreateSpec): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .addEmbed(embed)
         .build()
@@ -14,7 +14,7 @@ fun InteractionCreateEvent.followup(embed: EmbedCreateSpec): Mono<Message> {
     return this.createFollowup(spec)
 }
 
-fun InteractionCreateEvent.followup(message: String): Mono<Message> {
+fun DeferrableInteractionEvent.followup(message: String): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .content(message)
         .build()
@@ -22,7 +22,7 @@ fun InteractionCreateEvent.followup(message: String): Mono<Message> {
     return this.createFollowup(spec)
 }
 
-fun InteractionCreateEvent.followup(message: String, embed: EmbedCreateSpec): Mono<Message> {
+fun DeferrableInteractionEvent.followup(message: String, embed: EmbedCreateSpec): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .content(message)
         .addEmbed(embed)
@@ -31,7 +31,7 @@ fun InteractionCreateEvent.followup(message: String, embed: EmbedCreateSpec): Mo
     return this.createFollowup(spec)
 }
 
-fun InteractionCreateEvent.followupEphemeral(embed: EmbedCreateSpec): Mono<Message> {
+fun DeferrableInteractionEvent.followupEphemeral(embed: EmbedCreateSpec): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .addEmbed(embed)
         .ephemeral(true)
@@ -40,7 +40,7 @@ fun InteractionCreateEvent.followupEphemeral(embed: EmbedCreateSpec): Mono<Messa
     return this.createFollowup(spec)
 }
 
-fun InteractionCreateEvent.followupEphemeral(message: String): Mono<Message> {
+fun DeferrableInteractionEvent.followupEphemeral(message: String): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .content(message)
         .ephemeral(true)
@@ -49,7 +49,7 @@ fun InteractionCreateEvent.followupEphemeral(message: String): Mono<Message> {
     return this.createFollowup(spec)
 }
 
-fun InteractionCreateEvent.followupEphemeral(message: String, embed: EmbedCreateSpec): Mono<Message> {
+fun DeferrableInteractionEvent.followupEphemeral(message: String, embed: EmbedCreateSpec): Mono<Message> {
     val spec = InteractionFollowupCreateSpec.builder()
         .content(message)
         .addEmbed(embed)

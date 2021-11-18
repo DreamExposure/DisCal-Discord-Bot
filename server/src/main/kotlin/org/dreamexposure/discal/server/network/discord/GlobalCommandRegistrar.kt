@@ -112,7 +112,24 @@ class GlobalCommandRegistrar(
         //compare required bool
         if (option1.required().toOptional().orElse(false) != option2.required().toOptional().orElse(false)) return false
 
-        //TODO: compare channel types -- have to wait for d4j 3.2.1
+        //compare auto-complete
+        if (option1.autocomplete().toOptional().orElse(false) != option2.autocomplete().toOptional().orElse(false)) return false
+
+        //compare channel types
+        val channels1 = option1.channelTypes().toOptional().orElse(emptyList())
+        val channels2 = option2.channelTypes().toOptional().orElse(emptyList())
+        if (!channelTypesMatch(channels1, channels2)) return false
+
+        //compare min
+        val min1 = option1.minValue().toOptional().orElse(Double.MIN_VALUE)
+        val min2 = option2.minValue().toOptional().orElse(Double.MIN_VALUE)
+        if (min1 != min2) return false
+
+        //compare max
+        val max1 = option1.maxValue().toOptional().orElse(Double.MAX_VALUE)
+        val max2 = option2.maxValue().toOptional().orElse(Double.MAX_VALUE)
+        if (max1 != max2) return false
+
 
         //compare choices
         val choices1 = option1.choices().toOptional().orElse(emptyList())
@@ -139,6 +156,22 @@ class GlobalCommandRegistrar(
 
             if (c1.name() != c2.name()) return false //names not equal
             if (c1.value() != c2.value()) return false //values not equal
+        }
+
+        //If we get here, they must be equal
+        return true
+    }
+
+    private fun channelTypesMatch(channels1: List<Int>, channels2: List<Int>): Boolean {
+        if (channels1.isEmpty() && channels2.isEmpty()) return true //both empty, both equal
+
+        if (channels1.size != channels2.size) return false //sizes don't match, needs updating
+
+        //Compare the channels one-by-one...
+        for ((index, c1) in channels1.withIndex()) {
+            val c2 = channels2[index]
+
+            if (c1 != c2) return false //values not equal
         }
 
         //If we get here, they must be equal
