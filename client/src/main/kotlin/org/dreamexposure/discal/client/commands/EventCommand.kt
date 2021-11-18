@@ -414,6 +414,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         // New event
                         guild.getCalendar(pre.calNumber)
                                 .flatMap { it.createEvent(pre.createSpec()) }
+                                .doOnNext { wizard.remove(settings.guildID) }
                                 .flatMap {
                                     event.followupEphemeral(
                                             getMessage("confirm.success.create", settings),
@@ -428,6 +429,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         // Editing
                         pre.event!!.update(pre.updateSpec())
                                 .filter(UpdateEventResponse::success)
+                                .doOnNext { wizard.remove(settings.guildID) }
                                 .map { EventEmbed.getFull(guild, settings, it.new!!) }
                                 .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
                                 .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
@@ -551,6 +553,10 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 .orElse(1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
+            // Before we delete the event, if the wizard is editing that event we need to cancel the wizard
+            val pre = wizard.get(settings.guildID)
+            if (pre != null && pre.event?.eventId == eventId) wizard.remove(settings.guildID)
+
             event.interaction.guild.flatMap { it.getCalendar(calendarNumber) }.flatMap { calendar ->
                 calendar.getEvent(eventId)
                         .flatMap(Event::delete)

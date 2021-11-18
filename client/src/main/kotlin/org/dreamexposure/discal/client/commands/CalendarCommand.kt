@@ -159,6 +159,7 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
                         // New calendar
                         pre.createSpec(guild)
                             .flatMap(guild::createCalendar)
+                            .doOnNext { wizard.remove(settings.guildID) }
                             .flatMap {
                                 event.followupEphemeral(
                                     getMessage("confirm.success.create", settings),
@@ -173,6 +174,7 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
                         // Editing
                         pre.calendar!!.update(pre.updateSpec())
                             .filter(UpdateCalendarResponse::success)
+                            .doOnNext { wizard.remove(settings.guildID) }
                             .map { CalendarEmbed.link(guild, settings, it.new!!) }
                             .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
                             .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
@@ -200,6 +202,10 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
             .orElse(1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+            // Before we delete the calendar, if the wizard is editing that calendar we need to cancel the wizard
+            val pre = wizard.get(settings.guildID)
+            if (pre != null && pre.calendar?.calendarNumber == calendarNumber) wizard.remove(settings.guildID)
+
             event.interaction.guild
                 .flatMap { it.getCalendar(calendarNumber) }
                 .flatMap { it.delete() }
