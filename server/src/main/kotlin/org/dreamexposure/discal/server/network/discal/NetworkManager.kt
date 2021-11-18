@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.network.discal
 
+import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
@@ -60,7 +61,7 @@ class NetworkManager : ApplicationRunner {
                 TupleUtils.function { calCount, annCount ->
                     status.totalCalendars = calCount
                     status.totalAnnouncements = annCount
-                    status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now())
+                    status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())
 
                     status.copy()
                 }
