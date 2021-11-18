@@ -18,7 +18,8 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to create the event in (defaults to 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         }
       ]
     },
@@ -122,7 +123,9 @@
           "name": "day",
           "type": 4,
           "description": "The day of the start date",
-          "required": true
+          "required": true,
+          "min_value": 1,
+          "max_value": 31
         },
         {
           "name": "hour",
@@ -232,7 +235,9 @@
           "name": "minute",
           "type": 4,
           "description": "The minute of the start date",
-          "required": false
+          "required": false,
+          "min_value": 0,
+          "max_value": 59
         }
       ]
     },
@@ -308,7 +313,9 @@
           "name": "day",
           "type": 4,
           "description": "The day of the start date",
-          "required": true
+          "required": true,
+          "min_value": 1,
+          "max_value": 31
         },
         {
           "name": "hour",
@@ -418,7 +425,9 @@
           "name": "minute",
           "type": 4,
           "description": "The minute of the start date",
-          "required": false
+          "required": false,
+          "min_value": 0,
+          "max_value": 59
         }
       ]
     },
@@ -554,13 +563,15 @@
           "name": "interval",
           "type": 4,
           "description": "The interval at which the event should repeat; ex 2 for 'every other period.' (default 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         },
         {
           "name": "count",
           "type": 4,
           "description": "The amount of times the event should recur (defaults to -1 for infinitely)",
-          "required": false
+          "required": false,
+          "min_value": -1
         }
       ]
     },
@@ -598,7 +609,8 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         }
       ]
     },
@@ -618,13 +630,15 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         },
         {
           "name": "target",
           "type": 4,
           "description": "The calendar to copy the event to (defaults to the calendar the copied event is from)",
-          "required": false
+          "required": false,
+          "min_value": 1
         }
       ]
     },
@@ -644,7 +658,8 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         }
       ]
     },
@@ -664,7 +679,8 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
-          "required": false
+          "required": false,
+          "min_value": 1
         }
       ]
     }

@@ -6,7 +6,8 @@
       "name": "calendar",
       "type": 4,
       "description": "The calendar to display. Defaults to 1",
-      "required": false
+      "required": false,
+      "min_value": 1
     }
   ],
   "default_permissions": true
