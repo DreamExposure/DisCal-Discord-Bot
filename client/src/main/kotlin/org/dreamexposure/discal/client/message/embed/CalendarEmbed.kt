@@ -56,7 +56,7 @@ object CalendarEmbed : EmbedMaker {
                 val fieldTitle = getMessage(
                         "calendar", "link.field.date",
                         settings,
-                        Instant.from(date.key).asDiscordTimestamp(DiscordTimestampFormat.LONG_DATE)
+                        date.key.toInstant().asDiscordTimestamp(DiscordTimestampFormat.LONG_DATE)
                 )
 
                 val content = StringBuilder().append("```\n")
