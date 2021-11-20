@@ -5,7 +5,7 @@
     {
       "name": "overview",
       "type": 5,
-      "description": "Whether to display the next 15 upcoming events in the response (default true).",
+      "description": "Whether to display the next 15 upcoming events in the response (default false).",
       "required": false
     },
     {

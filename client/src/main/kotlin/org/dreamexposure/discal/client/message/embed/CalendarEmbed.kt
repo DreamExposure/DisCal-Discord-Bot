@@ -36,7 +36,7 @@ object CalendarEmbed : EmbedMaker {
                 .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
                 .addField(getMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
                 .url(calendar.link)
-                .footer(getMessage("calendar", "link.footer", settings), null)
+                .footer(getMessage("calendar", "link.footer.default", settings), null)
                 .color(discalColor)
                 .build()
     }
