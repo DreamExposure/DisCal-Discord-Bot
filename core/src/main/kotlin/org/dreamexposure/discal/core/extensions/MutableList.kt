@@ -26,6 +26,6 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
             .collect(Collectors.groupingBy {
                 ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
                         .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-            })
+            }).toSortedMap()
 
 }

@@ -53,22 +53,20 @@ object CalendarEmbed : EmbedMaker {
 
             // Show events
             events.forEach { date ->
-                val fieldTitle = getMessage(
-                        "calendar", "link.field.date",
-                        settings,
-                        date.key.toInstant().asDiscordTimestamp(DiscordTimestampFormat.LONG_DATE)
-                )
+                val fieldTitle = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat)
 
                 val content = StringBuilder()
                 date.value.forEach {
-                    content.append(it.start.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
+                    content.append("```\n")
+                            .append(it.start.humanReadableTime(it.timezone, settings.timeFormat))
                             .append(" - ")
-                            .append(it.end.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
+                            .append(it.end.humanReadableTime(it.timezone, settings.timeFormat))
                             .append(" | ")
-                    if (it.name.isNotBlank()) content.append(it.name).append(" | ")
+                    if (it.name.isNotBlank()) content.append(it.name)
                     else content.append(getMessage("calendar", "link.field.id", settings)).append(" ${it.eventId}")
-                    content.append(it.eventId).append("\n")
+                    content.append("\n")
                 }
+                content.append("```")
 
                builder.addField(fieldTitle, content.toString(), false)
             }
