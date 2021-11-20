@@ -53,12 +53,15 @@ object CalendarEmbed : EmbedMaker {
 
             // Show events
             events.forEach { date ->
-                val fieldTitle = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat)
 
-                val content = StringBuilder()
-                date.value.forEach {
-                    content.append("```\n")
-                            .append(it.start.humanReadableTime(it.timezone, settings.timeFormat))
+                val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat, true)
+
+                // sort events
+                val sortedEvents = date.value.sortedBy { it.start }
+
+                val content = StringBuilder().append("```\n")
+                sortedEvents.forEach {
+                            content.append(it.start.humanReadableTime(it.timezone, settings.timeFormat))
                             .append(" - ")
                             .append(it.end.humanReadableTime(it.timezone, settings.timeFormat))
                             .append(" | ")
@@ -68,7 +71,7 @@ object CalendarEmbed : EmbedMaker {
                 }
                 content.append("```")
 
-               builder.addField(fieldTitle, content.toString(), false)
+               builder.addField(title, content.toString(), false)
             }
 
 
