@@ -59,16 +59,15 @@ object CalendarEmbed : EmbedMaker {
                         date.key.toInstant().asDiscordTimestamp(DiscordTimestampFormat.LONG_DATE)
                 )
 
-                val content = StringBuilder().append("```\n")
+                val content = StringBuilder()
                 date.value.forEach {
                     content.append(it.start.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
                             .append(" - ")
                             .append(it.end.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
                             .append(" | ")
-                    if (it.name.isNotBlank()) content.append(it.name).append(" | ")
-                    content.append(it.eventId).append("\n")
+                    if (it.name.isNotBlank()) content.append("`${it.name}`").append(" | ")
+                    content.append("`${it.eventId}`").append("\n")
                 }
-                content.append("```")
 
                builder.addField(fieldTitle, content.toString(), false)
             }
