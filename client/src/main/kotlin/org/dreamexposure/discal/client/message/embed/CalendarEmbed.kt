@@ -65,8 +65,9 @@ object CalendarEmbed : EmbedMaker {
                             .append(" - ")
                             .append(it.end.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
                             .append(" | ")
-                    if (it.name.isNotBlank()) content.append("`${it.name}`").append(" | ")
-                    content.append("`${it.eventId}`").append("\n")
+                    if (it.name.isNotBlank()) content.append(it.name).append(" | ")
+                    else content.append(getMessage("calendar", "link.field.id", settings)).append(" ${it.eventId}")
+                    content.append(it.eventId).append("\n")
                 }
 
                builder.addField(fieldTitle, content.toString(), false)
