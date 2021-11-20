@@ -11,6 +11,7 @@ import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.StaticMessage
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
@@ -1176,6 +1177,107 @@ object DatabaseManager {
                 }.onErrorReturn(false)
         }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
     }
+
+    /* Static message */
+
+    fun updateStaticMessage(message: StaticMessage): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_STATIC_MESSAGE)
+                            .bind(0, message.guildId.asLong())
+                            .bind(1, message.messageId.asLong())
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ -> row }
+            }.hasElements().flatMap { exists ->
+                if (exists) {
+                    Mono.from(
+                            c.createStatement(Queries.UPDATE_STATIC_MESSAGE)
+                                    .bind(0, message.type.value)
+                                    .bind(1, message.lastUpdate)
+                                    .bind(2, message.guildId.asLong())
+                                    .bind(3, message.messageId.asLong())
+                                    .execute()
+                    ).flatMapMany(Result::getRowsUpdated)
+                            .hasElements()
+                            .thenReturn(true)
+                } else {
+                    Mono.from(
+                            c.createStatement(Queries.INSERT_STATIC_MESSAGE)
+                                    .bind(0, message.guildId.asLong())
+                                    .bind(1, message.messageId.asLong())
+                                    .bind(2, message.type.value)
+                                    .bind(3, message.lastUpdate)
+                                    .execute()
+                    ).flatMapMany(Result::getRowsUpdated)
+                            .hasElements()
+                            .thenReturn(true)
+                }.doOnError {
+                    LOGGER.error(DEFAULT, "Failed to update static message data", it)
+                }.onErrorResume { Mono.just(false) }
+            }
+        }
+    }
+
+    fun getStaticMessage(guildId: Snowflake, messageId: Snowflake): Mono<StaticMessage> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_STATIC_MESSAGE)
+                            .bind(0, guildId.asLong())
+                            .bind(1, messageId.asLong())
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val type = StaticMessage.Type.valueOf(row["type", Int::class.java]!!)
+                    val lastUpdate = row["last_update", Instant::class.java]!!
+
+                    StaticMessage(guildId, messageId, type, lastUpdate)
+                }
+            }.next().retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get static message data", it)
+            }.onErrorResume {
+                Mono.empty()
+            }
+        }
+    }
+
+    fun deleteStaticMessage(guildId: Snowflake, messageId: Snowflake): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.DELETE_STATIC_MESSAGE)
+                            .bind(0, guildId.asLong())
+                            .bind(1, messageId.asLong())
+                            .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                    .hasElements()
+                    .thenReturn(true)
+                    .doOnError {
+                        LOGGER.error(DEFAULT, "Failed to delete static message data", it)
+                    }.onErrorReturn(false)
+        }.defaultIfEmpty(false)
+    }
+
+    fun getStaticMessageCount(): Mono<Int> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_STATIC_MESSAGE_COUNT)
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val messages = row.get(0, Long::class.java)!!
+                    return@map messages.toInt()
+                }
+            }.next().retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get static message count", it)
+            }.onErrorReturn(-1)
+        }
+    }
 }
 
 private object Queries {
@@ -1333,6 +1435,31 @@ private object Queries {
         $DELETE_CALENDAR;$DELETE_ALL_EVENT_DATA;$DELETE_ALL_RSVP_DATA;$DELETE_ALL_ANNOUNCEMENT_DATA;
         $DECREMENT_CALENDARS;$DECREMENT_EVENTS;$DECREMENT_RSVPS;$DECREMENT_ANNOUNCEMENTS
     """.trimIndent()
+
+    @Language("MySQL")
+    val SELECT_STATIC_MESSAGE = """SELECT * FROM ${Tables.STATIC_MESSAGES}
+        WHERE guild_id = ? AND message_id = ?
+        """.trimMargin()
+
+    @Language("MySQL")
+    val INSERT_STATIC_MESSAGE = """INSERT INTO ${Tables.STATIC_MESSAGES}
+        (guild_id, message_id, type, last_update)
+        VALUES(?, ?, ?, ?)
+        """.trimMargin()
+
+    @Language("MySQL")
+    val UPDATE_STATIC_MESSAGE = """UPDATE ${Tables.STATIC_MESSAGES} SET
+        type = ?, last_update = ?
+        WHERE guild_id = ? AND message_id = ?
+         """.trimMargin()
+
+    @Language("MySQL")
+    val DELETE_STATIC_MESSAGE = """DELETE FROM ${Tables.STATIC_MESSAGES}
+        WHERE guild_id = ? AND message_id = ?
+        """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_STATIC_MESSAGE_COUNT = """SELECT COUNT(*) FROM ${Tables.STATIC_MESSAGES}"""
 }
 
 private object Tables {
@@ -1358,4 +1485,7 @@ private object Tables {
 
     @Language("Kotlin")
     const val CREDS = "credentials"
+
+    @Language("Kotlin")
+    const val STATIC_MESSAGES = "static_messages"
 }
