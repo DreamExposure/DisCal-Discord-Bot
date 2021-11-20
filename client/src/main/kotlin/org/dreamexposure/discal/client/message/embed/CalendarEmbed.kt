@@ -6,21 +6,20 @@ import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.TimeFormat
+import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
-import org.dreamexposure.discal.core.extensions.embedFieldSafe
-import org.dreamexposure.discal.core.extensions.embedTitleSafe
-import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import reactor.core.publisher.Mono
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 object CalendarEmbed : EmbedMaker {
-    fun link(guild: Guild, settings: GuildSettings, calNumber: Int): Mono<EmbedCreateSpec> {
-        return guild.getCalendar(calNumber).map {
-            link(guild, settings, it)
+    fun link(guild: Guild, settings: GuildSettings, calNumber: Int, overview: Boolean): Mono<EmbedCreateSpec> {
+        return guild.getCalendar(calNumber).flatMap {
+            if (overview) overview(guild, settings, it, false)
+            else Mono.just(link(guild, settings, it))
         }
     }
 
@@ -40,6 +39,54 @@ object CalendarEmbed : EmbedMaker {
                 .footer(getMessage("calendar", "link.footer", settings), null)
                 .color(discalColor)
                 .build()
+    }
+
+    fun overview(guild: Guild, settings: GuildSettings, calendar: Calendar, showUpdate: Boolean): Mono<EmbedCreateSpec> {
+        return calendar.getUpcomingEvents(15).collectList().map { it.groupByDate() }.map { events ->
+            val builder = defaultBuilder(guild, settings)
+
+            //Handle optional fields
+            if (calendar.name.isNotBlank())
+                builder.title(calendar.name.toMarkdown().embedTitleSafe())
+            if (calendar.description.isNotBlank())
+                builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+
+            // Show events
+            events.forEach { date ->
+                val fieldTitle = getMessage(
+                        "calendar", "link.field.date",
+                        settings,
+                        Instant.from(date.key).asDiscordTimestamp(DiscordTimestampFormat.LONG_DATE)
+                )
+
+                val content = StringBuilder().append("```\n")
+                date.value.forEach {
+                    content.append(it.start.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
+                            .append(" - ")
+                            .append(it.end.asDiscordTimestamp(DiscordTimestampFormat.SHORT_TIME))
+                            .append(" | ")
+                    if (it.name.isNotBlank()) content.append(it.name).append(" | ")
+                    content.append(it.eventId).append("\n")
+                }
+                content.append("```")
+
+               builder.addField(fieldTitle, content.toString(), false)
+            }
+
+
+            // set footer
+            if (showUpdate) {
+                val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
+                builder.footer(getMessage("calendar", "link.footer.update", settings, lastUpdate), null)
+            } else builder.footer(getMessage("calendar", "link.footer.default", settings), null)
+
+            // finish and return
+            builder.addField(getMessage("calendar", "link.field.timezone", settings), calendar.zoneName, true)
+                    .addField(getMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
+                    .url(calendar.link)
+                    .color(discalColor)
+                    .build()
+        }
     }
 
 

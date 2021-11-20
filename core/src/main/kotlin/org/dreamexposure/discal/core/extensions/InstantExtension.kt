@@ -5,7 +5,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-fun Instant.asDiscordTimestamp(): String = "<t:${this.toEpochMilli() / 1000}:F>"
+fun Instant.asDiscordTimestamp(fmt: DiscordTimestampFormat) = "<t:${this.toEpochMilli() / 1000}:${fmt.value}>"
 
 fun Instant.humanReadableFull(timezone: ZoneId, format: TimeFormat): String {
     return DateTimeFormatter.ofPattern(format.full).withZone(timezone).format(this)

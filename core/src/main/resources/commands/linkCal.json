@@ -3,6 +3,12 @@
   "description": "Provides info and a link to the Guild's Calendar",
   "options": [
     {
+      "name": "overview",
+      "type": 5,
+      "description": "Whether to display the next 15 upcoming events in the response (default true).",
+      "required": false
+    },
+    {
       "name": "calendar",
       "type": 4,
       "description": "The calendar to display. Defaults to 1",

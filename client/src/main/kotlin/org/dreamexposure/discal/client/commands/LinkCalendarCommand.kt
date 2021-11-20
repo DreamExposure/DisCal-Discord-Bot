@@ -17,6 +17,11 @@ class LinkCalendarCommand : SlashCommand {
     override val ephemeral = false
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+        val showOverview = event.getOption("overview")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asBoolean)
+                .orElse(true)
+
         val calendarNumber = event.getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -24,7 +29,7 @@ class LinkCalendarCommand : SlashCommand {
             .orElse(1)
 
         return event.interaction.guild.flatMap { guild ->
-            CalendarEmbed.link(guild, settings, calendarNumber)
+            CalendarEmbed.link(guild, settings, calendarNumber, showOverview)
                 .flatMap(event::followup)
         }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
     }

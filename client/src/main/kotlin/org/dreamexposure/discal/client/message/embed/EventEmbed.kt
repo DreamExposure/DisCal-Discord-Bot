@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.*
+import org.dreamexposure.discal.core.extensions.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
 object EventEmbed : EmbedMaker {
@@ -19,8 +20,15 @@ object EventEmbed : EmbedMaker {
         if (event.description.isNotBlank())
             builder.description(event.description.toMarkdown().embedDescriptionSafe())
 
-        builder.addField(getMessage("event", "full.field.start", settings), event.start.asDiscordTimestamp(), true)
-        builder.addField(getMessage("event", "full.field.end", settings), event.end.asDiscordTimestamp(), true)
+        builder.addField(
+                getMessage("event", "full.field.start", settings),
+                event.start.asDiscordTimestamp(LONG_DATETIME),
+                true)
+        builder.addField(
+                getMessage("event", "full.field.end", settings),
+                event.end.asDiscordTimestamp(LONG_DATETIME),
+                true
+        )
 
         if (event.location.isNotBlank()) builder.addField(
                 getMessage("event", "full.field.location", settings),
@@ -44,7 +52,11 @@ object EventEmbed : EmbedMaker {
         if (event.name.isNotBlank())
             builder.title(event.name.toMarkdown().embedTitleSafe())
 
-        builder.addField(getMessage("event", "con.field.start", settings), event.start.asDiscordTimestamp(), true)
+        builder.addField(
+                getMessage("event", "con.field.start", settings),
+                event.start.asDiscordTimestamp(LONG_DATETIME),
+                true
+        )
 
         if (event.location.isNotBlank()) builder.addField(
                 getMessage("event", "con.field.location", settings),
