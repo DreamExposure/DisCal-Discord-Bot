@@ -9,7 +9,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.dreamexposure.discal.core.utils.GlobalVal.iconUrl
 import reactor.core.publisher.Mono
 
-object ReadEventListener {
+object ReadyEventListener {
     fun handle(event: ReadyEvent): Mono<Void> {
         return event.client.applicationInfo
               .doOnNext { iconUrl = it.getIconUrl(Image.Format.PNG).get() }

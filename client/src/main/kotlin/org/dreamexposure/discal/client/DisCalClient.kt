@@ -89,7 +89,7 @@ class DisCalClient {
 
                         //Register listeners
                         val onReady = client
-                              .on(ReadyEvent::class.java, ReadEventListener::handle)
+                              .on(ReadyEvent::class.java, ReadyEventListener::handle)
                               .then()
 
                         val onRoleDelete = client
