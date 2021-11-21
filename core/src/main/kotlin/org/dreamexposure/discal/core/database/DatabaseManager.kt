@@ -1,4 +1,4 @@
-@file:Suppress("SqlResolve", "DuplicatedCode")
+@file:Suppress("DuplicatedCode")
 
 package org.dreamexposure.discal.core.database
 
@@ -1278,6 +1278,42 @@ object DatabaseManager {
             }.onErrorReturn(-1)
         }
     }
+
+    /* Event Data */
+    fun getEventsData(guildId: Snowflake, eventIds: List<String>): Mono<Map<String, EventData>> {
+        // clean up IDs
+        val idsToUse = mutableListOf<String>()
+        eventIds.forEach {
+            var id = it
+            if (it.contains("_")) id = it.split("_")[0]
+
+            if (!idsToUse.contains(id)) idsToUse.add(id)
+        }
+
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_MANY_EVENT_DATA)
+                            .bind(0, idsToUse.asStringList())
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val id = row["EVENT_ID", String::class.java]!!
+                    val calNum = row["CALENDAR_NUMBER", Int::class.java]!!
+                    val end = row["EVENT_END", Long::class.java]!!
+                    val img = row["IMAGE_LINK", String::class.java]!!
+
+                    EventData(guildId, id, calNum, end, img)
+                }
+            }.retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get many event data", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.collectMap { it.eventId }
+        }
+    }
 }
 
 private object Queries {
@@ -1460,6 +1496,11 @@ private object Queries {
 
     @Language("MySQL")
     val SELECT_STATIC_MESSAGE_COUNT = """SELECT COUNT(*) FROM ${Tables.STATIC_MESSAGES}"""
+
+    @Language("MySQL")
+    val SELECT_MANY_EVENT_DATA = """SELECT * FROM ${Tables.EVENTS}
+        WHERE event_id in (?)
+    """.trimMargin()
 }
 
 private object Tables {

@@ -48,8 +48,8 @@ class GoogleCalendar internal constructor(
         DiscalCache.handleCalendarDelete(guildId)
 
         return CalendarWrapper.deleteCalendar(calendarData)
-            .then(DatabaseManager.deleteCalendarAndRelatedData(calendarData))
-            .thenReturn(true)
+                .then(DatabaseManager.deleteCalendarAndRelatedData(calendarData))
+                .thenReturn(true)
     }
 
     override fun update(spec: UpdateCalendarSpec): Mono<UpdateCalendarResponse> {
@@ -86,13 +86,7 @@ class GoogleCalendar internal constructor(
 
     override fun getUpcomingEvents(amount: Int): Flux<Event> {
         return EventWrapper.getEvents(calendarData, amount, System.currentTimeMillis())
-              .flatMapMany { Flux.fromIterable(it) }
-              .concatMap { event ->
-                  DatabaseManager.getEventData(guildId, event.id)
-                        .map {
-                            GoogleEvent(this, it, event)
-                        }
-              }
+                .flatMapMany(this::loadEvents)
     }
 
     override fun getOngoingEvents(): Flux<Event> {
@@ -103,21 +97,13 @@ class GoogleCalendar internal constructor(
                 .flatMapMany { Flux.fromIterable(it) }
                 .filter { it.start.asInstant(timezone).isBefore(Instant.now()) }
                 .filter { it.end.asInstant(timezone).isAfter(Instant.now()) }
-                .concatMap { event ->
-                    DatabaseManager.getEventData(guildId, event.id)
-                            .map { GoogleEvent(this, it, event) }
-                }
+                .collectList()
+                .flatMapMany(this::loadEvents)
     }
 
     override fun getEventsInTimeRange(start: Instant, end: Instant): Flux<Event> {
         return EventWrapper.getEvents(calendarData, start.toEpochMilli(), end.toEpochMilli())
-                .flatMapMany { Flux.fromIterable(it) }
-                .concatMap { event ->
-                    DatabaseManager.getEventData(guildId, event.id)
-                            .map {
-                                GoogleEvent(this, it, event)
-                            }
-                }
+                .flatMapMany(this::loadEvents)
     }
 
     override fun createEvent(spec: CreateEventSpec): Mono<Event> {
@@ -155,6 +141,15 @@ class GoogleCalendar internal constructor(
 
             return@flatMap DatabaseManager.updateEventData(data)
                     .thenReturn(GoogleEvent(this, data, confirmed))
+        }
+    }
+
+    private fun loadEvents(events: List<GoogleEventModel>): Flux<GoogleEvent> {
+        return DatabaseManager.getEventsData(guildId, events.map { it.id }).flatMapMany { data ->
+            Flux.fromIterable(events).concatMap {
+                if (data.containsKey(it.id)) Mono.just(GoogleEvent(this, data[it.id]!!, it))
+                else Mono.just(GoogleEvent(this, EventData(guildId, eventId = it.id), it))
+            }
         }
     }
 
