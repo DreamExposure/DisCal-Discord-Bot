@@ -20,7 +20,7 @@ class LinkCalendarCommand : SlashCommand {
         val showOverview = event.getOption("overview")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asBoolean)
-                .orElse(false)
+                .orElse(true)
 
         val calendarNumber = event.getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
