@@ -44,31 +44,31 @@ class DisplayCalendarCommand : SlashCommand {
                 guild.getCalendar(calendarNumber).flatMap { cal ->
                     CalendarEmbed.overview(guild, settings, cal, true).flatMap { embed ->
                         event.interaction.channel.flatMap {
-                            it.createMessage(MessageCreateSpec.builder()
-                                    .addEmbed(embed)
-                                    .build()
-                            ).flatMap { msg ->
-                                val nextUpdate = ZonedDateTime.now(cal.timezone)
-                                        .truncatedTo(ChronoUnit.DAYS)
-                                        .plusHours(hour + 24)
-                                        .toInstant()
+                            it.createMessage(
+                                    MessageCreateSpec.builder()
+                                            .addEmbed(embed)
+                                            .build()
+                            )
+                        }.flatMap { msg ->
+                            val nextUpdate = ZonedDateTime.now(cal.timezone)
+                                    .truncatedTo(ChronoUnit.DAYS)
+                                    .plusHours(hour + 24)
+                                    .toInstant()
 
-                                val staticMsg = StaticMessage(
-                                        settings.guildID,
-                                        msg.id,
-                                        msg.channelId,
-                                        StaticMessage.Type.CALENDAR_OVERVIEW,
-                                        Instant.now(),
-                                        nextUpdate,
-                                        calendarNumber,
-                                )
+                            val staticMsg = StaticMessage(
+                                    settings.guildID,
+                                    msg.id,
+                                    msg.channelId,
+                                    StaticMessage.Type.CALENDAR_OVERVIEW,
+                                    Instant.now(),
+                                    nextUpdate,
+                                    calendarNumber,
+                            )
 
-                                DatabaseManager.updateStaticMessage(staticMsg)
-                                        .then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
-                            }
+                            DatabaseManager.updateStaticMessage(staticMsg)
+                                    .then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
                         }
                     }
-
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
