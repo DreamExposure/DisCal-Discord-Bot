@@ -148,7 +148,11 @@ class GoogleCalendar internal constructor(
         return DatabaseManager.getEventsData(guildId, events.map { it.id }).flatMapMany { data ->
             Flux.fromIterable(events).concatMap {
                 if (data.containsKey(it.id)) Mono.just(GoogleEvent(this, data[it.id]!!, it))
-                else Mono.just(GoogleEvent(this, EventData(guildId, eventId = it.id), it))
+                else {
+                    if (it.id.contains("_") && data.containsKey(it.id.split("_")[0]))
+                        Mono.just(GoogleEvent(this, data[it.id.split("_")[0]]!!, it))
+                    else Mono.just(GoogleEvent(this, EventData(guildId, eventId = it.id), it))
+                }
             }
         }
     }
