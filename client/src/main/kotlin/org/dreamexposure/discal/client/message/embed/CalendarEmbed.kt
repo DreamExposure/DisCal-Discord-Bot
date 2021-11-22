@@ -79,6 +79,7 @@ object CalendarEmbed : EmbedMaker {
             if (showUpdate) {
                 val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
                 builder.footer(getMessage("calendar", "link.footer.update", settings, lastUpdate), null)
+                        .timestamp(Instant.now())
             } else builder.footer(getMessage("calendar", "link.footer.default", settings), null)
 
             // finish and return
