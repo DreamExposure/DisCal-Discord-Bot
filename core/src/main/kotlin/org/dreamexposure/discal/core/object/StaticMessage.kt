@@ -16,10 +16,23 @@ data class StaticMessage(
         @SerialName("message_id")
         @Serializable(with = SnowflakeAsStringSerializer::class)
         val messageId: Snowflake,
+
+        @SerialName("channel_id")
+        @Serializable(with = SnowflakeAsStringSerializer::class)
+        val channelId: Snowflake,
+
         val type: Type,
+
         @SerialName("last_update")
         @Serializable(with = InstantAsStringSerializer::class)
         val lastUpdate: Instant,
+
+        @SerialName("scheduled_update")
+        @Serializable(with = InstantAsStringSerializer::class)
+        val scheduledUpdate: Instant,
+
+        @SerialName("calendar_number")
+        val calendarNumber: Int
 ) {
     enum class Type(val value: Int) {
         CALENDAR_OVERVIEW(1);

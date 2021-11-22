@@ -1206,8 +1206,11 @@ object DatabaseManager {
                             c.createStatement(Queries.INSERT_STATIC_MESSAGE)
                                     .bind(0, message.guildId.asLong())
                                     .bind(1, message.messageId.asLong())
-                                    .bind(2, message.type.value)
-                                    .bind(3, message.lastUpdate)
+                                    .bind(2, message.channelId.asLong())
+                                    .bind(3, message.type.value)
+                                    .bind(4, message.lastUpdate)
+                                    .bind(5, message.scheduledUpdate)
+                                    .bind(6, message.calendarNumber)
                                     .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                             .hasElements()
@@ -1228,10 +1231,13 @@ object DatabaseManager {
                             .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
+                    val channelId = Snowflake.of(row["channel_id", Long::class.java]!!)
                     val type = StaticMessage.Type.valueOf(row["type", Int::class.java]!!)
                     val lastUpdate = row["last_update", Instant::class.java]!!
+                    val scheduledUpdate = row["scheduled_update", Instant::class.java]!!
+                    val calNum = row["calendar_number", Int::class.java]!!
 
-                    StaticMessage(guildId, messageId, type, lastUpdate)
+                    StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calNum)
                 }
             }.next().retryWhen(Retry.max(3)
                     .filter(IllegalStateException::class::isInstance)
@@ -1279,7 +1285,38 @@ object DatabaseManager {
         }
     }
 
+    fun getStaticMessagesForShard(shardCount: Int, shardIndex: Int): Mono<List<StaticMessage>> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_SHARD)
+                            .bind(0, shardCount)
+                            .bind(1, shardIndex)
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val guildId = Snowflake.of(row["guild_id", Long::class.java]!!)
+                    val messageId = Snowflake.of(row["message_id", Long::class.java]!!)
+                    val channelId = Snowflake.of(row["channel_id", Long::class.java]!!)
+                    val type = StaticMessage.Type.valueOf(row["type", Int::class.java]!!)
+                    val lastUpdate = row["last_update", Instant::class.java]!!
+                    val scheduledUpdate = row["scheduled_update", Instant::class.java]!!
+                    val calNum = row["calendar_number", Int::class.java]!!
+
+                    StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calNum)
+                }
+            }.retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get many event data", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.collectList()
+        }
+    }
+
     /* Event Data */
+
     fun getEventsData(guildId: Snowflake, eventIds: List<String>): Mono<Map<String, EventData>> {
         // clean up IDs
         val idsToUse = mutableListOf<String>()
@@ -1478,9 +1515,14 @@ private object Queries {
         """.trimMargin()
 
     @Language("MySQL")
+    val SELECT_STATIC_MESSAGES_FOR_SHARD = """SELECT * FROM ${Tables.STATIC_MESSAGES}
+        WHERE MOD(guild_id >> 22, ?) = ?
+    """.trimMargin()
+
+    @Language("MySQL")
     val INSERT_STATIC_MESSAGE = """INSERT INTO ${Tables.STATIC_MESSAGES}
-        (guild_id, message_id, type, last_update)
-        VALUES(?, ?, ?, ?)
+        (guild_id, message_id, channel_id, type, last_update, scheduled_update, calendar_number)
+        VALUES(?, ?, ?, ?, ?, ?, ?)
         """.trimMargin()
 
     @Language("MySQL")
