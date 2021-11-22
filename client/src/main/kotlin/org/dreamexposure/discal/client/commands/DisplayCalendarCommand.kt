@@ -69,7 +69,7 @@ class DisplayCalendarCommand : SlashCommand {
                         }
                     }
 
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("notFound.calendar", settings)))
+                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
     }
