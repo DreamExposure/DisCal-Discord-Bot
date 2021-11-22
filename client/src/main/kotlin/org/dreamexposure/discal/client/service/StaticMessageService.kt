@@ -24,7 +24,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @Component
-class StaticMessageService: ApplicationRunner {
+class StaticMessageService : ApplicationRunner {
     //TODO: use gateway client from DI once available
 
     override fun run(args: ApplicationArguments?) {
@@ -59,11 +59,11 @@ class StaticMessageService: ApplicationRunner {
                                                 message.edit(MessageEditSpec.builder()
                                                         .embedsOrNull(listOf(it))
                                                         .build()
-                                                )
-                                            }.then(DatabaseManager.updateStaticMessage(data.copy(
-                                                    lastUpdate = Instant.now(),
-                                                    scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS))
-                                            ))
+                                                ).then(DatabaseManager.updateStaticMessage(data.copy(
+                                                        lastUpdate = Instant.now(),
+                                                        scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS))
+                                                ))
+                                            }
                                         })
                             }
                         }

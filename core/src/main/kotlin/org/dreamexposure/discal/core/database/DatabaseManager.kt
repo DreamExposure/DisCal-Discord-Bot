@@ -1156,18 +1156,24 @@ object DatabaseManager {
                     // announcement delete bindings
                     .bind(6, calendarData.guildId.asString())
                     .bind(7, calendarData.calendarNumber)
+                    // delete static message bindings
+                    .bind(8, calendarData.guildId.asLong())
+                    .bind(9, calendarData.calendarNumber)
                     // decrement calendar bindings
-                    .bind(8, calendarData.calendarNumber)
-                    .bind(9, calendarData.guildId.asString())
-                    // decrement event bindings
                     .bind(10, calendarData.calendarNumber)
                     .bind(11, calendarData.guildId.asString())
-                    // decrement rsvp bindings
+                    // decrement event bindings
                     .bind(12, calendarData.calendarNumber)
                     .bind(13, calendarData.guildId.asString())
-                    // decrement announcement bindings
+                    // decrement rsvp bindings
                     .bind(14, calendarData.calendarNumber)
                     .bind(15, calendarData.guildId.asString())
+                    // decrement announcement bindings
+                    .bind(16, calendarData.calendarNumber)
+                    .bind(17, calendarData.guildId.asString())
+                    // decrement static message bindings
+                    .bind(18, calendarData.calendarNumber)
+                    .bind(19, calendarData.guildId.asLong())
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                 .hasElements()
@@ -1193,8 +1199,8 @@ object DatabaseManager {
                 if (exists) {
                     Mono.from(
                             c.createStatement(Queries.UPDATE_STATIC_MESSAGE)
-                                    .bind(0, message.type.value)
-                                    .bind(1, message.lastUpdate)
+                                    .bind(0, message.lastUpdate)
+                                    .bind(1, message.scheduledUpdate)
                                     .bind(2, message.guildId.asLong())
                                     .bind(3, message.messageId.asLong())
                                     .execute()
@@ -1504,9 +1510,20 @@ private object Queries {
         """.trimMargin()
 
     @Language("MySQL")
+    val DECREMENT_STATIC_MESSAGES = """UPDATE ${Tables.STATIC_MESSAGES}
+        SET calendar_number = calendar_number - 1
+        WHERE calendar_number >=? AND guild_id = ?
+        """.trimMargin()
+
+    @Language("MySQL")
+    val DELETE_ALL_STATIC_MESSAGES = """DELETE FROM ${Tables.STATIC_MESSAGES}
+        WHERE guild_id = ? AND calendar_number = ?
+        """.trimMargin()
+
+    @Language("MySQL")
     val FULL_CALENDAR_DELETE = """
-        $DELETE_CALENDAR;$DELETE_ALL_EVENT_DATA;$DELETE_ALL_RSVP_DATA;$DELETE_ALL_ANNOUNCEMENT_DATA;
-        $DECREMENT_CALENDARS;$DECREMENT_EVENTS;$DECREMENT_RSVPS;$DECREMENT_ANNOUNCEMENTS
+        $DELETE_CALENDAR;$DELETE_ALL_EVENT_DATA;$DELETE_ALL_RSVP_DATA;$DELETE_ALL_ANNOUNCEMENT_DATA;$DELETE_ALL_STATIC_MESSAGES;
+        $DECREMENT_CALENDARS;$DECREMENT_EVENTS;$DECREMENT_RSVPS;$DECREMENT_ANNOUNCEMENTS;$DECREMENT_STATIC_MESSAGES
     """.trimIndent()
 
     @Language("MySQL")
@@ -1527,7 +1544,7 @@ private object Queries {
 
     @Language("MySQL")
     val UPDATE_STATIC_MESSAGE = """UPDATE ${Tables.STATIC_MESSAGES} SET
-        type = ?, last_update = ?
+        last_update = ?, scheduled_update = ?
         WHERE guild_id = ? AND message_id = ?
          """.trimMargin()
 
