@@ -144,7 +144,6 @@ class GoogleCalendar internal constructor(
         }
     }
 
-    //FIXME: not getting recurring event child data?
     private fun loadEvents(events: List<GoogleEventModel>): Flux<GoogleEvent> {
         return DatabaseManager.getEventsData(guildId, events.map { it.id }).flatMapMany { data ->
             Flux.fromIterable(events).concatMap {

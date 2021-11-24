@@ -1323,7 +1323,6 @@ object DatabaseManager {
 
     /* Event Data */
 
-    //FIXME: not returning events data? dunno why
     fun getEventsData(guildId: Snowflake, eventIds: List<String>): Mono<Map<String, EventData>> {
         // clean up IDs
         val idsToUse = mutableListOf<String>()
@@ -1333,12 +1332,20 @@ object DatabaseManager {
             if (!idsToUse.contains(id)) idsToUse.add(id)
         }
 
-        println("IDs: $idsToUse")
+        // Convert our list of IDs to sql escaped string
+        val builder = StringBuilder()
+        idsToUse.withIndex().forEach {
+            if (it.index != idsToUse.size - 1) {
+                builder.append("'${it.value}', ")
+            } else {
+                builder.append("'${it.value}'")
+            }
+        }
 
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_MANY_EVENT_DATA)
-                            .bind(0, idsToUse.toTypedArray())
+                    //Have to do it this way, sql injection is not possible as these IDs are not user input
+                    c.createStatement(Queries.SELECT_MANY_EVENT_DATA.replace("?", builder.toString()))
                             .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -1357,7 +1364,6 @@ object DatabaseManager {
             }.onErrorResume {
                 Mono.empty()
             }.collectMap { it.eventId }
-                    .doOnNext { println("Map: $it") }
         }
     }
 }
