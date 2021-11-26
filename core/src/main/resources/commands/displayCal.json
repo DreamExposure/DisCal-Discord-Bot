@@ -3,115 +3,135 @@
   "description": "Displays an auto-updating overview of the calendar",
   "options": [
     {
-      "name": "time",
-      "type": 4,
-      "description": "The hour of the day to update the message (in the calendar's timezone)",
-      "required": true,
-      "choices": [
+      "name": "new",
+      "type": 1,
+      "description": "Create a new static calendar overview message",
+      "options": [
         {
-          "name": "00",
-          "value": 0
+          "name": "time",
+          "type": 4,
+          "description": "The hour of the day to update the message (in the calendar's timezone). Default midnight.",
+          "required": false,
+          "choices": [
+            {
+              "name": "00",
+              "value": 0
+            },
+            {
+              "name": "01",
+              "value": 1
+            },
+            {
+              "name": "02",
+              "value": 2
+            },
+            {
+              "name": "03",
+              "value": 3
+            },
+            {
+              "name": "04",
+              "value": 4
+            },
+            {
+              "name": "05",
+              "value": 5
+            },
+            {
+              "name": "06",
+              "value": 6
+            },
+            {
+              "name": "07",
+              "value": 7
+            },
+            {
+              "name": "08",
+              "value": 8
+            },
+            {
+              "name": "09",
+              "value": 9
+            },
+            {
+              "name": "10",
+              "value": 10
+            },
+            {
+              "name": "11",
+              "value": 11
+            },
+            {
+              "name": "12",
+              "value": 12
+            },
+            {
+              "name": "13",
+              "value": 13
+            },
+            {
+              "name": "14",
+              "value": 14
+            },
+            {
+              "name": "15",
+              "value": 15
+            },
+            {
+              "name": "16",
+              "value": 16
+            },
+            {
+              "name": "17",
+              "value": 17
+            },
+            {
+              "name": "18",
+              "value": 18
+            },
+            {
+              "name": "19",
+              "value": 19
+            },
+            {
+              "name": "20",
+              "value": 20
+            },
+            {
+              "name": "21",
+              "value": 21
+            },
+            {
+              "name": "22",
+              "value": 22
+            },
+            {
+              "name": "23",
+              "value": 23
+            }
+          ]
         },
         {
-          "name": "01",
-          "value": 1
-        },
-        {
-          "name": "02",
-          "value": 2
-        },
-        {
-          "name": "03",
-          "value": 3
-        },
-        {
-          "name": "04",
-          "value": 4
-        },
-        {
-          "name": "05",
-          "value": 5
-        },
-        {
-          "name": "06",
-          "value": 6
-        },
-        {
-          "name": "07",
-          "value": 7
-        },
-        {
-          "name": "08",
-          "value": 8
-        },
-        {
-          "name": "09",
-          "value": 9
-        },
-        {
-          "name": "10",
-          "value": 10
-        },
-        {
-          "name": "11",
-          "value": 11
-        },
-        {
-          "name": "12",
-          "value": 12
-        },
-        {
-          "name": "13",
-          "value": 13
-        },
-        {
-          "name": "14",
-          "value": 14
-        },
-        {
-          "name": "15",
-          "value": 15
-        },
-        {
-          "name": "16",
-          "value": 16
-        },
-        {
-          "name": "17",
-          "value": 17
-        },
-        {
-          "name": "18",
-          "value": 18
-        },
-        {
-          "name": "19",
-          "value": 19
-        },
-        {
-          "name": "20",
-          "value": 20
-        },
-        {
-          "name": "21",
-          "value": 21
-        },
-        {
-          "name": "22",
-          "value": 22
-        },
-        {
-          "name": "23",
-          "value": 23
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to display. Defaults to 1",
+          "required": false,
+          "min_value": 1
         }
       ]
     },
     {
-      "name": "calendar",
-      "type": 4,
-      "description": "The calendar to display. Defaults to 1",
-      "required": false,
-      "min_value": 1
+      "name": "update",
+      "type": 1,
+      "description": "Manually update the calendar overview message with the provided message ID",
+      "options": [
+        {
+          "name": "message",
+          "type": 3,
+          "description": "The ID of the message to update",
+          "required": true
+        }
+      ]
     }
   ]
 }

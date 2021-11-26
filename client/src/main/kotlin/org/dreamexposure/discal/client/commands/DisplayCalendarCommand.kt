@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.common.util.Snowflake
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
@@ -16,6 +17,7 @@ import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import reactor.function.TupleUtils
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -26,12 +28,20 @@ class DisplayCalendarCommand : SlashCommand {
     override val ephemeral = true
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val hour = event.getOption("time")
+        return when (event.options[0].name) {
+            "new" -> new(event, settings)
+            "update" -> update(event, settings)
+            else -> Mono.empty() //Never can reach this, makes compiler happy.
+        }
+    }
+
+    private fun new(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+        val hour = event.options[0].getOption("time")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
-                .get()
+                .orElse(0) // default to midnight
 
-        val calendarNumber = event.getOption("calendar")
+        val calendarNumber = event.options[0].getOption("calendar")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
                 .map(Long::toInt)
@@ -72,5 +82,38 @@ class DisplayCalendarCommand : SlashCommand {
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
+    }
+
+    private fun update(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+        return Mono.defer {
+            val messageIdString = event.options[0].getOption("message")
+                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                    .map(ApplicationCommandInteractionOptionValue::asString)
+                    .get()
+
+            Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
+                val messageId = Snowflake.of(messageIdString)
+                DatabaseManager.getStaticMessage(settings.guildID, messageId)
+                        .filter { it.type == StaticMessage.Type.CALENDAR_OVERVIEW }
+                        .flatMap { static ->
+                            event.client.getMessageById(static.channelId, static.messageId).flatMap { msg ->
+                                val gMono = event.interaction.guild.cache()
+                                val cMono = gMono.flatMap { it.getCalendar(static.calendarNumber) }
+
+                                Mono.zip(gMono, cMono).flatMap(TupleUtils.function { guild, calendar ->
+                                    CalendarEmbed.overview(guild, settings, calendar, true)
+                                            .flatMap { msg.edit().withEmbedsOrNull(listOf(it)) }
+                                            .flatMap {
+                                                DatabaseManager.updateStaticMessage(
+                                                        static.copy(lastUpdate = Instant.now())
+                                                )
+                                            }.then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
+                                })
+                            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.message", settings)))
+                        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.staticMessage", settings)))
+            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
+        }.onErrorResume(NumberFormatException::class.java) {
+            event.followupEphemeral(getCommonMsg("error.format.snowflake.message", settings))
+        }
     }
 }
