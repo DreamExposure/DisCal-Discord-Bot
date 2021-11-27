@@ -10,6 +10,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.role.RoleDeleteEvent
+import discord4j.core.shard.MemberRequestFilter
 import discord4j.core.shard.ShardingStrategy
 import discord4j.discordjson.json.GuildData
 import discord4j.discordjson.json.MessageData
@@ -84,6 +85,7 @@ class DisCalClient {
                     .setSharding(getStrategy())
                     .setStore(Store.fromLayout(LegacyStoreLayout.of(getStores())))
                     .setInitialPresence { ClientPresence.doNotDisturb(ClientActivity.playing("Booting Up!")) }
+                    .setMemberRequestFilter(MemberRequestFilter.none()) // TODO: remove after no longer needing members intent
                     .withGateway { client ->
                         DisCalClient.client = client
 
