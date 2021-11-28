@@ -8,7 +8,7 @@ import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
-import org.dreamexposure.discal.core.extensions.DiscordTimestampFormat.LONG_DATETIME
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.extensions.embedFieldSafe

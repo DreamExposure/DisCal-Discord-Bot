@@ -7,6 +7,7 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
+import org.dreamexposure.discal.client.service.StaticMessageService
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
@@ -21,7 +22,7 @@ import reactor.core.publisher.Mono
 import java.time.ZoneId
 
 @Component
-class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
+class CalendarCommand(val wizard: Wizard<PreCalendar>, val staticMessageSrv: StaticMessageService) : SlashCommand {
     override val name = "calendar"
     override val ephemeral = true
 
@@ -175,9 +176,17 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>) : SlashCommand {
                         pre.calendar!!.update(pre.updateSpec())
                             .filter(UpdateCalendarResponse::success)
                             .doOnNext { wizard.remove(settings.guildID) }
-                            .map { CalendarEmbed.link(guild, settings, it.new!!) }
-                            .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
-                            .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
+                            .flatMap { ucr ->
+                                val updateMessages = staticMessageSrv.updateStaticMessages(
+                                        guild,
+                                        ucr.new!!,
+                                        settings
+                                )
+                                 event.followupEphemeral(
+                                        getMessage("confirm.success.edit", settings),
+                                        CalendarEmbed.link(guild, settings, ucr.new!!)
+                                ).flatMap { updateMessages.thenReturn(it) }
+                            }.switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
                 }
             } else {

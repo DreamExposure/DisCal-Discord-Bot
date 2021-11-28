@@ -6,6 +6,7 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.EventEmbed
+import org.dreamexposure.discal.client.service.StaticMessageService
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.event.PreEvent
@@ -27,7 +28,7 @@ import java.time.temporal.ChronoUnit
 
 @Suppress("DuplicatedCode")
 @Component
-class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
+class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMessageService) : SlashCommand {
     override val name = "event"
     override val ephemeral = true
 
@@ -415,11 +416,17 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         guild.getCalendar(pre.calNumber)
                                 .flatMap { it.createEvent(pre.createSpec()) }
                                 .doOnNext { wizard.remove(settings.guildID) }
-                                .flatMap {
+                                .flatMap { calEvent ->
+                                    val updateMessages = staticMessageSrv.updateStaticMessages(
+                                            guild,
+                                            calEvent.calendar,
+                                            settings
+                                    )
+
                                     event.followupEphemeral(
                                             getMessage("confirm.success.create", settings),
-                                            EventEmbed.getFull(guild, settings, it)
-                                    )
+                                            EventEmbed.getFull(guild, settings, calEvent)
+                                    ).flatMap { updateMessages.thenReturn(it) }
                                 }.doOnError {
                                     LOGGER.error("Create event with command failure", it)
                                 }.onErrorResume {
@@ -430,8 +437,18 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                         pre.event!!.update(pre.updateSpec())
                                 .filter(UpdateEventResponse::success)
                                 .doOnNext { wizard.remove(settings.guildID) }
-                                .map { EventEmbed.getFull(guild, settings, it.new!!) }
-                                .flatMap { event.followupEphemeral(getMessage("confirm.success.edit", settings), it) }
+                                .flatMap { uer ->
+                                    val updateMessages = staticMessageSrv.updateStaticMessages(
+                                            guild,
+                                            uer.new!!.calendar,
+                                            settings
+                                    )
+
+                                    event.followupEphemeral(
+                                            getMessage("confirm.success.edit", settings),
+                                            EventEmbed.getFull(guild, settings, uer.new!!)
+                                    ).flatMap { updateMessages.thenReturn(it) }
+                                }
                                 .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
                 }
@@ -561,6 +578,7 @@ class EventCommand(private val wizard: Wizard<PreEvent>) : SlashCommand {
                 calendar.getEvent(eventId)
                         .flatMap(Event::delete)
                         .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
+                        .flatMap { staticMessageSrv.updateStaticMessage(calendar, settings).thenReturn(it) }
                         .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
             }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))

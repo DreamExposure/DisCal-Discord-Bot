@@ -6,7 +6,7 @@ import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.*
-import org.dreamexposure.discal.core.extensions.DiscordTimestampFormat.LONG_DATETIME
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
 object EventEmbed : EmbedMaker {

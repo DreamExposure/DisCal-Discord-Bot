@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.extensions
+package org.dreamexposure.discal.core.enums.time
 
 enum class DiscordTimestampFormat(val value: String) {
     SHORT_TIME("t"),

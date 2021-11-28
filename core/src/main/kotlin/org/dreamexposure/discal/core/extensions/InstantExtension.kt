@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.extensions
 
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import java.time.Instant
 import java.time.ZoneId

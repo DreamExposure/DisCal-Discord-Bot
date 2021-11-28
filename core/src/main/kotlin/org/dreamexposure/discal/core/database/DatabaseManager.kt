@@ -1314,7 +1314,35 @@ object DatabaseManager {
                     .filter(IllegalStateException::class::isInstance)
                     .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get many event data", it)
+                LOGGER.error(DEFAULT, "Failed to get static messages for shard", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.collectList()
+        }
+    }
+
+    fun getStaticMessagesForCalendar(guildId: Snowflake, calendarNumber: Int): Mono<List<StaticMessage>> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_CALENDAR)
+                            .bind(0, guildId.asLong())
+                            .bind(1, calendarNumber)
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val messageId = Snowflake.of(row["message_id", Long::class.java]!!)
+                    val channelId = Snowflake.of(row["channel_id", Long::class.java]!!)
+                    val type = StaticMessage.Type.valueOf(row["type", Int::class.java]!!)
+                    val lastUpdate = row["last_update", Instant::class.java]!!
+                    val scheduledUpdate = row["scheduled_update", Instant::class.java]!!
+
+                    StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calendarNumber)
+                }
+            }.retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get static messages for calendar", it)
             }.onErrorResume {
                 Mono.empty()
             }.collectList()
@@ -1543,6 +1571,11 @@ private object Queries {
     @Language("MySQL")
     val SELECT_STATIC_MESSAGES_FOR_SHARD = """SELECT * FROM ${Tables.STATIC_MESSAGES}
         WHERE MOD(guild_id >> 22, ?) = ?
+    """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_STATIC_MESSAGES_FOR_CALENDAR = """SELECT * FROM ${Tables.STATIC_MESSAGES}
+        WHERE guild_id = ? AND calendar_number = ?
     """.trimMargin()
 
     @Language("MySQL")
