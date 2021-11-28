@@ -127,9 +127,6 @@ class GoogleEvent internal constructor(
             if (spec.recur) {
                 //event now recurs, add the RRUle.
                 spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
-            } else {
-                //Event no longer recurs, clear it...
-                event.recurrence.clear()
             }
         } else {
             //Recur equals null, so it's not changing whether its recurring, so handle if RRule changes only
