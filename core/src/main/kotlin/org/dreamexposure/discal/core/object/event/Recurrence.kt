@@ -52,7 +52,7 @@ data class Recurrence(
     fun toHumanReadable(): String {
         val read = "Frequency: ${this.frequency.name}\nInterval: ${this.interval}"
 
-        return if (this.count < 1) "$read$\nAmount: Infinite"
-        else "$read$\nAmount: ${this.count}"
+        return if (this.count < 1) "$read\nAmount: Infinite"
+        else "$read\nAmount: ${this.count}"
     }
 }

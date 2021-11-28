@@ -98,7 +98,8 @@ data class PreEvent private constructor(
             pre.color = event.color
             pre.location = event.location
             pre.image = event.image
-            pre.recurrence = event.recurrence
+            if (event.recur)
+                pre.recurrence = event.recurrence
             pre.event = event
 
             return pre
@@ -126,7 +127,8 @@ data class PreEvent private constructor(
                 pre.color = event.color
                 pre.location = event.location
                 pre.image = event.image
-                pre.recurrence = event.recurrence
+                if (event.recur)
+                    pre.recurrence = event.recurrence
 
                 pre
             }
