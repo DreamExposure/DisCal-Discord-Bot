@@ -1360,6 +1360,8 @@ object DatabaseManager {
             if (!idsToUse.contains(id)) idsToUse.add(id)
         }
 
+        if (idsToUse.isEmpty()) return Mono.just(emptyMap())
+
         // Convert our list of IDs to sql escaped string
         val builder = StringBuilder()
         idsToUse.withIndex().forEach {
@@ -1391,7 +1393,9 @@ object DatabaseManager {
                 LOGGER.error(DEFAULT, "Failed to get many event data", it)
             }.onErrorResume {
                 Mono.empty()
-            }.collectMap { it.eventId }
+            }.collectMap {
+                it.eventId
+            }.defaultIfEmpty(emptyMap())
         }
     }
 }
