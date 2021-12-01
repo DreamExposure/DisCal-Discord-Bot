@@ -24,7 +24,7 @@ buildscript {
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.1.4-SNAPSHOT"
+    version = "4.1.4"
     description = "DisCal"
 
     //Plugins
