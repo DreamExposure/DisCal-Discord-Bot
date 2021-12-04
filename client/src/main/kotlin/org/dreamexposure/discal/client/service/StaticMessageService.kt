@@ -69,8 +69,8 @@ class StaticMessageService : ApplicationRunner {
                                         })
                             }
                         }
-                    }.onErrorResume(ClientException.isStatusCode(404)) {
-                        //Message or channel was deleted, delete from database
+                    }.onErrorResume(ClientException.isStatusCode(403, 404)) {
+                        //Message or channel was deleted OR access was revoked, delete from database
                         DatabaseManager.deleteStaticMessage(data.guildId, data.messageId)
                     }
                 }.doOnError {
@@ -97,8 +97,8 @@ class StaticMessageService : ApplicationRunner {
                                             .embedsOrNull(listOf(it))
                                             .build()
                                     ).then(DatabaseManager.updateStaticMessage(msg.copy(lastUpdate = Instant.now())))
-                                }.onErrorResume(ClientException.isStatusCode(404)) {
-                                    //Message or channel was deleted, delete from database
+                                }.onErrorResume(ClientException.isStatusCode(403, 404)) {
+                                    //Message or channel was deleted OR access was revoked, delete from database
                                     DatabaseManager.deleteStaticMessage(msg.guildId, msg.messageId)
                                 }
                             }

@@ -7,6 +7,7 @@ import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.MessageCreateSpec
+import discord4j.rest.http.client.ClientException
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.StaticMessage
@@ -96,20 +97,23 @@ class DisplayCalendarCommand : SlashCommand {
                 DatabaseManager.getStaticMessage(settings.guildID, messageId)
                         .filter { it.type == StaticMessage.Type.CALENDAR_OVERVIEW }
                         .flatMap { static ->
-                            event.client.getMessageById(static.channelId, static.messageId).flatMap { msg ->
-                                val gMono = event.interaction.guild.cache()
-                                val cMono = gMono.flatMap { it.getCalendar(static.calendarNumber) }
+                            event.client.getMessageById(static.channelId, static.messageId)
+                                    .onErrorResume(ClientException.isStatusCode(403, 404)) {
+                                        Mono.empty()
+                                    }.flatMap { msg ->
+                                        val gMono = event.interaction.guild.cache()
+                                        val cMono = gMono.flatMap { it.getCalendar(static.calendarNumber) }
 
-                                Mono.zip(gMono, cMono).flatMap(TupleUtils.function { guild, calendar ->
-                                    CalendarEmbed.overview(guild, settings, calendar, true)
-                                            .flatMap { msg.edit().withEmbedsOrNull(listOf(it)) }
-                                            .flatMap {
-                                                DatabaseManager.updateStaticMessage(
-                                                        static.copy(lastUpdate = Instant.now())
-                                                )
-                                            }.then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
-                                })
-                            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.message", settings)))
+                                        Mono.zip(gMono, cMono).flatMap(TupleUtils.function { guild, calendar ->
+                                            CalendarEmbed.overview(guild, settings, calendar, true)
+                                                    .flatMap { msg.edit().withEmbedsOrNull(listOf(it)) }
+                                                    .flatMap {
+                                                        DatabaseManager.updateStaticMessage(
+                                                                static.copy(lastUpdate = Instant.now())
+                                                        )
+                                                    }.then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
+                                        })
+                                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.message", settings)))
                         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.staticMessage", settings)))
             }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
         }.onErrorResume(NumberFormatException::class.java) {
