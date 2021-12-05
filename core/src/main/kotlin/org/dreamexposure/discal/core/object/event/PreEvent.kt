@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.`object`.event
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.Pre
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
@@ -9,7 +10,9 @@ import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.utils.getEmbedMessage
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 
@@ -70,6 +73,26 @@ data class PreEvent private constructor(
                 recur = recurrence != null,
                 recurrence = recurrence,
         )
+    }
+
+    override fun generateWarnings(settings: GuildSettings): List<String> {
+        val warnings = mutableListOf<String>()
+
+        if (start != null && start!!.isBefore(Instant.now())) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings))
+        }
+        if (end != null && end!!.isBefore(Instant.now())) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings))
+        }
+
+        if (this.start != null && this.end != null) {
+            if (Duration.between(start!!, end!!).toDays() > 30) {
+                warnings.add(getEmbedMessage("event", "warning.wizard.veryLong", settings))
+            }
+
+        }
+
+        return warnings
     }
 
     companion object {

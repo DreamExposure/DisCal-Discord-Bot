@@ -31,3 +31,9 @@ fun getCommonMsg(key: String, settings: GuildSettings, vararg args: String): Str
 
     return src.getMessage(key, args, settings.getLocale())
 }
+
+fun getEmbedMessage(embed: String, key: String, settings: GuildSettings, vararg args: String): String {
+    val src = MessageSourceLoader.getSourceByPath("embed/$embed")
+
+    return src.getMessage(key, args, settings.getLocale())
+}

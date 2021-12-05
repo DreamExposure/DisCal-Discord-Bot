@@ -5,8 +5,8 @@ import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
-import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
+import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
 object EventEmbed : EmbedMaker {
@@ -144,6 +144,11 @@ object EventEmbed : EmbedMaker {
 
         if (event.image != null)
             builder.image(event.image!!)
+
+        val warnings = event.generateWarnings(settings)
+        if (warnings.isNotEmpty()) {
+            builder.addField(getMessage("event", "wizard.field.warnings", settings), warnings.joinToString("\n"), false)
+        }
 
         return builder.build()
     }

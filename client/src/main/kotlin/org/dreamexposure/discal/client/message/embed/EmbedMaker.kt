@@ -6,8 +6,8 @@ import discord4j.rest.util.Image
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.MessageSourceLoader
 import org.dreamexposure.discal.core.utils.getCommonMsg
+import org.dreamexposure.discal.core.utils.getEmbedMessage
 
 interface EmbedMaker {
     fun defaultBuilder(guild: Guild, settings: GuildSettings): EmbedCreateSpec.Builder {
@@ -21,9 +21,6 @@ interface EmbedMaker {
         return builder
     }
 
-    fun getMessage(embed: String, key: String, settings: GuildSettings, vararg args: String): String {
-        val src = MessageSourceLoader.getSourceByPath("embed/$embed")
-
-        return src.getMessage(key, args, settings.getLocale())
-    }
+    fun getMessage(embed: String, key: String, settings: GuildSettings, vararg args: String) =
+            getEmbedMessage(embed, key, settings, *args)
 }
