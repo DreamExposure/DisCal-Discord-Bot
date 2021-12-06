@@ -5,6 +5,7 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import discord4j.core.spec.MessageCreateSpec
 import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.client.service.StaticMessageService
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -422,11 +423,17 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                                             calEvent.calendar,
                                             settings
                                     )
+                                    val embedMono = event.interaction.channel.flatMap {
+                                        val spec = MessageCreateSpec.builder()
+                                                .content(getMessage("confirm.success.new", settings))
+                                                .addEmbed(EventEmbed.getFull(guild, settings, calEvent))
+                                                .build()
 
-                                    event.followupEphemeral(
-                                            getMessage("confirm.success.create", settings),
-                                            EventEmbed.getFull(guild, settings, calEvent)
-                                    ).flatMap { updateMessages.thenReturn(it) }
+                                        it.createMessage(spec)
+                                    }
+                                    val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
+
+                                    embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
                                 }.doOnError {
                                     LOGGER.error("Create event with command failure", it)
                                 }.onErrorResume {
@@ -443,11 +450,17 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                                             uer.new!!.calendar,
                                             settings
                                     )
+                                    val embedMono = event.interaction.channel.flatMap {
+                                        val spec = MessageCreateSpec.builder()
+                                                .content(getMessage("confirm.success.new", settings))
+                                                .addEmbed(EventEmbed.getFull(guild, settings, uer.new!!))
+                                                .build()
 
-                                    event.followupEphemeral(
-                                            getMessage("confirm.success.edit", settings),
-                                            EventEmbed.getFull(guild, settings, uer.new!!)
-                                    ).flatMap { updateMessages.thenReturn(it) }
+                                        it.createMessage(spec)
+                                    }
+                                    val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
+
+                                    embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
                                 }
                                 .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }

@@ -147,10 +147,7 @@ object EventEmbed : EmbedMaker {
 
         val warnings = event.generateWarnings(settings)
         if (warnings.isNotEmpty()) {
-            val warnText = """```fix
-                ${warnings.joinToString("\n")}
-                ```""".trimMargin()
-
+            val warnText = "```fix\n${warnings.joinToString("\n")}\n```"
             builder.addField(getMessage("event", "wizard.field.warnings", settings), warnText, false)
         }
 
