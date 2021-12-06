@@ -26,7 +26,7 @@ object DiscalEmbed : EmbedMaker {
                         .color(GlobalVal.discalColor)
                         .title(getMessage("discal", "info.title", settings))
                         .addField(getMessage("discal", "info.field.version", settings), DISCAL_VERSION.value, false)
-                        .addField(getMessage("discal", "info.field.library", settings), DISCAL_VERSION_D4J.value, false)
+                        .addField(getMessage("discal", "info.field.library", settings), "Discord4J ${DISCAL_VERSION_D4J.value}", false)
                         .addField(getMessage("discal", "info.field.shard", settings), formattedIndex(), true)
                         .addField(getMessage("discal", "info.field.guilds", settings), "$guilds", true)
                         .addField(
