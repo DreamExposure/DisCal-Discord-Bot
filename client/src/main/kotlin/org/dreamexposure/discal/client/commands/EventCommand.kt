@@ -425,7 +425,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                                     )
                                     val embedMono = event.interaction.channel.flatMap {
                                         val spec = MessageCreateSpec.builder()
-                                                .content(getMessage("confirm.success.new", settings))
+                                                .content(getMessage("confirm.success.create", settings))
                                                 .addEmbed(EventEmbed.getFull(guild, settings, calEvent))
                                                 .build()
 
@@ -452,7 +452,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                                     )
                                     val embedMono = event.interaction.channel.flatMap {
                                         val spec = MessageCreateSpec.builder()
-                                                .content(getMessage("confirm.success.new", settings))
+                                                .content(getMessage("confirm.success.edit", settings))
                                                 .addEmbed(EventEmbed.getFull(guild, settings, uer.new!!))
                                                 .build()
 
