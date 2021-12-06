@@ -78,10 +78,8 @@ data class PreEvent private constructor(
     override fun generateWarnings(settings: GuildSettings): List<String> {
         val warnings = mutableListOf<String>()
 
+        // Checking end time is not needed
         if (start != null && start!!.isBefore(Instant.now())) {
-            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings))
-        }
-        if (end != null && end!!.isBefore(Instant.now())) {
             warnings.add(getEmbedMessage("event", "warning.wizard.past", settings))
         }
 
