@@ -31,7 +31,7 @@ class StaticMessageService : ApplicationRunner {
 
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofHours(1))
-                .onBackpressureBuffer()
+                .onBackpressureDrop()
                 .flatMap { doMessageUpdateLogic() }
                 .doOnError { LOGGER.error(DEFAULT, "!-Static Message Service Error-!", it) }
                 .subscribe()

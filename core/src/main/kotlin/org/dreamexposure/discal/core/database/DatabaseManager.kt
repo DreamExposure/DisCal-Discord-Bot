@@ -1398,6 +1398,48 @@ object DatabaseManager {
             }.defaultIfEmpty(emptyMap())
         }
     }
+
+    /* Announcement Data */
+
+    fun getAnnouncementsForShard(shardCount: Int, shardIndex: Int): Mono<List<Announcement>> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.SELECT_ANNOUNCEMENTS_FOR_SHARD)
+                            .bind(0, shardCount)
+                            .bind(1, shardIndex)
+                            .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+
+                    val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
+
+                    a
+                }
+            }.retryWhen(Retry.max(3)
+                    .filter(IllegalStateException::class::isInstance)
+                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get announcements for shard", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.collectList()
+        }
+    }
 }
 
 private object Queries {
@@ -1605,6 +1647,11 @@ private object Queries {
     @Language("MySQL")
     val SELECT_MANY_EVENT_DATA = """SELECT * FROM ${Tables.EVENTS}
         WHERE event_id in (?)
+    """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_ANNOUNCEMENTS_FOR_SHARD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
+        WHERE MOD(guild_id >> 22, ?) = ?
     """.trimMargin()
 }
 

@@ -8,6 +8,8 @@ import discord4j.core.`object`.entity.channel.GuildMessageChannel
 import discord4j.core.spec.MessageCreateSpec
 import discord4j.rest.http.client.ClientException
 import io.netty.handler.codec.http.HttpResponseStatus
+import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.Application.Companion.getShardIndex
 import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
@@ -38,7 +40,7 @@ class AnnouncementService : ApplicationRunner {
     // Start
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofMinutes(5))
-            .onBackpressureBuffer()
+            .onBackpressureDrop()
             .flatMap { doAnnouncementCycle() }
             .doOnError { LOGGER.error(GlobalVal.DEFAULT, "!-Announcement run error-!", it) }
             .subscribe()
@@ -49,18 +51,25 @@ class AnnouncementService : ApplicationRunner {
         //TODO: This should come in through DI once other legacy is removed/rewritten
         if (DisCalClient.client == null) return Mono.empty()
 
-        return DisCalClient.client!!.guilds.flatMap { guild ->
-            DatabaseManager.getEnabledAnnouncements(guild.id)
-                .flatMapMany { Flux.fromIterable(it) }
-                .flatMap { announcement ->
-                    when (announcement.modifier) {
-                        AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
-                        AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement)
-                        AnnouncementModifier.END -> handleEndModifier(guild, announcement)
+        // Get announcements for this shard, then group by guild to make caching easier
+        return DatabaseManager.getAnnouncementsForShard(Application.getShardCount(), getShardIndex().toInt()).map { list ->
+            list.groupBy { it.guildId }
+        }.flatMapMany { groupedAnnouncements ->
+            Flux.fromIterable(groupedAnnouncements.entries)
+                    .flatMap { DisCalClient.client!!.getGuildById(it.key) }
+                    .flatMap { guild ->
+                        val announcements = groupedAnnouncements[guild.id] ?: emptyList()
+
+                        Flux.fromIterable(announcements).flatMap { announcement ->
+                            when (announcement.modifier) {
+                                AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
+                                AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement)
+                                AnnouncementModifier.END -> handleEndModifier(guild, announcement)
+                            }
+                        }.doOnError {
+                            LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
+                        }.onErrorResume { Mono.empty() }
                     }
-                }.doOnError {
-                    LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
-                }.onErrorResume { Mono.empty() }
         }.doOnError {
             LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
         }.onErrorResume {
