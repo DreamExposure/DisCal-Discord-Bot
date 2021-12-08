@@ -12,8 +12,9 @@ fun Instant.humanReadableFull(timezone: ZoneId, format: TimeFormat): String {
     return DateTimeFormatter.ofPattern(format.full).withZone(timezone).format(this)
 }
 
-fun Instant.humanReadableDate(timezone: ZoneId, format: TimeFormat, long: Boolean): String {
-    return if (long) DateTimeFormatter.ofPattern(format.longDate).withZone(timezone).format(this)
+fun Instant.humanReadableDate(timezone: ZoneId, format: TimeFormat, long: Boolean = true, longDay: Boolean = false): String {
+    return if (long && longDay) DateTimeFormatter.ofPattern(format.dayOfWeek).withZone(timezone).format(this)
+    else if (long) DateTimeFormatter.ofPattern(format.longDate).withZone(timezone).format(this)
     else DateTimeFormatter.ofPattern(format.date).withZone(timezone).format(this)
 }
 

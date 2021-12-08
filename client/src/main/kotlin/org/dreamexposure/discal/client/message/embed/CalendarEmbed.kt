@@ -55,7 +55,7 @@ object CalendarEmbed : EmbedMaker {
             // Show events
             events.forEach { date ->
 
-                val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat, true)
+                val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat, longDay = true)
 
                 // sort events
                 val sortedEvents = date.value.sortedBy { it.start }
