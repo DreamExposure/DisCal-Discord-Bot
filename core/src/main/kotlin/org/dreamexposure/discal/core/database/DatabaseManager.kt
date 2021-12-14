@@ -1140,6 +1140,8 @@ object DatabaseManager {
         }.defaultIfEmpty(false)
     }
 
+    /* Utility Deletion Methods */
+
     fun deleteCalendarAndRelatedData(calendarData: CalendarData): Mono<Boolean> {
         return connect { c ->
             Mono.from(
@@ -1181,6 +1183,32 @@ object DatabaseManager {
                 .doOnError {
                     LOGGER.error(DEFAULT, "Full calendar delete failed!", it)
                 }.onErrorReturn(false)
+        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
+    }
+
+    fun deleteAllDataForGuild(guildId: Snowflake): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                    c.createStatement(Queries.DELETE_EVERYTHING_FOR_GUILD) //Monolith 6 statement query
+                            // settings delete bindings
+                            .bind(0, guildId.asString())
+                            // calendar delete bindings
+                            .bind(1, guildId.asString())
+                            // event delete bindings
+                            .bind(2, guildId.asString())
+                            // rsvp delete bindings
+                            .bind(3, guildId.asString())
+                            // announcement delete bindings
+                            .bind(4, guildId.asString())
+                            // static message delete bindings
+                            .bind(5, guildId.asLong())
+                            .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                    .hasElements()
+                    .thenReturn(true)
+                    .doOnError {
+                        LOGGER.error(DEFAULT, "Full data delete failed!", it)
+                    }.onErrorReturn(false)
         }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
     }
 
@@ -1652,6 +1680,16 @@ private object Queries {
     @Language("MySQL")
     val SELECT_ANNOUNCEMENTS_FOR_SHARD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE MOD(guild_id >> 22, ?) = ?
+    """.trimMargin()
+
+    @Language("MySQL")
+    val DELETE_EVERYTHING_FOR_GUILD = """
+        delete from ${Tables.GUILD_SETTINGS} where GUILD_ID=?;
+        delete from ${Tables.CALENDARS} where GUILD_ID=?;
+        delete from ${Tables.EVENTS} where GUILD_ID=?;
+        delete from ${Tables.RSVP} where GUILD_ID=?;
+        delete from ${Tables.ANNOUNCEMENTS} where GUILD_ID=?;
+        delete from ${Tables.STATIC_MESSAGES} where guild_id=?;
     """.trimMargin()
 }
 

@@ -55,21 +55,25 @@ class AnnouncementService : ApplicationRunner {
         return DatabaseManager.getAnnouncementsForShard(Application.getShardCount(), getShardIndex().toInt()).map { list ->
             list.groupBy { it.guildId }
         }.flatMapMany { groupedAnnouncements ->
-            Flux.fromIterable(groupedAnnouncements.entries)
-                    .flatMap { DisCalClient.client!!.getGuildById(it.key) }
-                    .flatMap { guild ->
-                        val announcements = groupedAnnouncements[guild.id] ?: emptyList()
+            Flux.fromIterable(groupedAnnouncements.entries).flatMap { entry ->
+                DisCalClient.client!!.getGuildById(entry.key).flatMapMany { guild ->
+                    val announcements = groupedAnnouncements[guild.id] ?: emptyList()
 
-                        Flux.fromIterable(announcements).flatMap { announcement ->
-                            when (announcement.modifier) {
-                                AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
-                                AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement)
-                                AnnouncementModifier.END -> handleEndModifier(guild, announcement)
-                            }
-                        }.doOnError {
-                            LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
-                        }.onErrorResume { Mono.empty() }
-                    }
+                    Flux.fromIterable(announcements).flatMap { announcement ->
+                        when (announcement.modifier) {
+                            AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
+                            AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement)
+                            AnnouncementModifier.END -> handleEndModifier(guild, announcement)
+                        }
+                    }.doOnError {
+                        LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
+                    }.onErrorResume { Mono.empty() }
+                }.onErrorResume(ClientException.isStatusCode(403)) {
+                    // DisCal is no longer in the guild, remove all it's from the database
+
+                    DatabaseManager.deleteAllDataForGuild(entry.key).then()
+                }
+            }
         }.doOnError {
             LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
         }.onErrorResume {
