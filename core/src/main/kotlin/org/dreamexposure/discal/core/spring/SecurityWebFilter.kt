@@ -23,39 +23,30 @@ import java.util.concurrent.ConcurrentMap
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
 class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebFilter {
-    private val tempKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
     private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
 
     init {
         Flux.interval(Duration.ofMinutes(30))
-                .map { handleExpiredKeys() }
-                .subscribe()
+            .map { handleExpiredKeys() }
+            .subscribe()
     }
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return handlerMapping.getHandler(exchange).cast(HandlerMethod::class.java)
-                .switchIfEmpty(Mono.error(EmptyNotAllowedException())) // Don't apply custom filter if this is not on a method
-                .filter { it.hasMethodAnnotation(Authentication::class.java) }
-                .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
-                .map { it.getMethodAnnotation(Authentication::class.java)!! }
-                .map(Authentication::access)
-                .filter { it != Authentication.AccessLevel.PUBLIC } //if public, we don't need to check headers
-                .flatMap { requiredAccess ->
-                    authenticate(exchange)
-                            .filter { it < requiredAccess }
-                            .flatMap {
-                                Mono.error<Void>(AuthenticationException("Insufficient access level!"))
-                            }
-                }.onErrorResume(EmptyNotAllowedException::class.java) { Mono.empty() }
-                .then(chain.filter(exchange))
-    }
-
-    fun saveTempKey(key: String, expireAt: Instant) {
-        tempKeys[key] = expireAt
-    }
-
-    fun removeTempKey(key: String) {
-        tempKeys.remove(key)
+            .switchIfEmpty(Mono.error(EmptyNotAllowedException())) // Don't apply custom filter if this is not on a method
+            .filter { it.hasMethodAnnotation(Authentication::class.java) }
+            .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
+            .map { it.getMethodAnnotation(Authentication::class.java)!! }
+            .map(Authentication::access)
+            .filter { it != Authentication.AccessLevel.PUBLIC } //if public, we don't need to check headers
+            .flatMap { requiredAccess ->
+                authenticate(exchange)
+                    .filter { it < requiredAccess }
+                    .flatMap {
+                        Mono.error<Void>(AuthenticationException("Insufficient access level!"))
+                    }
+            }.onErrorResume(EmptyNotAllowedException::class.java) { Mono.empty() }
+            .then(chain.filter(exchange))
     }
 
     fun saveReadOnlyKey(key: String, expireAt: Instant) {
@@ -65,10 +56,9 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
     private fun handleExpiredKeys() {
         val allToRemove = mutableListOf<String>()
 
-        tempKeys.forEach { if (Instant.now().isAfter(it.value)) allToRemove += it.key }
         readOnlyKeys.forEach { if (Instant.now().isAfter(it.value)) allToRemove += it.key }
 
-        allToRemove.forEach { tempKeys.remove(it);readOnlyKeys.remove(it) }
+        allToRemove.forEach { readOnlyKeys.remove(it) }
     }
 
     /**
@@ -90,22 +80,29 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 authHeader.equals(BotSettings.BOT_API_TOKEN.get()) -> { // This is from within discal network
                     Mono.just(Authentication.AccessLevel.ADMIN)
                 }
-                tempKeys.containsKey(authHeader) -> { // Temp write key for logged in user
-                    Mono.just(Authentication.AccessLevel.WRITE)
-                }
                 readOnlyKeys.containsKey(authHeader) -> { // Read-only key granted for embed pages
                     Mono.just(Authentication.AccessLevel.READ)
                 }
-                else -> { // Check if key is in database...
-                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
-                        if (!acc.blocked) {
+                else -> {
+                    // Check if this is a logged-in user
+                    DatabaseManager.getSessionData(authHeader).flatMap { session ->
+                        if (session.expiresAt.isAfter(Instant.now())) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
-                            Mono.error(AuthenticationException("API key blocked"))
+                            Mono.error(AuthenticationException("Session expired"))
                         }
-                    }.switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
+                    }.switchIfEmpty(
+                        // Check if this is an API key
+                        DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
+                            if (!acc.blocked) {
+                                Mono.just(Authentication.AccessLevel.WRITE)
+                            } else {
+                                Mono.error(AuthenticationException("API key blocked"))
+                            }
+                        }
+                    ).switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
                 }
             }
-        }
+        }.switchIfEmpty(Mono.error(IllegalStateException("uh oh")))
     }
 }

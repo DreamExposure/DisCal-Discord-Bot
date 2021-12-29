@@ -29,7 +29,7 @@ object GlobalVal {
     @JvmStatic
     val discalColor: Color = Color.of(56, 138, 237)
 
-    const val discordApiUrl = "https://discord.com/api/v6"
+    const val discordApiUrl = "https://discord.com/api/v9"
 
     const val discordCdnUrl = "https://cdn.discordapp.com"
 

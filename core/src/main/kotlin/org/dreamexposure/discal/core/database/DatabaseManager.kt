@@ -12,6 +12,7 @@ import io.r2dbc.spi.Result
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.StaticMessage
+import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
@@ -1189,26 +1190,26 @@ object DatabaseManager {
     fun deleteAllDataForGuild(guildId: Snowflake): Mono<Boolean> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.DELETE_EVERYTHING_FOR_GUILD) //Monolith 6 statement query
-                            // settings delete bindings
-                            .bind(0, guildId.asString())
-                            // calendar delete bindings
-                            .bind(1, guildId.asString())
-                            // event delete bindings
-                            .bind(2, guildId.asString())
-                            // rsvp delete bindings
-                            .bind(3, guildId.asString())
-                            // announcement delete bindings
-                            .bind(4, guildId.asString())
-                            // static message delete bindings
-                            .bind(5, guildId.asLong())
-                            .execute()
+                c.createStatement(Queries.DELETE_EVERYTHING_FOR_GUILD) //Monolith 6 statement query
+                    // settings delete bindings
+                    .bind(0, guildId.asString())
+                    // calendar delete bindings
+                    .bind(1, guildId.asString())
+                    // event delete bindings
+                    .bind(2, guildId.asString())
+                    // rsvp delete bindings
+                    .bind(3, guildId.asString())
+                    // announcement delete bindings
+                    .bind(4, guildId.asString())
+                    // static message delete bindings
+                    .bind(5, guildId.asLong())
+                    .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Full data delete failed!", it)
-                    }.onErrorReturn(false)
+                .hasElements()
+                .thenReturn(true)
+                .doOnError {
+                    LOGGER.error(DEFAULT, "Full data delete failed!", it)
+                }.onErrorReturn(false)
         }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
     }
 
@@ -1217,38 +1218,38 @@ object DatabaseManager {
     fun updateStaticMessage(message: StaticMessage): Mono<Boolean> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_STATIC_MESSAGE)
-                            .bind(0, message.guildId.asLong())
-                            .bind(1, message.messageId.asLong())
-                            .execute()
+                c.createStatement(Queries.SELECT_STATIC_MESSAGE)
+                    .bind(0, message.guildId.asLong())
+                    .bind(1, message.messageId.asLong())
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
             }.hasElements().flatMap { exists ->
                 if (exists) {
                     Mono.from(
-                            c.createStatement(Queries.UPDATE_STATIC_MESSAGE)
-                                    .bind(0, message.lastUpdate)
-                                    .bind(1, message.scheduledUpdate)
-                                    .bind(2, message.guildId.asLong())
-                                    .bind(3, message.messageId.asLong())
-                                    .execute()
+                        c.createStatement(Queries.UPDATE_STATIC_MESSAGE)
+                            .bind(0, message.lastUpdate)
+                            .bind(1, message.scheduledUpdate)
+                            .bind(2, message.guildId.asLong())
+                            .bind(3, message.messageId.asLong())
+                            .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                        .hasElements()
+                        .thenReturn(true)
                 } else {
                     Mono.from(
-                            c.createStatement(Queries.INSERT_STATIC_MESSAGE)
-                                    .bind(0, message.guildId.asLong())
-                                    .bind(1, message.messageId.asLong())
-                                    .bind(2, message.channelId.asLong())
-                                    .bind(3, message.type.value)
-                                    .bind(4, message.lastUpdate)
-                                    .bind(5, message.scheduledUpdate)
-                                    .bind(6, message.calendarNumber)
-                                    .execute()
+                        c.createStatement(Queries.INSERT_STATIC_MESSAGE)
+                            .bind(0, message.guildId.asLong())
+                            .bind(1, message.messageId.asLong())
+                            .bind(2, message.channelId.asLong())
+                            .bind(3, message.type.value)
+                            .bind(4, message.lastUpdate)
+                            .bind(5, message.scheduledUpdate)
+                            .bind(6, message.calendarNumber)
+                            .execute()
                     ).flatMapMany(Result::getRowsUpdated)
-                            .hasElements()
-                            .thenReturn(true)
+                        .hasElements()
+                        .thenReturn(true)
                 }.doOnError {
                     LOGGER.error(DEFAULT, "Failed to update static message data", it)
                 }.onErrorResume { Mono.just(false) }
@@ -1259,10 +1260,10 @@ object DatabaseManager {
     fun getStaticMessage(guildId: Snowflake, messageId: Snowflake): Mono<StaticMessage> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_STATIC_MESSAGE)
-                            .bind(0, guildId.asLong())
-                            .bind(1, messageId.asLong())
-                            .execute()
+                c.createStatement(Queries.SELECT_STATIC_MESSAGE)
+                    .bind(0, guildId.asLong())
+                    .bind(1, messageId.asLong())
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val channelId = Snowflake.of(row["channel_id", Long::class.java]!!)
@@ -1274,8 +1275,8 @@ object DatabaseManager {
                     StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calNum)
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get static message data", it)
             }.onErrorResume {
@@ -1287,32 +1288,32 @@ object DatabaseManager {
     fun deleteStaticMessage(guildId: Snowflake, messageId: Snowflake): Mono<Boolean> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.DELETE_STATIC_MESSAGE)
-                            .bind(0, guildId.asLong())
-                            .bind(1, messageId.asLong())
-                            .execute()
+                c.createStatement(Queries.DELETE_STATIC_MESSAGE)
+                    .bind(0, guildId.asLong())
+                    .bind(1, messageId.asLong())
+                    .execute()
             ).flatMapMany(Result::getRowsUpdated)
-                    .hasElements()
-                    .thenReturn(true)
-                    .doOnError {
-                        LOGGER.error(DEFAULT, "Failed to delete static message data", it)
-                    }.onErrorReturn(false)
+                .hasElements()
+                .thenReturn(true)
+                .doOnError {
+                    LOGGER.error(DEFAULT, "Failed to delete static message data", it)
+                }.onErrorReturn(false)
         }.defaultIfEmpty(false)
     }
 
     fun getStaticMessageCount(): Mono<Int> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_STATIC_MESSAGE_COUNT)
-                            .execute()
+                c.createStatement(Queries.SELECT_STATIC_MESSAGE_COUNT)
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val messages = row.get(0, Long::class.java)!!
                     return@map messages.toInt()
                 }
             }.next().retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get static message count", it)
             }.onErrorReturn(-1)
@@ -1322,10 +1323,10 @@ object DatabaseManager {
     fun getStaticMessagesForShard(shardCount: Int, shardIndex: Int): Mono<List<StaticMessage>> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_SHARD)
-                            .bind(0, shardCount)
-                            .bind(1, shardIndex)
-                            .execute()
+                c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_SHARD)
+                    .bind(0, shardCount)
+                    .bind(1, shardIndex)
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val guildId = Snowflake.of(row["guild_id", Long::class.java]!!)
@@ -1339,8 +1340,8 @@ object DatabaseManager {
                     StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calNum)
                 }
             }.retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get static messages for shard", it)
             }.onErrorResume {
@@ -1352,10 +1353,10 @@ object DatabaseManager {
     fun getStaticMessagesForCalendar(guildId: Snowflake, calendarNumber: Int): Mono<List<StaticMessage>> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_CALENDAR)
-                            .bind(0, guildId.asLong())
-                            .bind(1, calendarNumber)
-                            .execute()
+                c.createStatement(Queries.SELECT_STATIC_MESSAGES_FOR_CALENDAR)
+                    .bind(0, guildId.asLong())
+                    .bind(1, calendarNumber)
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val messageId = Snowflake.of(row["message_id", Long::class.java]!!)
@@ -1367,8 +1368,8 @@ object DatabaseManager {
                     StaticMessage(guildId, messageId, channelId, type, lastUpdate, scheduledUpdate, calendarNumber)
                 }
             }.retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get static messages for calendar", it)
             }.onErrorResume {
@@ -1402,9 +1403,9 @@ object DatabaseManager {
 
         return connect { c ->
             Mono.from(
-                    //Have to do it this way, sql injection is not possible as these IDs are not user input
-                    c.createStatement(Queries.SELECT_MANY_EVENT_DATA.replace("?", builder.toString()))
-                            .execute()
+                //Have to do it this way, sql injection is not possible as these IDs are not user input
+                c.createStatement(Queries.SELECT_MANY_EVENT_DATA.replace("?", builder.toString()))
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val id = row["EVENT_ID", String::class.java]!!
@@ -1415,8 +1416,8 @@ object DatabaseManager {
                     EventData(guildId, id, calNum, end, img)
                 }
             }.retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get many event data", it)
             }.onErrorResume {
@@ -1432,10 +1433,10 @@ object DatabaseManager {
     fun getAnnouncementsForShard(shardCount: Int, shardIndex: Int): Mono<List<Announcement>> {
         return connect { c ->
             Mono.from(
-                    c.createStatement(Queries.SELECT_ANNOUNCEMENTS_FOR_SHARD)
-                            .bind(0, shardCount)
-                            .bind(1, shardIndex)
-                            .execute()
+                c.createStatement(Queries.SELECT_ANNOUNCEMENTS_FOR_SHARD)
+                    .bind(0, shardCount)
+                    .bind(1, shardIndex)
+                    .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
@@ -1459,14 +1460,152 @@ object DatabaseManager {
                     a
                 }
             }.retryWhen(Retry.max(3)
-                    .filter(IllegalStateException::class::isInstance)
-                    .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get announcements for shard", it)
             }.onErrorResume {
                 Mono.empty()
             }.collectList()
         }
+    }
+
+    /* Session Data */
+    fun insertSessionData(session: WebSession): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.INSERT_SESSION_DATA)
+                    .bind(0, session.token)
+                    .bind(1, session.user.asLong())
+                    .bind(2, session.expiresAt)
+                    .bind(3, session.accessToken)
+                    .bind(4, session.refreshToken)
+                    .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                .hasElements()
+                .thenReturn(true)
+        }.doOnError {
+            LOGGER.error(DEFAULT, "Failed to insert session data", it)
+        }.onErrorResume { Mono.just(false) }
+    }
+
+    fun removeAndInsertSessionData(session: WebSession): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.REMOVE_AND_INSERT_SESSION_DATA)
+                    // Remove all existing sessions for user bindings
+                    .bind(0, session.user.asLong())
+                    // Insert new session bindings
+                    .bind(1, session.token)
+                    .bind(2, session.user.asLong())
+                    .bind(3, session.expiresAt)
+                    .bind(4, session.accessToken)
+                    .bind(5, session.refreshToken)
+                    .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                .hasElements()
+                .thenReturn(true)
+        }.doOnError {
+            LOGGER.error(DEFAULT, "Failed to insert session data", it)
+        }.onErrorResume { Mono.just(false) }
+    }
+
+    fun getSessionData(token: String): Mono<WebSession> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.SELECT_SESSION_TOKEN)
+                    .bind(0, token)
+                    .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val userId = Snowflake.of(row["user_id", Long::class.java]!!)
+                    val expiresAt = row["expires_at", Instant::class.java]!!
+                    val accessToken = row["access_token", String::class.java]!!
+                    val refreshToken = row["refresh_token", String::class.java]!!
+
+                    WebSession(token, userId, expiresAt, accessToken, refreshToken)
+                }
+            }.next().retryWhen(Retry.max(3)
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get session data by token", it)
+            }.onErrorResume {
+                Mono.empty()
+            }
+        }
+    }
+
+    fun getAllSessionsForUser(userId: Snowflake): Mono<List<WebSession>> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.SELECT_SESSIONS_USER)
+                    .bind(0, userId.asLong())
+                    .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val token = row["token", String::class.java]!!
+                    val expiresAt = row["expires_at", Instant::class.java]!!
+                    val accessToken = row["access_token", String::class.java]!!
+                    val refreshToken = row["refresh_token", String::class.java]!!
+
+                    WebSession(token, userId, expiresAt, accessToken, refreshToken)
+                }
+            }.retryWhen(Retry.max(3)
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get sessions for user", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.collectList()
+        }
+    }
+
+    fun deleteSession(token: String): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.DELETE_SESSION)
+                    .bind(0, token)
+                    .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                .hasElements()
+                .thenReturn(true)
+                .doOnError {
+                    LOGGER.error(DEFAULT, "session delete failure", it)
+                }.onErrorReturn(false)
+        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
+    }
+
+    fun deleteAllSessionsForUser(userId: Snowflake): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.DELETE_SESSIONS_FOR_USER)
+                    .bind(0, userId.asLong())
+                    .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                .hasElements()
+                .thenReturn(true)
+                .doOnError {
+                    LOGGER.error(DEFAULT, "delete all sessions for user failure", it)
+                }.onErrorReturn(false)
+        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
+    }
+
+    fun deleteExpiredSessions(): Mono<Boolean> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.DELETE_EXPIRED_SESSIONS)
+                    .bind(0, Instant.now()) // Delete everything that expired before now
+                    .execute()
+            ).flatMapMany(Result::getRowsUpdated)
+                .hasElements()
+                .thenReturn(true)
+                .doOnError {
+                    // Technically because we have handling for expired tokens we don't need to panic if this breaks
+                    LOGGER.error(DEFAULT, "Expired session delete failure", it)
+                }.onErrorReturn(false)
+        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
     }
 }
 
@@ -1682,6 +1821,43 @@ private object Queries {
         WHERE MOD(guild_id >> 22, ?) = ?
     """.trimMargin()
 
+    /* Session Data */
+
+    @Language("MySQL")
+    val INSERT_SESSION_DATA = """INSERT INTO ${Tables.SESSIONS}
+        (token, user_id, expires_at, access_token, refresh_token)
+        VALUES(?, ?, ?)
+    """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_SESSION_TOKEN = """SELECT * FROM ${Tables.SESSIONS}
+        WHERE token = ?
+    """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_SESSIONS_USER = """SELECT * FROM ${Tables.SESSIONS}
+        WHERE user_id = ?
+    """.trimMargin()
+
+    @Language("MySQL")
+    val DELETE_SESSION = """DELETE FROM ${Tables.SESSIONS}
+        WHERE token = ?
+    """.trimMargin()
+
+    @Language("MySQL")
+    val DELETE_SESSIONS_FOR_USER = """DELETE FROM ${Tables.SESSIONS}
+        WHERE user_id = ?
+    """.trimMargin()
+
+    val REMOVE_AND_INSERT_SESSION_DATA = "$DELETE_SESSIONS_FOR_USER;$INSERT_SESSION_DATA"
+
+    @Language("MySQL")
+    val DELETE_EXPIRED_SESSIONS = """DELETE FROM ${Tables.SESSIONS}
+        where expires_at < ?
+    """.trimMargin()
+
+    /* Delete everything */
+
     @Language("MySQL")
     val DELETE_EVERYTHING_FOR_GUILD = """
         delete from ${Tables.GUILD_SETTINGS} where GUILD_ID=?;
@@ -1719,4 +1895,7 @@ private object Tables {
 
     @Language("Kotlin")
     const val STATIC_MESSAGES = "static_messages"
+
+    @Language("Kotlin")
+    const val SESSIONS = "sessions"
 }
