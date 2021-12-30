@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS sessions
 (
-    token TINYTEXT NOT NULL,
+    token CHAR(64) NOT NULL,
     user_id BIGINT NOT NULL,
     expires_at DATETIME NOT NULL,
     access_token TEXT NOT NULL,
