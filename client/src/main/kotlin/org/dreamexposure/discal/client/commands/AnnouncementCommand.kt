@@ -56,31 +56,31 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val type = event.options[1].getOption("type")
+        val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(AnnouncementType.Companion::fromValue)
             .orElse(AnnouncementType.UNIVERSAL)
 
-        val channelMono = event.options[1].getOption("channel")
+        val channelMono = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asChannel)
             .map { it.ofType(MessageChannel::class.java) }
             .orElse(event.interaction.channel)
 
-        val minutes = event.options[1].getOption("minutes")
+        val minutes = event.options[0].getOption("minutes")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(0)
 
-        val hours = event.options[1].getOption("hours")
+        val hours = event.options[0].getOption("hours")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(0)
 
-        val calendar = event.options[1].getOption("calendar")
+        val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
@@ -110,7 +110,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun type(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val type = event.options[1].getOption("type")
+        val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(AnnouncementType.Companion::fromValue)
@@ -130,7 +130,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun event(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val eventId = event.options[1].getOption("event")
+        val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
@@ -162,7 +162,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun color(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val color = event.options[1].getOption("color")
+        val color = event.options[0].getOption("color")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
@@ -190,7 +190,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun channel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val channelMono = event.options[1].getOption("channel")
+        val channelMono = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asChannel)
             .map { it.ofType(MessageChannel::class.java) }
@@ -213,7 +213,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun minutes(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val minutes = event.options[1].getOption("minutes")
+        val minutes = event.options[0].getOption("minutes")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
@@ -233,7 +233,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun hours(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val hours = event.options[1].getOption("hours")
+        val hours = event.options[0].getOption("hours")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
@@ -253,7 +253,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun info(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val info = event.options[1].getOption("info")
+        val info = event.options[0].getOption("info")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .orElse("None")
@@ -272,7 +272,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun calendar(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val calendar = event.options[1].getOption("calendar")
+        val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
@@ -292,7 +292,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun publish(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val publish = event.options[1].getOption("publish")
+        val publish = event.options[0].getOption("publish")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .get()
@@ -374,7 +374,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
@@ -398,7 +398,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun copy(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
@@ -422,7 +422,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
@@ -440,12 +440,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun enable(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        val enabled = event.options[1].getOption("enabled")
+        val enabled = event.options[0].getOption("enabled")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .get()
@@ -470,7 +470,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
@@ -492,24 +492,24 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val amount = event.options[1].getOption("amount")
+        val amount = event.options[0].getOption("amount")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .get()
 
-        val calendar = event.options[1].getOption("calendar")
+        val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
 
-        val showDisabled = event.options[1].getOption("show-disabled")
+        val showDisabled = event.options[0].getOption("show-disabled")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .orElse(false)
 
-        val type = event.options[1].getOption("type")
+        val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(AnnouncementType.Companion::fromValue)
@@ -558,12 +558,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun subscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        val subId = event.options[1].getOption("sub")
+        val subId = event.options[0].getOption("sub")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
 
@@ -617,12 +617,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     }
 
     private fun unsubscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementId = event.options[1].getOption("announcement")
+        val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        val subId = event.options[1].getOption("sub")
+        val subId = event.options[0].getOption("sub")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
 
