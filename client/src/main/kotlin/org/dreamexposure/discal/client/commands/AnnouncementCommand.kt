@@ -542,7 +542,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     )
                 }
             } else {
-                val limit = amount.coerceAtMost(announcements.size)
+                val limit = if (amount > 0) amount.coerceAtMost(announcements.size) else announcements.size
                 val guildMono = event.interaction.guild.cache()
 
                 val successMessage = event.followupEphemeral(getMessage("list.success.many", settings, "$limit"))
