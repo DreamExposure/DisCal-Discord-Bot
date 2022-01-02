@@ -16,7 +16,7 @@ data class PreCalendar private constructor(
         override val guildId: Snowflake,
         val host: CalendarHost,
         var name: String,
-        val editing: Boolean = false
+        override val editing: Boolean = false
 ): Pre(guildId) {
     var description: String? = null
 

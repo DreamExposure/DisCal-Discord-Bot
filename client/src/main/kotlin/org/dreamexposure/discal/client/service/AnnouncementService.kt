@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.service
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Message
-import discord4j.core.`object`.entity.Role
 import discord4j.core.`object`.entity.channel.GuildMessageChannel
 import discord4j.core.spec.MessageCreateSpec
 import discord4j.rest.http.client.ClientException
@@ -19,6 +18,7 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType.*
+import org.dreamexposure.discal.core.extensions.discord4j.buildMentions
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -156,7 +156,7 @@ class AnnouncementService : ApplicationRunner {
 
     private fun sendAnnouncement(guild: Guild, announcement: Announcement, event: Event): Mono<Message> {
         val embedMono = AnnouncementEmbed.determine(announcement, event, guild)
-        val mentionsMono = buildMentions(guild, announcement).onErrorReturn("")
+        val mentionsMono = guild.buildMentions(announcement).onErrorReturn("")
 
         return guild.getChannelById(Snowflake.of(announcement.announcementChannelId))
             .ofType(GuildMessageChannel::class.java)
@@ -183,39 +183,6 @@ class AnnouncementService : ApplicationRunner {
                     .flatMap { DatabaseManager.deleteAnnouncement(announcement.id.toString()) }
                     .then(Mono.empty())
             }
-    }
-
-    private fun buildMentions(guild: Guild, announcement: Announcement): Mono<String> {
-        val userMentions = Flux.fromIterable(announcement.subscriberUserIds)
-            .flatMap { guild.getMemberById(Snowflake.of(it)) }
-            .map { it.nicknameMention }
-            .onErrorReturn("")
-            .collectList()
-            .defaultIfEmpty(listOf())
-
-        val roleMentions = Flux.fromIterable(announcement.subscriberRoleIds)
-            .flatMap {
-                if (it.equals("everyone", true)) Mono.just("@everyone")
-                else if (it.equals("here", true)) Mono.just("@here")
-                else guild.getRoleById(Snowflake.of(it)).map(Role::getMention)
-            }
-            .onErrorReturn("")
-            .collectList()
-            .defaultIfEmpty(listOf())
-
-        return Mono.zip(userMentions, roleMentions).map(TupleUtils.function { users, roles ->
-            if (users.isEmpty() && roles.isEmpty()) ""
-            else {
-                val mentions = StringBuilder()
-
-                mentions.append("Subscribers: ")
-
-                for (u in users) mentions.append("$u ")
-                for (r in roles) mentions.append("$r ")
-
-                mentions.toString()
-            }
-        })
     }
 
     // Cache things

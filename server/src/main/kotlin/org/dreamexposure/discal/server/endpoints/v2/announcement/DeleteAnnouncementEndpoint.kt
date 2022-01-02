@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.*
 
 @RestController
 @RequestMapping("/v2/announcement")
@@ -36,7 +35,7 @@ class DeleteAnnouncementEndpoint(val client: DiscordClient) {
             //Handle request
             val body = JSONObject(rBody)
             val guildId = Snowflake.of(body.getString("guild_id"))
-            val announcementId = UUID.fromString(body.getString("announcement_id"))
+            val announcementId = body.getString("announcement_id")
 
             return@flatMap client.getGuildById(guildId).deleteAnnouncement(announcementId)
                     .then(responseMessage("Success")

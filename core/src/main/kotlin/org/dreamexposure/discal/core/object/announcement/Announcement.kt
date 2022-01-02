@@ -1,26 +1,29 @@
 package org.dreamexposure.discal.core.`object`.announcement
 
 import discord4j.common.util.Snowflake
-import discord4j.core.`object`.entity.Message
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Pre
+import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
-import org.dreamexposure.discal.core.serializers.UUIDasStringSerializer
-import java.util.*
+import org.dreamexposure.discal.core.utils.getEmbedMessage
 
 @Serializable
 data class Announcement(
-        @Serializable(with = SnowflakeAsStringSerializer::class)
-        @SerialName("guild_id")
-        val guildId: Snowflake,
-) {
-    @Serializable(with = UUIDasStringSerializer::class)
-    var id: UUID = UUID.randomUUID()
-        private set
+    @Serializable(with = SnowflakeAsStringSerializer::class)
+    @SerialName("guild_id")
+    override val guildId: Snowflake,
+
+    val id: String = KeyGenerator.generateAnnouncementId(),
+
+    @Transient
+    override val editing: Boolean = false,
+) : Pre(guildId) {
 
     @SerialName("subscriber_roles")
     val subscriberRoleIds: MutableList<String> = mutableListOf()
@@ -53,44 +56,6 @@ data class Announcement(
 
     var publish = false
 
-    //Stuff for wizards
-    @Transient
-    var creatorMessage: Message? = null
-
-    @Transient
-    var editing = false
-
-    @Transient
-    var lastEdit = System.currentTimeMillis()
-
-    constructor(guildId: Snowflake, announcementId: UUID) : this(guildId) {
-        this.id = announcementId
-    }
-
-    companion object {
-        fun copy(from: Announcement, copyId: Boolean = false): Announcement {
-            val to = from.copy()
-            if (copyId)
-                to.id = UUID.randomUUID()
-
-            //Copy all the other params...
-            to.subscriberRoleIds.addAll(from.subscriberRoleIds)
-            to.subscriberUserIds.addAll(from.subscriberUserIds)
-            to.announcementChannelId = from.announcementChannelId
-            to.type = from.type
-            to.modifier = from.modifier
-            to.eventId = from.eventId
-            to.eventColor = from.eventColor
-            to.hoursBefore = from.hoursBefore
-            to.minutesBefore = from.minutesBefore
-            to.info = from.info
-            to.enabled = from.enabled
-            to.publish = to.publish
-
-            return to
-        }
-    }
-
     fun setSubscriberRoleIdsFromString(subList: String) {
         this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
     }
@@ -100,8 +65,22 @@ data class Announcement(
     }
 
     fun hasRequiredValues(): Boolean {
-        return (this.minutesBefore != 0 || this.hoursBefore != 0)
-                && !(this.type == AnnouncementType.SPECIFIC && this.eventId == "N/a")
-                && this.announcementChannelId != "N/a"
+        return !((this.type == AnnouncementType.SPECIFIC || this.type == AnnouncementType.RECUR) && this.eventId == "N/a")
+            && this.announcementChannelId != "N/a"
+    }
+
+    override fun generateWarnings(settings: GuildSettings): List<String> {
+        val warnings = mutableListOf<String>()
+
+        if ((this.type == AnnouncementType.SPECIFIC || this.type == AnnouncementType.RECUR) && this.eventId == "N/a")
+            warnings.add(getEmbedMessage("announcement", "warning.wizard.eventId", settings))
+        if (this.type == AnnouncementType.COLOR && this.eventColor == EventColor.NONE)
+            warnings.add(getEmbedMessage("announcement", "warning.wizard.color", settings))
+        if (this.minutesBefore + (this.hoursBefore * 60) < 5)
+            warnings.add(getEmbedMessage("announcement", "warning.wizard.time", settings))
+        if (this.calendarNumber > settings.maxCalendars)
+            warnings.add(getEmbedMessage("announcement", "warning.wizard.calNum", settings))
+
+        return warnings
     }
 }

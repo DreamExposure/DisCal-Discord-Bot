@@ -14,7 +14,7 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.util.*
+import reactor.function.TupleUtils
 
 //Settings
 fun Guild.getSettings(): Mono<GuildSettings> = getRestGuild().getSettings()
@@ -75,16 +75,16 @@ fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> = getRestGuil
  * @param id The ID of the announcement to check for
  * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
  */
-fun Guild.announcementExists(id: UUID): Mono<Boolean> = getRestGuild().announcementExists(id)
+fun Guild.announcementExists(id: String): Mono<Boolean> = getRestGuild().announcementExists(id)
 
 /**
- * Attempts to retrieve an [Announcement] with the supplied [ID][UUID].
+ * Attempts to retrieve an [Announcement] with the supplied ID.
  * If an error occurs, it is emitted through the [Mono]
  *
  * @param id The ID of the [Announcement]
  * @return A [Mono] of the [Announcement] with the supplied ID, otherwise [empty][Mono.empty] is returned.
  */
-fun Guild.getAnnouncement(id: UUID): Mono<Announcement> = getRestGuild().getAnnouncement(id)
+fun Guild.getAnnouncement(id: String): Mono<Announcement> = getRestGuild().getAnnouncement(id)
 
 /**
  * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild].
@@ -106,7 +106,40 @@ fun Guild.createAnnouncement(ann: Announcement): Mono<Boolean> = getRestGuild().
 
 fun Guild.updateAnnouncement(ann: Announcement): Mono<Boolean> = getRestGuild().updateAnnouncement(ann)
 
-fun Guild.deleteAnnouncement(id: UUID): Mono<Boolean> = getRestGuild().deleteAnnouncement(id)
+fun Guild.deleteAnnouncement(id: String): Mono<Boolean> = getRestGuild().deleteAnnouncement(id)
+
+fun Guild.buildMentions(announcement: Announcement): Mono<String> {
+    val userMentions = Flux.fromIterable(announcement.subscriberUserIds)
+        .flatMap { this.getMemberById(Snowflake.of(it)) }
+        .map { it.nicknameMention }
+        .onErrorReturn("")
+        .collectList()
+        .defaultIfEmpty(listOf())
+
+    val roleMentions = Flux.fromIterable(announcement.subscriberRoleIds)
+        .flatMap {
+            if (it.equals("everyone", true)) Mono.just("@everyone")
+            else if (it.equals("here", true)) Mono.just("@here")
+            else this.getRoleById(Snowflake.of(it)).map(Role::getMention)
+        }
+        .onErrorReturn("")
+        .collectList()
+        .defaultIfEmpty(listOf())
+
+    return Mono.zip(userMentions, roleMentions).map(TupleUtils.function { users, roles ->
+        if (users.isEmpty() && roles.isEmpty()) ""
+        else {
+            val mentions = StringBuilder()
+
+            mentions.append("Subscribers: ")
+
+            for (u in users) mentions.append("$u ")
+            for (r in roles) mentions.append("$r ")
+
+            mentions.toString()
+        }
+    })
+}
 
 fun Guild.getControlRole(): Mono<Role> {
     return getSettings().flatMap { settings ->

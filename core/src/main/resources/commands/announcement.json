@@ -1,0 +1,454 @@
+{
+  "name": "announcement",
+  "description": "Commands for creating and modifying announcements",
+  "options": [
+    {
+      "name": "create",
+      "type": 1,
+      "description": "Starts the announcement creation wizard",
+      "required": false,
+      "options": [
+        {
+          "name": "type",
+          "type": 3,
+          "description": "The type of announcement",
+          "required": false,
+          "choices": [
+            {
+              "name": "Universal",
+              "value": "UNIVERSAL"
+            },
+            {
+              "name": "Specific",
+              "value": "SPECIFIC"
+            },
+            {
+              "name": "Color",
+              "value": "COLOR"
+            },
+            {
+              "name": "Recur",
+              "value": "RECUR"
+            }
+          ]
+        },
+        {
+          "name": "channel",
+          "type": 7,
+          "description": "The channel to post the announcement in",
+          "required": false,
+          "chanel_types": [0, 2, 5]
+        },
+        {
+          "name": "minutes",
+          "type": 4,
+          "description": "The number of minutes before the event to post. Added to hours.",
+          "required": false,
+          "min_value": 0,
+          "max_value": 59
+        },
+        {
+          "name": "hours",
+          "type": 4,
+          "description": "The number of hours before the event to post. Added to minutes.",
+          "required": false,
+          "min_value": 0
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to create the announcement in (defaults to 1)",
+          "required": false,
+          "min_value": 1
+        }
+      ]
+    },
+    {
+      "name": "type",
+      "type": 1,
+      "description": "Sets the type of announcement",
+      "required": false,
+      "options": [
+        {
+          "name": "type",
+          "type": 3,
+          "description": "The type of announcement",
+          "required": true,
+          "choices": [
+            {
+              "name": "Universal",
+              "value": "UNIVERSAL"
+            },
+            {
+              "name": "Specific",
+              "value": "SPECIFIC"
+            },
+            {
+              "name": "Color",
+              "value": "COLOR"
+            },
+            {
+              "name": "Recur",
+              "value": "RECUR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "event",
+      "type": 1,
+      "description": "Sets the announcement's event. Only for specific/recur type.",
+      "required": false,
+      "options": [
+        {
+          "name": "event",
+          "type": 3,
+          "description": "The ID of the event",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "color",
+      "type": 1,
+      "description": "Sets the announcement's color. Only for color type.",
+      "required": false,
+      "options": [
+        {
+          "name": "color",
+          "type": 4,
+          "description": "The color of the announcement",
+          "required": true,
+          "choices": [
+            {
+              "name": "Melrose",
+              "value": 1
+            },
+            {
+              "name": "Riptide",
+              "value": 2
+            },
+            {
+              "name": "Mauve",
+              "value": 3
+            },
+            {
+              "name": "Tangerine",
+              "value": 4
+            },
+            {
+              "name": "Dandelion",
+              "value": 5
+            },
+            {
+              "name": "Mac & Cheese",
+              "value": 6
+            },
+            {
+              "name": "Turquoise",
+              "value": 7
+            },
+            {
+              "name": "Mercury",
+              "value": 8
+            },
+            {
+              "name": "Blue",
+              "value": 9
+            },
+            {
+              "name": "Green",
+              "value": 10
+            },
+            {
+              "name": "Red",
+              "value": 11
+            },
+            {
+              "name": "No Color",
+              "value": 12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "channel",
+      "type": 1,
+      "description": "Sets the channel to post the announcement in.",
+      "required": false,
+      "options": [
+        {
+          "name": "channel",
+          "type": 7,
+          "description": "The channel to post the announcement in",
+          "required": true,
+          "chanel_types": [0, 2, 5]
+        }
+      ]
+    },
+    {
+      "name": "minutes",
+      "type": 1,
+      "description": "Sets the number of minutes before the event to post. Added to hours.",
+      "required": false,
+      "options": [
+        {
+          "name": "minutes",
+          "type": 4,
+          "description": "Minutes before the event to post. Added to hours.",
+          "required": true,
+          "min_value": 0,
+          "max_value": 59
+        }
+      ]
+    },
+    {
+      "name": "hours",
+      "type": 1,
+      "description": "Sets the number of hours before the event to post. Added to minutes.",
+      "required": false,
+      "options": [
+        {
+          "name": "hours",
+          "type": 4,
+          "description": "Hours before the event to post. Added to minutes.",
+          "required": true,
+          "min_value": 0
+        }
+      ]
+    },
+    {
+      "name": "info",
+      "type": 1,
+      "description": "Sets the additional info to be posted with the event.",
+      "required": false,
+      "options": [
+        {
+          "name": "info",
+          "type": 3,
+          "description": "Additional info to be posted with the event, if any.",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "calendar",
+      "type": 1,
+      "description": "Sets the calendar the announcement will read from.",
+      "required": false,
+      "options": [
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar the announcement will read from (defaults to 1)",
+          "required": true,
+          "min_value": 1
+        }
+      ]
+    },
+    {
+      "name": "publish",
+      "type": 1,
+      "description": "Sets whether the announcement should be cross-posted.",
+      "required": false,
+      "options": [
+        {
+          "name": "publish",
+          "type": 5,
+          "description": "Whether the announcement should be published.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "review",
+      "type": 1,
+      "description": "Displays the properties of the announcement in the wizard.",
+      "required": false
+    },
+    {
+      "name": "confirm",
+      "type": 1,
+      "description": "Commits the changes made in the wizard",
+      "required": false
+    },
+    {
+      "name": "cancel",
+      "type": 1,
+      "description": "Cancels the wizard",
+      "required": false
+    },
+    {
+      "name": "edit",
+      "type": 1,
+      "description": "Edits an existing announcement",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to edit",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "copy",
+      "type": 1,
+      "description": "Copies an an existing announcement's details to a new event",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to copy",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "delete",
+      "type": 1,
+      "description": "Deletes an announcement",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to delete",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "enable",
+      "type": 1,
+      "description": "Toggles whether an announcement is enabled",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to toggle",
+          "required": true
+        },
+        {
+          "name": "enabled",
+          "type": 5,
+          "description": "Whether the announcement should be enabled",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "view",
+      "type": 1,
+      "description": "Displays an announcement's details",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to view",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "type": 1,
+      "description": "Lists announcements",
+      "required": false,
+      "options": [
+        {
+          "name": "amount",
+          "type": 4,
+          "description": "The amount of announcements to list (-1 for all)",
+          "required": true,
+          "min_value": -1,
+          "max_value": 15
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to pull the announcements from. Defaults to 1",
+          "required": false,
+          "min_value": 1
+        },
+        {
+          "name": "show-disabled",
+          "type": 5,
+          "description": "Whether to show disabled announcements. Default false.",
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": 3,
+          "description": "Show only a certain type of announcement",
+          "required": false,
+          "choices": [
+            {
+              "name": "Universal",
+              "value": "UNIVERSAL"
+            },
+            {
+              "name": "Specific",
+              "value": "SPECIFIC"
+            },
+            {
+              "name": "Color",
+              "value": "COLOR"
+            },
+            {
+              "name": "Recur",
+              "value": "RECUR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "subscribe",
+      "type": 1,
+      "description": "Subscribes to an announcement",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to subscribe to",
+          "required": true
+        },
+        {
+          "name": "sub",
+          "type": 9,
+          "description": "A role or user to subscribe to the announcement",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "unsubscribe",
+      "type": 1,
+      "description": "Unsubscribes to an announcement",
+      "required": false,
+      "options": [
+        {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to unsubscribe from",
+          "required": true
+        },
+        {
+          "name": "sub",
+          "type": 9,
+          "description": "A role or user to unsubscribe from the announcement",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "default_permissions": true
+}

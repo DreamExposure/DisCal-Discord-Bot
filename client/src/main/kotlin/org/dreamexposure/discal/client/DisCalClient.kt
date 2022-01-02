@@ -26,9 +26,7 @@ import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.listeners.discord.*
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand
-import org.dreamexposure.discal.client.module.command.AnnouncementCommand
 import org.dreamexposure.discal.client.module.command.CommandExecutor
-import org.dreamexposure.discal.client.service.TimeManager
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -62,10 +60,6 @@ class DisCalClient {
 
             //Register commands
             CommandExecutor.registerCommand(AddCalendarCommand())
-            CommandExecutor.registerCommand(AnnouncementCommand())
-
-            //Start some daemon threads
-            TimeManager.getManager().init()
 
             //Start Spring
             val spring = try {
@@ -121,7 +115,6 @@ class DisCalClient {
     fun onShutdown() {
         LOGGER.info(STATUS, "Shutting down shard")
 
-        TimeManager.getManager().shutdown()
         DatabaseManager.disconnectFromMySQL()
 
         client?.logout()?.subscribe()

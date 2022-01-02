@@ -34,7 +34,6 @@ import reactor.core.publisher.Mono
 import reactor.util.retry.Retry
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 import java.util.function.Function
 
 object DatabaseManager {
@@ -746,7 +745,7 @@ object DatabaseManager {
         }
     }
 
-    fun getAnnouncement(announcementId: UUID, guildId: Snowflake): Mono<Announcement> {
+    fun getAnnouncement(announcementId: String, guildId: Snowflake): Mono<Announcement> {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENT_BY_GUILD)
@@ -788,7 +787,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -825,7 +824,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -860,7 +859,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
@@ -897,7 +896,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
@@ -933,7 +932,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
@@ -970,7 +969,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -1006,7 +1005,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
@@ -1031,6 +1030,43 @@ object DatabaseManager {
                 .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
+            }.onErrorReturn(mutableListOf())
+        }.defaultIfEmpty(mutableListOf())
+    }
+
+    fun getEnabledAnnouncements(guildId: Snowflake, type: AnnouncementType): Mono<List<Announcement>> {
+        return connect { c ->
+            Mono.from(
+                c.createStatement(Queries.SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE_GUILD)
+                    .bind(0, guildId.asString())
+                    .bind(1, type.name)
+                    .execute()
+            ).flatMapMany { res ->
+                res.map { row, _ ->
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
+
+                    val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
+                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
+                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
+                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
+                    a.eventId = row["EVENT_ID", String::class.java]!!
+                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
+                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
+                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
+                    a.info = row["INFO", String::class.java]!!
+                    a.enabled = row["ENABLED", Boolean::class.java]!!
+                    a.publish = row["PUBLISH", Boolean::class.java]!!
+
+                    a
+                }
+            }.collectList().retryWhen(Retry.max(3)
+                .filter(IllegalStateException::class::isInstance)
+                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
+            ).doOnError {
+                LOGGER.error(DEFAULT, "Failed to get guild's enabled announcements by type", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -1439,7 +1475,7 @@ object DatabaseManager {
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
-                    val announcementId = UUID.fromString(row.get("ANNOUNCEMENT_ID", String::class.java))
+                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
                     val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
@@ -1685,6 +1721,12 @@ private object Queries {
     val SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE ENABLED = 1 and ANNOUNCEMENT_TYPE = ?
         """.trimMargin()
+
+    @Language("MySQL")
+    val SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE_GUILD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
+        WHERE ENABLED = 1 AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?
+        """.trimMargin()
+
 
     @Language("MySQL")
     val SELECT_ALL_ANNOUNCEMENT_COUNT = """SELECT COUNT(*) FROM ${Tables.ANNOUNCEMENTS}"""

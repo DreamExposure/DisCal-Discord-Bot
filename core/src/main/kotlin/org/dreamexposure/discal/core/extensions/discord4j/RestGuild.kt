@@ -147,16 +147,16 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
  * @param id The ID of the announcement to check for
  * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
  */
-fun RestGuild.announcementExists(id: UUID): Mono<Boolean> = this.getAnnouncement(id).hasElement()
+fun RestGuild.announcementExists(id: String): Mono<Boolean> = this.getAnnouncement(id).hasElement()
 
 /**
- * Attempts to retrieve an [Announcement] with the supplied [ID][UUID].
+ * Attempts to retrieve an [Announcement] with the supplied ID.
  * If an error occurs, it is emitted through the [Mono]
  *
  * @param id The ID of the [Announcement]
  * @return A [Mono] of the [Announcement] with the supplied ID, otherwise [empty][Mono.empty] is returned.
  */
-fun RestGuild.getAnnouncement(id: UUID): Mono<Announcement> = DatabaseManager.getAnnouncement(id, this.id)
+fun RestGuild.getAnnouncement(id: String): Mono<Announcement> = DatabaseManager.getAnnouncement(id, this.id)
 
 /**
  * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild].
@@ -184,4 +184,4 @@ fun RestGuild.createAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseMan
 
 fun RestGuild.updateAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)
 
-fun RestGuild.deleteAnnouncement(id: UUID): Mono<Boolean> = DatabaseManager.deleteAnnouncement(id.toString())
+fun RestGuild.deleteAnnouncement(id: String): Mono<Boolean> = DatabaseManager.deleteAnnouncement(id)

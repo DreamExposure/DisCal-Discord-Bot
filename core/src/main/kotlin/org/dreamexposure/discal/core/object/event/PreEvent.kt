@@ -22,8 +22,8 @@ data class PreEvent private constructor(
         val eventId: String? = null,
         val calNumber: Int,
         val timezone: ZoneId,
-        val editing: Boolean = false,
-): Pre(guildId) {
+        override val editing: Boolean = false,
+): Pre(guildId, editing) {
     var name: String? = null
 
     var description: String? = null

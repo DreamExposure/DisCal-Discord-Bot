@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.*
 
 @RestController
 @RequestMapping("/v2/announcement")
@@ -40,7 +39,7 @@ class UpdateAnnouncementEndpoint(val client: DiscordClient) {
             //Handle request
             val body = JSONObject(rBody)
             val guildId = Snowflake.of(body.getString("guild_id"))
-            val announcementId = UUID.fromString(body.getString("announcement_id"))
+            val announcementId = body.getString("announcement_id")
 
             val guild = client.getGuildById(guildId)
 

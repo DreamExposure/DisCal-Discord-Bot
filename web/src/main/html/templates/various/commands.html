@@ -683,10 +683,7 @@
 
                 <!-- Start announcement command-->
                 <div id="announcement">
-                    <h2 class="text-center text-discal-blue">!announcement commands</h2>
-                    <h3 class="text-center text-discal-blue">
-                        Aliases: !announcements !announce !alert !alerts !a !ann
-                    </h3>
+                    <h2 class="text-center text-discal-blue">/announcement commands</h2>
 
                     <table class="flex-table-container" role="table" aria-label="Calendar Commands">
                         <caption class="no-display">Announcement Commands</caption>
@@ -703,7 +700,9 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">create</td>
                             <td class="tb-flex-row" role="cell">Starts the announcement create wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a create</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /announcement create (type) (channel) (minutes) (hours) (calendar)
+                            </td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -714,7 +713,7 @@
                                 Sets the announcement type.
                                 Valid types: UNIVERSAL, SPECIFIC, COLOR, RECUR
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a type [type]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement type [type]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -725,7 +724,7 @@
                                 Sets the announcement's event.
                                 Only needed when using SPECIFIC or RECUR types.
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a event [event-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement event [event-id]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -736,18 +735,7 @@
                                 Sets the announcement's color.
                                 Only needed when using COLOR type.
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a color [color]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start colour command-->
-                        <tr class="flex-table tb-optional" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">colour</td>
-                            <td class="tb-flex-row" role="cell">
-                                Sets the announcement's colour.
-                                Only needed when using COLOR type.
-                            </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a colour [colour]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement color [color]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -755,7 +743,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">channel</td>
                             <td class="tb-flex-row" role="cell">Set's the channel it will be posted to</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a channel [channel-name]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement channel [channel]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -766,7 +754,7 @@
                                 Sets the minutes before the event to announce.
                                 Added to hours
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a minutes [number]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement minutes [number]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -777,7 +765,7 @@
                                 Sets the hours before the event to announce.
                                 Added to minutes
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a hours [number]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement hours [number]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -785,9 +773,19 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">info</td>
                             <td class="tb-flex-row" role="cell">
-                                Sets the additional info to be posted along with the event
+                                Sets the additional info to be posted along with the event. No text input to remove.
                             </td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a info [text]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement info (text)</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start calendar command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">calendar</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the calendar the announcement will read from
+                            </td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement calendar [calendar]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -795,7 +793,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">public</td>
                             <td class="tb-flex-row" role="cell">Toggles if the announcement should be cross-posted</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a publish</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement publish [true/false]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged, patron-only</td>
                         </tr>
 
@@ -803,7 +801,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">review</td>
                             <td class="tb-flex-row" role="cell">Displays announcement properties</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a review</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement review</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -811,7 +809,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">confirm</td>
                             <td class="tb-flex-row" role="cell">Commits the changes made in the wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a confirm</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement confirm</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -819,7 +817,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">cancel</td>
                             <td class="tb-flex-row" role="cell">Cancels the announcement wizard</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a cancel</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement cancel</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -827,7 +825,7 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">edit</td>
                             <td class="tb-flex-row" role="cell">Starts the announcement editor</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a edit [announcement-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement edit [id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -835,7 +833,9 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">copy</td>
                             <td class="tb-flex-row" role="cell">Copies an existing announcement to a new one</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a copy [announcement-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /announcement copy [id] (calendar) (target)
+                            </td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -843,23 +843,17 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">delete</td>
                             <td class="tb-flex-row" role="cell">Deletes an announcement</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a delete [announcement-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement delete [id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
                         <!--Start enable command-->
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">enable</td>
-                            <td class="tb-flex-row" role="cell">Enables an announcement</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a enable [announcement-id]</td>
-                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
-                        </tr>
-
-                        <!--Start disable command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">disable</td>
-                            <td class="tb-flex-row" role="cell">Disables an announcement</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a disable [announcement-id]</td>
+                            <td class="tb-flex-row" role="cell">Sets whether an announcement is enabled</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /announcement enable [id] [true/false] (calendar)
+                            </td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -867,31 +861,35 @@
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">view</td>
                             <td class="tb-flex-row" role="cell">Displays an announcement's properties</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a view [announcement-id]</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement view [id] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
                         <!--Start list command-->
                         <tr class="flex-table" role="rowgroup">
                             <td class="tb-flex-row tb-command" role="cell">list</td>
-                            <td class="tb-flex-row" role="cell">Lists announcements</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a list [number]</td>
+                            <td class="tb-flex-row" role="cell">Lists announcements, -1 for all</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement list [amount] (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
-                        <!--Start sub command-->
+                        <!--Start subscribe command-->
                         <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">sub</td>
+                            <td class="tb-flex-row tb-command" role="cell">subscribe</td>
                             <td class="tb-flex-row" role="cell">Subscribes to an announcement to be pinged</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a sub [announcement-id] (users/roles)</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /announcement subscribe [id] (user/role) (calendar)
+                            </td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
 
-                        <!--Start unsub command-->
+                        <!--Start unsubscribe command-->
                         <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">unsub</td>
+                            <td class="tb-flex-row tb-command" role="cell">unsubscribe</td>
                             <td class="tb-flex-row" role="cell">Unsubscribes to an announcement to be pinged</td>
-                            <td class="tb-flex-row tb-usage" role="cell">!a unsub [announcement-id] (users/roles)</td>
+                            <td class="tb-flex-row tb-usage" role="cell">
+                                /announcement unsubscribe [id] (user/role) (calendar)
+                            </td>
                             <td class="tb-flex-row tb-access" role="cell">everyone</td>
                         </tr>
                         </tbody>
