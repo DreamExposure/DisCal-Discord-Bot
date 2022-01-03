@@ -547,7 +547,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
 
                 val successMessage = event.followupEphemeral(getMessage("list.success.many", settings, "$limit"))
                 val condAns = guildMono.flatMapMany { guild ->
-                    Flux.fromIterable(announcements.subList(0, limit - 1)).flatMap { a ->
+                    Flux.fromIterable(announcements.subList(0, limit)).flatMap { a ->
                         AnnouncementEmbed.condensed(a, guild).flatMap(event::followupEphemeral)
                     }
                 }
