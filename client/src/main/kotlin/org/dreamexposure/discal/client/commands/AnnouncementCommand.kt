@@ -336,6 +336,9 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                 if (pre.hasRequiredValues()) {
                     DatabaseManager.updateAnnouncement(pre).flatMap { success ->
                         if (success) {
+                            // Close wizard
+                            wizard.remove(settings.guildID)
+
                             val msg = if (pre.editing) getMessage("confirm.success.edit", settings)
                             else getMessage("confirm.success.create", settings)
 
