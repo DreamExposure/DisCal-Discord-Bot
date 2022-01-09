@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.cam.endpoints.v1.oauth2
 
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
+import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.service.StateService
 import org.dreamexposure.discal.core.`object`.BotSettings.ID
@@ -44,14 +45,14 @@ class DiscordOauthEndpoint(private val stateService: StateService) {
 
     @PostMapping("code")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    fun token(@RequestParam code: String, @RequestParam state: String): Mono<TokenResponse> {
+    fun token(@RequestBody body: TokenRequest): Mono<TokenResponse> {
         // Validate state
-        if (!stateService.validateState(state)) {
+        if (!stateService.validateState(body.state)) {
             // State invalid - 400
             return Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state"))
         }
 
-        return DiscordOauthHandler.doTokenExchange(code).flatMap { dTokens ->
+        return DiscordOauthHandler.doTokenExchange(body.code).flatMap { dTokens ->
             // request current user info
             DiscordOauthHandler.getOauthInfo(dTokens.accessToken).flatMap { authInfo ->
                 val apiToken = KeyGenerator.csRandomAlphaNumericString(64)
