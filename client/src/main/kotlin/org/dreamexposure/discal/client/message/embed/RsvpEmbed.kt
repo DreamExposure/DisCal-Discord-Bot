@@ -47,8 +47,11 @@ object RsvpEmbed : EmbedMaker {
             .map(MutableList<String>::asStringList)
             .map { it.ifEmpty { "N/a" } }
 
-        return Mono.zip(roleMono, onTimeMono, lateMono, undecidedMono, notMono)
-            .map(TupleUtils.function { role, onTime, late, undecided, notGoing ->
+        //TODO: Waitlist users (show up to 3, with (+X) if there are more)
+        val waitListMono = Mono.just("User1, User2 + 3 more")
+
+        return Mono.zip(roleMono, onTimeMono, lateMono, undecidedMono, notMono, waitListMono)
+            .map(TupleUtils.function { role, onTime, late, undecided, notGoing, waitList ->
                 val limitValue = if (rsvp.limit < 0) {
                     getMessage("rsvp", "list.field.limit.value", settings, "${rsvp.getCurrentCount()}")
                 } else "${rsvp.getCurrentCount()}/${rsvp.limit}"
@@ -63,6 +66,7 @@ object RsvpEmbed : EmbedMaker {
                     .addField(getMessage("rsvp", "list.field.late", settings), late, false)
                     .addField(getMessage("rsvp", "list.field.unsure", settings), undecided, false)
                     .addField(getMessage("rsvp", "list.field.notGoing", settings), notGoing, false)
+                    .addField(getMessage("rsvp", "list.field.waitlist", settings), waitList, false)
                     .footer(getMessage("rsvp", "list.footer", settings), null)
                     .build()
             })

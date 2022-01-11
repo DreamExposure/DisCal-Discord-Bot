@@ -35,6 +35,7 @@ class RsvpCommand : SlashCommand {
         }
     }
 
+    //TODO: Add to waitlist if there is no room remaining.
     private fun onTime(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -69,6 +70,7 @@ class RsvpCommand : SlashCommand {
         }
     }
 
+    //TODO: Add to waitlist if there is no room remaining.
     private fun late(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -221,6 +223,7 @@ class RsvpCommand : SlashCommand {
         }
     }
 
+    //TODO: If limit is increased, make sure to add users who are on the waitlist
     private fun limit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)

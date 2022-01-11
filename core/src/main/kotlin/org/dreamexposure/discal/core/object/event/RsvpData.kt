@@ -46,6 +46,8 @@ data class RsvpData(
 
     val undecided: MutableList<String> = CopyOnWriteArrayList()
 
+    val waitlist: MutableList<String> = CopyOnWriteArrayList()
+
     //List string stuffs
     fun setGoingOnTimeFromString(strList: String) {
         this.goingOnTime += strList.split(",").filter(String::isNotBlank)
@@ -61,6 +63,10 @@ data class RsvpData(
 
     fun setUndecidedFromString(strList: String) {
         this.undecided += strList.split(",").filter(String::isNotBlank)
+    }
+
+    fun setWaitlistFromString(strList: String) {
+        this.waitlist += strList.split(",").filter(String::isNotBlank)
     }
 
     fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size
@@ -108,17 +114,25 @@ data class RsvpData(
     }
 
     //Functions
-    fun removeCompletely(userId: String, client: DiscordClient): Mono<Void> {
+    fun removeCompletely(userId: String, client: DiscordClient, doWaitlistOp: Boolean = false): Mono<Void> {
         goingOnTime.removeAll { userId == it }
         goingLate.removeAll { userId == it }
         notGoing.removeAll { userId == it }
         undecided.removeAll { userId == it }
+        waitlist.removeAll { userId == it }
+
+        if (doWaitlistOp && waitlist.isNotEmpty()) {
+            val waitlistUser = waitlist.removeFirst()
+
+            TODO("Check waitlist and add user to going if they are in it")
+        }
 
         return if (roleId != null) removeRole(userId, roleId!!, "Removed RSVP to event with ID $eventId", client)
         else Mono.empty()
     }
 
-    fun removeCompletely(member: Member): Mono<Void> = removeCompletely(member.id.asString(), member.client.rest())
+    fun removeCompletely(member: Member, doWaitlistOp: Boolean = false): Mono<Void> =
+        removeCompletely(member.id.asString(), member.client.rest(), doWaitlistOp)
 
     fun addGoingOnTime(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)
@@ -142,15 +156,36 @@ data class RsvpData(
             }
     }
 
+    fun handleWaitListedUser(userId: String, client: DiscordClient): Mono<Void> {
+        //TODO: add user to going list
+
+        //TODO: DM user that they have been moved from the waitlist
+
+        //TODO: Assign role if role is set
+
+        TODO("Not yet implemented")
+    }
+
+    fun handleWaitListedUser(member: Member): Mono<Void> = handleWaitListedUser(member.id.asString(), member.client.rest())
+
+    fun fillRemaining(client: DiscordClient): Mono<Void> {
+        //TODO: Determine if there are remaining slots open
+
+        //TODO: Add users from waitlist one by one until there are no more slots open
+
+        TODO("Not yet implemented")
+    }
+
     fun addGoingLate(member: Member): Mono<Void> = addGoingLate(member.id.asString(), member.client.rest())
 
     fun shouldBeSaved(): Boolean {
         return this.goingOnTime.isNotEmpty()
-              || this.goingLate.isNotEmpty()
-              || this.notGoing.isNotEmpty()
-              || this.undecided.isNotEmpty()
-              || limit != -1
-              || roleId != null
+            || this.goingLate.isNotEmpty()
+            || this.notGoing.isNotEmpty()
+            || this.undecided.isNotEmpty()
+            || this.waitlist.isNotEmpty()
+            || limit != -1
+            || roleId != null
     }
 
     private fun addRole(userId: String, roleId: Snowflake, reason: String, client: DiscordClient): Mono<Void> {
