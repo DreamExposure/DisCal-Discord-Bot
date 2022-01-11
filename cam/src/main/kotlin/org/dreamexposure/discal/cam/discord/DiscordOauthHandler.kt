@@ -97,8 +97,9 @@ object DiscordOauthHandler {
 
                 //Convert avatar hash to full URL
                 if (responseBody.user!!.avatar != null) {
+                    val userId = responseBody.user!!.id.asString()
                     val avatarHash = responseBody.user!!.avatar
-                    val avatar = "https://cdn.discordapp.com/avatars/${responseBody.user!!.id}/$avatarHash.png"
+                    val avatar = "https://cdn.discordapp.com/avatars/$userId/$avatarHash.png"
 
                     responseBody = responseBody.copy(user = responseBody.user!!.copy(avatar = avatar))
                 }
