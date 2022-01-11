@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.cam.endpoints.v1.oauth2
 
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
+import org.dreamexposure.discal.cam.json.discal.LoginResponse
 import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.service.StateService
@@ -13,10 +14,8 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.reactive.function.server.ServerResponse
 import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Mono
-import java.net.URI
 import java.net.URLEncoder
 import java.nio.charset.Charset.defaultCharset
 
@@ -35,12 +34,12 @@ class DiscordOauthEndpoint(private val stateService: StateService) {
 
     @GetMapping("login")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    fun login(): Mono<ServerResponse> {
+    fun login(): Mono<LoginResponse> {
         val state = stateService.generateState()
 
         val link = "$oauthLinkWithoutState&state=$state"
 
-        return ServerResponse.temporaryRedirect(URI.create(link)).build()
+        return Mono.just(LoginResponse(link))
     }
 
     @PostMapping("code")
