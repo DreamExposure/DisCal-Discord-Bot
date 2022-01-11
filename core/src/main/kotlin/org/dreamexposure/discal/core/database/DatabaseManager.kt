@@ -1868,7 +1868,7 @@ private object Queries {
     @Language("MySQL")
     val INSERT_SESSION_DATA = """INSERT INTO ${Tables.SESSIONS}
         (token, user_id, expires_at, access_token, refresh_token)
-        VALUES(?, ?, ?)
+        VALUES(?, ?, ?, ?, ?)
     """.trimMargin()
 
     @Language("MySQL")
