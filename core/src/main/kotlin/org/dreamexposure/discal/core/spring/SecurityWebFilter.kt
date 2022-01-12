@@ -83,24 +83,24 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 readOnlyKeys.containsKey(authHeader) -> { // Read-only key granted for embed pages
                     Mono.just(Authentication.AccessLevel.READ)
                 }
-                else -> {
-                    // Check if this is a logged-in user
-                    DatabaseManager.getSessionData(authHeader).flatMap { session ->
+                authHeader.startsWith("Bearer ") -> {
+                    DatabaseManager.getSessionData(authHeader.substringAfter("Bearer ")).flatMap { session ->
                         if (session.expiresAt.isAfter(Instant.now())) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
                             Mono.error(AuthenticationException("Session expired"))
                         }
-                    }.switchIfEmpty(
-                        // Check if this is an API key
-                        DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
-                            if (!acc.blocked) {
-                                Mono.just(Authentication.AccessLevel.WRITE)
-                            } else {
-                                Mono.error(AuthenticationException("API key blocked"))
-                            }
+                    }.switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
+                }
+                else -> {
+                    // Check if this is an API key
+                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
+                        if (!acc.blocked) {
+                            Mono.just(Authentication.AccessLevel.WRITE)
+                        } else {
+                            Mono.error(AuthenticationException("API key blocked"))
                         }
-                    ).switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
+                    }.switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
                 }
             }
         }.switchIfEmpty(Mono.error(IllegalStateException("uh oh")))

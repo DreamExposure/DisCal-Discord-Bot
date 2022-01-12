@@ -42,6 +42,12 @@ class DiscordOauthEndpoint(private val stateService: StateService) {
         return Mono.just(LoginResponse(link))
     }
 
+    @GetMapping("logout")
+    @Authentication(access = Authentication.AccessLevel.WRITE)
+    fun logout(@RequestHeader("Authorization") token: String): Mono<Void> {
+        return DatabaseManager.deleteSession(token).then()
+    }
+
     @PostMapping("code")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
     fun token(@RequestBody body: TokenRequest): Mono<TokenResponse> {
