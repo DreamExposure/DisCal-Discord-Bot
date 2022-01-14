@@ -89,21 +89,22 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             if (wizard.get(settings.guildID) == null) {
                 channelMono.flatMap { channel ->
-                    val pre = Announcement(settings.guildID)
-                    pre.type = type
-                    pre.announcementChannelId = channel.id.asString()
-                    pre.minutesBefore = minutes
-                    pre.hoursBefore = hours
-                    pre.calendarNumber = calendar
+                    val pre = Announcement(settings.guildID,
+                        type = type,
+                        announcementChannelId = channel.id.asString(),
+                        minutesBefore = minutes,
+                        hoursBefore = hours,
+                        calendarNumber = calendar
+                    )
                     wizard.start(pre)
 
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("create.success", settings), it) }
                 }
             } else {
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
+                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
                     .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
@@ -120,8 +121,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 pre.type = type
+
+                // Handle edge case where event is already set, but has recurrence suffix.
+                pre.eventId = pre.eventId.split("_")[0]
+
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(getMessage("type.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -147,12 +152,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                             else pre.eventId = eventId
 
                             event.interaction.guild
-                                .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                                .map { AnnouncementEmbed.pre(it, pre, settings) }
                                 .flatMap { event.followupEphemeral(getMessage("event.success", settings), it) }
                         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
                 } else {
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("event.failure.type", settings), it) }
                 }
             } else {
@@ -176,11 +181,11 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     pre.eventColor = color
 
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("color.success", settings), it) }
                 } else {
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("color.failure.type", settings), it) }
                 }
             } else {
@@ -203,7 +208,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     pre.announcementChannelId = channel.id.asString()
 
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("channel.success", settings), it) }
                 }
             } else {
@@ -224,7 +229,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             if (pre != null) {
                 pre.minutesBefore = minutes
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(getMessage("minutes.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -244,7 +249,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             if (pre != null) {
                 pre.hoursBefore = hours
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(getMessage("hours.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -263,7 +268,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             if (pre != null) {
                 pre.info = info
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(getMessage("info.success.set", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -283,7 +288,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             if (pre != null) {
                 pre.calendarNumber = calendar
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(getMessage("calendar.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -303,11 +308,11 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                 if (settings.patronGuild) {
                     pre.publish = publish
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("publish.success", settings), it) }
                 } else {
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("error.patronOnly", settings), it) }
                 }
             } else {
@@ -321,7 +326,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                    .map { AnnouncementEmbed.pre(it, pre, settings) }
                     .flatMap { event.followupEphemeral(it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -342,7 +347,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                             val msg = if (pre.editing) getMessage("confirm.success.edit", settings)
                             else getMessage("confirm.success.create", settings)
 
-                            event.interaction.guild.flatMap { AnnouncementEmbed.view(pre, it) }.flatMap { embed ->
+                            event.interaction.guild.map { AnnouncementEmbed.view(pre, it, settings) }.flatMap { embed ->
                                 event.interaction.channel.flatMap {
                                     it.createMessage(msg).withEmbeds(embed)
                                         .then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
@@ -353,13 +358,13 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                             else getMessage("confirm.failure.create", settings)
 
                             event.interaction.guild
-                                .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                                .map { AnnouncementEmbed.pre(it, pre, settings) }
                                 .flatMap { event.followupEphemeral(msg, it) }
                         }
                     }
                 } else {
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("confirm.failure.missing", settings), it) }
                 }
             } else {
@@ -389,12 +394,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     wizard.start(pre)
 
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
             } else {
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
+                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
                     .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
@@ -413,12 +418,12 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     wizard.start(pre)
 
                     event.interaction.guild
-                        .flatMap { AnnouncementEmbed.pre(it, pre, settings) }
+                        .map { AnnouncementEmbed.pre(it, pre, settings) }
                         .flatMap { event.followupEphemeral(getMessage("copy.success", settings), it) }
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
             } else {
                 event.interaction.guild
-                    .flatMap { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
+                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
                     .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
@@ -460,11 +465,11 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                 DatabaseManager.updateAnnouncement(announcement).flatMap {
                     if (enabled) {
                         event.interaction.guild
-                            .flatMap { AnnouncementEmbed.view(announcement, it) }
+                            .map { AnnouncementEmbed.view(announcement, it, settings) }
                             .flatMap { event.followupEphemeral(getMessage("enable.success", settings), it) }
                     } else {
                         event.interaction.guild
-                            .flatMap { AnnouncementEmbed.view(announcement, it) }
+                            .map { AnnouncementEmbed.view(announcement, it, settings) }
                             .flatMap { event.followupEphemeral(getMessage("disable.success", settings), it) }
                     }
                 }
@@ -480,7 +485,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
 
         return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
             val guildMono = event.interaction.guild.cache()
-            val embedMono = guildMono.flatMap { AnnouncementEmbed.view(announcement, it) }
+            val embedMono = guildMono.map { AnnouncementEmbed.view(announcement, it, settings) }
             val subscribersMono = guildMono.flatMap { it.buildMentions(announcement) }
 
             Mono.zip(embedMono, subscribersMono).flatMap(TupleUtils.function { embed, subs ->
@@ -536,7 +541,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             if (announcements.isEmpty()) {
                 event.followupEphemeral(getMessage("list.success.none", settings))
             } else if (announcements.size == 1) {
-                event.interaction.guild.flatMap { AnnouncementEmbed.view(announcements[0], it) }.flatMap {
+                event.interaction.guild.map { AnnouncementEmbed.view(announcements[0], it, settings) }.flatMap {
                     event.createFollowup(InteractionFollowupCreateSpec.builder()
                         .content(getMessage("list.success.one", settings))
                         .addEmbed(it)
@@ -551,7 +556,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                 val successMessage = event.followupEphemeral(getMessage("list.success.many", settings, "$limit"))
                 val condAns = guildMono.flatMapMany { guild ->
                     Flux.fromIterable(announcements.subList(0, limit)).flatMap { a ->
-                        AnnouncementEmbed.condensed(a, guild).flatMap(event::followupEphemeral)
+                        event.followupEphemeral(AnnouncementEmbed.condensed(a, guild, settings))
                     }
                 }
 
@@ -581,28 +586,24 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                         announcement.subscriberUserIds.add(member.id.asString())
 
                         DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                                event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                    .content(getMessage("subscribe.success.other", settings, member.nicknameMention))
-                                    .addEmbed(embed)
-                                    .allowedMentions(AllowedMentions.suppressAll())
-                                    .build()
-                                )
-                            }
+                            event.createFollowup(InteractionFollowupCreateSpec.builder()
+                                .content(getMessage("subscribe.success.other", settings, member.nicknameMention))
+                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
+                                .allowedMentions(AllowedMentions.suppressAll())
+                                .build()
+                            )
                         }
                     }.switchIfEmpty(roleMono.flatMap { role ->
                         announcement.subscriberRoleIds.remove(role.id.asString())
                         announcement.subscriberRoleIds.add(role.id.asString())
 
                         DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                                event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                    .content(getMessage("subscribe.success.other", settings, role.mention))
-                                    .addEmbed(embed)
-                                    .allowedMentions(AllowedMentions.suppressAll())
-                                    .build()
-                                )
-                            }
+                            event.createFollowup(InteractionFollowupCreateSpec.builder()
+                                .content(getMessage("subscribe.success.other", settings, role.mention))
+                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
+                                .allowedMentions(AllowedMentions.suppressAll())
+                                .build()
+                            )
                         }
                     })
                 } else {
@@ -610,9 +611,10 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     announcement.subscriberUserIds.add(event.interaction.user.id.asString())
 
                     DatabaseManager.updateAnnouncement(announcement).flatMap {
-                        AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                            event.followupEphemeral(getMessage("subscribe.success.self", settings), embed)
-                        }
+                        event.followupEphemeral(
+                            getMessage("subscribe.success.self", settings),
+                            AnnouncementEmbed.view(announcement, guild, settings)
+                        )
                     }
                 }
             }
@@ -639,36 +641,33 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                         announcement.subscriberUserIds.remove(member.id.asString())
 
                         DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                                event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                    .content(getMessage("unsubscribe.success.other", settings, member.nicknameMention))
-                                    .addEmbed(embed)
-                                    .allowedMentions(AllowedMentions.suppressAll())
-                                    .build()
-                                )
-                            }
+                            event.createFollowup(InteractionFollowupCreateSpec.builder()
+                                .content(getMessage("unsubscribe.success.other", settings, member.nicknameMention))
+                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
+                                .allowedMentions(AllowedMentions.suppressAll())
+                                .build()
+                            )
                         }
                     }.switchIfEmpty(roleMono.flatMap { role ->
                         announcement.subscriberRoleIds.remove(role.id.asString())
 
                         DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                                event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                    .content(getMessage("unsubscribe.success.other", settings, role.mention))
-                                    .addEmbed(embed)
-                                    .allowedMentions(AllowedMentions.suppressAll())
-                                    .build()
-                                )
-                            }
+                            event.createFollowup(InteractionFollowupCreateSpec.builder()
+                                .content(getMessage("unsubscribe.success.other", settings, role.mention))
+                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
+                                .allowedMentions(AllowedMentions.suppressAll())
+                                .build()
+                            )
                         }
                     })
                 } else {
                     announcement.subscriberUserIds.remove(event.interaction.user.id.asString())
 
                     DatabaseManager.updateAnnouncement(announcement).flatMap {
-                        AnnouncementEmbed.view(announcement, guild).flatMap { embed ->
-                            event.followupEphemeral(getMessage("unsubscribe.success.self", settings), embed)
-                        }
+                        event.followupEphemeral(
+                            getMessage("unsubscribe.success.self", settings),
+                            AnnouncementEmbed.view(announcement, guild, settings)
+                        )
                     }
                 }
             }

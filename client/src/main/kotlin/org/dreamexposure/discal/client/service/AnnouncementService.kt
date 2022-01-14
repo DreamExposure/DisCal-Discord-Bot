@@ -94,7 +94,7 @@ class AnnouncementService : ApplicationRunner {
                     .filterWhen { isInRange(announcement, it) }
                     .flatMap { sendAnnouncement(guild, announcement, it) }
                       // Delete specific announcement after posted
-                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id.toString()) }
+                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then()
             }
             UNIVERSAL -> {
@@ -147,7 +147,7 @@ class AnnouncementService : ApplicationRunner {
         if (difference < 0) {
             //event past, delete if specific type
             if (announcement.type == SPECIFIC) {
-                return DatabaseManager.deleteAnnouncement(announcement.id.toString())
+                return DatabaseManager.deleteAnnouncement(announcement.id)
                     .thenReturn(false)
             }
             return Mono.just(false)
@@ -180,7 +180,7 @@ class AnnouncementService : ApplicationRunner {
                 Mono.just(it)
                     .filter(HttpResponseStatus.NOT_FOUND::equals)
                       // Channel announcement should post to was deleted
-                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id.toString()) }
+                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then(Mono.empty())
             }
     }

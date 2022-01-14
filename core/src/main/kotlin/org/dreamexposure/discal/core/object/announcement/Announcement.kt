@@ -23,38 +23,38 @@ data class Announcement(
 
     @Transient
     override val editing: Boolean = false,
-) : Pre(guildId) {
 
     @SerialName("subscriber_roles")
-    val subscriberRoleIds: MutableList<String> = mutableListOf()
+    val subscriberRoleIds: MutableList<String> = mutableListOf(),
 
     @SerialName("subscriber_users")
-    val subscriberUserIds: MutableList<String> = arrayListOf()
+val subscriberUserIds: MutableList<String> = arrayListOf(),
 
-    @SerialName("channel_id")
-    var announcementChannelId: String = "N/a"
-    var type = AnnouncementType.UNIVERSAL
-    var modifier = AnnouncementModifier.BEFORE
+@SerialName("channel_id")
+var announcementChannelId: String = "N/a",
+var type: AnnouncementType = AnnouncementType.UNIVERSAL,
+var modifier: AnnouncementModifier = AnnouncementModifier.BEFORE,
 
-    @SerialName("calendar_number")
-    var calendarNumber: Int = 1
+@SerialName("calendar_number")
+var calendarNumber: Int = 1,
 
-    @SerialName("event_id")
-    var eventId: String = "N/a"
+@SerialName("event_id")
+var eventId: String = "N/a",
 
-    @SerialName("event_color")
-    var eventColor = EventColor.NONE
+@SerialName("event_color")
+var eventColor: EventColor = EventColor.NONE,
 
-    @SerialName("hours")
-    var hoursBefore = 0
+@SerialName("hours")
+var hoursBefore: Int = 0,
 
-    @SerialName("minutes")
-    var minutesBefore = 0
-    var info = "None"
+@SerialName("minutes")
+var minutesBefore: Int = 0,
+var info: String = "None",
 
-    var enabled = true
+var enabled: Boolean = true,
 
-    var publish = false
+var publish: Boolean = false,
+) : Pre(guildId) {
 
     fun setSubscriberRoleIdsFromString(subList: String) {
         this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
