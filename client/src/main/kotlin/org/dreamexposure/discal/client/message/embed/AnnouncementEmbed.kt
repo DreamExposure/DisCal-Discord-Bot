@@ -199,7 +199,7 @@ object AnnouncementEmbed : EmbedMaker {
             .title(getMessage("announcement", "view.title", settings))
             .addField(getMessage("announcement", "view.field.type", settings), ann.type.name, true)
             .addField(getMessage("announcement", "view.field.modifier", settings), ann.modifier.name, true)
-            .addField(getMessage("announcement", "view.field.channel", settings), "<${ann.announcementChannelId}>", false)
+            .addField(getMessage("announcement", "view.field.channel", settings), "<#${ann.announcementChannelId}>", false)
             .addField(getMessage("announcement", "view.field.hours", settings), "${ann.hoursBefore}", true)
             .addField(getMessage("announcement", "view.field.minutes", settings), "${ann.minutesBefore}", true)
 
