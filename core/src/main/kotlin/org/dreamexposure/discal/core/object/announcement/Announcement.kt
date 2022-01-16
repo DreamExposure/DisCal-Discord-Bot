@@ -25,43 +25,43 @@ data class Announcement(
     override val editing: Boolean = false,
 
     @SerialName("subscriber_roles")
-    val subscriberRoleIds: MutableList<String> = mutableListOf(),
+    var subscriberRoleIds: MutableList<String> = mutableListOf(),
 
     @SerialName("subscriber_users")
-val subscriberUserIds: MutableList<String> = arrayListOf(),
+    var subscriberUserIds: MutableList<String> = arrayListOf(),
 
-@SerialName("channel_id")
-var announcementChannelId: String = "N/a",
-var type: AnnouncementType = AnnouncementType.UNIVERSAL,
-var modifier: AnnouncementModifier = AnnouncementModifier.BEFORE,
+    @SerialName("channel_id")
+    var announcementChannelId: String = "N/a",
+    var type: AnnouncementType = AnnouncementType.UNIVERSAL,
+    var modifier: AnnouncementModifier = AnnouncementModifier.BEFORE,
 
-@SerialName("calendar_number")
-var calendarNumber: Int = 1,
+    @SerialName("calendar_number")
+    var calendarNumber: Int = 1,
 
-@SerialName("event_id")
-var eventId: String = "N/a",
+    @SerialName("event_id")
+    var eventId: String = "N/a",
 
-@SerialName("event_color")
-var eventColor: EventColor = EventColor.NONE,
+    @SerialName("event_color")
+    var eventColor: EventColor = EventColor.NONE,
 
-@SerialName("hours")
-var hoursBefore: Int = 0,
+    @SerialName("hours")
+    var hoursBefore: Int = 0,
 
-@SerialName("minutes")
-var minutesBefore: Int = 0,
-var info: String = "None",
+    @SerialName("minutes")
+    var minutesBefore: Int = 0,
+    var info: String = "None",
 
-var enabled: Boolean = true,
+    var enabled: Boolean = true,
 
-var publish: Boolean = false,
+    var publish: Boolean = false,
 ) : Pre(guildId) {
 
     fun setSubscriberRoleIdsFromString(subList: String) {
-        this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
+        this.subscriberRoleIds = subList.split(",").filter(String::isNotBlank).toMutableList()
     }
 
     fun setSubscriberUserIdsFromString(subList: String) {
-        this.subscriberUserIds += subList.split(",").filter(String::isNotBlank)
+        this.subscriberUserIds = subList.split(",").filter(String::isNotBlank).toMutableList()
     }
 
     fun hasRequiredValues(): Boolean {
@@ -87,9 +87,9 @@ var publish: Boolean = false,
     fun buildMentions(): String {
         if (subscriberUserIds.isEmpty() && subscriberRoleIds.isEmpty()) return ""
 
-        val userMentions = subscriberUserIds.map { "<@$it> " }
+        val userMentions = subscriberUserIds.toList().map { "<@$it> " }
 
-        val roleMentions = subscriberRoleIds.map {
+        val roleMentions = subscriberRoleIds.toList().map {
             if (it.equals("everyone", true)) "@everyone "
             else if (it.equals("here", true)) "@here "
             else "<@&$it> "

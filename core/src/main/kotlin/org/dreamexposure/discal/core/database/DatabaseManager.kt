@@ -250,7 +250,7 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENT_BY_GUILD)
                     .bind(0, announcement.guildId.asString())
-                    .bind(1, announcement.id.toString())
+                    .bind(1, announcement.id)
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
@@ -279,7 +279,7 @@ object DatabaseManager {
                             .bind(10, announcement.info)
                             .bind(11, announcement.enabled)
                             .bind(12, announcement.publish)
-                            .bind(13, announcement.id.toString())
+                            .bind(13, announcement.id)
                             .bind(14, announcement.guildId.asString())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
@@ -295,7 +295,7 @@ object DatabaseManager {
 
                     Mono.from(
                         c.createStatement(insertCommand)
-                            .bind(0, announcement.id.toString())
+                            .bind(0, announcement.id)
                             .bind(1, announcement.calendarNumber)
                             .bind(2, announcement.guildId.asString())
                             .bind(3, announcement.subscriberRoleIds.asStringList())
@@ -750,7 +750,7 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENT_BY_GUILD)
                     .bind(0, guildId.asString())
-                    .bind(1, announcementId.toString())
+                    .bind(1, announcementId)
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
