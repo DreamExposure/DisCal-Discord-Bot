@@ -83,4 +83,23 @@ var publish: Boolean = false,
 
         return warnings
     }
+
+    fun buildMentions(): String {
+        if (subscriberUserIds.isEmpty() && subscriberRoleIds.isEmpty()) return ""
+
+        val userMentions = subscriberUserIds
+            .map { "<@$it> " }
+
+        val roleMentions = subscriberRoleIds.map {
+            if (it.equals("everyone", true)) "@everyone "
+            else if (it.equals("here", true)) "@here "
+            else "<@&$it> "
+        }
+
+        return StringBuilder()
+            .append("Subscribers: ")
+            .append(*userMentions.toTypedArray())
+            .append(*roleMentions.toTypedArray())
+            .toString()
+    }
 }

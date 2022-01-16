@@ -16,12 +16,14 @@ import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.extensions.discord4j.*
+import org.dreamexposure.discal.core.extensions.discord4j.followup
+import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 
 @Component
 class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
@@ -484,18 +486,14 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             .get()
 
         return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-            val guildMono = event.interaction.guild.cache()
-            val embedMono = guildMono.map { AnnouncementEmbed.view(announcement, it, settings) }
-            val subscribersMono = guildMono.flatMap { it.buildMentions(announcement) }
-
-            Mono.zip(embedMono, subscribersMono).flatMap(TupleUtils.function { embed, subs ->
+            return@flatMap event.interaction.guild.map { AnnouncementEmbed.view(announcement, it, settings) }.flatMap { embed ->
                 event.createFollowup(InteractionFollowupCreateSpec.builder()
-                    .content(subs)
+                    .content(announcement.buildMentions())
                     .addEmbed(embed)
                     .allowedMentions(AllowedMentions.suppressAll())
                     .build()
                 )
-            })
+            }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
     }
 
