@@ -2,12 +2,26 @@ package org.dreamexposure.discal.core.`object`.event
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Role
+import discord4j.core.spec.EmbedCreateSpec
 import discord4j.rest.http.client.ClientException
+import discord4j.rest.util.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
+import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
+import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.embedFieldSafe
+import org.dreamexposure.discal.core.extensions.toMarkdown
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
+import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.getEmbedMessage
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.concurrent.CopyOnWriteArrayList
@@ -77,6 +91,8 @@ data class RsvpData(
         else goingOnTime.contains(userId) || goingLate.contains(userId)
     }
 
+    private fun hasRoom() = limit < 0 || getCurrentCount() + 1 <= limit
+
     fun setRole(id: Snowflake, client: DiscordClient): Mono<Void> {
         roleId = id
 
@@ -115,20 +131,28 @@ data class RsvpData(
 
     //Functions
     fun removeCompletely(userId: String, client: DiscordClient, doWaitlistOp: Boolean = false): Mono<Void> {
+        // Remove from all lists
         goingOnTime.removeAll { userId == it }
         goingLate.removeAll { userId == it }
         notGoing.removeAll { userId == it }
         undecided.removeAll { userId == it }
         waitlist.removeAll { userId == it }
 
-        if (doWaitlistOp && waitlist.isNotEmpty()) {
-            val waitlistUser = waitlist.removeFirst()
-
-            TODO("Check waitlist and add user to going if they are in it")
+        // Remove role if one is set
+        val roleMono = if (roleId != null) {
+            removeRole(userId, roleId!!, "Removed RSVP to event with ID $eventId", client)
+        } else {
+            Mono.empty()
         }
 
-        return if (roleId != null) removeRole(userId, roleId!!, "Removed RSVP to event with ID $eventId", client)
-        else Mono.empty()
+        // If there is now room, add the next waiting user as going
+        val waitListMono = if (doWaitlistOp && waitlist.isNotEmpty() && hasRoom(waitlist.first())) {
+            handleWaitListedUser(waitlist.removeFirst(), client)
+        } else {
+            Mono.empty()
+        }
+
+        return roleMono.then(waitListMono)
     }
 
     fun removeCompletely(member: Member, doWaitlistOp: Boolean = false): Mono<Void> =
@@ -168,12 +192,28 @@ data class RsvpData(
 
     fun handleWaitListedUser(member: Member): Mono<Void> = handleWaitListedUser(member.id.asString(), member.client.rest())
 
-    fun fillRemaining(client: DiscordClient): Mono<Void> {
-        //TODO: Determine if there are remaining slots open
+    fun fillRemaining(guild: Guild, settings: GuildSettings): Mono<Void> {
+        val eventMono = guild.getCalendar(calendarNumber).flatMap { it.getEvent(eventId) }.cache()
 
-        //TODO: Add users from waitlist one by one until there are no more slots open
-
-        TODO("Not yet implemented")
+        return Flux.fromIterable(waitlist)
+            .takeWhile { hasRoom() }
+            .concatMap { userId ->
+                /* Add the user as attending on time
+                (it would be rude to show up late if other people want to attend the full event)
+                */
+                addGoingOnTime(userId, guild.client.rest()).then(eventMono).flatMap { event ->
+                    // Send DM
+                    guild.getMemberById(Snowflake.of(userId)).flatMap { it.privateChannel }.flatMap { channel ->
+                        channel.createMessage(followupEmbed(guild, settings, userId, event))
+                    }.doOnError {
+                        LOGGER.error("Failed to DM user for RSVP followup", it)
+                    }.onErrorResume { Mono.empty() } // if we couldn't DM, just fail.
+                }
+            }.doOnError {
+                LOGGER.error(GlobalVal.DEFAULT, "RSVP waitlist processing failed", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.then()
     }
 
     fun addGoingLate(member: Member): Mono<Void> = addGoingLate(member.id.asString(), member.client.rest())
@@ -198,5 +238,36 @@ data class RsvpData(
         return client.getGuildById(this.guildId)
             .removeMemberRole(Snowflake.of(userId), roleId, reason)
             .onErrorResume(ClientException::class.java) { Mono.empty() }
+    }
+
+    private fun followupEmbed(guild: Guild, settings: GuildSettings, userId: String, event: Event): EmbedCreateSpec {
+
+        val iconUrl = guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.iconUrl)
+
+        val builder = EmbedCreateSpec.builder()
+            // Even without branding enabled, we want the user to know what guild this is because it's in DMs
+            .author(guild.name, BotSettings.BASE_URL.get(), iconUrl)
+            .title(getEmbedMessage("rsvp", "waitlist.title", settings))
+            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name, event.eventId))
+            .addField(
+                getEmbedMessage("rsvp", "waitlist.field.start", settings),
+                event.start.asDiscordTimestamp(LONG_DATETIME),
+                true
+            ).addField(
+                getEmbedMessage("rsvp", "waitlist.field.end", settings),
+                event.end.asDiscordTimestamp(LONG_DATETIME),
+                true
+            ).footer(getEmbedMessage("rsvp", "waitlist.footer", settings, event.eventId), null)
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("rsvp", "waitlist.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotBlank()) builder.thumbnail(event.image)
+
+
+        return builder.build()
     }
 }

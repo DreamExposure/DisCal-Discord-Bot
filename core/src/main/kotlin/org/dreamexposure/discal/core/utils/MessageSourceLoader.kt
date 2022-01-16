@@ -37,3 +37,9 @@ fun getEmbedMessage(embed: String, key: String, settings: GuildSettings, vararg 
 
     return src.getMessage(key, args, settings.getLocale())
 }
+
+fun getCmdMessage(cmd: String, key: String, settings: GuildSettings, vararg args: String): String {
+    val src = MessageSourceLoader.getSourceByPath("command/$cmd/$cmd")
+
+    return src.getMessage(key, args, settings.getLocale())
+}

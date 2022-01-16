@@ -47,8 +47,16 @@ object RsvpEmbed : EmbedMaker {
             .map(MutableList<String>::asStringList)
             .map { it.ifEmpty { "N/a" } }
 
-        //TODO: Waitlist users (show up to 3, with (+X) if there are more)
-        val waitListMono = Mono.just("User1, User2 + 3 more")
+        // Wait list users (show up to 3, with (+X) if there are more)
+        val display = 3
+        val waitListMono = guild.getMembersFromId(rsvp.waitlist.take(display))
+            .map(Member::getUsername)
+            .collectList()
+            .map { list ->
+                if (rsvp.waitlist.size > display) "${list.asStringList()} +${rsvp.waitlist.size - display} more"
+                else if (list.isNotEmpty()) list.asStringList()
+                else "N/a"
+            }
 
         return Mono.zip(roleMono, onTimeMono, lateMono, undecidedMono, notMono, waitListMono)
             .map(TupleUtils.function { role, onTime, late, undecided, notGoing, waitList ->
@@ -66,7 +74,7 @@ object RsvpEmbed : EmbedMaker {
                     .addField(getMessage("rsvp", "list.field.late", settings), late, false)
                     .addField(getMessage("rsvp", "list.field.unsure", settings), undecided, false)
                     .addField(getMessage("rsvp", "list.field.notGoing", settings), notGoing, false)
-                    .addField(getMessage("rsvp", "list.field.waitlist", settings), waitList, false)
+                    .addField(getMessage("rsvp", "list.field.waitList", settings), waitList, false)
                     .footer(getMessage("rsvp", "list.footer", settings), null)
                     .build()
             })
