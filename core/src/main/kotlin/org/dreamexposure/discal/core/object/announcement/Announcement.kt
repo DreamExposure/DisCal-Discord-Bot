@@ -25,10 +25,10 @@ data class Announcement(
     override val editing: Boolean = false,
 
     @SerialName("subscriber_roles")
-    var subscriberRoleIds: MutableList<String> = mutableListOf(),
+    val subscriberRoleIds: MutableList<String> = mutableListOf(),
 
     @SerialName("subscriber_users")
-    var subscriberUserIds: MutableList<String> = arrayListOf(),
+    val subscriberUserIds: MutableList<String> = arrayListOf(),
 
     @SerialName("channel_id")
     var announcementChannelId: String = "N/a",
@@ -57,11 +57,11 @@ data class Announcement(
 ) : Pre(guildId) {
 
     fun setSubscriberRoleIdsFromString(subList: String) {
-        this.subscriberRoleIds = subList.split(",").filter(String::isNotBlank).toMutableList()
+        this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
     }
 
     fun setSubscriberUserIdsFromString(subList: String) {
-        this.subscriberUserIds = subList.split(",").filter(String::isNotBlank).toMutableList()
+        this.subscriberUserIds += subList.split(",").filter(String::isNotBlank)
     }
 
     fun hasRequiredValues(): Boolean {
@@ -87,9 +87,9 @@ data class Announcement(
     fun buildMentions(): String {
         if (subscriberUserIds.isEmpty() && subscriberRoleIds.isEmpty()) return ""
 
-        val userMentions = subscriberUserIds.toList().map { "<@$it> " }
+        val userMentions = subscriberUserIds.map { "<@$it> " }
 
-        val roleMentions = subscriberRoleIds.toList().map {
+        val roleMentions = subscriberRoleIds.map {
             if (it.equals("everyone", true)) "@everyone "
             else if (it.equals("here", true)) "@here "
             else "<@&$it> "
