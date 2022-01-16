@@ -20,6 +20,7 @@ import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
+import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -488,7 +489,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
         return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
             return@flatMap event.interaction.guild.map { AnnouncementEmbed.view(announcement, it, settings) }.flatMap { embed ->
                 event.createFollowup(InteractionFollowupCreateSpec.builder()
-                    .content(announcement.buildMentions())
+                    .content(announcement.buildMentions().messageContentSafe())
                     .addEmbed(embed)
                     .allowedMentions(AllowedMentions.suppressAll())
                     .build()

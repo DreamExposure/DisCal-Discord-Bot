@@ -87,8 +87,7 @@ var publish: Boolean = false,
     fun buildMentions(): String {
         if (subscriberUserIds.isEmpty() && subscriberRoleIds.isEmpty()) return ""
 
-        val userMentions = subscriberUserIds
-            .map { "<@$it> " }
+        val userMentions = subscriberUserIds.map { "<@$it> " }
 
         val roleMentions = subscriberRoleIds.map {
             if (it.equals("everyone", true)) "@everyone "

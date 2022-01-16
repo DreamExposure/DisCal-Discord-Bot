@@ -19,6 +19,7 @@ import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
@@ -159,7 +160,7 @@ class AnnouncementService : ApplicationRunner {
                 AnnouncementEmbed.determine(announcement, event, guild).flatMap { embed ->
                     channel.createMessage(
                         MessageCreateSpec.builder()
-                            .content(announcement.buildMentions())
+                            .content(announcement.buildMentions().messageContentSafe())
                             .addEmbed(embed)
                             .build()
                     )
