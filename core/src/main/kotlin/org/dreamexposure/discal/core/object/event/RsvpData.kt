@@ -113,7 +113,7 @@ data class RsvpData(
     }
 
     //Functions
-    fun removeCompletely(userId: String, client: DiscordClient, doWaitlistOp: Boolean = false): Mono<Void> {
+    fun removeCompletely(userId: String, client: DiscordClient, doWaitlistOp: Boolean = false): Mono<RsvpData> {
         // Remove from all lists
         goingOnTime.removeAll { userId == it }
         goingLate.removeAll { userId == it }
@@ -135,11 +135,12 @@ data class RsvpData(
             Mono.empty()
         }
 
-        return roleMono.then(waitListMono)
+        return roleMono.then(waitListMono).thenReturn(this)
     }
 
-    fun removeCompletely(member: Member, doWaitlistOp: Boolean = false): Mono<Void> =
-        removeCompletely(member.id.asString(), member.client.rest(), doWaitlistOp)
+    fun removeCompletely(member: Member, doWaitlistOp: Boolean = false): Mono<RsvpData> {
+        return removeCompletely(member.id.asString(), member.client.rest(), doWaitlistOp)
+    }
 
     fun addGoingOnTime(userId: String, client: DiscordClient): Mono<Void> {
         return Mono.just(userId)

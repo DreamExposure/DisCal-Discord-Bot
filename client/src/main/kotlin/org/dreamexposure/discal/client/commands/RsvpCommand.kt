@@ -143,7 +143,7 @@ class RsvpCommand : SlashCommand {
                     if (!calEvent.isOver()) {
                         val member = event.interaction.member.get()
                         calEvent.getRsvp()
-                            .flatMap { it.removeCompletely(member).thenReturn(it) }
+                            .flatMap { it.removeCompletely(member) }
                             .doOnNext { it.undecided.add(member.id.asString()) }
                             .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
                             .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
@@ -176,7 +176,7 @@ class RsvpCommand : SlashCommand {
                     if (!calEvent.isOver()) {
                         val member = event.interaction.member.get()
                         calEvent.getRsvp()
-                            .flatMap { it.removeCompletely(member).thenReturn(it) }
+                            .flatMap { it.removeCompletely(member) }
                             .doOnNext { it.notGoing.add(member.id.asString()) }
                             .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
                             .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
@@ -211,7 +211,7 @@ class RsvpCommand : SlashCommand {
                         calEvent.getRsvp().flatMap { rsvp ->
                             // Add next person on waitlist if this user was previously going to attend
                             rsvp.removeCompletely(member, true)
-                                .then(calEvent.updateRsvp(rsvp))
+                                .flatMap {  calEvent.updateRsvp(it) }
                                 .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
                                 .flatMap { event.followupEphemeral(getMessage("remove.success", settings), it) }
                         }
