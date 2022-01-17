@@ -24,38 +24,38 @@ data class Announcement(
 
     @Transient
     override val editing: Boolean = false,
-) : Pre(guildId) {
 
     @SerialName("subscriber_roles")
-    val subscriberRoleIds: MutableList<String> = CopyOnWriteArrayList()
+    val subscriberRoleIds: MutableList<String> = CopyOnWriteArrayList(),
 
     @SerialName("subscriber_users")
-    val subscriberUserIds: MutableList<String> = CopyOnWriteArrayList()
+    val subscriberUserIds: MutableList<String> = CopyOnWriteArrayList(),
 
     @SerialName("channel_id")
-    var announcementChannelId: String = "N/a"
-    var type = AnnouncementType.UNIVERSAL
-    var modifier = AnnouncementModifier.BEFORE
+    var announcementChannelId: String = "N/a",
+    var type: AnnouncementType = AnnouncementType.UNIVERSAL,
+    var modifier: AnnouncementModifier = AnnouncementModifier.BEFORE,
 
     @SerialName("calendar_number")
-    var calendarNumber: Int = 1
+    var calendarNumber: Int = 1,
 
     @SerialName("event_id")
-    var eventId: String = "N/a"
+    var eventId: String = "N/a",
 
     @SerialName("event_color")
-    var eventColor = EventColor.NONE
+    var eventColor: EventColor = EventColor.NONE,
 
     @SerialName("hours")
-    var hoursBefore = 0
+    var hoursBefore: Int = 0,
 
     @SerialName("minutes")
-    var minutesBefore = 0
-    var info = "None"
+    var minutesBefore: Int = 0,
+    var info: String = "None",
 
-    var enabled = true
+    var enabled: Boolean = true,
 
-    var publish = false
+    var publish: Boolean = false,
+) : Pre(guildId) {
 
     fun setSubscriberRoleIdsFromString(subList: String) {
         this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
@@ -83,5 +83,23 @@ data class Announcement(
             warnings.add(getEmbedMessage("announcement", "warning.wizard.calNum", settings))
 
         return warnings
+    }
+
+    fun buildMentions(): String {
+        if (subscriberUserIds.isEmpty() && subscriberRoleIds.isEmpty()) return ""
+
+        val userMentions = subscriberUserIds.map { "<@$it> " }
+
+        val roleMentions = subscriberRoleIds.map {
+            if (it.equals("everyone", true)) "@everyone "
+            else if (it.equals("here", true)) "@here "
+            else "<@&$it> "
+        }
+
+        return StringBuilder()
+            .append("Subscribers: ")
+            .append(*userMentions.toTypedArray())
+            .append(*roleMentions.toTypedArray())
+            .toString()
     }
 }

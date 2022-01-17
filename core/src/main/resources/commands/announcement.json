@@ -37,7 +37,7 @@
           "type": 7,
           "description": "The channel to post the announcement in",
           "required": false,
-          "chanel_types": [0, 2, 5]
+          "channel_types": [0, 2, 5]
         },
         {
           "name": "minutes",
@@ -184,7 +184,7 @@
           "type": 7,
           "description": "The channel to post the announcement in",
           "required": true,
-          "chanel_types": [0, 2, 5]
+          "channel_types": [0, 2, 5]
         }
       ]
     },

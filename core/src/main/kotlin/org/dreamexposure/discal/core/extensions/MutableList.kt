@@ -13,7 +13,7 @@ fun MutableList<String>.asStringList(): String {
     for ((i, str) in this.withIndex()) {
         if (str.isNotBlank()) {
             if (i == 0) builder.append(str)
-            else builder.append(",").append(builder)
+            else builder.append(",").append(str)
         }
     }
 

@@ -114,11 +114,11 @@ object GoogleAuth {
 
                     if (body.error == "invalid_grant") {
                         LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")
-                        Mono.error<CredentialData>(AccessRevokedException())
+                        Mono.error(AccessRevokedException())
                     } else {
                         LOGGER.debug(DEFAULT, "[Google] Error requesting new access token | ${response.code} | ${response.message} | $body")
+                        Mono.empty()
                     }
-                    Mono.empty()
                 }
                 else -> {
                     // Failed to get OK. Send debug info

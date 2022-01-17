@@ -14,7 +14,6 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 
 //Settings
 fun Guild.getSettings(): Mono<GuildSettings> = getRestGuild().getSettings()
@@ -108,69 +107,36 @@ fun Guild.updateAnnouncement(ann: Announcement): Mono<Boolean> = getRestGuild().
 
 fun Guild.deleteAnnouncement(id: String): Mono<Boolean> = getRestGuild().deleteAnnouncement(id)
 
-fun Guild.buildMentions(announcement: Announcement): Mono<String> {
-    val userMentions = Flux.fromIterable(announcement.subscriberUserIds)
-        .flatMap { this.getMemberById(Snowflake.of(it)) }
-        .map { it.nicknameMention }
-        .onErrorReturn("")
-        .collectList()
-        .defaultIfEmpty(listOf())
-
-    val roleMentions = Flux.fromIterable(announcement.subscriberRoleIds)
-        .flatMap {
-            if (it.equals("everyone", true)) Mono.just("@everyone")
-            else if (it.equals("here", true)) Mono.just("@here")
-            else this.getRoleById(Snowflake.of(it)).map(Role::getMention)
-        }
-        .onErrorReturn("")
-        .collectList()
-        .defaultIfEmpty(listOf())
-
-    return Mono.zip(userMentions, roleMentions).map(TupleUtils.function { users, roles ->
-        if (users.isEmpty() && roles.isEmpty()) ""
-        else {
-            val mentions = StringBuilder()
-
-            mentions.append("Subscribers: ")
-
-            for (u in users) mentions.append("$u ")
-            for (r in roles) mentions.append("$r ")
-
-            mentions.toString()
-        }
-    })
-}
-
 fun Guild.getControlRole(): Mono<Role> {
     return getSettings().flatMap { settings ->
         if (settings.controlRole.equals("everyone", true))
             return@flatMap this.everyoneRole
         else {
             return@flatMap getRoleById(Snowflake.of(settings.controlRole))
-                  .onErrorResume(ClientException::class.java) {
-                      //If control role is deleted/not found, we reset it to everyone
-                      if (it.status == HttpResponseStatus.NOT_FOUND) {
-                          settings.controlRole = "everyone"
-                          DatabaseManager.updateSettings(settings).then(everyoneRole)
-                      } else
-                          everyoneRole
-                  }
+                .onErrorResume(ClientException::class.java) {
+                    //If control role is deleted/not found, we reset it to everyone
+                    if (it.status == HttpResponseStatus.NOT_FOUND) {
+                        settings.controlRole = "everyone"
+                        DatabaseManager.updateSettings(settings).then(everyoneRole)
+                    } else
+                        everyoneRole
+                }
         }
     }
 }
 
 fun Guild.getMemberFromStringId(id: String): Mono<Member> {
     return Mono.just(id)
-          .filter(String::isNotEmpty)
-          .filter { it.matches(Regex("[0-9]+")) }
-          .map(Snowflake::of)
-          .flatMap(this::getMemberById)
-          .onErrorResume { Mono.empty() }
+        .filter(String::isNotEmpty)
+        .filter { it.matches(Regex("[0-9]+")) }
+        .map(Snowflake::of)
+        .flatMap(this::getMemberById)
+        .onErrorResume { Mono.empty() }
 }
 
 fun Guild.getMembersFromId(ids: List<String>): Flux<Member> {
     return Flux.fromIterable(ids)
-          .flatMap(this::getMemberFromStringId)
+        .flatMap(this::getMemberFromStringId)
 }
 
 fun Guild.getRestGuild(): RestGuild {

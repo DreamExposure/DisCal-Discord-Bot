@@ -18,8 +18,8 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType.*
-import org.dreamexposure.discal.core.extensions.discord4j.buildMentions
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
@@ -27,7 +27,6 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -89,12 +88,12 @@ class AnnouncementService : ApplicationRunner {
             SPECIFIC -> {
                 return getCalendar(guild, announcement)
                     .flatMap { it.getEvent(announcement.eventId) }
-                      //Event announcement is tied to was deleted -- This should now be handled at a lower level
+                    //Event announcement is tied to was deleted -- This should now be handled at a lower level
                     //.switchIfEmpty(DatabaseManager.deleteAnnouncement(announcement.id.toString()).then(Mono.empty()))
                     .filterWhen { isInRange(announcement, it) }
                     .flatMap { sendAnnouncement(guild, announcement, it) }
-                      // Delete specific announcement after posted
-                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id.toString()) }
+                    // Delete specific announcement after posted
+                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then()
             }
             UNIVERSAL -> {
@@ -147,7 +146,7 @@ class AnnouncementService : ApplicationRunner {
         if (difference < 0) {
             //event past, delete if specific type
             if (announcement.type == SPECIFIC) {
-                return DatabaseManager.deleteAnnouncement(announcement.id.toString())
+                return DatabaseManager.deleteAnnouncement(announcement.id)
                     .thenReturn(false)
             }
             return Mono.just(false)
@@ -155,23 +154,17 @@ class AnnouncementService : ApplicationRunner {
     }
 
     private fun sendAnnouncement(guild: Guild, announcement: Announcement, event: Event): Mono<Message> {
-        val embedMono = AnnouncementEmbed.determine(announcement, event, guild)
-        val mentionsMono = guild.buildMentions(announcement).onErrorReturn("")
-
         return guild.getChannelById(Snowflake.of(announcement.announcementChannelId))
             .ofType(GuildMessageChannel::class.java)
             .flatMap { channel ->
-                Mono.zip(embedMono, mentionsMono).flatMap(TupleUtils.function { embed, mentions ->
-                    if (mentions.isEmpty())
-                        return@function channel.createMessage(embed)
-                    else
-                        return@function channel.createMessage(
-                            MessageCreateSpec.builder()
-                                .content(mentions)
-                                .addEmbed(embed)
-                                .build()
-                        )
-                }).flatMap { message ->
+                AnnouncementEmbed.determine(announcement, event, guild).flatMap { embed ->
+                    channel.createMessage(
+                        MessageCreateSpec.builder()
+                            .content(announcement.buildMentions().messageContentSafe())
+                            .addEmbed(embed)
+                            .build()
+                    )
+                }.flatMap { message ->
                     if (announcement.publish) {
                         message.publish()
                     } else Mono.just(message)
@@ -179,8 +172,8 @@ class AnnouncementService : ApplicationRunner {
             }.onErrorResume(ClientException::class.java) {
                 Mono.just(it)
                     .filter(HttpResponseStatus.NOT_FOUND::equals)
-                      // Channel announcement should post to was deleted
-                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id.toString()) }
+                    // Channel announcement should post to was deleted
+                    .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then(Mono.empty())
             }
     }

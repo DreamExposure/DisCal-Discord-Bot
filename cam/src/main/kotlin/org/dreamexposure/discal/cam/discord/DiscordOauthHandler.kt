@@ -92,8 +92,17 @@ object DiscordOauthHandler {
         }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
             if (response.isSuccessful) {
                 //Transform body into our object
-                val responseBody = JSON_FORMAT.decodeFromString(AuthorizationInfo.serializer(),
+                var responseBody = JSON_FORMAT.decodeFromString(AuthorizationInfo.serializer(),
                     response.body!!.string())
+
+                //Convert avatar hash to full URL
+                if (responseBody.user!!.avatar != null) {
+                    val userId = responseBody.user!!.id.asString()
+                    val avatarHash = responseBody.user!!.avatar
+                    val avatar = "https://cdn.discordapp.com/avatars/$userId/$avatarHash.png"
+
+                    responseBody = responseBody.copy(user = responseBody.user!!.copy(avatar = avatar))
+                }
 
                 Mono.just(responseBody)
             } else {

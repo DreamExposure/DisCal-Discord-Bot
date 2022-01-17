@@ -17,8 +17,6 @@ import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
-import org.springframework.web.server.MethodNotAllowedException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
@@ -59,9 +57,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 exchange.response.statusCode = HttpStatus.FORBIDDEN
                 RestError.ACCESS_REVOKED
             }
-            is MethodNotAllowedException,
             is TypeMismatchException,
-            is MethodArgumentTypeMismatchException,
             is SerializationException -> {
                 exchange.response.statusCode = HttpStatus.BAD_REQUEST
                 RestError.BAD_REQUEST
