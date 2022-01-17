@@ -6,8 +6,10 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Role
 import discord4j.core.spec.EmbedCreateSpec
+import discord4j.discordjson.json.GuildData
+import discord4j.discordjson.json.GuildUpdateData
+import discord4j.discordjson.json.MessageData
 import discord4j.rest.http.client.ClientException
-import discord4j.rest.util.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.`object`.BotSettings
@@ -16,6 +18,7 @@ import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.extensions.embedFieldSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -24,6 +27,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getEmbedMessage
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.function.TupleUtils
 import java.util.concurrent.CopyOnWriteArrayList
 
 @Serializable
@@ -181,13 +185,23 @@ data class RsvpData(
     }
 
     fun handleWaitListedUser(userId: String, client: DiscordClient): Mono<Void> {
-        //TODO: add user to going list
+        val guild = client.getGuildById(guildId)
+        val eventMono = guild.getCalendar(calendarNumber).flatMap { it.getEvent(eventId) }
+        val guildDataMono = guild.data
+        val settingsMono = guild.getSettings()
 
-        //TODO: DM user that they have been moved from the waitlist
+        val embedMono = Mono.zip(guildDataMono, settingsMono, eventMono).map(
+            TupleUtils.function { data, settings, event ->
+                followupEmbed(data, settings, userId, event)
+            }
+        )
 
-        //TODO: Assign role if role is set
-
-        TODO("Not yet implemented")
+        /* Add the user as attending on time
+        (it would be rude to show up late if other people want to attend the full event)
+        */
+        return addGoingOnTime(userId, client).then(embedMono).flatMap {
+            dmUser(userId, it, client)
+        }.then()
     }
 
     fun handleWaitListedUser(member: Member): Mono<Void> = handleWaitListedUser(member.id.asString(), member.client.rest())
@@ -203,11 +217,8 @@ data class RsvpData(
                 */
                 addGoingOnTime(userId, guild.client.rest()).then(eventMono).flatMap { event ->
                     // Send DM
-                    guild.getMemberById(Snowflake.of(userId)).flatMap { it.privateChannel }.flatMap { channel ->
-                        channel.createMessage(followupEmbed(guild, settings, userId, event))
-                    }.doOnError {
-                        LOGGER.error("Failed to DM user for RSVP followup", it)
-                    }.onErrorResume { Mono.empty() } // if we couldn't DM, just fail.
+                    val embed = followupEmbed(guild.data, settings, userId, event)
+                    dmUser(userId, embed, guild.client.rest())
                 }
             }.doOnError {
                 LOGGER.error(GlobalVal.DEFAULT, "RSVP waitlist processing failed", it)
@@ -240,13 +251,14 @@ data class RsvpData(
             .onErrorResume(ClientException::class.java) { Mono.empty() }
     }
 
-    private fun followupEmbed(guild: Guild, settings: GuildSettings, userId: String, event: Event): EmbedCreateSpec {
-
-        val iconUrl = guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.iconUrl)
+    private fun followupEmbed(guild: GuildUpdateData, settings: GuildSettings, userId: String, event: Event): EmbedCreateSpec {
+        val iconUrl = if (guild.icon().isPresent)
+            "${GlobalVal.discordCdnUrl}/icons/${guild.id().asString()}/${guild.icon().get()}.png"
+        else GlobalVal.iconUrl
 
         val builder = EmbedCreateSpec.builder()
             // Even without branding enabled, we want the user to know what guild this is because it's in DMs
-            .author(guild.name, BotSettings.BASE_URL.get(), iconUrl)
+            .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
             .title(getEmbedMessage("rsvp", "waitlist.title", settings))
             .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name, event.eventId))
             .addField(
@@ -269,5 +281,47 @@ data class RsvpData(
 
 
         return builder.build()
+    }
+
+    private fun followupEmbed(guild: GuildData, settings: GuildSettings, userId: String, event: Event): EmbedCreateSpec {
+        val iconUrl = if (guild.icon().isPresent)
+            "${GlobalVal.discordCdnUrl}/icons/${guild.id().asString()}/${guild.icon().get()}.png"
+        else GlobalVal.iconUrl
+
+        val builder = EmbedCreateSpec.builder()
+            // Even without branding enabled, we want the user to know what guild this is because it's in DMs
+            .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
+            .title(getEmbedMessage("rsvp", "waitlist.title", settings))
+            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name, event.eventId))
+            .addField(
+                getEmbedMessage("rsvp", "waitlist.field.start", settings),
+                event.start.asDiscordTimestamp(LONG_DATETIME),
+                true
+            ).addField(
+                getEmbedMessage("rsvp", "waitlist.field.end", settings),
+                event.end.asDiscordTimestamp(LONG_DATETIME),
+                true
+            ).footer(getEmbedMessage("rsvp", "waitlist.footer", settings, event.eventId), null)
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("rsvp", "waitlist.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotBlank()) builder.thumbnail(event.image)
+
+
+        return builder.build()
+    }
+
+    private fun dmUser(userId: String, embedCreateSpec: EmbedCreateSpec, client: DiscordClient): Mono<MessageData> {
+        return client.getUserById(Snowflake.of(userId)).privateChannel.flatMap { channelData ->
+            client.getChannelById(Snowflake.of(channelData.id())).createMessage(embedCreateSpec.asRequest())
+        }.doOnError {
+            LOGGER.error("Failed to DM user for RSVP Followup", it)
+        }.onErrorResume {
+            Mono.empty()
+        }
     }
 }

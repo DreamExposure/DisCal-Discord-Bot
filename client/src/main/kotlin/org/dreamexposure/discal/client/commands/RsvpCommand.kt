@@ -189,7 +189,8 @@ class RsvpCommand : SlashCommand {
                     if (!calEvent.isOver()) {
                         val member = event.interaction.member.get()
                         calEvent.getRsvp().flatMap { rsvp ->
-                            rsvp.removeCompletely(member)
+                            // Add next person on waitlist if this user was previously going to attend
+                            rsvp.removeCompletely(member, true)
                                 .then(calEvent.updateRsvp(rsvp))
                                 .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
                                 .flatMap { event.followupEphemeral(getMessage("remove.success", settings), it) }

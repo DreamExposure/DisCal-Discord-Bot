@@ -20,6 +20,10 @@ fun MutableList<String>.asStringList(): String {
     return builder.toString()
 }
 
+fun MutableList<String>.setFromString(strList: String) {
+    this += strList.split(",").filter(String::isNotBlank)
+}
+
 
 fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
     return this.stream()
