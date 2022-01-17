@@ -12,6 +12,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import org.dreamexposure.discal.core.utils.getEmbedMessage
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Serializable
 data class Announcement(
@@ -26,10 +27,10 @@ data class Announcement(
 ) : Pre(guildId) {
 
     @SerialName("subscriber_roles")
-    val subscriberRoleIds: MutableList<String> = mutableListOf()
+    val subscriberRoleIds: MutableList<String> = CopyOnWriteArrayList()
 
     @SerialName("subscriber_users")
-    val subscriberUserIds: MutableList<String> = arrayListOf()
+    val subscriberUserIds: MutableList<String> = CopyOnWriteArrayList()
 
     @SerialName("channel_id")
     var announcementChannelId: String = "N/a"
