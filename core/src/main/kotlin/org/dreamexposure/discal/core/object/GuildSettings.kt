@@ -44,10 +44,6 @@ data class GuildSettings(
 
     fun getDmAnnouncementsString() = this.dmAnnouncements.asStringList()
 
-    fun setDmAnnouncementsString(dm: String) {
-        this.dmAnnouncements += dm.split(",").filter(String::isNotBlank)
-    }
-
     //TODO: Remove when old translation system is dropped
     fun getLocale(): Locale {
 

@@ -12,6 +12,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import org.dreamexposure.discal.core.utils.getEmbedMessage
+import java.util.concurrent.CopyOnWriteArrayList
 
 @Serializable
 data class Announcement(
@@ -25,10 +26,10 @@ data class Announcement(
     override val editing: Boolean = false,
 
     @SerialName("subscriber_roles")
-    val subscriberRoleIds: MutableList<String> = mutableListOf(),
+    val subscriberRoleIds: MutableList<String> = CopyOnWriteArrayList(),
 
     @SerialName("subscriber_users")
-    val subscriberUserIds: MutableList<String> = arrayListOf(),
+    val subscriberUserIds: MutableList<String> = CopyOnWriteArrayList(),
 
     @SerialName("channel_id")
     var announcementChannelId: String = "N/a",
@@ -55,14 +56,6 @@ data class Announcement(
 
     var publish: Boolean = false,
 ) : Pre(guildId) {
-
-    fun setSubscriberRoleIdsFromString(subList: String) {
-        this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setSubscriberUserIdsFromString(subList: String) {
-        this.subscriberUserIds += subList.split(",").filter(String::isNotBlank)
-    }
 
     fun hasRequiredValues(): Boolean {
         return !((this.type == AnnouncementType.SPECIFIC || this.type == AnnouncementType.RECUR) && this.eventId == "N/a")

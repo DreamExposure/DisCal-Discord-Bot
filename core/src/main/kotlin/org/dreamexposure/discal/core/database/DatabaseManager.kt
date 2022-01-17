@@ -27,6 +27,7 @@ import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.enums.event.EventColor.Companion.fromNameOrHexOrId
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asStringList
+import org.dreamexposure.discal.core.extensions.setFromString
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.intellij.lang.annotations.Language
@@ -392,7 +393,7 @@ object DatabaseManager {
                 if (exists) {
                     val updateCommand = """UPDATE ${Tables.RSVP} SET
                         CALENDAR_NUMBER = ?, EVENT_END = ?, GOING_ON_TIME = ?, GOING_LATE = ?,
-                        NOT_GOING = ?, UNDECIDED = ?, RSVP_LIMIT = ?, RSVP_ROLE = ?
+                        NOT_GOING = ?, UNDECIDED = ?, waitlist = ?, RSVP_LIMIT = ?, RSVP_ROLE = ?
                         WHERE EVENT_ID = ? AND GUILD_ID = ?
                     """.trimMargin()
 
@@ -404,14 +405,16 @@ object DatabaseManager {
                             .bind(3, data.goingLate.asStringList())
                             .bind(4, data.notGoing.asStringList())
                             .bind(5, data.undecided.asStringList())
-                            .bind(6, data.limit)
-                            .bind(8, data.eventId)
-                            .bind(9, data.guildId.asString())
+                            .bind(6, data.waitlist.asStringList())
+                            .bind(7, data.limit)
+                            //8 deal with nullable role below
+                            .bind(9, data.eventId)
+                            .bind(10, data.guildId.asString())
                     ).doOnNext { statement ->
                         if (data.roleId == null)
-                            statement.bindNull(7, Long::class.java)
+                            statement.bindNull(8, Long::class.java)
                         else
-                            statement.bind(7, data.roleId!!.asString())
+                            statement.bind(8, data.roleId!!.asString())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -420,8 +423,8 @@ object DatabaseManager {
                 } else if (data.shouldBeSaved()) {
                     val insertCommand = """INSERT INTO ${Tables.RSVP}
                         (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, GOING_ON_TIME, GOING_LATE,
-                        NOT_GOING, UNDECIDED, RSVP_LIMIT, RSVP_ROLE)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        NOT_GOING, UNDECIDED, waitlist, RSVP_LIMIT, RSVP_ROLE)
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimMargin()
 
                     Mono.just(
@@ -434,12 +437,13 @@ object DatabaseManager {
                             .bind(5, data.goingLate.asStringList())
                             .bind(6, data.notGoing.asStringList())
                             .bind(7, data.undecided.asStringList())
-                            .bind(8, data.limit)
+                            .bind(8, data.waitlist.asStringList())
+                            .bind(9, data.limit)
                     ).doOnNext { statement ->
                         if (data.roleId == null)
-                            statement.bindNull(9, Long::class.java)
+                            statement.bindNull(10, Long::class.java)
                         else
-                            statement.bind(9, data.roleId!!.asString())
+                            statement.bind(10, data.roleId!!.asString())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -552,7 +556,7 @@ object DatabaseManager {
                         lang, prefix, patron, dev, maxCals, branded
                     )
 
-                    settings.setDmAnnouncementsString(dmAnnouncementsString)
+                    settings.dmAnnouncements.setFromString(dmAnnouncementsString)
 
                     //Store in cache...
                     DiscalCache.guildSettings[guildId] = settings
@@ -722,10 +726,11 @@ object DatabaseManager {
                     val data = RsvpData(guildId, eventId, calNumber)
 
                     data.eventEnd = row["EVENT_END", Long::class.java]!!
-                    data.setGoingOnTimeFromString(row["GOING_ON_TIME", String::class.java]!!)
-                    data.setGoingLateFromString(row["GOING_LATE", String::class.java]!!)
-                    data.setNotGoingFromString(row["NOT_GOING", String::class.java]!!)
-                    data.setUndecidedFromString(row["UNDECIDED", String::class.java]!!)
+                    data.goingOnTime.setFromString(row["GOING_ON_TIME", String::class.java]!!)
+                    data.goingLate.setFromString(row["GOING_LATE", String::class.java]!!)
+                    data.notGoing.setFromString(row["NOT_GOING", String::class.java]!!)
+                    data.undecided.setFromString(row["UNDECIDED", String::class.java]!!)
+                    data.waitlist.setFromString(row["waitlist", String::class.java]!!)
                     data.limit = row["RSVP_LIMIT", Int::class.java]!!
 
                     //Handle new rsvp role
@@ -755,8 +760,8 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val a = Announcement(guildId, announcementId)
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -791,8 +796,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -828,8 +833,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -864,8 +869,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -901,8 +906,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -937,8 +942,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -973,8 +978,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -1010,8 +1015,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -1047,8 +1052,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
@@ -1480,8 +1485,8 @@ object DatabaseManager {
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.setSubscriberRoleIdsFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.setSubscriberUserIdsFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
+                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
+                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
                     a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
                     a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
