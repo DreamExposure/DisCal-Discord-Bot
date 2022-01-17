@@ -11,9 +11,7 @@ import java.time.Duration
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader
 
-//TODO: Remove jvm static
 object ImageValidator {
-    @JvmStatic
     fun validate(url: String, allowGif: Boolean): Mono<Boolean> {
         return Mono.fromCallable {
             val image = ImageIO.read(URL(url))
