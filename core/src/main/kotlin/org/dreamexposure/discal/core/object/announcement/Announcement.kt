@@ -57,14 +57,6 @@ data class Announcement(
     var publish: Boolean = false,
 ) : Pre(guildId) {
 
-    fun setSubscriberRoleIdsFromString(subList: String) {
-        this.subscriberRoleIds += subList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setSubscriberUserIdsFromString(subList: String) {
-        this.subscriberUserIds += subList.split(",").filter(String::isNotBlank)
-    }
-
     fun hasRequiredValues(): Boolean {
         return !((this.type == AnnouncementType.SPECIFIC || this.type == AnnouncementType.RECUR) && this.eventId == "N/a")
             && this.announcementChannelId != "N/a"

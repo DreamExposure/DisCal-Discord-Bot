@@ -66,27 +66,6 @@ data class RsvpData(
 
     val waitlist: MutableList<String> = CopyOnWriteArrayList()
 
-    //List string stuffs
-    fun setGoingOnTimeFromString(strList: String) {
-        this.goingOnTime += strList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setGoingLateFromString(strList: String) {
-        this.goingLate += strList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setNotGoingFromString(strList: String) {
-        this.notGoing += strList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setUndecidedFromString(strList: String) {
-        this.undecided += strList.split(",").filter(String::isNotBlank)
-    }
-
-    fun setWaitlistFromString(strList: String) {
-        this.waitlist += strList.split(",").filter(String::isNotBlank)
-    }
-
     fun getCurrentCount() = this.goingOnTime.size + this.goingLate.size
 
     fun hasRoom(userId: String): Boolean {
@@ -206,7 +185,7 @@ data class RsvpData(
 
     fun handleWaitListedUser(member: Member): Mono<Void> = handleWaitListedUser(member.id.asString(), member.client.rest())
 
-    fun fillRemaining(guild: Guild, settings: GuildSettings): Mono<Void> {
+    fun fillRemaining(guild: Guild, settings: GuildSettings): Mono<RsvpData> {
         val eventMono = guild.getCalendar(calendarNumber).flatMap { it.getEvent(eventId) }.cache()
 
         return Flux.fromIterable(waitlist)
@@ -224,7 +203,7 @@ data class RsvpData(
                 LOGGER.error(GlobalVal.DEFAULT, "RSVP waitlist processing failed", it)
             }.onErrorResume {
                 Mono.empty()
-            }.then()
+            }.then().thenReturn(this)
     }
 
     fun addGoingLate(member: Member): Mono<Void> = addGoingLate(member.id.asString(), member.client.rest())
