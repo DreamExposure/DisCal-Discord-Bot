@@ -26,6 +26,8 @@ object MessageSourceLoader {
     }
 }
 
+//FIXME: I think the varargs is bugging out with 3 or more provided. Will need to debug this later, but not today.
+
 fun getCommonMsg(key: String, settings: GuildSettings, vararg args: String): String {
     val src = MessageSourceLoader.getSourceByPath("common")
 

@@ -240,7 +240,7 @@ data class RsvpData(
             // Even without branding enabled, we want the user to know what guild this is because it's in DMs
             .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
             .title(getEmbedMessage("rsvp", "waitlist.title", settings))
-            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name, event.eventId))
+            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name))
             .addField(
                 getEmbedMessage("rsvp", "waitlist.field.start", settings),
                 event.start.asDiscordTimestamp(LONG_DATETIME),
@@ -272,7 +272,7 @@ data class RsvpData(
             // Even without branding enabled, we want the user to know what guild this is because it's in DMs
             .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
             .title(getEmbedMessage("rsvp", "waitlist.title", settings))
-            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name, event.eventId))
+            .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name))
             .addField(
                 getEmbedMessage("rsvp", "waitlist.field.start", settings),
                 event.start.asDiscordTimestamp(LONG_DATETIME),
