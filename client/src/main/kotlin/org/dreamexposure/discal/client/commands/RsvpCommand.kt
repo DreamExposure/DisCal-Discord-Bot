@@ -55,18 +55,18 @@ class RsvpCommand : SlashCommand {
                         calEvent.getRsvp().flatMap { rsvp ->
                             if (rsvp.hasRoom(member.id.asString())) {
                                 rsvp.removeCompletely(member)
-                                    .then(rsvp.addGoingOnTime(member))
-                                    .then(calEvent.updateRsvp(rsvp))
-                                    .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                    .flatMap { it.addGoingOnTime(member).thenReturn(it) }
+                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                     .flatMap {
                                         event.followupEphemeral(getMessage("onTime.success", settings), it)
                                     }
                             } else {
                                 // No room, add to waitlist instead
                                 rsvp.removeCompletely(member)
-                                    .doOnNext { rsvp.waitlist.add(member.id.asString()) }
-                                    .then(calEvent.updateRsvp(rsvp))
-                                    .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                    .doOnNext { it.waitlist.add(member.id.asString()) }
+                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                     .flatMap {
                                         event.followupEphemeral(getMessage("onTime.failure.limit", settings), it)
                                     }
@@ -100,18 +100,16 @@ class RsvpCommand : SlashCommand {
                         calEvent.getRsvp().flatMap { rsvp ->
                             if (rsvp.hasRoom(member.id.asString())) {
                                 rsvp.removeCompletely(member)
-                                    .then(rsvp.addGoingLate(member))
-                                    .then(calEvent.updateRsvp(rsvp))
-                                    .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
-                                    .flatMap {
-                                        event.followupEphemeral(getMessage("late.success", settings), it)
-                                    }
+                                    .flatMap { it.addGoingLate(member).thenReturn(it) }
+                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
+                                    .flatMap { event.followupEphemeral(getMessage("late.success", settings), it) }
                             } else {
                                 // No room, add to waitlist instead
                                 rsvp.removeCompletely(member)
-                                    .doOnNext { rsvp.waitlist.add(member.id.asString()) }
-                                    .then(calEvent.updateRsvp(rsvp))
-                                    .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                    .doOnNext { it.waitlist.add(member.id.asString()) }
+                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                     .flatMap {
                                         event.followupEphemeral(getMessage("late.failure.limit", settings), it)
                                     }
@@ -211,8 +209,8 @@ class RsvpCommand : SlashCommand {
                         calEvent.getRsvp().flatMap { rsvp ->
                             // Add next person on waitlist if this user was previously going to attend
                             rsvp.removeCompletely(member, true)
-                                .flatMap {  calEvent.updateRsvp(it) }
-                                .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                 .flatMap { event.followupEphemeral(getMessage("remove.success", settings), it) }
                         }
                     } else {
@@ -315,15 +313,15 @@ class RsvpCommand : SlashCommand {
                             calEvent.getRsvp().flatMap { rsvp ->
                                 if (role.isEveryone) {
                                     rsvp.clearRole(member.client.rest())
-                                        .then(calEvent.updateRsvp(rsvp))
-                                        .flatMap { RsvpEmbed.list(guild, settings, calEvent, rsvp) }
+                                        .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                        .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                         .flatMap {
                                             event.followupEphemeral(getMessage("role.success.remove", settings), it)
                                         }
                                 } else {
                                     rsvp.setRole(role)
-                                        .then(calEvent.updateRsvp(rsvp))
-                                        .then(RsvpEmbed.list(guild, settings, calEvent, rsvp))
+                                        .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
+                                        .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
                                         .flatMap {
                                             event.followupEphemeral(
                                                 getMessage("role.success.set", settings, role.name),
