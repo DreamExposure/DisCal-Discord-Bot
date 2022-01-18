@@ -60,7 +60,7 @@ class UpdateRsvpEndpoint(val client: DiscordClient) {
                               .hasElement()
                               .then(rsvp.setRole(roleId, client))
                     }
-                }
+                }.then()
 
                 //Handle removals (we do this first just in case they are using the limit)
                 val removalMono: Mono<Void> = Mono.just(body).filter {
