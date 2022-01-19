@@ -16,7 +16,9 @@ fun String.messageContentSafe(): String = this.substring(0, (2000).coerceAtMost(
 
 fun String.sanitize(): String = Jsoup.clean(this, GlobalVal.HTML_WHITELIST)
 
-fun String.toMarkdown(): String = GlobalVal.MARKDOWN_CONVERTER.convert(this.sanitize())
+fun String.toMarkdown(): String = GlobalVal.MARKDOWN_CONVERTER.convert(this.sanitize()).unescapeNewLines()
+
+fun String.unescapeNewLines(): String = this.replace(Regex("([\\\\n]+)([n])"), "\n")
 
 fun String.isValidTimezone(): Boolean {
     return try {
