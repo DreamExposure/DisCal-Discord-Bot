@@ -16,6 +16,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
 
@@ -111,15 +112,15 @@ interface Event {
      */
     fun getLinkedAnnouncements(): Flux<Announcement> {
         return DatabaseManager.getAnnouncements(this.guildId)
-                .flatMapMany { Flux.fromIterable(it) }
-                .filter { ann ->
-                    when (ann.type) {
-                        AnnouncementType.UNIVERSAL -> return@filter true
-                        AnnouncementType.COLOR -> return@filter ann.eventColor == this.color
-                        AnnouncementType.SPECIFIC -> return@filter ann.eventId == this.eventId
-                        AnnouncementType.RECUR -> return@filter this.eventId.contains(ann.eventId)
-                    }
+            .flatMapMany { Flux.fromIterable(it) }
+            .filter { ann ->
+                when (ann.type) {
+                    AnnouncementType.UNIVERSAL -> return@filter true
+                    AnnouncementType.COLOR -> return@filter ann.eventColor == this.color
+                    AnnouncementType.SPECIFIC -> return@filter ann.eventId == this.eventId
+                    AnnouncementType.RECUR -> return@filter this.eventId.contains(ann.eventId)
                 }
+            }
     }
 
     /**
@@ -155,24 +156,40 @@ interface Event {
 
     fun isStarted() = start.isBefore(Instant.now())
 
+    /**
+     * Whether the event is 24 hours long.
+     *
+     * @return Whether the event is 24 hours long
+     */
+    fun is24Hours() = Duration.between(start, end).toHours() == 24L
+
+    /**
+     * Whether the event lasts for a full calendar day (midnight to midnight) or longer.
+     *
+     * @return Whether the event is all day
+     */
+    fun isAllDay(): Boolean {
+        val start = this.start.atZone(timezone)
+
+        return start.hour == 0 && is24Hours()
+    }
+
     //Json bullshit
     fun toJson(): JSONObject {
         return JSONObject()
-                .put("guild_id", guildId)
-                .put("calendar", calendar.toJson())
-                .put("event_id", eventId)
-                .put("epoch_start", start.toEpochMilli())
-                .put("epoch_end", end.toEpochMilli())
-                .put("name", name)
-                .put("description", description)
-                .put("location", location)
-                .put("is_parent", !eventId.contains("_"))
-                .put("color", color.name)
-                .put("recur", recur)
-                .put("recurrence", JSONObject(JSON_FORMAT.encodeToString(recurrence)))
-                .put("rrule", recurrence.toRRule())
-                .put("image", eventData.imageLink)
+            .put("guild_id", guildId)
+            .put("calendar", calendar.toJson())
+            .put("event_id", eventId)
+            .put("epoch_start", start.toEpochMilli())
+            .put("epoch_end", end.toEpochMilli())
+            .put("name", name)
+            .put("description", description)
+            .put("location", location)
+            .put("is_parent", !eventId.contains("_"))
+            .put("color", color.name)
+            .put("recur", recur)
+            .put("recurrence", JSONObject(JSON_FORMAT.encodeToString(recurrence)))
+            .put("rrule", recurrence.toRRule())
+            .put("image", eventData.imageLink)
     }
-
-
 }
