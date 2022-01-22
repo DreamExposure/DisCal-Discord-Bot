@@ -44,7 +44,7 @@ object CalendarEmbed : EmbedMaker {
     }
 
     fun overview(guild: Guild, settings: GuildSettings, calendar: Calendar, showUpdate: Boolean): Mono<EmbedCreateSpec> {
-        return calendar.getUpcomingEvents(15).collectList().map { it.groupByDate() }.map { events ->
+        return calendar.getUpcomingEvents(15).collectList().map { it.groupByDateMulti() }.map { events ->
             val builder = defaultBuilder(guild, settings)
 
             //Handle optional fields

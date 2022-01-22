@@ -45,16 +45,17 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
 
     val multi: MutableMap<ZonedDateTime, List<Event>> = mutableMapOf()
 
-    //FIXME: This is somehow duplicating too many events.
     dates.forEach {
         LOGGER.debug("Date: $it")
 
-        val range = LongRange(it.toEpochSecond(), it.plus(1, ChronoUnit.DAYS).toEpochSecond())
+        val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).toEpochSecond())
         LOGGER.debug("Range: ${Instant.ofEpochSecond(range.first)} - ${Instant.ofEpochSecond(range.last)}")
 
         val events: MutableList<Event> = mutableListOf()
+
         this.forEach { event ->
-            if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond)) {
+            // When we check event end, we bump it back a second in order to prevent weirdness.
+            if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond - 1)) {
                 LOGGER.debug("Event in range? Start: ${event.start} | End: ${event.end} | Name: ${event.name}")
                 events.add(event)
             }
