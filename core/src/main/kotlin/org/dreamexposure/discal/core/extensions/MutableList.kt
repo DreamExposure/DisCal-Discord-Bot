@@ -36,6 +36,7 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
 
 }
 
+// TODO: This could use some optimization, but we'll leave it for now
 fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
     // Each of the days events start on, their ending is ignored
     val dates = this.map {
@@ -48,7 +49,7 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
     dates.forEach {
         LOGGER.debug("Date: $it")
 
-        val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).toEpochSecond())
+            val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).toEpochSecond())
         LOGGER.debug("Range: ${Instant.ofEpochSecond(range.first)} - ${Instant.ofEpochSecond(range.last)}")
 
         val events: MutableList<Event> = mutableListOf()
@@ -57,6 +58,10 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
             // When we check event end, we bump it back a second in order to prevent weirdness.
             if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond - 1)) {
                 LOGGER.debug("Event in range? Start: ${event.start} | End: ${event.end} | Name: ${event.name}")
+                events.add(event)
+            } else if (event.start.epochSecond < range.first && event.end.epochSecond > range.last) {
+                // This is a multi-day event that starts before today and ends after today
+                LOGGER.debug("Event extends beyond range? Start: ${event.start} | End: ${event.end} | Name: ${event.name}")
                 events.add(event)
             }
         }
