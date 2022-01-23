@@ -29,3 +29,24 @@ fun String.isValidTimezone(): Boolean {
 }
 
 fun String.isValidImage(allowGif: Boolean) = ImageValidator.validate(this, allowGif)
+
+fun String.padCenter(length: Int, padChar: Char = ' '): String {
+    if (this.length >= length) return this
+
+    val chars: CharArray = this.toCharArray()
+    val delta = length - chars.size
+    val a = if (delta % 2 == 0) delta / 2 else delta / 2 + 1
+    val b = a + chars.size
+
+    val output = CharArray(length)
+    for (i in 0 until length) {
+        if (i < a) {
+            output[i] = padChar
+        } else if (i < b) {
+            output[i] = chars[i - a]
+        } else {
+            output[i] = padChar
+        }
+    }
+    return String(output)
+}

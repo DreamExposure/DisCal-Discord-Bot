@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 object CalendarEmbed : EmbedMaker {
     fun link(guild: Guild, settings: GuildSettings, calNumber: Int, overview: Boolean): Mono<EmbedCreateSpec> {
@@ -43,7 +44,7 @@ object CalendarEmbed : EmbedMaker {
     }
 
     fun overview(guild: Guild, settings: GuildSettings, calendar: Calendar, showUpdate: Boolean): Mono<EmbedCreateSpec> {
-        return calendar.getUpcomingEvents(15).collectList().map { it.groupByDate() }.map { events ->
+        return calendar.getUpcomingEvents(15).collectList().map { it.groupByDateMulti() }.map { events ->
             val builder = defaultBuilder(guild, settings)
 
             //Handle optional fields
@@ -62,10 +63,31 @@ object CalendarEmbed : EmbedMaker {
 
                 val content = StringBuilder().append("```\n")
                 sortedEvents.forEach {
-                    content.append(it.start.humanReadableTime(it.timezone, settings.timeFormat))
-                        .append(" - ")
-                        .append(it.end.humanReadableTime(it.timezone, settings.timeFormat))
-                        .append(" | ")
+                    // determine time length
+                    val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.timeFormat)} -" +
+                        " ${it.end.humanReadableTime(it.timezone,settings.timeFormat)} ").length
+
+                    // Displaying time
+                   if (it.isAllDay()) {
+                       content.append(getCommonMsg("generic.time.allDay", settings).padCenter(timeDisplayLen))
+                           .append("| ")
+                   } else {
+                       // Add start text
+                       var str = if (it.start.isBefore(date.key.toInstant())) {
+                           "${getCommonMsg("generic.time.continued", settings)} - "
+                       } else {
+                           "${it.start.humanReadableTime(it.timezone, settings.timeFormat)} - "
+                       }
+                       // Add end text
+                       str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                           getCommonMsg("generic.time.continued", settings)
+                       } else {
+                           "${it.end.humanReadableTime(it.timezone, settings.timeFormat)} "
+                       }
+                       content.append(str.padCenter(timeDisplayLen))
+                           .append("| ")
+                   }
+                    // Display name or ID if not set
                     if (it.name.isNotBlank()) content.append(it.name)
                     else content.append(getMessage("calendar", "link.field.id", settings)).append(" ${it.eventId}")
                     content.append("\n")
