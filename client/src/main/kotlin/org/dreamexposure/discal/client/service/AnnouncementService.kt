@@ -68,9 +68,11 @@ class AnnouncementService : ApplicationRunner {
                         LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
                     }.onErrorResume { Mono.empty() }
                 }.onErrorResume(ClientException.isStatusCode(403)) {
+                    //FIXME: great way to wipe the database, not sure what the fuck happened here.
                     // DisCal is no longer in the guild, remove all it's from the database
 
-                    DatabaseManager.deleteAllDataForGuild(entry.key).then()
+                    //DatabaseManager.deleteAllDataForGuild(entry.key).then()
+                    Mono.empty()
                 }
             }
         }.doOnError {
