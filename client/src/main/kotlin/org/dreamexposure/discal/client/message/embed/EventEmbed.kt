@@ -12,8 +12,8 @@ import org.dreamexposure.discal.core.utils.getCommonMsg
 object EventEmbed : EmbedMaker {
     fun getFull(guild: Guild, settings: GuildSettings, event: Event): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .footer(getMessage("event", "full.footer", settings, event.eventId), null)
-                .color(event.color.asColor())
+            .footer(getMessage("event", "full.footer", settings, event.eventId), null)
+            .color(event.color.asColor())
 
         if (event.name.isNotBlank())
             builder.title(event.name.toMarkdown().embedTitleSafe())
@@ -21,19 +21,19 @@ object EventEmbed : EmbedMaker {
             builder.description(event.description.toMarkdown().embedDescriptionSafe())
 
         builder.addField(
-                getMessage("event", "full.field.start", settings),
-                event.start.asDiscordTimestamp(LONG_DATETIME),
-                true)
+            getMessage("event", "full.field.start", settings),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true)
         builder.addField(
-                getMessage("event", "full.field.end", settings),
-                event.end.asDiscordTimestamp(LONG_DATETIME),
-                true
+            getMessage("event", "full.field.end", settings),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
+            true
         )
 
         if (event.location.isNotBlank()) builder.addField(
-                getMessage("event", "full.field.location", settings),
-                event.location.toMarkdown().embedFieldSafe(),
-                false
+            getMessage("event", "full.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
         )
 
         builder.addField(getMessage("event", "full.field.cal", settings), "${event.calendar.calendarNumber}", false)
@@ -46,22 +46,22 @@ object EventEmbed : EmbedMaker {
 
     fun getCondensed(guild: Guild, settings: GuildSettings, event: Event): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .footer(getMessage("event", "con.footer", settings, event.eventId), null)
-                .color(event.color.asColor())
+            .footer(getMessage("event", "con.footer", settings, event.eventId), null)
+            .color(event.color.asColor())
 
         if (event.name.isNotBlank())
             builder.title(event.name.toMarkdown().embedTitleSafe())
 
         builder.addField(
-                getMessage("event", "con.field.start", settings),
-                event.start.asDiscordTimestamp(LONG_DATETIME),
-                true
+            getMessage("event", "con.field.start", settings),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true
         )
 
         if (event.location.isNotBlank()) builder.addField(
-                getMessage("event", "con.field.location", settings),
-                event.location.toMarkdown().embedFieldSafe(),
-                false
+            getMessage("event", "con.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
         )
 
         if (event.image.isNotBlank())
@@ -72,68 +72,72 @@ object EventEmbed : EmbedMaker {
 
     fun pre(guild: Guild, settings: GuildSettings, event: PreEvent): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
-                .title(getMessage("event", "wizard.title", settings))
-                .footer(getMessage("event", "wizard.footer", settings), null)
-                .color(event.color.asColor())
+            .title(getMessage("event", "wizard.title", settings))
+            .footer(getMessage("event", "wizard.footer", settings), null)
+            .color(event.color.asColor())
 
         if (!event.name.isNullOrBlank()) builder.addField(
-                getMessage("event", "wizard.field.name", settings),
-                event.name!!.toMarkdown().embedFieldSafe(),
-                false
+            getMessage("event", "wizard.field.name", settings),
+            event.name!!.toMarkdown().embedFieldSafe(),
+            false
         ) else builder.addField(
-                getMessage("event", "wizard.field.name", settings),
-                getCommonMsg("embed.unset", settings),
-                false
+            getMessage("event", "wizard.field.name", settings),
+            getCommonMsg("embed.unset", settings),
+            false
         )
 
         if (!event.description.isNullOrBlank()) builder.addField(
-                getMessage("event", "wizard.field.desc", settings),
-                event.description!!.toMarkdown().embedFieldSafe(),
-                false
+            getMessage("event", "wizard.field.desc", settings),
+            event.description!!.toMarkdown().embedFieldSafe(),
+            false
         ) else builder.addField(
-                getMessage("event", "wizard.field.desc", settings),
-                getCommonMsg("embed.unset", settings),
-                false
+            getMessage("event", "wizard.field.desc", settings),
+            getCommonMsg("embed.unset", settings),
+            false
         )
 
         if (!event.location.isNullOrBlank()) builder.addField(
-                getMessage("event", "wizard.field.location", settings),
-                event.location!!.toMarkdown().embedFieldSafe(),
-                false
+            getMessage("event", "wizard.field.location", settings),
+            event.location!!.toMarkdown().embedFieldSafe(),
+            false
         ) else builder.addField(
-                getMessage("event", "wizard.field.location", settings),
-                getCommonMsg("embed.unset", settings),
-                false
+            getMessage("event", "wizard.field.location", settings),
+            getCommonMsg("embed.unset", settings),
+            false
         )
 
         if (event.start != null) builder.addField(
-                getMessage("event", "wizard.field.start", settings),
-                event.start!!.humanReadableFull(event.timezone, settings.timeFormat),
-                true
+            getMessage("event", "wizard.field.start", settings),
+            event.start!!.humanReadableFull(event.timezone, settings.timeFormat),
+            true
         ) else builder.addField(
-                getMessage("event", "wizard.field.start", settings),
-                getCommonMsg("embed.unset", settings),
-                true
+            getMessage("event", "wizard.field.start", settings),
+            getCommonMsg("embed.unset", settings),
+            true
         )
 
         if (event.end != null) builder.addField(
-                getMessage("event", "wizard.field.end", settings),
-                event.end!!.humanReadableFull(event.timezone, settings.timeFormat),
-                true
+            getMessage("event", "wizard.field.end", settings),
+            event.end!!.humanReadableFull(event.timezone, settings.timeFormat),
+            true
         ) else builder.addField(
-                getMessage("event", "wizard.field.end", settings),
-                getCommonMsg("embed.unset", settings),
-                true
+            getMessage("event", "wizard.field.end", settings),
+            getCommonMsg("embed.unset", settings),
+            true
         )
 
         if (event.recurrence != null) builder.addField(
-                getMessage("event", "wizard.field.recurrence", settings),
-                event.recurrence!!.toHumanReadable(),
-                true
+            getMessage("event", "wizard.field.recurrence", settings),
+            event.recurrence!!.toHumanReadable(),
+            true
+        ) else if (event.editing && event.eventId != null && event.eventId!!.contains("_")) builder.addField(
+            getMessage("event", "wizard.field.recurrence", settings),
+            getMessage("event", "wizard.field.recurrence.child", settings, event.eventId!!.split("_")[0]),
+            false,
         ) else builder.addField(
-                getMessage("event", "wizard.field.recurrence", settings),
-                getCommonMsg("embed.unset", settings),
-                true
+            getMessage("event", "wizard.field.recurrence", settings),
+            getCommonMsg("embed.unset", settings),
+            true
         )
 
         builder.addField(getMessage("event", "wizard.field.timezone", settings), event.timezone.id, false)
