@@ -110,7 +110,7 @@ object GoogleAuth {
                     response.body?.close()
                     response.close()
 
-                    LOGGER.error("[Google] Int Cred bad Request: $body")
+                    LOGGER.error("[Google] Access Token Request: $body")
 
                     if (body.error == "invalid_grant") {
                         LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")
@@ -129,8 +129,6 @@ object GoogleAuth {
                     Mono.empty()
                 }
             }
-        }.doOnError {
-            LOGGER.error("[Google] Failed to request new access token", it)
-        }.onErrorResume { Mono.empty() }
+        }
     }
 }
