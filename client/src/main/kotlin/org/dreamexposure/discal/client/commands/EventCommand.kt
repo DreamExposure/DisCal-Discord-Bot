@@ -420,7 +420,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 if (!pre.hasRequiredValues()) {
-                    event.followupEphemeral(getMessage("confirm.failure.missing", settings))
+                    return@flatMap event.followupEphemeral(getMessage("confirm.failure.missing", settings))
                 }
 
                 event.interaction.guild.flatMap { guild ->
