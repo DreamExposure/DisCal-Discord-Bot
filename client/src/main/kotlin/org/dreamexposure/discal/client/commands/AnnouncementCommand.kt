@@ -580,6 +580,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     val memberMono = guild.getMemberById(subId.get()).onErrorResume { Mono.empty() }
                     val roleMono = guild.getRoleById(subId.get()).onErrorResume { Mono.empty() }
 
+                    @Suppress("DuplicatedCode")
                     memberMono.flatMap { member ->
                         announcement.subscriberUserIds.remove(member.id.asString())
                         announcement.subscriberUserIds.add(member.id.asString())
@@ -636,6 +637,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                     val memberMono = guild.getMemberById(subId.get()).onErrorResume { Mono.empty() }
                     val roleMono = guild.getRoleById(subId.get()).onErrorResume { Mono.empty() }
 
+                    @Suppress("DuplicatedCode")
                     memberMono.flatMap { member ->
                         announcement.subscriberUserIds.remove(member.id.asString())
 
