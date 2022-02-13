@@ -61,6 +61,16 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                 .map(ApplicationCommandInteractionOptionValue::asString)
                 .orElse("")
 
+        val description = event.options[0].getOption("description")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .orElse("")
+
+        val location = event.options[0].getOption("location")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .orElse("")
+
         val calendarNumber = event.options[0].getOption("calendar")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -73,6 +83,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     guild.getCalendar(calendarNumber).flatMap { cal ->
                         val pre = PreEvent.new(cal)
                         pre.name = name
+                        pre.description = description
+                        pre.location = location
                         wizard.start(pre)
 
                         event.followupEphemeral(getMessage("create.success", settings), EventEmbed.pre(guild, settings, pre))

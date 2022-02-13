@@ -11,7 +11,19 @@
         {
           "name": "name",
           "type": 3,
-          "description": "The name of the new calendar",
+          "description": "The name of the new event",
+          "required": false
+        },
+        {
+          "name": "description",
+          "type": 3,
+          "description": "The description of the new event",
+          "required": false
+        },
+        {
+          "name": "location",
+          "type": 3,
+          "description": "The location of the new event",
           "required": false
         },
         {
