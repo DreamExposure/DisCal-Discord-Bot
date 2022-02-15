@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.cam.spring
+package org.dreamexposure.discal.core.spring
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
@@ -8,8 +8,7 @@ import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
-import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
+import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.beans.TypeMismatchException
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
 import org.springframework.context.annotation.Configuration
@@ -39,7 +38,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                         RestError.BAD_REQUEST
                     }
                     else -> {
-                        LOGGER.error(DEFAULT, "[GlobalErrorHandler] Unhandled ResponseStatusException", throwable)
+                        LOGGER.error(GlobalVal.DEFAULT, "[GlobalErrorHandler] Unhandled ResponseStatusException", throwable)
                         exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                         RestError.INTERNAL_SERVER_ERROR
                     }
@@ -68,7 +67,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 RestError.NOT_FOUND
             }
             else -> { // Something we have no special case for
-                LOGGER.error(DEFAULT, "[GlobalErrorHandler] Unhandled exception", throwable)
+                LOGGER.error(GlobalVal.DEFAULT, "[GlobalErrorHandler] Unhandled exception", throwable)
                 exchange.response.statusCode = HttpStatus.INTERNAL_SERVER_ERROR
                 RestError.INTERNAL_SERVER_ERROR
             }
@@ -76,7 +75,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
 
         // Convert restError to json byte array
         val factory = exchange.response.bufferFactory()
-        val buffer = factory.wrap(JSON_FORMAT.encodeToString(restError).encodeToByteArray())
+        val buffer = factory.wrap(GlobalVal.JSON_FORMAT.encodeToString(restError).encodeToByteArray())
 
         // Return response with body
         exchange.response.headers.contentType = MediaType.APPLICATION_JSON
