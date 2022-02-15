@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v3/")
 class InviteEndpoint {
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    @GetMapping("invite", produces = ["application/json"])
+    @GetMapping("invite", produces = ["text/plain"])
     fun get(): Mono<String> {
         return Mono.just(BotSettings.INVITE_URL.get())
     }
