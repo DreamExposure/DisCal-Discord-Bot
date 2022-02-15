@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v2.event.list
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -25,6 +26,7 @@ import java.time.Instant
 @RequestMapping("/v2/events/list")
 class ListEventRangeEndpoint(val client: DiscordClient) {
     @PostMapping("/range", produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun listByRange(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

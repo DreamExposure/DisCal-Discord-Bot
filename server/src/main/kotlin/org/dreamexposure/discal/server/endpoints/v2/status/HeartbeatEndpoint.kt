@@ -5,6 +5,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
+import org.dreamexposure.discal.core.annotations.Authentication.*
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.network.discal.NetworkManager
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono
 class HeartbeatEndpoint(val networkManager: NetworkManager) {
 
     @PostMapping(value = ["/heartbeat"], produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun heartbeat(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

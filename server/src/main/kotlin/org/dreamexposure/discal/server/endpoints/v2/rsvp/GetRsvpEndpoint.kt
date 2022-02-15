@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.rsvp
 
 import discord4j.common.util.Snowflake
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v2/rsvp")
 class GetRsvpEndpoint {
     @PostMapping("/get", produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun getRsvp(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

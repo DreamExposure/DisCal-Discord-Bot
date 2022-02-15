@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v2.calendar
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.isValidTimezone
@@ -25,6 +26,7 @@ import java.time.ZoneId
 @RequestMapping("/v2/calendar")
 class UpdateCalendarEndpoint(val client: DiscordClient) {
     @PostMapping("/update", produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun updateCalendar(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

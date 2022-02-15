@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.account
 
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
@@ -16,6 +17,7 @@ import reactor.core.publisher.Mono
 @RestController
 @RequestMapping("/v2/account")
 class LogoutEndpoint {
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     @GetMapping("/logout", produces = ["application/json"])
     fun logoutOfAccount(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->

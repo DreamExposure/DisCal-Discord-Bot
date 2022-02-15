@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v2.event
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v2/event")
 class GetEventEndpoint(val client: DiscordClient) {
     @PostMapping("/get", produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun get(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

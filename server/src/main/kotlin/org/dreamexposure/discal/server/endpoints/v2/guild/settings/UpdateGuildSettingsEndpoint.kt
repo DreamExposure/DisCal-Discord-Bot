@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 
 import discord4j.common.util.Snowflake
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.time.TimeFormat
@@ -23,6 +24,7 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v2/guild/settings")
 class UpdateGuildSettingsEndpoint {
     @PostMapping(value = ["/update"], produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun updateSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

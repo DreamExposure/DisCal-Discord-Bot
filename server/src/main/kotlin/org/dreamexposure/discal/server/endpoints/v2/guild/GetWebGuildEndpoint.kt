@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.web.WebGuild
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
@@ -26,6 +27,7 @@ import reactor.function.TupleUtils
 @RequestMapping("/v2/guild")
 class GetWebGuildEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

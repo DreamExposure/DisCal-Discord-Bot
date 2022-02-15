@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v2.announcement
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -25,6 +26,7 @@ import reactor.core.publisher.Mono
 @RestController
 @RequestMapping("/v2/announcement")
 class UpdateAnnouncementEndpoint(val client: DiscordClient) {
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     @PostMapping("/update", produces = ["application/json"])
     fun update(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->

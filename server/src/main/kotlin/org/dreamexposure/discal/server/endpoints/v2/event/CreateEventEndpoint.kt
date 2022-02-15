@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.`object`.event.Recurrence
+import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -27,6 +28,7 @@ import java.time.Instant
 @RequestMapping("/v2/event")
 class CreateEventEndpoint(val client: DiscordClient) {
     @PostMapping("/create", produces = ["application/json"])
+    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
     fun create(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
