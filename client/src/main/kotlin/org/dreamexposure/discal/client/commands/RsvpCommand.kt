@@ -302,7 +302,7 @@ class RsvpCommand : SlashCommand {
         ).flatMap(ApplicationCommandInteractionOptionValue::asRole)
 
         return Mono.zip(event.interaction.guild, roleMono).flatMap(function { guild, role ->
-            if (!settings.patronGuild || !settings.devGuild) {
+            if (!settings.patronGuild) {
                 return@function event.followupEphemeral(getCommonMsg("error.patronOnly", settings))
             }
 
