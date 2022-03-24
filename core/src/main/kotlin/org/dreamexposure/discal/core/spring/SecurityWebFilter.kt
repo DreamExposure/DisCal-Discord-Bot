@@ -33,6 +33,7 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
 
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return handlerMapping.getHandler(exchange).cast(HandlerMethod::class.java)
+            .onErrorResume { Mono.error(EmptyNotAllowedException()) }
             .switchIfEmpty(Mono.error(EmptyNotAllowedException())) // Don't apply custom filter if this is not on a method
             .filter { it.hasMethodAnnotation(Authentication::class.java) }
             .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
