@@ -41,6 +41,10 @@ data class InstanceData(
         return "${formatter.format(lastHeartbeat)} UTC"
     }
 
-    @Suppress("unused") //Used in thymeleaf status page
-    fun getHumanReadableUptime(): String = uptime.getHumanReadable()
+    @SerialName("human_uptime")
+    var humanReadableUptime: String = uptime.getHumanReadable()
+    private set
+    get() {
+        return uptime.getHumanReadable()
+    }
 }

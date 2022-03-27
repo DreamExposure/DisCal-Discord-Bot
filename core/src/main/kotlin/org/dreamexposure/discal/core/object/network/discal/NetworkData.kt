@@ -25,7 +25,6 @@ data class NetworkData(
     @SerialName("bot_status")
     val botStatus: MutableList<BotInstanceData> = CopyOnWriteArrayList()
 ) {
-    @Serializable
     @SerialName("expected_shard_count")
     var expectedShardCount: Int = -1
         private set
@@ -34,7 +33,6 @@ data class NetworkData(
             else field
         }
 
-    @Serializable
     @SerialName("total_guilds")
     var totalGuilds: Int = 0
         private set
