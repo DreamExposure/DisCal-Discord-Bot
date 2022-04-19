@@ -1,21 +1,22 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.client.service.StaticMessageService
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.discord4j.*
 import org.dreamexposure.discal.core.extensions.isValidTimezone
+import org.dreamexposure.discal.core.extensions.toZoneId
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Wizard
+import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -47,6 +48,16 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>, val staticMessageSrv: Sta
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
+        val description = event.options[0].getOption("description")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .orElse("")
+
+        val timezone = event.options[0].getOption("timezone")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .orElse("")
+
         val host = event.options[0].getOption("host")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -57,12 +68,22 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>, val staticMessageSrv: Sta
             if (wizard.get(settings.guildID) == null) {
                 //Start calendar wizard
                 val pre = PreCalendar.new(settings.guildID, host, name)
+                pre.description = description
+                pre.timezone = timezone.toZoneId() // Extension method auto-checks if the timezone is valid
+
+                // Message content for wizard start so that if a bad optional timezone is given, we can provide better feedback.
+                val msg = if (timezone.isNotEmpty() && !timezone.isValidTimezone()) {
+                    // Invalid timezone specified
+                    getMessage("create.success.badTimezone", settings)
+                } else {
+                    getMessage("create.success", settings)
+                }
 
                 event.interaction.guild
                     .filterWhen(Guild::canAddCalendar)
                     .doOnNext { wizard.start(pre) } //only start wizard if another calendar can be added
                     .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(getMessage("create.success", settings), it) }
+                    .flatMap { event.followupEphemeral(msg, it) }
                     .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings)))
             } else {
                 event.interaction.guild

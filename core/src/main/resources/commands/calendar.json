@@ -15,6 +15,18 @@
           "required": true
         },
         {
+          "name": "description",
+          "type": 3,
+          "description": "The description of the new calendar",
+          "required": false
+        },
+        {
+          "name": "timezone",
+          "type": 3,
+          "description": "The timezone of the new calendar",
+          "required": false
+        },
+        {
           "name": "host",
           "type": 3,
           "description": "The 3rd party host for the calendar",

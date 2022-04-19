@@ -28,6 +28,14 @@ fun String.isValidTimezone(): Boolean {
     }
 }
 
+fun String.toZoneId(): ZoneId? {
+    return try {
+        if (!BadTimezone.isBad(this)) ZoneId.of(this) else null
+    } catch (ignore: Exception) {
+        null
+    }
+}
+
 fun String.isValidImage(allowGif: Boolean) = ImageValidator.validate(this, allowGif)
 
 fun String.padCenter(length: Int, padChar: Char = ' '): String {
