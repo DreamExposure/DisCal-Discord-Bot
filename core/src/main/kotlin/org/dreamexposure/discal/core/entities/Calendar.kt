@@ -2,14 +2,14 @@ package org.dreamexposure.discal.core.entities
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.json.JSONObject
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -160,6 +160,11 @@ interface Calendar {
      */
     fun getEventsInMonth(start: Instant, daysInMonth: Int): Flux<Event> =
           getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
+
+    fun getEventsInNextNDays(days: Int): Flux<Event> =
+        getEventsInTimeRange(Instant.now(), Instant.now().plus(days.toLong(), ChronoUnit.DAYS))
+
+
 
     /**
      * Requests to create an event with the supplied information.
