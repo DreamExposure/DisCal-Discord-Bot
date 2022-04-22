@@ -4,8 +4,8 @@ import okhttp3.FormBody
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.discord.AccessTokenResponse
 import org.dreamexposure.discal.cam.json.discord.AuthorizationInfo
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
+import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
@@ -16,6 +16,7 @@ import java.nio.charset.Charset
 
 object DiscordOauthHandler {
     private val redirectUrl = URLEncoder.encode(BotSettings.REDIR_URL.get(), Charset.defaultCharset())
+    private const val CDN_URL = "https://cdn.discordapp.com"
 
     fun doTokenExchange(code: String): Mono<AccessTokenResponse> {
         return Mono.fromCallable {
@@ -96,13 +97,16 @@ object DiscordOauthHandler {
                     response.body!!.string())
 
                 //Convert avatar hash to full URL
-                if (responseBody.user!!.avatar != null) {
+                val avatar = if (responseBody.user!!.avatar != null) {
                     val userId = responseBody.user!!.id.asString()
                     val avatarHash = responseBody.user!!.avatar
-                    val avatar = "https://cdn.discordapp.com/avatars/$userId/$avatarHash.png"
-
-                    responseBody = responseBody.copy(user = responseBody.user!!.copy(avatar = avatar))
+                    "$CDN_URL/avatars/$userId/$avatarHash.png"
+                } else {
+                    // No avatar present, get discord's default user avatar
+                    val discrim = responseBody.user!!.discriminator
+                    "$CDN_URL/embed/avatars/${discrim.toInt() % 5}.png"
                 }
+                responseBody = responseBody.copy(user = responseBody.user!!.copy(avatar = avatar))
 
                 Mono.just(responseBody)
             } else {
