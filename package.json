@@ -1,7 +1,7 @@
 {
   "title": "DisCal",
   "name": "discal",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "A Discord bot that integrates Google Calendar into Discord",
   "homepage": "https://www.discalbot.com",
   "bugs": {
