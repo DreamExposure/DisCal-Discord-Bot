@@ -1,17 +1,13 @@
 package org.dreamexposure.discal.client.commands
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.MessageCreateSpec
 import org.dreamexposure.discal.client.message.embed.EventEmbed
 import org.dreamexposure.discal.client.service.StaticMessageService
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.event.PreEvent
-import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -21,6 +17,10 @@ import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.isValidImage
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Wizard
+import org.dreamexposure.discal.core.`object`.event.PreEvent
+import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -103,7 +103,9 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
         val name = event.options[0].getOption("name")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+                .filter { !it.equals("N/a") || !it.equals("None") }
+                .orElse("")
+
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -122,7 +124,9 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
         val description = event.options[0].getOption("description")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+                .filter { !it.equals("N/a") || !it.equals("None") }
+                .orElse("")
+
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -322,7 +326,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
         val location = event.options[0].getOption("location")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+                .filter { !it.equals("N/a") || !it.equals("None") }
+                .orElse("")
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)

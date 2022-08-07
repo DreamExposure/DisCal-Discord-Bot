@@ -44,8 +44,8 @@
         {
           "name": "name",
           "type": 3,
-          "description": "The new name of the event",
-          "required": true
+          "description": "The new name of the event (Use 'N/a' or 'None' to remove)",
+          "required": false
         }
       ]
     },
@@ -58,8 +58,8 @@
         {
           "name": "description",
           "type": 3,
-          "description": "The new description of the event",
-          "required": true
+          "description": "The new description of the event (Use 'N/a' or 'None' to remove)",
+          "required": false
         }
       ]
     },
@@ -516,8 +516,8 @@
         {
           "name": "location",
           "type": 3,
-          "description": "The location of the event",
-          "required": true
+          "description": "The location of the event (Use 'N/a' or 'None' to remove)",
+          "required": false
         }
       ]
     },
