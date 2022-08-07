@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.json.JSONObject
@@ -150,7 +151,7 @@ interface Calendar {
      * @return A [Flux] of [events][Event] that are happening within the next 24-hour period from the start.
      */
     fun getEventsInNext24HourPeriod(start: Instant): Flux<Event> =
-          getEventsInTimeRange(start, start.plus(1, ChronoUnit.DAYS))
+        getEventsInTimeRange(start, start.plus(1, ChronoUnit.DAYS))
 
     /**
      * Requests to retrieve all [events][Event] within the month starting at the supplied [Instant].
@@ -159,11 +160,10 @@ interface Calendar {
      * @return A [Flux] of [events][Event] that are happening in the supplied 1-month period.
      */
     fun getEventsInMonth(start: Instant, daysInMonth: Int): Flux<Event> =
-          getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
+        getEventsInTimeRange(start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
 
     fun getEventsInNextNDays(days: Int): Flux<Event> =
         getEventsInTimeRange(Instant.now(), Instant.now().plus(days.toLong(), ChronoUnit.DAYS))
-
 
 
     /**
@@ -182,34 +182,36 @@ interface Calendar {
      *
      * @return A [WebCalendar] containing the information from this entity
      */
-    fun toWebCalendar(): WebCalendar {
+    fun toWebCalendar(settings: GuildSettings): WebCalendar {
         return WebCalendar(
-              this.calendarId,
-              this.calendarAddress,
-              this.calendarNumber,
-              this.calendarData.host,
-              this.link,
-              this.hostLink,
-              this.name,
-              this.description,
-              this.timezone.id.replace("/", "___"),
-              this.external
+            guildId = this.guildId,
+            id = this.calendarId,
+            address = this.calendarAddress,
+            number = this.calendarNumber,
+            host = this.calendarData.host,
+            link = this.link,
+            hostLink = this.hostLink,
+            name = this.name,
+            description = this.description,
+            timezone = this.timezone.id.replace("/", "___"),
+            external = this.external,
+            timeFormat = settings.timeFormat,
         )
     }
 
     fun toJson(): JSONObject {
         return JSONObject()
-              .put("guild_id", guildId.asString())
-              .put("calendar_id", calendarId)
-              .put("calendar_address", calendarAddress)
-              .put("calendar_number", calendarNumber)
-              .put("host", calendarData.host.name)
-              .put("host_link", hostLink)
-              .put("external", external)
-              .put("name", name)
-              .put("description", description)
-              .put("timezone", timezone)
-              .put("link", link)
+            .put("guild_id", guildId.asString())
+            .put("calendar_id", calendarId)
+            .put("calendar_address", calendarAddress)
+            .put("calendar_number", calendarNumber)
+            .put("host", calendarData.host.name)
+            .put("host_link", hostLink)
+            .put("external", external)
+            .put("name", name)
+            .put("description", description)
+            .put("timezone", timezone)
+            .put("link", link)
     }
 
     companion object {

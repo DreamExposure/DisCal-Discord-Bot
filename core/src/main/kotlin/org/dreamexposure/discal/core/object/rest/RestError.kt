@@ -18,8 +18,8 @@ enum class RestError(
 
 
     ACCESS_REVOKED(1001, "Access to resource revoked"),
-    NOT_FOUND(1002, "Resource not found");
-
+    NOT_FOUND(1002, "Resource not found"),
+    MISSING_ACCESS(1003, "Missing access");
 
     companion object {
         fun fromCode(code: Int): RestError {

@@ -14,12 +14,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
 import org.dreamexposure.discal.Application.Companion.getShardCount
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.extensions.discord4j.getMainCalendar
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.justOrEmpty
 import reactor.function.TupleUtils
@@ -82,9 +82,11 @@ data class WebGuild(
                 val announcements = DatabaseManager.getAnnouncements(id)
 
                 //TODO: Support multi-cal
-                val calendar = g.getMainCalendar()
-                    .map { it.toWebCalendar() }
-                    .defaultIfEmpty(WebCalendar.empty())
+                val calendar = settings.flatMap { s ->
+                    g.getMainCalendar()
+                        .map { it.toWebCalendar(s) }
+                        .defaultIfEmpty(WebCalendar(guildId = g.id))
+                }
 
 
                 Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
@@ -124,9 +126,11 @@ data class WebGuild(
             val announcements = DatabaseManager.getAnnouncements(g.id)
 
             //TODO: Support multi-cal
-            val calendar = g.getMainCalendar()
-                .map { it.toWebCalendar() }
-                .defaultIfEmpty(WebCalendar.empty())
+            val calendar = settings.flatMap { s ->
+                g.getMainCalendar()
+                    .map { it.toWebCalendar(s) }
+                    .defaultIfEmpty(WebCalendar(guildId = g.id))
+            }
 
             return Mono.zip(botNick, settings, roles, channels, announcements, calendar)
                   .map(TupleUtils.function { bn, s, r, wc, a, c ->
