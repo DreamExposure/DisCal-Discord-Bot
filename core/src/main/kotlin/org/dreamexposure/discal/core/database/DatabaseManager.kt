@@ -9,16 +9,6 @@ import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.StaticMessage
-import org.dreamexposure.discal.core.`object`.WebSession
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.event.EventData
-import org.dreamexposure.discal.core.`object`.event.RsvpData
-import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
-import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
@@ -29,6 +19,16 @@ import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.extensions.setFromString
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.StaticMessage
+import org.dreamexposure.discal.core.`object`.WebSession
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.event.EventData
+import org.dreamexposure.discal.core.`object`.event.RsvpData
+import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
+import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.intellij.lang.annotations.Language
 import reactor.core.publisher.Mono
@@ -760,6 +760,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val a = Announcement(guildId, announcementId)
+                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
                     a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
                     a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
                     a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
