@@ -24,6 +24,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       - name: Install NPM
         uses: actions/setup-node@v2
         with:
@@ -43,7 +44,7 @@ jobs:
 
       # Build project
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build
   publish-for-develop:
     name: Publish artifacts on develop
     runs-on: ubuntu-latest
