@@ -1,7 +1,7 @@
 # DisCal
 
 [![Discord](https://img.shields.io/discord/375357265198317579?label=DreamExposure&style=flat-square)](https://discord.gg/2TFqyuy)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/DreamExposure/DisCal-Discord-Bot/Gradle%20Build%20And%20Deploy?label=Build&style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/DreamExposure/DisCal-Discord-Bot/Java%20CI?label=Build&style=flat-square)
 [![Website](https://img.shields.io/website?down_color=red&down_message=offline&label=Status&style=flat-square&up_message=online&url=https%3A%2F%2Fwww.discalbot.com)](https://discalbot.com)
 
 DisCal is a discord bot that connects Discord and Google Calendar as seamlessly as possible with a wide feature set for
