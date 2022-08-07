@@ -7,10 +7,13 @@ import club.minnced.discord.webhook.send.WebhookEmbed.*
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
+import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
+import org.dreamexposure.discal.core.extensions.embedFieldSafe
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
+import java.time.Instant
 
 class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private val defaultHook: WebhookClient?
@@ -37,18 +40,19 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
 
     private fun executeStatus(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
-                .setTitle(EmbedTitle("Status", null))
-                .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
-                .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
-                .addField(EmbedField(false, "Logger", event.loggerName))
-                .addField(EmbedField(true, "Level", event.level.levelStr))
-                .addField(EmbedField(true, "Thread", event.threadName))
-                .setDescription(event.formattedMessage)
-                .setColor(GlobalVal.discalColor.rgb)
-                .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
+            .setTitle(EmbedTitle("Status", null))
+            .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
+            .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
+            .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
+            .addField(EmbedField(true, "Level", event.level.levelStr))
+            .addField(EmbedField(true, "Thread", event.threadName.embedFieldSafe()))
+            .setDescription(event.formattedMessage.embedDescriptionSafe())
+            .setColor(GlobalVal.discalColor.rgb)
+            .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
+            .setTimestamp(Instant.now())
 
         if (event.throwableProxy != null) {
-            content.addField(EmbedField(false, "Error Message", event.throwableProxy.message))
+            content.addField(EmbedField(false, "Error Message", event.throwableProxy.message.embedFieldSafe()))
             content.addField(EmbedField(false, "Stacktrace", "Stacktrace can be found in exceptions log file"))
         }
 
@@ -57,18 +61,19 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
 
     private fun executeDefault(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
-                .setTitle(EmbedTitle(event.level.levelStr, null))
-                .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
-                .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
-                .addField(EmbedField(false, "Logger", event.loggerName))
-                .addField(EmbedField(true, "Level", event.level.levelStr))
-                .addField(EmbedField(true, "Thread", event.threadName))
-                .setDescription(event.formattedMessage)
-                .setColor(GlobalVal.discalColor.rgb)
-                .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
+            .setTitle(EmbedTitle(event.level.levelStr, null))
+            .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
+            .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
+            .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
+            .addField(EmbedField(true, "Level", event.level.levelStr))
+            .addField(EmbedField(true, "Thread", event.threadName.embedFieldSafe()))
+            .setDescription(event.formattedMessage.embedDescriptionSafe())
+            .setColor(GlobalVal.discalColor.rgb)
+            .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
+            .setTimestamp(Instant.now())
 
         if (event.throwableProxy != null) {
-            content.addField(EmbedField(false, "Error Message", event.throwableProxy.message))
+            content.addField(EmbedField(false, "Error Message", event.throwableProxy.message.embedFieldSafe()))
             content.addField(EmbedField(false, "Stacktrace", "Stacktrace can be found in exceptions log file"))
         }
 
