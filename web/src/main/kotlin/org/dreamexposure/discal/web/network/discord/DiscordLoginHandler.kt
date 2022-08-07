@@ -4,12 +4,12 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.GoodTimezone
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.json.JSONArray
@@ -176,12 +176,10 @@ class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
                 //Tell the API server the user has logged out and to delete the temp key
                 val client = OkHttpClient()
 
-                val requestBody = "".toRequestBody(GlobalVal.JSON)
-
                 val logoutRequest = Request.Builder()
                         .url("${BotSettings.API_URL.get()}/v2/account/logout")
                         .header("Authorization", model["key"] as String)
-                        .post(requestBody)
+                        .get()
                         .build()
 
                 return@flatMap Mono.fromCallable(client.newCall(logoutRequest)::execute)
