@@ -119,7 +119,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_GUILD_SETTINGS)
-                    .bind(0, settings.guildID.asString())
+                    .bind(0, settings.guildID.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ -> row }
@@ -144,7 +144,7 @@ object DatabaseManager {
                             .bind(7, settings.maxCalendars)
                             .bind(8, settings.getDmAnnouncementsString())
                             .bind(9, settings.branded)
-                            .bind(10, settings.guildID.asString())
+                            .bind(10, settings.guildID.asLong())
                             .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
                         .hasElement()
@@ -158,7 +158,7 @@ object DatabaseManager {
 
                     Mono.from(
                         c.createStatement(insertCommand)
-                            .bind(0, settings.guildID.asString())
+                            .bind(0, settings.guildID.asLong())
                             .bind(1, settings.controlRole)
                             .bind(2, settings.announcementStyle.value)
                             .bind(3, settings.timeFormat.value)
@@ -184,7 +184,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_CALENDAR_BY_GUILD)
-                    .bind(0, calData.guildId.asString())
+                    .bind(0, calData.guildId.asLong())
                     .bind(1, calData.calendarNumber)
                     .execute()
             ).flatMapMany { res ->
@@ -209,7 +209,7 @@ object DatabaseManager {
                             .bind(6, calData.encryptedAccessToken)
                             .bind(7, calData.encryptedRefreshToken)
                             .bind(8, calData.expiresAt.toEpochMilli())
-                            .bind(9, calData.guildId.asString())
+                            .bind(9, calData.guildId.asLong())
                             .bind(10, calData.calendarNumber)
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
@@ -224,7 +224,7 @@ object DatabaseManager {
 
                     Mono.from(
                         c.createStatement(insertCommand)
-                            .bind(0, calData.guildId.asString())
+                            .bind(0, calData.guildId.asLong())
                             .bind(1, calData.calendarNumber)
                             .bind(2, calData.host.name)
                             .bind(3, calData.calendarId)
@@ -250,7 +250,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENT_BY_GUILD)
-                    .bind(0, announcement.guildId.asString())
+                    .bind(0, announcement.guildId.asLong())
                     .bind(1, announcement.id)
                     .execute()
             ).flatMapMany { res ->
@@ -281,7 +281,7 @@ object DatabaseManager {
                             .bind(11, announcement.enabled)
                             .bind(12, announcement.publish)
                             .bind(13, announcement.id)
-                            .bind(14, announcement.guildId.asString())
+                            .bind(14, announcement.guildId.asLong())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                         .hasElements()
@@ -298,7 +298,7 @@ object DatabaseManager {
                         c.createStatement(insertCommand)
                             .bind(0, announcement.id)
                             .bind(1, announcement.calendarNumber)
-                            .bind(2, announcement.guildId.asString())
+                            .bind(2, announcement.guildId.asLong())
                             .bind(3, announcement.subscriberRoleIds.asStringList())
                             .bind(4, announcement.subscriberUserIds.asStringList())
                             .bind(5, announcement.announcementChannelId)
@@ -331,7 +331,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_EVENT_BY_GUILD)
-                    .bind(0, data.guildId.asString())
+                    .bind(0, data.guildId.asLong())
                     .bind(1, id)
                     .execute()
             ).flatMapMany { res ->
@@ -349,7 +349,7 @@ object DatabaseManager {
                             .bind(1, data.imageLink)
                             .bind(2, data.eventEnd)
                             .bind(3, id)
-                            .bind(4, data.guildId.asString())
+                            .bind(4, data.guildId.asLong())
                             .execute()
                     ).flatMapMany(Result::getRowsUpdated)
                         .hasElements()
@@ -362,7 +362,7 @@ object DatabaseManager {
 
                     Mono.from(
                         c.createStatement(insertCommand)
-                            .bind(0, data.guildId.asString())
+                            .bind(0, data.guildId.asLong())
                             .bind(1, id)
                             .bind(2, data.calendarNumber)
                             .bind(3, data.eventEnd)
@@ -384,7 +384,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_RSVP_BY_GUILD)
-                    .bind(0, data.guildId.asString())
+                    .bind(0, data.guildId.asLong())
                     .bind(1, data.eventId)
                     .execute()
             ).flatMapMany { res ->
@@ -409,12 +409,12 @@ object DatabaseManager {
                             .bind(7, data.limit)
                             //8 deal with nullable role below
                             .bind(9, data.eventId)
-                            .bind(10, data.guildId.asString())
+                            .bind(10, data.guildId.asLong())
                     ).doOnNext { statement ->
                         if (data.roleId == null)
                             statement.bindNull(8, Long::class.java)
                         else
-                            statement.bind(8, data.roleId!!.asString())
+                            statement.bind(8, data.roleId!!.asLong())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -429,7 +429,7 @@ object DatabaseManager {
 
                     Mono.just(
                         c.createStatement(insertCommand)
-                            .bind(0, data.guildId.asString())
+                            .bind(0, data.guildId.asLong())
                             .bind(1, data.eventId)
                             .bind(2, data.calendarNumber)
                             .bind(3, data.eventEnd)
@@ -443,7 +443,7 @@ object DatabaseManager {
                         if (data.roleId == null)
                             statement.bindNull(10, Long::class.java)
                         else
-                            statement.bind(10, data.roleId!!.asString())
+                            statement.bind(10, data.roleId!!.asLong())
                     }.flatMap {
                         Mono.from(it.execute())
                     }.flatMapMany(Result::getRowsUpdated)
@@ -536,7 +536,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_GUILD_SETTINGS)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -578,7 +578,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_CALENDAR_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, calendarNumber)
                     .execute()
             ).flatMapMany { res ->
@@ -612,7 +612,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ALL_CALENDARS_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -664,7 +664,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_CALENDAR_COUNT_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -688,7 +688,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_EVENT_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, eventIdLookup)
                     .execute()
             ).flatMapMany { res ->
@@ -716,7 +716,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_RSVP_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, eventId)
                     .execute()
             ).flatMapMany { res ->
@@ -754,7 +754,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENT_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, announcementId)
                     .execute()
             ).flatMapMany { res ->
@@ -789,7 +789,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ALL_ANNOUNCEMENTS_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -825,7 +825,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ANNOUNCEMENTS_BY_GUILD_AND_TYPE)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, type.name)
                     .execute()
             ).flatMapMany { res ->
@@ -866,7 +866,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -903,7 +903,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -939,7 +939,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -971,7 +971,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ENABLED_ANNOUNCEMENTS_BY_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .execute()
             ).flatMapMany { res ->
                 res.map { row, _ ->
@@ -1012,7 +1012,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
@@ -1044,7 +1044,7 @@ object DatabaseManager {
         return connect { c ->
             Mono.from(
                 c.createStatement(Queries.SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE_GUILD)
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     .bind(1, type.name)
                     .execute()
             ).flatMapMany { res ->
@@ -1139,7 +1139,7 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.DELETE_ANNOUNCEMENTS_FOR_EVENT)
                     .bind(0, eventId)
-                    .bind(1, guildId.asString())
+                    .bind(1, guildId.asLong())
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                 .hasElements()
@@ -1171,8 +1171,8 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.REMOVE_RSVP_ROLE)
                     .bindNull(0, Long::class.java)
-                    .bind(1, guildId.asString())
-                    .bind(2, roleId.asString())
+                    .bind(1, guildId.asLong())
+                    .bind(2, roleId.asLong())
                     .execute()
             ).flatMapMany(Result::getRowsUpdated)
                 .hasElements()
@@ -1190,32 +1190,32 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.FULL_CALENDAR_DELETE) //Monolith 8 statement query
                     // calendar delete bindings
-                    .bind(0, calendarData.guildId.asString())
+                    .bind(0, calendarData.guildId.asLong())
                     .bind(1, calendarData.calendarNumber)
                     // event delete bindings
-                    .bind(2, calendarData.guildId.asString())
+                    .bind(2, calendarData.guildId.asLong())
                     .bind(3, calendarData.calendarNumber)
                     // rsvp delete bindings
-                    .bind(4, calendarData.guildId.asString())
+                    .bind(4, calendarData.guildId.asLong())
                     .bind(5, calendarData.calendarNumber)
                     // announcement delete bindings
-                    .bind(6, calendarData.guildId.asString())
+                    .bind(6, calendarData.guildId.asLong())
                     .bind(7, calendarData.calendarNumber)
                     // delete static message bindings
                     .bind(8, calendarData.guildId.asLong())
                     .bind(9, calendarData.calendarNumber)
                     // decrement calendar bindings
                     .bind(10, calendarData.calendarNumber)
-                    .bind(11, calendarData.guildId.asString())
+                    .bind(11, calendarData.guildId.asLong())
                     // decrement event bindings
                     .bind(12, calendarData.calendarNumber)
-                    .bind(13, calendarData.guildId.asString())
+                    .bind(13, calendarData.guildId.asLong())
                     // decrement rsvp bindings
                     .bind(14, calendarData.calendarNumber)
-                    .bind(15, calendarData.guildId.asString())
+                    .bind(15, calendarData.guildId.asLong())
                     // decrement announcement bindings
                     .bind(16, calendarData.calendarNumber)
-                    .bind(17, calendarData.guildId.asString())
+                    .bind(17, calendarData.guildId.asLong())
                     // decrement static message bindings
                     .bind(18, calendarData.calendarNumber)
                     .bind(19, calendarData.guildId.asLong())
@@ -1234,15 +1234,15 @@ object DatabaseManager {
             Mono.from(
                 c.createStatement(Queries.DELETE_EVERYTHING_FOR_GUILD) //Monolith 6 statement query
                     // settings delete bindings
-                    .bind(0, guildId.asString())
+                    .bind(0, guildId.asLong())
                     // calendar delete bindings
-                    .bind(1, guildId.asString())
+                    .bind(1, guildId.asLong())
                     // event delete bindings
-                    .bind(2, guildId.asString())
+                    .bind(2, guildId.asLong())
                     // rsvp delete bindings
-                    .bind(3, guildId.asString())
+                    .bind(3, guildId.asLong())
                     // announcement delete bindings
-                    .bind(4, guildId.asString())
+                    .bind(4, guildId.asLong())
                     // static message delete bindings
                     .bind(5, guildId.asLong())
                     .execute()
@@ -1482,7 +1482,7 @@ object DatabaseManager {
             ).flatMapMany { res ->
                 res.map { row, _ ->
                     val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", String::class.java]!!)
+                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
 
                     val a = Announcement(guildId, announcementId)
                     a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
