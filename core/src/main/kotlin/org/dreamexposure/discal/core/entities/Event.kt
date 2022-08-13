@@ -3,15 +3,15 @@ package org.dreamexposure.discal.core.entities
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
-import org.dreamexposure.discal.core.`object`.event.EventData
-import org.dreamexposure.discal.core.`object`.event.Recurrence
-import org.dreamexposure.discal.core.`object`.event.RsvpData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import org.dreamexposure.discal.core.`object`.event.EventData
+import org.dreamexposure.discal.core.`object`.event.Recurrence
+import org.dreamexposure.discal.core.`object`.event.RsvpData
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.json.JSONObject
 import reactor.core.publisher.Flux
@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 interface Event {
     /**
@@ -172,6 +173,23 @@ interface Event {
         val start = this.start.atZone(timezone)
 
         return start.hour == 0 && is24Hours()
+    }
+
+    /**
+     * Whether the event spans across multiple calendar days (ex Monday 8pm to Tuesday 3am)
+     *
+     * @return Whether the event is multi-day
+     */
+    fun isMultiDay(): Boolean {
+        val start = this.start.atZone(timezone).truncatedTo(ChronoUnit.DAYS)
+        val end = this.end.atZone(timezone).truncatedTo(ChronoUnit.DAYS)
+
+        return when {
+            start.year != end.year -> true
+            start.month != end.month -> true
+            start.dayOfYear != end.dayOfYear -> true
+            else -> false
+        }
     }
 
     //Json bullshit
