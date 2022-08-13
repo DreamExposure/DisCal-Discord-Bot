@@ -2,13 +2,13 @@ package org.dreamexposure.discal.client.message.embed
 
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import reactor.core.publisher.Mono
@@ -61,8 +61,13 @@ object CalendarEmbed : EmbedMaker {
                 // sort events
                 val sortedEvents = date.value.sortedBy { it.start }
 
-                val content = StringBuilder().append("```\n")
+                val content = StringBuilder()
+
                 sortedEvents.forEach {
+                    // Start event
+                    content.append("```\n")
+
+
                     // determine time length
                     val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.timeFormat)} -" +
                         " ${it.end.humanReadableTime(it.timezone,settings.timeFormat)} ").length
@@ -94,8 +99,10 @@ object CalendarEmbed : EmbedMaker {
                     if (it.location.isNotBlank()) content.append("    Location: ")
                         .append(it.location.embedFieldSafe())
                         .append("\n")
+
+                    // Finish event
+                    content.append("```\n")
                 }
-                content.append("```")
 
                 builder.addField(title, content.toString(), false)
             }
