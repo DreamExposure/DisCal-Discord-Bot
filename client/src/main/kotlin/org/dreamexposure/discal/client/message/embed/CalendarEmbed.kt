@@ -104,7 +104,8 @@ object CalendarEmbed : EmbedMaker {
                     content.append("```\n")
                 }
 
-                builder.addField(title, content.toString(), false)
+                if (content.isNotBlank())
+                    builder.addField(title, content.toString(), false)
             }
 
 
