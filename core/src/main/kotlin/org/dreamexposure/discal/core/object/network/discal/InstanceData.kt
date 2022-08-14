@@ -12,7 +12,6 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-@Suppress("DataClassPrivateConstructor")
 @Serializable
 data class InstanceData(
     @SerialName("instance_id")
@@ -42,6 +41,7 @@ data class InstanceData(
     }
 
     @SerialName("human_uptime")
+    @Suppress("unused") //Used in thymeleaf status page
     var humanReadableUptime: String = uptime.getHumanReadable()
     private set
     get() {

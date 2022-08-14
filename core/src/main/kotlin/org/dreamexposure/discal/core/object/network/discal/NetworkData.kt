@@ -20,7 +20,7 @@ data class NetworkData(
     var websiteStatus: InstanceData? = null,
 
     @SerialName("cam_status")
-    var camStatus: InstanceData? = null,
+    var camStatus: MutableList<InstanceData> = CopyOnWriteArrayList(),
 
     @SerialName("bot_status")
     val botStatus: MutableList<BotInstanceData> = CopyOnWriteArrayList()
@@ -51,8 +51,8 @@ data class NetworkData(
 
         totalMemMb += apiStatus.memory
         totalMemMb += websiteStatus?.memory ?: 0.0
-        totalMemMb += camStatus?.memory ?: 0.0
 
+        camStatus.forEach { totalMemMb += it.memory }
         botStatus.forEach { totalMemMb += it.instanceData.memory }
 
         return ((totalMemMb / 1024) * 100).roundToInt().toDouble() / 100
