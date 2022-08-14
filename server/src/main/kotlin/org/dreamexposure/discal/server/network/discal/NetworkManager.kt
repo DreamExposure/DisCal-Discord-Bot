@@ -1,12 +1,12 @@
 package org.dreamexposure.discal.server.network.discal
 
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkData
-import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -25,13 +25,12 @@ class NetworkManager : ApplicationRunner {
     fun getStatus() = status.copy()
 
     fun handleCam(data: InstanceData) {
-        val existing = status.camStatus
+        val existing = status.camStatus.find { it.instanceId == data.instanceId }
         if (existing == null)
-            LOGGER.info(STATUS, "CAM now connected")
-        else if (existing.instanceId != data.instanceId)
-            LOGGER.info(STATUS, "CAM instance ID changed")
+            LOGGER.info(STATUS, "CAM instance connected to network | Id: ${data.instanceId}")
 
-        status.camStatus = data
+        status.camStatus.remove(existing)
+        status.camStatus.add(data)
     }
 
     fun handleWebsite(data: InstanceData) {
@@ -58,17 +57,17 @@ class NetworkManager : ApplicationRunner {
 
     private fun updateAndReturnStatus(): Mono<NetworkData> {
         return Mono.zip(DatabaseManager.getCalendarCount(), DatabaseManager.getAnnouncementCount()).map(
-                TupleUtils.function { calCount, annCount ->
-                    status.totalCalendars = calCount
-                    status.totalAnnouncements = annCount
-                    status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())
+            TupleUtils.function { calCount, annCount ->
+                status.totalCalendars = calCount
+                status.totalAnnouncements = annCount
+                status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())
 
-                    status.copy()
-                }
+                status.copy()
+            }
         )
     }
 
-    private fun doRestart(bot: BotInstanceData): Mono<Void> {
+    private fun doRestartBot(bot: BotInstanceData): Mono<Void> {
         //Gotta actually see if it needs to be restarted
 
 
@@ -81,12 +80,31 @@ class NetworkManager : ApplicationRunner {
         return Mono.empty()
     }
 
+    private fun doRestartCam(cam: InstanceData): Mono<Void> {
+        //Gotta actually see if it needs to be restarted
+
+
+        if (!BotSettings.USE_RESTART_SERVICE.get().equals("true", true)) {
+            status.camStatus.removeIf { it.instanceId == cam.instanceId }
+            LOGGER.warn(STATUS, "Cam disconnected from network | Id: ${cam.instanceId} | Reason: Restart service not active!")
+        } else {
+            //TODO: Actually support restarting clients automatically one day
+        }
+        return Mono.empty()
+    }
+
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofMinutes(1))
-                .flatMap { updateAndReturnStatus() } //Update local status every minute
-                .flatMapIterable(NetworkData::botStatus)
-                .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
-                .flatMap(this::doRestart)
-                .subscribe()
+            .flatMap { updateAndReturnStatus() } //Update local status every minute
+            .flatMap {
+                val bot = Flux.from<BotInstanceData> { status.botStatus }
+                    .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
+                    .flatMap(this::doRestartBot)
+                val cam = Flux.from<InstanceData> { status.botStatus }
+                    .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
+                    .flatMap(this::doRestartCam)
+
+                Mono.`when`(bot, cam)
+            }.subscribe()
     }
 }
