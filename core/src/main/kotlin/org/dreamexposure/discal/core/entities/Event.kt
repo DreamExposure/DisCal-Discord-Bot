@@ -181,6 +181,8 @@ interface Event {
      * @return Whether the event is multi-day
      */
     fun isMultiDay(): Boolean {
+        if (isAllDay()) return false // All day events should not count as multi-day events
+
         val start = this.start.atZone(timezone).truncatedTo(ChronoUnit.DAYS)
         val end = this.end.atZone(timezone).truncatedTo(ChronoUnit.DAYS)
 
