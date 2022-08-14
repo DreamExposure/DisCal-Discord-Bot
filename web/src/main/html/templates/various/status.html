@@ -247,7 +247,7 @@
                 </p>
 
                 <p class="text-left text-discord-full-white"
-                    th:text="'Total Memory Usage: ' + ${status.totalMemoryInGb} + 'GB'">
+                   th:text="'Total Memory Usage: ' + ${status.totalMemoryInGb} + 'GB'">
                 </p>
 
                 <br>
@@ -285,22 +285,30 @@
 
                 <!--Start CAM Status-->
                 <h2 class="text-center text-discal-blue">Central Auth</h2>
-                <th:block th:if="${status.camStatus != null}">
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Version: ' + ${status.camStatus.version}">
-                    </p>
 
-                    <p class="text-left text-discord-full-white"
-                       th:text="'RAM Used: ' + ${status.camStatus.memory} + 'MB'">
-                    </p>
+                <th:block th:each="cam : ${status.camStatus}">
+                    <div th:id="'cam-' + ${cam.instanceId}">
+                        <h3 class="text-left text-discord-full-white"
+                            th:text="'Instance Id: ' + ${cam.instanceId}"></h3>
 
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Uptime: ' + ${status.camStatus.humanReadableUptime}">
-                    </p>
+                        <p class="text-left text-discord-full-white"
+                           th:text="'Version: ' + ${cam.version}">
+                        </p>
 
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Last Heartbeat: ' + ${status.camStatus.humanReadableHeartbeat}">
-                    </p>
+                        <p class="text-left text-discord-full-white"
+                           th:text="'RAM Used: ' + ${cam.memory} + 'MB'">
+                        </p>
+
+                        <p class="text-left text-discord-full-white"
+                           th:text="'Uptime: ' + ${cam.humanReadableUptime}">
+                        </p>
+
+                        <p class="text-left text-discord-full-white"
+                           th:text="'Last Heartbeat: ' + ${cam.humanReadableHeartbeat}">
+                        </p>
+                    </div>
+
+                    <br>
                 </th:block>
 
                 <br>
@@ -310,77 +318,79 @@
 
                 <!--Start Website Status-->
                 <h2 class="text-center text-discal-blue">Website</h2>
-                <th:block th:if="${status.websiteStatus != null}">
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Version: ' + ${status.websiteStatus.version}">
-                    </p>
-
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
-                    </p>
-
-                    <p class="text-left text-discord-full-white"
-                       th:text="'RAM Used: ' + ${status.websiteStatus.memory} + 'MB'">
-                    </p>
-
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Uptime: ' + ${status.websiteStatus.humanReadableUptime}">
-                    </p>
-
-                    <p class="text-left text-discord-full-white"
-                       th:text="'Last Heartbeat: ' + ${status.websiteStatus.humanReadableHeartbeat}">
-                    </p>
-                </th:block>
-
-                <br>
-                <!--End Website Status-->
-
-                <hr>
-
-                <!--Start Bot Statuses-->
-                <br>
-
-                <h2 class="text-center text-discal-blue">Clients</h2>
 
                 <th:block th:each="client : ${status.botStatus}">
-
-                    <div th:id="'client-' + ${client.shardIndex}">
-                        <h3 class="text-left text-discord-full-white"
-                            th:text="'Shard Index: ' + ${client.shardIndex}"></h3>
-
+                    <th:block th:if="${status.websiteStatus != null}">
                         <p class="text-left text-discord-full-white"
-                           th:text="'Version: ' + ${client.instanceData.version}">
+                           th:text="'Version: ' + ${status.websiteStatus.version}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Discord4J Version: ' + ${client.instanceData.d4jVersion}">
+                           th:text="'Discord4J Version: ' + ${status.websiteStatus.d4jVersion}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Guilds: ' + ${client.guilds}">
+                           th:text="'RAM Used: ' + ${status.websiteStatus.memory} + 'MB'">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'RAM Used: ' + ${client.instanceData.memory} + 'MB'">
-                        </p>
-
-                        <p class="text-left text-discord-full-white">
-                            Announcements: Not Yet Tracked
+                           th:text="'Uptime: ' + ${status.websiteStatus.humanReadableUptime}">
                         </p>
 
                         <p class="text-left text-discord-full-white"
-                           th:text="'Uptime: ' + ${client.instanceData.humanReadableUptime}">
+                           th:text="'Last Heartbeat: ' + ${status.websiteStatus.humanReadableHeartbeat}">
                         </p>
-
-                        <p class="text-left text-discord-full-white"
-                           th:text="'Last Heartbeat: ' + ${client.instanceData.humanReadableHeartbeat}">
-                        </p>
-                    </div>
+                    </th:block>
 
                     <br>
+                    <!--End Website Status-->
 
-                </th:block>
-                <!--End Client Statuses-->
+                    <hr>
+
+                    <!--Start Bot Statuses-->
+                    <br>
+
+                    <h2 class="text-center text-discal-blue">Clients</h2>
+
+                    <th:block th:each="client : ${status.botStatus}">
+
+                        <div th:id="'client-' + ${client.shardIndex}">
+                            <h3 class="text-left text-discord-full-white"
+                                th:text="'Shard Index: ' + ${client.shardIndex}"></h3>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'Version: ' + ${client.instanceData.version}">
+                            </p>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'Discord4J Version: ' + ${client.instanceData.d4jVersion}">
+                            </p>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'Guilds: ' + ${client.guilds}">
+                            </p>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'RAM Used: ' + ${client.instanceData.memory} + 'MB'">
+                            </p>
+
+                            <p class="text-left text-discord-full-white">
+                                Announcements: Not Yet Tracked
+                            </p>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'Uptime: ' + ${client.instanceData.humanReadableUptime}">
+                            </p>
+
+                            <p class="text-left text-discord-full-white"
+                               th:text="'Last Heartbeat: ' + ${client.instanceData.humanReadableHeartbeat}">
+                            </p>
+                        </div>
+
+                        <br>
+
+                    </th:block>
+                    <!--End Client Statuses-->
             </div>
             <!-- /.container-fluid -->
 
