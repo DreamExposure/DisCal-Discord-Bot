@@ -48,7 +48,7 @@
     "datatables.net-bs4": "1.11.3",
     "jquery": "3.6.0",
     "jquery.easing": "1.4.1",
-    "moment-timezone": "0.5.33",
+    "moment-timezone": "0.5.35",
     "rrule": "2.6.8",
     "sass": "1.42.1",
     "tippy.js": "6.3.1",
