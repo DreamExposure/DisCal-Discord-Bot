@@ -100,7 +100,7 @@ class NetworkManager : ApplicationRunner {
                 val bot = Flux.from<BotInstanceData> { status.botStatus }
                     .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartBot)
-                val cam = Flux.from<InstanceData> { status.botStatus }
+                val cam = Flux.from<InstanceData> { status.camStatus }
                     .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartCam)
 
