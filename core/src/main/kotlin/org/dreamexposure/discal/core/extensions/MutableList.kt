@@ -94,12 +94,12 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
     val multi = mutableMapOf<ZonedDateTime, List<Event>>()
 
     sortedDates.forEach {
-        val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).toEpochSecond())
+        val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).plusSeconds(59).toEpochSecond())
         val events = mutableListOf<Event>()
 
         this.forEach { event ->
-            // When we check event end, we bump it back a second in order to prevent weirdness.
-            if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond - 1)) {
+            // When we check event end, we bump it back a couple seconds in order to prevent weirdness.
+            if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond - 2)) {
                 // Event in range, add to list
                 events.add(event)
             } else if (event.start.epochSecond < range.first && event.end.epochSecond > range.last) {
