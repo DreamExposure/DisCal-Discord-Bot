@@ -2,35 +2,34 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    // Kotlin
+    id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.spring.dependency-management")
+
+    // Tooling
     id("com.google.cloud.tools.jib")
 }
 
-val thymeleafVersion: String by properties
-val thymeleafSecurityVersion: String by properties
-val thymeleafLayoutVersion: String by properties
-
+// Versions -- found in gradle.properties
 val springVersion: String by properties
-val springSecurityVersion: String by properties
-val springSessionVersion: String by properties
-val springR2Version: String by properties
+// Thymeleaf
+val thymeleafVersion: String by properties
+val thymeleafLayoutDialectVersion: String by properties
 
 dependencies {
     api(project(":core"))
 
+    // Spring
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:$springVersion")
+
     //Thymeleaf
     implementation("org.thymeleaf:thymeleaf:$thymeleafVersion")
     implementation("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
-    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:$thymeleafLayoutVersion")
-    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5:$thymeleafSecurityVersion")
-
-    //Spring
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:$springVersion")
-    implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
-    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:$thymeleafLayoutDialectVersion")
 }
 
 kotlin {

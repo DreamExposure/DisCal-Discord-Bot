@@ -5,26 +5,20 @@ import com.squareup.kotlinpoet.TypeSpec
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    // Kotlin
     kotlin("plugin.serialization")
-    kotlin("plugin.spring")
-
-    id("com.gorylenko.gradle-git-properties")
     id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
+    kotlin("plugin.spring")
+    id("io.spring.dependency-management")
+
+    // Tooling
+    id("com.gorylenko.gradle-git-properties")
 }
 
 val discord4jVersion: String by properties
-val discord4jStoresVersion: String by properties
 val kotlinSrcDir: File = buildDir.resolve("core/src/main/kotlin")
-
-dependencies {
-    api("com.discord4j:discord4j-core:$discord4jVersion") {
-        exclude(group = "io.projectreactor.netty", module = "*")
-    }
-    api("com.discord4j:stores-redis:$discord4jStoresVersion") {
-        exclude(group = "io.netty", module = "*")
-        exclude(group = "io.projectreactor.netty", module = "*")
-    }
-}
 
 kotlin {
     sourceSets {
@@ -43,6 +37,7 @@ gitProperties {
         "$version.d${System.currentTimeMillis().div(1000)}" //Seconds since epoch
     }
 
+    // Custom git properties for compile-time constants
     customProperty("discal.version", versionName)
     customProperty("discal.version.d4j", discord4jVersion)
 }

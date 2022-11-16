@@ -1,19 +1,18 @@
 plugins {
+    // Kotlin
+    id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.spring.dependency-management")
+
+    // Tooling
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by properties
-val springSessionVersion: String by properties
-val springR2Version: String by properties
-
 dependencies {
     api(project(":core"))
-
-    implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework:spring-r2dbc:$springR2Version")
 }
 
 kotlin {
