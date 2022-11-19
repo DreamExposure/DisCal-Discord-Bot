@@ -4,12 +4,12 @@ import discord4j.common.store.Store
 import discord4j.common.store.legacy.LegacyStoreLayout
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
-import discord4j.core.`object`.presence.ClientActivity
-import discord4j.core.`object`.presence.ClientPresence
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.event.domain.role.RoleDeleteEvent
+import discord4j.core.`object`.presence.ClientActivity
+import discord4j.core.`object`.presence.ClientPresence
 import discord4j.core.shard.MemberRequestFilter
 import discord4j.core.shard.ShardingStrategy
 import discord4j.discordjson.json.GuildData
@@ -27,9 +27,9 @@ import org.dreamexposure.discal.client.listeners.discord.*
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand
 import org.dreamexposure.discal.client.module.command.CommandExecutor
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -148,7 +148,6 @@ private fun getStores(): StoreService {
 private fun getIntents(): IntentSet {
     return IntentSet.of(
             Intent.GUILDS,
-            Intent.GUILD_MEMBERS,
             Intent.GUILD_MESSAGES,
             Intent.GUILD_MESSAGE_REACTIONS,
             Intent.DIRECT_MESSAGES,

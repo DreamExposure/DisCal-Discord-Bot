@@ -1,32 +1,18 @@
 plugins {
+    // Kotlin
+    id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.spring.dependency-management")
+
+    // Tooling
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by properties
-val springSessionVersion: String by properties
-val springR2Version: String by properties
-val flywayVersion: String by properties
-val mysqlConnectorVersion: String by properties
-val hikariVersion: String by properties
-val jacksonKotlinModVersion: String by properties
-
 dependencies {
     api(project(":core"))
-
-    //Database stuff
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("mysql:mysql-connector-java:$mysqlConnectorVersion")
-    implementation("com.zaxxer:HikariCP:$hikariVersion")
-
-    //Spring libs
-    implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework:spring-r2dbc:$springR2Version")
-
-    //jackson for kotlin
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonKotlinModVersion")
 }
 
 kotlin {
