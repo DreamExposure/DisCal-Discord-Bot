@@ -66,9 +66,6 @@ allprojects {
     // Various libs
     val okhttpVersion: String by properties
     val copyDownVersion: String by properties
-    // Forced --- TODO: Remove if no longer needed
-    val nettyVersion: String by properties
-    val slfVersion: String by properties
 
     repositories {
         mavenCentral()
@@ -125,14 +122,6 @@ allprojects {
         // Various Libs
         implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
-
-        //Forced stuff -- TODO: Remove if no longer needed
-        //slf4j-api - Need to force this for logback to work. I dunno
-        //implementation("org.slf4j:slf4j-api:$slfVersion")
-        //Netty - forced due to stores-redis:lettuce-core giving 4.1.38
-        //implementation("io.netty:netty-all:$nettyVersion")
-        //Forcing reactor version
-        //implementation("io.projectreactor:reactor-core")
     }
 
     kotlin {
