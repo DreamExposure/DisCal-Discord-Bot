@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.client.conf
+package org.dreamexposure.discal.client.config
 
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory

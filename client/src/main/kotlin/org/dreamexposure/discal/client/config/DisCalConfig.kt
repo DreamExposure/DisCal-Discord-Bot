@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.client.conf
+package org.dreamexposure.discal.client.config
 
 import org.dreamexposure.discal.core.`object`.Wizard
 import org.dreamexposure.discal.core.`object`.announcement.Announcement

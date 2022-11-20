@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.web.spring
+package org.dreamexposure.discal.web.controllers
 
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.dreamexposure.discal.web.network.discal.StatusHandler
@@ -9,7 +9,7 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Controller
-class SpringController(private val accountHandler: DiscordAccountHandler) {
+class PageController(private val accountHandler: DiscordAccountHandler) {
     @RequestMapping("/", "/home")
     fun home(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
         return accountHandler.getAccount(swe)
