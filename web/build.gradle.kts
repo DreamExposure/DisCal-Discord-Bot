@@ -73,6 +73,7 @@ tasks {
     }
 
     create<Exec>("cleanWeb") {
+        dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             gulp = "gulp.cmd"
@@ -81,6 +82,7 @@ tasks {
     }
 
     create<Exec>("compileCSS") {
+        dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             gulp = "gulp.cmd"
@@ -90,6 +92,7 @@ tasks {
     }
 
     create<Exec>("compileTypescript") {
+        dependsOn("npm")
         var webpack = "webpack"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             webpack = "webpack.cmd"
