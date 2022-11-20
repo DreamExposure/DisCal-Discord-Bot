@@ -71,7 +71,7 @@ class DisCalClient {
             }
 
             //Login
-            val listeners = spring.getBeansOfType(EventListener::class.java)
+            val listeners = spring.getBeansOfType(EventListener::class.java).values
             DiscordClientBuilder.create(BotSettings.TOKEN.get())
                     .build().gateway()
                     .setEnabledIntents(getIntents())
