@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.client.commands
+package org.dreamexposure.discal.client.commands.global
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
@@ -8,6 +8,7 @@ import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.MessageCreateSpec
 import discord4j.rest.http.client.ClientException
+import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.StaticMessage

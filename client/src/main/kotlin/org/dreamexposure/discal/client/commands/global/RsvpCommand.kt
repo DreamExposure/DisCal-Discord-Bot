@@ -1,10 +1,11 @@
-package org.dreamexposure.discal.client.commands
+package org.dreamexposure.discal.client.commands.global
 
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.RsvpEmbed
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral

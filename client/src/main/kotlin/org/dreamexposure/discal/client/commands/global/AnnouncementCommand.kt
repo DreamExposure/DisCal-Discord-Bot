@@ -1,17 +1,15 @@
-package org.dreamexposure.discal.client.commands
+package org.dreamexposure.discal.client.commands.global
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.channel.MessageChannel
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.spec.InteractionFollowupCreateSpec
 import discord4j.rest.util.AllowedMentions
+import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
@@ -21,6 +19,9 @@ import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.messageContentSafe
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.Wizard
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux

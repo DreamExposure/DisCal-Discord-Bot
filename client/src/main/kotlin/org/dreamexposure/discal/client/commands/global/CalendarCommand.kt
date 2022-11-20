@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.client.commands
+package org.dreamexposure.discal.client.commands.global
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
@@ -6,6 +6,7 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
+import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.client.service.StaticMessageService
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse

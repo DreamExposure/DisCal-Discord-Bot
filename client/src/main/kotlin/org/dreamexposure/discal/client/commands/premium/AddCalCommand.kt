@@ -1,14 +1,15 @@
-package org.dreamexposure.discal.client.commands
+package org.dreamexposure.discal.client.commands.premium
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.extensions.discord4j.canAddCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
+import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
