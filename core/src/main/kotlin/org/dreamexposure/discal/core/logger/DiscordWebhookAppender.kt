@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.logger
 
+import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
 import club.minnced.discord.webhook.WebhookClient
@@ -18,22 +19,35 @@ import java.time.Instant
 class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private val defaultHook: WebhookClient?
     private val statusHook: WebhookClient?
+    private val allErrorsWebhook: Boolean
 
     init {
         if (BotSettings.USE_WEBHOOKS.get().equals("true", true)) {
             defaultHook = WebhookClient.withUrl(BotSettings.DEFAULT_WEBHOOK.get())
             statusHook = WebhookClient.withUrl(BotSettings.STATUS_WEBHOOK.get())
+            allErrorsWebhook = BotSettings.ALL_ERRORS_WEBHOOK.get().toBoolean()
         } else {
             defaultHook = null
             statusHook = null
+            allErrorsWebhook = false
         }
     }
 
     override fun append(eventObject: ILoggingEvent) {
-        if (BotSettings.USE_WEBHOOKS.get().equals("true", true)) {
+        if (BotSettings.USE_WEBHOOKS.get().toBoolean()) {
             when {
-                eventObject.marker.equals(DEFAULT) -> executeDefault(eventObject)
-                eventObject.marker.equals(STATUS) -> executeStatus(eventObject)
+                eventObject.level.equals(Level.ERROR) && allErrorsWebhook -> {
+                    executeDefault(eventObject)
+                    return
+                }
+                eventObject.marker.equals(STATUS) -> {
+                    executeStatus(eventObject)
+                    return
+                }
+                eventObject.marker.equals(DEFAULT) -> {
+                    executeDefault(eventObject)
+                    return
+                }
             }
         }
     }
@@ -47,7 +61,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
             .addField(EmbedField(true, "Level", event.level.levelStr))
             .addField(EmbedField(true, "Thread", event.threadName.embedFieldSafe()))
             .setDescription(event.formattedMessage.embedDescriptionSafe())
-            .setColor(GlobalVal.discalColor.rgb)
+            .setColor(getEmbedColor(event))
             .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
             .setTimestamp(Instant.now())
 
@@ -68,7 +82,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
             .addField(EmbedField(true, "Level", event.level.levelStr))
             .addField(EmbedField(true, "Thread", event.threadName.embedFieldSafe()))
             .setDescription(event.formattedMessage.embedDescriptionSafe())
-            .setColor(GlobalVal.discalColor.rgb)
+            .setColor(getEmbedColor(event))
             .setFooter(EmbedFooter("v${GitProperty.DISCAL_VERSION.value}", null))
             .setTimestamp(Instant.now())
 
@@ -81,4 +95,9 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     }
 
 
+    private fun getEmbedColor(event: ILoggingEvent): Int {
+        return if (event.level.equals(Level.ERROR) || event.throwableProxy != null) GlobalVal.errorColor.rgb
+        else if (event.level.equals(Level.WARN)) GlobalVal.warnColor.rgb
+        else GlobalVal.discalColor.rgb
+    }
 }

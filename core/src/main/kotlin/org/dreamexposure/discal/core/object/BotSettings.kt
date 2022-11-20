@@ -47,6 +47,7 @@ enum class BotSettings {
 
     USE_REDIS_STORES,
     USE_WEBHOOKS,
+    ALL_ERRORS_WEBHOOK,
     UPDATE_SITES,
     USE_RESTART_SERVICE,
 
