@@ -105,7 +105,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        dependsOn("compileCSS", "compileTypescript")
+        dependsOn("npm", "compileCSS", "compileTypescript")
     }
 
     bootJar {
