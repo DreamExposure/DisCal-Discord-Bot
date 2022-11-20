@@ -24,6 +24,12 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
+      - name: Install NPM
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.8.0
+
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v2
         with:
@@ -36,9 +42,9 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      # Build project and have jib push images to private container registry
+      # Build project
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build
   publish-artifacts:
     name: Publish Artifacts
     runs-on: ubuntu-latest
