@@ -2,9 +2,9 @@ package org.dreamexposure.discal.cam
 
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.cam.google.GoogleInternalAuthHandler
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
@@ -27,7 +27,7 @@ class Cam {
         fun main(args: Array<String>) {
             //Get settings
             val p = Properties()
-            p.load(FileReader("settings.properties"))
+            p.load(FileReader("application.properties"))
             BotSettings.init(p)
 
             //Handle generating new google auth credentials for discal accounts
@@ -39,7 +39,6 @@ class Cam {
             //Start up spring
             try {
                 SpringApplicationBuilder(Application::class.java)
-                        .profiles(BotSettings.PROFILE.get())
                         .build()
                         .run(*args)
                 LOGGER.info(GlobalVal.STATUS, "CAM is now online")

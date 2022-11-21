@@ -50,7 +50,7 @@ class DisCalClient {
         fun main(args: Array<String>) {
             //Get settings
             val p = Properties()
-            p.load(FileReader("settings.properties"))
+            p.load(FileReader("application.properties"))
             BotSettings.init(p)
 
             //Load lang files
@@ -62,7 +62,6 @@ class DisCalClient {
             //Start Spring
             val spring = try {
                 SpringApplicationBuilder(Application::class.java)
-                        .profiles(BotSettings.PROFILE.get())
                         .build()
                         .run(*args)
             } catch (e: Exception) {

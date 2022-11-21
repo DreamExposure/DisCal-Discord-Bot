@@ -51,9 +51,7 @@ enum class BotSettings {
     UPDATE_SITES,
     USE_RESTART_SERVICE,
 
-    BOT_API_TOKEN,
-
-    PROFILE;
+    BOT_API_TOKEN;
 
     private var value: String? = null
 
