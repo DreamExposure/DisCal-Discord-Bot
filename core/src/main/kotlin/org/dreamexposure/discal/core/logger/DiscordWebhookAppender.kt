@@ -55,7 +55,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private fun executeStatus(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle("Status", null))
-            .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
+            .addField(EmbedField(true, "Shard Index", "${Application.getShardIndex()}"))
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))
@@ -76,7 +76,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private fun executeDefault(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle(event.level.levelStr, null))
-            .addField(EmbedField(true, "Shard Index", Application.getShardIndex()))
+            .addField(EmbedField(true, "Shard Index", "$Application.getShardIndex()}"))
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))

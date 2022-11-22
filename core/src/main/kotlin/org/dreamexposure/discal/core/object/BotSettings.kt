@@ -10,12 +10,6 @@ enum class BotSettings {
     SQL_DB,
     SQL_PREFIX,
 
-    REDIS_HOSTNAME,
-    REDIS_PORT,
-    REDIS_PASSWORD,
-    REDIS_USE_PASSWORD,
-
-    TOKEN,
     SECRET,
     ID,
 
@@ -45,7 +39,6 @@ enum class BotSettings {
     DEFAULT_WEBHOOK,
     STATUS_WEBHOOK,
 
-    USE_REDIS_STORES,
     USE_WEBHOOKS,
     ALL_ERRORS_WEBHOOK,
     UPDATE_SITES,

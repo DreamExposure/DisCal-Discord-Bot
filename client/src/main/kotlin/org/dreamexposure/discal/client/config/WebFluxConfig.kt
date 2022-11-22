@@ -10,9 +10,6 @@ import org.springframework.boot.web.server.ErrorPage
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.connection.RedisPassword
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.http.codec.json.KotlinSerializationJsonDecoder
@@ -32,17 +29,6 @@ class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<Configurable
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/api/**")
                 .allowedOrigins("*")
-    }
-
-    @Bean(name = ["redisDatasource"])
-    fun redisConnectionFactory(): LettuceConnectionFactory {
-        val rsc = RedisStandaloneConfiguration()
-        rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
-        rsc.port = BotSettings.REDIS_PORT.get().toInt()
-        if (BotSettings.REDIS_USE_PASSWORD.get().equals("true", true))
-            rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
-
-        return LettuceConnectionFactory(rsc)
     }
 
     @Bean(name = ["mysqlDatasource"])

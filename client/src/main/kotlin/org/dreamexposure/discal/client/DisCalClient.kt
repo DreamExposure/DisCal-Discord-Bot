@@ -1,51 +1,21 @@
 package org.dreamexposure.discal.client
 
-import discord4j.common.store.Store
-import discord4j.common.store.legacy.LegacyStoreLayout
-import discord4j.core.DiscordClientBuilder
-import discord4j.core.GatewayDiscordClient
-import discord4j.core.event.domain.Event
-import discord4j.core.`object`.presence.ClientActivity
-import discord4j.core.`object`.presence.ClientPresence
-import discord4j.core.shard.ShardingStrategy
-import discord4j.discordjson.json.GuildData
-import discord4j.discordjson.json.MessageData
-import discord4j.gateway.intent.Intent
-import discord4j.gateway.intent.IntentSet
-import discord4j.store.api.mapping.MappingStoreService
-import discord4j.store.api.service.StoreService
-import discord4j.store.jdk.JdkStoreService
-import discord4j.store.redis.RedisStoreService
-import io.lettuce.core.RedisClient
-import io.lettuce.core.RedisURI
-import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.client.listeners.discord.*
-import org.dreamexposure.discal.client.listeners.discord.EventListener
 import org.dreamexposure.discal.client.message.Messages
 import org.dreamexposure.discal.client.module.command.AddCalendarCommand
 import org.dreamexposure.discal.client.module.command.CommandExecutor
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
-import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
-import reactor.kotlin.core.publisher.toFlux
 import java.io.FileReader
 import java.util.*
-import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
 @Component
 class DisCalClient {
     companion object {
-        @JvmStatic
-        @Deprecated("Try to use client that is provided by d4j entities until using DI")
-        var client: GatewayDiscordClient? = null
-            private set
-
         @JvmStatic
         fun main(args: Array<String>) {
             //Get settings
@@ -60,76 +30,13 @@ class DisCalClient {
             CommandExecutor.registerCommand(AddCalendarCommand())
 
             //Start Spring
-            val spring = try {
-                SpringApplicationBuilder(Application::class.java)
-                        .build()
-                        .run(*args)
+            try {
+                SpringApplicationBuilder(Application::class.java).run(*args)
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "'Spring error' by PANIC! at the Bot", e)
+                LOGGER.error(DEFAULT, "Spring error!", e)
                 exitProcess(4)
             }
-
-            //Login
-            val listeners = spring.getBeansOfType(EventListener::class.java).values
-            DiscordClientBuilder.create(BotSettings.TOKEN.get())
-                    .build().gateway()
-                    .setEnabledIntents(getIntents())
-                    .setSharding(getStrategy())
-                    .setStore(Store.fromLayout(LegacyStoreLayout.of(getStores())))
-                    .setInitialPresence { ClientPresence.doNotDisturb(ClientActivity.playing("Booting Up!")) }
-                    .withEventDispatcher {dispatcher ->
-                        @Suppress("UNCHECKED_CAST")
-                        (listeners as Iterable<EventListener<Event>>).toFlux()
-                            .flatMap {
-                                dispatcher.on(it.genericType) { event -> mono { it.handle(event) } }
-                            }
-                    }
-                    .login()
-                    .block()
         }
     }
-
-
-    @PreDestroy
-    fun onShutdown() {
-        LOGGER.info(STATUS, "Shutting down shard")
-
-        DatabaseManager.disconnectFromMySQL()
-
-        client?.logout()?.subscribe()
-    }
 }
 
-private fun getStrategy(): ShardingStrategy {
-    return ShardingStrategy.builder()
-            .count(Application.getShardCount())
-            .indices(Application.getShardIndex().toInt())
-            .build()
-}
-
-private fun getStores(): StoreService {
-    return if (BotSettings.USE_REDIS_STORES.get().equals("true", ignoreCase = true)) {
-        val uri = RedisURI.Builder
-                .redis(BotSettings.REDIS_HOSTNAME.get(), BotSettings.REDIS_PORT.get().toInt())
-                .withPassword(BotSettings.REDIS_PASSWORD.get().toCharArray())
-                .build()
-
-        val rss = RedisStoreService.Builder()
-                .redisClient(RedisClient.create(uri))
-                .build()
-
-        MappingStoreService.create()
-                .setMappings(rss, GuildData::class.java, MessageData::class.java)
-                .setFallback(JdkStoreService())
-    } else JdkStoreService()
-}
-
-private fun getIntents(): IntentSet {
-    return IntentSet.of(
-            Intent.GUILDS,
-            Intent.GUILD_MESSAGES,
-            Intent.GUILD_MESSAGE_REACTIONS,
-            Intent.DIRECT_MESSAGES,
-            Intent.DIRECT_MESSAGE_REACTIONS
-    )
-}

@@ -1,10 +1,10 @@
 package org.dreamexposure.discal.client.service
 
+import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
-import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -16,7 +16,9 @@ import java.time.Duration
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
-class StatusChanger: ApplicationRunner {
+class StatusChanger(
+    private val discordClient: GatewayDiscordClient,
+): ApplicationRunner {
     private val index = AtomicInteger(0)
 
     private val statuses = listOf(
@@ -33,10 +35,7 @@ class StatusChanger: ApplicationRunner {
     )
 
     private fun update(): Mono<Void> {
-        if (DisCalClient.client == null)
-            return Mono.empty()
-
-        val guCountMono = DisCalClient.client!!.guilds.count()
+        val guCountMono = discordClient.guilds.count()
         val calCountMono = DatabaseManager.getCalendarCount()
         val annCountMono = DatabaseManager.getAnnouncementCount()
 
@@ -58,7 +57,7 @@ class StatusChanger: ApplicationRunner {
                             .replace("{version}", GitProperty.DISCAL_VERSION.value)
 
 
-                    DisCalClient.client!!.updatePresence(ClientPresence.online(ClientActivity.playing(status)))
+                    discordClient.updatePresence(ClientPresence.online(ClientActivity.playing(status)))
                 })
     }
 

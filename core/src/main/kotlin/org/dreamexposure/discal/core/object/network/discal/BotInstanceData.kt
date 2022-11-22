@@ -29,7 +29,7 @@ data class BotInstanceData private constructor(
                     .map { guildCount ->
                         BotInstanceData(
                                 instanceData = InstanceData(),
-                                shardIndex = Application.getShardIndex().toInt(),
+                                shardIndex = Application.getShardIndex(),
                                 shardCount = Application.getShardCount(),
                                 guilds = guildCount
                         )

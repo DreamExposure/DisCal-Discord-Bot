@@ -1,15 +1,15 @@
 package org.dreamexposure.discal.client.service
 
+import discord4j.core.GatewayDiscordClient
 import kotlinx.serialization.encodeToString
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.dreamexposure.discal.client.DisCalClient
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
-import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
@@ -23,11 +23,12 @@ import reactor.core.scheduler.Schedulers
 import java.time.Duration
 
 @Component
-class HeartbeatService : ApplicationRunner {
+class HeartbeatService(
+    private val discordClient: GatewayDiscordClient
+) : ApplicationRunner {
 
     private fun heartbeat(): Mono<Void> {
-        //TODO: Use DI for this soon
-        return BotInstanceData.load(DisCalClient.client)
+        return BotInstanceData.load(discordClient)
                 .map { data ->
                     val requestBody = HeartbeatRequest(HeartbeatType.BOT, botInstanceData = data)
 

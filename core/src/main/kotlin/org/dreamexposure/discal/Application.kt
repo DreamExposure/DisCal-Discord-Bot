@@ -19,7 +19,7 @@ class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()
 
-        fun getShardIndex(): String {
+        fun getShardIndex(): Int {
             /*
             This fucking sucks. So k8s doesn't expose the pod ordinal for a pod in a stateful set
             https://github.com/kubernetes/kubernetes/pull/68719
@@ -36,10 +36,10 @@ class Application {
             return if (shardPodName != null) {
                 //In k8s, parse this shit
                 val parts = shardPodName.split("-")
-                parts[parts.size -1]
+                parts[parts.size -1].toInt()
             } else {
                 //Fall back to config value
-                BotSettings.SHARD_INDEX.get()
+                BotSettings.SHARD_INDEX.get().toInt()
             }
         }
 

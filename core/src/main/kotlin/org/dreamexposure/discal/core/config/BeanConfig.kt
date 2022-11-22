@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.spring
+package org.dreamexposure.discal.core.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

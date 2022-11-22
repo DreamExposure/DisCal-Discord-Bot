@@ -7,9 +7,6 @@ import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.data.redis.connection.RedisPassword
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.http.codec.json.KotlinSerializationJsonDecoder
 import org.springframework.http.codec.json.KotlinSerializationJsonEncoder
@@ -19,17 +16,6 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 @Configuration
 @EnableWebFlux
 class WebFluxConfig: WebFluxConfigurer {
-
-    @Bean(name = ["redisDatasource"])
-    fun redisConnectionFactory(): LettuceConnectionFactory {
-        val rsc = RedisStandaloneConfiguration()
-        rsc.hostName = BotSettings.REDIS_HOSTNAME.get()
-        rsc.port = BotSettings.REDIS_PORT.get().toInt()
-        if (BotSettings.REDIS_USE_PASSWORD.get().equals("true", true))
-            rsc.password = RedisPassword.of(BotSettings.REDIS_PASSWORD.get())
-
-        return LettuceConnectionFactory(rsc)
-    }
 
     @Bean(name = ["mysqlDatasource"])
     fun mysqlConnectionFactory(): ConnectionFactory {
