@@ -8,7 +8,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.stereotype.Component
 
@@ -52,7 +52,7 @@ class GuildCreateListener : EventListener<GuildCreateEvent> {
         if (commands.isNotEmpty()) {
             appService.bulkOverwriteGuildApplicationCommand(appId, guildId, commands)
                 .doOnNext { LOGGER.debug("Bulk guild overwrite read: ${it.name()} | $guildId") }
-                .doOnError { LOGGER.error(BotSettings.DEFAULT_WEBHOOK.get(), "Bulk guild overwrite failed | $guildId", it) }
+                .doOnError { LOGGER.error(DEFAULT, "Bulk guild overwrite failed | $guildId", it) }
                 .then()
                 .awaitSingleOrNull()
         }

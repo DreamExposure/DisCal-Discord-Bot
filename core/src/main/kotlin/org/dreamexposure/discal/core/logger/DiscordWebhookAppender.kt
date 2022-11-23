@@ -6,26 +6,34 @@ import ch.qos.logback.core.AppenderBase
 import club.minnced.discord.webhook.WebhookClient
 import club.minnced.discord.webhook.send.WebhookEmbed.*
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
-import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
 import org.dreamexposure.discal.core.extensions.embedFieldSafe
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
+import java.io.FileReader
 import java.time.Instant
+import java.util.*
 
 class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private val defaultHook: WebhookClient?
     private val statusHook: WebhookClient?
+    private val useWebhooks: Boolean
     private val allErrorsWebhook: Boolean
+    private val appName: String
 
     init {
-        if (BotSettings.USE_WEBHOOKS.get().equals("true", true)) {
-            defaultHook = WebhookClient.withUrl(BotSettings.DEFAULT_WEBHOOK.get())
-            statusHook = WebhookClient.withUrl(BotSettings.STATUS_WEBHOOK.get())
-            allErrorsWebhook = BotSettings.ALL_ERRORS_WEBHOOK.get().toBoolean()
+        val appProps = Properties()
+        appProps.load(FileReader("application.properties"))
+
+        useWebhooks = appProps.getProperty("bot.logging.webhooks.use", "false").toBoolean()
+        appName = appProps.getProperty("spring.application.name")
+
+        if (useWebhooks) {
+            defaultHook = WebhookClient.withUrl(appProps.getProperty("bot.secret.default-webhook"))
+            statusHook = WebhookClient.withUrl(appProps.getProperty("bot.secret.status-webhook"))
+            allErrorsWebhook = appProps.getProperty("bot.logging.webhooks.all-errors", "false").toBoolean()
         } else {
             defaultHook = null
             statusHook = null
@@ -34,20 +42,22 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     }
 
     override fun append(eventObject: ILoggingEvent) {
-        if (BotSettings.USE_WEBHOOKS.get().toBoolean()) {
-            when {
-                eventObject.level.equals(Level.ERROR) && allErrorsWebhook -> {
-                    executeDefault(eventObject)
-                    return
-                }
-                eventObject.marker.equals(STATUS) -> {
-                    executeStatus(eventObject)
-                    return
-                }
-                eventObject.marker.equals(DEFAULT) -> {
-                    executeDefault(eventObject)
-                    return
-                }
+        if (!useWebhooks) return
+
+        when {
+            eventObject.level.equals(Level.ERROR) && allErrorsWebhook -> {
+                executeDefault(eventObject)
+                return
+            }
+
+            eventObject.marker.equals(STATUS) -> {
+                executeStatus(eventObject)
+                return
+            }
+
+            eventObject.marker.equals(DEFAULT) -> {
+                executeDefault(eventObject)
+                return
             }
         }
     }
@@ -55,7 +65,8 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private fun executeStatus(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle("Status", null))
-            .addField(EmbedField(true, "Shard Index", "${Application.getShardIndex()}"))
+            .addField(EmbedField(true, "Application", appName))
+            //TODO: Shard index
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))
@@ -76,7 +87,8 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
     private fun executeDefault(event: ILoggingEvent) {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle(event.level.levelStr, null))
-            .addField(EmbedField(true, "Shard Index", "$Application.getShardIndex()}"))
+            .addField(EmbedField(true, "Application", appName))
+            //TODO: Shard index
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))

@@ -36,11 +36,6 @@ enum class BotSettings {
     API_URL,
     CAM_URL,
 
-    DEFAULT_WEBHOOK,
-    STATUS_WEBHOOK,
-
-    USE_WEBHOOKS,
-    ALL_ERRORS_WEBHOOK,
     UPDATE_SITES,
     USE_RESTART_SERVICE,
 
