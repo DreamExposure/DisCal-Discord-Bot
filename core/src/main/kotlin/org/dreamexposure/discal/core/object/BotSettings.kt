@@ -10,9 +10,6 @@ enum class BotSettings {
     SQL_DB,
     SQL_PREFIX,
 
-    SECRET,
-    ID,
-
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     CREDENTIALS_COUNT,
@@ -25,9 +22,6 @@ enum class BotSettings {
     TOP_GG_TOKEN,
 
     TIME_OUT,
-
-    REDIR_URI,
-    REDIR_URL,
 
     INVITE_URL,
     SUPPORT_INVITE,

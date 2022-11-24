@@ -1,1 +1,0 @@
-package org.dreamexposure.discal.client.listeners.discord;

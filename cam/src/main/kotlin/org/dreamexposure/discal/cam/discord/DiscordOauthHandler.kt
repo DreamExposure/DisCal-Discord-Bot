@@ -5,24 +5,30 @@ import okhttp3.Request
 import org.dreamexposure.discal.cam.json.discord.AccessTokenResponse
 import org.dreamexposure.discal.cam.json.discord.AuthorizationInfo
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import java.net.URLEncoder
-import java.nio.charset.Charset
 
-object DiscordOauthHandler {
-    private val redirectUrl = URLEncoder.encode(BotSettings.REDIR_URL.get(), Charset.defaultCharset())
-    private const val CDN_URL = "https://cdn.discordapp.com"
+@Component
+class DiscordOauthHandler(
+    @Value("\${bot.url.discord.redirect}")
+    private val redirectUrl: String,
+    @Value("\${bot.discord-app-id}")
+    private val clientId: String,
+    @Value("\${bot.secret.client-secret}")
+    private val clientSecret: String,
+) {
+    private val CDN_URL = "https://cdn.discordapp.com"
 
     fun doTokenExchange(code: String): Mono<AccessTokenResponse> {
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                .addEncoded("client_id", BotSettings.ID.get())
-                .addEncoded("client_secret", BotSettings.SECRET.get())
+                .addEncoded("client_id", clientId)
+                .addEncoded("client_secret", clientSecret)
                 .addEncoded("grant_type", "authorization_code")
                 .addEncoded("code", code)
                 .addEncoded("redirect_uri", redirectUrl)
@@ -53,8 +59,8 @@ object DiscordOauthHandler {
     fun doTokenRefresh(refreshToken: String): Mono<AccessTokenResponse> {
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                .addEncoded("client_id", BotSettings.ID.get())
-                .addEncoded("client_secret", BotSettings.SECRET.get())
+                .addEncoded("client_id", clientId)
+                .addEncoded("client_secret", clientSecret)
                 .addEncoded("grant_type", "refresh_token")
                 .addEncoded("refresh_token", refreshToken)
                 .build()

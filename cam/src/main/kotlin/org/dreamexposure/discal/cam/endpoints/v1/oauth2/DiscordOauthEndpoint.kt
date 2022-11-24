@@ -5,13 +5,12 @@ import org.dreamexposure.discal.cam.json.discal.LoginResponse
 import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.service.StateService
-import org.dreamexposure.discal.core.`object`.BotSettings.ID
-import org.dreamexposure.discal.core.`object`.BotSettings.REDIR_URL
-import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.`object`.WebSession
+import org.dreamexposure.discal.core.utils.GlobalVal.discordApiUrl
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -21,16 +20,17 @@ import java.nio.charset.Charset.defaultCharset
 
 @RestController
 @RequestMapping("/oauth2/discord/")
-class DiscordOauthEndpoint(private val stateService: StateService) {
+class DiscordOauthEndpoint(
+    private val stateService: StateService,
+    private val discordOauthHandler: DiscordOauthHandler,
+    @Value("\${bot.url.discord.redirect}")
+    private val redirectUrl: String,
+    @Value("\${bot.discord-app-id}")
+    private val clientId: String,
+) {
     private final val scopes = URLEncoder.encode("identify guilds", defaultCharset())
-    private final val redirectUrl = URLEncoder.encode(REDIR_URL.get(), defaultCharset())
-    private final val oauthLinkWithoutState =
-        "${GlobalVal.discordApiUrl}/oauth2/authorize" +
-            "?client_id=${ID.get()}" +
-            "&redirect_uri=$redirectUrl" +
-            "&response_type=code" +
-            "&scope=$scopes" +
-            "&prompt=none" // Skip consent screen if user has already authorized these scopes before
+    private final val encodedRedirectUrl = URLEncoder.encode(redirectUrl, defaultCharset())
+    private final val oauthLinkWithoutState = "$discordApiUrl/oauth2/authorize?client_id=$clientId&redirect_uri=$encodedRedirectUrl&response_type=code&scope=$scopes&prompt=none"
 
     @GetMapping("login")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
@@ -57,9 +57,9 @@ class DiscordOauthEndpoint(private val stateService: StateService) {
             return Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state"))
         }
 
-        return DiscordOauthHandler.doTokenExchange(body.code).flatMap { dTokens ->
+        return discordOauthHandler.doTokenExchange(body.code).flatMap { dTokens ->
             // request current user info
-            DiscordOauthHandler.getOauthInfo(dTokens.accessToken).flatMap { authInfo ->
+            discordOauthHandler.getOauthInfo(dTokens.accessToken).flatMap { authInfo ->
                 val apiToken = KeyGenerator.csRandomAlphaNumericString(64)
 
                 val session = WebSession(

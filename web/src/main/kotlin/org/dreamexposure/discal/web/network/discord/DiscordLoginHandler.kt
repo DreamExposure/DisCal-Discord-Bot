@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
 import org.json.JSONArray
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -21,21 +22,31 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.function.TupleUtils
+import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.util.*
 
 @Controller
-class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
+class DiscordLoginHandler(
+    private val accountHandler: DiscordAccountHandler,
+    @Value("\${bot.url.discord.redirect}")
+    private val redirectUrl: String,
+    @Value("\${bot.discord-app-id}")
+    private val clientId: String,
+    @Value("\${bot.secret.client-secret}")
+    private val clientSecret: String,
+) {
     @GetMapping("/account/login")
     fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<String> {
         val client = OkHttpClient()
 
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                    .addEncoded("client_id", BotSettings.ID.get())
-                    .addEncoded("client_secret", BotSettings.SECRET.get())
+                    .addEncoded("client_id", clientId)
+                    .addEncoded("client_secret", clientSecret)
                     .addEncoded("grant_type", "authorization_code")
                     .addEncoded("code", code)
-                    .addEncoded("redirect_uri", BotSettings.REDIR_URI.get())
+                    .addEncoded("redirect_uri", URLEncoder.encode(redirectUrl, Charset.defaultCharset()))
                     .build()
 
             val tokenRequest = Request.Builder()

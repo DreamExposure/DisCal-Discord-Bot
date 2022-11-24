@@ -3,10 +3,11 @@ package org.dreamexposure.discal.web.handler
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -14,6 +15,8 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -21,7 +24,12 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Component
-class DiscordAccountHandler: ApplicationRunner {
+class DiscordAccountHandler(
+    @Value("\${bot.discord-app-id}")
+    private val clientId: String,
+    @Value("\${bot.url.discord.redirect}")
+    private val redirectUrl: String,
+): ApplicationRunner {
     private val discordAccounts: ConcurrentMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
 
     fun hasAccount(swe: ServerWebExchange): Mono<Boolean> {
@@ -127,9 +135,9 @@ class DiscordAccountHandler: ApplicationRunner {
     internal fun createDefaultModel(): MutableMap<String, Any> {
         val model: MutableMap<String, Any> = mutableMapOf()
         model["logged_in"] = false
-        model["bot_id"] = BotSettings.ID.get()
+        model["bot_id"] = clientId
         model["year"] = LocalDate.now().year
-        model["redirect_uri"] = BotSettings.REDIR_URI.get()
+        model["redirect_uri"] = URLEncoder.encode(redirectUrl, Charset.defaultCharset())
         model["bot_invite"] = BotSettings.INVITE_URL.get()
         model["support_invite"] = BotSettings.SUPPORT_INVITE.get()
         model["api_url"] = BotSettings.API_URL.get()
