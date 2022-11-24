@@ -18,9 +18,6 @@ enum class BotSettings {
     SHARD_COUNT,
     SHARD_INDEX,
 
-    D_BOTS_GG_TOKEN,
-    TOP_GG_TOKEN,
-
     TIME_OUT,
 
     INVITE_URL,
@@ -29,7 +26,6 @@ enum class BotSettings {
     BASE_URL,
     CAM_URL,
 
-    UPDATE_SITES,
     USE_RESTART_SERVICE,
 
     BOT_API_TOKEN;

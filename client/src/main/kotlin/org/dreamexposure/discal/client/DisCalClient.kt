@@ -2,8 +2,6 @@ package org.dreamexposure.discal.client
 
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.client.message.Messages
-import org.dreamexposure.discal.client.module.command.AddCalendarCommand
-import org.dreamexposure.discal.client.module.command.CommandExecutor
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
@@ -25,9 +23,6 @@ class DisCalClient {
 
             //Load lang files
             Messages.reloadLangs().subscribe()
-
-            //Register commands
-            CommandExecutor.registerCommand(AddCalendarCommand())
 
             //Start Spring
             try {
