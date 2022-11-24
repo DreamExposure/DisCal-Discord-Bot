@@ -9,7 +9,10 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
 @Controller
-class PageController(private val accountHandler: DiscordAccountHandler) {
+class PageController(
+    private val accountHandler: DiscordAccountHandler,
+    private val statusHandler: StatusHandler,
+) {
     @RequestMapping("/", "/home")
     fun home(model: MutableMap<String, Any>, swe: ServerWebExchange): Mono<String> {
         return accountHandler.getAccount(swe)
@@ -56,7 +59,7 @@ class PageController(private val accountHandler: DiscordAccountHandler) {
                 .doOnNext { model.clear() }
                 .doOnNext(model::putAll)
                 .doOnNext { model.remove("status") }
-                .then(StatusHandler.getLatestStatusInfo())
+                .then(statusHandler.getLatestStatusInfo())
                 .doOnNext { model["status"] = it }
                 .thenReturn("various/status")
     }

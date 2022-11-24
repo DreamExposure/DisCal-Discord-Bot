@@ -27,7 +27,6 @@ enum class BotSettings {
     SUPPORT_INVITE,
 
     BASE_URL,
-    API_URL,
     CAM_URL,
 
     UPDATE_SITES,

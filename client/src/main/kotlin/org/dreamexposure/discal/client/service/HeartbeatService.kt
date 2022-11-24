@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -24,7 +25,9 @@ import java.time.Duration
 
 @Component
 class HeartbeatService(
-    private val discordClient: GatewayDiscordClient
+    private val discordClient: GatewayDiscordClient,
+    @Value("\${bot.url.api}")
+    private val apiUrl: String,
 ) : ApplicationRunner {
 
     private fun heartbeat(): Mono<Void> {
@@ -35,7 +38,7 @@ class HeartbeatService(
                     val body = JSON_FORMAT.encodeToString(requestBody).toRequestBody(JSON)
 
                     Request.Builder()
-                            .url("${BotSettings.API_URL.get()}/v2/status/heartbeat")
+                            .url("$apiUrl/v2/status/heartbeat")
                             .post(body)
                             .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                             .header("Content-Type", "application/json")

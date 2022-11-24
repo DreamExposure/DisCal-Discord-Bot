@@ -29,6 +29,8 @@ class DiscordAccountHandler(
     private val clientId: String,
     @Value("\${bot.url.discord.redirect}")
     private val redirectUrl: String,
+    @Value("\${bot.url.api}")
+    private val apiUrl: String,
 ): ApplicationRunner {
     private val discordAccounts: ConcurrentMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
 
@@ -140,7 +142,7 @@ class DiscordAccountHandler(
         model["redirect_uri"] = URLEncoder.encode(redirectUrl, Charset.defaultCharset())
         model["bot_invite"] = BotSettings.INVITE_URL.get()
         model["support_invite"] = BotSettings.SUPPORT_INVITE.get()
-        model["api_url"] = BotSettings.API_URL.get()
+        model["api_url"] = apiUrl
 
         return model
     }
@@ -150,7 +152,7 @@ class DiscordAccountHandler(
             val client = OkHttpClient()
             val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
             val keyGrantRequest = Request.Builder()
-                    .url("${BotSettings.API_URL.get()}/v2/account/key/readonly/get")
+                    .url("$apiUrl/v2/account/key/readonly/get")
                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                     .post(keyGrantRequestBody)
                     .build()

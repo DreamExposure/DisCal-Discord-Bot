@@ -35,6 +35,8 @@ class DiscordLoginHandler(
     private val clientId: String,
     @Value("\${bot.secret.client-secret}")
     private val clientSecret: String,
+    @Value("\${bot.url.api}")
+    private val apiUrl: String,
 ) {
     @GetMapping("/account/login")
     fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<String> {
@@ -133,7 +135,7 @@ class DiscordLoginHandler(
                             //Do temp API key request...
                             val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
                             val keyGrantRequest = Request.Builder()
-                                    .url("${BotSettings.API_URL.get()}/v2/account/login")
+                                    .url("$apiUrl/v2/account/login")
                                     .header("Authorization", BotSettings.BOT_API_TOKEN.get())
                                     .post(keyGrantRequestBody)
                                     .build()
@@ -188,7 +190,7 @@ class DiscordLoginHandler(
                 val client = OkHttpClient()
 
                 val logoutRequest = Request.Builder()
-                        .url("${BotSettings.API_URL.get()}/v2/account/logout")
+                        .url("$apiUrl/v2/account/logout")
                         .header("Authorization", model["key"] as String)
                         .get()
                         .build()
