@@ -27,7 +27,8 @@ class SlashCommandListener(
 
             try {
                 val settings = DatabaseManager.getSettings(event.interaction.guildId.get()).awaitSingle()
-                command.handle(event, settings).awaitSingleOrNull()
+
+                command.suspendHandle(event, settings)
             } catch (e: Exception) {
                 LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
 
