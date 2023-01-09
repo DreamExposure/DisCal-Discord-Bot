@@ -3,11 +3,11 @@ package org.dreamexposure.discal.web.handler
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.extensions.asMinutes
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -24,14 +24,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Component
-class DiscordAccountHandler(
-    @Value("\${bot.discord-app-id}")
-    private val clientId: String,
-    @Value("\${bot.url.discord.redirect}")
-    private val redirectUrl: String,
-    @Value("\${bot.url.api}")
-    private val apiUrl: String,
-): ApplicationRunner {
+class DiscordAccountHandler : ApplicationRunner {
+    private final val apiUrl = Config.URL_API.getString()
+    private final val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
+    private final val clientId = Config.DISCORD_APP_ID.getString()
+
     private val discordAccounts: ConcurrentMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
 
     fun hasAccount(swe: ServerWebExchange): Mono<Boolean> {
@@ -118,14 +115,14 @@ class DiscordAccountHandler(
     }
 
     private fun removeTimedOutAccounts() {
-        val limit = BotSettings.TIME_OUT.get().toLong()
+        val limit = Config.CACHE_TTL_ACCOUNTS_MINUTES.getLong().asMinutes()
         val toRemove = mutableListOf<String>()
 
         for (id in discordAccounts.keys) {
             val model = discordAccounts[id]!!
             val lastUse = model["last_use"] as Long
 
-            if (System.currentTimeMillis() - lastUse > limit)
+            if (System.currentTimeMillis() - lastUse > limit.toMillis())
                 toRemove.add(id) //Timed out, remove account info and require sign in
         }
 
@@ -140,8 +137,8 @@ class DiscordAccountHandler(
         model["bot_id"] = clientId
         model["year"] = LocalDate.now().year
         model["redirect_uri"] = URLEncoder.encode(redirectUrl, Charset.defaultCharset())
-        model["bot_invite"] = BotSettings.INVITE_URL.get()
-        model["support_invite"] = BotSettings.SUPPORT_INVITE.get()
+        model["bot_invite"] = Config.URL_INVITE.getString()
+        model["support_invite"] = Config.URL_SUPPORT.getString()
         model["api_url"] = apiUrl
 
         return model
@@ -152,8 +149,8 @@ class DiscordAccountHandler(
             val client = OkHttpClient()
             val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
             val keyGrantRequest = Request.Builder()
-                    .url("$apiUrl/v2/account/key/readonly/get")
-                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                .url("$apiUrl/v2/account/key/readonly/get")
+                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
                     .post(keyGrantRequestBody)
                     .build()
 

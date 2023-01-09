@@ -1,11 +1,11 @@
 package org.dreamexposure.discal.client.commands.global
 
-import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import discord4j.core.`object`.entity.Message
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -16,7 +16,7 @@ class HelpCommand : SlashCommand {
 
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return event.followupEphemeral(
-            getMessage("error.workInProgress", settings, "${BotSettings.BASE_URL.get()}/commands")
+            getMessage("error.workInProgress", settings, "${Config.URL_BASE.getString()}/commands")
         )
     }
 }

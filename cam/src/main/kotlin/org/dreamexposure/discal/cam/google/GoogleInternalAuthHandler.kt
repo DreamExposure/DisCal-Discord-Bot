@@ -1,13 +1,13 @@
 package org.dreamexposure.discal.cam.google
 
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
-import org.dreamexposure.discal.core.`object`.google.InternalGoogleAuthPoll
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
+import org.dreamexposure.discal.core.`object`.google.InternalGoogleAuthPoll
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import org.json.JSONObject
@@ -93,7 +93,7 @@ object GoogleInternalAuthHandler {
                 GlobalVal.STATUS_SUCCESS -> {
                     //Access granted, save credentials...
                     val aprGrant = JSONObject(responseBody)
-                    val aes = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
+                    val aes = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
 
                     val refreshMono = aes.encrypt(aprGrant.getString("refresh_token"))
                     val accessMono = aes.encrypt(aprGrant.getString("access_token"))

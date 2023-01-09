@@ -6,11 +6,11 @@ import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.service.StateService
 import org.dreamexposure.discal.core.annotations.Authentication
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.utils.GlobalVal.discordApiUrl
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
@@ -23,11 +23,10 @@ import java.nio.charset.Charset.defaultCharset
 class DiscordOauthEndpoint(
     private val stateService: StateService,
     private val discordOauthHandler: DiscordOauthHandler,
-    @Value("\${bot.url.discord.redirect}")
-    private val redirectUrl: String,
-    @Value("\${bot.discord-app-id}")
-    private val clientId: String,
 ) {
+    private val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
+    private val clientId = Config.DISCORD_APP_ID.getString()
+
     private final val scopes = URLEncoder.encode("identify guilds", defaultCharset())
     private final val encodedRedirectUrl = URLEncoder.encode(redirectUrl, defaultCharset())
     private final val oauthLinkWithoutState = "$discordApiUrl/oauth2/authorize?client_id=$clientId&redirect_uri=$encodedRedirectUrl&response_type=code&scope=$scopes&prompt=none"

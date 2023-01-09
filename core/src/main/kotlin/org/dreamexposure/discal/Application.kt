@@ -1,6 +1,6 @@
 package org.dreamexposure.discal
 
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
@@ -39,14 +39,14 @@ class Application {
                 parts[parts.size -1].toInt()
             } else {
                 //Fall back to config value
-                BotSettings.SHARD_INDEX.get().toInt()
+                Config.SHARD_INDEX.getInt()
             }
         }
 
         fun getShardCount(): Int {
             val shardCount = System.getenv("SHARD_COUNT")
             return shardCount?.toInt() ?: //Fall back to config
-            BotSettings.SHARD_COUNT.get().toInt()
+            Config.SHARD_COUNT.getInt()
         }
 
         fun getUptime(): Duration {

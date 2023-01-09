@@ -10,6 +10,7 @@ import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
 import org.dreamexposure.discal.core.cache.DiscalCache
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementModifier
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
@@ -19,7 +20,6 @@ import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asStringList
 import org.dreamexposure.discal.core.extensions.setFromString
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.StaticMessage
 import org.dreamexposure.discal.core.`object`.WebSession
@@ -45,11 +45,11 @@ object DatabaseManager {
             builder()
                 .option(DRIVER, "pool")
                 .option(PROTOCOL, "mysql")
-                .option(HOST, BotSettings.SQL_HOST.get())
-                .option(PORT, BotSettings.SQL_PORT.get().toInt())
-                .option(USER, BotSettings.SQL_USER.get())
-                .option(PASSWORD, BotSettings.SQL_PASS.get())
-                .option(DATABASE, BotSettings.SQL_DB.get())
+                .option(HOST, Config.SQL_HOST.getString())
+                .option(PORT, Config.SQL_PORT.getInt())
+                .option(USER, Config.SQL_USER.getString())
+                .option(PASSWORD, Config.SQL_PASS.getString())
+                .option(DATABASE, Config.SQL_DB.getString())
                 .build()
         )
 

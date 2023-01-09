@@ -11,17 +11,17 @@ import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
 import okhttp3.Response
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.ClientData
-import org.dreamexposure.discal.core.`object`.google.GoogleAuthPoll
-import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
-import org.dreamexposure.discal.core.`object`.rest.RestError
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.google.ClientData
+import org.dreamexposure.discal.core.`object`.google.GoogleAuthPoll
+import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
+import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
@@ -34,7 +34,7 @@ import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuthWrapper {
-    private val clientData = ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get())
+    private val clientData = ClientData(Config.SECRET_GOOGLE_CLIENT_ID.getString(), Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
 
     private val discalTokens: MutableMap<Int, CredentialData> = ConcurrentHashMap()
     private val externalTokens: MutableMap<Snowflake, CredentialData> = ConcurrentHashMap()
@@ -68,15 +68,15 @@ object GoogleAuthWrapper {
         }
 
         return Mono.fromCallable {
-            val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
-                    .addQueryParameter("host", CalendarHost.GOOGLE.name)
-                    .addQueryParameter("id", credentialId.toString())
-                    .build()
+            val url = "${Config.URL_BASE.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
+                .addQueryParameter("host", CalendarHost.GOOGLE.name)
+                .addQueryParameter("id", credentialId.toString())
+                .build()
 
             val request = Request.Builder().get()
-                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                    .url(url)
-                    .build()
+                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
+                .url(url)
+                .build()
 
             HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
@@ -109,16 +109,16 @@ object GoogleAuthWrapper {
         }
 
         return Mono.fromCallable {
-            val url = "${BotSettings.CAM_URL.get()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
-                    .addQueryParameter("host", calData.host.name)
-                    .addQueryParameter("guild", calData.guildId.asString())
-                    .addQueryParameter("id", calData.calendarNumber.toString())
-                    .build()
+            val url = "${Config.URL_BASE.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
+                .addQueryParameter("host", calData.host.name)
+                .addQueryParameter("guild", calData.guildId.asString())
+                .addQueryParameter("id", calData.calendarNumber.toString())
+                .build()
 
             val request = Request.Builder().get()
-                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
-                    .url(url)
-                    .build()
+                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
+                .url(url)
+                .build()
 
             HTTP_CLIENT.newCall(request).execute()
         }.subscribeOn(Schedulers.boundedElastic()).flatMap { response ->
@@ -168,7 +168,7 @@ object GoogleAuthWrapper {
                 .switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
-    fun randomCredentialId() = Random.nextInt(BotSettings.CREDENTIALS_COUNT.get().toInt())
+    fun randomCredentialId() = Random.nextInt(Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt())
 
     fun requestDeviceCode(): Mono<Response> {
         return Mono.fromCallable {

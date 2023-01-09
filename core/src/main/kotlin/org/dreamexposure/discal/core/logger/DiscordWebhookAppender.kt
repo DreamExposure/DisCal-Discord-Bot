@@ -6,6 +6,7 @@ import ch.qos.logback.core.AppenderBase
 import club.minnced.discord.webhook.WebhookClient
 import club.minnced.discord.webhook.send.WebhookEmbed.*
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder
+import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
 import org.dreamexposure.discal.core.extensions.embedFieldSafe
@@ -66,7 +67,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle("Status", null))
             .addField(EmbedField(true, "Application", appName))
-            //TODO: Shard index
+            .addField(EmbedField(true, "Index", "${Application.getShardIndex()}"))
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))
@@ -88,7 +89,7 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
         val content = WebhookEmbedBuilder()
             .setTitle(EmbedTitle(event.level.levelStr, null))
             .addField(EmbedField(true, "Application", appName))
-            //TODO: Shard index
+            .addField(EmbedField(true, "Index", "${Application.getShardIndex()}"))
             .addField(EmbedField(true, "Time", "<t:${event.timeStamp / 1000}:f>"))
             .addField(EmbedField(false, "Logger", event.loggerName.embedFieldSafe()))
             .addField(EmbedField(true, "Level", event.level.levelStr))

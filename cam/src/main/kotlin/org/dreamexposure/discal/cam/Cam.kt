@@ -2,14 +2,12 @@ package org.dreamexposure.discal.cam
 
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.cam.google.GoogleInternalAuthHandler
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
-import java.io.FileReader
-import java.util.*
 import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
@@ -25,10 +23,7 @@ class Cam {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            //Get settings
-            val p = Properties()
-            p.load(FileReader("application.properties"))
-            BotSettings.init(p)
+            Config.init()
 
             //Handle generating new google auth credentials for discal accounts
             if (args.size > 1 && args[0].equals("-forceNewGoogleAuth", true)) {

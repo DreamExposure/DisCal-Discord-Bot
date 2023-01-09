@@ -2,12 +2,12 @@ package org.dreamexposure.discal.core.entities
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.json.JSONObject
@@ -83,7 +83,7 @@ interface Calendar {
      * A link to view the calendar on the official discal website
      */
     val link: String
-        get() = "${BotSettings.BASE_URL.get()}/embed/${guildId.asString()}/calendar/$calendarNumber"
+        get() = "${Config.URL_BASE.getString()}/embed/${guildId.asString()}/calendar/$calendarNumber"
 
     /**
      * A link to view the calendar on the host's website (e.g. google.com)

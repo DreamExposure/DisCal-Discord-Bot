@@ -6,10 +6,7 @@ import okhttp3.FormBody
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.google.ErrorData
 import org.dreamexposure.discal.cam.json.google.RefreshData
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.ClientData
-import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
@@ -17,6 +14,9 @@ import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.google.ClientData
+import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
@@ -28,11 +28,11 @@ import kotlin.system.exitProcess
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuth {
-    private val clientData = ClientData(BotSettings.GOOGLE_CLIENT_ID.get(), BotSettings.GOOGLE_CLIENT_SECRET.get())
+    private val clientData = ClientData(Config.SECRET_GOOGLE_CLIENT_ID.getString(), Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
     private val CREDENTIALS: Flux<DisCalGoogleCredential>
 
     init {
-        val credCount = BotSettings.CREDENTIALS_COUNT.get().toInt()
+        val credCount = Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt()
         CREDENTIALS = Flux.range(0, credCount)
                 .flatMap(DatabaseManager::getCredentialData)
                 .map(::DisCalGoogleCredential)

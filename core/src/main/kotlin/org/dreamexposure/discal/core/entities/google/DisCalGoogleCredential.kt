@@ -1,15 +1,15 @@
 package org.dreamexposure.discal.core.entities.google
 
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
+import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
 import reactor.core.publisher.Mono
 import java.time.Instant
 
 data class DisCalGoogleCredential(
         val credentialData: GoogleCredentialData,
 ) {
-    private val aes: AESEncryption = AESEncryption(BotSettings.CREDENTIALS_KEY.get())
+    private val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
     private var access: String? = null
     private var refresh: String? = null
 

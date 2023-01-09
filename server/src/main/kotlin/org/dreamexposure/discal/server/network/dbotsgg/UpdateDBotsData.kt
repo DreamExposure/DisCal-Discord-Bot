@@ -2,11 +2,11 @@ package org.dreamexposure.discal.server.network.dbotsgg
 
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.network.discal.NetworkManager
 import org.json.JSONObject
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
@@ -19,9 +19,8 @@ import java.time.Duration
 @ConditionalOnProperty("bot.integrations.update-bot-sites", havingValue = "true")
 class UpdateDBotsData(
     private val networkManager: NetworkManager,
-    @Value("\${bot.secret.token.d-bots-gg:N/a}")
-    private val token: String,
 ) : ApplicationRunner {
+    private val token = Config.SECRET_INTEGRATION_D_BOTS_GG_TOKEN.getString()
 
     private fun update(): Mono<Void> {
         return Mono.fromCallable {

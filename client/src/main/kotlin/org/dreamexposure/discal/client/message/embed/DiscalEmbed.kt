@@ -5,7 +5,7 @@ import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty.DISCAL_VERSION
 import org.dreamexposure.discal.GitProperty.DISCAL_VERSION_D4J
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.extensions.getHumanReadable
@@ -37,12 +37,12 @@ object DiscalEmbed : EmbedMaker {
                         .addField(getMessage("discal", "info.field.announcements", settings), "$ann", true)
                         .addField(getMessage("discal", "info.field.links", settings),
                               getMessage("discal",
-                                    "info.field.links.value",
-                                    settings,
-                                    "${BotSettings.BASE_URL.get()}/commands",
-                                    BotSettings.SUPPORT_INVITE.get(),
-                                    BotSettings.INVITE_URL.get(),
-                                    "https://www.patreon.com/Novafox"
+                                  "info.field.links.value",
+                                  settings,
+                                  "${Config.URL_BASE.getString()}/commands",
+                                  Config.URL_SUPPORT.getString(),
+                                  Config.URL_INVITE.getString(),
+                                  "https://www.patreon.com/Novafox"
                               ),
                               false
                         ).footer(getMessage("discal", "info.footer", settings), null)

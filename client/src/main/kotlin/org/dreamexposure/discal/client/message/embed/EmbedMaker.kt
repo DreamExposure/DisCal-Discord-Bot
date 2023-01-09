@@ -3,7 +3,7 @@ package org.dreamexposure.discal.client.message.embed
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import discord4j.rest.util.Image
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -14,9 +14,9 @@ interface EmbedMaker {
         val builder = EmbedCreateSpec.builder()
 
         if (settings.branded)
-            builder.author(guild.name, BotSettings.BASE_URL.get(), guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.iconUrl))
+            builder.author(guild.name, Config.URL_BASE.getString(), guild.getIconUrl(Image.Format.PNG).orElse(GlobalVal.iconUrl))
         else
-            builder.author(getCommonMsg("bot.name", settings), BotSettings.BASE_URL.get(), GlobalVal.iconUrl)
+            builder.author(getCommonMsg("bot.name", settings), Config.URL_BASE.getString(), GlobalVal.iconUrl)
 
         return builder
     }

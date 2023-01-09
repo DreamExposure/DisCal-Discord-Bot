@@ -3,7 +3,7 @@ package org.dreamexposure.discal.client.config
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactory
 import io.r2dbc.spi.ConnectionFactoryOptions
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
 import org.springframework.boot.web.server.ErrorPage
@@ -34,13 +34,13 @@ class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<Configurable
     @Bean(name = ["mysqlDatasource"])
     fun mysqlConnectionFactory(): ConnectionFactory {
         return ConnectionFactories.get(ConnectionFactoryOptions.builder()
-                .option(ConnectionFactoryOptions.DRIVER, "pool")
-                .option(ConnectionFactoryOptions.PROTOCOL, "mysql")
-                .option(ConnectionFactoryOptions.HOST, BotSettings.SQL_HOST.get())
-                .option(ConnectionFactoryOptions.PORT, BotSettings.SQL_PORT.get().toInt())
-                .option(ConnectionFactoryOptions.USER, BotSettings.SQL_USER.get())
-                .option(ConnectionFactoryOptions.PASSWORD, BotSettings.SQL_PASS.get())
-                .option(ConnectionFactoryOptions.DATABASE, BotSettings.SQL_DB.get())
+            .option(ConnectionFactoryOptions.DRIVER, "pool")
+            .option(ConnectionFactoryOptions.PROTOCOL, "mysql")
+            .option(ConnectionFactoryOptions.HOST, Config.SQL_HOST.getString())
+            .option(ConnectionFactoryOptions.PORT, Config.SQL_PORT.getInt())
+            .option(ConnectionFactoryOptions.USER, Config.SQL_USER.getString())
+            .option(ConnectionFactoryOptions.PASSWORD, Config.SQL_PASS.getString())
+            .option(ConnectionFactoryOptions.DATABASE, Config.SQL_DB.getString())
                 .build())
     }
 

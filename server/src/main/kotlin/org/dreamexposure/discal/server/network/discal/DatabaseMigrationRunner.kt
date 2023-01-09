@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.server.network.discal
 
 import com.zaxxer.hikari.HikariDataSource
-import org.dreamexposure.discal.core.`object`.BotSettings.*
+import org.dreamexposure.discal.core.config.Config.*
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.flywaydb.core.Flyway
@@ -15,18 +15,18 @@ import kotlin.system.exitProcess
 @Component
 class DatabaseMigrationRunner : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        val placeholders: Map<String, String> = mapOf(Pair("prefix", SQL_PREFIX.get()))
+        val placeholders: Map<String, String> = mapOf(Pair("prefix", SQL_PREFIX.getString()))
         try {
             val source = HikariDataSource()
-            source.jdbcUrl = "jdbc:mysql://${SQL_HOST.get()}:${SQL_PORT.get()}/${SQL_DB.get()}"
-            source.username = SQL_USER.get()
-            source.password = SQL_PASS.get()
+            source.jdbcUrl = "jdbc:mysql://${SQL_HOST.getString()}:${SQL_PORT.getString()}/${SQL_DB.getString()}"
+            source.username = SQL_USER.getString()
+            source.password = SQL_PASS.getString()
 
             val flyway = Flyway.configure()
                 .dataSource(source)
                 .cleanDisabled(true)
                 .baselineOnMigrate(true)
-                .table("${SQL_PREFIX.get()}schema_history")
+                .table("${SQL_PREFIX.getString()}schema_history")
                 .placeholders(placeholders)
                 .load()
 

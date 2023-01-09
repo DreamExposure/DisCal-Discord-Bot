@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.core.spring
 
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.annotations.Authentication
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
@@ -78,9 +78,11 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 authHeader.equals("teapot", true) -> {
                     Mono.error(TeaPotException())
                 }
-                authHeader.equals(BotSettings.BOT_API_TOKEN.get()) -> { // This is from within discal network
+
+                authHeader.equals(Config.SECRET_DISCAL_API_KEY.getString()) -> { // This is from within discal network
                     Mono.just(Authentication.AccessLevel.ADMIN)
                 }
+
                 readOnlyKeys.containsKey(authHeader) -> { // Read-only key granted for embed pages
                     Mono.just(Authentication.AccessLevel.READ)
                 }

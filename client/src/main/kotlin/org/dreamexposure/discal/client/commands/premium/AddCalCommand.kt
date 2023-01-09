@@ -5,10 +5,10 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.discord4j.canAddCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -34,6 +34,6 @@ class AddCalCommand : SlashCommand {
     }
 
     private fun getLink(settings: GuildSettings): String {
-        return "${BotSettings.BASE_URL.get()}/dashboard/${settings.guildID.asString()}/calendar/new?type=1&step=0"
+        return "${Config.URL_BASE.getString()}/dashboard/${settings.guildID.asString()}/calendar/new?type=1&step=0"
     }
 }

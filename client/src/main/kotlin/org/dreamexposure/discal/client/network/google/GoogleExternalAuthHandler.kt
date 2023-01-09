@@ -3,15 +3,15 @@ package org.dreamexposure.discal.client.network.google
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.client.message.Messages
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.ExternalGoogleAuthPoll
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
+import org.dreamexposure.discal.core.`object`.google.ExternalGoogleAuthPoll
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
@@ -36,7 +36,7 @@ object GoogleExternalAuthHandler {
                 response.close()
 
                 val embed = EmbedCreateSpec.builder()
-                        .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
+                    .author("DisCal", Config.URL_BASE.getString(), iconUrl)
                         .title(Messages.getMessage("Embed.AddCalendar.Code.Title", settings))
                         .addField(
                                 Messages.getMessage("Embed.AddCalendar.Code.Code", settings),
@@ -148,7 +148,7 @@ object GoogleExternalAuthHandler {
                                 .flatMapMany { Flux.fromIterable(it) }
                                 .map { cal ->
                                     EmbedCreateSpec.builder()
-                                            .author("DisCal", BotSettings.BASE_URL.get(), iconUrl)
+                                        .author("DisCal", Config.URL_BASE.getString(), iconUrl)
                                             .title(Messages.getMessage("Embed.AddCalendar.List.Title", poll.settings))
                                             .addField(
                                                     Messages.getMessage("Embed.AddCalendar.List.Name", poll.settings),
