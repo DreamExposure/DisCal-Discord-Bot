@@ -68,7 +68,7 @@ object GoogleAuthWrapper {
         }
 
         return Mono.fromCallable {
-            val url = "${Config.URL_BASE.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
+            val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("host", CalendarHost.GOOGLE.name)
                 .addQueryParameter("id", credentialId.toString())
                 .build()
@@ -109,7 +109,7 @@ object GoogleAuthWrapper {
         }
 
         return Mono.fromCallable {
-            val url = "${Config.URL_BASE.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
+            val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("host", calData.host.name)
                 .addQueryParameter("guild", calData.guildId.asString())
                 .addQueryParameter("id", calData.calendarNumber.toString())
