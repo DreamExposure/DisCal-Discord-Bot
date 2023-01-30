@@ -22,6 +22,7 @@ import discord4j.store.api.mapping.MappingStoreService
 import discord4j.store.api.service.StoreService
 import discord4j.store.jdk.JdkStoreService
 import discord4j.store.redis.RedisClusterStoreService
+import discord4j.store.redis.RedisStoreDefaults
 import discord4j.store.redis.RedisStoreService
 import io.lettuce.core.RedisClient
 import io.lettuce.core.RedisURI
@@ -84,6 +85,7 @@ class DiscordConfig {
         val redisPassword = Config.REDIS_PASSWORD.getString().toCharArray()
         val redisPort = Config.REDIS_PORT.getInt()
         val redisCluster = Config.CACHE_REDIS_IS_CLUSTER.getBoolean()
+        val prefix = Config.CACHE_PREFIX.getString()
 
         return if (useRedis) {
             val uriBuilder = RedisURI.Builder
@@ -93,10 +95,12 @@ class DiscordConfig {
             val rss = if (redisCluster) {
                 RedisClusterStoreService.Builder()
                     .redisClient(RedisClusterClient.create(uriBuilder.build()))
+                    .keyPrefix("$prefix.${RedisStoreDefaults.DEFAULT_KEY_PREFIX}")
                     .build()
             } else {
                 RedisStoreService.Builder()
                     .redisClient(RedisClient.create(uriBuilder.build()))
+                    .keyPrefix("$prefix.${RedisStoreDefaults.DEFAULT_KEY_PREFIX}")
                     .build()
             }
 
