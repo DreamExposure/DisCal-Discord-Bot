@@ -18,7 +18,6 @@ import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.ClientData
 import org.dreamexposure.discal.core.`object`.google.GoogleAuthPoll
 import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.`object`.rest.RestError
@@ -34,8 +33,6 @@ import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuthWrapper {
-    private val clientData = ClientData(Config.SECRET_GOOGLE_CLIENT_ID.getString(), Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
-
     private val discalTokens: MutableMap<Int, CredentialData> = ConcurrentHashMap()
     private val externalTokens: MutableMap<Snowflake, CredentialData> = ConcurrentHashMap()
 
@@ -173,7 +170,7 @@ object GoogleAuthWrapper {
     fun requestDeviceCode(): Mono<Response> {
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                    .addEncoded("client_id", clientData.clientId)
+                    .addEncoded("client_id", Config.SECRET_GOOGLE_CLIENT_ID.getString())
                     .addEncoded("scope", CalendarScopes.CALENDAR)
                     .build()
 
@@ -190,8 +187,8 @@ object GoogleAuthWrapper {
     fun requestPollResponse(poll: GoogleAuthPoll): Mono<Response> {
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                    .addEncoded("client_id", clientData.clientId)
-                    .addEncoded("client_secret", clientData.clientSecret)
+                    .addEncoded("client_id", Config.SECRET_GOOGLE_CLIENT_ID.getString())
+                    .addEncoded("client_secret", Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
                     .addEncoded("code", poll.deviceCode)
                     .addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
                     .build()

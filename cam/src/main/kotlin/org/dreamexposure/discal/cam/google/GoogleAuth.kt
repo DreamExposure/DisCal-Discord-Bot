@@ -15,7 +15,6 @@ import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.ClientData
 import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
@@ -28,7 +27,6 @@ import kotlin.system.exitProcess
 
 @Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuth {
-    private val clientData = ClientData(Config.SECRET_GOOGLE_CLIENT_ID.getString(), Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
     private val CREDENTIALS: Flux<DisCalGoogleCredential>
 
     init {
@@ -83,8 +81,8 @@ object GoogleAuth {
     private fun doAccessTokenRequest(refreshToken: String): Mono<CredentialData> {
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                    .addEncoded("client_id", clientData.clientId)
-                    .addEncoded("client_secret", clientData.clientSecret)
+                    .addEncoded("client_id", Config.SECRET_GOOGLE_CLIENT_ID.getString())
+                    .addEncoded("client_secret", Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
                     .addEncoded("refresh_token", refreshToken)
                     .addEncoded("grant_type", "refresh_token")
                     .build()
