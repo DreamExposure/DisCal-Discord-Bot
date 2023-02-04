@@ -1,13 +1,14 @@
 package org.dreamexposure.discal.core.cache
 
 import discord4j.common.util.Snowflake
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.entities.Calendar
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import reactor.core.publisher.Flux
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
 //TODO: Eventually use redis instead of in-memory so these can be shared across the whole discal network and need less time for eventual consistency.
+@Deprecated("Use proper caching impl")
 object DiscalCache {
     //guild id -> settings
     val guildSettings: MutableMap<Snowflake, GuildSettings> = ConcurrentHashMap()
