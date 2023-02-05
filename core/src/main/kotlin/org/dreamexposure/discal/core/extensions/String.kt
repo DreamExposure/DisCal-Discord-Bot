@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.ImageValidator
 import org.jsoup.Jsoup
 import java.time.ZoneId
+import java.util.*
 
 fun String.embedTitleSafe(): String = this.substring(0, (256).coerceAtMost(this.length))
 
@@ -58,3 +59,16 @@ fun String.padCenter(length: Int, padChar: Char = ' '): String {
     }
     return String(output)
 }
+
+// TODO: Do db migration so this can be removed
+fun String.asLocale(): Locale {
+    return when (this) {
+        "ENGLISH" -> Locale.ENGLISH
+        "JAPANESE" -> Locale.JAPANESE
+        "PORTUGUESE" -> Locale.forLanguageTag("pt")
+        "SPANISH" -> Locale.forLanguageTag("es")
+        else -> Locale.ENGLISH
+    }
+}
+
+fun String.asStringListFromDatabase(): List<String> = this.split(",").filter(String::isNotBlank)

@@ -9,7 +9,7 @@ import java.time.temporal.TemporalAdjusters
 import java.util.stream.Collectors
 
 
-fun MutableList<String>.asStringList(): String {
+fun List<String>.asStringList(): String {
     val builder = StringBuilder()
 
     for ((i, str) in this.withIndex()) {
