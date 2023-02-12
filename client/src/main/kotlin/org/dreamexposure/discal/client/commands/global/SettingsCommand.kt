@@ -1,18 +1,18 @@
 package org.dreamexposure.discal.client.commands.global
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.SettingsEmbed
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -32,6 +32,7 @@ class SettingsCommand : SlashCommand {
                     "announcement-style" -> announcementStyleSubcommand(event, settings)
                     "language" -> languageSubcommand(event, settings)
                     "time-format" -> timeFormatSubcommand(event, settings)
+                    "event-keep-duration" -> eventKeepDurationSubcommand(event, settings)
                     "branding" -> brandingSubcommand(event, settings)
                     else -> Mono.empty() //Never can reach this, makes compiler happy.
                 }
@@ -97,6 +98,18 @@ class SettingsCommand : SlashCommand {
 
         return DatabaseManager.updateSettings(settings)
             .flatMap { event.followupEphemeral(getMessage("format.success", settings, timeFormat.name)) }
+    }
+
+    private fun eventKeepDurationSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+        val keepDuration = event.options[0].getOption("value")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .get()
+
+        settings.eventKeepDuration = keepDuration
+
+        return DatabaseManager.updateSettings(settings)
+            .flatMap { event.followupEphemeral(getMessage("eventKeepDuration.success.$keepDuration", settings)) }
     }
 
     private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
