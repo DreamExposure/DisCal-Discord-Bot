@@ -95,6 +95,18 @@
       ]
     },
     {
+      "name": "keep-event-duration",
+      "type": 1,
+      "description": "Toggles whether to keep an event's duration when changing the start or end time (default false)",
+      "options": [
+        {
+          "name": "value",
+          "type": 5,
+          "description": "Whether to keep an event's duration"
+        }
+      ]
+    },
+    {
       "name": "branding",
       "type": 1,
       "description": "Toggles between using discal branding or your guild's name/image where possible",
