@@ -172,6 +172,10 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                 .map(Long::toInt)
                 .map { it.coerceAtLeast(0).coerceAtMost(59) }
                 .orElse(0)
+        val keepDuration = event.options[0].getOption("keep-duration")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .orElse(settings.eventKeepDuration)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -197,8 +201,13 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     }
                 } else {
                     // Event end already set, make sure everything is in order
-                    if (pre.end!!.isAfter(start)) {
+                    val originalDuration = if (pre.start != null) Duration.between(pre.start, pre.end) else null
+                    val shouldChangeDuration = keepDuration && originalDuration != null
+
+                    if (pre.end!!.isAfter(start) || shouldChangeDuration) {
                         pre.start = start
+                        if (shouldChangeDuration) pre.end = start.plus(originalDuration)
+
                         if (pre.start!!.isAfter(Instant.now())) {
                             event.interaction.guild
                                     .map { EventEmbed.pre(it, settings, pre) }
@@ -252,6 +261,10 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                 .map(Long::toInt)
                 .map { it.coerceAtLeast(0).coerceAtMost(59) }
                 .orElse(0)
+        val keepDuration = event.options[0].getOption("keep-duration")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .orElse(settings.eventKeepDuration)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -277,8 +290,13 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     }
                 } else {
                     // Event start already set, make sure everything is in order
-                    if (pre.start!!.isBefore(end)) {
+                    val originalDuration = if (pre.end != null) Duration.between(pre.start, pre.end) else null
+                    val shouldChangeDuration = keepDuration && originalDuration != null
+
+                    if (pre.start!!.isBefore(end) || shouldChangeDuration) {
                         pre.end = end
+                        if (shouldChangeDuration) pre.start = end.minus(originalDuration)
+
                         if (pre.end!!.isAfter(Instant.now())) {
                             event.interaction.guild
                                     .map { EventEmbed.pre(it, settings, pre) }

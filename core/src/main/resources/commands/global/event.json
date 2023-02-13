@@ -250,6 +250,12 @@
           "required": false,
           "min_value": 0,
           "max_value": 59
+        },
+        {
+          "name": "keep-duration",
+          "type": 5,
+          "description": "Adjusts the end time to keep the same duration (overrides guild-level setting)",
+          "required": false
         }
       ]
     },
@@ -440,6 +446,12 @@
           "required": false,
           "min_value": 0,
           "max_value": 59
+        },
+        {
+          "name": "keep-duration",
+          "type": 5,
+          "description": "Adjusts the start time to keep the same duration (overrides guild-level setting)",
+          "required": false
         }
       ]
     },

@@ -129,7 +129,7 @@ object DatabaseManager {
                                 CONTROL_ROLE = ?, ANNOUNCEMENT_STYLE = ?, TIME_FORMAT = ?,
                                 LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,
                                 MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?,
-                                BRANDED = ? WHERE GUILD_ID = ?
+                                BRANDED = ?, event_keep_duration = ? WHERE GUILD_ID = ?
                             """.trimMargin()
 
                     Mono.from(
@@ -144,7 +144,8 @@ object DatabaseManager {
                             .bind(7, settings.maxCalendars)
                             .bind(8, settings.getDmAnnouncementsString())
                             .bind(9, settings.branded)
-                            .bind(10, settings.guildID.asLong())
+                            .bind(10, settings.eventKeepDuration)
+                            .bind(11, settings.guildID.asLong())
                             .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
                         .hasElement()
@@ -152,8 +153,8 @@ object DatabaseManager {
                 } else {
                     val insertCommand = """INSERT INTO ${Tables.GUILD_SETTINGS}
                                 (GUILD_ID, CONTROL_ROLE, ANNOUNCEMENT_STYLE, TIME_FORMAT, LANG, PREFIX,
-                                PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, BRANDED)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, BRANDED, event_keep_duration)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                             """.trimMargin()
 
                     Mono.from(
@@ -169,6 +170,7 @@ object DatabaseManager {
                             .bind(8, settings.maxCalendars)
                             .bind(9, settings.getDmAnnouncementsString())
                             .bind(10, settings.branded)
+                            .bind(11, settings.eventKeepDuration)
                             .execute()
                     ).flatMap { res -> Mono.from(res.rowsUpdated) }
                         .hasElement()
@@ -550,10 +552,11 @@ object DatabaseManager {
                     val maxCals = row["MAX_CALENDARS", Int::class.java]!!
                     val dmAnnouncementsString = row["DM_ANNOUNCEMENTS", String::class.java]!!
                     val branded = row["BRANDED", Boolean::class.java]!!
+                    val eventKeepDuration = row["event_keep_duration", Boolean::class.java]!!
 
                     val settings = GuildSettings(
                         guildId, controlRole, announcementStyle, timeFormat,
-                        lang, prefix, patron, dev, maxCals, branded
+                        lang, prefix, patron, dev, maxCals, branded, eventKeepDuration,
                     )
 
                     settings.dmAnnouncements.setFromString(dmAnnouncementsString)
