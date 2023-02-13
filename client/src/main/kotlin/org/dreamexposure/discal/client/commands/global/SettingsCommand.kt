@@ -32,7 +32,7 @@ class SettingsCommand : SlashCommand {
                     "announcement-style" -> announcementStyleSubcommand(event, settings)
                     "language" -> languageSubcommand(event, settings)
                     "time-format" -> timeFormatSubcommand(event, settings)
-                    "event-keep-duration" -> eventKeepDurationSubcommand(event, settings)
+                    "keep-event-duration" -> eventKeepDurationSubcommand(event, settings)
                     "branding" -> brandingSubcommand(event, settings)
                     else -> Mono.empty() //Never can reach this, makes compiler happy.
                 }
