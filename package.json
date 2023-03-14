@@ -29,7 +29,7 @@
     "mini-css-extract-plugin": "2.3.0",
     "node-sass": "6.0.1",
     "ts-loader": "9.2.6",
-    "webpack": "5.54.0",
+    "webpack": "5.76.0",
     "webpack-cli": "4.8.0"
   },
   "dependencies": {
