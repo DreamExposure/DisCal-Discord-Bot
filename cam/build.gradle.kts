@@ -25,14 +25,13 @@ kotlin {
 }
 
 jib {
-    var imageVersion = version.toString()
-    if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
+    to {
+        image = "rg.nl-ams.scw.cloud/dreamexposure/discal-cam"
+        tags = mutableSetOf("latest", version.toString())
+    }
 
-    to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-cam:$imageVersion"
     val baseImage: String by properties
     from.image = baseImage
-
-    container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 
 tasks {
