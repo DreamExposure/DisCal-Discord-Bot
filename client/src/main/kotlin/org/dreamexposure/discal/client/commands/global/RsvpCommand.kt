@@ -22,6 +22,7 @@ class RsvpCommand : SlashCommand {
     override val name = "rsvp"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return when (event.options[0].name) {
             "ontime" -> onTime(event, settings)

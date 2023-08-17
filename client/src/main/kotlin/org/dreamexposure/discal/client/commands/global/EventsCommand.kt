@@ -25,6 +25,7 @@ class EventsCommand : SlashCommand {
     override val name = "events"
     override val ephemeral = false
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return when (event.options[0].name) {
             "upcoming" -> upcomingEventsSubcommand(event, settings)

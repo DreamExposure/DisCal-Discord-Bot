@@ -22,6 +22,7 @@ class SettingsCommand : SlashCommand {
     override val name = "settings"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         //Check if user has permission to use this
         return event.interaction.member.get().hasElevatedPermissions().flatMap { hasPerm ->

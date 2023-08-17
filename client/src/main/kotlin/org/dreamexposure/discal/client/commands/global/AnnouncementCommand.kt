@@ -32,6 +32,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
     override val name = "announcement"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return when (event.options[0].name) {
             "create" -> create(event, settings)

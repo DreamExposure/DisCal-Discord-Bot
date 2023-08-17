@@ -19,6 +19,7 @@ class AddCalCommand : SlashCommand {
     override val name = "addcal"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         //TODO: Remove dev-only and switch to patron-only once this is completed
         return if (settings.devGuild) {

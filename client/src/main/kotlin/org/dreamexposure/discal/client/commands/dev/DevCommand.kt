@@ -20,6 +20,7 @@ class DevCommand : SlashCommand {
     override val name = "dev"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         if (!GlobalVal.devUserIds.contains(event.interaction.user.id)) {
             return event.followupEphemeral(getMessage("error.notDeveloper", settings))

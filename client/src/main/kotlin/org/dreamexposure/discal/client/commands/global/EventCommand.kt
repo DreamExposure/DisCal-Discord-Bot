@@ -34,6 +34,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
     override val name = "event"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return when (event.options[0].name) {
             "create" -> create(event, settings)

@@ -14,6 +14,7 @@ class HelpCommand : SlashCommand {
     override val name = "help"
     override val ephemeral = true
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return event.followupEphemeral(
             getMessage("error.workInProgress", settings, "${Config.URL_BASE.getString()}/commands")

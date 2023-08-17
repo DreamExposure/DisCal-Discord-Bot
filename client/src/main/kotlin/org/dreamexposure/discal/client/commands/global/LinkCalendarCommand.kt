@@ -17,6 +17,7 @@ class LinkCalendarCommand : SlashCommand {
     override val name = "linkcal"
     override val ephemeral = false
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val showOverview = event.getOption("overview")
                 .flatMap(ApplicationCommandInteractionOption::getValue)

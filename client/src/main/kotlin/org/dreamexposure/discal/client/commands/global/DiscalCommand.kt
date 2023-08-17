@@ -14,6 +14,7 @@ class DiscalCommand : SlashCommand {
     override val name = "discal"
     override val ephemeral = false
 
+    @Deprecated("Use new handleSuspend for K-coroutines")
     override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return event.interaction.guild
               .flatMap(DiscalEmbed::info)
