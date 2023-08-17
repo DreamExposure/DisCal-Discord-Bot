@@ -93,8 +93,8 @@ jobs:
 
       # Have K8S pull latest images for dev pods
       - name: Trigger dev deploy
-        uses: Consensys/kubernetes-action@master
+        uses: davi020/kubernetes-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
-          args: delete -n discal pods -l profile=dev,app=discal
+          args: delete -n discal pods -l env=dev,app=discal
