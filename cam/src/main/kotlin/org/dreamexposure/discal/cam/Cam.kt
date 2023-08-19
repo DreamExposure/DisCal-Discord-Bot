@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.cam
 
+import jakarta.annotation.PreDestroy
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.cam.google.GoogleInternalAuthHandler
 import org.dreamexposure.discal.core.config.Config
@@ -8,7 +9,6 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
-import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
 @Component

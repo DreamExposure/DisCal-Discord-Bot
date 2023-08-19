@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server
 
+import jakarta.annotation.PreDestroy
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -8,7 +9,6 @@ import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
 import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.stereotype.Component
-import javax.annotation.PreDestroy
 import kotlin.system.exitProcess
 
 

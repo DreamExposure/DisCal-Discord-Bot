@@ -37,8 +37,8 @@ allprojects {
     apply(plugin = "kotlin")
 
     //Compiler nonsense
-    java.sourceCompatibility = JavaVersion.VERSION_16
-    java.targetCompatibility = JavaVersion.VERSION_16
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    java.targetCompatibility = JavaVersion.VERSION_17
 
     // Versions --- found in gradle.properties
     val kotlinVersion: String by properties

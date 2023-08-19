@@ -14,7 +14,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'DreamExposure/DisCal-Discord-Bot' }}
     strategy:
       matrix:
-        java: [ 16, 17 ]
+        java: [ 17 ]
     steps:
       - uses: actions/checkout@v2
 
