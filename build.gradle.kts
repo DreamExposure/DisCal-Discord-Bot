@@ -35,6 +35,7 @@ allprojects {
     //Plugins
     apply(plugin = "java")
     apply(plugin = "kotlin")
+    apply(plugin = "io.spring.dependency-management")
 
     //Compiler nonsense
     java.sourceCompatibility = JavaVersion.VERSION_17
@@ -66,15 +67,13 @@ allprojects {
     // Various libs
     val okhttpVersion: String by properties
     val copyDownVersion: String by properties
+    val jsoupVersion: String by properties
 
     repositories {
         mavenCentral()
         mavenLocal()
 
-        maven {
-            url = uri("https://repo.maven.apache.org/maven2/")
-        }
-
+        maven("https://repo.maven.apache.org/maven2/")
         maven("https://kotlin.bintray.com/kotlinx")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://repo.spring.io/milestone")
@@ -122,6 +121,7 @@ allprojects {
         // Various Libs
         implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
+        implementation("org.jsoup:jsoup:$jsoupVersion")
     }
 
     kotlin {

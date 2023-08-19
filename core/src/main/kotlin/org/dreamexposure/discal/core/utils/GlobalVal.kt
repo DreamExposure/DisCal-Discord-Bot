@@ -8,7 +8,7 @@ import io.github.furstenheim.OptionsBuilder
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 
@@ -45,9 +45,9 @@ object GlobalVal {
         ignoreUnknownKeys = true
     }
 
-    val HTML_WHITELIST: Whitelist
+    val HTML_WHITELIST: Safelist
         get() {
-            return Whitelist.basic()
+            return Safelist.basic()
                     .preserveRelativeLinks(false)
                     .removeAttributes("sub", "sup", "small")
         }
