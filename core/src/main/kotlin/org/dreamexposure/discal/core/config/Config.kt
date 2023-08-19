@@ -83,7 +83,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
             val props = Properties()
             props.load(FileReader("application.properties"))
 
-            values().forEach { it.value = props.getProperty(it.key, it.value?.toString()) }
+            entries.forEach { it.value = props.getProperty(it.key, it.value?.toString()) }
         }
     }
 

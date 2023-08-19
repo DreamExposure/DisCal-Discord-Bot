@@ -3,6 +3,7 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 plugins {
     // Kotlin
@@ -47,7 +48,7 @@ tasks {
         doLast {
             @Suppress("UNCHECKED_CAST")
             val gitProperties = ext[gitProperties.extProperty] as Map<String, String>
-            val enumPairs = gitProperties.mapKeys { it.key.replace('.', '_').toUpperCase() }
+            val enumPairs = gitProperties.mapKeys { it.key.replace('.', '_').uppercase(Locale.getDefault()) }
 
             val enumBuilder = TypeSpec.enumBuilder("GitProperty")
                   .primaryConstructor(

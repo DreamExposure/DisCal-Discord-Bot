@@ -51,12 +51,12 @@ class DiscordWebhookAppender : AppenderBase<ILoggingEvent>() {
                 return
             }
 
-            eventObject.marker.equals(STATUS) -> {
+            eventObject.markerList.contains(STATUS) -> {
                 executeStatus(eventObject)
                 return
             }
 
-            eventObject.marker.equals(DEFAULT) -> {
+            eventObject.markerList.contains(DEFAULT) -> {
                 executeDefault(eventObject)
                 return
             }
