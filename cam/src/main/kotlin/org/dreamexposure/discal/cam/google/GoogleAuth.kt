@@ -49,7 +49,7 @@ object GoogleAuth {
                     .flatMap(this::doAccessTokenRequest)
                     .flatMap { data ->
                         //calendarData.encryptedAccessToken = aes.encrypt(data.accessToken)
-                        calendarData.expiresAt = data.validUntil
+                        calendarData.expiresAt = data.validUntil.minusSeconds(60) // Add a minute of wiggle room
 
                         aes.encrypt(data.accessToken)
                                 .doOnNext { calendarData.encryptedAccessToken = it }
