@@ -39,9 +39,6 @@ class StateService {
         val expiresAt = states[state]
         states.remove(state) // Remove state immediately to prevent replay attacks
 
-        if (expiresAt != null && expiresAt.isAfter(Instant.now())) return true
-
-        // If state is not valid or has expired, we return false
-        return false
+        return expiresAt != null && expiresAt.isAfter(Instant.now())
     }
 }

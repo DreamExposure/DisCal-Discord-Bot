@@ -1,20 +1,20 @@
 package org.dreamexposure.discal.cam.endpoints.v1.oauth2
 
+import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
 import org.dreamexposure.discal.cam.json.discal.LoginResponse
 import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.service.StateService
 import org.dreamexposure.discal.core.annotations.Authentication
+import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.KeyGenerator
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.utils.GlobalVal.discordApiUrl
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
-import reactor.core.publisher.Mono
 import java.net.URLEncoder
 import java.nio.charset.Charset.defaultCharset
 
@@ -22,6 +22,7 @@ import java.nio.charset.Charset.defaultCharset
 @RequestMapping("/oauth2/discord/")
 class DiscordOauthEndpoint(
     private val stateService: StateService,
+    private val sessionService: SessionService,
     private val discordOauthHandler: DiscordOauthHandler,
 ) {
     private val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
@@ -33,45 +34,41 @@ class DiscordOauthEndpoint(
 
     @GetMapping("login")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    fun login(): Mono<LoginResponse> {
+    fun login(): LoginResponse {
         val state = stateService.generateState()
 
         val link = "$oauthLinkWithoutState&state=$state"
 
-        return Mono.just(LoginResponse(link))
+        return LoginResponse(link)
     }
 
     @GetMapping("logout")
     @Authentication(access = Authentication.AccessLevel.WRITE)
-    fun logout(@RequestHeader("Authorization") token: String): Mono<Void> {
-        return DatabaseManager.deleteSession(token).then()
+    suspend fun logout(@RequestHeader("Authorization") token: String) {
+        sessionService.deleteSession(token)
     }
 
     @PostMapping("code")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    fun token(@RequestBody body: TokenRequest): Mono<TokenResponse> {
+    suspend fun token(@RequestBody body: TokenRequest): TokenResponse {
         // Validate state
         if (!stateService.validateState(body.state)) {
             // State invalid - 400
-            return Mono.error(ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state"))
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state")
         }
 
-        return discordOauthHandler.doTokenExchange(body.code).flatMap { dTokens ->
-            // request current user info
-            discordOauthHandler.getOauthInfo(dTokens.accessToken).flatMap { authInfo ->
-                val apiToken = KeyGenerator.csRandomAlphaNumericString(64)
+        val dTokens = discordOauthHandler.doTokenExchange(body.code).awaitSingle()
+        val authInfo = discordOauthHandler.getOauthInfo(dTokens.accessToken).awaitSingle()
+        val apiToken = KeyGenerator.csRandomAlphaNumericString(64)
+        val session = WebSession(
+            apiToken,
+            authInfo.user!!.id,
+            accessToken = dTokens.accessToken,
+            refreshToken = dTokens.refreshToken
+        )
 
-                val session = WebSession(
-                    apiToken,
-                    authInfo.user!!.id,
-                    accessToken = dTokens.accessToken,
-                    refreshToken = dTokens.refreshToken
-                )
+        sessionService.removeAndInsertSession(session)
 
-                // Save session data then return response
-                DatabaseManager.removeAndInsertSessionData(session)
-                    .thenReturn(TokenResponse(session.token, session.expiresAt, authInfo.user))
-            }
-        }
+        return TokenResponse(session.token, session.expiresAt, authInfo.user)
     }
 }

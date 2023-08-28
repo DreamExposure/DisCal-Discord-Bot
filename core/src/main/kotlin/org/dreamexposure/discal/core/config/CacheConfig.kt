@@ -1,9 +1,14 @@
 package org.dreamexposure.discal.core.config
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.dreamexposure.discal.CredentialsCache
+import org.dreamexposure.discal.core.cache.JdkCacheRepository
+import org.dreamexposure.discal.core.cache.RedisCacheRepository
 import org.dreamexposure.discal.core.extensions.asMinutes
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Primary
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
@@ -13,8 +18,10 @@ class CacheConfig {
     // Cache name constants
     private val prefix = Config.CACHE_PREFIX.getString()
     private val settingsCacheName = "$prefix.settingsCache"
+    private val credentialsCacheName = "$prefix.credentialsCache"
 
     private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
+    private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -25,8 +32,20 @@ class CacheConfig {
             .withCacheConfiguration(settingsCacheName,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(settingsTtl)
             )
+            .withCacheConfiguration(credentialsCacheName,
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(credentialsTll)
+            )
             .build()
     }
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun credentialsRedisCache(cacheManager: RedisCacheManager, objectMapper: ObjectMapper): CredentialsCache =
+        RedisCacheRepository(cacheManager, objectMapper, credentialsCacheName)
+
+
     // In-memory fallback caching
+    @Bean
+    fun credentialsFallbackCache(): CredentialsCache = JdkCacheRepository(settingsTtl)
 }

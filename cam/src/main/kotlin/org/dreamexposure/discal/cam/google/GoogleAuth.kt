@@ -2,10 +2,12 @@ package org.dreamexposure.discal.cam.google
 
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_BAD_REQUEST
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK
+import kotlinx.coroutines.reactor.mono
 import okhttp3.FormBody
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.google.ErrorData
 import org.dreamexposure.discal.cam.json.google.RefreshData
+import org.dreamexposure.discal.core.business.CredentialService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.DatabaseManager
@@ -19,20 +21,24 @@ import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Instant
 import kotlin.system.exitProcess
 
-@Suppress("BlockingMethodInNonBlockingContext")
-object GoogleAuth {
-    private val CREDENTIALS: Flux<DisCalGoogleCredential>
+@Component
+class GoogleAuth(
+    private val credentialService: CredentialService,
+) {
+    private final val CREDENTIALS: Flux<DisCalGoogleCredential>
 
     init {
         val credCount = Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt()
+
         CREDENTIALS = Flux.range(0, credCount)
-                .flatMap(DatabaseManager::getCredentialData)
+            .flatMap { mono { credentialService.getCredential(it) } }
                 .map(::DisCalGoogleCredential)
                 .doOnError { exitProcess(1) }
                 .cache()
@@ -53,27 +59,27 @@ object GoogleAuth {
 
                         aes.encrypt(data.accessToken)
                                 .doOnNext { calendarData.encryptedAccessToken = it }
-                                .then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))
+                            .then(DatabaseManager.updateCalendar(calendarData).thenReturn(data))//TODO: Replace this
                     }
         }
     }
 
     fun requestNewAccessToken(credentialId: Int): Mono<CredentialData> {
         return CREDENTIALS
-                .filter { it.credentialData.credentialNumber == credentialId }
+            .filter { it.credential.credentialNumber == credentialId }
                 .next()
                 .switchIfEmpty(Mono.error(NotFoundException()))
                 .flatMap { credential ->
                     if (!credential.expired()) {
                         return@flatMap credential.getAccessToken()
-                                .map { CredentialData(it, credential.credentialData.expiresAt) }
+                            .map { CredentialData(it, credential.credential.expiresAt) }
                     }
 
                     credential.getRefreshToken()
                             .flatMap(this::doAccessTokenRequest)
                             .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
-                            .doOnNext { credential.credentialData.expiresAt = it.validUntil }
-                            .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }
+                        .doOnNext { credential.credential.expiresAt = it.validUntil }
+                        .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }//TODO: Replace this
                 }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
 
     }

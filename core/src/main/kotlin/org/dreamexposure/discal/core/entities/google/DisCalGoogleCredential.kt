@@ -2,12 +2,12 @@ package org.dreamexposure.discal.core.entities.google
 
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
-import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
+import org.dreamexposure.discal.core.`object`.new.Credential
 import reactor.core.publisher.Mono
 import java.time.Instant
 
 data class DisCalGoogleCredential(
-        val credentialData: GoogleCredentialData,
+    val credential: Credential,
 ) {
     private val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
     private var access: String? = null
@@ -15,13 +15,13 @@ data class DisCalGoogleCredential(
 
     fun getRefreshToken(): Mono<String> {
        if (refresh != null) return Mono.justOrEmpty(refresh)
-        return aes.decrypt(credentialData.encryptedRefreshToken)
+        return aes.decrypt(credential.encryptedRefreshToken)
                 .doOnNext { refresh = it }
     }
 
     fun getAccessToken(): Mono<String> {
         if (access != null) return Mono.justOrEmpty(access)
-        return aes.decrypt(credentialData.encryptedAccessToken)
+        return aes.decrypt(credential.encryptedAccessToken)
                 .doOnNext { access = it }
     }
 
@@ -29,7 +29,7 @@ data class DisCalGoogleCredential(
         refresh = token
         //credentialData.encryptedRefreshToken = aes.encrypt(token)
         return aes.encrypt(token)
-                .doOnNext { credentialData.encryptedRefreshToken = it }
+            .doOnNext { credential.encryptedRefreshToken = it }
                 .then()
     }
 
@@ -37,9 +37,9 @@ data class DisCalGoogleCredential(
         access = token
         //credentialData.encryptedAccessToken = aes.encrypt(token)
         return aes.encrypt(token)
-                .doOnNext { credentialData.encryptedAccessToken = it }
+            .doOnNext { credential.encryptedAccessToken = it }
                 .then()
     }
 
-    fun expired() = Instant.now().isAfter(credentialData.expiresAt)
+    fun expired() = Instant.now().isAfter(credential.expiresAt)
 }
