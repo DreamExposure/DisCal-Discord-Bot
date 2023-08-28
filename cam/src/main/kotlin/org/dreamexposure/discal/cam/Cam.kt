@@ -2,7 +2,6 @@ package org.dreamexposure.discal.cam
 
 import jakarta.annotation.PreDestroy
 import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.cam.google.GoogleInternalAuthHandler
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -24,12 +23,6 @@ class Cam {
         @JvmStatic
         fun main(args: Array<String>) {
             Config.init()
-
-            //Handle generating new google auth credentials for discal accounts
-            if (args.size > 1 && args[0].equals("-forceNewGoogleAuth", true)) {
-                //This will automatically kill this instance once finished
-                GoogleInternalAuthHandler.requestCode(args[1].toInt()).subscribe()
-            }
 
             //Start up spring
             try {

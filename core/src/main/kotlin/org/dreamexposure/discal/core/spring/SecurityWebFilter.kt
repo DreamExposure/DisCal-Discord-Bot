@@ -1,6 +1,8 @@
 package org.dreamexposure.discal.core.spring
 
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.Authentication
+import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
@@ -22,7 +24,10 @@ import java.util.concurrent.ConcurrentMap
 
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
-class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebFilter {
+class SecurityWebFilter(
+    private val sessionService: SessionService,
+    private val handlerMapping: RequestMappingHandlerMapping,
+) : WebFilter {
     private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
 
     init {
@@ -87,7 +92,7 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                     Mono.just(Authentication.AccessLevel.READ)
                 }
                 authHeader.startsWith("Bearer ") -> {
-                    DatabaseManager.getSessionData(authHeader.substringAfter("Bearer ")).flatMap { session ->
+                    mono { sessionService.getSession(authHeader.substringAfter("Bearer ")) }.flatMap { session ->
                         if (session.expiresAt.isAfter(Instant.now())) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
@@ -97,7 +102,7 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 }
                 else -> {
                     // Check if this is an API key
-                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
+                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc -> //TODO: Replace this
                         if (!acc.blocked) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {

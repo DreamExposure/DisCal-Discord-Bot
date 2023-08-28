@@ -22,7 +22,6 @@ import org.dreamexposure.discal.core.extensions.setFromString
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.StaticMessage
-import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
@@ -1099,29 +1098,6 @@ object DatabaseManager {
         }.defaultIfEmpty(-1)
     }
 
-    fun getCredentialData(credNumber: Int): Mono<GoogleCredentialData> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_CREDENTIAL_DATA)
-                    .bind(0, credNumber)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val refresh = row["REFRESH_TOKEN", String::class.java]!!
-                    val access = row["ACCESS_TOKEN", String::class.java]!!
-                    val expires = Instant.ofEpochMilli(row["EXPIRES_AT", Long::class.java]!!)
-
-                    GoogleCredentialData(credNumber, refresh, access, expires)
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
-            }.onErrorResume { Mono.empty() }
-        }
-    }
-
     fun deleteAnnouncement(announcementId: String): Mono<Boolean> {
         return connect { c ->
             Mono.from(
@@ -1514,144 +1490,6 @@ object DatabaseManager {
             }.collectList()
         }
     }
-
-    /* Session Data */
-    fun insertSessionData(session: WebSession): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.INSERT_SESSION_DATA)
-                    .bind(0, session.token)
-                    .bind(1, session.user.asLong())
-                    .bind(2, session.expiresAt)
-                    .bind(3, session.accessToken)
-                    .bind(4, session.refreshToken)
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-        }.doOnError {
-            LOGGER.error(DEFAULT, "Failed to insert session data", it)
-        }.onErrorResume { Mono.just(false) }
-    }
-
-    fun removeAndInsertSessionData(session: WebSession): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.REMOVE_AND_INSERT_SESSION_DATA)
-                    // Remove all existing sessions for user bindings
-                    .bind(0, session.user.asLong())
-                    // Insert new session bindings
-                    .bind(1, session.token)
-                    .bind(2, session.user.asLong())
-                    .bind(3, session.expiresAt)
-                    .bind(4, session.accessToken)
-                    .bind(5, session.refreshToken)
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-        }.doOnError {
-            LOGGER.error(DEFAULT, "Failed to insert session data", it)
-        }.onErrorResume { Mono.just(false) }
-    }
-
-    fun getSessionData(token: String): Mono<WebSession> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_SESSION_TOKEN)
-                    .bind(0, token)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val userId = Snowflake.of(row["user_id", Long::class.java]!!)
-                    val expiresAt = row["expires_at", Instant::class.java]!!
-                    val accessToken = row["access_token", String::class.java]!!
-                    val refreshToken = row["refresh_token", String::class.java]!!
-
-                    WebSession(token, userId, expiresAt, accessToken, refreshToken)
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get session data by token", it)
-            }.onErrorResume {
-                Mono.empty()
-            }
-        }
-    }
-
-    fun getAllSessionsForUser(userId: Snowflake): Mono<List<WebSession>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_SESSIONS_USER)
-                    .bind(0, userId.asLong())
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val token = row["token", String::class.java]!!
-                    val expiresAt = row["expires_at", Instant::class.java]!!
-                    val accessToken = row["access_token", String::class.java]!!
-                    val refreshToken = row["refresh_token", String::class.java]!!
-
-                    WebSession(token, userId, expiresAt, accessToken, refreshToken)
-                }
-            }.retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get sessions for user", it)
-            }.onErrorResume {
-                Mono.empty()
-            }.collectList()
-        }
-    }
-
-    fun deleteSession(token: String): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.DELETE_SESSION)
-                    .bind(0, token)
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-                .doOnError {
-                    LOGGER.error(DEFAULT, "session delete failure", it)
-                }.onErrorReturn(false)
-        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
-    }
-
-    fun deleteAllSessionsForUser(userId: Snowflake): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.DELETE_SESSIONS_FOR_USER)
-                    .bind(0, userId.asLong())
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-                .doOnError {
-                    LOGGER.error(DEFAULT, "delete all sessions for user failure", it)
-                }.onErrorReturn(false)
-        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
-    }
-
-    fun deleteExpiredSessions(): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.DELETE_EXPIRED_SESSIONS)
-                    .bind(0, Instant.now()) // Delete everything that expired before now
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-                .doOnError {
-                    // Technically because we have handling for expired tokens we don't need to panic if this breaks
-                    LOGGER.error(DEFAULT, "Expired session delete failure", it)
-                }.onErrorReturn(false)
-        }.defaultIfEmpty(true) // If nothing was updated and no error was emitted, it's safe to return this worked.
-    }
 }
 
 private object Queries {
@@ -1870,41 +1708,6 @@ private object Queries {
     @Language("MySQL")
     val SELECT_ANNOUNCEMENTS_FOR_SHARD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE MOD(guild_id >> 22, ?) = ?
-    """.trimMargin()
-
-    /* Session Data */
-
-    @Language("MySQL")
-    val INSERT_SESSION_DATA = """INSERT INTO ${Tables.SESSIONS}
-        (token, user_id, expires_at, access_token, refresh_token)
-        VALUES(?, ?, ?, ?, ?)
-    """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_SESSION_TOKEN = """SELECT * FROM ${Tables.SESSIONS}
-        WHERE token = ?
-    """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_SESSIONS_USER = """SELECT * FROM ${Tables.SESSIONS}
-        WHERE user_id = ?
-    """.trimMargin()
-
-    @Language("MySQL")
-    val DELETE_SESSION = """DELETE FROM ${Tables.SESSIONS}
-        WHERE token = ?
-    """.trimMargin()
-
-    @Language("MySQL")
-    val DELETE_SESSIONS_FOR_USER = """DELETE FROM ${Tables.SESSIONS}
-        WHERE user_id = ?
-    """.trimMargin()
-
-    val REMOVE_AND_INSERT_SESSION_DATA = "$DELETE_SESSIONS_FOR_USER;$INSERT_SESSION_DATA"
-
-    @Language("MySQL")
-    val DELETE_EXPIRED_SESSIONS = """DELETE FROM ${Tables.SESSIONS}
-        where expires_at < ?
     """.trimMargin()
 
     /* Delete everything */
