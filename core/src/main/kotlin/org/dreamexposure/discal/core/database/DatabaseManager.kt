@@ -26,7 +26,6 @@ import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.RsvpData
-import org.dreamexposure.discal.core.`object`.google.GoogleCredentialData
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.intellij.lang.annotations.Language
@@ -456,53 +455,6 @@ object DatabaseManager {
                     LOGGER.error(DEFAULT, "Failed to update rsvp data", it)
                 }.onErrorResume { Mono.just(false) }
             }
-        }
-    }
-
-    fun updateCredentialData(credData: GoogleCredentialData): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_CREDENTIAL_DATA)
-                    .bind(0, credData.credentialNumber)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ -> row }
-            }.hasElements().flatMap { exists ->
-                if (exists) {
-                    val updateCommand = """UPDATE ${Tables.CREDS} SET
-                        REFRESH_TOKEN = ?, ACCESS_TOKEN = ?, EXPIRES_AT = ?
-                        WHERE CREDENTIAL_NUMBER = ?""".trimMargin()
-
-                    Mono.from(
-                        c.createStatement(updateCommand)
-                            .bind(0, credData.encryptedRefreshToken)
-                            .bind(1, credData.encryptedAccessToken)
-                            .bind(2, credData.expiresAt.toEpochMilli())
-                            .bind(3, credData.credentialNumber)
-                            .execute()
-                    ).flatMapMany(Result::getRowsUpdated)
-                        .hasElements()
-                        .thenReturn(true)
-                } else {
-                    val insertCommand = """INSERT INTO ${Tables.CREDS}
-                        |(CREDENTIAL_NUMBER, REFRESH_TOKEN, ACCESS_TOKEN, EXPIRES_AT)
-                        |VALUES(?, ?, ?, ?)""".trimMargin()
-
-                    Mono.from(
-                        c.createStatement(insertCommand)
-                            .bind(0, credData.credentialNumber)
-                            .bind(1, credData.encryptedRefreshToken)
-                            .bind(2, credData.encryptedAccessToken)
-                            .bind(3, credData.expiresAt.toEpochMilli())
-                            .execute()
-                    ).flatMapMany(Result::getRowsUpdated)
-                        .hasElements()
-                        .thenReturn(true)
-                }.doOnError {
-                    LOGGER.error(DEFAULT, "Failed to update credential data", it)
-                }.onErrorResume { Mono.just(false) }
-            }
-
         }
     }
 
@@ -1579,11 +1531,6 @@ private object Queries {
     val SELECT_ALL_ANNOUNCEMENT_COUNT = """SELECT COUNT(*) FROM ${Tables.ANNOUNCEMENTS}"""
 
     @Language("MySQL")
-    val SELECT_CREDENTIAL_DATA = """SELECT * FROM ${Tables.CREDS}
-        WHERE CREDENTIAL_NUMBER = ?
-        """.trimMargin()
-
-    @Language("MySQL")
     val DELETE_ANNOUNCEMENT = """DELETE FROM ${Tables.ANNOUNCEMENTS}
         WHERE ANNOUNCEMENT_ID = ?
         """.trimMargin()
@@ -1745,11 +1692,5 @@ private object Tables {
     const val RSVP = "rsvp"
 
     @Language("Kotlin")
-    const val CREDS = "credentials"
-
-    @Language("Kotlin")
     const val STATIC_MESSAGES = "static_messages"
-
-    @Language("Kotlin")
-    const val SESSIONS = "sessions"
 }

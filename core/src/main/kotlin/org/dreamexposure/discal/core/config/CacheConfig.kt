@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.dreamexposure.discal.CredentialsCache
+import org.dreamexposure.discal.OauthStateCache
 import org.dreamexposure.discal.core.cache.JdkCacheRepository
 import org.dreamexposure.discal.core.cache.RedisCacheRepository
 import org.dreamexposure.discal.core.extensions.asMinutes
@@ -19,9 +20,11 @@ class CacheConfig {
     private val prefix = Config.CACHE_PREFIX.getString()
     private val settingsCacheName = "$prefix.settingsCache"
     private val credentialsCacheName = "$prefix.credentialsCache"
+    private val oauthStateCacheName = "$prefix.oauthStateCache"
 
     private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
     private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
+    private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -35,6 +38,8 @@ class CacheConfig {
             .withCacheConfiguration(credentialsCacheName,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(credentialsTll)
             )
+            .withCacheConfiguration(oauthStateCacheName,
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(oauthStateTtl))
             .build()
     }
 
@@ -44,8 +49,17 @@ class CacheConfig {
     fun credentialsRedisCache(cacheManager: RedisCacheManager, objectMapper: ObjectMapper): CredentialsCache =
         RedisCacheRepository(cacheManager, objectMapper, credentialsCacheName)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun oauthStateRedisCache(cacheManager: RedisCacheManager, objectMapper: ObjectMapper): OauthStateCache =
+        RedisCacheRepository(cacheManager, objectMapper, oauthStateCacheName)
+
 
     // In-memory fallback caching
     @Bean
     fun credentialsFallbackCache(): CredentialsCache = JdkCacheRepository(settingsTtl)
+
+    @Bean
+    fun oauthStateFallbackCache(): OauthStateCache = JdkCacheRepository(settingsTtl)
 }
