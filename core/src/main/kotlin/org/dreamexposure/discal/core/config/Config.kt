@@ -18,6 +18,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_SETTINGS_MINUTES("bot.cache.ttl-minutes.settings", 60),
     CACHE_TTL_CREDENTIALS_MINUTES("bot.cache.ttl-minutes.credentials", 120),
     CACHE_TTL_ACCOUNTS_MINUTES("bot.cache.ttl-minutes.accounts", 60),
+    CACHE_TTL_OAUTH_STATE_MINUTES("bot.cache.ttl-minutes.oauth.state", 5),
 
     // Security configuration
 

@@ -1,11 +1,11 @@
 package org.dreamexposure.discal.cam.endpoints.v1.oauth2
 
 import kotlinx.coroutines.reactor.awaitSingle
+import org.dreamexposure.discal.cam.business.OauthStateService
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
 import org.dreamexposure.discal.cam.json.discal.LoginResponse
 import org.dreamexposure.discal.cam.json.discal.TokenRequest
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
-import org.dreamexposure.discal.cam.service.StateService
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
@@ -21,8 +21,8 @@ import java.nio.charset.Charset.defaultCharset
 @RestController
 @RequestMapping("/oauth2/discord/")
 class DiscordOauthEndpoint(
-    private val stateService: StateService,
     private val sessionService: SessionService,
+    private val oauthStateService: OauthStateService,
     private val discordOauthHandler: DiscordOauthHandler,
 ) {
     private val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
@@ -34,8 +34,8 @@ class DiscordOauthEndpoint(
 
     @GetMapping("login")
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    fun login(): LoginResponse {
-        val state = stateService.generateState()
+    suspend fun login(): LoginResponse {
+        val state = oauthStateService.generateState()
 
         val link = "$oauthLinkWithoutState&state=$state"
 
@@ -52,7 +52,7 @@ class DiscordOauthEndpoint(
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
     suspend fun token(@RequestBody body: TokenRequest): TokenResponse {
         // Validate state
-        if (!stateService.validateState(body.state)) {
+        if (!oauthStateService.validateState(body.state)) {
             // State invalid - 400
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state")
         }

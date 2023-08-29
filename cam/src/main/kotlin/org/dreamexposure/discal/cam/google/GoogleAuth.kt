@@ -79,7 +79,7 @@ class GoogleAuth(
                             .flatMap(this::doAccessTokenRequest)
                             .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
                         .doOnNext { credential.credential.expiresAt = it.validUntil }
-                        .flatMap { DatabaseManager.updateCredentialData(credential.credentialData).thenReturn(it) }//TODO: Replace this
+                        .flatMap(mono { credentialService.updateCredential(credential.credential) }::thenReturn)
                 }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
 
     }
