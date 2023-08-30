@@ -17,11 +17,10 @@ class SessionCronJob(
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofHours(1))
-            .flatMap { justDoIt() }.doOnError {
-                LOGGER.error(GlobalVal.DEFAULT, "Session cronjob error", it)
-            }.onErrorResume {
-                Mono.empty()
-            }.subscribe()
+            .flatMap { justDoIt() }
+            .doOnError { LOGGER.error(GlobalVal.DEFAULT, "Session cronjob error", it) }
+            .onErrorResume { Mono.empty() }
+            .subscribe()
     }
 
     private fun justDoIt() = mono {
