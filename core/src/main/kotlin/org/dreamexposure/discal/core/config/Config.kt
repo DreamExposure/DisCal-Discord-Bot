@@ -50,12 +50,12 @@ enum class Config(private val key: String, private var value: Any? = null) {
     SHARD_COUNT("bot.sharding.count"),
     SHARD_INDEX("bot.sharding.index", 0),
     RESTART_SERVICE_ENABLED("bot.services.restart", false),
+    HEARTBEAT_INTERVAL("bot.timing.heartbeat.seconds", 120),
 
     DISCORD_APP_ID("bot.discord-app-id"),
 
     LOGGING_WEBHOOKS_USE("bot.logging.webhooks.use", false),
     LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-error", false),
-
 
     INTEGRATIONS_UPDATE_BOT_LIST_SITES("bot.integrations.update-bot-sites", false),
 
