@@ -21,3 +21,5 @@ fun Instant.humanReadableDate(timezone: ZoneId, format: TimeFormat, long: Boolea
 fun Instant.humanReadableTime(timezone: ZoneId, format: TimeFormat): String {
     return DateTimeFormatter.ofPattern(format.time).withZone(timezone).format(this)
 }
+
+fun Instant.isExpiredTtl(): Boolean = Instant.now().isAfter(this)

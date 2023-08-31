@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.cache
 
+import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import reactor.core.publisher.Flux
 import java.time.Duration
 import java.time.Instant
@@ -31,7 +32,7 @@ class JdkCacheRepository<K : Any, V>(override val ttl: Duration) : CacheReposito
         val cached = cache[key] ?: return null
         evict(key)
 
-        return if (Instant.now().isAfter(cached.first)) null else cached.second
+        return if (cached.first.isExpiredTtl()) null else cached.second
 
     }
 
