@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.cam.endpoints.v1
 
 import discord4j.common.util.Snowflake
-import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.cam.google.GoogleAuth
 import org.dreamexposure.discal.core.annotations.Authentication
 import org.dreamexposure.discal.core.business.CalendarService
@@ -25,7 +24,7 @@ class GetEndpoint(
             CalendarHost.GOOGLE -> {
                 if (guild == null) {
                     // Internal (owned by DisCal, should never go bad)
-                    googleAuth.requestNewAccessToken(id).awaitSingle()
+                    googleAuth.requestNewAccessToken(id)
                 } else {
                     // External (owned by user)
                     val calendar = calendarService.getCalendar(guild, id) ?: return null

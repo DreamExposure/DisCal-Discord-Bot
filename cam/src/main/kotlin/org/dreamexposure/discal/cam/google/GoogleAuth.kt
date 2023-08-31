@@ -3,7 +3,6 @@ package org.dreamexposure.discal.cam.google
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_BAD_REQUEST
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import okhttp3.FormBody
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.google.ErrorData
@@ -12,7 +11,6 @@ import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.CredentialService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.AESEncryption
-import org.dreamexposure.discal.core.entities.google.DisCalGoogleCredential
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
@@ -24,28 +22,16 @@ import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.time.Instant
-import kotlin.system.exitProcess
 
 @Component
 class GoogleAuth(
     private val credentialService: CredentialService,
     private val calendarService: CalendarService,
 ) {
-    private final val CREDENTIALS: Flux<DisCalGoogleCredential> // TODO: Refactor as kc
-
-    init {
-        val credCount = Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt()
-
-        CREDENTIALS = Flux.range(0, credCount)
-            .flatMap { mono { credentialService.getCredential(it) } }
-                .map(::DisCalGoogleCredential)
-                .doOnError { exitProcess(1) }
-                .cache()
-    }
+    private final val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
 
     suspend fun requestNewAccessToken(calendar: Calendar): CredentialData? {
         val aes = AESEncryption(calendar.secrets.privateKey)
@@ -66,24 +52,20 @@ class GoogleAuth(
         return refreshedCredential
     }
 
-    fun requestNewAccessToken(credentialId: Int): Mono<CredentialData> { // TODO: Refactor as kc
-        return CREDENTIALS
-            .filter { it.credential.credentialNumber == credentialId }
-                .next()
-                .switchIfEmpty(Mono.error(NotFoundException()))
-                .flatMap { credential ->
-                    if (!credential.expired()) {
-                        return@flatMap credential.getAccessToken()
-                            .map { CredentialData(it, credential.credential.expiresAt) }
-                    }
+    suspend fun requestNewAccessToken(credentialId: Int): CredentialData {
+        val credential = credentialService.getCredential(credentialId) ?: throw NotFoundException()
+        if (!credential.expiresAt.isExpiredTtl()) {
+            val accessToken = aes.decrypt(credential.encryptedAccessToken).awaitSingle()
+            return CredentialData(accessToken, credential.expiresAt)
+        }
 
-                    credential.getRefreshToken()
-                        .flatMap { mono { doAccessTokenRequest(it) } }
-                        .flatMap { credential.setAccessToken(it.accessToken).thenReturn(it) }
-                        .doOnNext { credential.credential.expiresAt = it.validUntil }
-                        .flatMap(mono { credentialService.updateCredential(credential.credential) }::thenReturn)
-                }.switchIfEmpty(Mono.error(EmptyNotAllowedException()))
+        val refreshToken = aes.decrypt(credential.encryptedRefreshToken).awaitSingle()
+        val refreshedCredentialData = doAccessTokenRequest(refreshToken) ?: throw EmptyNotAllowedException()
+        credential.encryptedAccessToken = aes.encrypt(refreshedCredentialData.accessToken).awaitSingle()
+        credential.expiresAt = refreshedCredentialData.validUntil.minusSeconds(60) // Add a minute of wiggle room
+        credentialService.updateCredential(credential)
 
+        return refreshedCredentialData
     }
 
     private suspend fun doAccessTokenRequest(refreshToken: String): CredentialData? {
@@ -124,7 +106,7 @@ class GoogleAuth(
                     throw AccessRevokedException()
                 } else {
                     LOGGER.error(DEFAULT, "[Google] Error requesting new access token | ${response.code} | ${response.message} | $body")
-                    return null
+                    null
                 }
             }
             else -> {
