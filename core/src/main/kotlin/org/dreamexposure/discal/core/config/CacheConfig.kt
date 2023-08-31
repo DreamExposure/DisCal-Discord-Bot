@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.CredentialsCache
 import org.dreamexposure.discal.OauthStateCache
 import org.dreamexposure.discal.core.cache.JdkCacheRepository
@@ -21,10 +22,12 @@ class CacheConfig {
     private val settingsCacheName = "$prefix.settingsCache"
     private val credentialsCacheName = "$prefix.credentialsCache"
     private val oauthStateCacheName = "$prefix.oauthStateCache"
+    private val calendarCacheName = "$prefix.calendarCache"
 
     private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
     private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
     private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
+    private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -34,13 +37,13 @@ class CacheConfig {
         return RedisCacheManager.builder(connection)
             .withCacheConfiguration(settingsCacheName,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(settingsTtl)
-            )
-            .withCacheConfiguration(credentialsCacheName,
+            ).withCacheConfiguration(credentialsCacheName,
                 RedisCacheConfiguration.defaultCacheConfig().entryTtl(credentialsTll)
-            )
-            .withCacheConfiguration(oauthStateCacheName,
-                RedisCacheConfiguration.defaultCacheConfig().entryTtl(oauthStateTtl))
-            .build()
+            ).withCacheConfiguration(oauthStateCacheName,
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(oauthStateTtl)
+            ).withCacheConfiguration(calendarCacheName,
+                RedisCacheConfiguration.defaultCacheConfig().entryTtl(calendarTtl)
+            ).build()
     }
 
     @Bean
@@ -55,6 +58,12 @@ class CacheConfig {
     fun oauthStateRedisCache(cacheManager: RedisCacheManager, objectMapper: ObjectMapper): OauthStateCache =
         RedisCacheRepository(cacheManager, objectMapper, oauthStateCacheName)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun calendarRedisCache(cacheManager: RedisCacheManager, objectMapper: ObjectMapper): CalendarCache =
+        RedisCacheRepository(cacheManager, objectMapper, calendarCacheName)
+
 
     // In-memory fallback caching
     @Bean
@@ -62,4 +71,7 @@ class CacheConfig {
 
     @Bean
     fun oauthStateFallbackCache(): OauthStateCache = JdkCacheRepository(settingsTtl)
+
+    @Bean
+    fun calendarFallbackCache(): CalendarCache = JdkCacheRepository(calendarTtl)
 }

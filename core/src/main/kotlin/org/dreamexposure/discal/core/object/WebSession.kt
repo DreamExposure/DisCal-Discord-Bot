@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.`object`
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.database.SessionData
+import org.dreamexposure.discal.core.extensions.asSnowflake
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -18,7 +19,7 @@ data class WebSession(
 ) {
     constructor(data: SessionData) : this(
         token = data.token,
-        user = Snowflake.of(data.userId),
+        user = data.userId.asSnowflake(),
         expiresAt = data.expiresAt,
         accessToken = data.accessToken,
         refreshToken = data.refreshToken,
