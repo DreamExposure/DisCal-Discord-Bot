@@ -3,7 +3,6 @@ package org.dreamexposure.discal.cam
 import jakarta.annotation.PreDestroy
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.builder.SpringApplicationBuilder
@@ -14,10 +13,7 @@ import kotlin.system.exitProcess
 class Cam {
 
     @PreDestroy
-    fun onShutdown() {
-        LOGGER.info(GlobalVal.STATUS, "CAM shutting down.")
-        DatabaseManager.disconnectFromMySQL()
-    }
+    fun onShutdown() = LOGGER.info(GlobalVal.STATUS, "CAM shutting down.")
 
     companion object {
         @JvmStatic
