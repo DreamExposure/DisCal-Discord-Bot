@@ -2,9 +2,9 @@ package org.dreamexposure.discal.core.spring
 
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.Authentication
+import org.dreamexposure.discal.core.business.ApiKeyService
 import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.TeaPotException
@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentMap
 class SecurityWebFilter(
     private val sessionService: SessionService,
     private val handlerMapping: RequestMappingHandlerMapping,
+    private val apiKeyService: ApiKeyService,
 ) : WebFilter {
     private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
 
@@ -102,8 +103,8 @@ class SecurityWebFilter(
                 }
                 else -> {
                     // Check if this is an API key
-                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc -> //TODO: Replace this
-                        if (!acc.blocked) {
+                    mono { apiKeyService.getKey(authHeader) }.flatMap { key ->
+                        if (!key.blocked) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
                             Mono.error(AuthenticationException("API key blocked"))
