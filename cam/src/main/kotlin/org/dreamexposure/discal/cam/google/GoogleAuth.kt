@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.cam.google
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_BAD_REQUEST
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK
 import kotlinx.coroutines.reactor.awaitSingle
@@ -20,7 +22,6 @@ import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
-import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -30,6 +31,7 @@ import java.time.Instant
 class GoogleAuth(
     private val credentialService: CredentialService,
     private val calendarService: CalendarService,
+    private val objectMapper: ObjectMapper,
 ) {
     private final val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
 
@@ -88,15 +90,13 @@ class GoogleAuth(
 
         return when (response.code) {
             STATUS_CODE_OK -> {
-                val body = JSON_FORMAT.decodeFromString(RefreshData.serializer(), response.body!!.string())
-                response.body?.close()
+                val body = objectMapper.readValue<RefreshData>(response.body!!.string())
                 response.close()
 
                 CredentialData(body.accessToken, Instant.now().plusSeconds(body.expiresIn.toLong()))
             }
             STATUS_CODE_BAD_REQUEST -> {
-                val body = JSON_FORMAT.decodeFromString(ErrorData.serializer(), response.body!!.string())
-                response.body?.close()
+                val body = objectMapper.readValue<ErrorData>(response.body!!.string())
                 response.close()
 
                 LOGGER.error("[Google] Access Token Request: $body")
@@ -112,7 +112,6 @@ class GoogleAuth(
             else -> {
                 // Failed to get OK. Send error info
                 LOGGER.error(DEFAULT, "[Google] Error requesting new access token | ${response.code} ${response.message} | ${response.body?.string()}")
-                response.body?.close()
                 response.close()
 
                 null
