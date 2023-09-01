@@ -2,19 +2,13 @@ package org.dreamexposure.discal
 
 import org.dreamexposure.discal.core.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import java.lang.management.ManagementFactory
 import java.time.Duration
 import java.util.*
 import kotlin.math.roundToInt
 
-@SpringBootApplication(exclude = [
-    SessionAutoConfiguration::class,
-    R2dbcAutoConfiguration::class,
-    DataSourceAutoConfiguration::class,
-])
+@SpringBootApplication(exclude = [SessionAutoConfiguration::class])
 class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()
