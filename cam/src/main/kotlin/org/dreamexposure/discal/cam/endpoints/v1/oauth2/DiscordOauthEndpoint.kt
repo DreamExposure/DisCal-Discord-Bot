@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.cam.endpoints.v1.oauth2
 
-import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.cam.business.OauthStateService
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
 import org.dreamexposure.discal.cam.json.discal.LoginResponse
@@ -57,8 +56,8 @@ class DiscordOauthEndpoint(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid state")
         }
 
-        val dTokens = discordOauthHandler.doTokenExchange(body.code).awaitSingle()
-        val authInfo = discordOauthHandler.getOauthInfo(dTokens.accessToken).awaitSingle()
+        val dTokens = discordOauthHandler.doTokenExchange(body.code)
+        val authInfo = discordOauthHandler.getOauthInfo(dTokens.accessToken)
         val apiToken = KeyGenerator.csRandomAlphaNumericString(64)
         val session = WebSession(
             apiToken,
