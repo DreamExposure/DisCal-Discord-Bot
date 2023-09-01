@@ -100,8 +100,6 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-cache:$springVersion")
 
         // Database
-        implementation("org.flywaydb:flyway-core:$flywayVersion")
-        implementation("org.flywaydb:flyway-mysql:$flywayVersion")
         implementation("dev.miku:r2dbc-mysql:$mikuR2dbcMySqlVersion")
         implementation("mysql:mysql-connector-java:$mySqlConnectorJava")
 

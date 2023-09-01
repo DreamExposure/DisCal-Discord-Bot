@@ -11,8 +11,16 @@ plugins {
     id("com.google.cloud.tools.jib")
 }
 
+// Versions --- found in gradle.properties
+// Database
+val flywayVersion: String by properties
+
 dependencies {
     api(project(":core"))
+
+    // Database
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-mysql:$flywayVersion")
 }
 
 kotlin {
