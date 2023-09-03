@@ -7,6 +7,11 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // Basic spring settings
     APP_NAME("spring.application.name"),
 
+    // Database settings, to be removed once DatabaseManager is retired
+    SQL_URL("spring.r2dbc.url"),
+    SQL_USERNAME("spring.r2dbc.username"),
+    SQL_PASSWORD("spring.r2dbc.password"),
+
     // Redis cache settings
     REDIS_HOST("spring.data.redis.host"),
     REDIS_PORT("spring.data.redis.port"),
@@ -60,24 +65,6 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     INTEGRATIONS_UPDATE_BOT_LIST_SITES("bot.integrations.update-bot-sites", false),
 
-    // Legacy -- All the below should be deprecated and ultimated removed
-    @Deprecated("Use Spring Data")
-    SQL_HOST("SQL_HOST"),
-
-    @Deprecated("Use Spring Data")
-    SQL_PORT("SQL_PORT"),
-
-    @Deprecated("Use Spring Data")
-    SQL_USER("SQL_USER"),
-
-    @Deprecated("Use Spring Data")
-    SQL_PASS("SQL_PASS"),
-
-    @Deprecated("Use Spring Data")
-    SQL_DB("SQL_DB"),
-
-    @Deprecated("Use Spring Data")
-    SQL_PREFIX("SQL_PREFIX"),
 
     ;
 
