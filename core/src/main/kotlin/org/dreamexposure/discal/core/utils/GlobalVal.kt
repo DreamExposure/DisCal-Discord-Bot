@@ -13,20 +13,14 @@ import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 
 object GlobalVal {
-    @JvmStatic
     var iconUrl: String = ""
 
-    @JvmStatic
-    @Deprecated(message = "Using linebreak char should be sufficient")
-    val lineBreak: String = System.getProperty("line.separator")
 
-    @JvmStatic
     val devUserIds = listOf(
             Snowflake.of(130510525770629121L), //NovaFox161
             Snowflake.of(135995653095555073L), //Dannie <3
     )
 
-    @JvmStatic
     val discalColor: Color = Color.of(56, 138, 237)
     val errorColor: Color  = Color.of(248, 38, 48)
     val warnColor: Color = Color.of(232, 150, 0)
@@ -64,7 +58,6 @@ object GlobalVal {
             )
         }
 
-    @JvmStatic
     val DEFAULT: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_DEFAULT")
 
     val STATUS: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_STATUS")

@@ -2,8 +2,6 @@ import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    java
-
     //kotlin
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -36,10 +34,6 @@ allprojects {
     apply(plugin = "java")
     apply(plugin = "kotlin")
     apply(plugin = "io.spring.dependency-management")
-
-    //Compiler nonsense
-    java.sourceCompatibility = JavaVersion.VERSION_17
-    java.targetCompatibility = JavaVersion.VERSION_17
 
     // Versions --- found in gradle.properties
     val kotlinVersion: String by properties
@@ -120,6 +114,11 @@ allprojects {
         implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
         implementation("org.jsoup:jsoup:$jsoupVersion")
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlin {
