@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.core.database.CalendarRepository
 import org.dreamexposure.discal.core.`object`.new.Calendar
@@ -42,7 +43,7 @@ class DefaultCalendarService(
             accessToken = calendar.secrets.encryptedAccessToken,
             refreshToken = calendar.secrets.encryptedRefreshToken,
             expiresAt = calendar.secrets.expiresAt.toEpochMilli(),
-        ).awaitSingle()
+        ).awaitSingleOrNull()
 
         val cached = calendarCache.get(calendar.guildId.asLong())
         if (cached != null) {

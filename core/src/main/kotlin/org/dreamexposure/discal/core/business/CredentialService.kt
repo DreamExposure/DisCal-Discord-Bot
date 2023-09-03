@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.business
 
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.CredentialsCache
 import org.dreamexposure.discal.core.database.CredentialData
 import org.dreamexposure.discal.core.database.CredentialsRepository
@@ -44,7 +45,7 @@ class DefaultCredentialService(
             refreshToken = credential.encryptedRefreshToken,
             accessToken = credential.encryptedAccessToken,
             expiresAt = credential.expiresAt.toEpochMilli(),
-        ).awaitSingle()
+        ).awaitSingleOrNull()
 
         credentialsCache.put(credential.credentialNumber, credential)
     }
