@@ -8,26 +8,17 @@ plugins {
     // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    //id("io.spring.dependency-management")
+    id("io.spring.dependency-management")
 
     // Tooling
     id("com.google.cloud.tools.jib")
 }
-
-// Versions -- found in gradle.properties
-// Thymeleaf
-val thymeleafVersion: String by properties
 
 dependencies {
     api(project(":core"))
 
     // Spring
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-
-    //Thymeleaf
-    implementation("org.thymeleaf:thymeleaf")
-    implementation("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
-    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
 }
 
 kotlin {
