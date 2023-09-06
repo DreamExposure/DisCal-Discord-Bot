@@ -1,16 +1,14 @@
 package org.dreamexposure.discal.client.service
 
 import discord4j.common.util.Snowflake
+import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.channel.GuildMessageChannel
 import discord4j.core.spec.MessageCreateSpec
 import discord4j.rest.http.client.ClientException
 import io.netty.handler.codec.http.HttpResponseStatus
-import org.dreamexposure.discal.client.DisCalClient
 import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
-import org.dreamexposure.discal.core.`object`.announcement.AnnouncementCache
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
@@ -19,6 +17,8 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementType.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import org.dreamexposure.discal.core.`object`.announcement.AnnouncementCache
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -29,7 +29,9 @@ import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
-class AnnouncementService : ApplicationRunner {
+class AnnouncementService(
+    private val discordClient: GatewayDiscordClient
+) : ApplicationRunner {
     private val maxDifferenceMs = Duration.ofMinutes(5).toMillis()
 
     private val cached = ConcurrentHashMap<Snowflake, AnnouncementCache>()
@@ -45,10 +47,7 @@ class AnnouncementService : ApplicationRunner {
 
     // Runner
     private fun doAnnouncementCycle(): Mono<Void> {
-        //TODO: This should come in through DI once other legacy is removed/rewritten
-        if (DisCalClient.client == null) return Mono.empty()
-
-        return DisCalClient.client!!.guilds.flatMap { guild ->
+        return discordClient.guilds.flatMap { guild ->
             DatabaseManager.getEnabledAnnouncements(guild.id).flatMapMany { Flux.fromIterable(it) }.flatMap { announcement ->
                 when (announcement.modifier) {
                     AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
@@ -108,12 +107,14 @@ class AnnouncementService : ApplicationRunner {
                     .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then()
             }
+
             UNIVERSAL -> {
                 return getEvents(guild, announcement)
                     .filterWhen { isInRange(announcement, it) }
                     .flatMap { sendAnnouncement(guild, announcement, it) }
                     .then()
             }
+
             COLOR -> {
                 return getEvents(guild, announcement)
                     .filter { it.color == announcement.eventColor }
@@ -121,6 +122,7 @@ class AnnouncementService : ApplicationRunner {
                     .flatMap { sendAnnouncement(guild, announcement, it) }
                     .then()
             }
+
             RECUR -> {
                 return getEvents(guild, announcement)
                     .filter { it.eventId.contains("_") && it.eventId.split("_")[0] == announcement.eventId }

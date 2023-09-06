@@ -1,15 +1,15 @@
 package org.dreamexposure.discal.client.service
 
+import discord4j.core.GatewayDiscordClient
 import kotlinx.serialization.encodeToString
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.dreamexposure.discal.client.DisCalClient
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
-import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
@@ -23,20 +23,22 @@ import reactor.core.scheduler.Schedulers
 import java.time.Duration
 
 @Component
-class HeartbeatService : ApplicationRunner {
+class HeartbeatService(
+    private val discordClient: GatewayDiscordClient,
+) : ApplicationRunner {
+    private final val apiUrl = Config.URL_API.getString()
 
     private fun heartbeat(): Mono<Void> {
-        //TODO: Use DI for this soon
-        return BotInstanceData.load(DisCalClient.client)
+        return BotInstanceData.load(discordClient)
                 .map { data ->
                     val requestBody = HeartbeatRequest(HeartbeatType.BOT, botInstanceData = data)
 
                     val body = JSON_FORMAT.encodeToString(requestBody).toRequestBody(JSON)
 
                     Request.Builder()
-                            .url("${BotSettings.API_URL.get()}/v2/status/heartbeat")
-                            .post(body)
-                            .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                        .url("$apiUrl/v2/status/heartbeat")
+                        .post(body)
+                        .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
                             .header("Content-Type", "application/json")
                             .build()
                 }.flatMap {

@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.server.network.discal
 
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkData
@@ -71,7 +71,7 @@ class NetworkManager : ApplicationRunner {
         //Gotta actually see if it needs to be restarted
 
 
-        if (!BotSettings.USE_RESTART_SERVICE.get().equals("true", true)) {
+        if (!Config.RESTART_SERVICE_ENABLED.getBoolean()) {
             status.botStatus.removeIf { it.shardIndex == bot.shardIndex }
             LOGGER.warn(STATUS, "Client disconnected from network | Index: ${bot.shardIndex} | Reason: Restart service not active!")
         } else {
@@ -84,7 +84,7 @@ class NetworkManager : ApplicationRunner {
         //Gotta actually see if it needs to be restarted
 
 
-        if (!BotSettings.USE_RESTART_SERVICE.get().equals("true", true)) {
+        if (!Config.RESTART_SERVICE_ENABLED.getBoolean()) {
             status.camStatus.removeIf { it.instanceId == cam.instanceId }
             LOGGER.warn(STATUS, "Cam disconnected from network | Id: ${cam.instanceId} | Reason: Restart service not active!")
         } else {
@@ -100,7 +100,7 @@ class NetworkManager : ApplicationRunner {
                 val bot = Flux.from<BotInstanceData> { status.botStatus }
                     .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartBot)
-                val cam = Flux.from<InstanceData> { status.botStatus }
+                val cam = Flux.from<InstanceData> { status.camStatus }
                     .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartCam)
 

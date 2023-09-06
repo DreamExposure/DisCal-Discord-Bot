@@ -11,29 +11,32 @@ import java.util.*
 
 @Serializable
 data class GuildSettings(
-      @Serializable(with = SnowflakeAsStringSerializer::class)
+    @Serializable(with = SnowflakeAsStringSerializer::class)
         @SerialName("guild_id")
         val guildID: Snowflake,
 
-      @SerialName("control_role")
+    @SerialName("control_role")
         var controlRole: String = "everyone",
 
-      @SerialName("announcement_style")
+    @SerialName("announcement_style")
         var announcementStyle: AnnouncementStyle = AnnouncementStyle.EVENT,
-      @SerialName("time_format")
+    @SerialName("time_format")
         var timeFormat: TimeFormat = TimeFormat.TWENTY_FOUR_HOUR,
 
-      var lang: String = "ENGLISH",
-      var prefix: String = "!",
+    var lang: String = "ENGLISH",
+    var prefix: String = "!",
 
-      @SerialName("patron_guild")
-        var patronGuild: Boolean = false,
-      @SerialName("dev_guild")
-        var devGuild: Boolean = false,
-      @SerialName("max_calendars")
-        var maxCalendars: Int = 1,
+    @SerialName("patron_guild")
+    var patronGuild: Boolean = false,
+    @SerialName("dev_guild")
+    var devGuild: Boolean = false,
+    @SerialName("max_calendars")
+    var maxCalendars: Int = 1,
 
-      var branded: Boolean = false,
+    var branded: Boolean = false,
+
+    @SerialName("event_keep_duration")
+    var eventKeepDuration: Boolean = false,
 ) {
     @SerialName("dm_announcements")
     val dmAnnouncements: MutableList<String> = mutableListOf()

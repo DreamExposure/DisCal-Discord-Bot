@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.server.utils
 
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.web.AuthenticationState
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.web.AuthenticationState
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.web.server.ServerWebExchange
@@ -40,17 +40,18 @@ object Authentication {
             val authKey = swe.request.headers["Authorization"]!![0]
 
             return when {
-                authKey == BotSettings.BOT_API_TOKEN.get() -> { //This is from within discal network
+                authKey == Config.SECRET_DISCAL_API_KEY.getString() -> { //This is from within discal network
                     Mono.just(AuthenticationState(true)
-                            .status(GlobalVal.STATUS_SUCCESS)
-                            .reason("Success")
-                            .keyUsed(authKey)
-                            .fromDisCalNetwork(true)
+                        .status(GlobalVal.STATUS_SUCCESS)
+                        .reason("Success")
+                        .keyUsed(authKey)
+                        .fromDisCalNetwork(true)
                     )
                 }
+
                 tempKeys.containsKey(authKey) -> { //Temp key granted for logged in user
                     Mono.just(AuthenticationState(true)
-                            .status(GlobalVal.STATUS_SUCCESS)
+                        .status(GlobalVal.STATUS_SUCCESS)
                             .reason("Success")
                             .keyUsed(authKey)
                             .fromDisCalNetwork(false)

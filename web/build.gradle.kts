@@ -2,35 +2,32 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    // Kotlin
+    id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.plugin.allopen")
+    //id("io.spring.dependency-management")
+
+    // Tooling
     id("com.google.cloud.tools.jib")
 }
 
+// Versions -- found in gradle.properties
+// Thymeleaf
 val thymeleafVersion: String by properties
-val thymeleafSecurityVersion: String by properties
-val thymeleafLayoutVersion: String by properties
-
-val springVersion: String by properties
-val springSecurityVersion: String by properties
-val springSessionVersion: String by properties
-val springR2Version: String by properties
 
 dependencies {
     api(project(":core"))
 
-    //Thymeleaf
-    implementation("org.thymeleaf:thymeleaf:$thymeleafVersion")
-    implementation("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
-    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:$thymeleafLayoutVersion")
-    implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity5:$thymeleafSecurityVersion")
+    // Spring
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-    //Spring
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf:$springVersion")
-    implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework.security:spring-security-core:$springSecurityVersion")
-    implementation("org.springframework.security:spring-security-web:$springSecurityVersion")
+    //Thymeleaf
+    implementation("org.thymeleaf:thymeleaf")
+    implementation("org.thymeleaf:thymeleaf-spring5:$thymeleafVersion")
+    implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
 }
 
 kotlin {
@@ -50,14 +47,13 @@ sourceSets {
 }
 
 jib {
-    var imageVersion = version.toString()
-    if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
+    to {
+        image = "rg.nl-ams.scw.cloud/dreamexposure/discal-web"
+        tags = mutableSetOf("latest", version.toString())
+    }
 
-    to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-web:$imageVersion"
     val baseImage: String by properties
     from.image = baseImage
-
-    container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 
 // The weird OS checks are because of windows. See this SO answer: https://stackoverflow.com/a/53428540
@@ -74,6 +70,7 @@ tasks {
     }
 
     create<Exec>("cleanWeb") {
+        dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             gulp = "gulp.cmd"
@@ -82,6 +79,7 @@ tasks {
     }
 
     create<Exec>("compileCSS") {
+        dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             gulp = "gulp.cmd"
@@ -91,6 +89,7 @@ tasks {
     }
 
     create<Exec>("compileTypescript") {
+        dependsOn("npm")
         var webpack = "webpack"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             webpack = "webpack.cmd"
@@ -106,7 +105,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        dependsOn("compileCSS", "compileTypescript")
+        dependsOn("npm", "compileCSS", "compileTypescript")
     }
 
     bootJar {

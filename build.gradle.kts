@@ -1,64 +1,73 @@
+import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    java
-
     //kotlin
     kotlin("jvm")
     kotlin("plugin.serialization")
-    kotlin("plugin.spring") apply false
-    id("org.jetbrains.kotlin.plugin.allopen") apply false
+    id("org.jetbrains.kotlin.plugin.allopen")
 
-    //Other
+    // Spring
+    kotlin("plugin.spring")
     id("org.springframework.boot") apply false
+    id("io.spring.dependency-management")
+
+    //Tooling
     id("com.gorylenko.gradle-git-properties") apply false
     id("com.google.cloud.tools.jib") apply false
 }
 
 buildscript {
+    val kotlinPoetVersion: String by properties
     dependencies {
-        classpath("com.squareup:kotlinpoet:1.7.2")
+        classpath("com.squareup:kotlinpoet:$kotlinPoetVersion")
     }
 }
 
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.2.2"
+    version = "4.2.3"
     description = "DisCal"
 
     //Plugins
     apply(plugin = "java")
     apply(plugin = "kotlin")
+    apply(plugin = "io.spring.dependency-management")
 
-    //Compiler nonsense
-    java.sourceCompatibility = JavaVersion.VERSION_16
-    java.targetCompatibility = JavaVersion.VERSION_16
-
-    //Versions
+    // Versions --- found in gradle.properties
     val kotlinVersion: String by properties
-    val kotlinxSerializationVersion: String by properties
-
-    val springVersion: String by properties
-
-    val googleCoreVersion: String by properties
-    val googleCalendarVersion: String by properties
-
-    val r2MysqlVersion: String by properties
-    val r2PoolVersion: String by properties
-
-    val nettyVersion: String by properties
-    val reactorBomVersion: String by properties
-
-    val slfVersion: String by properties
-    val jsonVersion: String by properties
-    val okHttpVersion: String by properties
+    // Tool
+    val kotlinxCoroutinesReactorVersion: String by properties
+    val reactorKotlinExtensions: String by properties
+    // Discord
+    val discord4jVersion: String by properties
+    val discord4jStoresVersion: String by properties
     val discordWebhookVersion: String by properties
+    // Spring
+    val springVersion: String by properties
+    // Database
+    val flywayVersion: String by properties
+    val mikuR2dbcMySqlVersion: String by properties
+    val mySqlConnectorJava: String by properties
+    // Serialization
+    val kotlinxSerializationJsonVersion: String by properties
+    val jacksonVersion: String by properties
+    val jsonVersion: String by properties
+    // Google libs
+    val googleApiClientVersion: String by properties
+    val googleServicesCalendarVersion: String by properties
+    val googleOauthClientVersion: String by properties
+    // Various libs
+    val okhttpVersion: String by properties
     val copyDownVersion: String by properties
+    val jsoupVersion: String by properties
 
     repositories {
         mavenCentral()
+        mavenLocal()
 
+        maven("https://repo.maven.apache.org/maven2/")
         maven("https://kotlin.bintray.com/kotlinx")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://repo.spring.io/milestone")
@@ -66,48 +75,50 @@ allprojects {
     }
 
     dependencies {
-        //Boms
-        implementation(platform("io.projectreactor:reactor-bom:$reactorBomVersion"))
-
-        //Kotlin Deps
+        // Tools
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
         implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxCoroutinesReactorVersion")
+        implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:$reactorKotlinExtensions")
 
-        //Forced stuff
-        //slf4j-api - Need to force this for logback to work. I dunno
-        implementation("org.slf4j:slf4j-api:$slfVersion")
-        //Netty - forced due to stores-redis:lettuce-core giving 4.1.38
-        implementation("io.netty:netty-all:$nettyVersion")
-        //Forcing reactor version
-        implementation("io.projectreactor:reactor-core")
-
-        //Google apis
-        implementation("com.google.api-client:google-api-client:$googleCoreVersion")
-        implementation("com.google.apis:google-api-services-calendar:$googleCalendarVersion")
-        implementation("com.google.oauth-client:google-oauth-client-jetty:$googleCoreVersion") {
-            exclude(group = "org.mortbay.jetty", module = "servlet-api")
-        }
-        //r2dbc
-        implementation("dev.miku:r2dbc-mysql:$r2MysqlVersion") {
-            exclude("io.netty", "*")
-            exclude("io.projectreactor", "*")
-            exclude("io.projectreactor.netty", "*")
-        }
-        implementation("io.r2dbc:r2dbc-pool:$r2PoolVersion")
-
-
-        implementation("org.json:json:$jsonVersion")
-
-        implementation("com.squareup.okhttp3:okhttp:$okHttpVersion")
-
+        // Discord
+        implementation("com.discord4j:discord4j-core:$discord4jVersion")
+        implementation("com.discord4j:stores-redis:$discord4jStoresVersion")
         implementation("club.minnced:discord-webhooks:$discordWebhookVersion")
 
-        implementation("io.github.furstenheim:copy_down:$copyDownVersion")
-
-        //Spring
-        implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
+        // Spring
+        implementation("org.springframework.boot:spring-boot-starter-data-jdbc:$springVersion")
         implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:$springVersion")
+        implementation("org.springframework.boot:spring-boot-starter-data-redis:$springVersion")
+        implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
+        implementation("org.springframework.boot:spring-boot-starter-cache:$springVersion")
+
+        // Database
+        implementation("dev.miku:r2dbc-mysql:$mikuR2dbcMySqlVersion")
+        implementation("mysql:mysql-connector-java:$mySqlConnectorJava")
+
+        // Serialization
+        implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        implementation("org.json:json:$jsonVersion")
+
+        // Google libs
+        implementation("com.google.api-client:google-api-client:$googleApiClientVersion")
+        implementation("com.google.apis:google-api-services-calendar:$googleServicesCalendarVersion")
+        implementation("com.google.oauth-client:google-oauth-client-jetty:$googleOauthClientVersion") {
+            exclude(group = "org.mortbay.jetty", module = "servlet-api")
+        }
+
+        // Various Libs
+        implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+        implementation("io.github.furstenheim:copy_down:$copyDownVersion")
+        implementation("org.jsoup:jsoup:$jsoupVersion")
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlin {
@@ -127,9 +138,16 @@ subprojects {
         withType<KotlinCompile> {
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = targetCompatibility
+                jvmTarget = java.targetCompatibility.majorVersion
             }
         }
+    }
+}
+
+tasks {
+    wrapper {
+        distributionType = ALL
+        gradleVersion = "8.2.1"
     }
 }
 

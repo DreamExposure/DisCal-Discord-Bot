@@ -1,19 +1,18 @@
 plugins {
+    // Kotlin
+    id("org.jetbrains.kotlin.plugin.allopen")
+
+    // Spring
     kotlin("plugin.spring")
     id("org.springframework.boot")
-    id("org.jetbrains.kotlin.plugin.allopen")
+    id("io.spring.dependency-management")
+
+    // Tooling
     id("com.google.cloud.tools.jib")
 }
 
-val springVersion: String by properties
-val springSessionVersion: String by properties
-val springR2Version: String by properties
-
 dependencies {
     api(project(":core"))
-
-    implementation("org.springframework.session:spring-session-data-redis:$springSessionVersion")
-    implementation("org.springframework:spring-r2dbc:$springR2Version")
 }
 
 kotlin {
@@ -25,14 +24,13 @@ kotlin {
 }
 
 jib {
-    var imageVersion = version.toString()
-    if (imageVersion.contains("SNAPSHOT")) imageVersion = "latest"
+    to {
+        image = "rg.nl-ams.scw.cloud/dreamexposure/discal-client"
+        tags = mutableSetOf("latest", version.toString())
+    }
 
-    to.image = "rg.nl-ams.scw.cloud/dreamexposure/discal-client:$imageVersion"
     val baseImage: String by properties
     from.image = baseImage
-
-    container.creationTime = "USE_CURRENT_TIMESTAMP"
 }
 
 tasks {

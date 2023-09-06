@@ -9,7 +9,7 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.Instant
 
 object InstantAsStringSerializer : KSerializer<Instant> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Duration", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("InstantAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Instant) = encoder.encodeString(value.toString())
 

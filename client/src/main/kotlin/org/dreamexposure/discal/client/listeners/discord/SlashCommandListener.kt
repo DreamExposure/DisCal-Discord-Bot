@@ -1,38 +1,47 @@
 package org.dreamexposure.discal.client.listeners.discord
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.utils.getCommonMsg
-import org.springframework.context.ApplicationContext
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.springframework.stereotype.Component
 
-class SlashCommandListener(applicationContext: ApplicationContext) {
-    private val cmds = applicationContext.getBeansOfType(SlashCommand::class.java).values
+@Component
+class SlashCommandListener(
+    private val commands: List<SlashCommand>
+) : EventListener<ChatInputInteractionEvent> {
 
-    fun handle(event: ChatInputInteractionEvent): Mono<Void> {
+    override suspend fun handle(event: ChatInputInteractionEvent) {
         if (!event.interaction.guildId.isPresent) {
-            return event.reply("Commands not supported in DMs.")
+            event.reply("Commands not supported in DMs.").awaitSingleOrNull()
+            return
         }
 
-        return Flux.fromIterable(cmds)
-            .filter { it.name == event.commandName }
-            .next()
-            .flatMap { command ->
-                val mono =
-                    if (command.ephemeral) event.deferReply().withEphemeral(true)
-                    else event.deferReply()
+        val command = commands.firstOrNull { it.name == event.commandName }
 
-                mono.then(DatabaseManager.getSettings(event.interaction.guildId.get())).flatMap {
-                    command.handle(event, it).switchIfEmpty(event.followupEphemeral(getCommonMsg("error.unknown", it)))
-                }
-            }.doOnError {
-                LOGGER.error("Unhandled slash command error", it)
-            }.onErrorResume {
-                event.followupEphemeral("An unknown error has occurred. Please try again and/or contact DisCal support.")
-            }.then()
+        if (command != null) {
+            event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
+
+            try {
+                val settings = DatabaseManager.getSettings(event.interaction.guildId.get()).awaitSingle()
+
+                command.suspendHandle(event, settings)
+            } catch (e: Exception) {
+                LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
+
+                // Attempt to provide a message if there's an unhandled exception
+                event.createFollowup("An unknown error has occurred")
+                    .withEphemeral(command.ephemeral)
+                    .awaitSingleOrNull()
+            }
+        } else {
+            event.createFollowup("An unknown error has occurred. Please try again and/or contact DisCal support.")
+                .withEphemeral(true)
+                .awaitSingleOrNull()
+        }
+
     }
 }

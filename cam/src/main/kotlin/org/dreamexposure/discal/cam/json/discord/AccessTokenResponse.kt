@@ -1,20 +1,18 @@
 package org.dreamexposure.discal.cam.json.discord
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
 data class AccessTokenResponse(
-    @SerialName("access_token")
+    @JsonProperty("access_token")
     val accessToken: String,
 
-    @SerialName("token_type")
+    @JsonProperty("token_type")
     val type: String,
 
-    @SerialName("expires_in")
+    @JsonProperty("expires_in")
     val expiresIn: Long,
 
-    @SerialName("refresh_token")
+    @JsonProperty("refresh_token")
     val refreshToken: String,
 
     val scope: String,

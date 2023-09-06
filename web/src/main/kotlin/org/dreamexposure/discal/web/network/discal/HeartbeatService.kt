@@ -4,11 +4,11 @@ import kotlinx.serialization.encodeToString
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
-import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -20,6 +20,7 @@ import java.time.Duration
 
 @Component
 class HeartbeatService : ApplicationRunner {
+    private final val apiUrl = Config.URL_API.getString()
 
     private fun heartbeat(): Mono<Void> {
         return Mono.just(InstanceData())
@@ -29,9 +30,9 @@ class HeartbeatService : ApplicationRunner {
                 val body = GlobalVal.JSON_FORMAT.encodeToString(requestBody).toRequestBody(GlobalVal.JSON)
 
                 Request.Builder()
-                    .url("${BotSettings.API_URL.get()}/v2/status/heartbeat")
+                    .url("$apiUrl/v2/status/heartbeat")
                     .post(body)
-                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                    .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
                     .header("Content-Type", "application/json")
                     .build()
             }.flatMap {

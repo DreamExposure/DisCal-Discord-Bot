@@ -1,13 +1,11 @@
 package org.dreamexposure.discal.cam.json.google
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import com.fasterxml.jackson.annotation.JsonProperty
 
-@Serializable
 data class RefreshData(
-        @SerialName("access_token")
+        @JsonProperty("access_token")
         val accessToken: String,
 
-        @SerialName("expires_in")
+        @JsonProperty("expires_in")
         val expiresIn: Int
 )

@@ -4,11 +4,11 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.GoodTimezone
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.BotSettings
 import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
@@ -21,21 +21,30 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import reactor.function.TupleUtils
+import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.util.*
 
 @Controller
-class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
+class DiscordLoginHandler(
+    private val accountHandler: DiscordAccountHandler,
+) {
+    private final val apiUrl = Config.URL_API.getString()
+    private final val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
+    private final val clientId = Config.DISCORD_APP_ID.getString()
+    private final val clientSecret = Config.SECRET_CLIENT_SECRET.getString()
+
     @GetMapping("/account/login")
     fun handleDiscordCode(swe: ServerWebExchange, @RequestParam("code") code: String): Mono<String> {
         val client = OkHttpClient()
 
         return Mono.fromCallable {
             val body = FormBody.Builder()
-                    .addEncoded("client_id", BotSettings.ID.get())
-                    .addEncoded("client_secret", BotSettings.SECRET.get())
-                    .addEncoded("grant_type", "authorization_code")
+                .addEncoded("client_id", clientId)
+                .addEncoded("client_secret", clientSecret)
+                .addEncoded("grant_type", "authorization_code")
                     .addEncoded("code", code)
-                    .addEncoded("redirect_uri", BotSettings.REDIR_URI.get())
+                    .addEncoded("redirect_uri", URLEncoder.encode(redirectUrl, Charset.defaultCharset()))
                     .build()
 
             val tokenRequest = Request.Builder()
@@ -122,8 +131,8 @@ class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
                             //Do temp API key request...
                             val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
                             val keyGrantRequest = Request.Builder()
-                                    .url("${BotSettings.API_URL.get()}/v2/account/login")
-                                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                                .url("$apiUrl/v2/account/login")
+                                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
                                     .post(keyGrantRequestBody)
                                     .build()
                             val keyGrantResponseMono = Mono
@@ -177,7 +186,7 @@ class DiscordLoginHandler(private val accountHandler: DiscordAccountHandler) {
                 val client = OkHttpClient()
 
                 val logoutRequest = Request.Builder()
-                        .url("${BotSettings.API_URL.get()}/v2/account/logout")
+                        .url("$apiUrl/v2/account/logout")
                         .header("Authorization", model["key"] as String)
                         .get()
                         .build()

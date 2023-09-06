@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.serializers
 
-import discord4j.common.util.Snowflake
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -10,7 +9,7 @@ import kotlinx.serialization.encoding.Encoder
 import java.time.Duration
 
 object DurationAsStringSerializer : KSerializer<Duration> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Duration", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("DurationAsString", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Duration) = encoder.encodeString(value.toMillis().toString())
 

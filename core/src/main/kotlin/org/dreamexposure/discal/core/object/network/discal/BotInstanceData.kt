@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.`object`.network.discal
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import discord4j.core.GatewayDiscordClient
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -10,12 +11,15 @@ import reactor.core.publisher.Mono
 @Serializable
 data class BotInstanceData private constructor(
         @SerialName("instance")
+        @JsonProperty("instance")
         val instanceData: InstanceData,
 
         @SerialName("shard_index")
+        @JsonProperty("shard_index")
         val shardIndex: Int,
 
         @SerialName("shard_count")
+        @JsonProperty("shard_count")
         val shardCount: Int,
 
         val guilds: Int = 0,
@@ -29,7 +33,7 @@ data class BotInstanceData private constructor(
                     .map { guildCount ->
                         BotInstanceData(
                                 instanceData = InstanceData(),
-                                shardIndex = Application.getShardIndex().toInt(),
+                                shardIndex = Application.getShardIndex(),
                                 shardCount = Application.getShardCount(),
                                 guilds = guildCount
                         )

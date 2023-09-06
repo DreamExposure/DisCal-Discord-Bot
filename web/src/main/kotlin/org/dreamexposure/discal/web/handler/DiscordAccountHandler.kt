@@ -3,7 +3,8 @@ package org.dreamexposure.discal.web.handler
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.extensions.asMinutes
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.json.JSONObject
@@ -14,6 +15,8 @@ import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.net.URLEncoder
+import java.nio.charset.Charset
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
@@ -21,7 +24,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Component
-class DiscordAccountHandler: ApplicationRunner {
+class DiscordAccountHandler : ApplicationRunner {
+    private final val apiUrl = Config.URL_API.getString()
+    private final val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
+    private final val clientId = Config.DISCORD_APP_ID.getString()
+
     private val discordAccounts: ConcurrentMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
 
     fun hasAccount(swe: ServerWebExchange): Mono<Boolean> {
@@ -108,14 +115,14 @@ class DiscordAccountHandler: ApplicationRunner {
     }
 
     private fun removeTimedOutAccounts() {
-        val limit = BotSettings.TIME_OUT.get().toLong()
+        val limit = Config.CACHE_TTL_ACCOUNTS_MINUTES.getLong().asMinutes()
         val toRemove = mutableListOf<String>()
 
         for (id in discordAccounts.keys) {
             val model = discordAccounts[id]!!
             val lastUse = model["last_use"] as Long
 
-            if (System.currentTimeMillis() - lastUse > limit)
+            if (System.currentTimeMillis() - lastUse > limit.toMillis())
                 toRemove.add(id) //Timed out, remove account info and require sign in
         }
 
@@ -127,12 +134,12 @@ class DiscordAccountHandler: ApplicationRunner {
     internal fun createDefaultModel(): MutableMap<String, Any> {
         val model: MutableMap<String, Any> = mutableMapOf()
         model["logged_in"] = false
-        model["bot_id"] = BotSettings.ID.get()
+        model["bot_id"] = clientId
         model["year"] = LocalDate.now().year
-        model["redirect_uri"] = BotSettings.REDIR_URI.get()
-        model["bot_invite"] = BotSettings.INVITE_URL.get()
-        model["support_invite"] = BotSettings.SUPPORT_INVITE.get()
-        model["api_url"] = BotSettings.API_URL.get()
+        model["redirect_uri"] = URLEncoder.encode(redirectUrl, Charset.defaultCharset())
+        model["bot_invite"] = Config.URL_INVITE.getString()
+        model["support_invite"] = Config.URL_SUPPORT.getString()
+        model["api_url"] = apiUrl
 
         return model
     }
@@ -142,8 +149,8 @@ class DiscordAccountHandler: ApplicationRunner {
             val client = OkHttpClient()
             val keyGrantRequestBody = "".toRequestBody(GlobalVal.JSON)
             val keyGrantRequest = Request.Builder()
-                    .url("${BotSettings.API_URL.get()}/v2/account/key/readonly/get")
-                    .header("Authorization", BotSettings.BOT_API_TOKEN.get())
+                .url("$apiUrl/v2/account/key/readonly/get")
+                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
                     .post(keyGrantRequestBody)
                     .build()
 

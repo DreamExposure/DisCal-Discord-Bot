@@ -2,12 +2,12 @@ package org.dreamexposure.discal.core.spring
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.beans.TypeMismatchException
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
@@ -27,7 +27,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
         //Handle exceptions we have codes for
         val restError: RestError = when (throwable) {
             is ResponseStatusException -> {
-                when (throwable.status) {
+                when (throwable.statusCode) {
                     HttpStatus.NOT_FOUND -> {
                         exchange.response.statusCode = HttpStatus.NOT_FOUND
                         LOGGER.trace("404 exchange | Path: ${exchange.request.path}")

@@ -16,6 +16,8 @@
     <logger name="discord4j.gateway" level="INFO"/>
     <logger name="discord4j.gateway.client" level="INFO"/>
     <logger name="dev.miku.r2dbc.mysql" level="INFO"/>
+    <logger name="io.r2dbc.pool" level="WARN"/>
+    <logger name="io.lettuce" level="INFO"/>
 
     <!-- Filters -->
     <turboFilter class="org.dreamexposure.discal.core.filter.GatewayEventFilter">

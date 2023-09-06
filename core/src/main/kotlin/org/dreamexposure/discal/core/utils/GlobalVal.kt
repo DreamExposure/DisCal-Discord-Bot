@@ -8,26 +8,23 @@ import io.github.furstenheim.OptionsBuilder
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
 
 object GlobalVal {
-    @JvmStatic
     var iconUrl: String = ""
 
-    @JvmStatic
-    @Deprecated(message = "Using linebreak char should be sufficient")
-    val lineBreak: String = System.getProperty("line.separator")
 
-    @JvmStatic
     val devUserIds = listOf(
             Snowflake.of(130510525770629121L), //NovaFox161
             Snowflake.of(135995653095555073L), //Dannie <3
     )
 
-    @JvmStatic
     val discalColor: Color = Color.of(56, 138, 237)
+    val errorColor: Color  = Color.of(248, 38, 48)
+    val warnColor: Color = Color.of(232, 150, 0)
+
 
     const val discordApiUrl = "https://discord.com/api/v9"
 
@@ -42,9 +39,9 @@ object GlobalVal {
         ignoreUnknownKeys = true
     }
 
-    val HTML_WHITELIST: Whitelist
+    val HTML_WHITELIST: Safelist
         get() {
-            return Whitelist.basic()
+            return Safelist.basic()
                     .preserveRelativeLinks(false)
                     .removeAttributes("sub", "sup", "small")
         }
@@ -61,7 +58,6 @@ object GlobalVal {
             )
         }
 
-    @JvmStatic
     val DEFAULT: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_DEFAULT")
 
     val STATUS: Marker = MarkerFactory.getMarker("DISCAL_WEBHOOK_STATUS")

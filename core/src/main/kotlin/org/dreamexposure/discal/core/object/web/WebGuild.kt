@@ -14,12 +14,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
 import org.dreamexposure.discal.Application.Companion.getShardCount
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.extensions.discord4j.getMainCalendar
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.justOrEmpty
 import reactor.function.TupleUtils
@@ -62,8 +61,7 @@ data class WebGuild(
                 val name = data.name()
                 val ico = data.icon().orElse("")
 
-                val botNick = g.member(Snowflake.of(BotSettings.ID.get()))
-                      .data
+                val botNick = g.selfMember
                       .map(MemberData::nick)
                       .map { Possible.flatOpt(it) }
                       .flatMap { justOrEmpty(it) }
@@ -105,7 +103,7 @@ data class WebGuild(
             val name = g.name
             val icon = g.getIconUrl(Image.Format.PNG).orElse(null)
 
-            val botNick = g.getMemberById(Snowflake.of(BotSettings.ID.get()))
+            val botNick = g.selfMember
                   .map(Member::getNickname)
                   .flatMap { justOrEmpty(it) }
                   .defaultIfEmpty("DisCal")

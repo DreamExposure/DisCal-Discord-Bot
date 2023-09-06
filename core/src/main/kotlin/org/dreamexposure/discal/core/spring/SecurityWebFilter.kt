@@ -1,8 +1,10 @@
 package org.dreamexposure.discal.core.spring
 
-import org.dreamexposure.discal.core.`object`.BotSettings
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.Authentication
-import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.business.ApiKeyService
+import org.dreamexposure.discal.core.business.SessionService
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.TeaPotException
@@ -22,7 +24,11 @@ import java.util.concurrent.ConcurrentMap
 
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
-class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebFilter {
+class SecurityWebFilter(
+    private val sessionService: SessionService,
+    private val handlerMapping: RequestMappingHandlerMapping,
+    private val apiKeyService: ApiKeyService,
+) : WebFilter {
     private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
 
     init {
@@ -78,14 +84,16 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 authHeader.equals("teapot", true) -> {
                     Mono.error(TeaPotException())
                 }
-                authHeader.equals(BotSettings.BOT_API_TOKEN.get()) -> { // This is from within discal network
+
+                authHeader.equals(Config.SECRET_DISCAL_API_KEY.getString()) -> { // This is from within discal network
                     Mono.just(Authentication.AccessLevel.ADMIN)
                 }
+
                 readOnlyKeys.containsKey(authHeader) -> { // Read-only key granted for embed pages
                     Mono.just(Authentication.AccessLevel.READ)
                 }
                 authHeader.startsWith("Bearer ") -> {
-                    DatabaseManager.getSessionData(authHeader.substringAfter("Bearer ")).flatMap { session ->
+                    mono { sessionService.getSession(authHeader.substringAfter("Bearer ")) }.flatMap { session ->
                         if (session.expiresAt.isAfter(Instant.now())) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
@@ -95,8 +103,8 @@ class SecurityWebFilter(val handlerMapping: RequestMappingHandlerMapping) : WebF
                 }
                 else -> {
                     // Check if this is an API key
-                    DatabaseManager.getAPIAccount(authHeader).flatMap { acc ->
-                        if (!acc.blocked) {
+                    mono { apiKeyService.getKey(authHeader) }.flatMap { key ->
+                        if (!key.blocked) {
                             Mono.just(Authentication.AccessLevel.WRITE)
                         } else {
                             Mono.error(AuthenticationException("API key blocked"))

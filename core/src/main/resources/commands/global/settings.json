@@ -1,0 +1,126 @@
+{
+  "name": "settings",
+  "description": "A set of commands for changing various bot settings",
+  "options": [
+    {
+      "name": "view",
+      "type": 1,
+      "description": "Displays the current settings for the bot in this guild",
+      "required": false
+    },
+    {
+      "name": "role",
+      "type": 1,
+      "description": "Sets the role required to use privileged commands",
+      "required": false,
+      "options": [
+        {
+          "name": "role",
+          "type": 8,
+          "description": "The role required to use privileged commands",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "announcement-style",
+      "type": 1,
+      "description": "Changes what style announcements will be posted as",
+      "required": false,
+      "options": [
+        {
+          "name": "style",
+          "type": 4,
+          "description": "The announcement style to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "Full",
+              "value": 1
+            },
+            {
+              "name": "Simple",
+              "value": 2
+            },
+            {
+              "name": "Event Only",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "type": 1,
+      "description": "Changes what language the bot will use in responses.",
+      "required": false,
+      "options": [
+        {
+          "name": "lang",
+          "type": 3,
+          "description": "The language to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "English",
+              "value": "en"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "time-format",
+      "type": 1,
+      "description": "Changes how date/time is formatted when required",
+      "required": false,
+      "options": [
+        {
+          "name": "format",
+          "type": 4,
+          "description": "The format to use",
+          "required": true,
+          "choices": [
+            {
+              "name": "24 Hour",
+              "value": 1
+            },
+            {
+              "name": "12 Hour",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "keep-event-duration",
+      "type": 1,
+      "description": "Toggles whether to keep an event's duration when changing the start or end time (default false)",
+      "options": [
+        {
+          "name": "value",
+          "type": 5,
+          "description": "Whether to keep an event's duration",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "branding",
+      "type": 1,
+      "description": "Toggles between using discal branding or your guild's name/image where possible",
+      "required": false,
+      "options": [
+        {
+          "name": "use",
+          "type": 5,
+          "description": "Whether to use server branding",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "default_permissions": true
+}

@@ -1,20 +1,19 @@
 package org.dreamexposure.discal
 
-import org.dreamexposure.discal.core.`object`.BotSettings
+import org.dreamexposure.discal.core.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.r2dbc.R2dbcAutoConfiguration
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
 import java.lang.management.ManagementFactory
 import java.time.Duration
 import java.util.*
 import kotlin.math.roundToInt
 
-@SpringBootApplication(exclude = [SessionAutoConfiguration::class, R2dbcAutoConfiguration::class])
+@SpringBootApplication(exclude = [SessionAutoConfiguration::class])
 class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()
 
-        fun getShardIndex(): String {
+        fun getShardIndex(): Int {
             /*
             This fucking sucks. So k8s doesn't expose the pod ordinal for a pod in a stateful set
             https://github.com/kubernetes/kubernetes/pull/68719
@@ -31,17 +30,17 @@ class Application {
             return if (shardPodName != null) {
                 //In k8s, parse this shit
                 val parts = shardPodName.split("-")
-                parts[parts.size -1]
+                parts[parts.size -1].toInt()
             } else {
                 //Fall back to config value
-                BotSettings.SHARD_INDEX.get()
+                Config.SHARD_INDEX.getInt()
             }
         }
 
         fun getShardCount(): Int {
             val shardCount = System.getenv("SHARD_COUNT")
             return shardCount?.toInt() ?: //Fall back to config
-            BotSettings.SHARD_COUNT.get().toInt()
+            Config.SHARD_COUNT.getInt()
         }
 
         fun getUptime(): Duration {

@@ -12,8 +12,7 @@ import discord4j.discordjson.json.MessageData
 import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.dreamexposure.discal.core.`object`.BotSettings
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
@@ -22,6 +21,7 @@ import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.extensions.embedFieldSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getEmbedMessage
@@ -238,7 +238,7 @@ data class RsvpData(
 
         val builder = EmbedCreateSpec.builder()
             // Even without branding enabled, we want the user to know what guild this is because it's in DMs
-            .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
+            .author(guild.name(), Config.URL_BASE.getString(), iconUrl)
             .title(getEmbedMessage("rsvp", "waitlist.title", settings))
             .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name))
             .addField(
@@ -270,7 +270,7 @@ data class RsvpData(
 
         val builder = EmbedCreateSpec.builder()
             // Even without branding enabled, we want the user to know what guild this is because it's in DMs
-            .author(guild.name(), BotSettings.BASE_URL.get(), iconUrl)
+            .author(guild.name(), Config.URL_BASE.getString(), iconUrl)
             .title(getEmbedMessage("rsvp", "waitlist.title", settings))
             .description(getEmbedMessage("rsvp", "waitlist.desc", settings, userId, event.name))
             .addField(
