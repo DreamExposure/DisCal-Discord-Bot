@@ -16,12 +16,12 @@ class JdkCacheRepository<K : Any, V>(override val ttl: Duration) : CacheReposito
     }
 
     override suspend fun put(key: K, value: V) {
-        cache[key] = Pair(Instant.now(), value)
+        cache[key] = Pair(Instant.now().plus(ttl), value)
     }
 
     override suspend fun get(key: K): V? {
         val cached = cache[key] ?: return null
-        if (Instant.now().isAfter(cached.first)) {
+        if (cached.first.isExpiredTtl()) {
             evict(key)
             return null
         }
@@ -41,6 +41,6 @@ class JdkCacheRepository<K : Any, V>(override val ttl: Duration) : CacheReposito
     }
 
     private fun evictOld() {
-        cache.forEach { (key, pair) -> if (Duration.between(pair.first, Instant.now()) >= ttl) cache.remove(key) }
+        cache.forEach { (key, pair) -> if (pair.first.isExpiredTtl()) cache.remove(key) }
     }
 }
