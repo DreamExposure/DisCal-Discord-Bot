@@ -145,5 +145,9 @@ tasks {
         distributionType = ALL
         gradleVersion = "8.2.1"
     }
+
+    bootJar {
+        enabled = false
+    }
 }
 

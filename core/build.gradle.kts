@@ -85,4 +85,8 @@ tasks {
     withType<KotlinCompile> {
         dependsOn(generateGitProperties)
     }
+
+    bootJar {
+        enabled = false
+    }
 }
