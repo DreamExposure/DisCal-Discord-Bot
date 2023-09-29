@@ -54,6 +54,8 @@ allprojects {
     val kotlinxSerializationJsonVersion: String by properties
     val jacksonVersion: String by properties
     val jsonVersion: String by properties
+    // Observability
+    val logbackContribVersion: String by properties
     // Google libs
     val googleApiClientVersion: String by properties
     val googleServicesCalendarVersion: String by properties
@@ -102,6 +104,10 @@ allprojects {
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
         implementation("org.json:json:$jsonVersion")
+
+        // Observability
+        implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
+        implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
 
         // Google libs
         implementation("com.google.api-client:google-api-client:$googleApiClientVersion")

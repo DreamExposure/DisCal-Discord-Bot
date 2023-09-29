@@ -3,7 +3,6 @@
     <!-- Properties -->
     <property name="LOG_DIR" value="logs"/>
     <property name="ERROR_LOG_FILE" value="exceptions"/>
-    <property name="DEBUG_LOG_FILE" value="debug"/>
 
     <!-- Logs we care about -->
     <logger name="org.dreamexposure.discal" level="DEBUG"/>
@@ -25,9 +24,23 @@
     </turboFilter>
 
     <!-- Appenders -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="CONSOLE_HUMAN_READABLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <!-- I am considering looking into getting additional info passed into these logs (like traces and shit) but I think I need to learn tempo first-->
+            <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
+                <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
+
+                <jsonFormatter class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
+                    <prettyPrint>false</prettyPrint>
+                </jsonFormatter>
+                <appendLineSeparator>true</appendLineSeparator>
+            </layout>
         </encoder>
     </appender>
 
@@ -53,10 +66,22 @@
     </appender>
 
     <!-- Assigning default appenders -->
+    <springProfile name="local">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE_HUMAN_READABLE"/>
+            <appender-ref ref="FILE_ERROR_LOG"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="!local">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE_JSON"/>
+            <appender-ref ref="DISCAL_WEBHOOK"/>
+        </root>
+    </springProfile>
+
     <root level="DEBUG">
-        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="DISCAL_WEBHOOK"/>
-        <appender-ref ref="FILE_ERROR_LOG"/>
     </root>
 </configuration>
 
