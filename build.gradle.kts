@@ -84,6 +84,7 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-data-redis")
         implementation("org.springframework.boot:spring-boot-starter-webflux")
         implementation("org.springframework.boot:spring-boot-starter-cache")
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
         implementation("dev.miku:r2dbc-mysql:$mikuR2dbcMySqlVersion")
@@ -98,6 +99,7 @@ allprojects {
         // Observability
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
         implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
+        implementation("io.micrometer:micrometer-registry-prometheus")
 
         // Google libs
         implementation("com.google.api-client:google-api-client:$googleApiClientVersion")

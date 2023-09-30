@@ -7,6 +7,8 @@
     <!-- Logs we care about -->
     <logger name="org.dreamexposure.discal" level="DEBUG"/>
     <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.springframework.http.codec" level="WARN"/>
+    <logger name="org.springframework.core.codec" level="WARN"/>
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="proxy" level="INFO"/>
