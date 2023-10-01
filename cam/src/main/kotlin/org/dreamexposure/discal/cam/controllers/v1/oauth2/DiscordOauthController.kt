@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.cam.endpoints.v1.oauth2
+package org.dreamexposure.discal.cam.controllers.v1.oauth2
 
 import org.dreamexposure.discal.cam.json.discal.LoginResponse
 import org.dreamexposure.discal.cam.json.discal.TokenRequest
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/oauth2/discord/")
-class DiscordOauthEndpoint(
+class DiscordOauthController(
     private val discordOauthManager: DiscordOauthManager,
 ) {
 

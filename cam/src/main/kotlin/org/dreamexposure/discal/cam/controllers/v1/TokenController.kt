@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.cam.endpoints.v1
+package org.dreamexposure.discal.cam.controllers.v1
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.cam.managers.CalendarAuthManager
@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v1/")
-class GetEndpoint(
+@RequestMapping("/v1/token/")
+class TokenController(
     private val calendarAuthManager: CalendarAuthManager,
 ) {
     @Authentication(access = Authentication.AccessLevel.ADMIN)
-    @GetMapping("token", produces = ["application/json"])
-    suspend fun get(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guild: Snowflake?): CredentialData? {
+    @GetMapping(produces = ["application/json"])
+    suspend fun getToken(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guild: Snowflake?): CredentialData? {
         return calendarAuthManager.getCredentialData(host, id, guild)
     }
 }

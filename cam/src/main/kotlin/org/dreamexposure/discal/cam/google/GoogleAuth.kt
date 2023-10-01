@@ -42,6 +42,7 @@ class GoogleAuth(
                 .map { CredentialData(it, calendar.secrets.expiresAt) }
                 .awaitSingle()
         }
+        LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
         val refreshToken = aes.decrypt(calendar.secrets.encryptedRefreshToken).awaitSingle()
         val refreshedCredential = doAccessTokenRequest(refreshToken) ?: return null
@@ -60,6 +61,8 @@ class GoogleAuth(
             val accessToken = aes.decrypt(credential.encryptedAccessToken).awaitSingle()
             return CredentialData(accessToken, credential.expiresAt)
         }
+
+        LOGGER.debug("Refreshing access token | credentialId:$credentialId")
 
         val refreshToken = aes.decrypt(credential.encryptedRefreshToken).awaitSingle()
         val refreshedCredentialData = doAccessTokenRequest(refreshToken) ?: throw EmptyNotAllowedException()
