@@ -26,6 +26,7 @@ class AESEncryption(privateKey: String) {
         }
     }
 
+    @Deprecated("Use #decryptFixed(string) instead")
     fun encrypt(data: String): Mono<String> {
         return Mono.fromCallable {
             this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
@@ -39,6 +40,20 @@ class AESEncryption(privateKey: String) {
         }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
     }
 
+
+    fun encryptFixed(data: String): String {
+        return try {
+            this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
+            val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
+
+            Base64.encodeBase64String(encrypted)
+        } catch (ex: Exception) {
+            LOGGER.error("Encrypt failure", ex)
+            throw IllegalStateException("Encrypt Failure", ex)
+        }
+    }
+
+    @Deprecated("Use #decryptFixed(string) instead")
     fun decrypt(data: String): Mono<String> {
         return Mono.fromCallable {
             this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
@@ -50,5 +65,17 @@ class AESEncryption(privateKey: String) {
         }.onErrorResume {
             Mono.error(IllegalStateException("Decrypt Failure", it))
         }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
+    }
+
+    fun decryptFixed(data: String): String {
+        return try {
+            this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
+            val decrypted = this.cipher?.doFinal(Base64.decodeBase64(data))
+
+            String(decrypted!!, StandardCharsets.UTF_8)
+        } catch (ex: Exception) {
+            LOGGER.error("Decrypt failure", ex)
+            throw IllegalStateException("Decrypt Failure", ex)
+        }
     }
 }

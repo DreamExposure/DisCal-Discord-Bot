@@ -35,8 +35,8 @@ data class Calendar(
     data class Secrets(
         val credentialId: Int,
         val privateKey: String,
-        val encryptedRefreshToken: String,
-        var encryptedAccessToken: String,
+        val encryptedRefreshToken: String, // TODO: Secrets should be unencrypted immediately before/after Db write/read respectively
+        var encryptedAccessToken: String, // TODO: Secrets should be unencrypted immediately before/after Db write/read respectively
         var expiresAt: Instant,
     )
 }

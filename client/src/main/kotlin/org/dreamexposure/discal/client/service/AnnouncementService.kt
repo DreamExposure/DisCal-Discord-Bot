@@ -204,12 +204,14 @@ class AnnouncementService(
 
     private fun getEvents(guild: Guild, announcement: Announcement): Flux<Event> {
         val cached = getCached(announcement.guildId)
+        if (cached.events.contains(announcement.calendarNumber))
+            return Flux.fromIterable(cached.events[announcement.calendarNumber]!!)
 
-        return if (!cached.events.contains(announcement.calendarNumber)) {
-            getCalendar(guild, announcement).flatMapMany {
-                it.getUpcomingEvents(20).cache()
-            }
-        } else cached.events[announcement.calendarNumber]!!
+        return getCalendar(guild, announcement).flatMapMany {
+            it.getUpcomingEvents(20)
+        }.collectList()
+            .doOnNext { cached.events[announcement.calendarNumber] = it }
+            .flatMapIterable { it }
     }
 
     private fun getCached(guildId: Snowflake): AnnouncementCache {

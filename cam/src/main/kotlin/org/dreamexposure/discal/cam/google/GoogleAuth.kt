@@ -33,7 +33,6 @@ class GoogleAuth(
     private val calendarService: CalendarService,
     private val objectMapper: ObjectMapper,
 ) {
-    private final val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
 
     suspend fun requestNewAccessToken(calendar: Calendar): CredentialData? {
         val aes = AESEncryption(calendar.secrets.privateKey)
@@ -57,16 +56,13 @@ class GoogleAuth(
 
     suspend fun requestNewAccessToken(credentialId: Int): CredentialData {
         val credential = credentialService.getCredential(credentialId) ?: throw NotFoundException()
-        if (!credential.expiresAt.isExpiredTtl()) {
-            val accessToken = aes.decrypt(credential.encryptedAccessToken).awaitSingle()
-            return CredentialData(accessToken, credential.expiresAt)
-        }
+        if (!credential.expiresAt.isExpiredTtl()) return CredentialData(credential.accessToken, credential.expiresAt)
+
 
         LOGGER.debug("Refreshing access token | credentialId:$credentialId")
 
-        val refreshToken = aes.decrypt(credential.encryptedRefreshToken).awaitSingle()
-        val refreshedCredentialData = doAccessTokenRequest(refreshToken) ?: throw EmptyNotAllowedException()
-        credential.encryptedAccessToken = aes.encrypt(refreshedCredentialData.accessToken).awaitSingle()
+        val refreshedCredentialData = doAccessTokenRequest(credential.refreshToken) ?: throw EmptyNotAllowedException()
+        credential.accessToken = refreshedCredentialData.accessToken
         credential.expiresAt = refreshedCredentialData.validUntil.minusSeconds(60) // Add a minute of wiggle room
         credentialService.updateCredential(credential)
 
