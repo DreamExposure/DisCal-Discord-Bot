@@ -63,6 +63,8 @@ object GoogleAuthWrapper {
             return Mono.just(token.accessToken)
         }
 
+        LOGGER.debug("Refreshing local token via CAM | credentialId:$credentialId")
+
         return Mono.fromCallable {
             val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("host", CalendarHost.GOOGLE.name)
@@ -105,6 +107,8 @@ object GoogleAuthWrapper {
         if (token != null && !token.isExpired()) {
             return Mono.just(token.accessToken)
         }
+
+        LOGGER.debug("Refreshing local token via CAM | guild:{} | host:{} | calendarId:{} ", calData.guildId, calData.host, calData.calendarNumber)
 
         return Mono.fromCallable {
             val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
