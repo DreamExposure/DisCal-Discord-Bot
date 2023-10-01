@@ -77,10 +77,15 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Publish to CR with Gradle
+        uses: Wandalen/wretry.action@master
         env:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
-        run: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+        with:
+          command: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+          attempt_limit: 5
+          # 1 minute in ms
+          attempt_delay: 60000
   deploy-dev:
     name: Deploy dev
     runs-on: ubuntu-latest
