@@ -16,10 +16,13 @@ class DefaultCredentialService(
 ) : CredentialService {
 
     override suspend fun createCredential(credential: Credential): Credential {
+        val encryptedRefreshToken = Credential.aes.encrypt(credential.refreshToken).awaitSingle()
+        val encryptedAccessToken = Credential.aes.encrypt(credential.accessToken).awaitSingle()
+
         val saved = credentialsRepository.save(CredentialData(
             credentialNumber = credential.credentialNumber,
-            accessToken = credential.encryptedAccessToken,
-            refreshToken = credential.encryptedRefreshToken,
+            accessToken = encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
             expiresAt = credential.expiresAt.toEpochMilli(),
         )).map(::Credential).awaitSingle()
 
@@ -40,10 +43,13 @@ class DefaultCredentialService(
     }
 
     override suspend fun updateCredential(credential: Credential) {
+        val encryptedRefreshToken = Credential.aes.encrypt(credential.refreshToken).awaitSingle()
+        val encryptedAccessToken = Credential.aes.encrypt(credential.accessToken).awaitSingle()
+
         credentialsRepository.updateByCredentialNumber(
             credentialNumber = credential.credentialNumber,
-            refreshToken = credential.encryptedRefreshToken,
-            accessToken = credential.encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
+            accessToken = encryptedAccessToken,
             expiresAt = credential.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
