@@ -95,10 +95,11 @@ class GoogleAuth(
                 CredentialData(body.accessToken, Instant.now().plusSeconds(body.expiresIn.toLong()))
             }
             STATUS_CODE_BAD_REQUEST -> {
-                val body = objectMapper.readValue<ErrorData>(response.body!!.string())
+                val bodyRaw = response.body!!.string()
+                LOGGER.error("[Google] Access Token Request: $bodyRaw")
+                val body = objectMapper.readValue<ErrorData>(bodyRaw)
                 response.close()
 
-                LOGGER.error("[Google] Access Token Request: $body")
 
                 if (body.error == "invalid_grant") {
                     LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")

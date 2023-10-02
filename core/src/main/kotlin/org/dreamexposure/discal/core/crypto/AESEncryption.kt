@@ -16,21 +16,18 @@ class AESEncryption(privateKey: String) {
 
     private val ivParameterSpec = IvParameterSpec(key1.toByteArray(StandardCharsets.UTF_8))
     private val secretKeySpec = SecretKeySpec(privateKey.toByteArray(StandardCharsets.UTF_8), "AES")
-    private var cipher: Cipher?
+    private var encryptCipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+    private var decryptCipher: Cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
 
     init {
-        try {
-            this.cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
-        } catch (ignore: Exception) {
-            this.cipher = null
-        }
+        this.encryptCipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
+        this.decryptCipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
     }
 
     @Deprecated("Use #decryptFixed(string) instead")
     fun encrypt(data: String): Mono<String> {
         return Mono.fromCallable {
-            this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
+            val encrypted = this.encryptCipher.doFinal(data.toByteArray(StandardCharsets.UTF_8))
 
             Base64.encodeBase64String(encrypted)
         }.doOnError {
@@ -43,8 +40,7 @@ class AESEncryption(privateKey: String) {
 
     fun encryptFixed(data: String): String {
         return try {
-            this.cipher?.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val encrypted = this.cipher?.doFinal(data.toByteArray(StandardCharsets.UTF_8))
+            val encrypted = this.encryptCipher.doFinal(data.toByteArray(StandardCharsets.UTF_8))
 
             Base64.encodeBase64String(encrypted)
         } catch (ex: Exception) {
@@ -56,8 +52,7 @@ class AESEncryption(privateKey: String) {
     @Deprecated("Use #decryptFixed(string) instead")
     fun decrypt(data: String): Mono<String> {
         return Mono.fromCallable {
-            this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val decrypted = this.cipher?.doFinal(Base64.decodeBase64(data))
+            val decrypted = this.decryptCipher.doFinal(Base64.decodeBase64(data))
 
             String(decrypted!!, StandardCharsets.UTF_8)
         }.doOnError {
@@ -69,8 +64,7 @@ class AESEncryption(privateKey: String) {
 
     fun decryptFixed(data: String): String {
         return try {
-            this.cipher?.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-            val decrypted = this.cipher?.doFinal(Base64.decodeBase64(data))
+            val decrypted = this.decryptCipher.doFinal(Base64.decodeBase64(data))
 
             String(decrypted!!, StandardCharsets.UTF_8)
         } catch (ex: Exception) {
