@@ -8,6 +8,9 @@ import discord4j.core.`object`.entity.channel.GuildMessageChannel
 import discord4j.core.spec.MessageCreateSpec
 import discord4j.rest.http.client.ClientException
 import io.netty.handler.codec.http.HttpResponseStatus
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
@@ -48,11 +51,14 @@ class AnnouncementService(
     // Runner
     private fun doAnnouncementCycle(): Mono<Void> {
         return discordClient.guilds.flatMap { guild ->
-            DatabaseManager.getEnabledAnnouncements(guild.id).flatMapMany { Flux.fromIterable(it) }.flatMap { announcement ->
-                when (announcement.modifier) {
-                    AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement)
-                    AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement)
-                    AnnouncementModifier.END -> handleEndModifier(guild, announcement)
+            mono {
+                val announcements = DatabaseManager.getEnabledAnnouncements(guild.id).awaitSingle()
+                announcements.forEach { announcement ->
+                    when (announcement.modifier) {
+                        AnnouncementModifier.BEFORE -> handleBeforeModifier(guild, announcement).awaitSingleOrNull()
+                        AnnouncementModifier.DURING -> handleDuringModifier(guild, announcement).awaitSingleOrNull()
+                        AnnouncementModifier.END -> handleEndModifier(guild, announcement).awaitSingleOrNull()
+                    }
                 }
             }.doOnError {
                 LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
