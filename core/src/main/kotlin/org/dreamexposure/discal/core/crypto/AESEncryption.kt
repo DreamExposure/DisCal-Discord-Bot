@@ -21,7 +21,7 @@ class AESEncryption(privateKey: String) {
 
     init {
         this.encryptCipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
-        this.decryptCipher.init(Cipher.ENCRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
+        this.decryptCipher.init(Cipher.DECRYPT_MODE, this.secretKeySpec, this.ivParameterSpec)
     }
 
     @Deprecated("Use #decryptFixed(string) instead")
@@ -70,6 +70,7 @@ class AESEncryption(privateKey: String) {
         } catch (ex: Exception) {
             LOGGER.error("Decrypt failure", ex)
             throw IllegalStateException("Decrypt Failure", ex)
+        } finally {
         }
     }
 }
