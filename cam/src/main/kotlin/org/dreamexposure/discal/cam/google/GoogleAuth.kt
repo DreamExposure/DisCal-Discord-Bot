@@ -12,7 +12,6 @@ import org.dreamexposure.discal.cam.json.google.RefreshData
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.CredentialService
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
@@ -36,21 +35,16 @@ class GoogleAuth(
 ) {
 
     suspend fun requestNewAccessToken(calendar: Calendar): CredentialData? {
-        val aes = AESEncryption(calendar.secrets.privateKey)
-        if (!calendar.secrets.expiresAt.isExpiredTtl()) {
-            return aes.decrypt(calendar.secrets.encryptedAccessToken)
-                .map { CredentialData(it, calendar.secrets.expiresAt) }
-                .awaitSingle()
-        }
+        if (!calendar.secrets.expiresAt.isExpiredTtl()) return CredentialData(calendar.secrets.accessToken, calendar.secrets.expiresAt)
+
         LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
-        val refreshToken = aes.decrypt(calendar.secrets.encryptedRefreshToken).awaitSingle()
-        val refreshedCredential = doAccessTokenRequest(refreshToken) ?: return null
-
+        val refreshedCredential = doAccessTokenRequest(calendar.secrets.refreshToken) ?: return null
+        calendar.secrets.accessToken = refreshedCredential.accessToken
         calendar.secrets.expiresAt = refreshedCredential.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
-        calendar.secrets.encryptedAccessToken = aes.encrypt(refreshedCredential.accessToken).awaitSingle()
-
         calendarService.updateCalendar(calendar)
+
+        LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
         return refreshedCredential
     }
@@ -59,13 +53,14 @@ class GoogleAuth(
         val credential = credentialService.getCredential(credentialId) ?: throw NotFoundException()
         if (!credential.expiresAt.isExpiredTtl()) return CredentialData(credential.accessToken, credential.expiresAt)
 
-
         LOGGER.debug("Refreshing access token | credentialId:$credentialId")
 
         val refreshedCredentialData = doAccessTokenRequest(credential.refreshToken) ?: throw EmptyNotAllowedException()
         credential.accessToken = refreshedCredentialData.accessToken
         credential.expiresAt = refreshedCredentialData.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
         credentialService.updateCredential(credential)
+
+        LOGGER.debug("Refreshed access token | credentialId:{} | validUntil{}", credentialId, credential.expiresAt)
 
         return refreshedCredentialData
     }

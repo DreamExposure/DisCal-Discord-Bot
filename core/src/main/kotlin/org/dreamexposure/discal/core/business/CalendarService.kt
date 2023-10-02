@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.CalendarCache
+import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarRepository
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.springframework.stereotype.Component
@@ -31,6 +32,10 @@ class DefaultCalendarService(
     }
 
     override suspend fun updateCalendar(calendar: Calendar) {
+        val aes = AESEncryption(calendar.secrets.privateKey)
+        val encryptedRefreshToken = aes.encrypt(calendar.secrets.refreshToken).awaitSingle()
+        val encryptedAccessToken = aes.encrypt(calendar.secrets.accessToken).awaitSingle()
+
         calendarRepository.updateCalendarByGuildIdAndCalendarNumber(
             guildId = calendar.guildId.asLong(),
             calendarNumber = calendar.number,
@@ -40,8 +45,8 @@ class DefaultCalendarService(
             external = calendar.external,
             credentialId = calendar.secrets.credentialId,
             privateKey = calendar.secrets.privateKey,
-            accessToken = calendar.secrets.encryptedAccessToken,
-            refreshToken = calendar.secrets.encryptedRefreshToken,
+            accessToken = encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
             expiresAt = calendar.secrets.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 

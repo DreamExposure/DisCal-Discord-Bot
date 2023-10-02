@@ -1,6 +1,8 @@
 package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
+import kotlinx.coroutines.reactor.awaitSingle
+import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarData
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.asInstantMilli
@@ -23,20 +25,27 @@ data class Calendar(
         id = data.calendarId,
         address = data.calendarAddress,
         external = data.external,
-        secrets = Secrets(
-            credentialId = data.credentialId,
-            privateKey = data.privateKey,
-            encryptedRefreshToken = data.refreshToken,
-            encryptedAccessToken = data.accessToken,
-            expiresAt = data.expiresAt.asInstantMilli(),
-        )
+        secrets = Secrets(data)
     )
 
     data class Secrets(
         val credentialId: Int,
         val privateKey: String,
-        val encryptedRefreshToken: String, // TODO: Secrets should be unencrypted immediately before/after Db write/read respectively
-        var encryptedAccessToken: String, // TODO: Secrets should be unencrypted immediately before/after Db write/read respectively
         var expiresAt: Instant,
-    )
+    ) {
+        lateinit var refreshToken: String
+        lateinit var accessToken: String
+
+        constructor(data: CalendarData) : this(
+            credentialId = data.credentialId,
+            privateKey = data.privateKey,
+            expiresAt = data.expiresAt.asInstantMilli()
+        ) {
+            suspend {
+                val aes = AESEncryption(privateKey)
+                refreshToken = aes.decrypt(data.refreshToken).awaitSingle()
+                accessToken = aes.decrypt(data.accessToken).awaitSingle()
+            }
+        }
+    }
 }
