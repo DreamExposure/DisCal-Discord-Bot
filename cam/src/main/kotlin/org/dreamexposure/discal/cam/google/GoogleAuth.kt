@@ -25,6 +25,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.time.Duration
 import java.time.Instant
 
 @Component
@@ -46,7 +47,7 @@ class GoogleAuth(
         val refreshToken = aes.decrypt(calendar.secrets.encryptedRefreshToken).awaitSingle()
         val refreshedCredential = doAccessTokenRequest(refreshToken) ?: return null
 
-        calendar.secrets.expiresAt = refreshedCredential.validUntil.minusSeconds(60) // Add a minute of wiggle room
+        calendar.secrets.expiresAt = refreshedCredential.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
         calendar.secrets.encryptedAccessToken = aes.encrypt(refreshedCredential.accessToken).awaitSingle()
 
         calendarService.updateCalendar(calendar)
@@ -63,7 +64,7 @@ class GoogleAuth(
 
         val refreshedCredentialData = doAccessTokenRequest(credential.refreshToken) ?: throw EmptyNotAllowedException()
         credential.accessToken = refreshedCredentialData.accessToken
-        credential.expiresAt = refreshedCredentialData.validUntil.minusSeconds(60) // Add a minute of wiggle room
+        credential.expiresAt = refreshedCredentialData.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
         credentialService.updateCredential(credential)
 
         return refreshedCredentialData
