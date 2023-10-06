@@ -15,7 +15,7 @@ class DefaultCalendarService(
     private val calendarCache: CalendarCache,
 ) : CalendarService {
     override suspend fun getAllCalendars(guildId: Snowflake): List<Calendar> {
-        var calendars = calendarCache.get(guildId.asLong())?.toList()
+        var calendars = calendarCache.get(key = guildId)?.toList()
         if (calendars != null) return calendars
 
         calendars = calendarRepository.findAllByGuildId(guildId.asLong())
@@ -23,7 +23,7 @@ class DefaultCalendarService(
             .collectList()
             .awaitSingle()
 
-        calendarCache.put(guildId.asLong(), calendars.toTypedArray())
+        calendarCache.put(key = guildId, value = calendars.toTypedArray())
         return calendars
     }
 
@@ -50,11 +50,11 @@ class DefaultCalendarService(
             expiresAt = calendar.secrets.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
-        val cached = calendarCache.get(calendar.guildId.asLong())
+        val cached = calendarCache.get(key = calendar.guildId)
         if (cached != null) {
             val newList = cached.toMutableList()
             newList.removeIf { it.number == calendar.number }
-            calendarCache.put(calendar.guildId.asLong(), (newList + calendar).toTypedArray())
+            calendarCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
         }
     }
 

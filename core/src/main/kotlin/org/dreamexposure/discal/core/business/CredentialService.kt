@@ -26,19 +26,19 @@ class DefaultCredentialService(
             expiresAt = credential.expiresAt.toEpochMilli(),
         )).map(::Credential).awaitSingle()
 
-        credentialsCache.put(saved.credentialNumber, saved)
+        credentialsCache.put(key = saved.credentialNumber, value = saved)
         return saved
     }
 
     override suspend fun getCredential(number: Int): Credential? {
-        var credential = credentialsCache.get(number)
+        var credential = credentialsCache.get(key = number)
         if (credential != null) return credential
 
         credential = credentialsRepository.findByCredentialNumber(number)
             .map(::Credential)
             .awaitSingle()
 
-        if (credential != null) credentialsCache.put(number, credential)
+        if (credential != null) credentialsCache.put(key = number, value = credential)
         return credential
     }
 
@@ -53,7 +53,7 @@ class DefaultCredentialService(
             expiresAt = credential.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
-        credentialsCache.put(credential.credentialNumber, credential)
+        credentialsCache.put(key = credential.credentialNumber, value = credential)
     }
 }
 
