@@ -19,12 +19,14 @@ class DefaultCredentialService(
         val encryptedRefreshToken = Credential.aes.encrypt(credential.refreshToken).awaitSingle()
         val encryptedAccessToken = Credential.aes.encrypt(credential.accessToken).awaitSingle()
 
-        val saved = credentialsRepository.save(CredentialData(
+        val savedData = credentialsRepository.save(CredentialData(
             credentialNumber = credential.credentialNumber,
             accessToken = encryptedAccessToken,
             refreshToken = encryptedRefreshToken,
             expiresAt = credential.expiresAt.toEpochMilli(),
-        )).map(::Credential).awaitSingle()
+        )).awaitSingle()
+        val saved = Credential(savedData)
+
 
         credentialsCache.put(key = saved.credentialNumber, value = saved)
         return saved
@@ -34,11 +36,10 @@ class DefaultCredentialService(
         var credential = credentialsCache.get(key = number)
         if (credential != null) return credential
 
-        credential = credentialsRepository.findByCredentialNumber(number)
-            .map(::Credential)
-            .awaitSingle()
+        val data = credentialsRepository.findByCredentialNumber(number).awaitSingle()
+        credential = Credential(data)
 
-        if (credential != null) credentialsCache.put(key = number, value = credential)
+        credentialsCache.put(key = number, value = credential)
         return credential
     }
 

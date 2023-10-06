@@ -7,24 +7,23 @@ import org.dreamexposure.discal.core.database.CredentialData
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import java.time.Instant
 
-data class Credential(
+
+@Suppress("DataClassPrivateConstructor")
+data class Credential private constructor(
     val credentialNumber: Int,
     var expiresAt: Instant,
+    var refreshToken: String,
+    var accessToken: String,
 ) {
-    lateinit var refreshToken: String
-    lateinit var accessToken: String
-
-    constructor(data: CredentialData) : this(
-        credentialNumber = data.credentialNumber,
-        expiresAt = data.expiresAt.asInstantMilli(),
-    ) {
-        suspend {
-            refreshToken = aes.decrypt(data.refreshToken).awaitSingle()
-            accessToken = aes.decrypt(data.accessToken).awaitSingle()
-        }
-    }
 
     companion object {
         val aes = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
+
+        suspend operator fun invoke(data: CredentialData) = Credential(
+            credentialNumber = data.credentialNumber,
+            expiresAt = data.expiresAt.asInstantMilli(),
+            refreshToken = aes.decrypt(data.refreshToken).awaitSingle(),
+            accessToken = aes.decrypt(data.accessToken).awaitSingle(),
+        )
     }
 }
