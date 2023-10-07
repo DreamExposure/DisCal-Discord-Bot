@@ -9,7 +9,7 @@ import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import java.time.Instant
 
-data class Calendar(
+data class Calendar private constructor(
     val guildId: Snowflake,
     val number: Int,
     val host: CalendarHost,
@@ -18,34 +18,33 @@ data class Calendar(
     val external: Boolean,
     val secrets: Secrets,
 ) {
-    constructor(data: CalendarData) : this(
-        guildId = data.guildId.asSnowflake(),
-        number = data.calendarNumber,
-        host = CalendarHost.valueOf(data.host),
-        id = data.calendarId,
-        address = data.calendarAddress,
-        external = data.external,
-        secrets = Secrets(data)
-    )
+    companion object {
+        suspend operator fun invoke(data: CalendarData): Calendar {
+            val aes = AESEncryption(data.privateKey)
+
+            return Calendar(
+                guildId = data.guildId.asSnowflake(),
+                number = data.calendarNumber,
+                host = CalendarHost.valueOf(data.host),
+                id = data.calendarId,
+                address = data.calendarAddress,
+                external = data.external,
+                secrets = Secrets(
+                    credentialId = data.credentialId,
+                    privateKey = data.privateKey,
+                    expiresAt = data.expiresAt.asInstantMilli(),
+                    refreshToken = aes.decrypt(data.refreshToken).awaitSingle(),
+                    accessToken = aes.decrypt(data.accessToken).awaitSingle(),
+                )
+            )
+        }
+    }
 
     data class Secrets(
         val credentialId: Int,
         val privateKey: String,
         var expiresAt: Instant,
-    ) {
-        lateinit var refreshToken: String
-        lateinit var accessToken: String
-
-        constructor(data: CalendarData) : this(
-            credentialId = data.credentialId,
-            privateKey = data.privateKey,
-            expiresAt = data.expiresAt.asInstantMilli()
-        ) {
-            suspend {
-                val aes = AESEncryption(privateKey)
-                refreshToken = aes.decrypt(data.refreshToken).awaitSingle()
-                accessToken = aes.decrypt(data.accessToken).awaitSingle()
-            }
-        }
-    }
+        var refreshToken: String,
+        var accessToken: String,
+    )
 }

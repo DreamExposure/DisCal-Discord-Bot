@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarRepository
@@ -19,7 +20,7 @@ class DefaultCalendarService(
         if (calendars != null) return calendars
 
         calendars = calendarRepository.findAllByGuildId(guildId.asLong())
-            .map(::Calendar)
+            .flatMap { mono { Calendar(it) } }
             .collectList()
             .awaitSingle()
 
