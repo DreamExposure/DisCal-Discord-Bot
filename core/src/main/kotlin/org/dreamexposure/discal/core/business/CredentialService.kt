@@ -16,38 +16,45 @@ class DefaultCredentialService(
 ) : CredentialService {
 
     override suspend fun createCredential(credential: Credential): Credential {
-        val saved = credentialsRepository.save(CredentialData(
-            credentialNumber = credential.credentialNumber,
-            accessToken = credential.encryptedAccessToken,
-            refreshToken = credential.encryptedRefreshToken,
-            expiresAt = credential.expiresAt.toEpochMilli(),
-        )).map(::Credential).awaitSingle()
+        val encryptedRefreshToken = Credential.aes.encrypt(credential.refreshToken).awaitSingle()
+        val encryptedAccessToken = Credential.aes.encrypt(credential.accessToken).awaitSingle()
 
-        credentialsCache.put(saved.credentialNumber, saved)
+        val savedData = credentialsRepository.save(CredentialData(
+            credentialNumber = credential.credentialNumber,
+            accessToken = encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
+            expiresAt = credential.expiresAt.toEpochMilli(),
+        )).awaitSingle()
+        val saved = Credential(savedData)
+
+
+        credentialsCache.put(key = saved.credentialNumber, value = saved)
         return saved
     }
 
     override suspend fun getCredential(number: Int): Credential? {
-        var credential = credentialsCache.get(number)
+        var credential = credentialsCache.get(key = number)
         if (credential != null) return credential
 
-        credential = credentialsRepository.findByCredentialNumber(number)
-            .map(::Credential)
-            .awaitSingle()
+        val data = credentialsRepository.findByCredentialNumber(number).awaitSingle()
+        credential = Credential(data)
 
-        if (credential != null) credentialsCache.put(number, credential)
+        credentialsCache.put(key = number, value = credential)
         return credential
     }
 
     override suspend fun updateCredential(credential: Credential) {
+        val encryptedRefreshToken = Credential.aes.encrypt(credential.refreshToken).awaitSingle()
+        val encryptedAccessToken = Credential.aes.encrypt(credential.accessToken).awaitSingle()
+
         credentialsRepository.updateByCredentialNumber(
             credentialNumber = credential.credentialNumber,
-            refreshToken = credential.encryptedRefreshToken,
-            accessToken = credential.encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
+            accessToken = encryptedAccessToken,
             expiresAt = credential.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
-        credentialsCache.put(credential.credentialNumber, credential)
+        credentialsCache.put(key = credential.credentialNumber, value = credential)
     }
 }
 

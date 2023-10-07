@@ -18,7 +18,7 @@ pluginManagement {
         // Spring
         kotlin("plugin.spring") version kotlinVersion
         id("io.spring.dependency-management") version springDependencyManagementVersion
-        id("org.springframework.boot") version springVersion apply false
+        id("org.springframework.boot") version springVersion
 
         // Tooling
         id("com.gorylenko.gradle-git-properties") version gitPropertiesVersion apply false

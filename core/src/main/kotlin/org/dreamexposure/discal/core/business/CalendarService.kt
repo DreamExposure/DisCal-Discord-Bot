@@ -3,7 +3,9 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.CalendarCache
+import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarRepository
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.springframework.stereotype.Component
@@ -14,15 +16,15 @@ class DefaultCalendarService(
     private val calendarCache: CalendarCache,
 ) : CalendarService {
     override suspend fun getAllCalendars(guildId: Snowflake): List<Calendar> {
-        var calendars = calendarCache.get(guildId.asLong())?.toList()
+        var calendars = calendarCache.get(key = guildId)?.toList()
         if (calendars != null) return calendars
 
         calendars = calendarRepository.findAllByGuildId(guildId.asLong())
-            .map(::Calendar)
+            .flatMap { mono { Calendar(it) } }
             .collectList()
             .awaitSingle()
 
-        calendarCache.put(guildId.asLong(), calendars.toTypedArray())
+        calendarCache.put(key = guildId, value = calendars.toTypedArray())
         return calendars
     }
 
@@ -31,6 +33,10 @@ class DefaultCalendarService(
     }
 
     override suspend fun updateCalendar(calendar: Calendar) {
+        val aes = AESEncryption(calendar.secrets.privateKey)
+        val encryptedRefreshToken = aes.encrypt(calendar.secrets.refreshToken).awaitSingle()
+        val encryptedAccessToken = aes.encrypt(calendar.secrets.accessToken).awaitSingle()
+
         calendarRepository.updateCalendarByGuildIdAndCalendarNumber(
             guildId = calendar.guildId.asLong(),
             calendarNumber = calendar.number,
@@ -40,16 +46,16 @@ class DefaultCalendarService(
             external = calendar.external,
             credentialId = calendar.secrets.credentialId,
             privateKey = calendar.secrets.privateKey,
-            accessToken = calendar.secrets.encryptedAccessToken,
-            refreshToken = calendar.secrets.encryptedRefreshToken,
+            accessToken = encryptedAccessToken,
+            refreshToken = encryptedRefreshToken,
             expiresAt = calendar.secrets.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
-        val cached = calendarCache.get(calendar.guildId.asLong())
+        val cached = calendarCache.get(key = calendar.guildId)
         if (cached != null) {
             val newList = cached.toMutableList()
             newList.removeIf { it.number == calendar.number }
-            calendarCache.put(calendar.guildId.asLong(), (newList + calendar).toTypedArray())
+            calendarCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
         }
     }
 

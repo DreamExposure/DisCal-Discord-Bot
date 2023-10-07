@@ -9,7 +9,7 @@ plugins {
 
     // Spring
     kotlin("plugin.spring")
-    id("org.springframework.boot") apply false
+    id("org.springframework.boot")
     id("io.spring.dependency-management")
 
     //Tooling
@@ -27,7 +27,7 @@ buildscript {
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.2.3"
+    version = "4.2.4"
     description = "DisCal"
 
     //Plugins
@@ -36,30 +36,22 @@ allprojects {
     apply(plugin = "io.spring.dependency-management")
 
     // Versions --- found in gradle.properties
-    val kotlinVersion: String by properties
-    // Tool
-    val kotlinxCoroutinesReactorVersion: String by properties
-    val reactorKotlinExtensions: String by properties
     // Discord
     val discord4jVersion: String by properties
     val discord4jStoresVersion: String by properties
     val discordWebhookVersion: String by properties
-    // Spring
-    val springVersion: String by properties
-    // Database
-    val flywayVersion: String by properties
+    // Database\
     val mikuR2dbcMySqlVersion: String by properties
     val mySqlConnectorJava: String by properties
     // Serialization
     val kotlinxSerializationJsonVersion: String by properties
-    val jacksonVersion: String by properties
-    val jsonVersion: String by properties
+    // Observability
+    val logbackContribVersion: String by properties
     // Google libs
     val googleApiClientVersion: String by properties
     val googleServicesCalendarVersion: String by properties
     val googleOauthClientVersion: String by properties
     // Various libs
-    val okhttpVersion: String by properties
     val copyDownVersion: String by properties
     val jsoupVersion: String by properties
 
@@ -76,10 +68,10 @@ allprojects {
 
     dependencies {
         // Tools
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinxCoroutinesReactorVersion")
-        implementation("io.projectreactor.kotlin:reactor-kotlin-extensions:$reactorKotlinExtensions")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        implementation("org.jetbrains.kotlin:kotlin-reflect")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+        implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 
         // Discord
         implementation("com.discord4j:discord4j-core:$discord4jVersion")
@@ -87,11 +79,12 @@ allprojects {
         implementation("club.minnced:discord-webhooks:$discordWebhookVersion")
 
         // Spring
-        implementation("org.springframework.boot:spring-boot-starter-data-jdbc:$springVersion")
-        implementation("org.springframework.boot:spring-boot-starter-data-r2dbc:$springVersion")
-        implementation("org.springframework.boot:spring-boot-starter-data-redis:$springVersion")
-        implementation("org.springframework.boot:spring-boot-starter-webflux:$springVersion")
-        implementation("org.springframework.boot:spring-boot-starter-cache:$springVersion")
+        implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+        implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+        implementation("org.springframework.boot:spring-boot-starter-data-redis")
+        implementation("org.springframework.boot:spring-boot-starter-webflux")
+        implementation("org.springframework.boot:spring-boot-starter-cache")
+        implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
         implementation("dev.miku:r2dbc-mysql:$mikuR2dbcMySqlVersion")
@@ -99,9 +92,14 @@ allprojects {
 
         // Serialization
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
-        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-        implementation("org.json:json:$jsonVersion")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+        implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+        implementation("org.json:json")
+
+        // Observability
+        implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
+        implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
+        implementation("io.micrometer:micrometer-registry-prometheus")
 
         // Google libs
         implementation("com.google.api-client:google-api-client:$googleApiClientVersion")
@@ -111,7 +109,7 @@ allprojects {
         }
 
         // Various Libs
-        implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+        implementation("com.squareup.okhttp3:okhttp")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
         implementation("org.jsoup:jsoup:$jsoupVersion")
     }
@@ -148,6 +146,10 @@ tasks {
     wrapper {
         distributionType = ALL
         gradleVersion = "8.2.1"
+    }
+
+    bootJar {
+        enabled = false
     }
 }
 

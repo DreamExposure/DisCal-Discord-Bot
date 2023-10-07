@@ -57,7 +57,5 @@ class DiscordOauthManager(
         sessionService.removeAndInsertSession(session)
 
         return TokenResponse(session.token, session.expiresAt, authInfo.user)
-
-        TODO()
     }
 }

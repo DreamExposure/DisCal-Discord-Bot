@@ -10,10 +10,10 @@ class OauthStateService(
 ) {
     suspend fun generateState(): String {
         val state = KeyGenerator.csRandomAlphaNumericString(64)
-        stateCache.put(state, state)
+        stateCache.put(key = state, value = state)
 
         return state
     }
 
-    suspend fun validateState(state: String) = stateCache.getAndRemove(state) != null
+    suspend fun validateState(state: String) = stateCache.getAndRemove(key = state) != null
 }

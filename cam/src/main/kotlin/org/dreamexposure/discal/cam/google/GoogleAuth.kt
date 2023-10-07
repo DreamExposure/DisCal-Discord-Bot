@@ -12,7 +12,6 @@ import org.dreamexposure.discal.cam.json.google.RefreshData
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.CredentialService
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
@@ -25,6 +24,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
+import java.time.Duration
 import java.time.Instant
 
 @Component
@@ -33,39 +33,34 @@ class GoogleAuth(
     private val calendarService: CalendarService,
     private val objectMapper: ObjectMapper,
 ) {
-    private final val aes: AESEncryption = AESEncryption(Config.SECRET_GOOGLE_CREDENTIAL_KEY.getString())
 
     suspend fun requestNewAccessToken(calendar: Calendar): CredentialData? {
-        val aes = AESEncryption(calendar.secrets.privateKey)
-        if (!calendar.secrets.expiresAt.isExpiredTtl()) {
-            return aes.decrypt(calendar.secrets.encryptedAccessToken)
-                .map { CredentialData(it, calendar.secrets.expiresAt) }
-                .awaitSingle()
-        }
+        if (!calendar.secrets.expiresAt.isExpiredTtl()) return CredentialData(calendar.secrets.accessToken, calendar.secrets.expiresAt)
 
-        val refreshToken = aes.decrypt(calendar.secrets.encryptedRefreshToken).awaitSingle()
-        val refreshedCredential = doAccessTokenRequest(refreshToken) ?: return null
+        LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
-        calendar.secrets.expiresAt = refreshedCredential.validUntil.minusSeconds(60) // Add a minute of wiggle room
-        calendar.secrets.encryptedAccessToken = aes.encrypt(refreshedCredential.accessToken).awaitSingle()
-
+        val refreshedCredential = doAccessTokenRequest(calendar.secrets.refreshToken) ?: return null
+        calendar.secrets.accessToken = refreshedCredential.accessToken
+        calendar.secrets.expiresAt = refreshedCredential.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
         calendarService.updateCalendar(calendar)
+
+        LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
         return refreshedCredential
     }
 
     suspend fun requestNewAccessToken(credentialId: Int): CredentialData {
         val credential = credentialService.getCredential(credentialId) ?: throw NotFoundException()
-        if (!credential.expiresAt.isExpiredTtl()) {
-            val accessToken = aes.decrypt(credential.encryptedAccessToken).awaitSingle()
-            return CredentialData(accessToken, credential.expiresAt)
-        }
+        if (!credential.expiresAt.isExpiredTtl()) return CredentialData(credential.accessToken, credential.expiresAt)
 
-        val refreshToken = aes.decrypt(credential.encryptedRefreshToken).awaitSingle()
-        val refreshedCredentialData = doAccessTokenRequest(refreshToken) ?: throw EmptyNotAllowedException()
-        credential.encryptedAccessToken = aes.encrypt(refreshedCredentialData.accessToken).awaitSingle()
-        credential.expiresAt = refreshedCredentialData.validUntil.minusSeconds(60) // Add a minute of wiggle room
+        LOGGER.debug("Refreshing access token | credentialId:$credentialId")
+
+        val refreshedCredentialData = doAccessTokenRequest(credential.refreshToken) ?: throw EmptyNotAllowedException()
+        credential.accessToken = refreshedCredentialData.accessToken
+        credential.expiresAt = refreshedCredentialData.validUntil.minus(Duration.ofMinutes(5)) // Add some wiggle room
         credentialService.updateCredential(credential)
+
+        LOGGER.debug("Refreshed access token | credentialId:{} | validUntil{}", credentialId, credential.expiresAt)
 
         return refreshedCredentialData
     }
@@ -96,10 +91,11 @@ class GoogleAuth(
                 CredentialData(body.accessToken, Instant.now().plusSeconds(body.expiresIn.toLong()))
             }
             STATUS_CODE_BAD_REQUEST -> {
-                val body = objectMapper.readValue<ErrorData>(response.body!!.string())
+                val bodyRaw = response.body!!.string()
+                LOGGER.error("[Google] Access Token Request: $bodyRaw")
+                val body = objectMapper.readValue<ErrorData>(bodyRaw)
                 response.close()
 
-                LOGGER.error("[Google] Access Token Request: $body")
 
                 if (body.error == "invalid_grant") {
                     LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")

@@ -31,7 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
-@Suppress("BlockingMethodInNonBlockingContext")
 object GoogleAuthWrapper {
     private val discalTokens: MutableMap<Int, CredentialData> = ConcurrentHashMap()
     private val externalTokens: MutableMap<Snowflake, CredentialData> = ConcurrentHashMap()
@@ -64,6 +63,8 @@ object GoogleAuthWrapper {
             return Mono.just(token.accessToken)
         }
 
+        LOGGER.debug("Refreshing local token via CAM | credentialId:$credentialId")
+
         return Mono.fromCallable {
             val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
                 .addQueryParameter("host", CalendarHost.GOOGLE.name)
@@ -92,11 +93,13 @@ object GoogleAuthWrapper {
                     response.close()
 
                     // Log because this really shouldn't be happening
-                    LOGGER.debug(DEFAULT, "[Google] Error requesting access token from CAM for Int. | $error")
+                    LOGGER.error(DEFAULT, "[Google] Error requesting access token from CAM for Int. | credentialId:$credentialId | error:$error")
                     Mono.empty()
                 }
             }
-        }
+        }.doOnError {
+            LOGGER.error("GoogleAuth | Failed to get access token from CAM | credentialId:$credentialId")
+        }.onErrorResume { Mono.empty() }
     }
 
     private fun getAccessToken(calData: CalendarData): Mono<String> {
@@ -104,6 +107,8 @@ object GoogleAuthWrapper {
         if (token != null && !token.isExpired()) {
             return Mono.just(token.accessToken)
         }
+
+        LOGGER.debug("Refreshing local token via CAM | guild:{} | host:{} | calendarId:{} ", calData.guildId, calData.host, calData.calendarNumber)
 
         return Mono.fromCallable {
             val url = "${Config.URL_CAM.getString()}/v1/token".toHttpUrlOrNull()!!.newBuilder()
@@ -140,7 +145,7 @@ object GoogleAuthWrapper {
                         }
                         else -> {
                             //An unknown/unsupported error has occurred, log and return empty, upstream can handle this
-                            LOGGER.debug(DEFAULT, "[Google] Error requesting access token from CAM for Ext. | $error")
+                            LOGGER.debug(DEFAULT, "[Google] Error requesting access token from CAM for Ext. | {}", error)
                             Mono.empty()
                         }
                     }

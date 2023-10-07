@@ -318,7 +318,7 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
                 } else {
                     event.interaction.guild
                         .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("error.patronOnly", settings), it) }
+                        .flatMap { event.followupEphemeral(getCommonMsg("error.patronOnly", settings), it) }
                 }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
