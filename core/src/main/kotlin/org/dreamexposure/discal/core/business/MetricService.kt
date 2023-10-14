@@ -15,4 +15,17 @@ class MetricService(
             listOf(Tag.of("handler", handler), Tag.of("type", type))
         ).record(Duration.ofMillis(duration))
     }
+
+    fun recordAnnouncementTaskDuration(scope: String, duration: Long) {
+        meterRegistry.timer(
+            "bot.discal.announcement.task.duration",
+            listOf(Tag.of("scope", scope)),
+        ).record(Duration.ofMillis(duration))
+    }
+
+    fun incrementAnnouncementPosted() {
+        meterRegistry.counter(
+            "bot.discal.announcement.posted",
+        ).increment()
+    }
 }

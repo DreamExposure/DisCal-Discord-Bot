@@ -12,6 +12,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
+import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
@@ -26,6 +27,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
+import org.springframework.util.StopWatch
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -33,7 +35,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class AnnouncementService(
-    private val discordClient: GatewayDiscordClient
+    private val discordClient: GatewayDiscordClient,
+    private val metricService: MetricService,
 ) : ApplicationRunner {
     private val maxDifferenceMs = Duration.ofMinutes(5).toMillis()
 
@@ -50,7 +53,13 @@ class AnnouncementService(
 
     // Runner
     private fun doAnnouncementCycle(): Mono<Void> {
+        val taskTimer = StopWatch()
+        taskTimer.start()
+
         return discordClient.guilds.flatMap { guild ->
+            val guildTimer = StopWatch()
+            guildTimer.start()
+
             mono {
                 val announcements = DatabaseManager.getEnabledAnnouncements(guild.id).awaitSingle()
                 announcements.forEach { announcement ->
@@ -62,13 +71,20 @@ class AnnouncementService(
                 }
             }.doOnError {
                 LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
-            }.onErrorResume { Mono.empty() }
+            }.onErrorResume {
+                Mono.empty()
+            }.doFinally {
+                guildTimer.stop()
+                metricService.recordAnnouncementTaskDuration("guild", guildTimer.totalTimeMillis)
+            }
         }.doOnError {
             LOGGER.error(GlobalVal.DEFAULT, "Announcement error", it)
         }.onErrorResume {
             Mono.empty()
         }.doFinally {
             cached.clear()
+            taskTimer.stop()
+            metricService.recordAnnouncementTaskDuration("overall", taskTimer.totalTimeMillis)
         }.then()
         /*
         // Get announcements for this shard, then group by guild to make caching easier
@@ -195,6 +211,8 @@ class AnnouncementService(
                     // Channel announcement should post to was deleted
                     .flatMap { DatabaseManager.deleteAnnouncement(announcement.id) }
                     .then(Mono.empty())
+            }.doFinally {
+                metricService.incrementAnnouncementPosted()
             }
     }
 
