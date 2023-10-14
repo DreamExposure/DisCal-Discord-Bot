@@ -4,17 +4,23 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.stereotype.Component
+import org.springframework.util.StopWatch
 
 @Component
 class SlashCommandListener(
-    private val commands: List<SlashCommand>
+    private val commands: List<SlashCommand>,
+    private val metricService: MetricService,
 ) : EventListener<ChatInputInteractionEvent> {
 
     override suspend fun handle(event: ChatInputInteractionEvent) {
+        val timer = StopWatch()
+        timer.start()
+
         if (!event.interaction.guildId.isPresent) {
             event.reply("Commands not supported in DMs.").awaitSingleOrNull()
             return
@@ -43,5 +49,7 @@ class SlashCommandListener(
                 .awaitSingleOrNull()
         }
 
+        timer.stop()
+        metricService.recordInteractionDuration(event.commandName, "chat-input", timer.totalTimeMillis)
     }
 }
