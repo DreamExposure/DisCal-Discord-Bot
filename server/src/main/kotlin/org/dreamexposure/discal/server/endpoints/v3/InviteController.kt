@@ -5,14 +5,11 @@ import org.dreamexposure.discal.core.config.Config
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Mono
 
 @RestController
-@RequestMapping("/v3/")
-class InviteEndpoint {
+@RequestMapping("/v3/invite")
+class InviteController {
     @Authentication(access = Authentication.AccessLevel.PUBLIC)
-    @GetMapping("invite", produces = ["text/plain"])
-    fun get(): Mono<String> {
-        return Mono.just(Config.URL_INVITE.getString())
-    }
+    @GetMapping(produces = ["text/plain"])
+    fun get() = Config.URL_INVITE.getString()
 }
