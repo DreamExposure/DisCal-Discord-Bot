@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.cam.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.cam.business.SecurityService
@@ -33,7 +32,8 @@ class SecurityWebFilter(
     suspend fun doSecurityFilter(exchange: ServerWebExchange, chain: WebFilterChain) {
         val handlerMethod = handlerMapping.getHandler(exchange)
             .cast(HandlerMethod::class.java)
-            .awaitFirst()
+            .onErrorResume { Mono.empty() }
+            .awaitFirstOrNull() ?: return
 
         if (!handlerMethod.hasMethodAnnotation(SecurityRequirement::class.java)) {
             throw IllegalStateException("No SecurityRequirement annotation!")
