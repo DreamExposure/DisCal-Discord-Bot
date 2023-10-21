@@ -29,7 +29,7 @@ class CalendarAuthManager(
             }
         } catch (ex: Exception) {
             LOGGER.error("Get CredentialData Exception | guildId:$guild | credentialId:$id | calendarHost:${host.name}", ex)
-            null
+            throw ex // rethrow
         }
     }
 }

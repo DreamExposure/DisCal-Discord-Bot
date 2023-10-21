@@ -23,6 +23,7 @@ class DefaultSessionService(
             expiresAt = session.expiresAt,
             accessToken = session.accessToken,
             refreshToken = session.refreshToken,
+            scopes = session.scopes.joinToString(",") { it.name }
         )).map(::WebSession).awaitSingle()
     }
 

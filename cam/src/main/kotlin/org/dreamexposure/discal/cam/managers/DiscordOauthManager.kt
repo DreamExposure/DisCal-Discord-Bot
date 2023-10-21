@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.`object`.WebSession
+import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.utils.GlobalVal.discordApiUrl
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -51,7 +52,8 @@ class DiscordOauthManager(
             apiToken,
             authInfo.user!!.id,
             accessToken = dTokens.accessToken,
-            refreshToken = dTokens.refreshToken
+            refreshToken = dTokens.refreshToken,
+            scopes = Scope.defaultWebsiteLoginScopes(),
         )
 
         sessionService.removeAndInsertSession(session)

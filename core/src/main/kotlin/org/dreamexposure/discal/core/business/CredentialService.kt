@@ -36,7 +36,7 @@ class DefaultCredentialService(
         var credential = credentialsCache.get(key = number)
         if (credential != null) return credential
 
-        val data = credentialsRepository.findByCredentialNumber(number).awaitSingle()
+        val data = credentialsRepository.findByCredentialNumber(number).awaitSingleOrNull() ?: return null
         credential = Credential(data)
 
         credentialsCache.put(key = number, value = credential)
