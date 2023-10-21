@@ -72,7 +72,7 @@ object GoogleAuthWrapper {
                 .build()
 
             val request = Request.Builder().get()
-                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
+                .header("Authorization",  "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
                 .url(url)
                 .build()
 
@@ -118,7 +118,7 @@ object GoogleAuthWrapper {
                 .build()
 
             val request = Request.Builder().get()
-                .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
+                .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
                 .url(url)
                 .build()
 
