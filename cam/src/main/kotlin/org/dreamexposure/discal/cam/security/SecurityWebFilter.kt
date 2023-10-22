@@ -61,26 +61,15 @@ class SecurityWebFilter(
             return
         }
 
-        if (!securityService.authenticateToken(authHeader)) {
-            exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+        val result = securityService.authenticateAndAuthorizeToken(
+            authHeader,
+            authAnnotation.schemas.toList(),
+            authAnnotation.scopes.toList()
+        )
+        if (result.first != HttpStatus.OK) {
+            exchange.response.statusCode = result.first
             exchange.response.writeJsonString(
-                objectMapper.writeValueAsString(ErrorResponse("Unauthenticated"))
-            ).awaitFirstOrNull()
-            return
-        }
-
-        if (!securityService.validateTokenSchema(authHeader, authAnnotation.schemas.toList())) {
-            exchange.response.statusCode = HttpStatus.UNAUTHORIZED
-            exchange.response.writeJsonString(
-                objectMapper.writeValueAsString(ErrorResponse("Unsupported schema"))
-            ).awaitFirstOrNull()
-            return
-        }
-
-        if (!securityService.authorizeToken(authHeader, authAnnotation.scopes.toList())) {
-            exchange.response.statusCode = HttpStatus.FORBIDDEN
-            exchange.response.writeJsonString(
-                objectMapper.writeValueAsString(ErrorResponse("Access denied"))
+                objectMapper.writeValueAsString(ErrorResponse(result.second))
             ).awaitFirstOrNull()
             return
         }

@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.cam.business.cronjob
+package org.dreamexposure.discal.web.business.cronjob
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.reactor.mono
@@ -13,7 +13,6 @@ import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -23,8 +22,8 @@ import reactor.core.scheduler.Schedulers
 
 @Component
 class HeartbeatCronJob(
-    private val httpClient: OkHttpClient,
-    private val objectMapper: ObjectMapper,
+        private val httpClient: OkHttpClient,
+        private val objectMapper: ObjectMapper,
 ): ApplicationRunner {
     private final val apiUrl = Config.URL_API.getString()
 
@@ -37,11 +36,11 @@ class HeartbeatCronJob(
     }
 
     private fun heartbeat() = mono {
-        val requestBody = HeartbeatRequest(HeartbeatType.CAM, instanceData = InstanceData())
+        val requestBody = HeartbeatRequest(HeartbeatType.WEBSITE, instanceData = InstanceData())
 
         val request = Request.Builder()
             .url("$apiUrl/v3/status/heartbeat")
-            .post(objectMapper.writeValueAsString(requestBody).toRequestBody(JSON))
+            .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
             .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
             .header("Content-Type", "application/json")
             .build()

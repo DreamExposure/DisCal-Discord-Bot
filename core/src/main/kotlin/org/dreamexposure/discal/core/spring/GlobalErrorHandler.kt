@@ -5,7 +5,6 @@ import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
-import org.dreamexposure.discal.core.exceptions.TeaPotException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -43,10 +42,6 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                         RestError.INTERNAL_SERVER_ERROR
                     }
                 }
-            }
-            is TeaPotException -> {
-                exchange.response.statusCode = HttpStatus.I_AM_A_TEAPOT
-                RestError.TEAPOT
             }
             is AuthenticationException -> {
                 exchange.response.statusCode = HttpStatus.UNAUTHORIZED

@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.rest.http.client.ClientException
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.*
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -26,7 +26,7 @@ import reactor.function.TupleUtils
 @RequestMapping("/v2/rsvp")
 class UpdateRsvpEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun updateRsvp(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

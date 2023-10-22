@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.TokenType
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
 @Component
@@ -13,6 +14,16 @@ class SecurityService(
     private val sessionService: SessionService,
     private val apiKeyService: ApiKeyService,
 ) {
+    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>): Pair<HttpStatus, String> {
+        if (!authenticateToken(token)) return Pair(HttpStatus.UNAUTHORIZED, "Unauthenticated")
+
+        if (!validateTokenSchema(token, schemas)) return Pair(HttpStatus.UNAUTHORIZED, "Unsupported schema")
+
+        if (!authorizeToken(token, scopes)) return Pair(HttpStatus.FORBIDDEN, "Access denied")
+
+        return Pair(HttpStatus.OK, "Authorized")
+    }
+
     suspend fun authenticateToken(token: String): Boolean {
         val schema = getSchema(token)
         val tokenStr = token.removePrefix(schema.schema)

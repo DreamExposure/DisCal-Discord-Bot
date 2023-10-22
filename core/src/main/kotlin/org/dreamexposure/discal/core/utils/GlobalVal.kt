@@ -32,6 +32,7 @@ object GlobalVal {
 
     val JSON = "application/json; charset=utf-8".toMediaType()
 
+    @Deprecated("Use DI instead")
     val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
     val JSON_FORMAT = Json {

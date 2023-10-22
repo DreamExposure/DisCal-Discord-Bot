@@ -2,7 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 
 import discord4j.common.util.Snowflake
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono
 class GetGuildSettingsEndpoint {
 
     @PostMapping(value = ["/get"], produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap<String?> { authState ->
             if (!authState.success) {

@@ -4,6 +4,9 @@ enum class Scope {
     CALENDAR_TOKEN_READ,
 
     OAUTH2_DISCORD,
+
+    INTERNAL_CAM_VALIDATE_TOKEN,
+    INTERNAL_HEARTBEAT,
     ;
 
     companion object {

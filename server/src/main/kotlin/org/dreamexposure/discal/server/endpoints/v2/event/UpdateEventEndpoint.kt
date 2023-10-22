@@ -3,12 +3,12 @@ package org.dreamexposure.discal.server.endpoints.v2.event
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.`object`.event.Recurrence
-import org.dreamexposure.discal.core.annotations.Authentication.*
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -27,7 +27,7 @@ import java.time.Instant
 @RequestMapping("/v2/event")
 class UpdateEventEndpoint(val client: DiscordClient) {
     @PostMapping("/update", produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun update(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
