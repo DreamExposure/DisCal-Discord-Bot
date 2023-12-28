@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.message.embed
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
 import org.dreamexposure.discal.core.entities.Calendar
+import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.*
@@ -14,6 +15,7 @@ import org.dreamexposure.discal.core.utils.getCommonMsg
 import reactor.core.publisher.Mono
 import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -47,14 +49,23 @@ object CalendarEmbed : EmbedMaker {
         return calendar.getUpcomingEvents(15).collectList().map { it.groupByDateMulti() }.map { events ->
             val builder = defaultBuilder(guild, settings)
 
+
             //Handle optional fields
             if (calendar.name.isNotBlank())
                 builder.title(calendar.name.toMarkdown().embedTitleSafe())
             if (calendar.description.isNotBlank())
                 builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
 
+            // Truncate dates to 23 due to discord enforcing the field limit
+            val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
+            for (event in events) {
+                if (truncatedEvents.size < 23) {
+                    truncatedEvents[event.key] = event.value
+                } else break
+            }
+
             // Show events
-            events.forEach { date ->
+            truncatedEvents.forEach { date ->
 
                 val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat, longDay = true)
 
@@ -105,7 +116,7 @@ object CalendarEmbed : EmbedMaker {
                 }
 
                 if (content.isNotBlank())
-                    builder.addField(title, content.toString(), false)
+                    builder.addField(title, content.toString().embedFieldSafe(), false)
             }
 
 
