@@ -7,6 +7,7 @@ import discord4j.rest.http.client.ClientException
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.Application.Companion.getShardIndex
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
+import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
@@ -28,7 +29,10 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 
 @Component
-class StaticMessageService(private val beanFactory: BeanFactory) : ApplicationRunner {
+class StaticMessageService(
+    private val metricService: MetricService,
+    private val beanFactory: BeanFactory
+) : ApplicationRunner {
     private val discordClient: GatewayDiscordClient
         get() = beanFactory.getBean()
 
@@ -62,9 +66,11 @@ class StaticMessageService(private val beanFactory: BeanFactory) : ApplicationRu
                                                 message.edit(MessageEditSpec.builder()
                                                         .embedsOrNull(listOf(it))
                                                         .build()
-                                                ).then(DatabaseManager.updateStaticMessage(data.copy(
-                                                        lastUpdate = Instant.now(),
-                                                        scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS))
+                                                ).doOnNext {
+                                                    metricService.incrementStaticMessagesUpdated(data.type)
+                                                }.then(DatabaseManager.updateStaticMessage(data.copy(
+                                                    lastUpdate = Instant.now(),
+                                                    scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS))
                                                 ))
                                             }
                                         })
@@ -97,7 +103,9 @@ class StaticMessageService(private val beanFactory: BeanFactory) : ApplicationRu
                                     message.edit(MessageEditSpec.builder()
                                             .embedsOrNull(listOf(it))
                                             .build()
-                                    ).then(DatabaseManager.updateStaticMessage(msg.copy(lastUpdate = Instant.now())))
+                                    ).doOnNext {
+                                        metricService.incrementStaticMessagesUpdated(msg.type)
+                                    }.then(DatabaseManager.updateStaticMessage(msg.copy(lastUpdate = Instant.now())))
                                 }.onErrorResume(ClientException.isStatusCode(403, 404)) {
                                     //Message or channel was deleted OR access was revoked, delete from database
                                     DatabaseManager.deleteStaticMessage(msg.guildId, msg.messageId)

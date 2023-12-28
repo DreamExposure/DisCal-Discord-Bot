@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
+import org.dreamexposure.discal.core.`object`.StaticMessage
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -26,6 +27,13 @@ class MetricService(
     fun incrementAnnouncementPosted() {
         meterRegistry.counter(
             "bot.discal.announcement.posted",
+        ).increment()
+    }
+
+    fun incrementStaticMessagesUpdated(type: StaticMessage.Type) {
+        meterRegistry.counter(
+            "bot.discal.static-messages.updated",
+            listOf(Tag.of("type", type.name.lowercase())),
         ).increment()
     }
 }
