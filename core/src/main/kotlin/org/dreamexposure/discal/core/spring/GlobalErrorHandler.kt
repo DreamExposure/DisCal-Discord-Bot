@@ -10,17 +10,17 @@ import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.beans.TypeMismatchException
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
-import org.springframework.context.annotation.Configuration
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 
-@Configuration
 @Order(-2)
+@Component
 class GlobalErrorHandler : ErrorWebExceptionHandler {
     override fun handle(exchange: ServerWebExchange, throwable: Throwable): Mono<Void> {
         //Handle exceptions we have codes for
