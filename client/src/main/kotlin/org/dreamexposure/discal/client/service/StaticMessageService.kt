@@ -21,6 +21,7 @@ import org.springframework.beans.factory.getBean
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
+import org.springframework.util.StopWatch
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.function.TupleUtils
@@ -38,85 +39,97 @@ class StaticMessageService(
 
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Duration.ofHours(1))
-                .onBackpressureDrop()
-                .flatMap { doMessageUpdateLogic() }
-                .doOnError { LOGGER.error(DEFAULT, "!-Static Message Service Error-!", it) }
-                .subscribe()
+            .onBackpressureDrop()
+            .flatMap { doMessageUpdateLogic() }
+            .doOnError { LOGGER.error(DEFAULT, "!-Static Message Service Error-!", it) }
+            .subscribe()
     }
 
 
     private fun doMessageUpdateLogic(): Mono<Void> {
-        return DatabaseManager.getStaticMessagesForShard(Application.getShardCount(), getShardIndex())
-                .flatMapMany { Flux.fromIterable(it) }
-                //We have no interest in updating the message so close to its last update
-                .filter { Duration.between(Instant.now(), it.lastUpdate).abs().toMinutes() >= 30 }
-                // Only update messages in range
-                .filter { Duration.between(Instant.now(), it.scheduledUpdate).toMinutes() <= 60 }
-                .flatMap { data ->
-                    discordClient.getMessageById(data.channelId, data.messageId).flatMap { message ->
-                        when (data.type) {
-                            StaticMessage.Type.CALENDAR_OVERVIEW -> {
-                                val guildMono = message.guild.cache()
-                                val setMono = guildMono.flatMap(Guild::getSettings)
-                                val calMono = guildMono.flatMap { it.getCalendar(data.calendarNumber) }
+        val taskTimer = StopWatch()
+        taskTimer.start()
 
-                                Mono.zip(guildMono, setMono, calMono).flatMap(
-                                        TupleUtils.function { guild, settings, calendar ->
-                                            CalendarEmbed.overview(guild, settings, calendar, true).flatMap {
-                                                message.edit(MessageEditSpec.builder()
-                                                        .embedsOrNull(listOf(it))
-                                                        .build()
-                                                ).doOnNext {
-                                                    metricService.incrementStaticMessagesUpdated(data.type)
-                                                }.then(DatabaseManager.updateStaticMessage(data.copy(
+        return DatabaseManager.getStaticMessagesForShard(Application.getShardCount(), getShardIndex())
+            .flatMapMany { Flux.fromIterable(it) }
+            //We have no interest in updating the message so close to its last update
+            .filter { Duration.between(Instant.now(), it.lastUpdate).abs().toMinutes() >= 30 }
+            // Only update messages in range
+            .filter { Duration.between(Instant.now(), it.scheduledUpdate).toMinutes() <= 60 }
+            .flatMap { data ->
+                discordClient.getMessageById(data.channelId, data.messageId).flatMap { message ->
+                    when (data.type) {
+                        StaticMessage.Type.CALENDAR_OVERVIEW -> {
+                            val guildMono = message.guild.cache()
+                            val setMono = guildMono.flatMap(Guild::getSettings)
+                            val calMono = guildMono.flatMap { it.getCalendar(data.calendarNumber) }
+
+                            Mono.zip(guildMono, setMono, calMono).flatMap(
+                                TupleUtils.function { guild, settings, calendar ->
+                                    CalendarEmbed.overview(guild, settings, calendar, true).flatMap {
+                                        message.edit(
+                                            MessageEditSpec.builder()
+                                                .embedsOrNull(listOf(it))
+                                                .build()
+                                        ).doOnNext {
+                                            metricService.incrementStaticMessagesUpdated(data.type)
+                                        }.then(
+                                            DatabaseManager.updateStaticMessage(
+                                                data.copy(
                                                     lastUpdate = Instant.now(),
-                                                    scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS))
-                                                ))
-                                            }
-                                        })
-                            }
+                                                    scheduledUpdate = data.scheduledUpdate.plus(1, ChronoUnit.DAYS)
+                                                )
+                                            )
+                                        )
+                                    }
+                                })
                         }
-                    }.onErrorResume(ClientException.isStatusCode(403, 404)) {
-                        //Message or channel was deleted OR access was revoked, delete from database
-                        DatabaseManager.deleteStaticMessage(data.guildId, data.messageId)
                     }
-                }.doOnError {
-                    LOGGER.error(DEFAULT, "Static message update error", it)
-                }.onErrorResume {
-                    Mono.empty()
-                }.then()
+                }.onErrorResume(ClientException.isStatusCode(403, 404)) {
+                    //Message or channel was deleted OR access was revoked, delete from database
+                    DatabaseManager.deleteStaticMessage(data.guildId, data.messageId)
+                }
+            }.doOnError {
+                LOGGER.error(DEFAULT, "Static message update error", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.doFinally {
+                taskTimer.stop()
+                metricService.recordStaticMessageTaskDuration("overall", taskTimer.totalTimeMillis)
+            }.then()
     }
 
     fun updateStaticMessage(calendar: Calendar, settings: GuildSettings): Mono<Void> {
         return discordClient.getGuildById(settings.guildID)
-                .flatMap { updateStaticMessages(it, calendar, settings) }
+            .flatMap { updateStaticMessages(it, calendar, settings) }
     }
 
     fun updateStaticMessages(guild: Guild, calendar: Calendar, settings: GuildSettings): Mono<Void> {
         return DatabaseManager.getStaticMessagesForCalendar(guild.id, calendar.calendarNumber)
-                .flatMapMany { Flux.fromIterable(it) }
-                .flatMap { msg ->
-                    when (msg.type) {
-                        StaticMessage.Type.CALENDAR_OVERVIEW -> {
-                            CalendarEmbed.overview(guild, settings, calendar, true).flatMap {
-                                guild.client.getMessageById(msg.channelId, msg.messageId).flatMap { message ->
-                                    message.edit(MessageEditSpec.builder()
-                                            .embedsOrNull(listOf(it))
-                                            .build()
-                                    ).doOnNext {
-                                        metricService.incrementStaticMessagesUpdated(msg.type)
-                                    }.then(DatabaseManager.updateStaticMessage(msg.copy(lastUpdate = Instant.now())))
-                                }.onErrorResume(ClientException.isStatusCode(403, 404)) {
-                                    //Message or channel was deleted OR access was revoked, delete from database
-                                    DatabaseManager.deleteStaticMessage(msg.guildId, msg.messageId)
-                                }
+            .flatMapMany { Flux.fromIterable(it) }
+            .flatMap { msg ->
+                when (msg.type) {
+                    StaticMessage.Type.CALENDAR_OVERVIEW -> {
+                        CalendarEmbed.overview(guild, settings, calendar, true).flatMap {
+                            guild.client.getMessageById(msg.channelId, msg.messageId).flatMap { message ->
+                                message.edit(
+                                    MessageEditSpec.builder()
+                                        .embedsOrNull(listOf(it))
+                                        .build()
+                                ).doOnNext {
+                                    metricService.incrementStaticMessagesUpdated(msg.type)
+                                }.then(DatabaseManager.updateStaticMessage(msg.copy(lastUpdate = Instant.now())))
+                            }.onErrorResume(ClientException.isStatusCode(403, 404)) {
+                                //Message or channel was deleted OR access was revoked, delete from database
+                                DatabaseManager.deleteStaticMessage(msg.guildId, msg.messageId)
                             }
                         }
                     }
-                }.doOnError {
-                    LOGGER.error(DEFAULT, "Static message update error", it)
-                }.onErrorResume {
-                    Mono.empty()
-                }.then()
+                }
+            }.doOnError {
+                LOGGER.error(DEFAULT, "Static message update error", it)
+            }.onErrorResume {
+                Mono.empty()
+            }.then()
     }
 }

@@ -17,17 +17,23 @@ class MetricService(
         ).record(Duration.ofMillis(duration))
     }
 
-    fun recordAnnouncementTaskDuration(scope: String, duration: Long) {
+    fun recordTaskDuration(task: String, tags: List<Tag>, duration: Long) {
         meterRegistry.timer(
-            "bot.discal.announcement.task.duration",
-            listOf(Tag.of("scope", scope)),
+            "bot.task.duration",
+            tags.plus(Tag.of("task", task))
         ).record(Duration.ofMillis(duration))
     }
 
+    fun recordAnnouncementTaskDuration(scope: String, duration: Long) {
+        recordTaskDuration("announcement", listOf(Tag.of("scope", scope)), duration)
+    }
+
     fun incrementAnnouncementPosted() {
-        meterRegistry.counter(
-            "bot.discal.announcement.posted",
-        ).increment()
+        meterRegistry.counter("bot.discal.announcement.posted").increment()
+    }
+
+    fun recordStaticMessageTaskDuration(scope: String, duration: Long) {
+        recordTaskDuration("static-message", listOf(Tag.of("scope", scope)), duration)
     }
 
     fun incrementStaticMessagesUpdated(type: StaticMessage.Type) {
