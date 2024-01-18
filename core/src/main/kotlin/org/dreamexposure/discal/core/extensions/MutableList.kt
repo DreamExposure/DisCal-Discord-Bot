@@ -35,6 +35,23 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
 }
 
 fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
+    // Get a list of all distinct days events take place on (the first start date and the last end date)
+    val startRange = this.map { it.start }.minOf { it }
+    val endRange = this.map { it.end }.maxOf { it }
+    val startDate = ZonedDateTime.ofInstant(startRange, this.first().timezone).truncatedTo(ChronoUnit.DAYS)
+        .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
+    val endDate = ZonedDateTime.ofInstant(endRange, this.first().timezone).truncatedTo(ChronoUnit.DAYS)
+        .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
+
+    // Get a list of all days between the start and end dates
+    val days = mutableListOf<ZonedDateTime>()
+    var current = startDate
+    while (current.isBefore(endDate)) {
+        current = current.plusDays(1)
+        days.add(current)
+    }
+
+    /*
     // First get a list of distinct dates each event starts on
     var rawDates = this.map {
         ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
@@ -59,9 +76,10 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
 
         days
     }.flatten())
+     */
 
     // Sort dates
-    val sortedDates = rawDates.distinct().sorted().toList()
+    val sortedDates = days.distinct().sorted().toList()
 
     // Group events
     val multi = mutableMapOf<ZonedDateTime, List<Event>>()
@@ -82,5 +100,5 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
         }
         multi[it] = events.sortedBy(Event::start)
     }
-    return multi.toSortedMap()
+    return multi.filter { it.value.isNotEmpty() }.toSortedMap()
 }
