@@ -36,13 +36,13 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
 
 fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
     // First get a list of distinct dates each event starts on
-    val rawDates = this.map {
+    var rawDates = this.map {
         ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
             .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-    }.toMutableList()
+    }.toList()
 
     // Add days for multi-day events including end dates
-    rawDates.plus(this.asSequence().filter {
+    rawDates = rawDates.plus(this.asSequence().filter {
         it.isMultiDay()
     }.map {
         val start = ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
@@ -58,7 +58,7 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
         }
 
         days
-    })
+    }.flatten())
 
     // Sort dates
     val sortedDates = rawDates.distinct().sorted().toList()
