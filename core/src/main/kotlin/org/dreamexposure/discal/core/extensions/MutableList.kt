@@ -4,7 +4,6 @@ import org.dreamexposure.discal.core.entities.Event
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.util.stream.Collectors
 
 
 fun List<String>.asStringList(): String {
@@ -24,17 +23,9 @@ fun MutableList<String>.setFromString(strList: String) {
     this += strList.split(",").filter(String::isNotBlank)
 }
 
-
 fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
-    return this.stream()
-        .collect(Collectors.groupingBy {
-            ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
-                .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-        }).toSortedMap()
+    if (this.isEmpty()) return emptyMap()
 
-}
-
-fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
     // Get a list of all distinct days events take place on (the first start date and the last end date)
     val startRange = this.map { it.start }.minOf { it }
     val endRange = this.map { it.end }.maxOf { it }
