@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.server.endpoints.v2.account
 
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono
 @RestController
 @RequestMapping("/v2/account/key")
 class KeyRequestEndpoint {
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     @PostMapping("/readonly/get", produces = ["application/json"])
     fun getReadOnlyKey(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->

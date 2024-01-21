@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.discordjson.json.ImmutableNicknameModifyData
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.*
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
@@ -24,7 +24,7 @@ import java.util.*
 @RequestMapping("/v2/guild")
 class UpdateWebGuildEndpoint(val client: DiscordClient) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun updateGuild(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

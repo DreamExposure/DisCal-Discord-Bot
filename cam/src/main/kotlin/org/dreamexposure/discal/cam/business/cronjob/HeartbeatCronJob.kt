@@ -2,6 +2,7 @@ package org.dreamexposure.discal.cam.business.cronjob
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.reactor.mono
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
@@ -12,7 +13,6 @@ import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -23,6 +23,7 @@ import reactor.core.scheduler.Schedulers
 
 @Component
 class HeartbeatCronJob(
+    private val httpClient: OkHttpClient,
     private val objectMapper: ObjectMapper,
 ): ApplicationRunner {
     private final val apiUrl = Config.URL_API.getString()
@@ -39,13 +40,13 @@ class HeartbeatCronJob(
         val requestBody = HeartbeatRequest(HeartbeatType.CAM, instanceData = InstanceData())
 
         val request = Request.Builder()
-            .url("$apiUrl/v2/status/heartbeat")
+            .url("$apiUrl/v3/status/heartbeat")
             .post(objectMapper.writeValueAsString(requestBody).toRequestBody(JSON))
-            .header("Authorization", Config.SECRET_DISCAL_API_KEY.getString())
+            .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
             .header("Content-Type", "application/json")
             .build()
 
-        Mono.fromCallable(HTTP_CLIENT.newCall(request)::execute)
+        Mono.fromCallable(httpClient.newCall(request)::execute)
             .map(Response::close)
             .subscribeOn(Schedulers.boundedElastic())
             .doOnError { LOGGER.error(GlobalVal.DEFAULT, "[Heartbeat] Failed to heartbeat", it) }

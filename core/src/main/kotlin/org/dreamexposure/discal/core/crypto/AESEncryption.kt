@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.core.crypto
 
 import org.apache.commons.codec.binary.Base64
-import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.logger.LOGGER
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -31,9 +30,7 @@ class AESEncryption(privateKey: String) {
             Base64.encodeBase64String(encrypted)
         }.doOnError {
             LOGGER.error("Encrypt failure", it)
-        }.onErrorResume {
-            Mono.error(IllegalStateException("Encrypt Failure", it))
-        }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
+        }.subscribeOn(Schedulers.single())
     }
 
 
@@ -44,8 +41,6 @@ class AESEncryption(privateKey: String) {
             String(decrypted!!, StandardCharsets.UTF_8)
         }.doOnError {
             LOGGER.error("Decrypt failure", it)
-        }.onErrorResume {
-            Mono.error(IllegalStateException("Decrypt Failure", it))
-        }.subscribeOn(Schedulers.single()).switchIfEmpty(Mono.error(EmptyNotAllowedException()))
+        }.subscribeOn(Schedulers.single())
     }
 }

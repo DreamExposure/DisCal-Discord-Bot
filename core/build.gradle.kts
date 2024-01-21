@@ -33,14 +33,14 @@ kotlin {
 gitProperties {
     extProperty = "gitPropertiesExt"
 
-    val versionName = if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+    val buildVersion = if (System.getenv("GITHUB_RUN_NUMBER") != null) {
         "$version.b${System.getenv("GITHUB_RUN_NUMBER")}"
     } else {
         "$version.d${System.currentTimeMillis().div(1000)}" //Seconds since epoch
     }
 
     // Custom git properties for compile-time constants
-    customProperty("discal.version", versionName)
+    customProperty("discal.version", buildVersion)
     customProperty("discal.version.d4j", discord4jVersion)
 }
 

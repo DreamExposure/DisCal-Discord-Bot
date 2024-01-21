@@ -422,7 +422,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                             .flatMap { event.followupEphemeral(getMessage("recur.success.disable", settings), it) }
                 }
             } else {
-                event.followupEphemeral(getMessage("error.wizard.notStart", settings))
+                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }

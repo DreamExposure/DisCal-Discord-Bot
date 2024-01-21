@@ -1,12 +1,9 @@
 package org.dreamexposure.discal.core.extensions
 
 import org.dreamexposure.discal.core.entities.Event
-import org.dreamexposure.discal.core.logger.LOGGER
-import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
-import java.util.stream.Collectors
 
 
 fun List<String>.asStringList(): String {
@@ -26,69 +23,54 @@ fun MutableList<String>.setFromString(strList: String) {
     this += strList.split(",").filter(String::isNotBlank)
 }
 
-
 fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
-    return this.stream()
-        .collect(Collectors.groupingBy {
-            ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
-                .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-        }).toSortedMap()
+    if (this.isEmpty()) return emptyMap()
 
-}
+    // Get a list of all distinct days events take place on (the first start date and the last end date)
+    val startRange = this.map { it.start }.minOf { it }
+    val endRange = this.map { it.end }.maxOf { it }
+    val startDate = ZonedDateTime.ofInstant(startRange, this.first().timezone).truncatedTo(ChronoUnit.DAYS)
+        .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
+    val endDate = ZonedDateTime.ofInstant(endRange, this.first().timezone).truncatedTo(ChronoUnit.DAYS)
+        .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
 
-// TODO: This could use some optimization, but we'll leave it for now
-fun MutableList<Event>.groupByDateMultiOld(): Map<ZonedDateTime, List<Event>> {
-    // Each of the days events start on, their ending is ignored
-    val dates = this.map {
-        ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
-            .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-    }.distinct().sorted()
-
-    val multi: MutableMap<ZonedDateTime, List<Event>> = mutableMapOf()
-
-    dates.forEach {
-        LOGGER.debug("Date: $it")
-
-        val range = LongRange(it.toEpochSecond(), it.plusHours(23).plusMinutes(59).toEpochSecond())
-        LOGGER.debug("Range: ${Instant.ofEpochSecond(range.first)} - ${Instant.ofEpochSecond(range.last)}")
-
-        val events: MutableList<Event> = mutableListOf()
-
-        this.forEach { event ->
-            // When we check event end, we bump it back a second in order to prevent weirdness.
-            if (range.contains(event.start.epochSecond) || range.contains(event.end.epochSecond - 1)) {
-                LOGGER.debug("Event in range? Start: ${event.start} | End: ${event.end} | Name: ${event.name}")
-                events.add(event)
-            } else if (event.start.epochSecond < range.first && event.end.epochSecond > range.last) {
-                // This is a multi-day event that starts before today and ends after today
-                LOGGER.debug("Event extends beyond range? Start: ${event.start} | End: ${event.end} | Name: ${event.name}")
-                events.add(event)
-            }
-        }
-        LOGGER.debug("events in this range: ${events.size}")
-        multi[it] = events
+    // Get a list of all days between the start and end dates
+    val days = mutableListOf<ZonedDateTime>()
+    var current = startDate
+    while (current.isBefore(endDate)) {
+        current = current.plusDays(1)
+        days.add(current)
     }
 
-    return multi.toSortedMap()
-}
-
-fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
+    /*
     // First get a list of distinct dates each event starts on
-    val rawDates = this.map {
+    var rawDates = this.map {
         ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
             .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-    }.toMutableList()
+    }.toList()
 
-    // Add multi-day end dates if not already present
-    rawDates += this.asSequence().filter {
+    // Add days for multi-day events including end dates
+    rawDates = rawDates.plus(this.asSequence().filter {
         it.isMultiDay()
     }.map {
-        ZonedDateTime.ofInstant(it.end, it.timezone).truncatedTo(ChronoUnit.DAYS)
+        val start = ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
             .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-    }
+        val end = ZonedDateTime.ofInstant(it.end, it.timezone).truncatedTo(ChronoUnit.DAYS)
+            .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
+
+        val days = listOf<ZonedDateTime>()
+        var current = start
+        while (current.isBefore(end)) {
+            current = current.plusDays(1)
+            days.plus(current)
+        }
+
+        days
+    }.flatten())
+     */
 
     // Sort dates
-    val sortedDates = rawDates.distinct().sorted().toList()
+    val sortedDates = days.distinct().sorted().toList()
 
     // Group events
     val multi = mutableMapOf<ZonedDateTime, List<Event>>()
@@ -109,5 +91,5 @@ fun MutableList<Event>.groupByDateMulti(): Map<ZonedDateTime, List<Event>> {
         }
         multi[it] = events.sortedBy(Event::start)
     }
-    return multi.toSortedMap()
+    return multi.filter { it.value.isNotEmpty() }.toSortedMap()
 }

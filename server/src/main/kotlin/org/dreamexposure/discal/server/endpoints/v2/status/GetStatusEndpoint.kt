@@ -2,7 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.status
 
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.network.discal.NetworkManager
@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono
 class GetStatusEndpoint(val networkManager: NetworkManager) {
 
     @PostMapping("/get", produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getStatus(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return Authentication.authenticate(swe).map { authState ->
             if (!authState.success) {

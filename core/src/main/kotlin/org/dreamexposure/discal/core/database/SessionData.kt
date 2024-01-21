@@ -10,4 +10,5 @@ data class SessionData(
     val expiresAt: Instant,
     val accessToken: String,
     val refreshToken: String,
+    val scopes: String,
 )

@@ -8,6 +8,7 @@ import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import java.time.Instant
+import javax.crypto.IllegalBlockSizeException
 
 data class Calendar private constructor(
     val guildId: Snowflake,
@@ -21,6 +22,11 @@ data class Calendar private constructor(
     companion object {
         suspend operator fun invoke(data: CalendarData): Calendar {
             val aes = AESEncryption(data.privateKey)
+            val accessToken = try {
+                aes.decrypt(data.accessToken).awaitSingle()
+            } catch (ex: IllegalBlockSizeException) {
+                null
+            }
 
             return Calendar(
                 guildId = data.guildId.asSnowflake(),
@@ -32,9 +38,9 @@ data class Calendar private constructor(
                 secrets = Secrets(
                     credentialId = data.credentialId,
                     privateKey = data.privateKey,
-                    expiresAt = data.expiresAt.asInstantMilli(),
+                    expiresAt = if (accessToken != null) data.expiresAt.asInstantMilli() else Instant.EPOCH,
                     refreshToken = aes.decrypt(data.refreshToken).awaitSingle(),
-                    accessToken = aes.decrypt(data.accessToken).awaitSingle(),
+                    accessToken = accessToken ?: "",
                 )
             )
         }

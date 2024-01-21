@@ -3,7 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v2.calendar
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.annotations.Authentication.AccessLevel
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v2/calendar")
 class GetCalendarEndpoint(val client: DiscordClient) {
     @PostMapping("/get", produces = ["application/json"])
-    @org.dreamexposure.discal.core.annotations.Authentication(access = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getCalendar(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return Authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

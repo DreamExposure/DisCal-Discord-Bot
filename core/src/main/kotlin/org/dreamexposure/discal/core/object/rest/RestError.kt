@@ -6,6 +6,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
+@Deprecated("Use ErrorResponse instead")
 @Serializable(with = RestErrorSerializer::class)
 enum class RestError(
         val code: Int,

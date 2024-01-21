@@ -25,8 +25,14 @@ kotlin {
 
 jib {
     to {
+        val buildVersion = if (System.getenv("GITHUB_RUN_NUMBER") != null) {
+            "$version.b${System.getenv("GITHUB_RUN_NUMBER")}"
+        } else {
+            "$version.d${System.currentTimeMillis().div(1000)}" //Seconds since epoch
+        }
+
         image = "rg.nl-ams.scw.cloud/dreamexposure/discal-client"
-        tags = mutableSetOf("latest", version.toString())
+        tags = mutableSetOf("latest", version.toString(), buildVersion)
     }
 
     val baseImage: String by properties

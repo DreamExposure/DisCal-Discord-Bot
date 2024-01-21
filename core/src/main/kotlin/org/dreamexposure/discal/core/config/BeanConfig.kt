@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import discord4j.common.JacksonResources
+import okhttp3.OkHttpClient
 import org.dreamexposure.discal.core.serializers.DurationMapper
 import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import org.springframework.context.annotation.Bean
@@ -27,5 +28,10 @@ class BeanConfig {
     @Bean
     fun handlerMapping(): RequestMappingHandlerMapping {
         return RequestMappingHandlerMapping()
+    }
+
+    @Bean
+    fun httpClient(): OkHttpClient {
+        return OkHttpClient()
     }
 }

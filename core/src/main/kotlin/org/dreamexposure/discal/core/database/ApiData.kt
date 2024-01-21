@@ -8,4 +8,5 @@ data class ApiData(
     val apiKey: String,
     val blocked: Boolean,
     val timeIssued: Long,
+    val scopes: String,
 )

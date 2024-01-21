@@ -1,117 +1,99 @@
 package org.dreamexposure.discal.core.spring
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
-import org.dreamexposure.discal.core.annotations.Authentication
-import org.dreamexposure.discal.core.business.ApiKeyService
-import org.dreamexposure.discal.core.business.SessionService
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.exceptions.AuthenticationException
-import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
-import org.dreamexposure.discal.core.exceptions.TeaPotException
+import org.dreamexposure.discal.core.extensions.spring.writeJsonString
+import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
+import org.dreamexposure.discal.core.`object`.rest.v1.security.ValidateRequest
+import org.dreamexposure.discal.core.`object`.rest.v1.security.ValidateResponse
+import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
 import org.springframework.web.server.WebFilterChain
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.time.Duration
-import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentMap
 
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
 class SecurityWebFilter(
-    private val sessionService: SessionService,
     private val handlerMapping: RequestMappingHandlerMapping,
-    private val apiKeyService: ApiKeyService,
+    private val httpClient: OkHttpClient,
+    private val objectMapper: ObjectMapper,
 ) : WebFilter {
-    private val readOnlyKeys: ConcurrentMap<String, Instant> = ConcurrentHashMap()
-
-    init {
-        Flux.interval(Duration.ofMinutes(30))
-            .map { handleExpiredKeys() }
-            .subscribe()
-    }
-
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
-        return handlerMapping.getHandler(exchange).cast(HandlerMethod::class.java)
-            .onErrorResume { Mono.error(EmptyNotAllowedException()) }
-            .switchIfEmpty(Mono.error(EmptyNotAllowedException())) // Don't apply custom filter if this is not on a method
-            .filter { it.hasMethodAnnotation(Authentication::class.java) }
-            .switchIfEmpty(Mono.error(IllegalAccessException("No authentication annotation!")))
-            .map { it.getMethodAnnotation(Authentication::class.java)!! }
-            .map(Authentication::access)
-            .filter { it != Authentication.AccessLevel.PUBLIC } //if public, we don't need to check headers
-            .flatMap { requiredAccess ->
-                authenticate(exchange)
-                    .filter { it < requiredAccess }
-                    .flatMap {
-                        Mono.error<Void>(AuthenticationException("Insufficient access level!"))
-                    }
-            }.onErrorResume(EmptyNotAllowedException::class.java) { Mono.empty() }
-            .then(chain.filter(exchange))
+        return mono {
+            doSecurityFilter(exchange, chain)
+        }.then(chain.filter(exchange))
     }
 
-    fun saveReadOnlyKey(key: String, expireAt: Instant) {
-        readOnlyKeys[key] = expireAt
-    }
+    suspend fun doSecurityFilter(exchange: ServerWebExchange, chain: WebFilterChain) {
+        val handlerMethod = handlerMapping.getHandler(exchange)
+            .cast(HandlerMethod::class.java)
+            .onErrorResume { Mono.empty() }
+            .awaitFirstOrNull() ?: return
 
-    private fun handleExpiredKeys() {
-        val allToRemove = mutableListOf<String>()
+        if (!handlerMethod.hasMethodAnnotation(SecurityRequirement::class.java)) {
+            throw IllegalStateException("No SecurityRequirement annotation!")
+        }
 
-        readOnlyKeys.forEach { if (Instant.now().isAfter(it.value)) allToRemove += it.key }
+        val authAnnotation = handlerMethod.getMethodAnnotation(SecurityRequirement::class.java)!!
+        val authHeader = exchange.request.headers.getOrEmpty("Authorization").firstOrNull()
 
-        allToRemove.forEach { readOnlyKeys.remove(it) }
-    }
+        if (authAnnotation.disableSecurity) return
 
-    /**
-     * Returns the highest permission this user has, or throws an error
-     */
-    private fun authenticate(exchange: ServerWebExchange): Mono<Authentication.AccessLevel> {
-        return Mono.defer {
-            // Make sure auth header is present
-            if (!exchange.request.headers.containsKey("Authorization")) {
-                return@defer Mono.error(AuthenticationException("No authorization header present"))
+        if (authHeader == null) {
+            exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("Missing Authorization header"))
+            ).awaitFirstOrNull()
+            return
+        }
+
+        if (authHeader.equals("teapot", ignoreCase = true)) {
+            exchange.response.statusCode = HttpStatus.I_AM_A_TEAPOT
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("I'm a teapot"))
+            ).awaitFirstOrNull()
+            return
+        }
+
+        // Use CAM to validate token
+        val requestBody = ValidateRequest(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList())
+        val request = Request.Builder()
+            .url("${Config.URL_CAM.getString()}/v1/security/validate")
+            .post(objectMapper.writeValueAsString(requestBody).toRequestBody(JSON))
+            .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
+            .header("Content-Type", "application/json")
+            .build()
+
+        val response = httpClient.newCall(request).execute()
+        if (response.isSuccessful) {
+            val responseBody = objectMapper.readValue(response.body!!.string(), ValidateResponse::class.java)
+            response.close()
+
+            if (!responseBody.valid) {
+                exchange.response.statusCode = responseBody.code
+                exchange.response.writeJsonString(
+                    objectMapper.writeValueAsString(ErrorResponse(responseBody.message))
+                ).awaitFirstOrNull()
+                return
             }
+        } else {
+            val responseBody = objectMapper.readValue(response.body!!.string(), ErrorResponse::class.java)
+            response.close()
+            throw IllegalStateException("Failed to validate token | ${response.code} | ${responseBody.message}")
+        }
 
-            val authHeader = exchange.request.headers["Authorization"]!![0]
-            return@defer when {
-                // I'm a teapot
-                authHeader.equals("teapot", true) -> {
-                    Mono.error(TeaPotException())
-                }
-
-                authHeader.equals(Config.SECRET_DISCAL_API_KEY.getString()) -> { // This is from within discal network
-                    Mono.just(Authentication.AccessLevel.ADMIN)
-                }
-
-                readOnlyKeys.containsKey(authHeader) -> { // Read-only key granted for embed pages
-                    Mono.just(Authentication.AccessLevel.READ)
-                }
-                authHeader.startsWith("Bearer ") -> {
-                    mono { sessionService.getSession(authHeader.substringAfter("Bearer ")) }.flatMap { session ->
-                        if (session.expiresAt.isAfter(Instant.now())) {
-                            Mono.just(Authentication.AccessLevel.WRITE)
-                        } else {
-                            Mono.error(AuthenticationException("Session expired"))
-                        }
-                    }.switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
-                }
-                else -> {
-                    // Check if this is an API key
-                    mono { apiKeyService.getKey(authHeader) }.flatMap { key ->
-                        if (!key.blocked) {
-                            Mono.just(Authentication.AccessLevel.WRITE)
-                        } else {
-                            Mono.error(AuthenticationException("API key blocked"))
-                        }
-                    }.switchIfEmpty(Mono.error(AuthenticationException("API key not found")))
-                }
-            }
-        }.switchIfEmpty(Mono.error(IllegalStateException("uh oh")))
+        // If we made it here, everything is good to go.
     }
 }
