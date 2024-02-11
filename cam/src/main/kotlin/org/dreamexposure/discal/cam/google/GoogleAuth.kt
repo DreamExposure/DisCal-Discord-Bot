@@ -99,7 +99,7 @@ class GoogleAuth(
 
                 if (body.error == "invalid_grant") {
                     LOGGER.debug(DEFAULT, "[Google] Access to resource has been revoked")
-                    throw AccessRevokedException()
+                    throw AccessRevokedException() // TODO: How should I handle this for external calendars? Right now we just delete everything
                 } else {
                     LOGGER.error(DEFAULT, "[Google] Error requesting new access token | ${response.code} | ${response.message} | $body")
                     null
