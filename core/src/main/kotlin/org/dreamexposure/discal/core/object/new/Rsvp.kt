@@ -12,7 +12,7 @@ data class Rsvp(
     val eventId: String,
     val calendarNumber: Int = 1,
 
-    val eventEnd: Instant = Instant.MIN,
+    val eventEnd: Instant = Instant.ofEpochMilli(0),
 
     val goingOnTime: Set<Snowflake> = setOf(),
     val goingLate: Set<Snowflake> = setOf(),
