@@ -1,3 +1,3 @@
 package org.dreamexposure.discal.core.exceptions
 
-class NotFoundException: Exception("resource not found")
+class NotFoundException(message: String? = null): Exception(message ?: message ?: "resource not found")

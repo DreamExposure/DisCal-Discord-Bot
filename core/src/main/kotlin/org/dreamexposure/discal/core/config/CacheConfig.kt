@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.CredentialsCache
 import org.dreamexposure.discal.OauthStateCache
+import org.dreamexposure.discal.RsvpCache
 import org.dreamexposure.discal.core.cache.JdkCacheRepository
 import org.dreamexposure.discal.core.cache.RedisStringCacheRepository
 import org.dreamexposure.discal.core.extensions.asMinutes
@@ -18,6 +19,7 @@ class CacheConfig {
     private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
     private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
     private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
+    private val rsvpTtl = Config.CACHE_TTL_RSVP_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -39,6 +41,12 @@ class CacheConfig {
     fun calendarRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "Calendars", calendarTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun rsvpRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): RsvpCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "Rsvps", rsvpTtl)
+
 
     // In-memory fallback caching
     @Bean
@@ -49,4 +57,7 @@ class CacheConfig {
 
     @Bean
     fun calendarFallbackCache(): CalendarCache = JdkCacheRepository(calendarTtl)
+
+    @Bean
+    fun rsvpFallbackCache(): RsvpCache = JdkCacheRepository(rsvpTtl)
 }

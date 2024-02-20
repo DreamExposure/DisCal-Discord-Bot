@@ -11,7 +11,6 @@ import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.event.Recurrence
-import org.dreamexposure.discal.core.`object`.event.RsvpData
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import org.json.JSONObject
 import reactor.core.publisher.Flux
@@ -124,15 +123,6 @@ interface Event {
             }
     }
 
-    /**
-     * Attempts to request the [RsvpData] of the event.
-     * If an error occurs, it is emitted through the Mono.
-     *
-     * @return A [Mono] containing the [RsvpData] of the event
-     */
-    fun getRsvp(): Mono<RsvpData> = DatabaseManager.getRsvpData(guildId, eventId)
-
-    fun updateRsvp(rsvp: RsvpData) = DatabaseManager.updateRsvpData(rsvp)
 
     /**
      * Attempts to update the event and returns the result.

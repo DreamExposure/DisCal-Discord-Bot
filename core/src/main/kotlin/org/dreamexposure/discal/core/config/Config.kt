@@ -24,7 +24,8 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_CREDENTIALS_MINUTES("bot.cache.ttl-minutes.credentials", 120),
     CACHE_TTL_ACCOUNTS_MINUTES("bot.cache.ttl-minutes.accounts", 60),
     CACHE_TTL_OAUTH_STATE_MINUTES("bot.cache.ttl-minutes.oauth.state", 5),
-    CACHE_TTL_CALENDAR_MINUTES("bots.cache.ttl-minutes.calendar", 120),
+    CACHE_TTL_CALENDAR_MINUTES("bot.cache.ttl-minutes.calendar", 120),
+    CACHE_TTL_RSVP_MINUTES("bot.cache.ttl-minutes.rsvp", 60),
 
     // Security configuration
 
@@ -51,6 +52,9 @@ enum class Config(private val key: String, private var value: Any? = null) {
     URL_SUPPORT("bot.url.support", "https://discord.gg/2TFqyuy"),
     URL_INVITE("bot.url.invite"),
     URL_DISCORD_REDIRECT("bot.url.discord.redirect"),
+
+    // UI and UX
+    EMBED_RSVP_WAITLIST_DISPLAY_LENGTH("bot.ui.embed.rsvp.waitlist.length", 3),
 
     // Everything else
     SHARD_COUNT("bot.sharding.count"),

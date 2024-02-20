@@ -1,29 +1,33 @@
 package org.dreamexposure.discal.client.commands.global
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.client.message.embed.RsvpEmbed
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.RsvpService
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils.function
 
 @Component
-class RsvpCommand : SlashCommand {
+class RsvpCommand(
+    private val rsvpService: RsvpService,
+    private val embedService: EmbedService,
+) : SlashCommand {
     override val name = "rsvp"
     override val ephemeral = true
 
-    @Deprecated("Use new handleSuspend for K-coroutines")
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+
+    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "ontime" -> onTime(event, settings)
             "late" -> late(event, settings)
@@ -33,218 +37,225 @@ class RsvpCommand : SlashCommand {
             "list" -> list(event, settings)
             "limit" -> limit(event, settings)
             "role" -> role(event, settings)
-            else -> Mono.empty() //Never can reach this, makes compiler happy.
+            else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private fun onTime(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun onTime(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    if (!calEvent.isOver()) {
-                        val member = event.interaction.member.get()
-                        calEvent.getRsvp().flatMap { rsvp ->
-                            if (rsvp.hasRoom(member.id.asString())) {
-                                rsvp.removeCompletely(member)
-                                    .flatMap { it.addGoingOnTime(member).thenReturn(it) }
-                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                    .flatMap {
-                                        event.followupEphemeral(getMessage("onTime.success", settings), it)
-                                    }
-                            } else {
-                                // No room, add to waitlist instead
-                                rsvp.removeCompletely(member)
-                                    .doOnNext { it.waitlist.add(member.id.asString()) }
-                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                    .flatMap {
-                                        event.followupEphemeral(getMessage("onTime.failure.limit", settings), it)
-                                    }
-                            }
-                        }
-                    } else {
-                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                    }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+        val userId = event.interaction.user.id
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        return if (rsvp.hasRoom(userId)) {
+            rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingOnTime = rsvp.goingOnTime + userId))
+
+            event.followupEphemeral(
+                getMessage("onTime.success", settings),
+                embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+            ).awaitSingle()
+        } else {
+            rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, waitlist = rsvp.waitlist + userId))
+
+            event.followupEphemeral(
+                getMessage("onTime.failure.limit", settings),
+                embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+            ).awaitSingle()
         }
     }
 
-    private fun late(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun late(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    if (!calEvent.isOver()) {
-                        val member = event.interaction.member.get()
-                        calEvent.getRsvp().flatMap { rsvp ->
-                            if (rsvp.hasRoom(member.id.asString())) {
-                                rsvp.removeCompletely(member)
-                                    .flatMap { it.addGoingLate(member).thenReturn(it) }
-                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                    .flatMap { event.followupEphemeral(getMessage("late.success", settings), it) }
-                            } else {
-                                // No room, add to waitlist instead
-                                rsvp.removeCompletely(member)
-                                    .doOnNext { it.waitlist.add(member.id.asString()) }
-                                    .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                    .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                    .flatMap {
-                                        event.followupEphemeral(getMessage("late.failure.limit", settings), it)
-                                    }
-                            }
-                        }
-                    } else {
-                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                    }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
+        val userId = event.interaction.user.id
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        return if (rsvp.hasRoom(userId)) {
+            rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingLate = rsvp.goingLate + userId))
+
+            event.followupEphemeral(
+                getMessage("late.success", settings),
+                embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+            ).awaitSingle()
+        } else {
+            rsvp = rsvpService.upsertRsvp(rsvp.copy(waitlist = rsvp.waitlist + userId))
+
+            event.followupEphemeral(
+                getMessage("late.failure.limit", settings),
+                embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+            ).awaitSingle()
         }
     }
 
-    private fun unsure(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun unsure(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    if (!calEvent.isOver()) {
-                        val member = event.interaction.member.get()
-                        calEvent.getRsvp()
-                            .flatMap { it.removeCompletely(member) }
-                            .doOnNext { it.undecided.add(member.id.asString()) }
-                            .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                            .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                            .flatMap {
-                                event.followupEphemeral(getMessage("unsure.success", settings), it)
-                            }
-                    } else {
-                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                    }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-        }
+        val userId = event.interaction.user.id
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, undecided = rsvp.undecided + userId))
+
+        return event.followupEphemeral(
+            getMessage("unsure.success", settings),
+            embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+        ).awaitSingle()
     }
 
-    private fun notGoing(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun notGoing(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    if (!calEvent.isOver()) {
-                        val member = event.interaction.member.get()
-                        calEvent.getRsvp()
-                            .flatMap { it.removeCompletely(member) }
-                            .doOnNext { it.notGoing.add(member.id.asString()) }
-                            .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                            .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                            .flatMap {
-                                event.followupEphemeral(getMessage("notGoing.success", settings), it)
-                            }
-                    } else {
-                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                    }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-        }
+        val userId = event.interaction.user.id
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, notGoing = rsvp.notGoing + userId))
+
+        return event.followupEphemeral(
+            getMessage("notGoing.success", settings),
+            embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+        ).awaitSingle()
     }
 
-    private fun remove(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun remove(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    if (!calEvent.isOver()) {
-                        val member = event.interaction.member.get()
-                        calEvent.getRsvp().flatMap { rsvp ->
-                            // Add next person on waitlist if this user was previously going to attend
-                            rsvp.removeCompletely(member, true)
-                                .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                .flatMap { event.followupEphemeral(getMessage("remove.success", settings), it) }
-                        }
-                    } else {
-                        event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                    }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-        }
+        val userId = event.interaction.user.id
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId))
+
+        return event.followupEphemeral(
+            getMessage("remove.success", settings),
+            embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+        ).awaitSingle()
     }
 
-    private fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEvent(eventId).flatMap { calEvent ->
-                    RsvpEmbed.list(guild, settings, calEvent).flatMap { event.followupEphemeral(it) }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-        }
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+
+        val rsvp = rsvpService.getRsvp(guild.id, eventId)
+
+        return event.followupEphemeral(embedService.rsvpListEmbed(calendarEvent, rsvp, settings)).awaitSingle()
     }
 
-    private fun limit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun limit(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -262,82 +273,76 @@ class RsvpCommand : SlashCommand {
             .map(Long::toInt)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member)
-            .filterWhen(Member::hasControlRole)
-            .flatMap { event.interaction.guild }
-            .flatMap { guild ->
-                guild.getCalendar(calendarNumber).flatMap { cal ->
-                    cal.getEvent(eventId).flatMap { calEvent ->
-                        if (!calEvent.isOver()) {
-                            calEvent.getRsvp()
-                                .doOnNext { it.limit = limit }
-                                // Handle adding other users to going in the event the limit was increased/removed
-                                .flatMap { it.fillRemaining(guild, settings) }
-                                .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                .flatMap {
-                                    event.followupEphemeral(getMessage("limit.success", settings, "$limit"), it)
-                                }
-                        } else {
-                            event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                        }
-                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate control role first to reduce work
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole)
+            return event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        rsvp = rsvpService.upsertRsvp(rsvp.copy(limit = limit))
+
+
+        return event.followupEphemeral(
+            getMessage("limit.success", settings),
+            embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+        ).awaitSingle()
     }
 
-    private fun role(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun role(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        if (!settings.patronGuild)
+            return event.followupEphemeral(getCommonMsg("error.patronOnly", settings)).awaitSingle()
+
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
+        val role = Mono.justOrEmpty(
+            event.options[0].getOption("role").flatMap(ApplicationCommandInteractionOption::getValue)
+        ).flatMap(ApplicationCommandInteractionOptionValue::asRole).awaitSingle()
 
-        val roleMono = Mono.justOrEmpty(
-            event.options[0].getOption("role")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-        ).flatMap(ApplicationCommandInteractionOptionValue::asRole)
 
-        return Mono.zip(event.interaction.guild, roleMono).flatMap(function { guild, role ->
-            if (!settings.patronGuild) {
-                return@function event.followupEphemeral(getCommonMsg("error.patronOnly", settings))
-            }
+        // Validate control role first to reduce work
+        val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
+        if (!hasElevatedPerms)
+            return event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)).awaitSingle()
 
-            Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap { member ->
-                guild.getCalendar(calendarNumber).flatMap { cal ->
-                    cal.getEvent(eventId).flatMap { calEvent ->
-                        if (!calEvent.isOver()) {
-                            calEvent.getRsvp().flatMap { rsvp ->
-                                if (role.isEveryone) {
-                                    rsvp.clearRole(member.client.rest())
-                                        .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                        .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                        .flatMap {
-                                            event.followupEphemeral(getMessage("role.success.remove", settings), it)
-                                        }
-                                } else {
-                                    rsvp.setRole(role)
-                                        .flatMap { calEvent.updateRsvp(it).thenReturn(it) }
-                                        .flatMap { RsvpEmbed.list(guild, settings, calEvent, it) }
-                                        .flatMap {
-                                            event.followupEphemeral(
-                                                getMessage("role.success.set", settings, role.name),
-                                                it
-                                            )
-                                        }
-                                }
-                            }
-                        } else {
-                            event.followupEphemeral(getCommonMsg("error.event.ended", settings))
-                        }
-                    }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)))
-        })
+        val guild = event.interaction.guild.awaitSingle()
+        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
+        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+
+        // Validate required conditions
+        if (calendar == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+        if (calendarEvent == null)
+            return event.followupEphemeral(getCommonMsg("error.notFound.event", settings)).awaitSingle()
+        if (calendarEvent.isOver())
+            return event.followupEphemeral(getCommonMsg("error.event.ended", settings)).awaitSingle()
+
+
+        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        rsvp = rsvpService.upsertRsvp(rsvp.copy(role = if (role.isEveryone) null else role.id))
+
+        val embed = embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
+
+        return if (role.isEveryone) event.followupEphemeral(getMessage("role.success.remove", settings), embed).awaitSingle()
+        else event.followupEphemeral(getMessage("role.success.set", settings, role.name), embed).awaitSingle()
     }
 }

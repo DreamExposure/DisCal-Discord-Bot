@@ -25,7 +25,6 @@ import org.dreamexposure.discal.core.`object`.StaticMessage
 import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
-import org.dreamexposure.discal.core.`object`.event.RsvpData
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.intellij.lang.annotations.Language
@@ -378,83 +377,6 @@ object DatabaseManager {
         }
     }
 
-    fun updateRsvpData(data: RsvpData): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_RSVP_BY_GUILD)
-                    .bind(0, data.guildId.asLong())
-                    .bind(1, data.eventId)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ -> row }
-            }.hasElements().flatMap { exists ->
-                if (exists) {
-                    val updateCommand = """UPDATE ${Tables.RSVP} SET
-                        CALENDAR_NUMBER = ?, EVENT_END = ?, GOING_ON_TIME = ?, GOING_LATE = ?,
-                        NOT_GOING = ?, UNDECIDED = ?, waitlist = ?, RSVP_LIMIT = ?, RSVP_ROLE = ?
-                        WHERE EVENT_ID = ? AND GUILD_ID = ?
-                    """.trimMargin()
-
-                    Mono.just(
-                        c.createStatement(updateCommand)
-                            .bind(0, data.calendarNumber)
-                            .bind(1, data.eventEnd)
-                            .bind(2, data.goingOnTime.asStringList())
-                            .bind(3, data.goingLate.asStringList())
-                            .bind(4, data.notGoing.asStringList())
-                            .bind(5, data.undecided.asStringList())
-                            .bind(6, data.waitlist.asStringList())
-                            .bind(7, data.limit)
-                            //8 deal with nullable role below
-                            .bind(9, data.eventId)
-                            .bind(10, data.guildId.asLong())
-                    ).doOnNext { statement ->
-                        if (data.roleId == null)
-                            statement.bindNull(8, Long::class.java)
-                        else
-                            statement.bind(8, data.roleId!!.asLong())
-                    }.flatMap {
-                        Mono.from(it.execute())
-                    }.flatMapMany(Result::getRowsUpdated)
-                        .hasElements()
-                        .thenReturn(true)
-                } else if (data.shouldBeSaved()) {
-                    val insertCommand = """INSERT INTO ${Tables.RSVP}
-                        (GUILD_ID, EVENT_ID, CALENDAR_NUMBER, EVENT_END, GOING_ON_TIME, GOING_LATE,
-                        NOT_GOING, UNDECIDED, waitlist, RSVP_LIMIT, RSVP_ROLE)
-                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """.trimMargin()
-
-                    Mono.just(
-                        c.createStatement(insertCommand)
-                            .bind(0, data.guildId.asLong())
-                            .bind(1, data.eventId)
-                            .bind(2, data.calendarNumber)
-                            .bind(3, data.eventEnd)
-                            .bind(4, data.goingOnTime.asStringList())
-                            .bind(5, data.goingLate.asStringList())
-                            .bind(6, data.notGoing.asStringList())
-                            .bind(7, data.undecided.asStringList())
-                            .bind(8, data.waitlist.asStringList())
-                            .bind(9, data.limit)
-                    ).doOnNext { statement ->
-                        if (data.roleId == null)
-                            statement.bindNull(10, Long::class.java)
-                        else
-                            statement.bind(10, data.roleId!!.asLong())
-                    }.flatMap {
-                        Mono.from(it.execute())
-                    }.flatMapMany(Result::getRowsUpdated)
-                        .hasElements()
-                        .thenReturn(true)
-                } else {
-                    Mono.just(false)
-                }.doOnError {
-                    LOGGER.error(DEFAULT, "Failed to update rsvp data", it)
-                }.onErrorResume { Mono.just(false) }
-            }
-        }
-    }
 
     fun getAPIAccount(APIKey: String): Mono<UserAPIAccount> {
         return connect { c ->
@@ -662,44 +584,6 @@ object DatabaseManager {
                 Mono.empty()
             }
         }.defaultIfEmpty(EventData(guildId, eventId = eventIdLookup))
-    }
-
-    fun getRsvpData(guildId: Snowflake, eventId: String): Mono<RsvpData> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_RSVP_BY_GUILD)
-                    .bind(0, guildId.asLong())
-                    .bind(1, eventId)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val calNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-
-                    val data = RsvpData(guildId, eventId, calNumber)
-
-                    data.eventEnd = row["EVENT_END", Long::class.java]!!
-                    data.goingOnTime.setFromString(row["GOING_ON_TIME", String::class.java]!!)
-                    data.goingLate.setFromString(row["GOING_LATE", String::class.java]!!)
-                    data.notGoing.setFromString(row["NOT_GOING", String::class.java]!!)
-                    data.undecided.setFromString(row["UNDECIDED", String::class.java]!!)
-                    data.waitlist.setFromString(row["waitlist", String::class.java]!!)
-                    data.limit = row["RSVP_LIMIT", Int::class.java]!!
-
-                    //Handle new rsvp role
-                    if (row.get("RSVP_ROLE") != null)
-                        data.setRole(Snowflake.of(row["RSVP_ROLE", Long::class.java]!!))
-
-                    data
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get rsvp data", it)
-            }.onErrorResume {
-                Mono.empty()
-            }.defaultIfEmpty(RsvpData(guildId, eventId))
-        }
     }
 
     fun getAnnouncement(announcementId: String, guildId: Snowflake): Mono<Announcement> {
@@ -1095,23 +979,6 @@ object DatabaseManager {
         }.defaultIfEmpty(false)
     }
 
-    fun removeRsvpRole(guildId: Snowflake, roleId: Snowflake): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.REMOVE_RSVP_ROLE)
-                    .bindNull(0, Long::class.java)
-                    .bind(1, guildId.asLong())
-                    .bind(2, roleId.asLong())
-                    .execute()
-            ).flatMapMany(Result::getRowsUpdated)
-                .hasElements()
-                .thenReturn(true)
-                .doOnError {
-                    LOGGER.error(DEFAULT, "Failed update all rsvp with role for guild ", it)
-                }.onErrorReturn(false)
-        }.defaultIfEmpty(false)
-    }
-
     /* Utility Deletion Methods */
 
     fun deleteCalendarAndRelatedData(calendarData: CalendarData): Mono<Boolean> {
@@ -1477,11 +1344,6 @@ private object Queries {
         """.trimMargin()
 
     @Language("MySQL")
-    val SELECT_RSVP_BY_GUILD = """SELECT * FROM ${Tables.RSVP}
-        WHERE GUILD_ID = ? AND EVENT_ID = ?
-        """.trimMargin()
-
-    @Language("MySQL")
     val SELECT_ANNOUNCEMENT_BY_GUILD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE GUILD_ID = ? and ANNOUNCEMENT_ID = ?
         """.trimMargin()
@@ -1556,12 +1418,6 @@ private object Queries {
     @Language("MySQL")
     val DELETE_ALL_RSVP_DATA = """DELETE FROM ${Tables.RSVP}
         WHERE GUILD_ID = ? AND CALENDAR_NUMBER = ?
-        """.trimMargin()
-
-    @Language("MySQL")
-    val REMOVE_RSVP_ROLE = """UPDATE ${Tables.RSVP}
-        SET RSVP_ROLE = ?
-        WHERE GUILD_ID = ? AND RSVP_ROLE = ?
         """.trimMargin()
 
     @Language("MySQL")
