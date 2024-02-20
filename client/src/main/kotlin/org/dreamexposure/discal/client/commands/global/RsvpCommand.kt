@@ -296,7 +296,7 @@ class RsvpCommand(
 
 
         return event.followupEphemeral(
-            getMessage("limit.success", settings),
+            getMessage("limit.success", settings, limit.toString()),
             embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
         ).awaitSingle()
     }

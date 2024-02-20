@@ -146,7 +146,7 @@ class RsvpService(
             discordClient.getGuildById(new.guildId)
                 .removeMemberRole(userId, old.role, "Removed RSVP to event with ID ${new.eventId}")
                 .doOnError {
-                    LOGGER.debug(
+                    LOGGER.error(
                         "Failed to remove role:${old.role?.asString()} from user:${userId.asString()}",
                         it
                     )
@@ -160,7 +160,7 @@ class RsvpService(
             discordClient.getGuildById(new.guildId)
                 .addMemberRole(userId, new.role, "RSVP'd to event with ID: ${new.eventId}")
                 .doOnError {
-                    LOGGER.debug(
+                    LOGGER.error(
                         "Failed to add role:${old.role?.asString()} to user:${userId.asString()}",
                         it
                     )
