@@ -49,11 +49,7 @@ class EmbedService(
     /////////////////////////////
     ////// Calendar Embeds //////
     /////////////////////////////
-    suspend fun calendarOverviewEmbed(
-        calendar: Calendar,
-        settings: GuildSettings,
-        showUpdate: Boolean
-    ): EmbedCreateSpec {
+    suspend fun calendarOverviewEmbed(calendar: Calendar, settings: GuildSettings, showUpdate: Boolean): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
 
         // Get the events to build the overview
@@ -140,6 +136,31 @@ class EmbedService(
         return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings), calendar.zoneName, true)
             .addField(getEmbedMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
             .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
+    suspend fun linkCalendarEmbed(calendarNumber: Int, settings: GuildSettings, overview: Boolean): EmbedCreateSpec {
+        val calendar = discordClient.getGuildById(settings.guildID).getCalendar(calendarNumber).awaitSingle()
+        return if (overview) calendarOverviewEmbed(calendar, settings, showUpdate = false)
+        else linkCalendarEmbed(calendar, settings)
+    }
+
+    suspend fun linkCalendarEmbed(calendar: Calendar, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+
+        //Handle optional fields
+        if (calendar.name.isNotBlank())
+            builder.title(calendar.name.toMarkdown().embedTitleSafe())
+        if (calendar.description.isNotBlank())
+            builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings), calendar.zoneName, false)
+            .addField(getEmbedMessage("calendar", "link.field.host", settings), calendar.calendarData.host.name, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
+            .addField(getEmbedMessage("calendar", "link.field.id", settings), calendar.calendarId, false)
+            .url(calendar.link)
+            .footer(getEmbedMessage("calendar", "link.footer.default", settings), null)
             .color(GlobalVal.discalColor)
             .build()
     }
