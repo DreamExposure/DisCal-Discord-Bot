@@ -1,10 +1,7 @@
 package org.dreamexposure.discal.core.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.dreamexposure.discal.CalendarCache
-import org.dreamexposure.discal.CredentialsCache
-import org.dreamexposure.discal.OauthStateCache
-import org.dreamexposure.discal.RsvpCache
+import org.dreamexposure.discal.*
 import org.dreamexposure.discal.core.cache.JdkCacheRepository
 import org.dreamexposure.discal.core.cache.RedisStringCacheRepository
 import org.dreamexposure.discal.core.extensions.asMinutes
@@ -20,6 +17,7 @@ class CacheConfig {
     private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
     private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
     private val rsvpTtl = Config.CACHE_TTL_RSVP_MINUTES.getLong().asMinutes()
+    private val staticMessageTtl = Config.CACHE_TTL_STATIC_MESSAGE_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -47,6 +45,12 @@ class CacheConfig {
     fun rsvpRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): RsvpCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "Rsvps", rsvpTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun staticMessageRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): StaticMessageCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "StaticMessages", staticMessageTtl)
+
 
     // In-memory fallback caching
     @Bean
@@ -60,4 +64,7 @@ class CacheConfig {
 
     @Bean
     fun rsvpFallbackCache(): RsvpCache = JdkCacheRepository(rsvpTtl)
+
+    @Bean
+    fun staticMessageFallbackCache(): StaticMessageCache = JdkCacheRepository(staticMessageTtl)
 }

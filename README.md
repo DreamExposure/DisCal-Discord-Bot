@@ -81,7 +81,6 @@ DisCal uses a simple-to-understand permission scheme for handling access to comm
 | Command              | Description                                           | Permissions |
 |----------------------|-------------------------------------------------------|-------------|
 | `/displaycal new`    | Creates a new auto-updating calendar overview message | elevated    |
-| `/displaycal update` | Updates an existing calendar overview                 | elevated    |
 </details>
 
 <details>

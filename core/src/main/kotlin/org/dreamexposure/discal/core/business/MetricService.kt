@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
-import org.dreamexposure.discal.core.`object`.StaticMessage
+import org.dreamexposure.discal.core.`object`.new.StaticMessage
 import org.springframework.stereotype.Component
 import java.time.Duration
 

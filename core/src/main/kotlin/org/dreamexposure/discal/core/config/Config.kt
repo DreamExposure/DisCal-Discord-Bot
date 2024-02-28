@@ -18,6 +18,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     REDIS_PASSWORD("spring.data.redis.password", ""),
     CACHE_REDIS_IS_CLUSTER("redis.cluster", false),
     CACHE_USE_REDIS("bot.cache.redis", false),
+    CACHE_USE_REDIS_D4J("bot.cache.redis.d4j", false),
 
     CACHE_PREFIX("bot.cache.prefix", "discal"),
     CACHE_TTL_SETTINGS_MINUTES("bot.cache.ttl-minutes.settings", 60),
@@ -26,6 +27,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_OAUTH_STATE_MINUTES("bot.cache.ttl-minutes.oauth.state", 5),
     CACHE_TTL_CALENDAR_MINUTES("bot.cache.ttl-minutes.calendar", 120),
     CACHE_TTL_RSVP_MINUTES("bot.cache.ttl-minutes.rsvp", 60),
+    CACHE_TTL_STATIC_MESSAGE_MINUTES("bot.cache.ttl-minutes.static-messages", 60),
 
     // Security configuration
 

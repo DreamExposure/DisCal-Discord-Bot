@@ -45,6 +45,7 @@ object CalendarEmbed : EmbedMaker {
             .build()
     }
 
+    @Deprecated("Use replacement in EmbedService")
     fun overview(guild: Guild, settings: GuildSettings, calendar: Calendar, showUpdate: Boolean): Mono<EmbedCreateSpec> {
         return calendar.getUpcomingEvents(15).collectList().map { it.groupByDate() }.map { events ->
             val builder = defaultBuilder(guild, settings)

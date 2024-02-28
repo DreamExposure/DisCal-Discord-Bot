@@ -64,7 +64,7 @@ class DiscordConfig {
 
     @Bean
     fun discordStores(): StoreService {
-        val useRedis = Config.CACHE_USE_REDIS.getBoolean()
+        val useRedis = Config.CACHE_USE_REDIS_D4J.getBoolean()
         val redisHost = Config.REDIS_HOST.getString()
         val redisPassword = Config.REDIS_PASSWORD.getString().toCharArray()
         val redisPort = Config.REDIS_PORT.getInt()

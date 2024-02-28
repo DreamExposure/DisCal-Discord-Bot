@@ -5,13 +5,12 @@ import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
-import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
+import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
-import org.dreamexposure.discal.core.extensions.embedFieldSafe
-import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.new.Rsvp
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -20,6 +19,9 @@ import org.dreamexposure.discal.core.utils.getEmbedMessage
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 @Component
 class EmbedService(
@@ -44,6 +46,107 @@ class EmbedService(
             )
     }
 
+    /////////////////////////////
+    ////// Calendar Embeds //////
+    /////////////////////////////
+    suspend fun calendarOverviewEmbed(
+        calendar: Calendar,
+        settings: GuildSettings,
+        showUpdate: Boolean
+    ): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+
+        // Get the events to build the overview
+        val events = calendar.getUpcomingEvents(15)
+            .collectList()
+            .map { it.groupByDate() }
+            .awaitSingle()
+
+        //Handle optional fields
+        if (calendar.name.isNotBlank())
+            builder.title(calendar.name.toMarkdown().embedTitleSafe())
+        if (calendar.description.isNotBlank())
+            builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+
+        // Truncate dates to 23 due to discord enforcing the field limit
+        val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
+        for (event in events) {
+            if (truncatedEvents.size < 23) {
+                truncatedEvents[event.key] = event.value
+            } else break
+        }
+
+        // Show events
+        truncatedEvents.forEach { date ->
+            val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.timeFormat, longDay = true)
+
+            // sort events
+            val sortedEvents = date.value.sortedBy { it.start }
+
+            val content = StringBuilder()
+
+            sortedEvents.forEach {
+                // Start event
+                content.append("```\n")
+
+                // determine time length
+                val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.timeFormat)} -" +
+                    " ${it.end.humanReadableTime(it.timezone, settings.timeFormat)} ").length
+
+                // Displaying time
+                if (it.isAllDay()) {
+                    content.append(getCommonMsg("generic.time.allDay", settings).padCenter(timeDisplayLen))
+                        .append("| ")
+                } else {
+                    // Add start text
+                    var str = if (it.start.isBefore(date.key.toInstant())) {
+                        "${getCommonMsg("generic.time.continued", settings)} - "
+                    } else {
+                        "${it.start.humanReadableTime(it.timezone, settings.timeFormat)} - "
+                    }
+                    // Add end text
+                    str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                        getCommonMsg("generic.time.continued", settings)
+                    } else {
+                        "${it.end.humanReadableTime(it.timezone, settings.timeFormat)} "
+                    }
+                    content.append(str.padCenter(timeDisplayLen))
+                        .append("| ")
+                }
+                // Display name or ID if not set
+                if (it.name.isNotBlank()) content.append(it.name)
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings)).append(" ${it.eventId}")
+                content.append("\n")
+                if (it.location.isNotBlank()) content.append("    Location: ")
+                    .append(it.location.embedFieldSafe())
+                    .append("\n")
+
+                // Finish event
+                content.append("```\n")
+            }
+
+            if (content.isNotBlank())
+                builder.addField(title, content.toString().embedFieldSafe(), false)
+        }
+
+        // set footer
+        if (showUpdate) {
+            val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
+            builder.footer(getEmbedMessage("calendar", "link.footer.update", settings, lastUpdate), null)
+                .timestamp(Instant.now())
+        } else builder.footer(getEmbedMessage("calendar", "link.footer.default", settings), null)
+
+        // finish and return
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings), calendar.zoneName, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings), "${calendar.calendarNumber}", true)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
+    /////////////////////////
+    ////// RSVP Embeds //////
+    /////////////////////////
     suspend fun rsvpDmFollowupEmbed(rsvp: Rsvp, userId: Snowflake): EmbedCreateSpec {
         // TODO: These will be replaced by service calls eventually as I migrate components over to new patterns
         val restGuild = discordClient.getGuildById(rsvp.guildId)
