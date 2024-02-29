@@ -1,9 +1,9 @@
 package org.dreamexposure.discal.client.listeners.discord
 
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import discord4j.core.event.domain.interaction.ButtonInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.client.interaction.InteractionHandler
 import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -14,35 +14,32 @@ import org.springframework.util.StopWatch
 import java.util.*
 
 @Component
-class SlashCommandListener(
-    private val commands: List<SlashCommand>,
+class ButtonInteractionListener(
+    private val buttons: List<InteractionHandler<ButtonInteractionEvent>>,
     private val metricService: MetricService,
-) : EventListener<ChatInputInteractionEvent> {
-
-    override suspend fun handle(event: ChatInputInteractionEvent) {
+): EventListener<ButtonInteractionEvent> {
+    override suspend fun handle(event: ButtonInteractionEvent) {
         val timer = StopWatch()
         timer.start()
 
         if (!event.interaction.guildId.isPresent) {
-            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH)).awaitSingleOrNull()
+            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH))
             return
         }
 
-        val command = commands.firstOrNull { it.name == event.commandName }
+        val button = buttons.firstOrNull { it.ids.contains(event.customId) }
 
-        if (command != null) {
-            event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
-
+        if (button != null) {
             try {
                 val settings = DatabaseManager.getSettings(event.interaction.guildId.get()).awaitSingle()
 
-                command.suspendHandle(event, settings)
+                button.handle(event, settings)
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
+                LOGGER.error(DEFAULT, "Error handling button interaction | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
                 event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
-                    .withEphemeral(command.ephemeral)
+                    .withEphemeral(true)
                     .awaitSingleOrNull()
             }
         } else {
@@ -52,6 +49,6 @@ class SlashCommandListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.commandName, "chat-input", timer.totalTimeMillis)
+        metricService.recordInteractionDuration(event.customId, "button", timer.totalTimeMillis)
     }
 }

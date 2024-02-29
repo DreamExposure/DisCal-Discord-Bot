@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class GuildCreateListener(objectMapper: ObjectMapper) : EventListener<GuildCreateEvent> {
-    private val premiumCommands: List<ApplicationCommandRequest>
-    private val devCommands: List<ApplicationCommandRequest>
+    private final val premiumCommands: List<ApplicationCommandRequest>
+    private final val devCommands: List<ApplicationCommandRequest>
 
     init {
         val matcher = PathMatchingResourcePatternResolver()

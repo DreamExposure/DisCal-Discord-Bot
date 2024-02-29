@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.discordjson.json.MessageEditRequest
 import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
@@ -27,6 +28,7 @@ class StaticMessageService(
     private val staticMessageRepository: StaticMessageRepository,
     private val staticMessageCache: StaticMessageCache,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
 ) {
@@ -86,7 +88,12 @@ class StaticMessageService(
 
 
         // Finally create the message
-        val message = channel.createMessage(embed.asRequest()).awaitSingle()
+        val message = channel.createMessage(
+            MessageCreateRequest.builder()
+                .addEmbed(embed.asRequest())
+                .components(componentService.getStaticMessageComponents().map { it.data })
+                .build()
+        ).awaitSingle()
         val saved = staticMessageRepository.save(
             StaticMessageData(
                 guildId = guildId.asLong(),
@@ -128,9 +135,12 @@ class StaticMessageService(
         // Finally update the message
         val embed = embedService.calendarOverviewEmbed(calendar, settings, showUpdate = true)
 
-        discordClient.getMessageById(old.channelId, old.messageId)
-            .edit(MessageEditRequest.builder().addEmbed(embed.asRequest()).build())
-            .awaitSingleOrNull()
+        discordClient.getMessageById(old.channelId, old.messageId).edit(
+            MessageEditRequest.builder()
+                .addEmbed(embed.asRequest())
+                .components(componentService.getStaticMessageComponents().map { it.data })
+                .build()
+        ).awaitSingleOrNull()
 
         val updated = old.copy(
             lastUpdate = Instant.now(),
@@ -175,9 +185,12 @@ class StaticMessageService(
                 return@forEach
             }
 
-            discordClient.getMessageById(old.channelId, old.messageId)
-                .edit(MessageEditRequest.builder().addEmbed(embed.asRequest()).build())
-                .awaitSingleOrNull()
+            discordClient.getMessageById(old.channelId, old.messageId).edit(
+                MessageEditRequest.builder()
+                    .addEmbed(embed.asRequest())
+                    .components(componentService.getStaticMessageComponents().map { it.data })
+                    .build()
+            ).awaitSingleOrNull()
 
             val updated = old.copy(
                 lastUpdate = Instant.now(),

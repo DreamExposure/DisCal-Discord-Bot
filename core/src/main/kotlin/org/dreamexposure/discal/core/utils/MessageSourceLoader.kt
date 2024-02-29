@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.utils
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.springframework.context.support.ResourceBundleMessageSource
 import java.nio.charset.StandardCharsets
+import java.util.*
 
 object MessageSourceLoader {
     private val sources: MutableMap<String, ResourceBundleMessageSource> = mutableMapOf()
@@ -28,10 +29,12 @@ object MessageSourceLoader {
 
 //FIXME: I think the varargs is bugging out with 3 or more provided. Will need to debug this later, but not today.
 
-fun getCommonMsg(key: String, settings: GuildSettings, vararg args: String): String {
-    val src = MessageSourceLoader.getSourceByPath("common")
+fun getCommonMsg(key: String, settings: GuildSettings, vararg args: String) = getCommonMsg(key, settings.getLocale(), *args)
 
-    return src.getMessage(key, args, settings.getLocale())
+fun getCommonMsg(key: String, locale: Locale, vararg args: String): String {
+    val src= MessageSourceLoader.getSourceByPath("common")
+
+    return src.getMessage(key, args, locale)
 }
 
 fun getEmbedMessage(embed: String, key: String, settings: GuildSettings, vararg args: String): String {
