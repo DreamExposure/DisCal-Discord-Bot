@@ -29,7 +29,7 @@ class DefaultCalendarService(
     }
 
     override suspend fun getCalendar(guildId: Snowflake, number: Int): Calendar? {
-        return getAllCalendars(guildId).first { it.number == number }
+        return getAllCalendars(guildId).firstOrNull { it.number == number }
     }
 
     override suspend fun updateCalendar(calendar: Calendar) {

@@ -693,115 +693,6 @@ object DatabaseManager {
         }.defaultIfEmpty(mutableListOf())
     }
 
-    fun getAnnouncements(): Mono<List<Announcement>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ALL_ANNOUNCEMENTS)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
-
-                    val a = Announcement(guildId, announcementId)
-                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
-                    a.eventId = row["EVENT_ID", String::class.java]!!
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
-                    a.info = row["INFO", String::class.java]!!
-                    a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.publish = row["PUBLISH", Boolean::class.java]!!
-
-                    a
-                }
-            }.collectList().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get all announcements", it)
-            }.onErrorReturn(mutableListOf())
-        }.defaultIfEmpty(mutableListOf())
-    }
-
-    fun getAnnouncements(type: AnnouncementType): Mono<List<Announcement>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ALL_ANNOUNCEMENTS_BY_TYPE)
-                    .bind(0, type.name)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
-
-                    val a = Announcement(guildId, announcementId)
-                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
-                    a.eventId = row["EVENT_ID", String::class.java]!!
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
-                    a.info = row["INFO", String::class.java]!!
-                    a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.publish = row["PUBLISH", Boolean::class.java]!!
-
-                    a
-                }
-            }.collectList().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get announcements by type", it)
-            }.onErrorReturn(mutableListOf())
-        }.defaultIfEmpty(mutableListOf())
-    }
-
-    fun getEnabledAnnouncements(): Mono<List<Announcement>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ALL_ENABLED_ANNOUNCEMENTS)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
-
-                    val a = Announcement(guildId, announcementId)
-                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
-                    a.eventId = row["EVENT_ID", String::class.java]!!
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
-                    a.info = row["INFO", String::class.java]!!
-                    a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.publish = row["PUBLISH", Boolean::class.java]!!
-
-                    a
-                }
-            }.collectList().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get enabled announcements", it)
-            }.onErrorReturn(mutableListOf())
-        }.defaultIfEmpty(mutableListOf())
-    }
-
     fun getEnabledAnnouncements(guildId: Snowflake): Mono<List<Announcement>> {
         return connect { c ->
             Mono.from(
@@ -834,43 +725,6 @@ object DatabaseManager {
                 .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
             ).doOnError {
                 LOGGER.error(DEFAULT, "Failed to get guild's enabled announcements", it)
-            }.onErrorReturn(mutableListOf())
-        }.defaultIfEmpty(mutableListOf())
-    }
-
-    fun getEnabledAnnouncements(announcementType: AnnouncementType): Mono<List<Announcement>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE)
-                    .bind(0, announcementType.name)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
-
-                    val a = Announcement(guildId, announcementId)
-                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
-                    a.eventId = row["EVENT_ID", String::class.java]!!
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
-                    a.info = row["INFO", String::class.java]!!
-                    a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.publish = row["PUBLISH", Boolean::class.java]!!
-
-                    a
-                }
-            }.collectList().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get enabled announcements by type", it)
             }.onErrorReturn(mutableListOf())
         }.defaultIfEmpty(mutableListOf())
     }
@@ -1183,9 +1037,6 @@ private object Queries {
         """.trimMargin()
 
     @Language("MySQL")
-    val SELECT_ALL_ANNOUNCEMENTS = """SELECT * FROM ${Tables.ANNOUNCEMENTS}"""
-
-    @Language("MySQL")
     val SELECT_ALL_ANNOUNCEMENTS_BY_GUILD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE GUILD_ID = ?
         """.trimMargin()
@@ -1196,23 +1047,8 @@ private object Queries {
         """.trimMargin()
 
     @Language("MySQL")
-    val SELECT_ALL_ANNOUNCEMENTS_BY_TYPE = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
-        WHERE ANNOUNCEMENT_TYPE = ?
-        """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_ALL_ENABLED_ANNOUNCEMENTS = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
-        WHERE ENABLED = 1
-        """.trimMargin()
-
-    @Language("MySQL")
     val SELECT_ENABLED_ANNOUNCEMENTS_BY_GUILD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE ENABLED = 1 and GUILD_ID = ?
-        """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
-        WHERE ENABLED = 1 and ANNOUNCEMENT_TYPE = ?
         """.trimMargin()
 
     @Language("MySQL")

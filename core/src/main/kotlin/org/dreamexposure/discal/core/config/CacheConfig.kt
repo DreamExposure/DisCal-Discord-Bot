@@ -18,6 +18,7 @@ class CacheConfig {
     private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
     private val rsvpTtl = Config.CACHE_TTL_RSVP_MINUTES.getLong().asMinutes()
     private val staticMessageTtl = Config.CACHE_TTL_STATIC_MESSAGE_MINUTES.getLong().asMinutes()
+    private val announcementTll = Config.CACHE_TTL_ANNOUNCEMENT_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -51,6 +52,12 @@ class CacheConfig {
     fun staticMessageRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): StaticMessageCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "StaticMessages", staticMessageTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun announcementRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): AnnouncementCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "Announcements", announcementTll)
+
 
     // In-memory fallback caching
     @Bean
@@ -67,4 +74,7 @@ class CacheConfig {
 
     @Bean
     fun staticMessageFallbackCache(): StaticMessageCache = JdkCacheRepository(staticMessageTtl)
+
+    @Bean
+    fun announcementFallbackCache(): AnnouncementCache = JdkCacheRepository(announcementTll)
 }

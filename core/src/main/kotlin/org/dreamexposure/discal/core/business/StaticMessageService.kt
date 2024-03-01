@@ -218,5 +218,4 @@ class StaticMessageService(
         staticMessageRepository.deleteByGuildIdAndMessageId(guildId.asLong(), messageId.asLong()).awaitSingleOrNull()
         staticMessageCache.evict(guildId, key = messageId)
     }
-
 }
