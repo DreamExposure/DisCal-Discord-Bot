@@ -82,7 +82,7 @@ jobs:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
         with:
-          command: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+          command: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET} -Djib.console=plain
           attempt_limit: 25
           # 1 minute in ms
           attempt_delay: 60000
