@@ -1,8 +1,10 @@
 package org.dreamexposure.discal.server.network.discal
 
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.core.business.AnnouncementService
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
@@ -13,13 +15,16 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
+// TODO: This whole class needs to be refactored at some point, its total spaghetti lmao
 @Component
-class NetworkManager : ApplicationRunner {
+class NetworkManager(
+    private val calendarService: CalendarService,
+    private val announcementService: AnnouncementService,
+) : ApplicationRunner {
     private val status: NetworkData = NetworkData(apiStatus = InstanceData())
 
     fun getStatus() = status.copy()
@@ -55,16 +60,12 @@ class NetworkManager : ApplicationRunner {
         status.botStatus.sortWith(Comparator.comparingInt(BotInstanceData::shardIndex))
     }
 
-    private fun updateAndReturnStatus(): Mono<NetworkData> {
-        return Mono.zip(DatabaseManager.getCalendarCount(), DatabaseManager.getAnnouncementCount()).map(
-            TupleUtils.function { calCount, annCount ->
-                status.totalCalendars = calCount
-                status.totalAnnouncements = annCount
-                status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())
+    private fun updateAndReturnStatus() = mono {
+        status.totalCalendars = calendarService.getCalendarCount().toInt()
+        status.totalAnnouncements = announcementService.getAnnouncementCount().toInt()
+        status.apiStatus = status.apiStatus.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())
 
-                status.copy()
-            }
-        )
+        status.copy()
     }
 
     private fun doRestartBot(bot: BotInstanceData): Mono<Void> {
@@ -108,3 +109,4 @@ class NetworkManager : ApplicationRunner {
             }.subscribe()
     }
 }
+K

@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*
 class RsvpController(
     private val rsvpService: RsvpService,
 ) {
+    // TODO: Need way to check if authenticated user has access to the guild...
 
     @SecurityRequirement(scopes = [Scope.EVENT_RSVP_READ])
     @GetMapping(produces = ["application/json"])
     suspend fun getRsvp(@PathVariable guildId: Snowflake, @PathVariable eventId: String): Rsvp {
-        // TODO: Need way to check if authenticated user has access to this guild
         return rsvpService.getRsvp(guildId, eventId)
     }
 
@@ -24,7 +24,6 @@ class RsvpController(
     @SecurityRequirement(scopes = [Scope.EVENT_RSVP_WRITE])
     @PatchMapping(produces = ["application/json"], consumes = ["application/json"])
     suspend fun patchRsvp(@PathVariable guildId: Snowflake, @PathVariable eventId: String, @RequestBody rsvp: Rsvp): Rsvp {
-        // TODO: Need a way to check if authenticated user has access to this guild
         return rsvpService.updateRsvp(rsvp)
     }
 }

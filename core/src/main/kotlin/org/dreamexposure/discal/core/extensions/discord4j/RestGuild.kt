@@ -3,15 +3,14 @@ package org.dreamexposure.discal.core.extensions.discord4j
 import com.google.api.services.calendar.model.AclRule
 import discord4j.core.`object`.entity.Guild
 import discord4j.rest.entity.RestGuild
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
 import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
@@ -138,50 +137,3 @@ fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
         }
     }
 }
-
-//Announcements
-/**
- * Requests to check if an announcement with the supplied ID exists.
- * If an error occurs, it is emitted through the Mono.
- *
- * @param id The ID of the announcement to check for
- * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
- */
-fun RestGuild.announcementExists(id: String): Mono<Boolean> = this.getAnnouncement(id).hasElement()
-
-/**
- * Attempts to retrieve an [Announcement] with the supplied ID.
- * If an error occurs, it is emitted through the [Mono]
- *
- * @param id The ID of the [Announcement]
- * @return A [Mono] of the [Announcement] with the supplied ID, otherwise [empty][Mono.empty] is returned.
- */
-fun RestGuild.getAnnouncement(id: String): Mono<Announcement> = DatabaseManager.getAnnouncement(id, this.id)
-
-/**
- * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild].
- * If an error occurs, it is emitted through the [Flux]
- *
- * @return A Flux of all [announcements][Announcement] belonging to this [Guild]
- */
-fun RestGuild.getAllAnnouncements(): Flux<Announcement> {
-    return DatabaseManager.getAnnouncements(this.id)
-            .flatMapMany { Flux.fromIterable(it) }
-}
-
-/**
- * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild] that are enabled.
- * If an error occurs, it is emitted through the [Flux]
- *
- * @return A [Flux] of all [announcements][Announcement] belonging to this [Guild] that are enabled.
- */
-fun RestGuild.getEnabledAnnouncements(): Flux<Announcement> {
-    return DatabaseManager.getEnabledAnnouncements(this.id)
-            .flatMapMany { Flux.fromIterable(it) }
-}
-
-fun RestGuild.createAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)
-
-fun RestGuild.updateAnnouncement(ann: Announcement): Mono<Boolean> = DatabaseManager.updateAnnouncement(ann)
-
-fun RestGuild.deleteAnnouncement(id: String): Mono<Boolean> = DatabaseManager.deleteAnnouncement(id)

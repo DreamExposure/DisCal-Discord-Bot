@@ -514,25 +514,6 @@ object DatabaseManager {
         }
     }
 
-    fun getCalendarCount(): Mono<Int> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ALL_CALENDAR_COUNT)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val calendars = row.get(0, Long::class.java)!!
-                    return@map calendars.toInt()
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get calendar count", it)
-            }.onErrorReturn(-1)
-        }
-    }
-
     fun getCalendarCount(guildId: Snowflake): Mono<Int> {
         return connect { c ->
             Mono.from(
@@ -766,25 +747,6 @@ object DatabaseManager {
         }.defaultIfEmpty(mutableListOf())
     }
 
-    fun getAnnouncementCount(): Mono<Int> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ALL_ANNOUNCEMENT_COUNT)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcements = row[0, Long::class.java]!!
-                    return@map announcements.toInt()
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get announcement count", it)
-            }.onErrorReturn(-1)
-        }.defaultIfEmpty(-1)
-    }
-
     fun deleteAnnouncement(announcementId: String): Mono<Boolean> {
         return connect { c ->
             Mono.from(
@@ -953,48 +915,6 @@ object DatabaseManager {
             }.defaultIfEmpty(emptyMap())
         }
     }
-
-    /* Announcement Data */
-
-    fun getAnnouncementsForShard(shardCount: Int, shardIndex: Int): Mono<List<Announcement>> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_ANNOUNCEMENTS_FOR_SHARD)
-                    .bind(0, shardCount)
-                    .bind(1, shardIndex)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val announcementId = row["ANNOUNCEMENT_ID", String::class.java]!!
-                    val guildId = Snowflake.of(row["GUILD_ID", Long::class.java]!!)
-
-                    val a = Announcement(guildId, announcementId)
-                    a.calendarNumber = row["CALENDAR_NUMBER", Int::class.java]!!
-                    a.subscriberRoleIds.setFromString(row["SUBSCRIBERS_ROLE", String::class.java]!!)
-                    a.subscriberUserIds.setFromString(row["SUBSCRIBERS_USER", String::class.java]!!)
-                    a.announcementChannelId = row["CHANNEL_ID", String::class.java]!!
-                    a.type = AnnouncementType.valueOf(row["ANNOUNCEMENT_TYPE", String::class.java]!!)
-                    a.modifier = AnnouncementModifier.valueOf(row["MODIFIER", String::class.java]!!)
-                    a.eventId = row["EVENT_ID", String::class.java]!!
-                    a.eventColor = fromNameOrHexOrId(row["EVENT_COLOR", String::class.java]!!)
-                    a.hoursBefore = row["HOURS_BEFORE", Int::class.java]!!
-                    a.minutesBefore = row["MINUTES_BEFORE", Int::class.java]!!
-                    a.info = row["INFO", String::class.java]!!
-                    a.enabled = row["ENABLED", Boolean::class.java]!!
-                    a.publish = row["PUBLISH", Boolean::class.java]!!
-
-                    a
-                }
-            }.retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get announcements for shard", it)
-            }.onErrorResume {
-                Mono.empty()
-            }.collectList()
-        }
-    }
 }
 
 private object Queries {
@@ -1017,9 +937,6 @@ private object Queries {
     val SELECT_ALL_CALENDARS_BY_GUILD = """SELECT * FROM ${Tables.CALENDARS}
         WHERE GUILD_ID = ?
         """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_ALL_CALENDAR_COUNT = """SELECT COUNT(*) FROM ${Tables.CALENDARS}"""
 
     @Language("MySQL")
     val SELECT_CALENDAR_COUNT_BY_GUILD = """SELECT COUNT(*) FROM ${Tables.CALENDARS}
@@ -1055,10 +972,6 @@ private object Queries {
     val SELECT_ENABLED_ANNOUNCEMENTS_BY_TYPE_GUILD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
         WHERE ENABLED = 1 AND GUILD_ID = ? AND ANNOUNCEMENT_TYPE = ?
         """.trimMargin()
-
-
-    @Language("MySQL")
-    val SELECT_ALL_ANNOUNCEMENT_COUNT = """SELECT COUNT(*) FROM ${Tables.ANNOUNCEMENTS}"""
 
     @Language("MySQL")
     val DELETE_ANNOUNCEMENT = """DELETE FROM ${Tables.ANNOUNCEMENTS}
@@ -1140,11 +1053,6 @@ private object Queries {
     @Language("MySQL")
     val SELECT_MANY_EVENT_DATA = """SELECT * FROM ${Tables.EVENTS}
         WHERE event_id in (?)
-    """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_ANNOUNCEMENTS_FOR_SHARD = """SELECT * FROM ${Tables.ANNOUNCEMENTS}
-        WHERE MOD(guild_id >> 22, ?) = ?
     """.trimMargin()
 
     /* Delete everything */

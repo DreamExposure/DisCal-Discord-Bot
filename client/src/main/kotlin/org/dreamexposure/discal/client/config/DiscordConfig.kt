@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.config
 
 import discord4j.common.store.Store
 import discord4j.common.store.legacy.LegacyStoreLayout
+import discord4j.core.DiscordClient
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.Event
@@ -13,7 +14,6 @@ import discord4j.discordjson.json.GuildData
 import discord4j.discordjson.json.MessageData
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
-import discord4j.rest.RestClient
 import discord4j.store.api.mapping.MappingStoreService
 import discord4j.store.api.service.StoreService
 import discord4j.store.jdk.JdkStoreService
@@ -58,8 +58,8 @@ class DiscordConfig {
     }
 
     @Bean
-    fun discordRestClient(gatewayDiscordClient: GatewayDiscordClient): RestClient {
-        return gatewayDiscordClient.restClient
+    fun discordClient(gatewayDiscordClient: GatewayDiscordClient): DiscordClient {
+        return gatewayDiscordClient.rest()
     }
 
     @Bean

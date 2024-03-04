@@ -1,13 +1,15 @@
 package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
+import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.asStringListFromDatabase
+import java.time.Duration
 
 data class Announcement(
-    val id: String,
+    val id: String = KeyGenerator.generateAnnouncementId(),
     val guildId: Snowflake,
     val calendarNumber: Int = 1,
 
@@ -50,6 +52,8 @@ data class Announcement(
         enabled = data.enabled,
         publish = data.publish,
     )
+
+    fun getCalculatedTime(): Duration = Duration.ofHours(hoursBefore.toLong()).plusMinutes(minutesBefore.toLong())
 
 
     data class Subscribers(

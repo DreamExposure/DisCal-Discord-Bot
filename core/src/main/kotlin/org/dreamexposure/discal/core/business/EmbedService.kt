@@ -4,14 +4,18 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
+import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.Rsvp
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -44,6 +48,39 @@ class EmbedService(
                 Config.URL_BASE.getString(),
                 iconUrl
             )
+    }
+
+    ////////////////////////////
+    ////// General Embeds //////
+    ////////////////////////////
+    suspend fun discalInfoEmbed(settings: GuildSettings, calendarCount: Long, announcementCount: Long): EmbedCreateSpec {
+        val guildCount = discordClient.guilds.count().awaitSingle()
+
+        return defaultEmbedBuilder(settings)
+            .color(GlobalVal.discalColor)
+            .title(getEmbedMessage("discal", "info.title", settings))
+            .addField(getEmbedMessage("discal", "info.field.version", settings), GitProperty.DISCAL_VERSION.value, false)
+            .addField(getEmbedMessage("discal", "info.field.library", settings), "Discord4J ${GitProperty.DISCAL_VERSION_D4J.value}", false)
+            .addField(getEmbedMessage("discal", "info.field.shard", settings), "${Application.getShardIndex()}/${Application.getShardCount()}", true)
+            .addField(getEmbedMessage("discal", "info.field.guilds", settings), "$guildCount", true)
+            .addField(
+                getEmbedMessage("discal", "info.field.uptime", settings),
+                Application.getUptime().getHumanReadable(),
+                false
+            ).addField(getEmbedMessage("discal", "info.field.calendars", settings), "$calendarCount", true)
+            .addField(getEmbedMessage("discal", "info.field.announcements", settings), "$announcementCount", true)
+            .addField(getEmbedMessage("discal", "info.field.links", settings),
+                getEmbedMessage("discal",
+                    "info.field.links.value",
+                    settings,
+                    "${Config.URL_BASE.getString()}/commands",
+                    Config.URL_SUPPORT.getString(),
+                    Config.URL_INVITE.getString(),
+                    "https://www.patreon.com/Novafox"
+                ),
+                false
+            ).footer(getEmbedMessage("discal", "info.footer", settings), null)
+            .build()
     }
 
     /////////////////////////////
@@ -270,5 +307,166 @@ class EmbedService(
             .addField(getEmbedMessage("rsvp", "list.field.waitList", settings), waitList, false)
             .footer(getEmbedMessage("rsvp", "list.footer", settings), null)
             .build()
+    }
+
+    /////////////////////////////////
+    ////// Announcement Embeds //////
+    /////////////////////////////////
+    suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
+        return when(settings.announcementStyle) {
+            AnnouncementStyle.FULL -> fullAnnouncementEmbed(announcement, event, settings)
+            AnnouncementStyle.SIMPLE -> simpleAnnouncementEmbed(announcement, event, settings)
+            AnnouncementStyle.EVENT -> eventAnnouncementEmbed(announcement, event, settings)
+        }
+    }
+
+    suspend fun fullAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .color(event.color.asColor())
+            .title(getEmbedMessage("announcement", "full.title", settings))
+
+        if (event.name.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "full.field.name", settings),
+            event.name.toMarkdown().embedFieldSafe(),
+            false
+        )
+        if (event.description.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "full.field.desc", settings),
+            event.description.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(
+            getEmbedMessage("announcement", "full.field.start", settings),
+            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            true
+        )
+        builder.addField(
+            getEmbedMessage("announcement", "full.field.end", settings),
+            event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "full.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+            getEmbedMessage("announcement", "full.field.info", settings),
+            announcement.info.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(
+            getEmbedMessage("announcement", "full.field.calendar", settings),
+            "${event.calendar.calendarNumber}",
+            true
+        )
+        builder.addField(getEmbedMessage("announcement", "full.field.event", settings), event.eventId, true)
+
+        if (event.image.isNotBlank())
+            builder.image(event.image)
+
+        builder.footer(getEmbedMessage("announcement", "full.footer", settings, announcement.id), null)
+
+        return builder.build()
+    }
+
+    suspend fun simpleAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .color(event.color.asColor())
+            .title(getEmbedMessage("announcement", "simple.title", settings))
+
+        if (event.name.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "simple.field.name", settings),
+            event.name.toMarkdown().embedFieldSafe(),
+            false
+        )
+        if (event.description.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "simple.field.desc", settings),
+            event.description.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(
+            getEmbedMessage("announcement", "simple.field.start", settings),
+            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "simple.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+            getEmbedMessage("announcement", "simple.field.info", settings),
+            announcement.info.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotEmpty())
+            builder.image(event.image)
+
+        builder.footer(getEmbedMessage("announcement", "simple.footer", settings, announcement.id), null)
+
+        return builder.build()
+    }
+
+    suspend fun eventAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .color(event.color.asColor())
+            .title(getEmbedMessage("announcement", "event.title", settings))
+
+        if (event.name.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "event.field.name", settings),
+            event.name.toMarkdown().embedFieldSafe(),
+            false
+        )
+        if (event.description.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "event.field.desc", settings),
+            event.description.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(
+            getEmbedMessage("announcement", "event.field.start", settings),
+            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            true
+        )
+        builder.addField(
+            getEmbedMessage("announcement", "event.field.end", settings),
+            event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "event.field.location", settings),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(
+            getEmbedMessage("announcement", "event.field.calendar", settings),
+            "${event.calendar.calendarNumber}",
+            true
+        )
+        builder.addField(getEmbedMessage("announcement", "event.field.event", settings), event.eventId, true)
+
+        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+            getEmbedMessage("announcement", "event.field.info", settings),
+            announcement.info.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotBlank())
+            builder.image(event.image)
+
+        builder.footer(getEmbedMessage("announcement", "event.footer", settings, announcement.id), null)
+
+        return builder.build()
     }
 }
