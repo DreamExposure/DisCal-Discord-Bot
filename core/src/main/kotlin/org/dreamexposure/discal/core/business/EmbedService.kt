@@ -202,6 +202,21 @@ class EmbedService(
             .build()
     }
 
+    suspend fun calendarTimeEmbed(calendar: Calendar, settings: GuildSettings): EmbedCreateSpec {
+        val formattedTime = Instant.now().humanReadableFullSimple(calendar.timezone, settings.timeFormat)
+        val formattedLocal = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.SHORT_DATETIME)
+
+        return defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("time", "embed.title", settings))
+            .addField(getEmbedMessage("time", "embed.field.current", settings), formattedTime, true)
+            .addField(getEmbedMessage("time", "embed.field.timezone", settings), calendar.zoneName, true)
+            .addField(getEmbedMessage("time", "embed.field.local", settings), formattedLocal, false)
+            .footer(getEmbedMessage("time", "embed.footer", settings), null)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
     /////////////////////////
     ////// RSVP Embeds //////
     /////////////////////////
@@ -313,7 +328,7 @@ class EmbedService(
     ////// Announcement Embeds //////
     /////////////////////////////////
     suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
-        return when(settings.announcementStyle) {
+        return when (settings.announcementStyle) {
             AnnouncementStyle.FULL -> fullAnnouncementEmbed(announcement, event, settings)
             AnnouncementStyle.SIMPLE -> simpleAnnouncementEmbed(announcement, event, settings)
             AnnouncementStyle.EVENT -> eventAnnouncementEmbed(announcement, event, settings)
