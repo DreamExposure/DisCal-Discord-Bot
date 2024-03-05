@@ -33,7 +33,7 @@ class MetricService(
     }
 
     fun recordStaticMessageTaskDuration(scope: String, duration: Long) {
-        recordTaskDuration("static-message", listOf(Tag.of("scope", scope)), duration)
+        recordTaskDuration("static_message", listOf(Tag.of("scope", scope)), duration)
     }
 
     fun incrementStaticMessagesUpdated(type: StaticMessage.Type) {

@@ -38,17 +38,21 @@ class AnnouncementCronJob(
         val taskTimer = StopWatch()
         taskTimer.start()
 
-        val guilds = discordClient.guilds.collectList().awaitSingle()
+        try {
+            val guilds = discordClient.guilds.collectList().awaitSingle()
 
-        guilds.forEach { guild ->
-            try {
-                announcementService.processAnnouncementsForGuild(guild.id, maxDifference)
-            } catch (ex: Exception) {
-                LOGGER.error("Failed to process announcements for guild | guildId:${guild.id.asLong()}", ex)
+            guilds.forEach { guild ->
+                try {
+                    announcementService.processAnnouncementsForGuild(guild.id, maxDifference)
+                } catch (ex: Exception) {
+                    LOGGER.error("Failed to process announcements for guild | guildId:${guild.id.asLong()}", ex)
+                }
             }
+        } catch (ex: Exception) {
+            LOGGER.error("Failed to process announcements for all guilds", ex)
+        } finally {
+            taskTimer.stop()
+            metricService.recordAnnouncementTaskDuration("overall", taskTimer.totalTimeMillis)
         }
-
-        taskTimer.stop()
-        metricService.recordAnnouncementTaskDuration("overall", taskTimer.totalTimeMillis)
     }
 }

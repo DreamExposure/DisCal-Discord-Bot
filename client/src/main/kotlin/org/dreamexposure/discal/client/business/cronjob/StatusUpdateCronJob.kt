@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.business.cronjob
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.`object`.presence.ClientActivity
 import discord4j.core.`object`.presence.ClientPresence
+import io.micrometer.core.instrument.Tag
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.Application
@@ -84,6 +85,6 @@ class StatusUpdateCronJob(
         discordClient.updatePresence(ClientPresence.online(ClientActivity.playing(status))).awaitSingleOrNull()
 
         taskTimer.stop()
-        metricService.recordTaskDuration("status_update", duration = taskTimer.totalTimeMillis)
+        metricService.recordTaskDuration("status_update", listOf(Tag.of("scope", "cron_job")),  taskTimer.totalTimeMillis)
     }
 }
