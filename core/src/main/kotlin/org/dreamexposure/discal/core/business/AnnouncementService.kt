@@ -83,10 +83,10 @@ class AnnouncementService(
         return announcements
     }
 
-    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, returnDisabled: Boolean? = true): List<Announcement> {
-        return getAllAnnouncements(guildId).filter {
-            type?.equals(it.type) ?: true
-        }.filter { returnDisabled?.equals(true) ?: it.enabled }
+    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, returnDisabled: Boolean = true): List<Announcement> {
+        return getAllAnnouncements(guildId)
+            .filter { if (type == null) true else it.type == type }
+            .filter { if (returnDisabled) true else it.enabled }
     }
 
     suspend fun getAnnouncement(guildId: Snowflake, id: String): Announcement? {
