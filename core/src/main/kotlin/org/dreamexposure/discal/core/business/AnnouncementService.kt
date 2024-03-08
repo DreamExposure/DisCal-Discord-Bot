@@ -7,14 +7,15 @@ import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.AnnouncementCache
+import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
 import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
+import org.dreamexposure.discal.core.`object`.new.WizardState
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
@@ -27,6 +28,7 @@ import java.time.Instant
 class AnnouncementService(
     private val announcementRepository: AnnouncementRepository,
     private val announcementCache: AnnouncementCache,
+    private val announcementWizardStateCache: AnnouncementWizardStateCache,
     private val embedService: EmbedService,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
@@ -44,11 +46,11 @@ class AnnouncementService(
             channelId = announcement.channelId.asString(),
             announcementType = announcement.type.name,
             modifier = announcement.modifier.name,
-            eventId = announcement.eventId,
+            eventId = announcement.eventId ?: "N/a",
             eventColor = announcement.eventColor.name,
             hoursBefore = announcement.hoursBefore,
             minutesBefore = announcement.minutesBefore,
-            info = announcement.info,
+            info = announcement.info ?: "None",
             enabled = announcement.enabled,
             publish = announcement.publish,
         )).map(::Announcement).awaitSingle()
@@ -81,16 +83,10 @@ class AnnouncementService(
         return announcements
     }
 
-    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type): List<Announcement> {
-        return getAllAnnouncements(guildId).filter { it.type == type }
-    }
-
-    suspend fun getEnabledAnnouncements(guildId: Snowflake): List<Announcement> {
-        return getAllAnnouncements(guildId).filter(Announcement::enabled)
-    }
-
-    suspend fun getEnabledAnnouncements(guildId: Snowflake, type: Announcement.Type): List<Announcement> {
-        return getEnabledAnnouncements(guildId).filter { it.type == type }
+    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, returnDisabled: Boolean? = true): List<Announcement> {
+        return getAllAnnouncements(guildId).filter {
+            type?.equals(it.type) ?: true
+        }.filter { returnDisabled?.equals(true) ?: it.enabled }
     }
 
     suspend fun getAnnouncement(guildId: Snowflake, id: String): Announcement? {
@@ -107,11 +103,11 @@ class AnnouncementService(
             channelId = announcement.channelId.asString(),
             announcementType = announcement.type.name,
             modifier = announcement.modifier.name,
-            eventId = announcement.eventId,
+            eventId = announcement.eventId ?: "N/a",
             eventColor = announcement.eventColor.name,
             hoursBefore = announcement.hoursBefore,
             minutesBefore = announcement.minutesBefore,
-            info = announcement.info,
+            info = announcement.info ?: "None",
             enabled = announcement.enabled,
             publish = announcement.publish,
         ).awaitSingleOrNull()
@@ -201,52 +197,71 @@ class AnnouncementService(
         taskTimer.start()
 
         val guild = discordClient.getGuildById(guildId)
-        val calendars: MutableSet<Calendar> = mutableSetOf()
-        val events: MutableMap<Int, List<Event>> = mutableMapOf()
 
         // TODO: Need to break this out to add handling for modifiers
-        getEnabledAnnouncements(guildId).forEach { announcement ->
-            // Get the calendar
-            var calendar = calendars.firstOrNull { it.calendarNumber == announcement.calendarNumber }
-            if (calendar == null) {
-                calendar = guild.getCalendar(announcement.calendarNumber).awaitSingleOrNull() ?: return@forEach
-                calendars.add(calendar)
-            }
+        getAllAnnouncements(guildId = guildId, returnDisabled = false)
+            .groupBy { it.calendarNumber }
+            .forEach { calendarPair ->
+                // Get the calendar
+                val calendar = guild.getCalendar(calendarPair.key).awaitSingleOrNull() ?: return@forEach
 
-            // Handle specific type first, since we don't need to fetch all events for this
-            if (announcement.type == Announcement.Type.SPECIFIC) {
-                val event = calendar.getEvent(announcement.eventId).awaitSingleOrNull() ?: return@forEach
-                if (isInRange(announcement, event, maxDifference)) {
-                    sendAnnouncement(announcement, event)
+                var events: List<Event>? = null
+
+                // Loop through announcements
+                for (announcement in calendarPair.value) {
+                    // Handle specific type first, since we don't need to fetch all events for this
+                    if (announcement.type == Announcement.Type.SPECIFIC) {
+                        val event = calendar.getEvent(announcement.eventId!!).awaitSingleOrNull() ?: continue
+                        if (isInRange(announcement, event, maxDifference)) {
+                            sendAnnouncement(announcement, event)
+                        }
+                    }
+
+                    // Get the events to filter through, we only need to fetch this once for the set of announcements,
+                    if (events == null) {
+                        events = calendar.getUpcomingEvents(20)
+                            .collectList()
+                            .awaitSingle()
+                    }
+
+
+                    // Handle filtering out events based on this announcement's types
+                    var filteredEvents = events
+
+                    if (announcement.type == Announcement.Type.COLOR) {
+                        filteredEvents = filteredEvents?.filter { it.color == announcement.eventColor }
+                    } else if (announcement.type == Announcement.Type.RECUR) {
+                        filteredEvents = filteredEvents
+                            ?.filter { it.eventId.contains("_") }
+                            ?.filter { it.eventId.split("_")[0] == announcement.eventId }
+                    }
+
+                    // Loop through filtered events and post any announcements in range
+                    filteredEvents
+                        ?.filter { isInRange(announcement, it, maxDifference) }
+                        ?.forEach { sendAnnouncement(announcement, it) }
                 }
             }
 
-            // Get the events to filter through
-            var filteredEvents = events[calendar.calendarNumber]
-            if (filteredEvents == null) {
-                filteredEvents = calendar.getUpcomingEvents(20)
-                    .collectList()
-                    .awaitSingle()
-                events[calendar.calendarNumber] = filteredEvents
-            }
-
-            // Handle filtering out events based on this announcement's types
-            if (announcement.type == Announcement.Type.COLOR) {
-                filteredEvents = filteredEvents?.filter { it.color == announcement.eventColor }
-            } else if (announcement.type == Announcement.Type.RECUR) {
-                filteredEvents = filteredEvents
-                    ?.filter { it.eventId.contains("_") }
-                    ?.filter { it.eventId.split("_")[0] == announcement.eventId }
-            }
-
-            // Loop through filtered events and post any announcements in range
-            filteredEvents
-                ?.filter { isInRange(announcement, it, maxDifference) }
-                ?.forEach { sendAnnouncement(announcement, it) }
-
-        }
-
         taskTimer.stop()
         metricService.recordAnnouncementTaskDuration("guild", taskTimer.totalTimeMillis)
+    }
+
+    suspend fun getWizard(guildId: Snowflake, userId: Snowflake): WizardState<Announcement>? {
+        return announcementWizardStateCache.get(guildId, userId)
+    }
+
+    suspend fun putWizard(state: WizardState<Announcement>) {
+        announcementWizardStateCache.put(state.guildId, state.userId, state)
+    }
+
+    suspend fun cancelWizard(guildId: Snowflake, userId: Snowflake) {
+        announcementWizardStateCache.evict(guildId, userId)
+    }
+
+    suspend fun cancelWizard(guildId: Snowflake, announcementId: String) {
+        announcementWizardStateCache.getAll(guildId)
+            .filter { it.entity.id == announcementId }
+            .forEach { announcementWizardStateCache.evict(guildId, it.userId) }
     }
 }

@@ -35,6 +35,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // Global bot timings
     TIMING_BOT_STATUS_UPDATE_MINUTES("bot.timing.status-update.minutes", 5),
     TIMING_ANNOUNCEMENT_TASK_RUN_INTERVAL_MINUTES("bot.timing.announcement.task-run-interval.minutes", 5),
+    TIMING_WIZARD_TIMEOUT_MINUTES("bot.timing.wizard-timeout.minutes", 30),
 
     // Bot secrets
     SECRET_DISCAL_API_KEY("bot.secret.api-token"),

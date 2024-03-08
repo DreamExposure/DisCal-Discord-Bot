@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
+import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
@@ -17,12 +18,14 @@ import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.Rsvp
+import org.dreamexposure.discal.core.`object`.new.WizardState
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.dreamexposure.discal.core.utils.getEmbedMessage
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -368,7 +371,7 @@ class EmbedService(
             false
         )
 
-        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+        if (!announcement.info.isNullOrBlank()) builder.addField(
             getEmbedMessage("announcement", "full.field.info", settings),
             announcement.info.toMarkdown().embedFieldSafe(),
             false
@@ -417,7 +420,7 @@ class EmbedService(
             false
         )
 
-        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+        if (!announcement.info.isNullOrBlank()) builder.addField(
             getEmbedMessage("announcement", "simple.field.info", settings),
             announcement.info.toMarkdown().embedFieldSafe(),
             false
@@ -471,7 +474,7 @@ class EmbedService(
         )
         builder.addField(getEmbedMessage("announcement", "event.field.event", settings), event.eventId, true)
 
-        if (announcement.info.isNotBlank() && !announcement.info.equals("None", true)) builder.addField(
+        if (!announcement.info.isNullOrBlank()) builder.addField(
             getEmbedMessage("announcement", "event.field.info", settings),
             announcement.info.toMarkdown().embedFieldSafe(),
             false
@@ -481,6 +484,129 @@ class EmbedService(
             builder.image(event.image)
 
         builder.footer(getEmbedMessage("announcement", "event.footer", settings, announcement.id), null)
+
+        return builder.build()
+    }
+
+    suspend fun viewAnnouncementEmbed(announcement: Announcement, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("announcement", "view.title", settings))
+            .addField(getEmbedMessage("announcement", "view.field.type", settings), announcement.type.name, true)
+            .addField(getEmbedMessage("announcement", "view.field.modifier", settings), announcement.modifier.name, true)
+            .addField(getEmbedMessage("announcement", "view.field.channel", settings), "<#${announcement.channelId.asLong()}>", false)
+            .addField(getEmbedMessage("announcement", "view.field.hours", settings), "${announcement.hoursBefore}", true)
+            .addField(getEmbedMessage("announcement", "view.field.minutes", settings), "${announcement.minutesBefore}", true)
+
+        if (!announcement.info.isNullOrBlank()) {
+            builder.addField(getEmbedMessage("announcement", "view.field.info", settings), announcement.info.toMarkdown().embedFieldSafe(), false)
+        }
+
+        builder.addField(getEmbedMessage("announcement", "view.field.calendar", settings), "${announcement.calendarNumber}", true)
+
+        if (announcement.type == Announcement.Type.RECUR || announcement.type == Announcement.Type.SPECIFIC)
+            builder.addField(getEmbedMessage("announcement", "view.field.event", settings), announcement.eventId!!, true)
+
+        if (announcement.type == Announcement.Type.COLOR) {
+            builder.color(announcement.eventColor.asColor())
+            builder.addField(getEmbedMessage("announcement", "view.field.color", settings), announcement.eventColor.name, true)
+        } else builder.color(GlobalVal.discalColor)
+
+        return builder.addField(getEmbedMessage("announcement", "view.field.id", settings), announcement.id, false)
+            .addField(getEmbedMessage("announcement", "view.field.enabled", settings), "${announcement.enabled}", true)
+            .addField(getEmbedMessage("announcement", "view.field.publish", settings), "${announcement.publish}", true)
+            .build()
+    }
+
+    suspend fun condensedAnnouncementEmbed(announcement: Announcement, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("announcement", "con.title", settings))
+            .addField(getEmbedMessage("announcement", "con.field.id", settings), announcement.id, false)
+            .addField(getEmbedMessage("announcement", "con.field.time", settings), "${announcement.hoursBefore}H${announcement.minutesBefore}m", true)
+            .addField(getEmbedMessage("announcement", "con.field.enabled", settings), "${announcement.enabled}", true)
+            .footer(getEmbedMessage("announcement", "con.footer", settings, announcement.type.name, announcement.modifier.name), null)
+
+        if (announcement.type == Announcement.Type.COLOR) builder.color(announcement.eventColor.asColor())
+        else builder.color(GlobalVal.discalColor)
+
+        return builder.build()
+    }
+
+    suspend fun announcementWizardEmbed(wizard: WizardState<Announcement>, settings: GuildSettings): EmbedCreateSpec {
+        val announcement = wizard.entity
+
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("announcement", "wizard.title", settings))
+            .footer(getEmbedMessage("announcement", "wizard.footer", settings), null)
+            .color(announcement.eventColor.asColor())
+            //fields
+            .addField(getEmbedMessage("announcement", "wizard.field.type", settings), announcement.type.name, true)
+            .addField(getEmbedMessage("announcement", "wizard.field.modifier", settings), announcement.modifier.name, true)
+
+        if (announcement.type == Announcement.Type.COLOR) {
+            if (announcement.eventColor == EventColor.NONE) builder.addField(
+                getEmbedMessage("announcement", "wizard.field.color", settings),
+                getCommonMsg("embed.unset", settings),
+                false
+            ) else builder.addField(
+                getEmbedMessage("announcement", "wizard.field.color", settings),
+                announcement.eventColor.name,
+                false
+            )
+        }
+
+        if (announcement.type == Announcement.Type.SPECIFIC || announcement.type == Announcement.Type.RECUR) {
+            if (announcement.eventId.isNullOrBlank()) builder.addField(
+                getEmbedMessage("announcement", "wizard.field.event", settings),
+                getCommonMsg("embed.unset", settings),
+                false
+            ) else builder.addField(
+                getEmbedMessage("announcement", "wizard.field.event", settings),
+                announcement.eventId,
+                false
+            )
+        }
+
+        if (announcement.info == "None" || announcement.info.isNullOrBlank()) builder.addField(
+            getEmbedMessage("announcement", "wizard.field.info", settings),
+            getCommonMsg("embed.unset", settings),
+            false
+        ) else builder.addField(
+            getEmbedMessage("announcement", "wizard.field.info", settings),
+            announcement.info.embedFieldSafe().toMarkdown(),
+            false
+        )
+
+        builder.addField(getEmbedMessage("announcement", "wizard.field.channel", settings), "<#${announcement.channelId.asLong()}>", false)
+        builder.addField(getEmbedMessage("announcement", "wizard.field.minutes", settings), "${announcement.minutesBefore}", true)
+        builder.addField(getEmbedMessage("announcement", "wizard.field.hours", settings), "${announcement.hoursBefore}", true)
+
+        if (wizard.editing) builder.addField(getEmbedMessage("announcement", "wizard.field.id", settings), announcement.id, false)
+        else builder.addField(
+            getEmbedMessage("announcement", "wizard.field.id", settings),
+            getCommonMsg("embed.unset", settings),
+            false
+        )
+
+        builder.addField(getEmbedMessage("announcement", "wizard.field.publish", settings), "${announcement.publish}", true)
+        builder.addField(getEmbedMessage("announcement", "wizard.field.enabled", settings), "${announcement.enabled}", true)
+        builder.addField(getEmbedMessage("announcement", "wizard.field.calendar", settings), "${announcement.calendarNumber}", true)
+
+        // Build up any warnings
+        val warningsBuilder = StringBuilder()
+        if ((announcement.type == Announcement.Type.SPECIFIC || announcement.type == Announcement.Type.RECUR) && announcement.eventId.isNullOrBlank())
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.eventId", settings))
+        if (announcement.type == Announcement.Type.COLOR && announcement.eventColor == EventColor.NONE)
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.color", settings))
+        if (announcement.getCalculatedTime() < Duration.ofMinutes(5))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings))
+        if (announcement.calendarNumber > settings.maxCalendars)
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings))
+
+
+
+        if (warningsBuilder.isNotBlank()) {
+            builder.addField(getEmbedMessage("announcement", "wizard.field.warnings", settings), warningsBuilder.toString(), false)
+        }
 
         return builder.build()
     }

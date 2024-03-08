@@ -7,6 +7,7 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
+@Deprecated("This was dumb, what was I doing lmao")
 class Wizard<T: Pre> {
     private val active = ConcurrentHashMap<Snowflake, T>()
 

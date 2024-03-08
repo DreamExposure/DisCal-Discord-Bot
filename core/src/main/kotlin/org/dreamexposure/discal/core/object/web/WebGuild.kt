@@ -18,11 +18,11 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.extensions.discord4j.getMainCalendar
 import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import reactor.core.publisher.Mono
 import reactor.core.publisher.Mono.justOrEmpty
 import reactor.function.TupleUtils
 
+@Deprecated("Yeah, this is a disaster")
 @Serializable
 data class WebGuild(
       @Serializable(with = LongAsStringSerializer::class)
@@ -46,7 +46,7 @@ data class WebGuild(
 ) {
     val roles: MutableList<WebRole> = mutableListOf()
     val channels: MutableList<WebChannel> = mutableListOf()
-    val announcements: MutableList<Announcement> = mutableListOf()
+    val announcements: List<String> = emptyList()
 
     @SerialName("available_langs")
     val availableLangs: MutableList<String> = mutableListOf()
@@ -77,20 +77,17 @@ data class WebGuild(
                       .map { channel -> WebChannel.fromChannel(channel) }
                       .collectList()
 
-                val announcements = DatabaseManager.getAnnouncements(id)
-
                 //TODO: Support multi-cal
                 val calendar = g.getMainCalendar()
                     .map { it.toWebCalendar() }
                     .defaultIfEmpty(WebCalendar.empty())
 
 
-                Mono.zip(botNick, settings, roles, webChannels, announcements, calendar)
-                      .map(TupleUtils.function { bn, s, r, wc, a, c ->
+                Mono.zip(botNick, settings, roles, webChannels, calendar)
+                      .map(TupleUtils.function { bn, s, r, wc, c ->
                           WebGuild(id.asLong(), name, ico, s, bn, elevatedAccess = false, discalRole = false, c).apply {
                               this.roles.addAll(r)
                               this.channels.addAll(wc)
-                              this.announcements.addAll(a)
                           }
                       })
             }.onErrorResume(ClientException::class.java) {
@@ -119,19 +116,16 @@ data class WebGuild(
                   .map { channel -> WebChannel.fromChannel(channel) }
                   .collectList()
 
-            val announcements = DatabaseManager.getAnnouncements(g.id)
-
             //TODO: Support multi-cal
             val calendar = g.getMainCalendar()
                 .map { it.toWebCalendar() }
                 .defaultIfEmpty(WebCalendar.empty())
 
-            return Mono.zip(botNick, settings, roles, channels, announcements, calendar)
-                  .map(TupleUtils.function { bn, s, r, wc, a, c ->
+            return Mono.zip(botNick, settings, roles, channels, calendar)
+                  .map(TupleUtils.function { bn, s, r, wc, c ->
                       WebGuild(id, name, icon, s, bn, elevatedAccess = false, discalRole = false, c).apply {
                           this.roles.addAll(r)
                           this.channels.addAll(wc)
-                          this.announcements.addAll(a)
                       }
                   })
         }

@@ -19,13 +19,13 @@ data class Announcement(
 
 
     val subscribers: Subscribers = Subscribers(),
-    val eventId: String = "N/a",
+    val eventId: String? = null,
     val eventColor: EventColor = EventColor.NONE,
 
     val hoursBefore: Int = 0,
     val minutesBefore: Int = 0,
 
-    val info: String = "None",
+    val info: String? = null,
     val enabled: Boolean = true,
     val publish: Boolean = false,
 ) {
@@ -39,16 +39,16 @@ data class Announcement(
         channelId = Snowflake.of(data.channelId),
 
         subscribers = Subscribers(
-            roles = data.subscribersRole.asStringListFromDatabase(),
-            users = data.subscribersUser.asStringListFromDatabase().map(Snowflake::of),
+            roles = data.subscribersRole.asStringListFromDatabase().toSet(),
+            users = data.subscribersUser.asStringListFromDatabase().map(Snowflake::of).toSet(),
         ),
-        eventId = data.eventId,
+        eventId = if (data.eventId.isBlank() || data.eventId.equals("N/a", ignoreCase = true)) null else data.eventId,
         eventColor = EventColor.fromNameOrHexOrId(data.eventColor),
 
         hoursBefore = data.hoursBefore,
         minutesBefore = data.minutesBefore,
 
-        info = data.info,
+        info = if (data.info.isBlank() || data.info.equals("None", ignoreCase = true)) null else data.info,
         enabled = data.enabled,
         publish = data.publish,
     )
@@ -56,10 +56,31 @@ data class Announcement(
     fun getCalculatedTime(): Duration = Duration.ofHours(hoursBefore.toLong()).plusMinutes(minutesBefore.toLong())
 
 
+    ////////////////////////////
+    ////// Nested classes //////
+    ////////////////////////////
     data class Subscribers(
-        val roles: List<String> = listOf(),
-        val users: List<Snowflake> = listOf(),
-    )
+        val roles: Set<String> = setOf(),
+        val users: Set<Snowflake> = setOf(),
+    ) {
+        fun buildMentions(): String {
+            if (users.isEmpty() && roles.isEmpty()) return ""
+
+            val userMentions = users.map { "<@${it.asLong()}> " }
+
+            val roleMentions = roles.map {
+                if (it.equals("everyone", true)) "@everyone "
+                else if (it.equals("here", true)) "@here "
+                else "<@&$it> "
+            }
+
+            return StringBuilder()
+                .append("Subscribers: ")
+                .append(*userMentions.toTypedArray())
+                .append(*roleMentions.toTypedArray())
+                .toString()
+        }
+    }
 
     enum class Type {
         UNIVERSAL,
