@@ -45,6 +45,7 @@ allprojects {
     val mySqlConnectorJava: String by properties
     // Serialization
     val kotlinxSerializationJsonVersion: String by properties
+    val orgJsonVersion: String by properties
     // Observability
     val logbackContribVersion: String by properties
     // Google libs
@@ -76,7 +77,10 @@ allprojects {
         // Discord
         implementation("com.discord4j:discord4j-core:$discord4jVersion")
         implementation("com.discord4j:stores-redis:$discord4jStoresVersion")
-        implementation("club.minnced:discord-webhooks:$discordWebhookVersion")
+        implementation("club.minnced:discord-webhooks:$discordWebhookVersion") {
+            // Due to vulnerability in older versions: https://github.com/advisories/GHSA-rm7j-f5g5-27vv
+            exclude(group = "org.json", module = "json")
+        }
 
         // Spring
         implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
@@ -94,7 +98,7 @@ allprojects {
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-        implementation("org.json:json")
+        implementation("org.json:json:$orgJsonVersion")
 
         // Observability
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
