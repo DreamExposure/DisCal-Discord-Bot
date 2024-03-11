@@ -63,7 +63,7 @@ class CacheConfig {
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
     fun announcementWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): AnnouncementWizardStateCache =
-        RedisStringCacheRepository(objectMapper, redisTemplate, "Wizards.Announcements", wizardTtl)
+        RedisStringCacheRepository(objectMapper, redisTemplate, "AnnouncementWizards", wizardTtl)
 
 
     // In-memory fallback caching

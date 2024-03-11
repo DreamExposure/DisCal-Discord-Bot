@@ -7,6 +7,7 @@ import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.AnnouncementCache
+import org.dreamexposure.discal.AnnouncementWizard
 import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
@@ -15,7 +16,6 @@ import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
-import org.dreamexposure.discal.core.`object`.new.WizardState
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
@@ -247,11 +247,11 @@ class AnnouncementService(
         metricService.recordAnnouncementTaskDuration("guild", taskTimer.totalTimeMillis)
     }
 
-    suspend fun getWizard(guildId: Snowflake, userId: Snowflake): WizardState<Announcement>? {
+    suspend fun getWizard(guildId: Snowflake, userId: Snowflake): AnnouncementWizard? {
         return announcementWizardStateCache.get(guildId, userId)
     }
 
-    suspend fun putWizard(state: WizardState<Announcement>) {
+    suspend fun putWizard(state: AnnouncementWizard) {
         announcementWizardStateCache.put(state.guildId, state.userId, state)
     }
 
