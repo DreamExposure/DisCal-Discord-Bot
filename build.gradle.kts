@@ -40,9 +40,6 @@ allprojects {
     val discord4jVersion: String by properties
     val discord4jStoresVersion: String by properties
     val discordWebhookVersion: String by properties
-    // Database\
-    val mikuR2dbcMySqlVersion: String by properties
-    val mySqlConnectorJava: String by properties
     // Serialization
     val kotlinxSerializationJsonVersion: String by properties
     val orgJsonVersion: String by properties
@@ -91,8 +88,8 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
-        implementation("dev.miku:r2dbc-mysql:$mikuR2dbcMySqlVersion")
-        implementation("mysql:mysql-connector-java:$mySqlConnectorJava")
+        implementation("io.asyncer:r2dbc-mysql")
+        implementation("com.mysql:mysql-connector-j")
 
         // Serialization
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
