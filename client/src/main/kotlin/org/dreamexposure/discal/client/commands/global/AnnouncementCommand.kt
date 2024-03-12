@@ -18,7 +18,7 @@ import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.new.Announcement
-import org.dreamexposure.discal.core.`object`.new.WizardState
+import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
@@ -97,7 +97,7 @@ class AnnouncementCommand(
                 .awaitSingle()
         }
 
-        val newWizard = WizardState(
+        val newWizard = AnnouncementWizardState(
             guildId = settings.guildID,
             userId = event.interaction.user.id,
             editing = false,
@@ -495,7 +495,7 @@ class AnnouncementCommand(
         val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
             ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
 
-        val newWizard = WizardState(
+        val newWizard = AnnouncementWizardState(
             guildId = settings.guildID,
             userId = event.interaction.user.id,
             editing = true,
@@ -531,7 +531,7 @@ class AnnouncementCommand(
         val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
             ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
 
-        val newWizard = WizardState(
+        val newWizard = AnnouncementWizardState(
             guildId = settings.guildID,
             userId = event.interaction.user.id,
             editing = false,
