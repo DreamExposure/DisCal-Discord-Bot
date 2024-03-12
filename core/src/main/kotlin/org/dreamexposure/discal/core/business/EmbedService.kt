@@ -566,7 +566,7 @@ class EmbedService(
             )
         }
 
-        if (announcement.info == "None" || announcement.info.isNullOrBlank()) builder.addField(
+        if (announcement.info.isNullOrBlank()) builder.addField(
             getEmbedMessage("announcement", "wizard.field.info", settings),
             getCommonMsg("embed.unset", settings),
             false
@@ -594,11 +594,11 @@ class EmbedService(
         // Build up any warnings
         val warningsBuilder = StringBuilder()
         if ((announcement.type == Announcement.Type.SPECIFIC || announcement.type == Announcement.Type.RECUR) && announcement.eventId.isNullOrBlank())
-            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.eventId", settings))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.eventId", settings)).appendLine()
         if (announcement.type == Announcement.Type.COLOR && announcement.eventColor == EventColor.NONE)
-            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.color", settings))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.color", settings)).appendLine()
         if (announcement.getCalculatedTime() < Duration.ofMinutes(5))
-            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings)).appendLine()
         if (announcement.calendarNumber > settings.maxCalendars)
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings))
 

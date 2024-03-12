@@ -125,18 +125,20 @@ class AnnouncementService(
     suspend fun deleteAnnouncement(guildId: Snowflake, id: String) {
         announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
 
-        val cached = announcementCache.get(key = guildId)
+        val cached = announcementCache.get(key = guildId)?.toMutableList()
         if (cached != null) {
-            announcementCache.put(key = guildId, value = cached.filterNot { it.id == id }.toTypedArray())
+            cached.removeIf { it.id == id }
+            announcementCache.put(key = guildId, value = cached.toTypedArray())
         }
     }
 
     suspend fun deleteAnnouncements(guildId: Snowflake, eventId: String) {
         announcementRepository.deleteAllByGuildIdAndEventId(guildId.asLong(), eventId).awaitSingleOrNull()
 
-        val cached = announcementCache.get(key = guildId)
+        val cached = announcementCache.get(key = guildId)?.toMutableList()
         if (cached != null) {
-            announcementCache.put(key = guildId, value = cached.filterNot { it.eventId == eventId }.toTypedArray())
+            cached.removeIf { it.eventId == eventId }
+            announcementCache.put(key = guildId, value = cached.toTypedArray())
         }
     }
 
