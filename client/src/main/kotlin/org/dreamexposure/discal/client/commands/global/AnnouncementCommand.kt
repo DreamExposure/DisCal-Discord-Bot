@@ -557,7 +557,6 @@ class AnnouncementCommand(
 
         // If announcement is being edited, cancel the editor
         announcementService.cancelWizard(settings.guildID, announcementId)
-
         announcementService.deleteAnnouncement(settings.guildID, announcementId)
 
         return event.createFollowup(getMessage("delete.success", settings))

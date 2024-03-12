@@ -123,12 +123,16 @@ class AnnouncementService(
     }
 
     suspend fun deleteAnnouncement(guildId: Snowflake, id: String) {
-        announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
+        try {
+            announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
 
-        val cached = announcementCache.get(key = guildId)?.toMutableList()
-        if (cached != null) {
-            cached.removeIf { it.id == id }
-            announcementCache.put(key = guildId, value = cached.toTypedArray())
+            val cached = announcementCache.get(key = guildId)?.toMutableList()
+            if (cached != null) {
+                cached.removeIf { it.id == id }
+                announcementCache.put(key = guildId, value = cached.toTypedArray())
+            }
+        } catch (ex: Exception) {
+            LOGGER.debug("Failed to delete announcement | guildId:${guildId.asLong()} | announcementId:$id")
         }
     }
 
