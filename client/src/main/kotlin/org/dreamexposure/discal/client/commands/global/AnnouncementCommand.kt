@@ -587,8 +587,8 @@ class AnnouncementCommand(
         val message = if (enabled) "enable.success" else "disable.success"
         return event.createFollowup()
             .withEphemeral(ephemeral)
-            .withContent("${getMessage(message, settings)}\n\n${announcement.subscribers.buildMentions()}")
-            .withEmbeds(embedService.viewAnnouncementEmbed(announcement, settings))
+            .withContent("${getMessage(message, settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
             .withAllowedMentions(AllowedMentions.suppressAll())
             .awaitSingle()
     }
@@ -686,8 +686,8 @@ class AnnouncementCommand(
 
         return event.createFollowup()
             .withEphemeral(ephemeral)
-            .withContent("${getMessage("subscribe.success", settings)}\n\n${announcement.subscribers.buildMentions()}")
-            .withEmbeds(embedService.viewAnnouncementEmbed(announcement, settings))
+            .withContent("${getMessage("subscribe.success", settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
             .withAllowedMentions(AllowedMentions.suppressAll())
             .awaitSingle()
     }
@@ -719,8 +719,8 @@ class AnnouncementCommand(
 
         return event.createFollowup()
             .withEphemeral(ephemeral)
-            .withContent("${getMessage("unsubscribe.success", settings)}\n\n${announcement.subscribers.buildMentions()}")
-            .withEmbeds(embedService.viewAnnouncementEmbed(announcement, settings))
+            .withContent("${getMessage("unsubscribe.success", settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
             .withAllowedMentions(AllowedMentions.suppressAll())
             .awaitSingle()
     }
