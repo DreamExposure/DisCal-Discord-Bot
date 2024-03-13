@@ -442,6 +442,12 @@
       "required": false,
       "options": [
         {
+          "name": "announcement",
+          "type": 3,
+          "description": "The announcement to subscribe to",
+          "required": true
+        },
+        {
           "name": "user",
           "type": 6,
           "description": "A user to unsubscribe from the announcement (Do not include to self-unsubscribe)",
