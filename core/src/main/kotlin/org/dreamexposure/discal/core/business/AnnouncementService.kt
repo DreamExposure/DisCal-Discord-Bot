@@ -123,26 +123,20 @@ class AnnouncementService(
     }
 
     suspend fun deleteAnnouncement(guildId: Snowflake, id: String) {
-        try {
-            announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
+        announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
 
-            val cached = announcementCache.get(key = guildId)?.toMutableList()
-            if (cached != null) {
-                cached.removeIf { it.id == id }
-                announcementCache.put(key = guildId, value = cached.toTypedArray())
-            }
-        } catch (ex: Exception) {
-            LOGGER.debug("Failed to delete announcement | guildId:${guildId.asLong()} | announcementId:$id")
+        val cached = announcementCache.get(key = guildId)
+        if (cached != null) {
+            announcementCache.put(key = guildId, value = cached.filterNot { it.id == id }.toTypedArray())
         }
     }
 
     suspend fun deleteAnnouncements(guildId: Snowflake, eventId: String) {
         announcementRepository.deleteAllByGuildIdAndEventId(guildId.asLong(), eventId).awaitSingleOrNull()
 
-        val cached = announcementCache.get(key = guildId)?.toMutableList()
+        val cached = announcementCache.get(key = guildId)
         if (cached != null) {
-            cached.removeIf { it.eventId == eventId }
-            announcementCache.put(key = guildId, value = cached.toTypedArray())
+            announcementCache.put(key = guildId, value = cached.filterNot { it.eventId == eventId }.toTypedArray())
         }
     }
 

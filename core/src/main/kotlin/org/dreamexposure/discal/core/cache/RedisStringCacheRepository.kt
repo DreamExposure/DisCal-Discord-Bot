@@ -51,21 +51,27 @@ class RedisStringCacheRepository<K, V>(
     }
 
     override suspend fun getAll(guildId: Snowflake?): List<V> {
-        val keys = redisTemplate.scan(ScanOptions.scanOptions()
-            .type(DataType.STRING)
-            .match(formatKeySearch(guildId))
-            .build()
-        ).collectList().awaitSingle()
+        try {
+            val keys = redisTemplate.scan(ScanOptions.scanOptions()
+                .type(DataType.STRING)
+                .match(formatKeySearch(guildId))
+                .build()
+            ).collectList().awaitSingle()
+            if (keys.isEmpty()) return emptyList()
 
-        val rawValues = valueOps.multiGetAndAwait(keys)
+            val rawValues = valueOps.multiGetAndAwait(keys)
 
-        return try {
-            rawValues.map { objectMapper.readValue(it, valueType) }
+            return try {
+                rawValues.map { objectMapper.readValue(it, valueType) }
+            } catch (ex: Exception) {
+                LOGGER.error("Failed to read value from redis... evicting all | guildId:$guildId | keys:${keys.joinToString(",")} | data:${rawValues.joinToString(",")}", ex)
+                evictAll(guildId)
+
+                emptyList()
+            }
         } catch (ex: Exception) {
-            LOGGER.error("Failed to read value from redis... evicting all | guildId:$guildId | keys:${keys.joinToString(",")} | data:${rawValues.joinToString(",")}", ex)
-            evictAll(guildId)
-
-            emptyList()
+            LOGGER.error("Failed to fetch all | guildId:${guildId?.asLong()}", ex)
+            return emptyList()
         }
     }
 
