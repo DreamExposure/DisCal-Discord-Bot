@@ -11,6 +11,7 @@ import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
 import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -197,51 +198,50 @@ class AnnouncementService(
         taskTimer.start()
 
         val guild = discordClient.getGuildById(guildId)
+        val calendars: MutableSet<Calendar> = mutableSetOf()
+        val events: MutableMap<Int, List<Event>> = mutableMapOf()
 
         // TODO: Need to break this out to add handling for modifiers
-        getAllAnnouncements(guildId = guildId, returnDisabled = false)
-            .groupBy { it.calendarNumber }
-            .forEach { calendarPair ->
-                // Get the calendar
-                val calendar = guild.getCalendar(calendarPair.key).awaitSingleOrNull() ?: return@forEach
+        getAllAnnouncements(guildId, returnDisabled = false).forEach { announcement ->
+            // Get the calendar
+            var calendar = calendars.firstOrNull { it.calendarNumber == announcement.calendarNumber }
+            if (calendar == null) {
+                calendar = guild.getCalendar(announcement.calendarNumber).awaitSingleOrNull() ?: return@forEach
+                calendars.add(calendar)
+            }
 
-                var events: List<Event>? = null
-
-                // Loop through announcements
-                for (announcement in calendarPair.value) {
-                    // Handle specific type first, since we don't need to fetch all events for this
-                    if (announcement.type == Announcement.Type.SPECIFIC) {
-                        val event = calendar.getEvent(announcement.eventId!!).awaitSingleOrNull() ?: continue
-                        if (isInRange(announcement, event, maxDifference)) {
-                            sendAnnouncement(announcement, event)
-                        }
-                    }
-
-                    // Get the events to filter through, we only need to fetch this once for the set of announcements,
-                    if (events == null) {
-                        events = calendar.getUpcomingEvents(20)
-                            .collectList()
-                            .awaitSingle()
-                    }
-
-
-                    // Handle filtering out events based on this announcement's types
-                    var filteredEvents = events
-
-                    if (announcement.type == Announcement.Type.COLOR) {
-                        filteredEvents = filteredEvents?.filter { it.color == announcement.eventColor }
-                    } else if (announcement.type == Announcement.Type.RECUR) {
-                        filteredEvents = filteredEvents
-                            ?.filter { it.eventId.contains("_") }
-                            ?.filter { it.eventId.split("_")[0] == announcement.eventId }
-                    }
-
-                    // Loop through filtered events and post any announcements in range
-                    filteredEvents
-                        ?.filter { isInRange(announcement, it, maxDifference) }
-                        ?.forEach { sendAnnouncement(announcement, it) }
+            // Handle specific type first, since we don't need to fetch all events for this
+            if (announcement.type == Announcement.Type.SPECIFIC) {
+                val event = calendar.getEvent(announcement.eventId!!).awaitSingleOrNull() ?: return@forEach
+                if (isInRange(announcement, event, maxDifference)) {
+                    sendAnnouncement(announcement, event)
                 }
             }
+
+            // Get the events to filter through
+            var filteredEvents = events[calendar.calendarNumber]
+            if (filteredEvents == null) {
+                filteredEvents = calendar.getUpcomingEvents(20)
+                    .collectList()
+                    .awaitSingle()
+                events[calendar.calendarNumber] = filteredEvents
+            }
+
+            // Handle filtering out events based on this announcement's types
+            if (announcement.type == Announcement.Type.COLOR) {
+                filteredEvents = filteredEvents?.filter { it.color == announcement.eventColor }
+            } else if (announcement.type == Announcement.Type.RECUR) {
+                filteredEvents = filteredEvents
+                    ?.filter { it.eventId.contains("_") }
+                    ?.filter { it.eventId.split("_")[0] == announcement.eventId }
+            }
+
+            // Loop through filtered events and post any announcements in range
+            filteredEvents
+                ?.filter { isInRange(announcement, it, maxDifference) }
+                ?.forEach { sendAnnouncement(announcement, it) }
+
+        }
 
         taskTimer.stop()
         metricService.recordAnnouncementTaskDuration("guild", taskTimer.totalTimeMillis)
