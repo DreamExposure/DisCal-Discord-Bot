@@ -38,6 +38,7 @@ services:
     ports:
       - "8081:8080"
       - "5006:5005"
+      - "8008:8008"
     volumes:
       - ./.docker/cam:/discal
     working_dir: /discal
