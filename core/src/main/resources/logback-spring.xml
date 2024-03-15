@@ -17,7 +17,7 @@
     <logger name="discord4j.core" level="DEBUG"/>
     <logger name="discord4j.gateway" level="INFO"/>
     <logger name="discord4j.gateway.client" level="INFO"/>
-    <logger name="dev.miku.r2dbc.mysql" level="INFO"/>
+    <logger name="io.asyncer.r2dbc.mysql.client" level="INFO"/>
     <logger name="io.r2dbc.pool" level="WARN"/>
     <logger name="io.lettuce" level="INFO"/>
 
@@ -35,7 +35,7 @@
 
     <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <!-- I am considering looking into getting additional info passed into these logs (like traces and shit) but I think I need to learn tempo first-->
+            <!--TODO: I am considering looking into getting additional info passed into these logs (like traces and shit) but I think I need to learn tempo first-->
             <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
                 <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
 
@@ -47,7 +47,7 @@
         </encoder>
     </appender>
 
-    <appender name="DISCAL_WEBHOOK" class="org.dreamexposure.discal.core.logger.DiscordWebhookAppender"/>
+    <appender name="DISCORD_WEBHOOK" class="org.dreamexposure.discal.core.logger.DiscordWebhookAppender"/>
 
     <appender name="FILE_ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -79,12 +79,12 @@
     <springProfile name="!local">
         <root level="DEBUG">
             <appender-ref ref="CONSOLE_JSON"/>
-            <appender-ref ref="DISCAL_WEBHOOK"/>
+            <appender-ref ref="DISCORD_WEBHOOK"/>
         </root>
     </springProfile>
 
     <root level="DEBUG">
-        <appender-ref ref="DISCAL_WEBHOOK"/>
+        <appender-ref ref="DISCORD_WEBHOOK"/>
     </root>
 </configuration>
 
