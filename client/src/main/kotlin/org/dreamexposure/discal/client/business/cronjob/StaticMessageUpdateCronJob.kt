@@ -5,6 +5,8 @@ import org.dreamexposure.discal.Application.Companion.getShardCount
 import org.dreamexposure.discal.Application.Companion.getShardIndex
 import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.business.StaticMessageService
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.extensions.asMinutes
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.boot.ApplicationArguments
@@ -22,7 +24,7 @@ class StaticMessageUpdateCronJob(
     private val metricService: MetricService,
 ):ApplicationRunner {
     override fun run(args: ApplicationArguments?) {
-        Flux.interval(Duration.ofHours(1))
+        Flux.interval(Config.TIMING_STATIC_MESSAGE_UPDATE_TASK_RUN_INTERVAL_MINUTES.getLong().asMinutes())
             .onBackpressureDrop()
             .flatMap { doUpdate() }
             .onErrorResume { Mono.empty() }
