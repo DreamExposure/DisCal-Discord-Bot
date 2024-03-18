@@ -55,7 +55,7 @@ class StaticMessageUpdateCronJob(
             LOGGER.error(DEFAULT, "StaticMessageUpdateCronJob failure", ex)
         } finally {
             taskTimer.stop()
-            metricService.recordStaticMessageTaskDuration("overall", taskTimer.totalTimeMillis)
+            metricService.recordStaticMessageTaskDuration("cronjob", taskTimer.totalTimeMillis)
         }
     }
 }

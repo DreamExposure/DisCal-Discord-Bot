@@ -48,6 +48,6 @@ class AnnouncementCronJob(
             }
         }
         taskTimer.stop()
-        metricService.recordAnnouncementTaskDuration("overall", taskTimer.totalTimeMillis)
+        metricService.recordAnnouncementTaskDuration("cronjob", taskTimer.totalTimeMillis)
     }
 }
