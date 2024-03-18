@@ -19,6 +19,7 @@ class TimeCommand(
     private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "time"
+    override val hasSubcommands = false
     override val ephemeral = true
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {

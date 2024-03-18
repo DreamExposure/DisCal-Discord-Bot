@@ -19,6 +19,7 @@ class LinkCalendarCommand(
     private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "linkcal"
+    override val hasSubcommands = false
     override val ephemeral = false
 
 

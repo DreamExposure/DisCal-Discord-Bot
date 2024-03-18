@@ -30,6 +30,7 @@ class CalendarCommand(
     private val staticMessageService: StaticMessageService
 ) : SlashCommand {
     override val name = "calendar"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")

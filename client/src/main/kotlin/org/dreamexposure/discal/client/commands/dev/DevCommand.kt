@@ -1,16 +1,16 @@
 package org.dreamexposure.discal.client.commands.dev
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.crypto.KeyGenerator.csRandomAlphaNumericString
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono
 @Component
 class DevCommand : SlashCommand {
     override val name = "dev"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")

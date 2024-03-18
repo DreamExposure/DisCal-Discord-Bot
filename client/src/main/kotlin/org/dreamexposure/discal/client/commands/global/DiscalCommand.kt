@@ -18,6 +18,7 @@ class DiscalCommand(
     private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "discal"
+    override val hasSubcommands = false
     override val ephemeral = false
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {

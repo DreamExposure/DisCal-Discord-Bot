@@ -29,6 +29,7 @@ class SlashCommandListener(
         }
 
         val command = commands.firstOrNull { it.name == event.commandName }
+        val subCommand = if (command?.hasSubcommands == true) event.options[0].name else null
 
         if (command != null) {
             event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
@@ -52,6 +53,8 @@ class SlashCommandListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.commandName, "chat-input", timer.totalTimeMillis)
+
+        val computedInteractionName = if (subCommand != null) "/${event.commandName}#$subCommand" else "/${event.commandName}"
+        metricService.recordInteractionDuration(computedInteractionName, "chat-input", timer.totalTimeMillis)
     }
 }

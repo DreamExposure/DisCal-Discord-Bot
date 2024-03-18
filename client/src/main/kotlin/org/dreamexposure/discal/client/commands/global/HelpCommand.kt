@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class HelpCommand : SlashCommand {
     override val name = "help"
+    override val hasSubcommands = false
     override val ephemeral = true
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {

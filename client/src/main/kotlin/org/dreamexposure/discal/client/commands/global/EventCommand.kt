@@ -36,6 +36,7 @@ class EventCommand(
     private val staticMessageService: StaticMessageService
 ) : SlashCommand {
     override val name = "event"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")

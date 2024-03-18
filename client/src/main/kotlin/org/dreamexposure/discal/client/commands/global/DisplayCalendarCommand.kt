@@ -20,6 +20,7 @@ class DisplayCalendarCommand(
     private val staticMessageService: StaticMessageService,
 ) : SlashCommand {
     override val name = "displaycal"
+    override val hasSubcommands = true
     override val ephemeral = true
 
 

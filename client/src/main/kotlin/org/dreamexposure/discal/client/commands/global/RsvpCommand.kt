@@ -24,6 +24,7 @@ class RsvpCommand(
     private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "rsvp"
+    override val hasSubcommands = true
     override val ephemeral = true
 
 

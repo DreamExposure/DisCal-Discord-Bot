@@ -29,6 +29,7 @@ class AnnouncementCommand(
     private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "announcement"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
