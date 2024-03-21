@@ -6,6 +6,7 @@ import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_BAD_REQUEST
 import com.google.api.client.http.HttpStatusCodes.STATUS_CODE_OK
 import kotlinx.coroutines.reactor.awaitSingle
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.google.ErrorData
 import org.dreamexposure.discal.cam.json.google.RefreshData
@@ -20,7 +21,6 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
-import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -32,6 +32,7 @@ class GoogleAuth(
     private val credentialService: CredentialService,
     private val calendarService: CalendarService,
     private val objectMapper: ObjectMapper,
+    private val httpClient: OkHttpClient,
 ) {
 
     suspend fun requestNewAccessToken(calendar: Calendar): CredentialData? {
@@ -79,7 +80,7 @@ class GoogleAuth(
             .build()
 
 
-        val response = Mono.fromCallable(HTTP_CLIENT.newCall(request)::execute)
+        val response = Mono.fromCallable(httpClient.newCall(request)::execute)
             .subscribeOn(Schedulers.boundedElastic())
             .awaitSingle()
 
