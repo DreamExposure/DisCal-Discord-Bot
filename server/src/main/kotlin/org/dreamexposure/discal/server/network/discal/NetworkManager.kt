@@ -98,10 +98,10 @@ class NetworkManager(
         Flux.interval(Duration.ofMinutes(1))
             .flatMap { updateAndReturnStatus() } //Update local status every minute
             .flatMap {
-                val bot = Flux.from<BotInstanceData> { status.botStatus }
+                val bot = Flux.fromIterable(status.botStatus)
                     .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartBot)
-                val cam = Flux.from<InstanceData> { status.camStatus }
+                val cam = Flux.fromIterable(status.camStatus)
                     .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
                     .flatMap(this::doRestartCam)
 
