@@ -16,9 +16,9 @@ jobs:
       matrix:
         java: [ 17 ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -26,18 +26,18 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Install NPM
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 14.8.0
 
       - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: ${{ matrix.java }}
           distribution: 'adopt'
 
       - name: Validate gradle
-        uses: gradle/wrapper-validation-action@v1
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
@@ -51,11 +51,11 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && (github.ref_name == 'develop' || github.ref_name == 'master') }}
     needs: build
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/cache@v1
+      - uses: actions/cache@v4
         with:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
@@ -63,12 +63,12 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Install NPM
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: 14.8.0
 
       - name: Set up JDK
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: 'adopt'
@@ -82,7 +82,7 @@ jobs:
           SCW_USER: ${{ secrets.SCW_USER }}
           SCW_SECRET: ${{ secrets.SCW_SECRET }}
         with:
-          command: ./gradlew jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET}
+          command: ./gradlew clean jib -Djib.to.auth.username=${SCW_USER} -Djib.to.auth.password=${SCW_SECRET} -Djib.console=plain
           attempt_limit: 25
           # 1 minute in ms
           attempt_delay: 60000
@@ -92,7 +92,7 @@ jobs:
     if: github.ref_name == 'develop'
     needs: publish-artifacts
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 

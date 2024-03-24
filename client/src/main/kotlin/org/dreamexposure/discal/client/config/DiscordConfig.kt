@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.config
 
 import discord4j.common.store.Store
 import discord4j.common.store.legacy.LegacyStoreLayout
+import discord4j.core.DiscordClient
 import discord4j.core.DiscordClientBuilder
 import discord4j.core.GatewayDiscordClient
 import discord4j.core.event.domain.Event
@@ -13,7 +14,6 @@ import discord4j.discordjson.json.GuildData
 import discord4j.discordjson.json.MessageData
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
-import discord4j.rest.RestClient
 import discord4j.store.api.mapping.MappingStoreService
 import discord4j.store.api.service.StoreService
 import discord4j.store.jdk.JdkStoreService
@@ -58,13 +58,13 @@ class DiscordConfig {
     }
 
     @Bean
-    fun discordRestClient(gatewayDiscordClient: GatewayDiscordClient): RestClient {
-        return gatewayDiscordClient.restClient
+    fun discordClient(gatewayDiscordClient: GatewayDiscordClient): DiscordClient {
+        return gatewayDiscordClient.rest()
     }
 
     @Bean
     fun discordStores(): StoreService {
-        val useRedis = Config.CACHE_USE_REDIS.getBoolean()
+        val useRedis = Config.CACHE_USE_REDIS_D4J.getBoolean()
         val redisHost = Config.REDIS_HOST.getString()
         val redisPassword = Config.REDIS_PASSWORD.getString().toCharArray()
         val redisPort = Config.REDIS_PORT.getInt()

@@ -422,9 +422,15 @@
           "required": true
         },
         {
-          "name": "sub",
-          "type": 9,
-          "description": "A role or user to subscribe to the announcement",
+          "name": "user",
+          "type": 6,
+          "description": "A user to subscribe to the announcement (Do not include to self-subscribe)",
+          "required": false
+        },
+        {
+          "name": "role",
+          "type": 8,
+          "description": "A role to subscribe to the announcement (Do not include to self-subscribe)",
           "required": false
         }
       ]
@@ -438,13 +444,19 @@
         {
           "name": "announcement",
           "type": 3,
-          "description": "The announcement to unsubscribe from",
+          "description": "The announcement to subscribe to",
           "required": true
         },
         {
-          "name": "sub",
-          "type": 9,
-          "description": "A role or user to unsubscribe from the announcement",
+          "name": "user",
+          "type": 6,
+          "description": "A user to unsubscribe from the announcement (Do not include to self-unsubscribe)",
+          "required": false
+        },
+        {
+          "name": "role",
+          "type": 8,
+          "description": "A role to unsubscribe from the announcement (Do not include to self-unsubscribe)",
           "required": false
         }
       ]

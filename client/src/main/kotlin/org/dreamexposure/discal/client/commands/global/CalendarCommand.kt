@@ -6,9 +6,10 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.CalendarEmbed
-import org.dreamexposure.discal.client.service.StaticMessageService
+import org.dreamexposure.discal.core.business.StaticMessageService
 import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.discord4j.*
@@ -24,8 +25,12 @@ import reactor.core.publisher.Mono
 import java.time.ZoneId
 
 @Component
-class CalendarCommand(val wizard: Wizard<PreCalendar>, val staticMessageSrv: StaticMessageService) : SlashCommand {
+class CalendarCommand(
+    private val wizard: Wizard<PreCalendar>,
+    private val staticMessageService: StaticMessageService
+) : SlashCommand {
     override val name = "calendar"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")
@@ -200,11 +205,9 @@ class CalendarCommand(val wizard: Wizard<PreCalendar>, val staticMessageSrv: Sta
                             .filter(UpdateCalendarResponse::success)
                             .doOnNext { wizard.remove(settings.guildID) }
                             .flatMap { ucr ->
-                                val updateMessages = staticMessageSrv.updateStaticMessages(
-                                        guild,
-                                        ucr.new!!,
-                                        settings
-                                )
+                                val updateMessages = mono {
+                                    staticMessageService.updateStaticMessages(settings.guildID, ucr.new!!.calendarNumber)
+                                }
                                  event.followupEphemeral(
                                         getMessage("confirm.success.edit", settings),
                                         CalendarEmbed.link(guild, settings, ucr.new!!)

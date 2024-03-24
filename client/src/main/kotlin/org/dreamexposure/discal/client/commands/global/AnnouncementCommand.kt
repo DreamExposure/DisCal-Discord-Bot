@@ -3,37 +3,36 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import discord4j.core.`object`.entity.channel.MessageChannel
-import discord4j.core.spec.InteractionFollowupCreateSpec
 import discord4j.rest.util.AllowedMentions
+import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.client.message.embed.AnnouncementEmbed
+import org.dreamexposure.discal.core.business.AnnouncementService
+import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.crypto.KeyGenerator
-import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
-import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
+import org.dreamexposure.discal.core.`object`.new.Announcement
+import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
+import kotlin.jvm.optionals.getOrNull
 
 @Component
-class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
+class AnnouncementCommand(
+    private val announcementService: AnnouncementService,
+    private val embedService: EmbedService,
+) : SlashCommand {
     override val name = "announcement"
+    override val hasSubcommands = true
     override val ephemeral = true
 
-    @Deprecated("Use new handleSuspend for K-coroutines")
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "create" -> create(event, settings)
             "type" -> type(event, settings)
@@ -56,122 +55,153 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             "list" -> list(event, settings)
             "subscribe" -> subscribe(event, settings)
             "unsubscribe" -> unsubscribe(event, settings)
-            else -> Mono.empty() // Never can reach this, makes compiler happy.
+            else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .map(AnnouncementType.Companion::fromValue)
-            .orElse(AnnouncementType.UNIVERSAL)
-
-        val channelMono = event.options[0].getOption("channel")
+            .map(Announcement.Type::valueOf)
+            .orElse(Announcement.Type.UNIVERSAL)
+        val channelId = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asChannel)
-            .map { it.ofType(MessageChannel::class.java) }
-            .orElse(event.interaction.channel)
-
+            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .orElse(event.interaction.channelId)
         val minutes = event.options[0].getOption("minutes")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(0)
-
         val hours = event.options[0].getOption("hours")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(0)
-
         val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            if (wizard.get(settings.guildID) == null) {
-                channelMono.flatMap { channel ->
-                    val pre = Announcement(settings.guildID,
-                        type = type,
-                        announcementChannelId = channel.id.asString(),
-                        minutesBefore = minutes,
-                        hoursBefore = hours,
-                        calendarNumber = calendar
-                    )
-                    wizard.start(pre)
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("create.success", settings), it) }
-                }
-            } else {
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
-                    .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard already started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        if (existingWizard != null) {
+            return event.createFollowup(getMessage("error.wizard.started", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        val newWizard = AnnouncementWizardState(
+            guildId = settings.guildID,
+            userId = event.interaction.user.id,
+            editing = false,
+            entity = Announcement(
+                guildId = settings.guildID,
+                calendarNumber = calendar,
+                type = type,
+                channelId = channelId,
+                hoursBefore = hours,
+                minutesBefore = minutes,
+            )
+        )
+        announcementService.putWizard(newWizard)
+
+        return event.createFollowup(getMessage("create.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .awaitSingle()
     }
 
-    private fun type(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun type(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .map(AnnouncementType.Companion::fromValue)
+            .map(Announcement.Type::valueOf)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                pre.type = type
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        val altered = existingWizard.copy(
+            entity = existingWizard.entity.copy(
+                type = type,
                 // Handle edge case where event is already set, but has recurrence suffix.
-                pre.eventId = pre.eventId.split("_")[0]
+                eventId = existingWizard.entity.eventId?.split("_")?.get(0)
+            )
+        )
+        announcementService.putWizard(altered)
 
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(getMessage("type.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        return event.createFollowup(getMessage("type.success", settings))
+            .withEphemeral(true)
+            .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .awaitSingle()
     }
 
-    private fun event(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun event(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val eventId = event.options[0].getOption("event")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                if (pre.type == AnnouncementType.RECUR || pre.type == AnnouncementType.SPECIFIC) {
-                    event.interaction.guild
-                        .flatMap { it.getCalendar(pre.calendarNumber) }
-                        .flatMap { it.getEvent(eventId) }
-                        .flatMap { calEvent ->
-                            if (pre.type == AnnouncementType.RECUR) pre.eventId = calEvent.eventId.split("_")[0]
-                            else pre.eventId = eventId
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                            event.interaction.guild
-                                .map { AnnouncementEmbed.pre(it, pre, settings) }
-                                .flatMap { event.followupEphemeral(getMessage("event.success", settings), it) }
-                        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
-                } else {
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("event.failure.type", settings), it) }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        // Validate current type
+        if (announcement.type != Announcement.Type.RECUR && announcement.type != Announcement.Type.SPECIFIC) {
+            return event.createFollowup(getMessage("event.failure.type", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        // Validate event actually exists
+        val calendarEvent = event.interaction.guild
+            .flatMap { it.getCalendar(announcement.calendarNumber) }
+            .flatMap { it.getEvent(eventId) }
+            .awaitSingleOrNull()
+        if (calendarEvent == null) {
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        // Handle what format the ID is actually saved in
+        val idToSet = if (announcement.type == Announcement.Type.RECUR) calendarEvent.eventId.split("_")[0]
+        else eventId
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(eventId = idToSet))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("event.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun color(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun color(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val color = event.options[0].getOption("color")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -179,501 +209,520 @@ class AnnouncementCommand(val wizard: Wizard<Announcement>) : SlashCommand {
             .map(EventColor.Companion::fromId)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                if (pre.type == AnnouncementType.COLOR) {
-                    pre.eventColor = color
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("color.success", settings), it) }
-                } else {
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("color.failure.type", settings), it) }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        // Make sure type matches
+        if (existingWizard.entity.type != Announcement.Type.COLOR) {
+            return event.createFollowup(getMessage("color.failure.type", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(eventColor =  color))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("color.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun channel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val channelMono = event.options[0].getOption("channel")
+    private suspend fun channel(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val channelId = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asChannel)
-            .map { it.ofType(MessageChannel::class.java) }
-            .orElse(event.interaction.channel)
+            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .orElse(event.interaction.channelId)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                channelMono.flatMap { channel ->
-                    pre.announcementChannelId = channel.id.asString()
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("channel.success", settings), it) }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(channelId = channelId))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("channel.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun minutes(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun minutes(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val minutes = event.options[0].getOption("minutes")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                pre.minutesBefore = minutes
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(getMessage("minutes.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(minutesBefore = minutes))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("minutes.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun hours(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun hours(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val hours = event.options[0].getOption("hours")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(0)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                pre.hoursBefore = hours
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(getMessage("hours.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(hoursBefore = hours))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("hours.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun info(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun info(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val info = event.options[0].getOption("info")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("None")
+            .filter { it.isNotBlank() || !it.equals("None", true) }
+            .getOrNull()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                pre.info = info
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(getMessage("info.success.set", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(info = info))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("info.success.set", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun calendar(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun calendar(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                pre.calendarNumber = calendar
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(getMessage("calendar.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(calendarNumber = calendar))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("calendar.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun publish(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun publish(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val publish = event.options[0].getOption("publish")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                if (settings.patronGuild) {
-                    pre.publish = publish
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("publish.success", settings), it) }
-                } else {
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getCommonMsg("error.patronOnly", settings), it) }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
+
+        // Confirm guild has access to feature
+        if (!settings.patronGuild) {
+            return event.createFollowup(getCommonMsg("error.patronOnly", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        val alteredWizard = existingWizard.copy(entity = announcement.copy(publish = publish))
+        announcementService.putWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("publish.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, pre, settings) }
-                    .flatMap { event.followupEphemeral(it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+    private suspend fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        return event.createFollowup()
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+            .awaitSingle()
     }
 
-    private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            val pre = wizard.get(settings.guildID)
-            if (pre != null) {
-                if (pre.hasRequiredValues()) {
-                    DatabaseManager.updateAnnouncement(pre).flatMap { success ->
-                        if (success) {
-                            // Close wizard
-                            wizard.remove(settings.guildID)
+    private suspend fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                            val msg = if (pre.editing) getMessage("confirm.success.edit", settings)
-                            else getMessage("confirm.success.create", settings)
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        val announcement = existingWizard.entity
 
-                            event.interaction.guild.map { AnnouncementEmbed.view(pre, it, settings) }.flatMap { embed ->
-                                event.interaction.channel.flatMap {
-                                    it.createMessage(msg).withEmbeds(embed)
-                                        .then(event.followupEphemeral(getCommonMsg("success.generic", settings)))
-                                }
-                            }
-                        } else {
-                            val msg = if (pre.editing) getMessage("confirm.failure.edit", settings)
-                            else getMessage("confirm.failure.create", settings)
+        // Check if required values set
+        val failureReason =
+            if ((announcement.type == Announcement.Type.SPECIFIC || announcement.type == Announcement.Type.RECUR) && announcement.eventId.isNullOrBlank()) {
+                getMessage("confirm.failure.missing-event-id", settings)
+            } else if (announcement.type == Announcement.Type.COLOR && announcement.eventColor == EventColor.NONE) {
+                getMessage("confirm.failure.missing-event-color", settings)
+            } else if (announcement.getCalculatedTime().isZero) {
+                getMessage("confirm.failure.minimum-time", settings)
+            } else null
+        if (failureReason != null) {
+            return event.createFollowup(failureReason)
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
 
-                            event.interaction.guild
-                                .map { AnnouncementEmbed.pre(it, pre, settings) }
-                                .flatMap { event.followupEphemeral(msg, it) }
-                        }
-                    }
-                } else {
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("confirm.failure.missing", settings), it) }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        if (existingWizard.editing) announcementService.updateAnnouncement(announcement)
+        else announcementService.createAnnouncement(announcement)
+        announcementService.cancelWizard(settings.guildID, event.interaction.user.id)
+
+        val message = if (existingWizard.editing) getMessage("confirm.success.edit", settings)
+        else getMessage("confirm.success.create", settings)
+
+        return event.createFollowup(message)
+            .withEphemeral(false)
+            .withEmbeds(embedService.viewAnnouncementEmbed(announcement, settings))
+            .awaitSingle()
     }
 
-    private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            wizard.remove(settings.guildID)
+    private suspend fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-            event.followupEphemeral(getMessage("cancel.success", settings))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        announcementService.cancelWizard(settings.guildID, event.interaction.user.id)
+
+        return event.createFollowup(getMessage("cancel.success", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            if (wizard.get(settings.guildID) == null) {
-                DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { ann ->
-                    val pre = ann.copy(editing = true)
-                    wizard.start(pre)
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
-            } else {
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
-                    .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard already started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        if (existingWizard != null) {
+            return event.createFollowup(getMessage("error.wizard.started", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+
+        val newWizard = AnnouncementWizardState(
+            guildId = settings.guildID,
+            userId = event.interaction.user.id,
+            editing = true,
+            entity = announcement
+        )
+        announcementService.putWizard(newWizard)
+
+        return event.createFollowup(getMessage("edit.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .awaitSingle()
     }
 
-    private fun copy(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun copy(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            if (wizard.get(settings.guildID) == null) {
-                DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { ann ->
-                    val pre = ann.copy(id = KeyGenerator.generateAnnouncementId())
-                    wizard.start(pre)
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                    event.interaction.guild
-                        .map { AnnouncementEmbed.pre(it, pre, settings) }
-                        .flatMap { event.followupEphemeral(getMessage("copy.success", settings), it) }
-                }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
-            } else {
-                event.interaction.guild
-                    .map { AnnouncementEmbed.pre(it, wizard.get(settings.guildID)!!, settings) }
-                    .flatMap { event.followup(getMessage("error.wizard.started", settings), it) }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // Check if wizard already started
+        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        if (existingWizard != null) {
+            return event.createFollowup(getMessage("error.wizard.started", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
+
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+
+        val newWizard = AnnouncementWizardState(
+            guildId = settings.guildID,
+            userId = event.interaction.user.id,
+            editing = false,
+            entity = announcement.copy(id = KeyGenerator.generateAnnouncementId())
+        )
+        announcementService.putWizard(newWizard)
+
+        return event.createFollowup(getMessage("copy.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .awaitSingle()
     }
 
-    private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            // Before we delete the announcement, if the wizard is editing it, we need to cancel the wizard
-            val pre = wizard.get(settings.guildID)
-            if (pre != null && pre.id == announcementId) wizard.remove(settings.guildID)
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-            DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-                DatabaseManager.deleteAnnouncement(announcement.id)
-                    .then(event.followupEphemeral(getMessage("delete.success", settings)))
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        // If announcement is being edited, cancel the editor
+        announcementService.cancelWizard(settings.guildID, announcementId)
+        announcementService.deleteAnnouncement(settings.guildID, announcementId)
+
+        return event.createFollowup(getMessage("delete.success", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun enable(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun enable(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
-
         val enabled = event.options[0].getOption("enabled")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
-            DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-                announcement.enabled = enabled
+        // Validate permissions
+        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
 
-                DatabaseManager.updateAnnouncement(announcement).flatMap {
-                    if (enabled) {
-                        event.interaction.guild
-                            .map { AnnouncementEmbed.view(announcement, it, settings) }
-                            .flatMap { event.followupEphemeral(getMessage("enable.success", settings), it) }
-                    } else {
-                        event.interaction.guild
-                            .map { AnnouncementEmbed.view(announcement, it, settings) }
-                            .flatMap { event.followupEphemeral(getMessage("disable.success", settings), it) }
-                    }
-                }
-            }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+
+        val new = announcement.copy(enabled = enabled)
+        announcementService.updateAnnouncement(new)
+
+        val message = if (enabled) "enable.success" else "disable.success"
+        return event.createFollowup()
+            .withEphemeral(ephemeral)
+            .withContent("${getMessage(message, settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
+            .withAllowedMentions(AllowedMentions.suppressAll())
+            .awaitSingle()
     }
 
-    private fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-            return@flatMap event.interaction.guild.map { AnnouncementEmbed.view(announcement, it, settings) }.flatMap { embed ->
-                event.createFollowup(InteractionFollowupCreateSpec.builder()
-                    .content(announcement.buildMentions().messageContentSafe())
-                    .addEmbed(embed)
-                    .allowedMentions(AllowedMentions.suppressAll())
-                    .build()
-                )
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+
+        return event.createFollowup()
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.viewAnnouncementEmbed(announcement, settings))
+            .withContent(announcement.subscribers.buildMentions())
+            .withAllowedMentions(AllowedMentions.suppressAll())
+            .awaitSingle()
     }
 
-    private fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val amount = event.options[0].getOption("amount")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .get()
-
         val calendar = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
-
         val showDisabled = event.options[0].getOption("show-disabled")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .orElse(false)
-
         val type = event.options[0].getOption("type")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .map(AnnouncementType.Companion::fromValue)
+            .map(Announcement.Type::valueOf)
+            .getOrNull()
 
-        // Determine which db query to use.
-        val announcementsMono = if (!showDisabled) {
-            if (type.isPresent) {
-                DatabaseManager.getEnabledAnnouncements(settings.guildID, type.get())
-            } else {
-                DatabaseManager.getEnabledAnnouncements(settings.guildID)
-            }
+        // Get filtered announcements
+        val announcements = announcementService.getAllAnnouncements(settings.guildID, type, showDisabled)
+            .filter { it.calendarNumber == calendar }
+
+        return if (announcements.isEmpty()) {
+            event.followupEphemeral(getMessage("list.success.none", settings)).awaitSingle()
+        } else if (announcements.size == 1) {
+            event.createFollowup()
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.viewAnnouncementEmbed(announcements[0], settings))
+                .withContent(announcements[0].subscribers.buildMentions())
+                .withAllowedMentions(AllowedMentions.suppressAll())
+                .awaitSingle()
         } else {
-            if (type.isPresent) {
-                DatabaseManager.getAnnouncements(settings.guildID, type.get())
-            } else {
-                DatabaseManager.getAnnouncements(settings.guildID)
+            val limit = if (amount > 0) amount.coerceAtMost(announcements.size) else announcements.size
+
+            val message = event.followupEphemeral(getMessage("list.success.many", settings, "$limit")).awaitSingle()
+
+            announcements.subList(0, limit).forEach { announcement ->
+                event.followupEphemeral(embedService.condensedAnnouncementEmbed(announcement, settings)).awaitSingle()
             }
+
+            message
         }
 
-        return announcementsMono.map { it.filter { a -> a.calendarNumber == calendar } }.flatMap { announcements ->
-            if (announcements.isEmpty()) {
-                event.followupEphemeral(getMessage("list.success.none", settings))
-            } else if (announcements.size == 1) {
-                event.interaction.guild.map { AnnouncementEmbed.view(announcements[0], it, settings) }.flatMap {
-                    event.createFollowup(InteractionFollowupCreateSpec.builder()
-                        .content(getMessage("list.success.one", settings))
-                        .addEmbed(it)
-                        .allowedMentions(AllowedMentions.suppressAll())
-                        .build()
-                    )
-                }
-            } else {
-                val limit = if (amount > 0) amount.coerceAtMost(announcements.size) else announcements.size
-                val guildMono = event.interaction.guild.cache()
 
-                val successMessage = event.followupEphemeral(getMessage("list.success.many", settings, "$limit"))
-                val condAns = guildMono.flatMapMany { guild ->
-                    Flux.fromIterable(announcements.subList(0, limit)).flatMap { a ->
-                        event.followupEphemeral(AnnouncementEmbed.condensed(a, guild, settings))
-                    }
-                }
-
-                successMessage.then(condAns.last())
-            }
-        }
     }
 
-    private fun subscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun subscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
-
-        val subId = event.options[0].getOption("sub")
+        val userId = event.options[0].getOption("user")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .getOrNull()
+        val roleId = event.options[0].getOption("role")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .getOrNull()
 
-        return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-            event.interaction.guild.flatMap { guild ->
-                if (subId.isPresent) {
-                    val memberMono = guild.getMemberById(subId.get()).onErrorResume { Mono.empty() }
-                    val roleMono = guild.getRoleById(subId.get()).onErrorResume { Mono.empty() }
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
 
-                    @Suppress("DuplicatedCode")
-                    memberMono.flatMap { member ->
-                        announcement.subscriberUserIds.remove(member.id.asString())
-                        announcement.subscriberUserIds.add(member.id.asString())
+        var newSubs = announcement.subscribers
+        if (userId != null) newSubs = newSubs.copy(users = newSubs.users + userId)
+        if (roleId != null) newSubs = newSubs.copy(roles = newSubs.roles + roleId.asString())
+        if (roleId == null && userId == null) newSubs = newSubs.copy(users = newSubs.users + event.interaction.user.id)
 
-                        DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                .content(getMessage("subscribe.success.other", settings, member.nicknameMention))
-                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
-                                .allowedMentions(AllowedMentions.suppressAll())
-                                .build()
-                            )
-                        }
-                    }.switchIfEmpty(roleMono.flatMap { role ->
-                        announcement.subscriberRoleIds.remove(role.id.asString())
-                        announcement.subscriberRoleIds.add(role.id.asString())
+        val new = announcement.copy(subscribers = newSubs)
+        announcementService.updateAnnouncement(new)
 
-                        DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                .content(getMessage("subscribe.success.other", settings, role.mention))
-                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
-                                .allowedMentions(AllowedMentions.suppressAll())
-                                .build()
-                            )
-                        }
-                    })
-                } else {
-                    announcement.subscriberUserIds.remove(event.interaction.user.id.asString())
-                    announcement.subscriberUserIds.add(event.interaction.user.id.asString())
-
-                    DatabaseManager.updateAnnouncement(announcement).flatMap {
-                        event.followupEphemeral(
-                            getMessage("subscribe.success.self", settings),
-                            AnnouncementEmbed.view(announcement, guild, settings)
-                        )
-                    }
-                }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
+        return event.createFollowup()
+            .withEphemeral(ephemeral)
+            .withContent("${getMessage("subscribe.success", settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
+            .withAllowedMentions(AllowedMentions.suppressAll())
+            .awaitSingle()
     }
 
-    private fun unsubscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun unsubscribe(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementId = event.options[0].getOption("announcement")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
-
-        val subId = event.options[0].getOption("sub")
+        val userId = event.options[0].getOption("user")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .getOrNull()
+        val roleId = event.options[0].getOption("role")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .getOrNull()
 
-        return DatabaseManager.getAnnouncement(announcementId, settings.guildID).flatMap { announcement ->
-            event.interaction.guild.flatMap { guild ->
-                if (subId.isPresent) {
-                    val memberMono = guild.getMemberById(subId.get()).onErrorResume { Mono.empty() }
-                    val roleMono = guild.getRoleById(subId.get()).onErrorResume { Mono.empty() }
+        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
+            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
 
-                    @Suppress("DuplicatedCode")
-                    memberMono.flatMap { member ->
-                        announcement.subscriberUserIds.remove(member.id.asString())
+        var newSubs = announcement.subscribers
+        if (userId != null) newSubs = newSubs.copy(users = newSubs.users - userId)
+        if (roleId != null) newSubs = newSubs.copy(roles = newSubs.roles - roleId.asString())
+        if (roleId == null && userId == null) newSubs = newSubs.copy(users = newSubs.users - event.interaction.user.id)
 
-                        DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                .content(getMessage("unsubscribe.success.other", settings, member.nicknameMention))
-                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
-                                .allowedMentions(AllowedMentions.suppressAll())
-                                .build()
-                            )
-                        }
-                    }.switchIfEmpty(roleMono.flatMap { role ->
-                        announcement.subscriberRoleIds.remove(role.id.asString())
+        val new = announcement.copy(subscribers = newSubs)
+        announcementService.updateAnnouncement(new)
 
-                        DatabaseManager.updateAnnouncement(announcement).flatMap {
-                            event.createFollowup(InteractionFollowupCreateSpec.builder()
-                                .content(getMessage("unsubscribe.success.other", settings, role.mention))
-                                .addEmbed(AnnouncementEmbed.view(announcement, guild, settings))
-                                .allowedMentions(AllowedMentions.suppressAll())
-                                .build()
-                            )
-                        }
-                    })
-                } else {
-                    announcement.subscriberUserIds.remove(event.interaction.user.id.asString())
-
-                    DatabaseManager.updateAnnouncement(announcement).flatMap {
-                        event.followupEphemeral(
-                            getMessage("unsubscribe.success.self", settings),
-                            AnnouncementEmbed.view(announcement, guild, settings)
-                        )
-                    }
-                }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)))
+        return event.createFollowup()
+            .withEphemeral(ephemeral)
+            .withContent("${getMessage("unsubscribe.success", settings)}\n\n${new.subscribers.buildMentions()}")
+            .withEmbeds(embedService.viewAnnouncementEmbed(new, settings))
+            .withAllowedMentions(AllowedMentions.suppressAll())
+            .awaitSingle()
     }
 }

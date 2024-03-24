@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono
 
 interface SlashCommand {
     val name: String
-
+    val hasSubcommands: Boolean
     val ephemeral: Boolean
 
     @Deprecated("Use new handleSuspend for K-coroutines")

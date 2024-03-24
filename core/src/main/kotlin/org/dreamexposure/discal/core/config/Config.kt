@@ -18,15 +18,25 @@ enum class Config(private val key: String, private var value: Any? = null) {
     REDIS_PASSWORD("spring.data.redis.password", ""),
     CACHE_REDIS_IS_CLUSTER("redis.cluster", false),
     CACHE_USE_REDIS("bot.cache.redis", false),
+    CACHE_USE_REDIS_D4J("bot.cache.redis.d4j", false),
 
     CACHE_PREFIX("bot.cache.prefix", "discal"),
     CACHE_TTL_SETTINGS_MINUTES("bot.cache.ttl-minutes.settings", 60),
     CACHE_TTL_CREDENTIALS_MINUTES("bot.cache.ttl-minutes.credentials", 120),
     CACHE_TTL_ACCOUNTS_MINUTES("bot.cache.ttl-minutes.accounts", 60),
     CACHE_TTL_OAUTH_STATE_MINUTES("bot.cache.ttl-minutes.oauth.state", 5),
-    CACHE_TTL_CALENDAR_MINUTES("bots.cache.ttl-minutes.calendar", 120),
+    CACHE_TTL_CALENDAR_MINUTES("bot.cache.ttl-minutes.calendar", 120),
+    CACHE_TTL_RSVP_MINUTES("bot.cache.ttl-minutes.rsvp", 60),
+    CACHE_TTL_STATIC_MESSAGE_MINUTES("bot.cache.ttl-minutes.static-messages", 60),
+    CACHE_TTL_ANNOUNCEMENT_MINUTES("bot.cache.ttl-minutes.announcements", 120),
 
     // Security configuration
+
+    // Global bot timings
+    TIMING_BOT_STATUS_UPDATE_MINUTES("bot.timing.status-update.minutes", 5),
+    TIMING_ANNOUNCEMENT_TASK_RUN_INTERVAL_MINUTES("bot.timing.announcement.task-run-interval.minutes", 5),
+    TIMING_WIZARD_TIMEOUT_MINUTES("bot.timing.wizard-timeout.minutes", 30),
+    TIMING_STATIC_MESSAGE_UPDATE_TASK_RUN_INTERVAL_MINUTES("bot.timing.static-message.update.task-run-interval.minutes", 30),
 
     // Bot secrets
     SECRET_DISCAL_API_KEY("bot.secret.api-token"),
@@ -51,6 +61,9 @@ enum class Config(private val key: String, private var value: Any? = null) {
     URL_SUPPORT("bot.url.support", "https://discord.gg/2TFqyuy"),
     URL_INVITE("bot.url.invite"),
     URL_DISCORD_REDIRECT("bot.url.discord.redirect"),
+
+    // UI and UX
+    EMBED_RSVP_WAITLIST_DISPLAY_LENGTH("bot.ui.embed.rsvp.waitlist.length", 3),
 
     // Everything else
     SHARD_COUNT("bot.sharding.count"),

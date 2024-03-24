@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.reactor.awaitSingle
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.dreamexposure.discal.cam.json.discord.AccessTokenResponse
 import org.dreamexposure.discal.cam.json.discord.AuthorizationInfo
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
@@ -18,6 +18,7 @@ import reactor.core.scheduler.Schedulers
 @Component
 class DiscordOauthHandler(
     private val objectMapper: ObjectMapper,
+    private val httpClient: OkHttpClient,
 ) {
     private val cdnUrl = "https://cdn.discordapp.com"
     private val redirectUrl = Config.URL_DISCORD_REDIRECT.getString()
@@ -38,7 +39,7 @@ class DiscordOauthHandler(
             .header("Content-Type", "application/x-www-form-urlencoded")
             .build()
 
-        val response = Mono.fromCallable(HTTP_CLIENT.newCall(tokenExchangeRequest)::execute)
+        val response = Mono.fromCallable(httpClient.newCall(tokenExchangeRequest)::execute)
             .subscribeOn(Schedulers.boundedElastic())
             .awaitSingle()
 
@@ -66,7 +67,7 @@ class DiscordOauthHandler(
             .header("Content-Type", "application/x-www-form-urlencoded")
             .build()
 
-        val response = Mono.fromCallable(HTTP_CLIENT.newCall(tokenExchangeRequest)::execute)
+        val response = Mono.fromCallable(httpClient.newCall(tokenExchangeRequest)::execute)
             .subscribeOn(Schedulers.boundedElastic())
             .awaitSingle()
 
@@ -88,7 +89,7 @@ class DiscordOauthHandler(
             .header("Authorization", "Bearer $accessToken")
             .build()
 
-        val response = Mono.fromCallable(HTTP_CLIENT.newCall(request)::execute)
+        val response = Mono.fromCallable(httpClient.newCall(request)::execute)
             .subscribeOn(Schedulers.boundedElastic())
             .awaitSingle()
 

@@ -6,9 +6,10 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
 import discord4j.core.spec.MessageCreateSpec
+import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.EventEmbed
-import org.dreamexposure.discal.client.service.StaticMessageService
+import org.dreamexposure.discal.core.business.StaticMessageService
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.response.UpdateEventResponse
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -30,8 +31,12 @@ import java.time.temporal.ChronoUnit
 
 @Suppress("DuplicatedCode")
 @Component
-class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMessageService) : SlashCommand {
+class EventCommand(
+    private val wizard: Wizard<PreEvent>,
+    private val staticMessageService: StaticMessageService
+) : SlashCommand {
     override val name = "event"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")
@@ -59,9 +64,9 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val name = event.options[0].getOption("name")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .orElse("")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .orElse("")
 
         val description = event.options[0].getOption("description")
             .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -74,10 +79,10 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             .orElse("")
 
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             if (wizard.get(settings.guildID) == null) {
@@ -89,13 +94,16 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                         pre.location = location
                         wizard.start(pre)
 
-                        event.followupEphemeral(getMessage("create.success", settings), EventEmbed.pre(guild, settings, pre))
+                        event.followupEphemeral(
+                            getMessage("create.success", settings),
+                            EventEmbed.pre(guild, settings, pre)
+                        )
                     }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
                 }
             } else {
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
-                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings)) }
+                    .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings)) }
             }
 
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
@@ -103,10 +111,10 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val name = event.options[0].getOption("name")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .filter { !it.equals("N/a") || !it.equals("None") }
-                .orElse("")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .filter { !it.equals("N/a") || !it.equals("None") }
+            .orElse("")
 
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
@@ -114,8 +122,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             if (pre != null) {
                 pre.name = name
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("name.success", settings), it) }
+                    .map { EventEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("name.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -124,10 +132,10 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val description = event.options[0].getOption("description")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .filter { !it.equals("N/a") || !it.equals("None") }
-                .orElse("")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .filter { !it.equals("N/a") || !it.equals("None") }
+            .orElse("")
 
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
@@ -135,8 +143,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             if (pre != null) {
                 pre.description = description
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("description.success", settings), it) }
+                    .map { EventEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("description.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -145,34 +153,34 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun start(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val year = event.options[0].getOption("year")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
+            .get()
         val month = event.options[0].getOption("month")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map(Month::of)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(Month::of)
+            .get()
         val day = event.options[0].getOption("day")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
+            .get()
         val hour = event.options[0].getOption("hour")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(0)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(0)
         val minute = event.options[0].getOption("minute")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(0).coerceAtMost(59) }
-                .orElse(0)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(0).coerceAtMost(59) }
+            .orElse(0)
         val keepDuration = event.options[0].getOption("keep-duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
@@ -183,8 +191,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             if (pre != null) {
                 //Build date time object
                 val start = ZonedDateTime.of(
-                        LocalDateTime.of(year, month, day, hour, minute),
-                        pre.timezone
+                    LocalDateTime.of(year, month, day, hour, minute),
+                    pre.timezone
                 ).toInstant()
 
                 if (pre.end == null) {
@@ -192,13 +200,13 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     pre.end = start.plus(1, ChronoUnit.HOURS) // Add default end time to 1 hour after start.
                     if (pre.start!!.isAfter(Instant.now())) {
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
                     } else {
                         // scheduled for the past, allow but add a warning.
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
                     }
                 } else {
                     // Event end already set, make sure everything is in order
@@ -211,19 +219,19 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
                         if (pre.start!!.isAfter(Instant.now())) {
                             event.interaction.guild
-                                    .map { EventEmbed.pre(it, settings, pre) }
-                                    .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("start.success", settings), it) }
                         } else {
                             // scheduled for the past, allow but add a warning.
                             event.interaction.guild
-                                    .map { EventEmbed.pre(it, settings, pre) }
-                                    .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("start.success.past", settings), it) }
                         }
                     } else {
                         // Event end cannot be before event start
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("start.failure.afterEnd", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("start.failure.afterEnd", settings), it) }
                     }
                 }
             } else {
@@ -234,34 +242,34 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun end(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val year = event.options[0].getOption("year")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(Year.MIN_VALUE).coerceAtMost(Year.MAX_VALUE) }
+            .get()
         val month = event.options[0].getOption("month")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map(Month::of)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(Month::of)
+            .get()
         val day = event.options[0].getOption("day")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(1).coerceAtMost(month.maxLength()) }
+            .get()
         val hour = event.options[0].getOption("hour")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(0)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(0)
         val minute = event.options[0].getOption("minute")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map { it.coerceAtLeast(0).coerceAtMost(59) }
-                .orElse(0)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map { it.coerceAtLeast(0).coerceAtMost(59) }
+            .orElse(0)
         val keepDuration = event.options[0].getOption("keep-duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
@@ -272,8 +280,8 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
             if (pre != null) {
                 //Build date time object
                 val end = ZonedDateTime.of(
-                        LocalDateTime.of(year, month, day, hour, minute),
-                        pre.timezone
+                    LocalDateTime.of(year, month, day, hour, minute),
+                    pre.timezone
                 ).toInstant()
 
                 if (pre.start == null) {
@@ -281,13 +289,13 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     pre.start = end.minus(1, ChronoUnit.HOURS) // Add default start time to 1 hour before end.
                     if (pre.end!!.isAfter(Instant.now())) {
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
                     } else {
                         // scheduled for the past, allow but add a warning.
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
                     }
                 } else {
                     // Event start already set, make sure everything is in order
@@ -300,19 +308,19 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
                         if (pre.end!!.isAfter(Instant.now())) {
                             event.interaction.guild
-                                    .map { EventEmbed.pre(it, settings, pre) }
-                                    .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("end.success", settings), it) }
                         } else {
                             // scheduled for the past, allow but add a warning.
                             event.interaction.guild
-                                    .map { EventEmbed.pre(it, settings, pre) }
-                                    .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
+                                .map { EventEmbed.pre(it, settings, pre) }
+                                .flatMap { event.followupEphemeral(getMessage("end.success.past", settings), it) }
                         }
                     } else {
                         // Event start cannot be after event end
                         event.interaction.guild
-                                .map { EventEmbed.pre(it, settings, pre) }
-                                .flatMap { event.followupEphemeral(getMessage("end.failure.beforeStart", settings), it) }
+                            .map { EventEmbed.pre(it, settings, pre) }
+                            .flatMap { event.followupEphemeral(getMessage("end.failure.beforeStart", settings), it) }
                     }
                 }
             } else {
@@ -323,19 +331,19 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun color(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val color = event.options[0].getOption("color")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .map(EventColor.Companion::fromId)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(EventColor.Companion::fromId)
+            .get()
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 pre.color = color
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("color.success", settings), it) }
+                    .map { EventEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("color.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -344,18 +352,18 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun location(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val location = event.options[0].getOption("location")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .filter { !it.equals("N/a") || !it.equals("None") }
-                .orElse("")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .filter { !it.equals("N/a") || !it.equals("None") }
+            .orElse("")
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
             if (pre != null) {
                 pre.location = location
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("location.success", settings), it) }
+                    .map { EventEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("location.success", settings), it) }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
             }
@@ -364,9 +372,9 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun image(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val image = event.options[0].getOption("image")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -374,11 +382,11 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                 Mono.just(image).filterWhen { it.isValidImage(settings.patronGuild || settings.devGuild) }.flatMap {
                     pre.image = image
                     event.interaction.guild
-                            .map { EventEmbed.pre(it, settings, pre) }
-                            .flatMap { event.followupEphemeral(getMessage("image.success", settings), it) }
-                }.switchIfEmpty(event.interaction.guild
                         .map { EventEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("image.failure", settings), it) }
+                        .flatMap { event.followupEphemeral(getMessage("image.success", settings), it) }
+                }.switchIfEmpty(event.interaction.guild
+                    .map { EventEmbed.pre(it, settings, pre) }
+                    .flatMap { event.followupEphemeral(getMessage("image.failure", settings), it) }
                 )
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -388,24 +396,24 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun recur(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val shouldRecur = event.options[0].getOption("recur")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asBoolean)
-                .orElse(true)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .orElse(true)
         val frequency = event.options[0].getOption("frequency")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .map(EventFrequency.Companion::fromValue)
-                .orElse(EventFrequency.WEEKLY)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(EventFrequency.Companion::fromValue)
+            .orElse(EventFrequency.WEEKLY)
         val interval = event.options[0].getOption("interval")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
         val count = event.options[0].getOption("count")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(-1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(-1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             val pre = wizard.get(settings.guildID)
@@ -413,13 +421,13 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                 if (shouldRecur) {
                     pre.recurrence = Recurrence(frequency, interval, count)
                     event.interaction.guild
-                            .map { EventEmbed.pre(it, settings, pre) }
-                            .flatMap { event.followupEphemeral(getMessage("recur.success.enable", settings), it) }
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("recur.success.enable", settings), it) }
                 } else {
                     pre.recurrence = null
                     event.interaction.guild
-                            .map { EventEmbed.pre(it, settings, pre) }
-                            .flatMap { event.followupEphemeral(getMessage("recur.success.disable", settings), it) }
+                        .map { EventEmbed.pre(it, settings, pre) }
+                        .flatMap { event.followupEphemeral(getMessage("recur.success.disable", settings), it) }
                 }
             } else {
                 event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
@@ -452,54 +460,58 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     if (!pre.editing) {
                         // New event
                         guild.getCalendar(pre.calNumber)
-                                .flatMap { it.createEvent(pre.createSpec()) }
-                                .doOnNext { wizard.remove(settings.guildID) }
-                                .flatMap { calEvent ->
-                                    val updateMessages = staticMessageSrv.updateStaticMessages(
-                                            guild,
-                                            calEvent.calendar,
-                                            settings
+                            .flatMap { it.createEvent(pre.createSpec()) }
+                            .doOnNext { wizard.remove(settings.guildID) }
+                            .flatMap { calEvent ->
+                                val updateMessages = mono {
+                                    staticMessageService.updateStaticMessages(
+                                        settings.guildID,
+                                        calEvent.calendar.calendarNumber
                                     )
-                                    val embedMono = event.interaction.channel.flatMap {
-                                        val spec = MessageCreateSpec.builder()
-                                                .content(getMessage("confirm.success.create", settings))
-                                                .addEmbed(EventEmbed.getFull(guild, settings, calEvent))
-                                                .build()
+                                }
+                                val embedMono = event.interaction.channel.flatMap {
+                                    val spec = MessageCreateSpec.builder()
+                                        .content(getMessage("confirm.success.create", settings))
+                                        .addEmbed(EventEmbed.getFull(guild, settings, calEvent))
+                                        .build()
 
-                                        it.createMessage(spec)
-                                    }
-                                    val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
+                                    it.createMessage(spec)
+                                }
+                                val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
 
-                                    embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
-                                }.doOnError {
-                                    LOGGER.error("Create event with command failure", it)
-                                }.onErrorResume {
-                                    event.followupEphemeral(getMessage("confirm.failure.create", settings))
-                                }.switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.create", settings)))
+                                embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
+                            }.doOnError {
+                                LOGGER.error("Create event with command failure", it)
+                            }.onErrorResume {
+                                event.followupEphemeral(getMessage("confirm.failure.create", settings))
+                            }.switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.create", settings)))
                     } else {
                         // Editing
                         pre.event!!.update(pre.updateSpec())
-                                .filter(UpdateEventResponse::success)
-                                .doOnNext { wizard.remove(settings.guildID) }
-                                .flatMap { uer ->
-                                    val updateMessages = staticMessageSrv.updateStaticMessages(
-                                            guild,
-                                            uer.new!!.calendar,
-                                            settings
+                            .filter(UpdateEventResponse::success)
+                            .doOnNext { wizard.remove(settings.guildID) }
+                            .flatMap { uer ->
+
+
+                                val updateMessages = mono {
+                                    staticMessageService.updateStaticMessages(
+                                        settings.guildID,
+                                        uer.new!!.calendar.calendarNumber
                                     )
-                                    val embedMono = event.interaction.channel.flatMap {
-                                        val spec = MessageCreateSpec.builder()
-                                                .content(getMessage("confirm.success.edit", settings))
-                                                .addEmbed(EventEmbed.getFull(guild, settings, uer.new!!))
-                                                .build()
-
-                                        it.createMessage(spec)
-                                    }
-                                    val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
-
-                                    embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
                                 }
-                                .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
+                                val embedMono = event.interaction.channel.flatMap {
+                                    val spec = MessageCreateSpec.builder()
+                                        .content(getMessage("confirm.success.edit", settings))
+                                        .addEmbed(EventEmbed.getFull(guild, settings, uer.new!!))
+                                        .build()
+
+                                    it.createMessage(spec)
+                                }
+                                val followupMono = event.followupEphemeral(getCommonMsg("success.generic", settings))
+
+                                embedMono.then(followupMono).flatMap { updateMessages.thenReturn(it) }
+                            }
+                            .switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
                     }
                 }
             } else {
@@ -518,81 +530,81 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val eventId = event.options[0].getOption("event")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             if (wizard.get(settings.guildID) == null) {
                 event.interaction.guild.flatMap { guild ->
                     guild.getCalendar(calendarNumber).flatMap { calendar ->
                         calendar.getEvent(eventId)
-                                .map { PreEvent.edit(it) }
-                                .doOnNext { wizard.start(it) }
-                                .map { EventEmbed.pre(guild, settings, it) }
-                                .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
-                                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                            .map { PreEvent.edit(it) }
+                            .doOnNext { wizard.start(it) }
+                            .map { EventEmbed.pre(guild, settings, it) }
+                            .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
+                            .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
                     }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
                 }
             } else {
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
-                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+                    .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun copy(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val eventId = event.options[0].getOption("event")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
         val targetCalendarNumber = event.options[0].getOption("target")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(calendarNumber)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(calendarNumber)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             if (wizard.get(settings.guildID) == null) {
                 event.interaction.guild.flatMap { guild ->
                     guild.getCalendar(calendarNumber).flatMap { calendar ->
                         calendar.getEvent(eventId)
-                                .flatMap { PreEvent.copy(guild, it, targetCalendarNumber) }
-                                .doOnNext { wizard.start(it) }
-                                .map { EventEmbed.pre(guild, settings, it) }
-                                .flatMap { event.followupEphemeral(getMessage("copy.success", settings), it) }
-                                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                            .flatMap { PreEvent.copy(guild, it, targetCalendarNumber) }
+                            .doOnNext { wizard.start(it) }
+                            .map { EventEmbed.pre(guild, settings, it) }
+                            .flatMap { event.followupEphemeral(getMessage("copy.success", settings), it) }
+                            .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
                     }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
                 }
             } else {
                 event.interaction.guild
-                        .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
-                        .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
+                    .map { EventEmbed.pre(it, settings, wizard.get(settings.guildID)!!) }
+                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
             }
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }
 
     private fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val eventId = event.options[0].getOption("event")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
         return event.interaction.guild.flatMap { guild ->
             guild.getCalendar(calendarNumber).flatMap { calendar ->
@@ -600,7 +612,7 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
                     event.interaction.channel.flatMap {
                         // Create message so others can see
                         event.followupEphemeral(getMessage("view.success", settings)).then(
-                                it.createMessage(EventEmbed.getFull(guild, settings, calEvent))
+                            it.createMessage(EventEmbed.getFull(guild, settings, calEvent))
                         )
                     }
                 }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
@@ -610,14 +622,14 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
     private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         val eventId = event.options[0].getOption("event")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asString)
-                .get()
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
         val calendarNumber = event.options[0].getOption("calendar")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asLong)
-                .map(Long::toInt)
-                .orElse(1)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
 
         return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasControlRole).flatMap {
             // Before we delete the event, if the wizard is editing that event we need to cancel the wizard
@@ -626,10 +638,14 @@ class EventCommand(val wizard: Wizard<PreEvent>, val staticMessageSrv: StaticMes
 
             event.interaction.guild.flatMap { it.getCalendar(calendarNumber) }.flatMap { calendar ->
                 calendar.getEvent(eventId)
-                        .flatMap(Event::delete)
-                        .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
-                        .flatMap { staticMessageSrv.updateStaticMessage(calendar, settings).thenReturn(it) }
-                        .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
+                    .flatMap(Event::delete)
+                    .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
+                    .flatMap {
+                        mono {
+                            staticMessageService.updateStaticMessages(settings.guildID, calendarNumber)
+                        }.thenReturn(it)
+                    }
+                    .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.event", settings)))
             }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)))
         }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.privileged", settings)))
     }

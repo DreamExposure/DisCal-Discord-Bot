@@ -37,4 +37,7 @@ interface CalendarRepository : R2dbcRepository<CalendarData, Long> {
         refreshToken: String,
         expiresAt: Long,
     ): Mono<Int>
+
+    @Query(" SELECT 1")
+    fun healthCheck(): Mono<Int>
 }

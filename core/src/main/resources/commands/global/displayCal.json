@@ -119,19 +119,6 @@
           "min_value": 1
         }
       ]
-    },
-    {
-      "name": "update",
-      "type": 1,
-      "description": "Manually update the calendar overview message with the provided message ID",
-      "options": [
-        {
-          "name": "message",
-          "type": 3,
-          "description": "The ID of the message to update",
-          "required": true
-        }
-      ]
     }
   ]
 }

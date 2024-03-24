@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.database.CalendarData
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
+import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import java.time.Instant
 import javax.crypto.IllegalBlockSizeException
 
@@ -22,11 +23,11 @@ data class Calendar private constructor(
     companion object {
         suspend operator fun invoke(data: CalendarData): Calendar {
             val aes = AESEncryption(data.privateKey)
-            val accessToken = try {
+            val accessToken = if (!data.expiresAt.asInstantMilli().isExpiredTtl()) try {
                 aes.decrypt(data.accessToken).awaitSingle()
             } catch (ex: IllegalBlockSizeException) {
                 null
-            }
+            } else null // No point in trying to decrypt if it's expired
 
             return Calendar(
                 guildId = data.guildId.asSnowflake(),

@@ -6,6 +6,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.web.AuthenticationState
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.springframework.http.HttpMethod
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -27,8 +28,8 @@ object Authentication {
 
     fun authenticate(swe: ServerWebExchange): Mono<AuthenticationState> {
         //Check if correct method
-        if (!swe.request.methodValue.equals("POST", true) || swe.request.methodValue.equals("GET", true)) {
-            LOGGER.debug("Denied access | Method: ${swe.request.methodValue}")
+        if (swe.request.method != HttpMethod.POST || swe.request.method == HttpMethod.GET) {
+            LOGGER.debug("Denied access | Method: ${swe.request.method.name()}")
             return Mono.just(AuthenticationState(false)
                     .status(GlobalVal.STATUS_NOT_ALLOWED)
                     .reason("Method not allowed")

@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono
 @Component
 class AddCalCommand : SlashCommand {
     override val name = "addcal"
+    override val hasSubcommands = false
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")

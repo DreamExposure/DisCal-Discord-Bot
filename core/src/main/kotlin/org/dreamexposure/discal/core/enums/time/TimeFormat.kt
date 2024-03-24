@@ -9,15 +9,33 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable(with = TimeFormatAsIntSerializer::class)
-enum class TimeFormat(val value: Int = 1, val full: String, val date: String, val longDate: String, val time: String, val dayOfWeek: String) {
-    TWENTY_FOUR_HOUR(1, "LLLL dd yyyy '@' HH:mm", "yyyy/MM/dd", "dd LLLL yyyy", "HH:mm", "EEEE '-' dd LLLL yyyy"),
-    TWELVE_HOUR(2, "LLLL dd yyyy '@' hh:mm a", "yyyy/MM/dd", "dd LLLL yyyy", "hh:mm a", "EEEE '-' dd LLLL yyyy");
+enum class TimeFormat(
+    val value: Int,
+    val fullSimple: String,
+    val full: String,
+    val date: String,
+    val longDate: String,
+    val time: String,
+    val dayOfWeek: String
+) {
+    TWENTY_FOUR_HOUR(
+        value = 1,
+        fullSimple = "yyyy/MM/dd hh:mm:ss",
+        full = "LLLL dd yyyy '@' HH:mm",
+        date = "yyyy/MM/dd",
+        longDate = "dd LLLL yyyy",
+        time = "HH:mm",
+        dayOfWeek = "EEEE '-' dd LLLL yyyy"),
+    TWELVE_HOUR(
+        value = 2,
+        fullSimple = "yyyy/MM/dd hh:mm:ss a",
+        full = "LLLL dd yyyy '@' hh:mm a",
+        date = "yyyy/MM/dd",
+        longDate = "dd LLLL yyyy",
+        time = "hh:mm a",
+        dayOfWeek = "EEEE '-' dd LLLL yyyy");
 
     companion object {
-        fun isValid(i: Int): Boolean {
-            return i == 1 || i == 2
-        }
-
         fun fromValue(i: Int): TimeFormat {
             return when (i) {
                 1 -> TWENTY_FOUR_HOUR

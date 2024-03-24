@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.config
 
 import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
 import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.springframework.context.annotation.Bean
@@ -14,7 +13,4 @@ class DisCalConfig {
 
     @Bean
     fun eventWizard(): Wizard<PreEvent> = Wizard()
-
-    @Bean
-    fun announcementWizard(): Wizard<Announcement> = Wizard()
 }

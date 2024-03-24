@@ -56,6 +56,7 @@ class RedisStringCacheRepository<K, V>(
             .match(formatKeySearch(guildId))
             .build()
         ).collectList().awaitSingle()
+        if (keys.isEmpty()) return emptyList()
 
         val rawValues = valueOps.multiGetAndAwait(keys)
 
@@ -109,6 +110,7 @@ class RedisStringCacheRepository<K, V>(
             .match(formatKeySearch(guildId))
             .build()
         ).collectList().awaitSingle()
+        if (keys.isEmpty()) return
 
         redisTemplate.deleteAndAwait(*keys.toTypedArray())
     }

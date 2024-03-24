@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono
 @Component
 class SettingsCommand : SlashCommand {
     override val name = "settings"
+    override val hasSubcommands = true
     override val ephemeral = true
 
     @Deprecated("Use new handleSuspend for K-coroutines")

@@ -32,7 +32,7 @@ jib {
         }
 
         image = "rg.nl-ams.scw.cloud/dreamexposure/discal-client"
-        tags = mutableSetOf("latest", version.toString(), buildVersion)
+        tags = mutableSetOf("latest", buildVersion)
     }
 
     val baseImage: String by properties

@@ -2,16 +2,14 @@ package org.dreamexposure.discal.core.extensions.discord4j
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
-import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Role
 import discord4j.rest.entity.RestGuild
 import discord4j.rest.http.client.ClientException
 import io.netty.handler.codec.http.HttpResponseStatus
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.announcement.Announcement
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -66,47 +64,6 @@ fun Guild.getAllCalendars(): Flux<Calendar> = getRestGuild().getAllCalendars()
  */
 fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> = getRestGuild().createCalendar(spec)
 
-//Announcements
-/**
- * Requests to check if an announcement with the supplied ID exists.
- * If an error occurs, it is emitted through the Mono.
- *
- * @param id The ID of the announcement to check for
- * @return A Mono, whereupon successful completion, returns a boolean as to if the announcement exists or not
- */
-fun Guild.announcementExists(id: String): Mono<Boolean> = getRestGuild().announcementExists(id)
-
-/**
- * Attempts to retrieve an [Announcement] with the supplied ID.
- * If an error occurs, it is emitted through the [Mono]
- *
- * @param id The ID of the [Announcement]
- * @return A [Mono] of the [Announcement] with the supplied ID, otherwise [empty][Mono.empty] is returned.
- */
-fun Guild.getAnnouncement(id: String): Mono<Announcement> = getRestGuild().getAnnouncement(id)
-
-/**
- * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild].
- * If an error occurs, it is emitted through the [Flux]
- *
- * @return A Flux of all [announcements][Announcement] belonging to this [Guild]
- */
-fun Guild.getAllAnnouncements(): Flux<Announcement> = getRestGuild().getAllAnnouncements()
-
-/**
- * Attempts to retrieve all [announcements][Announcement] belonging to this [Guild] that are enabled.
- * If an error occurs, it is emitted through the [Flux]
- *
- * @return A [Flux] of all [announcements][Announcement] belonging to this [Guild] that are enabled.
- */
-fun Guild.getEnabledAnnouncements(): Flux<Announcement> = getRestGuild().getEnabledAnnouncements()
-
-fun Guild.createAnnouncement(ann: Announcement): Mono<Boolean> = getRestGuild().createAnnouncement(ann)
-
-fun Guild.updateAnnouncement(ann: Announcement): Mono<Boolean> = getRestGuild().updateAnnouncement(ann)
-
-fun Guild.deleteAnnouncement(id: String): Mono<Boolean> = getRestGuild().deleteAnnouncement(id)
-
 fun Guild.getControlRole(): Mono<Role> {
     return getSettings().flatMap { settings ->
         if (settings.controlRole.equals("everyone", true))
@@ -123,20 +80,6 @@ fun Guild.getControlRole(): Mono<Role> {
                 }
         }
     }
-}
-
-fun Guild.getMemberFromStringId(id: String): Mono<Member> {
-    return Mono.just(id)
-        .filter(String::isNotEmpty)
-        .filter { it.matches(Regex("[0-9]+")) }
-        .map(Snowflake::of)
-        .flatMap(this::getMemberById)
-        .onErrorResume { Mono.empty() }
-}
-
-fun Guild.getMembersFromId(ids: List<String>): Flux<Member> {
-    return Flux.fromIterable(ids)
-        .flatMap(this::getMemberFromStringId)
 }
 
 fun Guild.getRestGuild(): RestGuild {

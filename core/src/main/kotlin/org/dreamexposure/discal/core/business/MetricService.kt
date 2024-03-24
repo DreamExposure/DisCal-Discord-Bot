@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Tag
-import org.dreamexposure.discal.core.`object`.StaticMessage
+import org.dreamexposure.discal.core.`object`.new.StaticMessage
 import org.springframework.stereotype.Component
 import java.time.Duration
 
@@ -17,7 +17,7 @@ class MetricService(
         ).record(Duration.ofMillis(duration))
     }
 
-    fun recordTaskDuration(task: String, tags: List<Tag>, duration: Long) {
+    fun recordTaskDuration(task: String, tags: List<Tag> = listOf(), duration: Long) {
         meterRegistry.timer(
             "bot.task.duration",
             tags.plus(Tag.of("task", task))
@@ -33,7 +33,7 @@ class MetricService(
     }
 
     fun recordStaticMessageTaskDuration(scope: String, duration: Long) {
-        recordTaskDuration("static-message", listOf(Tag.of("scope", scope)), duration)
+        recordTaskDuration("static_message", listOf(Tag.of("scope", scope)), duration)
     }
 
     fun incrementStaticMessagesUpdated(type: StaticMessage.Type) {

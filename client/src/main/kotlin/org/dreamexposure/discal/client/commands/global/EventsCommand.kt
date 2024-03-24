@@ -23,6 +23,7 @@ import java.time.format.DateTimeParseException
 @Component
 class EventsCommand : SlashCommand {
     override val name = "events"
+    override val hasSubcommands = true
     override val ephemeral = false
 
     @Deprecated("Use new handleSuspend for K-coroutines")

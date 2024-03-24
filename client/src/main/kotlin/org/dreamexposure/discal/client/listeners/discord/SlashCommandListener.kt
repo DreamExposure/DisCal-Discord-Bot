@@ -8,8 +8,10 @@ import org.dreamexposure.discal.core.business.MetricService
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
+import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import org.springframework.util.StopWatch
+import java.util.*
 
 @Component
 class SlashCommandListener(
@@ -22,11 +24,12 @@ class SlashCommandListener(
         timer.start()
 
         if (!event.interaction.guildId.isPresent) {
-            event.reply("Commands not supported in DMs.").awaitSingleOrNull()
+            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH)).awaitSingleOrNull()
             return
         }
 
         val command = commands.firstOrNull { it.name == event.commandName }
+        val subCommand = if (command?.hasSubcommands == true) event.options[0].name else null
 
         if (command != null) {
             event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
@@ -39,17 +42,19 @@ class SlashCommandListener(
                 LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
-                event.createFollowup("An unknown error has occurred")
+                event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
                     .withEphemeral(command.ephemeral)
                     .awaitSingleOrNull()
             }
         } else {
-            event.createFollowup("An unknown error has occurred. Please try again and/or contact DisCal support.")
+            event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
                 .withEphemeral(true)
                 .awaitSingleOrNull()
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.commandName, "chat-input", timer.totalTimeMillis)
+
+        val computedInteractionName = if (subCommand != null) "/${event.commandName}#$subCommand" else "/${event.commandName}"
+        metricService.recordInteractionDuration(computedInteractionName, "chat-input", timer.totalTimeMillis)
     }
 }
