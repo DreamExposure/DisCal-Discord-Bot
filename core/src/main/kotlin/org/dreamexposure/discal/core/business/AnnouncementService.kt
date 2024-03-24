@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
@@ -159,6 +160,7 @@ class AnnouncementService(
             val embed = embedService.determineAnnouncementEmbed(announcement, event, settings)
 
             val message = channel.createMessage(MessageCreateRequest.builder()
+                .content(announcement.subscribers.buildMentions().messageContentSafe())
                 .addEmbed(embed.asRequest())
                 .build()
             ).awaitSingle()
