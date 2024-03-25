@@ -63,7 +63,7 @@ class AnnouncementService(
         return saved
     }
 
-    suspend fun getAnnouncementCount(): Long = announcementRepository.count().awaitSingle()
+    suspend fun getAnnouncementCount(): Long = announcementRepository.countAll().awaitSingle()
 
     suspend fun getAllAnnouncements(shardIndex: Int, shardCount: Int): List<Announcement> {
         return announcementRepository.findAllByShardIndexAndEnabledIsTrue(shardCount, shardIndex)

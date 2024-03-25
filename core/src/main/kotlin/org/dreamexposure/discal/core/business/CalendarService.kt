@@ -15,7 +15,7 @@ class CalendarService(
     private val calendarRepository: CalendarRepository,
     private val calendarCache: CalendarCache,
 ) {
-    suspend fun getCalendarCount(): Long = calendarRepository.count().awaitSingle()
+    suspend fun getCalendarCount(): Long = calendarRepository.countAll().awaitSingle()
 
     suspend fun getAllCalendars(guildId: Snowflake): List<Calendar> {
         var calendars = calendarCache.get(key = guildId)?.toList()

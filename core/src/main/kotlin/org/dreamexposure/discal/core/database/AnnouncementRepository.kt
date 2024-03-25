@@ -7,6 +7,9 @@ import reactor.core.publisher.Mono
 
 interface AnnouncementRepository: R2dbcRepository<AnnouncementData, String> {
 
+    @Query("SELECT COUNT(*) FROM announcements")
+    fun countAll(): Mono<Long>
+
     fun findByGuildIdAndAnnouncementId(guildId: Long, announcementId: String): Mono<AnnouncementData>
 
     fun findAllByGuildId(guildId: Long): Flux<AnnouncementData>

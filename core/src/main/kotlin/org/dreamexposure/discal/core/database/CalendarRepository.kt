@@ -7,6 +7,9 @@ import reactor.core.publisher.Mono
 
 interface CalendarRepository : R2dbcRepository<CalendarData, Long> {
 
+    @Query("SELECT COUNT(*) FROM calendars")
+    fun countAll(): Mono<Long>
+
     fun findAllByGuildId(guildId: Long): Flux<CalendarData>
 
     fun findByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<CalendarData>
@@ -37,7 +40,4 @@ interface CalendarRepository : R2dbcRepository<CalendarData, Long> {
         refreshToken: String,
         expiresAt: Long,
     ): Mono<Int>
-
-    @Query(" SELECT 1")
-    fun healthCheck(): Mono<Int>
 }
