@@ -35,7 +35,7 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
         .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
 
     // Get a list of all days between the start and end dates
-    val days = mutableListOf<ZonedDateTime>()
+    val days = mutableListOf<ZonedDateTime>(startDate, endDate)
     var current = startDate
     while (current.isBefore(endDate)) {
         current = current.plusDays(1)
