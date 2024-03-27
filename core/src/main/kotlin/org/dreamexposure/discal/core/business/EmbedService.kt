@@ -56,9 +56,7 @@ class EmbedService(
     ////////////////////////////
     ////// General Embeds //////
     ////////////////////////////
-    suspend fun discalInfoEmbed(settings: GuildSettings, calendarCount: Long, announcementCount: Long): EmbedCreateSpec {
-        val guildCount = discordClient.guilds.count().awaitSingle()
-
+    suspend fun discalInfoEmbed(settings: GuildSettings, guildCount: Long, calendarCount: Long, announcementCount: Long): EmbedCreateSpec {
         return defaultEmbedBuilder(settings)
             .color(GlobalVal.discalColor)
             .title(getEmbedMessage("discal", "info.title", settings))

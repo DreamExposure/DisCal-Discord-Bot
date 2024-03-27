@@ -24,8 +24,9 @@ class DiscalCommand(
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementCount = announcementService.getAnnouncementCount()
         val calendarCount = calendarService.getCalendarCount()
+        val guildCount = event.client.guilds.count().awaitSingle()
 
-        val embed = embedService.discalInfoEmbed(settings, calendarCount, announcementCount)
+        val embed = embedService.discalInfoEmbed(settings, guildCount, calendarCount, announcementCount)
 
         return event.followup(embed).awaitSingle()
     }

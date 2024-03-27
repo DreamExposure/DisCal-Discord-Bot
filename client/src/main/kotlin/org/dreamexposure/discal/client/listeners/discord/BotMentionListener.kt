@@ -26,11 +26,14 @@ class BotMentionListener(
             val settings = event.guild.flatMap(Guild::getSettings).awaitSingle()
             val announcementCount = announcementService.getAnnouncementCount()
             val calendarCount = calendarService.getCalendarCount()
+            val guildCount = event.client.guilds.count().awaitSingle()
             val channel = event.message.channel.awaitSingle()
 
-            val embed = embedService.discalInfoEmbed(settings, calendarCount, announcementCount)
+            val embed = embedService.discalInfoEmbed(settings, guildCount, calendarCount, announcementCount)
 
-            channel.createMessage(embed).awaitSingleOrNull()
+            channel.createMessage(embed)
+                .withMessageReference(event.message.id)
+                .awaitSingleOrNull()
         }
     }
 
