@@ -32,7 +32,7 @@ class SlashCommandListener(
         val subCommand = if (command?.hasSubcommands == true) event.options[0].name else null
 
         if (command != null) {
-            event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
+            if (command.shouldDefer(event)) event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
 
             try {
                 val settings = DatabaseManager.getSettings(event.interaction.guildId.get()).awaitSingle()

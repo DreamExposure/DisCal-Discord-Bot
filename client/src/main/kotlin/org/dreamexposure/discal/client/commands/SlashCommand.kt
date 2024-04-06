@@ -13,6 +13,8 @@ interface SlashCommand {
     val hasSubcommands: Boolean
     val ephemeral: Boolean
 
+    fun shouldDefer(event: ChatInputInteractionEvent): Boolean = true
+
     @Deprecated("Use new handleSuspend for K-coroutines")
     fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
         return mono { suspendHandle(event, settings) }
