@@ -8,7 +8,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.StaticMessageService
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.`object`.GuildSettings
@@ -45,16 +44,22 @@ class DisplayCalendarCommand(
         // Validate control role
         val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
         if (!hasElevatedPerms)
-            return event.followupEphemeral(getCommonMsg("error.perms.elevated", settings)).awaitSingle()
+            return event.createFollowup(getCommonMsg("error.perms.elevated", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         // Validate calendar exists
         val calendar = event.interaction.guild.flatMap { it.getCalendar(calendarNumber) }.awaitSingleOrNull()
         if (calendar == null)
-            return event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         // Create and respond
         staticMessageService.createStaticMessage(settings.guildID, event.interaction.channelId, calendarNumber, hour)
 
-        return event.followupEphemeral(getCommonMsg("success.generic", settings)).awaitSingle()
+        return event.createFollowup(getCommonMsg("success.generic", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 }

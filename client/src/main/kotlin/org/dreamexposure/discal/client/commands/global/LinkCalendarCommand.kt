@@ -8,7 +8,6 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -38,9 +37,14 @@ class LinkCalendarCommand(
             it.getCalendar(calendarNumber)
         }.awaitSingleOrNull()
         if (calendar == null) {
-            return event.followup(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
         }
 
-        return event.followup(embedService.linkCalendarEmbed(calendarNumber, settings, showOverview)).awaitSingle()
+        return event.createFollowup()
+            .withEmbeds(embedService.linkCalendarEmbed(calendarNumber, settings, showOverview))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 }

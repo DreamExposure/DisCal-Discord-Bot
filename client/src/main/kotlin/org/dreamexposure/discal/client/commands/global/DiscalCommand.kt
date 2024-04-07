@@ -7,7 +7,6 @@ import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.AnnouncementService
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.springframework.stereotype.Component
 
@@ -28,6 +27,9 @@ class DiscalCommand(
 
         val embed = embedService.discalInfoEmbed(settings, guildCount, calendarCount, announcementCount)
 
-        return event.followup(embed).awaitSingle()
+        return event.createFollowup()
+            .withEmbeds(embed)
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 }
