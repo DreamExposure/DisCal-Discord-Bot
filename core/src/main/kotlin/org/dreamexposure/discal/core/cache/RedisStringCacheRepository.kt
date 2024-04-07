@@ -25,12 +25,12 @@ class RedisStringCacheRepository<K, V>(
     }
 
     override suspend fun put(guildId: Snowflake?, key: K, value: V) {
-        valueOps.setAndAwait(formatKey(guildId, key), objectMapper.writeValueAsString(value), ttl)
+        valueOps.setAndAwait(formatKey(guildId, key), objectMapper.writeValueAsString(value), ttlWithJitter)
     }
 
     override suspend fun putMany(guildId: Snowflake?, values: Map<K, V>) {
         values.forEach { (key, value) ->
-            valueOps.setAndAwait(formatKey(guildId, key), objectMapper.writeValueAsString(value), ttl)
+            valueOps.setAndAwait(formatKey(guildId, key), objectMapper.writeValueAsString(value), ttlWithJitter)
         }
     }
 
