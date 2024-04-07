@@ -26,6 +26,8 @@ class StaticMessageRefreshButton(
             LOGGER.error("Error handling static message refresh button | guildId:${settings.guildID.asLong()} | messageId: ${event.messageId.asLong()}", ex)
 
             event.createFollowup(getCommonMsg("error.unknown", settings.getLocale()))
+                .withEphemeral(true)
+                .awaitSingleOrNull()
         }
     }
 }
