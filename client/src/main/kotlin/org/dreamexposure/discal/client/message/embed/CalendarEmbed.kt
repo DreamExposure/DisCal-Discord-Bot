@@ -7,8 +7,8 @@ import org.dreamexposure.discal.core.extensions.embedDescriptionSafe
 import org.dreamexposure.discal.core.extensions.embedFieldSafe
 import org.dreamexposure.discal.core.extensions.embedTitleSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.GlobalVal.discalColor
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
@@ -42,11 +42,11 @@ object CalendarEmbed : EmbedMaker {
                 false
             ).addField(
                 getMessage("calendar", "wizard.field.description", settings),
-                preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings) }?.toMarkdown()?.embedFieldSafe()
-                    ?: getCommonMsg("embed.unset", settings),
+                preCal.description?.ifEmpty { getCommonMsg("embed.unset", settings.locale) }?.toMarkdown()?.embedFieldSafe()
+                    ?: getCommonMsg("embed.unset", settings.locale),
                 false
             ).addField(getMessage("calendar", "wizard.field.timezone", settings),
-                preCal.timezone?.id ?: getCommonMsg("embed.unset", settings),
+                preCal.timezone?.id ?: getCommonMsg("embed.unset", settings.locale),
                 true
             ).addField(getMessage("calendar", "wizard.field.host", settings), preCal.host.name, true)
             .footer(getMessage("calendar", "wizard.footer", settings), null)

@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.utils
 
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.springframework.context.support.ResourceBundleMessageSource
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -28,23 +27,20 @@ object MessageSourceLoader {
 }
 
 //FIXME: I think the varargs is bugging out with 3 or more provided. Will need to debug this later, but not today.
-
-fun getCommonMsg(key: String, settings: GuildSettings, vararg args: String) = getCommonMsg(key, settings.getLocale(), *args)
-
 fun getCommonMsg(key: String, locale: Locale, vararg args: String): String {
     val src= MessageSourceLoader.getSourceByPath("common")
 
     return src.getMessage(key, args, locale)
 }
 
-fun getEmbedMessage(embed: String, key: String, settings: GuildSettings, vararg args: String): String {
+fun getEmbedMessage(embed: String, key: String, locale: Locale, vararg args: String): String {
     val src = MessageSourceLoader.getSourceByPath("embed/$embed")
 
-    return src.getMessage(key, args, settings.getLocale())
+    return src.getMessage(key, args, locale)
 }
 
-fun getCmdMessage(cmd: String, key: String, settings: GuildSettings, vararg args: String): String {
+fun getCmdMessage(cmd: String, key: String, locale: Locale, vararg args: String): String {
     val src = MessageSourceLoader.getSourceByPath("command/$cmd/$cmd")
 
-    return src.getMessage(key, args, settings.getLocale())
+    return src.getMessage(key, args, locale)
 }

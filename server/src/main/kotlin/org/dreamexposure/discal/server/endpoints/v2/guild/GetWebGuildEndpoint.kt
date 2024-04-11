@@ -2,12 +2,16 @@ package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
+import org.dreamexposure.discal.core.business.GuildSettingsService
+import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
-import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.web.WebGuild
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
@@ -25,7 +29,11 @@ import reactor.function.TupleUtils
 
 @RestController
 @RequestMapping("/v2/guild")
-class GetWebGuildEndpoint(val client: DiscordClient) {
+class GetWebGuildEndpoint(
+    private val client: DiscordClient,
+    private val settingsService: GuildSettingsService,
+    private val permissionService: PermissionService,
+) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
@@ -41,12 +49,30 @@ class GetWebGuildEndpoint(val client: DiscordClient) {
             val userId = Snowflake.of(body.getString("user_id"))
 
             val g = client.getGuildById(guildId)
+            val settingsMono = mono {
+                settingsService.getSettings(guildId)
+            }.map {
+                // Convert to deprecated settings for compatibility with legacy website
+                GuildSettings(
+                    guildID = it.guildId,
+                    controlRole = it.controlRole,
+                    announcementStyle = AnnouncementStyle.fromValue(it.interfaceStyle.announcementStyle.value),
+                    timeFormat = it.interfaceStyle.timeFormat,
+                    lang = it.locale.toLanguageTag(),
+                    prefix = it.prefix,
+                    patronGuild = it.patronGuild,
+                    devGuild = it.devGuild,
+                    maxCalendars = it.maxCalendars,
+                    branded = it.interfaceStyle.branded,
+                    eventKeepDuration = it.eventKeepDuration,
+                )
+            }
 
-            WebGuild.fromGuild(g).flatMap { wg ->
+            settingsMono.flatMap { WebGuild.fromGuild(g, it) }.flatMap { wg ->
                 val member = g.member(userId)
 
                 val elevatedMono = member.hasElevatedPermissions()
-                val discalRoleMono = member.hasControlRole()
+                val discalRoleMono = mono { permissionService.hasControlRole(guildId, userId) }
 
                 Mono.zip(elevatedMono, discalRoleMono)
                         .map(TupleUtils.function { elevated, discalRole ->

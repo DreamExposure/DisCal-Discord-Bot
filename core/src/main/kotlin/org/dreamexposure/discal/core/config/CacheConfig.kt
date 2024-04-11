@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 
 @Configuration
 class CacheConfig {
+    private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
     private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
     private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
     private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
@@ -23,6 +24,12 @@ class CacheConfig {
 
 
     // Redis caching
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun guildSettingsRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): GuildSettingsCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "GuildSettings", settingsTtl)
+
     @Bean
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
@@ -67,6 +74,9 @@ class CacheConfig {
 
 
     // In-memory fallback caching
+    @Bean
+    fun guildSettingsFallbackCache(): GuildSettingsCache = JdkCacheRepository(settingsTtl)
+
     @Bean
     fun credentialsFallbackCache(): CredentialsCache = JdkCacheRepository(credentialsTll)
 

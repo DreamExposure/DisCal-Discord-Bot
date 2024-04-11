@@ -4,91 +4,98 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
+import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.client.message.embed.SettingsEmbed
-import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
+import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.enums.time.TimeFormat
-import org.dreamexposure.discal.core.extensions.discord4j.followup
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Mono
+import java.util.*
 
 @Component
-class SettingsCommand : SlashCommand {
+class SettingsCommand(
+    private val settingsService: GuildSettingsService,
+    private val embedService: EmbedService,
+) : SlashCommand {
     override val name = "settings"
     override val hasSubcommands = true
     override val ephemeral = true
 
-    @Deprecated("Use new handleSuspend for K-coroutines")
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        //Check if user has permission to use this
-        return event.interaction.member.get().hasElevatedPermissions().flatMap { hasPerm ->
-            if (hasPerm) {
-                return@flatMap when (event.options[0].name) {
-                    "view" -> viewSubcommand(event, settings)
-                    "role" -> roleSubcommand(event, settings)
-                    "announcement-style" -> announcementStyleSubcommand(event, settings)
-                    "language" -> languageSubcommand(event, settings)
-                    "time-format" -> timeFormatSubcommand(event, settings)
-                    "keep-event-duration" -> eventKeepDurationSubcommand(event, settings)
-                    "branding" -> brandingSubcommand(event, settings)
-                    else -> Mono.empty() //Never can reach this, makes compiler happy.
-                }
-            } else {
-                event.followupEphemeral(getCommonMsg("error.perms.elevated", settings))
-            }
+    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        return when (event.options[0].name) {
+            "view" -> view(event, settings)
+            "role" -> role(event, settings)
+            "announcement-style" -> announcementStyle(event, settings)
+            "language" -> language(event, settings)
+            "time-format" -> timeFormat(event, settings)
+            "keep-event-duration" -> eventKeepDuration(event, settings)
+            "branding" -> branding(event, settings)
+            else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private fun viewSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return event.interaction.guild
-              .flatMap { SettingsEmbed.getView(it, settings) }
-              .flatMap(event::followup)
+    private suspend fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        return event.createFollowup()
+            .withEmbeds(embedService.settingsEmbeds(settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun roleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.options[0].getOption("role"))
-              .map { it.value.get() }
-              .flatMap(ApplicationCommandInteractionOptionValue::asRole)
-              .doOnNext { settings.controlRole = it.id.asString() }
-              .flatMap { role ->
-                  DatabaseManager.updateSettings(settings).then(
-                      event.followupEphemeral(getMessage("role.success", settings, role.name))
-                  )
-              }
+    private suspend fun role(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val roleId = event.options[0].getOption("role")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .orElse(settings.guildId)
+
+        val newSettings= settingsService.upsertSettings(settings.copy(controlRole = roleId.asString()))
+
+        return event.createFollowup(getMessage("role.success", settings))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun announcementStyleSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val announcementStyle = event.options[0].getOption("style")
+    private suspend fun announcementStyle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val style = event.options[0].getOption("style")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .map(AnnouncementStyle::fromValue)
+            .map { v -> GuildSettings.AnnouncementStyle.entries.first { it.value == v } }
             .get()
 
-        settings.announcementStyle = announcementStyle
+        val newSettings = settingsService.upsertSettings(settings.copy(interfaceStyle = settings.interfaceStyle.copy(announcementStyle = style)))
 
-        return DatabaseManager.updateSettings(settings)
-            .flatMap { event.followupEphemeral(getMessage("style.success", settings, announcementStyle.name)) }
+        return event.createFollowup(getMessage("style.success", settings, style.name))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun languageSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val lang = event.options[0].getOption("lang")
+    private suspend fun language(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val locale = event.options[0].getOption("lang")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Locale::forLanguageTag)
             .get()
 
-        settings.lang = lang
+        val newSettings = settingsService.upsertSettings(settings.copy(locale = locale))
 
-        return DatabaseManager.updateSettings(settings)
-            .flatMap { event.followupEphemeral(getMessage("lang.success", settings)) }
+        return event.createFollowup(getMessage("lang.success", newSettings))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun timeFormatSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun timeFormat(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val timeFormat = event.options[0].getOption("format")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -96,37 +103,43 @@ class SettingsCommand : SlashCommand {
             .map(TimeFormat::fromValue)
             .get()
 
-        settings.timeFormat = timeFormat
+        val newSettings = settingsService.upsertSettings(settings.copy(interfaceStyle = settings.interfaceStyle.copy(timeFormat = timeFormat)))
 
-        return DatabaseManager.updateSettings(settings)
-            .flatMap { event.followupEphemeral(getMessage("format.success", settings, timeFormat.name)) }
+        return event.createFollowup(getMessage("format.success", settings, timeFormat.name))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun eventKeepDurationSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun eventKeepDuration(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val keepDuration = event.options[0].getOption("value")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
             .get()
 
-        settings.eventKeepDuration = keepDuration
+        val newSettings = settingsService.upsertSettings(settings.copy(eventKeepDuration = keepDuration))
 
-        return DatabaseManager.updateSettings(settings)
-            .flatMap { event.followupEphemeral(getMessage("eventKeepDuration.success.$keepDuration", settings)) }
+        return event.createFollowup(getMessage("eventKeepDuration.success.$keepDuration", settings))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun brandingSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return if (settings.patronGuild) {
-            val useBranding = event.options[0].getOption("use")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(ApplicationCommandInteractionOptionValue::asBoolean)
-                .get()
+    private suspend fun branding(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val useBranding = event.options[0].getOption("use")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .get()
 
-            settings.branded = useBranding
+        if (!settings.patronGuild) return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-            DatabaseManager.updateSettings(settings)
-                .flatMap { event.followupEphemeral(getMessage("brand.success", settings, "$useBranding")) }
-        } else {
-            event.followupEphemeral(getCommonMsg("error.patronOnly", settings))
-        }
+        val newSettings = settingsService.upsertSettings(settings.copy(interfaceStyle = settings.interfaceStyle.copy(branded = useBranding)))
+
+        return event.createFollowup(getMessage("brand.success", settings, "$useBranding"))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 }

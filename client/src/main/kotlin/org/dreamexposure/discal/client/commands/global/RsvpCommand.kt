@@ -8,11 +8,11 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.RsvpService
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono
 class RsvpCommand(
     private val rsvpService: RsvpService,
     private val embedService: EmbedService,
+    private val permissionService: PermissionService,
 ) : SlashCommand {
     override val name = "rsvp"
     override val hasSubcommands = true
@@ -59,15 +60,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -108,15 +109,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -157,15 +158,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -197,15 +198,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -237,15 +238,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -276,11 +277,11 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -311,9 +312,9 @@ class RsvpCommand(
             .get()
 
         // Validate control role first to reduce work
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
         if (!hasControlRole)
-            return event.createFollowup(getCommonMsg("error.perms.privileged", settings))
+            return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -324,15 +325,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -348,7 +349,7 @@ class RsvpCommand(
 
     private suspend fun role(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         if (!settings.patronGuild)
-            return event.createFollowup(getCommonMsg("error.patronOnly", settings))
+            return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -369,7 +370,7 @@ class RsvpCommand(
         // Validate control role first to reduce work
         val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
         if (!hasElevatedPerms)
-            return event.createFollowup(getCommonMsg("error.perms.elevated", settings))
+            return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
@@ -379,15 +380,15 @@ class RsvpCommand(
 
         // Validate required conditions
         if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings))
+            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 

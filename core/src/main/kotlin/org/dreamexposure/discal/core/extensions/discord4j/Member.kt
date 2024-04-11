@@ -9,6 +9,4 @@ fun Member.hasPermissions(pred: Predicate<PermissionSet>) = getRestMember().hasP
 
 fun Member.hasElevatedPermissions() = getRestMember().hasElevatedPermissions()
 
-fun Member.hasControlRole() = getRestMember().hasControlRole()
-
 fun Member.getRestMember(): RestMember = client.rest().restMember(guildId, memberData)

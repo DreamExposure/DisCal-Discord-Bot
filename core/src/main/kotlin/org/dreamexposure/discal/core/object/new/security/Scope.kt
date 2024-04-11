@@ -3,6 +3,9 @@ package org.dreamexposure.discal.core.`object`.new.security
 enum class Scope {
     CALENDAR_TOKEN_READ,
 
+    GUILD_SETTINGS_READ,
+    GUILD_SETTINGS_WRITE,
+
     EVENT_RSVP_READ,
     EVENT_RSVP_WRITE,
 

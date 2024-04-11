@@ -4,7 +4,7 @@ import discord4j.core.event.domain.interaction.ButtonInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.StaticMessageService
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 
@@ -21,11 +21,11 @@ class StaticMessageRefreshButton(
                 .withEphemeral(true)
                 .awaitSingleOrNull()
 
-            staticMessageService.updateStaticMessage(settings.guildID, event.messageId)
+            staticMessageService.updateStaticMessage(settings.guildId, event.messageId)
         } catch (ex: Exception) {
-            LOGGER.error("Error handling static message refresh button | guildId:${settings.guildID.asLong()} | messageId: ${event.messageId.asLong()}", ex)
+            LOGGER.error("Error handling static message refresh button | guildId:${settings.guildId.asLong()} | messageId: ${event.messageId.asLong()}", ex)
 
-            event.createFollowup(getCommonMsg("error.unknown", settings.getLocale()))
+            event.createFollowup(getCommonMsg("error.unknown", settings.locale))
                 .withEphemeral(true)
                 .awaitSingleOrNull()
         }

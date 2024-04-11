@@ -1,11 +1,10 @@
 package org.dreamexposure.discal.client.listeners.discord
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.business.MetricService
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -16,6 +15,7 @@ import java.util.*
 @Component
 class SlashCommandListener(
     private val commands: List<SlashCommand>,
+    private val settingsService: GuildSettingsService,
     private val metricService: MetricService,
 ) : EventListener<ChatInputInteractionEvent> {
 
@@ -35,7 +35,8 @@ class SlashCommandListener(
             if (command.shouldDefer(event)) event.deferReply().withEphemeral(command.ephemeral).awaitSingleOrNull()
 
             try {
-                val settings = DatabaseManager.getSettings(event.interaction.guildId.get()).awaitSingle()
+
+                val settings = settingsService.getSettings(event.interaction.guildId.get())
 
                 command.suspendHandle(event, settings)
             } catch (e: Exception) {

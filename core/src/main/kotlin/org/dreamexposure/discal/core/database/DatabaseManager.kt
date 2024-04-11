@@ -9,14 +9,9 @@ import io.r2dbc.spi.Connection
 import io.r2dbc.spi.ConnectionFactories
 import io.r2dbc.spi.ConnectionFactoryOptions.*
 import io.r2dbc.spi.Result
-import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.enums.time.TimeFormat
-import org.dreamexposure.discal.core.extensions.setFromString
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.`object`.event.EventData
 import org.dreamexposure.discal.core.`object`.web.UserAPIAccount
@@ -56,120 +51,6 @@ object DatabaseManager {
     }
 
     fun disconnectFromMySQL() = pool.dispose()
-
-    fun updateAPIAccount(acc: UserAPIAccount): Mono<Boolean> {
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_API_KEY)
-                    .bind(0, acc.APIKey)
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ -> row }
-            }.hasElements().flatMap { exists ->
-                if (exists) {
-                    val updateCommand = """ UPDATE ${Tables.API} SET
-                                USER_ID = ?, BLOCKED = ?
-                                WHERE API_KEY = ?
-                                """.trimMargin()
-
-                    Mono.from(
-                        c.createStatement(updateCommand)
-                            .bind(0, acc.userId)
-                            .bind(1, acc.blocked)
-                            .bind(2, acc.APIKey)
-                            .execute()
-                    ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                        .thenReturn(true)
-                } else {
-                    val insertCommand = """INSERT INTO ${Tables.API}
-                                (USER_ID, API_KEY, BLOCKED, TIME_ISSUED)
-                                VALUES (?, ?, ?, ?)
-                            """.trimMargin()
-
-                    Mono.from(
-                        c.createStatement(insertCommand)
-                            .bind(0, acc.userId)
-                            .bind(1, acc.APIKey)
-                            .bind(2, acc.blocked)
-                            .bind(3, acc.timeIssued)
-                            .execute()
-                    ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                        .thenReturn(true)
-                }
-            }.doOnError {
-                LOGGER.error(DEFAULT, "Failed to update API account", it)
-            }.onErrorResume { Mono.just(false) }
-        }
-    }
-
-    fun updateSettings(settings: GuildSettings): Mono<Boolean> {
-        DiscalCache.guildSettings[settings.guildID] = settings
-
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_GUILD_SETTINGS)
-                    .bind(0, settings.guildID.asLong())
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ -> row }
-            }.hasElements().flatMap { exists ->
-                if (exists) {
-                    val updateCommand = """UPDATE ${Tables.GUILD_SETTINGS} SET
-                                CONTROL_ROLE = ?, ANNOUNCEMENT_STYLE = ?, TIME_FORMAT = ?,
-                                LANG = ?, PREFIX = ?, PATRON_GUILD = ?, DEV_GUILD = ?,
-                                MAX_CALENDARS = ?, DM_ANNOUNCEMENTS = ?,
-                                BRANDED = ?, event_keep_duration = ? WHERE GUILD_ID = ?
-                            """.trimMargin()
-
-                    Mono.from(
-                        c.createStatement(updateCommand)
-                            .bind(0, settings.controlRole)
-                            .bind(1, settings.announcementStyle.value)
-                            .bind(2, settings.timeFormat.value)
-                            .bind(3, settings.lang)
-                            .bind(4, settings.prefix)
-                            .bind(5, settings.patronGuild)
-                            .bind(6, settings.devGuild)
-                            .bind(7, settings.maxCalendars)
-                            .bind(8, settings.getDmAnnouncementsString())
-                            .bind(9, settings.branded)
-                            .bind(10, settings.eventKeepDuration)
-                            .bind(11, settings.guildID.asLong())
-                            .execute()
-                    ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                        .hasElement()
-                        .thenReturn(true)
-                } else {
-                    val insertCommand = """INSERT INTO ${Tables.GUILD_SETTINGS}
-                                (GUILD_ID, CONTROL_ROLE, ANNOUNCEMENT_STYLE, TIME_FORMAT, LANG, PREFIX,
-                                PATRON_GUILD, DEV_GUILD, MAX_CALENDARS, DM_ANNOUNCEMENTS, BRANDED, event_keep_duration)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            """.trimMargin()
-
-                    Mono.from(
-                        c.createStatement(insertCommand)
-                            .bind(0, settings.guildID.asLong())
-                            .bind(1, settings.controlRole)
-                            .bind(2, settings.announcementStyle.value)
-                            .bind(3, settings.timeFormat.value)
-                            .bind(4, settings.lang)
-                            .bind(5, settings.prefix)
-                            .bind(6, settings.patronGuild)
-                            .bind(7, settings.devGuild)
-                            .bind(8, settings.maxCalendars)
-                            .bind(9, settings.getDmAnnouncementsString())
-                            .bind(10, settings.branded)
-                            .bind(11, settings.eventKeepDuration)
-                            .execute()
-                    ).flatMap { res -> Mono.from(res.rowsUpdated) }
-                        .hasElement()
-                        .thenReturn(true)
-                }
-            }.doOnError {
-                LOGGER.error(DEFAULT, "Failed to update guild settings", it)
-            }.onErrorResume { Mono.just(false) }
-        }
-    }
 
     fun updateCalendar(calData: CalendarData): Mono<Boolean> {
         return connect { c ->
@@ -319,52 +200,6 @@ object DatabaseManager {
             }.onErrorResume { Mono.empty() }
         }
     }
-
-    fun getSettings(guildId: Snowflake): Mono<GuildSettings> {
-        if (DiscalCache.guildSettings.containsKey(guildId))
-            return Mono.just(DiscalCache.guildSettings[guildId]!!)
-
-        return connect { c ->
-            Mono.from(
-                c.createStatement(Queries.SELECT_GUILD_SETTINGS)
-                    .bind(0, guildId.asLong())
-                    .execute()
-            ).flatMapMany { res ->
-                res.map { row, _ ->
-                    val controlRole = row["CONTROL_ROLE", String::class.java]!!
-                    val announcementStyle = AnnouncementStyle.fromValue(row["ANNOUNCEMENT_STYLE", Int::class.java]!!)
-                    val timeFormat = TimeFormat.fromValue(row["TIME_FORMAT", Int::class.java]!!)
-                    val lang = row["LANG", String::class.java]!!
-                    val prefix = row["PREFIX", String::class.java]!!
-                    val patron = row["PATRON_GUILD", Boolean::class.java]!!
-                    val dev = row["DEV_GUILD", Boolean::class.java]!!
-                    val maxCals = row["MAX_CALENDARS", Int::class.java]!!
-                    val dmAnnouncementsString = row["DM_ANNOUNCEMENTS", String::class.java]!!
-                    val branded = row["BRANDED", Boolean::class.java]!!
-                    val eventKeepDuration = row["event_keep_duration", Boolean::class.java]!!
-
-                    val settings = GuildSettings(
-                        guildId, controlRole, announcementStyle, timeFormat,
-                        lang, prefix, patron, dev, maxCals, branded, eventKeepDuration,
-                    )
-
-                    settings.dmAnnouncements.setFromString(dmAnnouncementsString)
-
-                    //Store in cache...
-                    DiscalCache.guildSettings[guildId] = settings
-
-                    settings
-                }
-            }.next().retryWhen(Retry.max(3)
-                .filter(IllegalStateException::class::isInstance)
-                .filter { it.message != null && it.message!!.contains("Request queue was disposed") }
-            ).doOnError {
-                LOGGER.error(DEFAULT, "Failed to get guild settings", it)
-            }.onErrorReturn(GuildSettings.empty(guildId)).defaultIfEmpty(GuildSettings.empty(guildId))
-        }
-    }
-
-    fun getMainCalendar(guildId: Snowflake): Mono<CalendarData> = getCalendar(guildId, 1)
 
     fun getCalendar(guildId: Snowflake, calendarNumber: Int): Mono<CalendarData> {
         return connect { c ->
@@ -644,11 +479,6 @@ private object Queries {
     @Language("MySQL")
     val SELECT_API_KEY = """SELECT * FROM ${Tables.API}
         WHERE API_KEY = ?
-        """.trimMargin()
-
-    @Language("MySQL")
-    val SELECT_GUILD_SETTINGS = """SELECT * FROM ${Tables.GUILD_SETTINGS}
-        WHERE GUILD_ID = ?
         """.trimMargin()
 
     @Language("MySQL")

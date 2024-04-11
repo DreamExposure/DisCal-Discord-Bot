@@ -49,34 +49,6 @@
           "required": true
         }
       ]
-    },
-    {
-      "name": "api-register",
-      "type": 1,
-      "description": "Registers a new API key for the user",
-      "required": false,
-      "options": [
-        {
-          "name": "user",
-          "type": 6,
-          "description": "The user who uses the API key being created",
-          "required": true
-        }
-      ]
-    },
-    {
-      "name": "api-block",
-      "type": 1,
-      "description": "Sets an API key as blocked and prevents its use",
-      "required": false,
-      "options": [
-        {
-          "name": "key",
-          "type": 3,
-          "description": "The API key to block",
-          "required": true
-        }
-      ]
     }
   ],
   "default_permissions": true

@@ -9,6 +9,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 @Serializable(with = AnnouncementStyleAsIntSerializer::class)
+@Deprecated("Use new subclassed enum in GuildSettings")
 enum class AnnouncementStyle(val value: Int = 1) {
     FULL(1), SIMPLE(2), EVENT(3);
 

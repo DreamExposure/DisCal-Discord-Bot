@@ -20,28 +20,7 @@ import java.time.Duration
 import java.util.*
 import com.google.api.services.calendar.model.Calendar as GoogleCalendarModel
 
-//Settings
-fun RestGuild.getSettings(): Mono<GuildSettings> = DatabaseManager.getSettings(this.id)
-
 //Calendars
-/**
- * Attempts to request whether this [Guild] has at least one [Calendar].
- * If an error occurs, it is emitted through the [Mono]
- *
- * @return A [Mono] containing whether this [Guild] has a [Calendar].
- */
-fun RestGuild.hasCalendar(): Mono<Boolean> {
-    return DatabaseManager.getAllCalendars(this.id).map(List<CalendarData>::isNotEmpty)
-}
-
-fun RestGuild.canAddCalendar(): Mono<Boolean> {
-    //Always check the live database and bypass cache
-    return DatabaseManager.getCalendarCount(this.id)
-            .flatMap { current ->
-                if (current == 0) Mono.just(true)
-                else getSettings().map { current < it.maxCalendars }
-            }
-}
 
 fun RestGuild.determineNextCalendarNumber(): Mono<Int> {
     return DatabaseManager.getAllCalendars(this.id)

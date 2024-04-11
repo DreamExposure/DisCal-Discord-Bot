@@ -1,14 +1,14 @@
 package org.dreamexposure.discal.client.commands.global
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.client.message.embed.EventEmbed
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.extensions.discord4j.followup
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
@@ -75,7 +75,7 @@ class EventsCommand : SlashCommand {
                         }.last()
                     }
                 }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings.locale)))
         }
     }
 
@@ -106,7 +106,7 @@ class EventsCommand : SlashCommand {
                         }.last()
                     }
                 }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings.locale)))
         }
     }
 
@@ -137,7 +137,7 @@ class EventsCommand : SlashCommand {
                         }.last()
                     }
                 }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings.locale)))
         }
     }
 
@@ -196,9 +196,9 @@ class EventsCommand : SlashCommand {
                         }.last()
                     }
                 }
-            }).switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
+            }).switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings.locale)))
             .onErrorResume(DateTimeParseException::class.java) {
-                event.followup(getCommonMsg("error.format.date", settings))
+                event.followup(getCommonMsg("error.format.date", settings.locale))
             }
     }
 }

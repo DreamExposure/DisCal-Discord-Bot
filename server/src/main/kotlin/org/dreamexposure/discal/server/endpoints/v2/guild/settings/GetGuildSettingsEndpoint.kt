@@ -1,10 +1,13 @@
 package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 
 import discord4j.common.util.Snowflake
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
-import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.business.GuildSettingsService
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -20,7 +23,9 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/guild/settings")
-class GetGuildSettingsEndpoint {
+class GetGuildSettingsEndpoint(
+    private val settingsService: GuildSettingsService,
+) {
 
     @PostMapping(value = ["/get"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
@@ -35,9 +40,26 @@ class GetGuildSettingsEndpoint {
             val body = JSONObject(rBody)
             val guildId = Snowflake.of(body.getString("guild_id"))
 
-            return@flatMap DatabaseManager.getSettings(guildId)
-                    .map { GlobalVal.JSON_FORMAT.encodeToString(it) }
-                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
+
+
+            return@flatMap mono { settingsService.getSettings(guildId) }
+                .map {
+                    // Convert to deprecated settings for compatibility with legacy website
+                    GuildSettings(
+                        guildID = it.guildId,
+                        controlRole = it.controlRole,
+                        announcementStyle = AnnouncementStyle.fromValue(it.interfaceStyle.announcementStyle.value),
+                        timeFormat = it.interfaceStyle.timeFormat,
+                        lang = it.locale.toLanguageTag(),
+                        prefix = it.prefix,
+                        patronGuild = it.patronGuild,
+                        devGuild = it.devGuild,
+                        maxCalendars = it.maxCalendars,
+                        branded = it.interfaceStyle.branded,
+                        eventKeepDuration = it.eventKeepDuration,
+                    )
+                }.map { GlobalVal.JSON_FORMAT.encodeToString(it) }
+                .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 

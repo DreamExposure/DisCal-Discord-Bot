@@ -7,6 +7,7 @@ import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarRepository
+import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.springframework.stereotype.Component
 
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component
 class CalendarService(
     private val calendarRepository: CalendarRepository,
     private val calendarCache: CalendarCache,
+    private val settingsService: GuildSettingsService,
 ) {
     suspend fun getCalendarCount(): Long = calendarRepository.countAll().awaitSingle()
 
@@ -59,5 +61,14 @@ class CalendarService(
             newList.removeIf { it.number == calendar.number }
             calendarCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
         }
+    }
+
+    suspend fun canAddNewCalendar(guildId: Snowflake): Boolean {
+        // For compatibility with legacy system
+        val calCount = DatabaseManager.getCalendarCount(guildId).awaitSingle()
+        if (calCount == 0) return true
+
+        val settings = settingsService.getSettings(guildId)
+        return calCount < settings.maxCalendars
     }
 }

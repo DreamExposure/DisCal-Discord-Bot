@@ -5,7 +5,7 @@ import org.dreamexposure.discal.core.cache.CacheRepository
 import org.dreamexposure.discal.core.`object`.new.*
 
 // Cache
-//typealias GuildSettingsCache = CacheRepository<Long, GuildSettings>
+typealias GuildSettingsCache = CacheRepository<Snowflake, GuildSettings>
 typealias CredentialsCache = CacheRepository<Int, Credential>
 typealias OauthStateCache = CacheRepository<String, String>
 typealias CalendarCache = CacheRepository<Snowflake, Array<Calendar>>

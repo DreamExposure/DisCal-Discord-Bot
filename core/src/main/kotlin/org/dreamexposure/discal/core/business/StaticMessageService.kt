@@ -12,7 +12,6 @@ import org.dreamexposure.discal.core.database.StaticMessageData
 import org.dreamexposure.discal.core.database.StaticMessageRepository
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.getSettings
 import org.dreamexposure.discal.core.`object`.new.StaticMessage
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
@@ -27,6 +26,7 @@ import java.time.temporal.ChronoUnit
 class StaticMessageService(
     private val staticMessageRepository: StaticMessageRepository,
     private val staticMessageCache: StaticMessageCache,
+    private val settingsService: GuildSettingsService,
     private val embedService: EmbedService,
     private val componentService: ComponentService,
     private val metricService: MetricService,
@@ -75,12 +75,11 @@ class StaticMessageService(
     ): StaticMessage {
 
         // Gather everything we need
-        val settings = discordClient.getGuildById(guildId).getSettings().awaitSingle()
         val calendar = discordClient.getGuildById(guildId)
             .getCalendar(calendarNumber)
             .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
         val channel = discordClient.getChannelById(channelId)
-        val embed = embedService.calendarOverviewEmbed(calendar, settings, showUpdate = true)
+        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
         val nextUpdate = ZonedDateTime.now(calendar.timezone)
             .truncatedTo(ChronoUnit.DAYS)
             .plusHours(updateHour + 24)
@@ -127,13 +126,12 @@ class StaticMessageService(
             return
         }
 
-        val settings = discordClient.getGuildById(guildId).getSettings().awaitSingle()
         val calendar = discordClient.getGuildById(guildId)
             .getCalendar(old.calendarNumber)
             .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
 
         // Finally update the message
-        val embed = embedService.calendarOverviewEmbed(calendar, settings, showUpdate = true)
+        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
 
         discordClient.getMessageById(old.channelId, old.messageId).edit(
             MessageEditRequest.builder()
@@ -168,11 +166,10 @@ class StaticMessageService(
         taskTimer.start()
 
         val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber)
-        val settings = discordClient.getGuildById(guildId).getSettings().awaitSingle()
         val calendar = discordClient.getGuildById(guildId)
             .getCalendar(calendarNumber)
             .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
-        val embed = embedService.calendarOverviewEmbed(calendar, settings, showUpdate = true)
+        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
 
         oldVersions.forEach { old ->
             val existingData = discordClient.getMessageById(old.channelId, old.messageId)

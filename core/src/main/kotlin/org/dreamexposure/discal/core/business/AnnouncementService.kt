@@ -10,7 +10,6 @@ import org.dreamexposure.discal.AnnouncementCache
 import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
@@ -155,9 +154,8 @@ class AnnouncementService(
                 deleteAnnouncement(announcement.guildId, announcement.id)
                 return
             }
-            val settings = DatabaseManager.getSettings(announcement.guildId).awaitSingle()
 
-            val embed = embedService.determineAnnouncementEmbed(announcement, event, settings)
+            val embed = embedService.determineAnnouncementEmbed(announcement, event)
 
             val message = channel.createMessage(MessageCreateRequest.builder()
                 .content(announcement.subscribers.buildMentions().messageContentSafe())

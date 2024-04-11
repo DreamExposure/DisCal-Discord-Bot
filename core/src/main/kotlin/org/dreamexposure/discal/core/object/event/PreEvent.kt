@@ -2,14 +2,14 @@ package org.dreamexposure.discal.core.`object`.event
 
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.entity.Guild
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.Pre
 import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.entities.spec.create.CreateEventSpec
 import org.dreamexposure.discal.core.entities.spec.update.UpdateEventSpec
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.`object`.Pre
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getEmbedMessage
 import reactor.core.publisher.Mono
 import java.time.Duration
@@ -79,17 +79,17 @@ data class PreEvent private constructor(
         val warnings = mutableListOf<String>()
 
         if (name.isNullOrBlank()) {
-            warnings.add(getEmbedMessage("event", "warning.wizard.noName", settings))
+            warnings.add(getEmbedMessage("event", "warning.wizard.noName", settings.locale))
         }
 
         // Checking end time is not needed
         if (start != null && start!!.isBefore(Instant.now())) {
-            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings))
+            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings.locale))
         }
 
         if (this.start != null && this.end != null) {
             if (Duration.between(start!!, end!!).toDays() > 30) {
-                warnings.add(getEmbedMessage("event", "warning.wizard.veryLong", settings))
+                warnings.add(getEmbedMessage("event", "warning.wizard.veryLong", settings.locale))
             }
 
         }

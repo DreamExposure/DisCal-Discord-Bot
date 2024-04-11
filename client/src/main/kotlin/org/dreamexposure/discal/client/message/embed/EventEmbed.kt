@@ -2,11 +2,11 @@ package org.dreamexposure.discal.client.message.embed
 
 import discord4j.core.`object`.entity.Guild
 import discord4j.core.spec.EmbedCreateSpec
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.`object`.event.PreEvent
 import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.extensions.*
+import org.dreamexposure.discal.core.`object`.event.PreEvent
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 
 object EventEmbed : EmbedMaker {
@@ -82,7 +82,7 @@ object EventEmbed : EmbedMaker {
             false
         ) else builder.addField(
             getMessage("event", "wizard.field.name", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             false
         )
 
@@ -92,7 +92,7 @@ object EventEmbed : EmbedMaker {
             false
         ) else builder.addField(
             getMessage("event", "wizard.field.desc", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             false
         )
 
@@ -102,27 +102,27 @@ object EventEmbed : EmbedMaker {
             false
         ) else builder.addField(
             getMessage("event", "wizard.field.location", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             false
         )
 
         if (event.start != null) builder.addField(
             getMessage("event", "wizard.field.start", settings),
-            event.start!!.humanReadableFull(event.timezone, settings.timeFormat),
+            event.start!!.humanReadableFull(event.timezone, settings.interfaceStyle.timeFormat),
             true
         ) else builder.addField(
             getMessage("event", "wizard.field.start", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             true
         )
 
         if (event.end != null) builder.addField(
             getMessage("event", "wizard.field.end", settings),
-            event.end!!.humanReadableFull(event.timezone, settings.timeFormat),
+            event.end!!.humanReadableFull(event.timezone, settings.interfaceStyle.timeFormat),
             true
         ) else builder.addField(
             getMessage("event", "wizard.field.end", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             true
         )
 
@@ -136,7 +136,7 @@ object EventEmbed : EmbedMaker {
             false,
         ) else builder.addField(
             getMessage("event", "wizard.field.recurrence", settings),
-            getCommonMsg("embed.unset", settings),
+            getCommonMsg("embed.unset", settings.locale),
             true
         )
 

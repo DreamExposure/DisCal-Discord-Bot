@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord
 
 import discord4j.core.event.domain.message.MessageCreateEvent
-import discord4j.core.`object`.entity.Guild
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.User
 import kotlinx.coroutines.reactor.awaitSingle
@@ -9,11 +8,12 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.AnnouncementService
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.extensions.discord4j.getSettings
+import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.springframework.stereotype.Component
 
 @Component
 class BotMentionListener(
+    private val settingsService: GuildSettingsService,
     private val announcementService: AnnouncementService,
     private val calendarService: CalendarService,
     private val embedService: EmbedService,
@@ -23,7 +23,7 @@ class BotMentionListener(
             && !event.message.author.map(User::isBot).orElse(false) // Not from a bot
             && onlyMentionsBot(event.message)
         ) {
-            val settings = event.guild.flatMap(Guild::getSettings).awaitSingle()
+            val settings = settingsService.getSettings(event.guildId.get())
             val announcementCount = announcementService.getAnnouncementCount()
             val calendarCount = calendarService.getCalendarCount()
             val guildCount = event.client.guilds.count().awaitSingle()
