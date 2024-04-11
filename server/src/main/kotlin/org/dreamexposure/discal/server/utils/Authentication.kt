@@ -95,7 +95,7 @@ object Authentication {
                 }
             }
         } else {
-            LOGGER.debug(DEFAULT, "Attempted to use API without auth | ${swe.request.remoteAddress}")
+            LOGGER.debug(DEFAULT, "Attempted to use API without auth | {}", swe.request.remoteAddress)
 
             return Mono.just(AuthenticationState(false)
                     .status(GlobalVal.STATUS_BAD_REQUEST)
