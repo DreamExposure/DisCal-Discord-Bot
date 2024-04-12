@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.commands.dev
 
+import discord4j.common.util.Snowflake
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
@@ -37,7 +38,8 @@ class DevCommand(
     private suspend fun patron(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Snowflake::of)
             .get()
 
         val oldTargetSettings = settingsService.getSettings(guildId)
@@ -51,7 +53,8 @@ class DevCommand(
     private suspend fun dev(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Snowflake::of)
             .get()
 
         val oldTargetSettings = settingsService.getSettings(guildId)
@@ -65,7 +68,8 @@ class DevCommand(
     private suspend fun maxCalendars(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asSnowflake)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Snowflake::of)
             .get()
         val amount = event.options[0].getOption("amount")
             .flatMap(ApplicationCommandInteractionOption::getValue)
