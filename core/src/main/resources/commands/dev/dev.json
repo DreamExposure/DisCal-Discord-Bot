@@ -49,6 +49,19 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "settings",
+      "type": 1,
+      "description": "Allows viewing another guild's settings for debugging",
+      "options": [
+        {
+          "name": "guild",
+          "type": 3,
+          "description": "The ID of the guild to view",
+          "required": true
+        }
+      ]
     }
   ],
   "default_permissions": true
