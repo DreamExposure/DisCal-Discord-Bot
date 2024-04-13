@@ -2,16 +2,18 @@ package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarData
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
+import reactor.core.publisher.Mono
 import java.time.Instant
 import javax.crypto.IllegalBlockSizeException
 
-data class Calendar private constructor(
+data class Calendar(
     val guildId: Snowflake,
     val number: Int,
     val host: CalendarHost,
@@ -23,11 +25,12 @@ data class Calendar private constructor(
     companion object {
         suspend operator fun invoke(data: CalendarData): Calendar {
             val aes = AESEncryption(data.privateKey)
-            val accessToken = if (!data.expiresAt.asInstantMilli().isExpiredTtl()) try {
-                aes.decrypt(data.accessToken).awaitSingle()
-            } catch (ex: IllegalBlockSizeException) {
-                null
-            } else null // No point in trying to decrypt if it's expired
+            val accessToken =
+                if (!data.expiresAt.asInstantMilli().isExpiredTtl()) aes.decrypt(data.accessToken)
+                    .onErrorResume(IllegalBlockSizeException::class.java) {
+                        Mono.empty()
+                    }.awaitSingleOrNull()
+                else null // No point in trying to decrypt if it's expired
 
             return Calendar(
                 guildId = data.guildId.asSnowflake(),
