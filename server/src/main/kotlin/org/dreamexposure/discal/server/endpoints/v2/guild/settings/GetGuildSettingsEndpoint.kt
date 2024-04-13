@@ -47,11 +47,11 @@ class GetGuildSettingsEndpoint(
                     // Convert to deprecated settings for compatibility with legacy website
                     GuildSettings(
                         guildID = it.guildId,
-                        controlRole = it.controlRole,
+                        controlRole = it.controlRole?.asString() ?: "everyone",
                         announcementStyle = AnnouncementStyle.fromValue(it.interfaceStyle.announcementStyle.value),
                         timeFormat = it.interfaceStyle.timeFormat,
                         lang = it.locale.toLanguageTag(),
-                        prefix = it.prefix,
+                        prefix = "!",
                         patronGuild = it.patronGuild,
                         devGuild = it.devGuild,
                         maxCalendars = it.maxCalendars,

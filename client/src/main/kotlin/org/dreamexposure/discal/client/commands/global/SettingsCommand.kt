@@ -56,7 +56,7 @@ class SettingsCommand(
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
             .orElse(settings.guildId)
 
-        val newSettings= settingsService.upsertSettings(settings.copy(controlRole = roleId.asString()))
+        val newSettings= settingsService.upsertSettings(settings.copy(controlRole = roleId))
 
         return event.createFollowup(getMessage("role.success", settings))
             .withEmbeds(embedService.settingsEmbeds(newSettings))

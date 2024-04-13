@@ -5,20 +5,16 @@ import org.dreamexposure.discal.core.database.GuildSettingsData
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asLocale
 import org.dreamexposure.discal.core.extensions.asSnowflake
-import org.dreamexposure.discal.core.extensions.asStringListFromDatabase
 import java.util.*
 
 data class GuildSettings(
     val guildId: Snowflake,
 
-    val controlRole: String = "everyone",
+    val controlRole: Snowflake? = null,
     val patronGuild: Boolean = false,
     val devGuild: Boolean = false,
     val maxCalendars: Int = 1,
-    val dmAnnouncements: Set<Snowflake> = setOf(),
     val locale: Locale = Locale.ENGLISH,
-    @Deprecated("Should be removed since chat commands are no longer used")
-    val prefix: String = "!",
     val eventKeepDuration: Boolean = false,
 
     val interfaceStyle: InterfaceStyle = InterfaceStyle()
@@ -26,13 +22,11 @@ data class GuildSettings(
     constructor(data: GuildSettingsData): this(
         guildId = data.guildId.asSnowflake(),
 
-        controlRole = data.controlRole,
+        controlRole = if (data.controlRole.equals("everyone", true)) null else Snowflake.of(data.controlRole),
         patronGuild = data.patronGuild,
         devGuild = data.devGuild,
         maxCalendars = data.maxCalendars,
-        dmAnnouncements = data.dmAnnouncements.asStringListFromDatabase().map(Snowflake::of).toSet(),
         locale = data.lang.asLocale(),
-        prefix = data.prefix,
         eventKeepDuration = data.eventKeepDuration,
 
         interfaceStyle = InterfaceStyle(

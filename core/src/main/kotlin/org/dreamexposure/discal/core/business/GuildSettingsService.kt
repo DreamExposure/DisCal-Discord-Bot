@@ -39,14 +39,12 @@ class GuildSettingsService(
         val saved = repository.save(GuildSettingsData(
             guildId = settings.guildId.asLong(),
 
-            controlRole = settings.controlRole,
+            controlRole = settings.controlRole?.asString() ?: "everyone",
             timeFormat = settings.interfaceStyle.timeFormat.value,
             patronGuild = settings.patronGuild,
             devGuild = settings.devGuild,
             maxCalendars = settings.maxCalendars,
-            dmAnnouncements = settings.dmAnnouncements.joinToString(",") { it.asString() },
             lang = settings.locale.toLanguageTag(),
-            prefix = settings.prefix,
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
@@ -62,14 +60,12 @@ class GuildSettingsService(
         repository.updateByGuildId(
             guildId = settings.guildId.asLong(),
 
-            controlRole = settings.controlRole,
+            controlRole = settings.controlRole?.asString() ?: "everyone",
             timeFormat = settings.interfaceStyle.timeFormat.value,
             patronGuild = settings.patronGuild,
             devGuild = settings.devGuild,
             maxCalendars = settings.maxCalendars,
-            dmAnnouncements = settings.dmAnnouncements.joinToString(",") { it.asString() },
             lang = settings.locale.toLanguageTag(),
-            prefix = settings.prefix,
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,

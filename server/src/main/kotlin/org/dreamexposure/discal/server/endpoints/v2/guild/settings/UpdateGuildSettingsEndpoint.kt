@@ -45,10 +45,9 @@ class UpdateGuildSettingsEndpoint(
 
             mono { settingsService.getSettings(guildId) }.flatMap { settings ->
                 //Handle various things that are allowed to change
-                val conRole = body.optString("control_role", settings.controlRole)
+                val conRole = body.optString("control_role", settings.controlRole?.asString() ?: "everyone")
                 val aStyle = body.optInt("announcement_style", settings.interfaceStyle.announcementStyle.value)
                 val lang = body.optString("lang", settings.locale.toLanguageTag())
-                val prefix = body.optString("prefix", settings.prefix)
                 val timeFormat = body.optInt("time_format", settings.interfaceStyle.timeFormat.value)
                 var patronGuild = settings.patronGuild
                 var devGuild = settings.devGuild
@@ -64,14 +63,13 @@ class UpdateGuildSettingsEndpoint(
                 }
 
                 val newSettings = settings.copy(
-                    controlRole = conRole,
+                    controlRole = if (conRole.equals("everyone", true)) null else Snowflake.of(conRole),
                     interfaceStyle = settings.interfaceStyle.copy(
                         announcementStyle = GuildSettings.AnnouncementStyle.entries.first { it.value == aStyle },
                         timeFormat = TimeFormat.fromValue(timeFormat),
                         branded = branded,
                     ),
                     locale = Locale.forLanguageTag(lang),
-                    prefix = prefix,
                     patronGuild = patronGuild,
                     devGuild = devGuild,
                     maxCalendars = maxCals,
