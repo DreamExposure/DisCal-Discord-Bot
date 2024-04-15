@@ -50,6 +50,7 @@ allprojects {
     val googleServicesCalendarVersion: String by properties
     val googleOauthClientVersion: String by properties
     // Various libs
+    val okhttpVersion: String by properties
     val copyDownVersion: String by properties
     val jsoupVersion: String by properties
 
@@ -111,6 +112,7 @@ allprojects {
 
         // Various Libs
         implementation("com.squareup.okhttp3:okhttp")
+        implementation("com.squareup.okhttp3:okhttp-coroutines:$okhttpVersion")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
         implementation("org.jsoup:jsoup:$jsoupVersion")
     }
