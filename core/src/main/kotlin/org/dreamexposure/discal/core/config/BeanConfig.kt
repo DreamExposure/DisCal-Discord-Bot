@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import discord4j.common.JacksonResources
-import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener
+import io.micrometer.core.instrument.binder.okhttp3.OkHttpObservationInterceptor
+import io.micrometer.observation.ObservationRegistry
 import okhttp3.OkHttpClient
 import org.dreamexposure.discal.core.serializers.DurationMapper
 import org.dreamexposure.discal.core.serializers.SnowflakeMapper
@@ -33,13 +33,12 @@ class BeanConfig {
     }
 
     @Bean
-    fun httpClient(registry: MeterRegistry): OkHttpClient {
+    fun httpClient(registry: ObservationRegistry): OkHttpClient {
+        val interceptor = OkHttpObservationInterceptor.builder(registry, "okhttp.requests")
+            .build()
+
         return OkHttpClient.Builder()
-            .eventListener(
-                OkHttpMetricsEventListener.builder(registry, "okhttp.requests")
-                    // This does allow for cardinality explosion... unsure how I want to deal with that?
-                    .uriMapper { it.url.encodedPath }
-                    .build()
-            ).build()
+            .addInterceptor(interceptor)
+            .build()
     }
 }
