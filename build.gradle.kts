@@ -102,6 +102,7 @@ allprojects {
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
         implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
         implementation("io.micrometer:micrometer-registry-prometheus")
+        implementation("io.projectreactor:reactor-core-micrometer")
 
         // Google libs
         implementation("com.google.api-client:google-api-client:$googleApiClientVersion")
