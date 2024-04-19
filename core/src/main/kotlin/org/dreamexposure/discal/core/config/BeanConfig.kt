@@ -36,7 +36,7 @@ class BeanConfig {
     fun httpClient(registry: ObservationRegistry): OkHttpClient {
         val interceptor = OkHttpObservationInterceptor.builder(registry, "okhttp.requests")
             // This can lead to tag cardinality explosion as it doesn't use uri patterns, should investigate options for that one day
-            .uriMapper { "${it.method} ${it.url.host}${it.url.encodedPath}" }
+            .uriMapper { it.url.encodedPath }
             .build()
 
         return OkHttpClient.Builder()
