@@ -21,7 +21,7 @@ import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.springframework.stereotype.Component
 
 @Component
-abstract class CamApiWrapper(
+class CamApiWrapper(
     private val httpClient: OkHttpClient,
     private val objectMapper: ObjectMapper,
 ) {
