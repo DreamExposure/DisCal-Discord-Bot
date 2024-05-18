@@ -92,7 +92,7 @@ object GoogleAuthWrapper {
                 }
             }
         }.doOnError {
-            LOGGER.error("GoogleAuth | Failed to get access token from CAM | credentialId:$credentialId")
+            LOGGER.error("GoogleAuth | Failed to get access token from CAM | credentialId:$credentialId", it)
         }.onErrorResume { Mono.empty() }
     }
 
