@@ -1,9 +1,10 @@
-package org.dreamexposure.discal.core.`object`.rest.v1.security
+package org.dreamexposure.discal.core.`object`.new.model.discal.cam
 
 import org.springframework.http.HttpStatus
 
-data class ValidateResponse(
+data class SecurityValidateV1Response(
     val valid: Boolean,
     val code: HttpStatus,
     val message: String,
 )
+

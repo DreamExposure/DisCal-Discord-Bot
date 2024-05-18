@@ -5,20 +5,15 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.HttpStatusCodes
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
-import com.google.api.services.calendar.CalendarScopes
 import discord4j.common.util.Snowflake
-import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
-import okhttp3.Response
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
-import org.dreamexposure.discal.core.exceptions.google.GoogleAuthCancelException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.`object`.google.GoogleAuthPoll
 import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
 import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
@@ -26,7 +21,6 @@ import org.dreamexposure.discal.core.utils.GlobalVal.HTTP_CLIENT
 import org.dreamexposure.discal.core.utils.GlobalVal.JSON_FORMAT
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
-import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
@@ -171,50 +165,4 @@ object GoogleAuthWrapper {
     }
 
     fun randomCredentialId() = Random.nextInt(Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt())
-
-    fun requestDeviceCode(): Mono<Response> {
-        return Mono.fromCallable {
-            val body = FormBody.Builder()
-                    .addEncoded("client_id", Config.SECRET_GOOGLE_CLIENT_ID.getString())
-                    .addEncoded("scope", CalendarScopes.CALENDAR)
-                    .build()
-
-            val request = Request.Builder()
-                    .url("https://accounts.google.com/o/oauth2/device/code")
-                    .post(body)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .build()
-
-            HTTP_CLIENT.newCall(request).execute()
-        }.subscribeOn(Schedulers.boundedElastic())
-    }
-
-    fun requestPollResponse(poll: GoogleAuthPoll): Mono<Response> {
-        return Mono.fromCallable {
-            val body = FormBody.Builder()
-                    .addEncoded("client_id", Config.SECRET_GOOGLE_CLIENT_ID.getString())
-                    .addEncoded("client_secret", Config.SECRET_GOOGLE_CLIENT_SECRET.getString())
-                    .addEncoded("code", poll.deviceCode)
-                    .addEncoded("grant_type", "http://oauth.net/grant_type/device/1.0")
-                    .build()
-
-            val request = Request.Builder()
-                    .url("https://www.googleapis.com/oauth2/v4/token")
-                    .post(body)
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .build()
-
-            HTTP_CLIENT.newCall(request).execute()
-        }.subscribeOn(Schedulers.boundedElastic())
-    }
-
-    fun scheduleOAuthPoll(poll: GoogleAuthPoll): Mono<Void> {
-        poll.remainingSeconds = poll.remainingSeconds - poll.interval
-
-        return poll.callback(poll)
-                .then(Mono.delay(Duration.ofSeconds(poll.interval.toLong())))
-                .repeat()
-                .then()
-                .onErrorResume(GoogleAuthCancelException::class.java) { Mono.empty() }
-    }
 }

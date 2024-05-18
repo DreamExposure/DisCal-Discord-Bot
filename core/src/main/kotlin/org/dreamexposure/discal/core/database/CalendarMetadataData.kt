@@ -3,7 +3,7 @@ package org.dreamexposure.discal.core.database
 import org.springframework.data.relational.core.mapping.Table
 
 @Table("calendars")
-data class CalendarData(
+data class CalendarMetadataData(
     val guildId: Long,
     val calendarNumber: Int,
     val host: String,

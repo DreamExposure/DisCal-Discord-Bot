@@ -5,14 +5,16 @@ import org.springframework.data.r2dbc.repository.R2dbcRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
-interface CalendarRepository : R2dbcRepository<CalendarData, Long> {
+interface CalendarMetadataRepository : R2dbcRepository<CalendarMetadataData, Long> {
 
     @Query("SELECT COUNT(*) FROM calendars")
     fun countAll(): Mono<Long>
 
-    fun findAllByGuildId(guildId: Long): Flux<CalendarData>
+    fun countAllByGuildId(guildId: Long): Mono<Long>
 
-    fun findByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<CalendarData>
+    fun findAllByGuildId(guildId: Long): Flux<CalendarMetadataData>
+
+    fun findByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<CalendarMetadataData>
 
     @Query("""
         UPDATE calendars

@@ -45,7 +45,7 @@ class CacheConfig {
     @Bean
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
-    fun calendarRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarCache =
+    fun calendarMetadataRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarMetadataCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "Calendars", calendarTtl)
 
     @Bean
@@ -84,7 +84,7 @@ class CacheConfig {
     fun oauthStateFallbackCache(): OauthStateCache = JdkCacheRepository(oauthStateTtl)
 
     @Bean
-    fun calendarFallbackCache(): CalendarCache = JdkCacheRepository(calendarTtl)
+    fun calendarMetadataFallbackCache(): CalendarMetadataCache = JdkCacheRepository(calendarTtl)
 
     @Bean
     fun rsvpFallbackCache(): RsvpCache = JdkCacheRepository(rsvpTtl)

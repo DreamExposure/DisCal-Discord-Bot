@@ -4,44 +4,47 @@ import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
-import org.dreamexposure.discal.CalendarCache
+import org.dreamexposure.discal.CalendarMetadataCache
 import org.dreamexposure.discal.core.crypto.AESEncryption
-import org.dreamexposure.discal.core.database.CalendarRepository
-import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.`object`.new.Calendar
+import org.dreamexposure.discal.core.database.CalendarMetadataRepository
+import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
 import org.springframework.stereotype.Component
 
 @Component
 class CalendarService(
-    private val calendarRepository: CalendarRepository,
-    private val calendarCache: CalendarCache,
+    private val calendarMetadataRepository: CalendarMetadataRepository,
+    private val calendarMetadataCache: CalendarMetadataCache,
     private val settingsService: GuildSettingsService,
 ) {
-    suspend fun getCalendarCount(): Long = calendarRepository.countAll().awaitSingle()
+    suspend fun getCalendarCount(): Long = calendarMetadataRepository.countAll().awaitSingle()
 
-    suspend fun getAllCalendars(guildId: Snowflake): List<Calendar> {
-        var calendars = calendarCache.get(key = guildId)?.toList()
+    suspend fun getCalendarCount(guildId: Snowflake) = calendarMetadataRepository.countAllByGuildId(guildId.asLong()).awaitSingle()
+
+    // TODO: Exposing CalendarMetadata directly should not be done once a higher abstraction has been implemented
+    suspend fun getAllCalendarMetadata(guildId: Snowflake): List<CalendarMetadata> {
+        var calendars = calendarMetadataCache.get(key = guildId)?.toList()
         if (calendars != null) return calendars
 
-        calendars = calendarRepository.findAllByGuildId(guildId.asLong())
-            .flatMap { mono { Calendar(it) } }
+        calendars = calendarMetadataRepository.findAllByGuildId(guildId.asLong())
+            .flatMap { mono { CalendarMetadata(it) } }
             .collectList()
             .awaitSingle()
 
-        calendarCache.put(key = guildId, value = calendars.toTypedArray())
+        calendarMetadataCache.put(key = guildId, value = calendars.toTypedArray())
         return calendars
     }
 
-    suspend fun getCalendar(guildId: Snowflake, number: Int): Calendar? {
-        return getAllCalendars(guildId).firstOrNull { it.number == number }
+    suspend fun getCalendarMetadata(guildId: Snowflake, number: Int): CalendarMetadata? {
+        return getAllCalendarMetadata(guildId).firstOrNull { it.number == number }
     }
 
-    suspend fun updateCalendar(calendar: Calendar) {
+    // TODO: This should be privated once a higher abstraction has been implemented
+    suspend fun updateCalendarMetadata(calendar: CalendarMetadata) {
         val aes = AESEncryption(calendar.secrets.privateKey)
         val encryptedRefreshToken = aes.encrypt(calendar.secrets.refreshToken).awaitSingle()
         val encryptedAccessToken = aes.encrypt(calendar.secrets.accessToken).awaitSingle()
 
-        calendarRepository.updateCalendarByGuildIdAndCalendarNumber(
+        calendarMetadataRepository.updateCalendarByGuildIdAndCalendarNumber(
             guildId = calendar.guildId.asLong(),
             calendarNumber = calendar.number,
             host = calendar.host.name,
@@ -55,18 +58,17 @@ class CalendarService(
             expiresAt = calendar.secrets.expiresAt.toEpochMilli(),
         ).awaitSingleOrNull()
 
-        val cached = calendarCache.get(key = calendar.guildId)
+        val cached = calendarMetadataCache.get(key = calendar.guildId)
         if (cached != null) {
             val newList = cached.toMutableList()
             newList.removeIf { it.number == calendar.number }
-            calendarCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
+            calendarMetadataCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
         }
     }
 
     suspend fun canAddNewCalendar(guildId: Snowflake): Boolean {
-        // For compatibility with legacy system
-        val calCount = DatabaseManager.getCalendarCount(guildId).awaitSingle()
-        if (calCount == 0) return true
+        val calCount = getCalendarCount(guildId)
+        if (calCount == 0L) return true
 
         val settings = settingsService.getSettings(guildId)
         return calCount < settings.maxCalendars

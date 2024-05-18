@@ -4,8 +4,7 @@ import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.crypto.AESEncryption
-import org.dreamexposure.discal.core.database.CalendarData
-import org.dreamexposure.discal.core.enums.calendar.CalendarHost
+import org.dreamexposure.discal.core.database.CalendarMetadataData
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
@@ -13,17 +12,17 @@ import reactor.core.publisher.Mono
 import java.time.Instant
 import javax.crypto.IllegalBlockSizeException
 
-data class Calendar(
+data class CalendarMetadata(
     val guildId: Snowflake,
     val number: Int,
-    val host: CalendarHost,
+    val host: Host,
     val id: String,
     val address: String,
     val external: Boolean,
     val secrets: Secrets,
 ) {
     companion object {
-        suspend operator fun invoke(data: CalendarData): Calendar {
+        suspend operator fun invoke(data: CalendarMetadataData): CalendarMetadata {
             val aes = AESEncryption(data.privateKey)
             val accessToken =
                 if (!data.expiresAt.asInstantMilli().isExpiredTtl()) aes.decrypt(data.accessToken)
@@ -32,10 +31,10 @@ data class Calendar(
                     }.awaitSingleOrNull()
                 else null // No point in trying to decrypt if it's expired
 
-            return Calendar(
+            return CalendarMetadata(
                 guildId = data.guildId.asSnowflake(),
                 number = data.calendarNumber,
-                host = CalendarHost.valueOf(data.host),
+                host = Host.valueOf(data.host),
                 id = data.calendarId,
                 address = data.calendarAddress,
                 external = data.external,
@@ -50,6 +49,9 @@ data class Calendar(
         }
     }
 
+    ////////////////////////////
+    ////// Nested classes //////
+    ////////////////////////////
     data class Secrets(
         val credentialId: Int,
         val privateKey: String,
@@ -57,4 +59,8 @@ data class Calendar(
         var refreshToken: String,
         var accessToken: String,
     )
+
+    enum class Host {
+        GOOGLE,
+    }
 }
