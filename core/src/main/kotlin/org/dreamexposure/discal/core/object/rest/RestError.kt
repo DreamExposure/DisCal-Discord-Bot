@@ -24,7 +24,7 @@ enum class RestError(
 
     companion object {
         fun fromCode(code: Int): RestError {
-            return values().firstOrNull { it.code == code } ?: INTERNAL_SERVER_ERROR
+            return entries.firstOrNull { it.code == code } ?: INTERNAL_SERVER_ERROR
         }
     }
 }
@@ -33,6 +33,7 @@ enum class RestError(
 data class RestErrorData(
         val code: Int,
         val message: String,
+    val error: String,
 )
 
 class RestErrorSerializer: KSerializer<RestError> {
@@ -40,7 +41,7 @@ class RestErrorSerializer: KSerializer<RestError> {
     override val descriptor: SerialDescriptor = SerialDescriptor("RestError", delegateSerializer.descriptor)
 
     override fun serialize(encoder: Encoder, value: RestError) {
-        val data = RestErrorData(value.code, value.message)
+        val data = RestErrorData(value.code, value.message, value.message)
         encoder.encodeSerializableValue(delegateSerializer, data)
     }
 
