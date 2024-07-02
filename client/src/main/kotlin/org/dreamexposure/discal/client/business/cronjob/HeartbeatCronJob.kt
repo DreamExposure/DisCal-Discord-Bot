@@ -15,6 +15,7 @@ import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
 import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
@@ -33,27 +34,31 @@ class HeartbeatCronJob(
     override fun run(args: ApplicationArguments?) {
         Flux.interval(Config.HEARTBEAT_INTERVAL.getLong().asSeconds())
             .flatMap { heartbeat() }
-            .doOnError {  LOGGER.error(GlobalVal.DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
+            .doOnError {  LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
             .onErrorResume { Mono.empty() }
             .subscribe()
     }
 
     private fun heartbeat() = mono {
-        val data = BotInstanceData.load(discordClient).awaitSingle()
+        try {
+            val data = BotInstanceData.load(discordClient).awaitSingle()
 
-        val requestBody = HeartbeatRequest(HeartbeatType.BOT, botInstanceData = data)
-        val request = Request.Builder()
-            .url("$apiUrl/v3/status/heartbeat")
-            .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
-            .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
-            .header("Content-Type", "application/json")
-            .build()
+            val requestBody = HeartbeatRequest(HeartbeatType.BOT, botInstanceData = data)
+            val request = Request.Builder()
+                .url("$apiUrl/v3/status/heartbeat")
+                .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
+                .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
+                .header("Content-Type", "application/json")
+                .build()
 
-        Mono.fromCallable(httpClient.newCall(request)::execute)
-            .map(Response::close)
-            .subscribeOn(Schedulers.boundedElastic())
-            .doOnError { LOGGER.error(GlobalVal.DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
-            .onErrorResume { Mono.empty() }
-            .subscribe()
+            Mono.fromCallable(httpClient.newCall(request)::execute)
+                .map(Response::close)
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnError { LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
+                .onErrorResume { Mono.empty() }
+                .subscribe()
+        } catch (ex: Exception) {
+            LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", ex)
+        }
     }
 }
