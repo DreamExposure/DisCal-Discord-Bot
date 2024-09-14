@@ -138,6 +138,8 @@ allprojects {
 subprojects {
     tasks {
         withType<KotlinCompile> {
+            @Suppress("DEPRECATION")
+            // FIXME: This is marked as deprecated but the related link does not seem to work, and no quick fix is available
             kotlinOptions {
                 freeCompilerArgs = listOf("-Xjsr305=strict")
                 jvmTarget = java.targetCompatibility.majorVersion
@@ -149,7 +151,7 @@ subprojects {
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "8.2.1"
+        gradleVersion = "8.10.1"
     }
 
     bootJar {
