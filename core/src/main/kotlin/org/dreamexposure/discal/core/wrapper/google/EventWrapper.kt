@@ -5,14 +5,15 @@ import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
 import org.apache.http.HttpStatus
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import java.util.function.Predicate
 
+@Deprecated("Use new GoogleCalendarApiWrapper component")
 object EventWrapper {
     fun createEvent(calData: CalendarData, event: Event): Mono<Event> {
         return GoogleAuthWrapper.getCalendarService(calData).flatMap { service ->

@@ -2,7 +2,7 @@ package org.dreamexposure.discal.cam.business.google
 
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.CredentialService
-import org.dreamexposure.discal.core.business.api.GoogleCalendarApiWrapper
+import org.dreamexposure.discal.core.business.api.GoogleAuthApiWrapper
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
@@ -17,14 +17,14 @@ import java.time.Instant
 class GoogleAuthService(
     private val credentialService: CredentialService,
     private val calendarService: CalendarService,
-    private val googleCalendarApiWrapper: GoogleCalendarApiWrapper,
+    private val googleAuthApiWrapper: GoogleAuthApiWrapper,
 ) {
     suspend fun requestNewAccessToken(calendar: CalendarMetadata): TokenV1Model? {
         if (!calendar.secrets.expiresAt.isExpiredTtl()) return TokenV1Model(calendar.secrets.accessToken, calendar.secrets.expiresAt)
 
         LOGGER.debug("Refreshing access token | guildId:{} | calendar:{}", calendar.guildId, calendar.number)
 
-        val refreshed = googleCalendarApiWrapper.refreshAccessToken(calendar.secrets.refreshToken).entity ?: return null
+        val refreshed = googleAuthApiWrapper.refreshAccessToken(calendar.secrets.refreshToken).entity ?: return null
         calendar.secrets.accessToken = refreshed.accessToken
         calendar.secrets.expiresAt = Instant.now().plusSeconds(refreshed.expiresIn.toLong()).minus(Duration.ofMinutes(5)) // Add some wiggle room
         calendarService.updateCalendarMetadata(calendar)
@@ -40,7 +40,7 @@ class GoogleAuthService(
 
         LOGGER.debug("Refreshing access token | credentialId:$credentialId")
 
-        val refreshed = googleCalendarApiWrapper.refreshAccessToken(credential.refreshToken).entity ?: throw EmptyNotAllowedException()
+        val refreshed = googleAuthApiWrapper.refreshAccessToken(credential.refreshToken).entity ?: throw EmptyNotAllowedException()
         credential.accessToken = refreshed.accessToken
         credential.expiresAt = Instant.now().plusSeconds(refreshed.expiresIn.toLong()).minus(Duration.ofMinutes(5)) // Add some wiggle room
         credentialService.updateCredential(credential)

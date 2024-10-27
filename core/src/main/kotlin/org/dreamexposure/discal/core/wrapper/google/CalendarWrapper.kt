@@ -3,12 +3,13 @@ package org.dreamexposure.discal.core.wrapper.google
 import com.google.api.services.calendar.model.Calendar
 import com.google.api.services.calendar.model.CalendarListEntry
 import discord4j.common.util.Snowflake
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.utils.GlobalVal
 import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 
+@Deprecated("User new GoogleCalendarApiWrapper component")
 object CalendarWrapper {
     fun createCalendar(calendar: Calendar, credId: Int, guildId: Snowflake): Mono<Calendar> {
         return GoogleAuthWrapper.getCalendarService(credId).flatMap { service ->

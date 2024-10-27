@@ -21,6 +21,7 @@ class CacheConfig {
     private val staticMessageTtl = Config.CACHE_TTL_STATIC_MESSAGE_MINUTES.getLong().asMinutes()
     private val announcementTll = Config.CACHE_TTL_ANNOUNCEMENT_MINUTES.getLong().asMinutes()
     private val wizardTtl = Config.TIMING_WIZARD_TIMEOUT_MINUTES.getLong().asMinutes()
+    private val calendarTokenTtl = Config.CACHE_TTL_CALENDAR_TOKEN_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -97,4 +98,7 @@ class CacheConfig {
 
     @Bean
     fun announcementWizardFallbackCache(): AnnouncementWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun calendarTokenFallbackCache(): CalendarTokenCache = JdkCacheRepository(calendarTokenTtl)
 }

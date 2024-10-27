@@ -6,7 +6,7 @@ import org.dreamexposure.discal.core.serializers.InstantAsStringSerializer
 import java.time.Instant
 
 @Serializable
-@Deprecated("Really shouldn't need this after the auth wrapper has been redone")
+@Deprecated("Really shouldn't need this after the auth wrapper has been redone, replaced with the TokenV1Model")
 data class CredentialData(
         @SerialName("access_token")
         val accessToken: String,

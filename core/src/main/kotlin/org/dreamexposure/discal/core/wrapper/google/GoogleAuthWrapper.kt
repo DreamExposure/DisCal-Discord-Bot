@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.random.Random
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
+@Deprecated("Use GoogleCalendarApiWrapper")
 object GoogleAuthWrapper {
     private val discalTokens: MutableMap<Int, CredentialData> = ConcurrentHashMap()
     private val externalTokens: MutableMap<Snowflake, CredentialData> = ConcurrentHashMap()
