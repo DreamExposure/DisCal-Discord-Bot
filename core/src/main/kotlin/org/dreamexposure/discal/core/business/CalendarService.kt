@@ -4,9 +4,11 @@ import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
+import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.CalendarMetadataCache
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarMetadataRepository
+import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
 import org.springframework.stereotype.Component
 
@@ -14,12 +16,20 @@ import org.springframework.stereotype.Component
 class CalendarService(
     private val calendarMetadataRepository: CalendarMetadataRepository,
     private val calendarMetadataCache: CalendarMetadataCache,
+    private val calendarProviders: List<CalendarProvider>,
+    private val calendarCache: CalendarCache,
     private val settingsService: GuildSettingsService,
 ) {
+    /////////
+    /// Calendar count
+    /////////
     suspend fun getCalendarCount(): Long = calendarMetadataRepository.countAll().awaitSingle()
 
     suspend fun getCalendarCount(guildId: Snowflake) = calendarMetadataRepository.countAllByGuildId(guildId.asLong()).awaitSingle()
 
+    /////////
+    /// Calendar metadata
+    /////////
     // TODO: Exposing CalendarMetadata directly should not be done once a higher abstraction has been implemented
     suspend fun getAllCalendarMetadata(guildId: Snowflake): List<CalendarMetadata> {
         var calendars = calendarMetadataCache.get(key = guildId)?.toList()
@@ -66,6 +76,30 @@ class CalendarService(
         }
     }
 
+    /////////
+    /// Calendar
+    /////////
+    suspend fun getCalendar(guildId: Snowflake, number: Int): Calendar? {
+        var calendar = calendarCache.get(guildId, number)
+        if (calendar != null) return calendar
+
+        // TODO: Is this how I want to handle that actually???
+        val metadata = getCalendarMetadata(guildId, number) ?: return null
+
+        calendar = calendarProviders
+            .firstOrNull { it.host == metadata.host }
+            ?.getCalendar(metadata)
+        if (calendar != null) calendarCache.put(guildId, number, calendar)
+
+        return calendar
+    }
+
+    // TODO: Implement rest of required CRUD functions
+
+
+    /////////
+    /// Extra functions
+    /////////
     suspend fun canAddNewCalendar(guildId: Snowflake): Boolean {
         val calCount = getCalendarCount(guildId)
         if (calCount == 0L) return true
