@@ -2,7 +2,7 @@ package org.dreamexposure.discal.cam.business.google
 
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.CredentialService
-import org.dreamexposure.discal.core.business.api.GoogleAuthApiWrapper
+import org.dreamexposure.discal.core.business.google.GoogleAuthApiWrapper
 import org.dreamexposure.discal.core.exceptions.EmptyNotAllowedException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.extensions.isExpiredTtl

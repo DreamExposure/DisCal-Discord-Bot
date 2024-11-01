@@ -1,7 +1,8 @@
-package org.dreamexposure.discal.core.business.api
+package org.dreamexposure.discal.core.business.google
 
 import okhttp3.FormBody
 import okhttp3.Request
+import org.dreamexposure.discal.core.business.api.ApiWrapperClient
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.logger.LOGGER

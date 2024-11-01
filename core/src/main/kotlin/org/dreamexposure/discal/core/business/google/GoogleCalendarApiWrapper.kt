@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.business.api
+package org.dreamexposure.discal.core.business.google
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
@@ -11,6 +11,7 @@ import com.google.api.services.calendar.model.CalendarListEntry
 import com.google.api.services.calendar.model.Event
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.CalendarTokenCache
+import org.dreamexposure.discal.core.business.api.CamApiWrapper
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.extensions.asSnowflake
