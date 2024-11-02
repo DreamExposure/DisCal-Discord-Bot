@@ -18,6 +18,8 @@ import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
+import org.dreamexposure.discal.core.`object`.new.model.ResponseModel
+import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -92,83 +94,87 @@ class GoogleCalendarApiWrapper(
     /////////
     /// ACL Rule
     /////////
-    suspend fun insertAclRule(rule: AclRule, calMetadata: CalendarMetadata): AclRule? {
+    suspend fun insertAclRule(rule: AclRule, calMetadata: CalendarMetadata): ResponseModel<AclRule> {
         val service = getGoogleCalendarService(calMetadata)
 
         return try {
-            service.acl()
+            val aclRule = service.acl()
                 .insert(calMetadata.id, rule)
                 .setQuotaUser(calMetadata.guildId.asString())
                 .execute() //TODO: Figure out if I should put this on a different scheduler?
+            ResponseModel(aclRule)
         } catch (e: Exception) {
-            // I think I'm okay with preventing this exception from propagating?
             LOGGER.error("Failed to insert ACL rule for Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to insert ACL rule for Google Calendar", e), 600)
         }
     }
 
     /////////
     /// Calendars
     /////////
-    suspend fun createCalendar(calendar: Calendar, credentialId: Int, guildId: Snowflake): Calendar? {
+    suspend fun createCalendar(calendar: Calendar, credentialId: Int, guildId: Snowflake): ResponseModel<Calendar> {
         val service = getGoogleCalendarService(credentialId)
 
         return try {
-            service.calendars()
+            val calendar = service.calendars()
                 .insert(calendar)
                 .setQuotaUser(guildId.asString())
                 .execute()
+            ResponseModel(calendar)
         } catch (e: Exception) {
             LOGGER.error("Failed to create calendar for Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to create calendar for Google Calendar", e), 600)
         }
     }
 
-    suspend fun patchCalendar(calendar: Calendar, metadata: CalendarMetadata): Calendar? {
+    suspend fun patchCalendar(calendar: Calendar, metadata: CalendarMetadata): ResponseModel<Calendar> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.calendars()
+            val calendar = service.calendars()
                 .patch(calendar.id, calendar)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(calendar)
         } catch (e: Exception) {
             LOGGER.error("Failed to patch calendar for Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to patch calendar for Google Calendar", e), 600)
         }
     }
 
-    suspend fun updateCalendar(calendar: Calendar, metadata: CalendarMetadata): Calendar? {
+    suspend fun updateCalendar(calendar: Calendar, metadata: CalendarMetadata): ResponseModel<Calendar> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.calendars()
+            val calendar = service.calendars()
                 .patch(calendar.id, calendar)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(calendar)
         } catch (e: Exception){
             LOGGER.error("Failed to update calendar for Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to update calendar for Google Calendar", e), 600)
         }
     }
 
-    suspend fun getCalendar(metadata: CalendarMetadata): Calendar? {
+    suspend fun getCalendar(metadata: CalendarMetadata): ResponseModel<Calendar> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.calendars()
+            val calendar= service.calendars()
                 .get(metadata.address)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(calendar)
         } catch (e: Exception) {
             LOGGER.error("Failed to get calendar from Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to get calendar from Google Calendar", e), 600)
         }
     }
 
-    suspend fun deleteCalendar(metadata: CalendarMetadata): Boolean {
+    suspend fun deleteCalendar(metadata: CalendarMetadata): ResponseModel<Boolean> {
         // Sanity check if calendar can be deleted
-        if (metadata.external || metadata.address.equals("primary", true)) return false
+        if (metadata.external || metadata.address.equals("primary", true)) return ResponseModel(false)
 
         val service = getGoogleCalendarService(metadata)
 
@@ -177,75 +183,78 @@ class GoogleCalendarApiWrapper(
                 .delete(metadata.address)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
-            true
+            ResponseModel(true)
         } catch (e: Exception) {
             LOGGER.error("Failed to delete calendar from Google Calendar", e)
-            false
+            ResponseModel(600, false, ErrorResponse("Failed to delete calendar from Google Calendar", e))
         }
     }
 
-    suspend fun getUsersExternalCalendars(metadata: CalendarMetadata): List<CalendarListEntry> {
+    suspend fun getUsersExternalCalendars(metadata: CalendarMetadata): ResponseModel<List<CalendarListEntry>> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.calendarList()
+            val calendarList = service.calendarList()
                 .list()
                 .setMinAccessRole("writer")
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
-                .items
+            ResponseModel(calendarList.items)
         } catch (e: Exception) {
             LOGGER.error("Failed to list external calendars", e)
-            emptyList()
+            ResponseModel(600, emptyList(), ErrorResponse("Failed to list external calendars", e))
         }
     }
 
     /////////
     /// Events
     /////////
-    suspend fun createEvent(metadata: CalendarMetadata, event: Event): Event? {
+    suspend fun createEvent(metadata: CalendarMetadata, event: Event): ResponseModel<Event> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val event = service.events()
                 .insert(metadata.id, event)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(event)
         } catch (e: Exception) {
             LOGGER.error("Failed to create event on Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to create event on Google Calendar", e), 600)
         }
     }
 
-    suspend fun patchEvent(metadata: CalendarMetadata, event: Event): Event? {
+    suspend fun patchEvent(metadata: CalendarMetadata, event: Event): ResponseModel<Event> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val event = service.events()
                 .patch(metadata.id, event.id, event)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(event)
         } catch (e: Exception) {
             LOGGER.error("Failed to patch event on Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to patch event on Google Calendar", e), 600)
         }
     }
 
-    suspend fun updateEvent(metadata: CalendarMetadata, event: Event): Event? {
+    suspend fun updateEvent(metadata: CalendarMetadata, event: Event): ResponseModel<Event> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val event = service.events()
                 .update(metadata.id, event.id, event)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
+            ResponseModel(event)
         } catch (e: Exception) {
             LOGGER.error("Failed to update event on Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to update event on Google Calendar", e), 600)
         }
     }
 
-    suspend fun getEvent(metadata: CalendarMetadata, id: String): Event? {
+    suspend fun getEvent(metadata: CalendarMetadata, id: String): ResponseModel<Event> {
         val service = getGoogleCalendarService(metadata)
 
         // This whole block can probably be shortened once old impl behavior is moved to a higher abstraction layer
@@ -256,35 +265,35 @@ class GoogleCalendarApiWrapper(
                 .execute()
 
             // TODO: Old impl deleted related announcements here, this should be moved higher in the impl imho
-            if (event.status.equals("cancelled", true)) null
-            else event
+            if (event.status.equals("cancelled", true)) ResponseModel(200, null, null)
+            else ResponseModel(event)
         } catch (e: GoogleJsonResponseException) {
             when (HttpStatus.valueOf(e.statusCode)) {
                 HttpStatus.GONE -> {
                     // Event is gone. Sometimes Google will return this if the event is deleted
                     // TODO: Old impl also deleted related announcements here
-                    null
+                    ResponseModel(404, null, ErrorResponse("Event Deleted"))
                 }
                 HttpStatus.NOT_FOUND -> {
                     // Event not found. Was this ever an event?
                     // TODO: Old impl deleting announcements again
-                    null
+                    ResponseModel(404, null, ErrorResponse("Event Not Found"))
                 } else -> {
                     LOGGER.error("Failed to get event on Google Calendar w/ GoogleResponseException", e)
-                    null
+                ResponseModel(ErrorResponse("Failed to get event on Google Calendar w/ GoogleResponseException", e), e.statusCode)
                 }
             }
         } catch (e: Exception) {
             LOGGER.error("Failed to get event from Google Calendar", e)
-            null
+            ResponseModel(ErrorResponse("Failed to get event from Google Calendar", e), 600)
         }
     }
 
-    suspend fun getEvents(metadata: CalendarMetadata, amount: Int, start: Instant): List<Event> {
+    suspend fun getEvents(metadata: CalendarMetadata, amount: Int, start: Instant): ResponseModel<List<Event>> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val events = service.events()
                 .list(metadata.id)
                 .setMaxResults(amount)
                 .setTimeMin(DateTime(start.toEpochMilli()))
@@ -293,18 +302,18 @@ class GoogleCalendarApiWrapper(
                 .setShowDeleted(false)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
-                .items
+            ResponseModel(events.items)
         } catch (e: Exception) {
             LOGGER.error("Failed to get events from Google Calendar by start date (variant 1)", e)
-            emptyList()
+            ResponseModel(600, emptyList(), ErrorResponse("Failed to get events from Google Calendar", e))
         }
     }
 
-    suspend fun getEvents(metadata: CalendarMetadata, amount: Int, start: Instant, end: Instant): List<Event> {
+    suspend fun getEvents(metadata: CalendarMetadata, amount: Int, start: Instant, end: Instant): ResponseModel<List<Event>> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val events = service.events()
                 .list(metadata.id)
                 .setMaxResults(amount)
                 .setTimeMin(DateTime(start.toEpochMilli()))
@@ -314,18 +323,18 @@ class GoogleCalendarApiWrapper(
                 .setShowDeleted(false)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
-                .items
+            ResponseModel(events.items)
         } catch (e: Exception) {
             LOGGER.error("Failed to get events from Google Calendar by start and end date (variant 2)", e)
-            emptyList()
+            ResponseModel(600, emptyList(), ErrorResponse("Failed to get events from Google Calendar", e))
         }
     }
 
-    suspend fun getEvents(metadata: CalendarMetadata, start: Instant, end: Instant): List<Event> {
+    suspend fun getEvents(metadata: CalendarMetadata, start: Instant, end: Instant): ResponseModel<List<Event>> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
-            service.events()
+            val events = service.events()
                 .list(metadata.id)
                 .setTimeMin(DateTime(start.toEpochMilli()))
                 .setTimeMax(DateTime(end.toEpochMilli()))
@@ -334,14 +343,14 @@ class GoogleCalendarApiWrapper(
                 .setShowDeleted(false)
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
-                .items
+            ResponseModel(events.items)
         } catch (e: Exception) {
             LOGGER.error("Failed to get events from Google Calendar by start and end date without amount (variant 3)", e)
-            emptyList()
+            ResponseModel(600, emptyList(), ErrorResponse("Failed to get events from Google Calendar", e))
         }
     }
 
-    suspend fun deleteEvent(metadata: CalendarMetadata, id: String): Boolean {
+    suspend fun deleteEvent(metadata: CalendarMetadata, id: String): ResponseModel<Boolean> {
         val service = getGoogleCalendarService(metadata)
 
         return try {
@@ -353,22 +362,22 @@ class GoogleCalendarApiWrapper(
             //Google sends 4 possible status codes, 200, 204, 404, 410.
             // First 2 should be treated as successful, and the other 2 as not found.
             when (response.statusCode) {
-                200, 204 -> true
-                404, 410 -> false
+                200, 204 -> ResponseModel(true)
+                404, 410 -> ResponseModel(false)
                 else -> {
                     //Log response data and return false as google sent an unexpected response code.
-                    LOGGER.debug("Failed to delete event from Google Calendar w/ unknown response | ${response.statusCode} | ${response.statusMessage}")
-                    false
+                    LOGGER.error("Failed to delete event from Google Calendar w/ unknown response | ${response.statusCode} | ${response.statusMessage}")
+                    ResponseModel(response.statusCode, false, ErrorResponse(response.statusMessage))
                 }
             }
         } catch (e: GoogleJsonResponseException) {
            if (e.statusCode != 410 || e.statusCode != 404) {
                LOGGER.error("Failed to delete event from Google Calendar", e)
-               false
-           } else true
+               ResponseModel(e.statusCode, false, ErrorResponse(e.statusMessage, e))
+           } else ResponseModel(true)
         } catch (e: Exception) {
             LOGGER.error("Failed to delete event from Google Calendar w/ unknown error", e)
-            false
+            ResponseModel(600, false, ErrorResponse("Failed to delete event from Google Calendar", e))
         }
     }
 
