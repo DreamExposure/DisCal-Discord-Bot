@@ -23,7 +23,6 @@ import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import java.time.Instant
-import kotlin.random.Random
 import com.google.api.services.calendar.Calendar as GoogleCalendarService
 
 
@@ -380,10 +379,4 @@ class GoogleCalendarApiWrapper(
             ResponseModel(600, false, ErrorResponse("Failed to delete event from Google Calendar", e))
         }
     }
-
-    /////////
-    /// Misc/Utility
-    /////////
-    // TODO: Should I consider placing this somewhere else more sensible???
-    fun randomCredentialId() = Random.nextInt(Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt())
 }
