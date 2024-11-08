@@ -204,4 +204,10 @@ class RsvpService(
             .forEach { rsvpCache.put(guildId, it.eventId, it) }
     }
 
+    suspend fun deleteRsvpForCalendarDeletion(guildId: Snowflake, calendarNumber: Int) {
+        rsvpRepository.deleteAllByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        rsvpRepository.decrementCalendarsByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        rsvpCache.evictAll(guildId)
+    }
+
 }

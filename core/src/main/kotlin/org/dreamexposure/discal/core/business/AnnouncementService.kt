@@ -141,6 +141,12 @@ class AnnouncementService(
         }
     }
 
+    suspend fun deleteAnnouncementsForCalendarDeletion(guildId: Snowflake, calendarNumber: Int) {
+        announcementRepository.deleteAllByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        announcementRepository.decrementCalendarsByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        announcementCache.evict(key = guildId)
+    }
+
     suspend fun sendAnnouncement(announcement: Announcement, event: Event) {
         try {
             val channel = discordClient.getChannelById(announcement.channelId)

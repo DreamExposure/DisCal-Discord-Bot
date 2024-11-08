@@ -42,4 +42,13 @@ interface CalendarMetadataRepository : R2dbcRepository<CalendarMetadataData, Lon
         refreshToken: String,
         expiresAt: Long,
     ): Mono<Int>
+
+    fun deleteAllByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Void>
+
+    @Query("""
+        UPDATE calendars
+        SET calendar_number = calendar_number - 1
+        WHERE calendar_number >= :calendarNumber AND guild_id = :guildId
+    """)
+    fun decrementCalendarsByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Long>
 }

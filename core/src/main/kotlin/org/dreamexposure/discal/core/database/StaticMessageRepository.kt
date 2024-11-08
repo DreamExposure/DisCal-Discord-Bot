@@ -45,5 +45,14 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
         calendarNumber: Int,
     ): Mono<Int>
 
-    fun deleteByGuildIdAndMessageId(guildId: Long, messageId: Long): Mono<Void>
+    fun deleteAllByGuildIdAndMessageId(guildId: Long, messageId: Long): Mono<Void>
+
+    fun deleteByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Void>
+
+    @Query("""
+        UPDATE static_messages
+        SET calendar_number = calendar_number - 1
+        WHERE calendar_number >= :calendarNumber AND guild_id = :guildId
+    """)
+    fun decrementCalendarsByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Long>
 }

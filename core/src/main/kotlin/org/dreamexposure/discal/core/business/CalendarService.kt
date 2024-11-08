@@ -21,6 +21,9 @@ class CalendarService(
     private val calendarProviders: List<CalendarProvider>,
     private val calendarCache: CalendarCache,
     private val settingsService: GuildSettingsService,
+    private val staticMessageService: StaticMessageService,
+    private val rsvpService: RsvpService,
+    private val announcementService: AnnouncementService,
 ) {
     /////////
     /// Calendar count
@@ -111,7 +114,6 @@ class CalendarService(
         var calendar = calendarCache.get(guildId, number)
         if (calendar != null) return calendar
 
-        // TODO: Is this how I want to handle that actually???
         val metadata = getCalendarMetadata(guildId, number) ?: return null
 
         calendar = calendarProviders
@@ -147,16 +149,29 @@ class CalendarService(
     suspend fun deleteCalendar(guildId: Snowflake, number: Int) {
         val metadata = getCalendarMetadata(guildId, number) ?: return
 
+        // Delete from 3rd party locations
         calendarProviders.first { it.host == metadata.host }.deleteCalendar(guildId, metadata)
-        calendarCache.evict(guildId, metadata.number)
-        val cached = calendarMetadataCache.get(key = guildId)
-        if (cached != null) {
-            val newList = cached.toMutableList()
-            newList.removeIf { it.number == number }
-            calendarMetadataCache.put(key = guildId, value = newList.toTypedArray())
-        }
 
+        // Delete from db and handle "re-indexing" all calendar resources (because calendars are sequential for user-convenience)
+        calendarMetadataRepository.deleteAllByGuildIdAndCalendarNumber(guildId.asLong(), number).awaitSingleOrNull()
+        calendarMetadataRepository.decrementCalendarsByGuildIdAndCalendarNumber(guildId.asLong(), number).awaitSingleOrNull()
+
+        // Remove from caches
+        calendarCache.evict(guildId, metadata.number)
+        calendarMetadataCache.evict(key = guildId)
+
+        /*
         // TODO: Need to call a modern version of DatabaseManager.deleteCalendarAndRelatedData method
+        This is a set of calls to replicate the behavior of the old monolith db call
+        that would go through all tables to handle deleting (as cascade delete constraints have not yet been added,
+        and to update the calendar number references down-stream. This is again for user-convenience, or so I tell myself
+        as a cope for how badly designed this project originally was and I just, can't let go of it,
+         so I keep trying to fix it bit by bit <3
+         */
+        // TODO: Delete related events
+        rsvpService.deleteRsvpForCalendarDeletion(guildId, number)
+        announcementService.deleteAnnouncementsForCalendarDeletion(guildId, number)
+        staticMessageService.deleteStaticMessagesForCalendarDeletion(guildId, number)
 
     }
 

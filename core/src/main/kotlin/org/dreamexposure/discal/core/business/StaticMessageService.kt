@@ -212,7 +212,13 @@ class StaticMessageService(
     }
 
     suspend fun deleteStaticMessage(guildId: Snowflake, messageId: Snowflake) {
-        staticMessageRepository.deleteByGuildIdAndMessageId(guildId.asLong(), messageId.asLong()).awaitSingleOrNull()
+        staticMessageRepository.deleteAllByGuildIdAndMessageId(guildId.asLong(), messageId.asLong()).awaitSingleOrNull()
         staticMessageCache.evict(guildId, key = messageId)
+    }
+
+    suspend fun deleteStaticMessagesForCalendarDeletion(guildId: Snowflake, calendarNumber: Int) {
+        staticMessageRepository.deleteByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        staticMessageRepository.decrementCalendarsByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
+        staticMessageCache.evictAll(guildId)
     }
 }
