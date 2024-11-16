@@ -6,24 +6,29 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.CalendarCache
 import org.dreamexposure.discal.CalendarMetadataCache
+import org.dreamexposure.discal.EventCache
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarMetadataData
 import org.dreamexposure.discal.core.database.CalendarMetadataRepository
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
+import org.dreamexposure.discal.core.`object`.new.Event
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class CalendarService(
     private val calendarMetadataRepository: CalendarMetadataRepository,
     private val calendarMetadataCache: CalendarMetadataCache,
+    private val eventCache: EventCache,
     private val calendarProviders: List<CalendarProvider>,
     private val calendarCache: CalendarCache,
     private val settingsService: GuildSettingsService,
     private val staticMessageService: StaticMessageService,
     private val rsvpService: RsvpService,
     private val announcementService: AnnouncementService,
+    private val eventMetadataService: EventMetadataService,
 ) {
     /////////
     /// Calendar count
@@ -161,20 +166,70 @@ class CalendarService(
         calendarMetadataCache.evict(key = guildId)
 
         /*
-        // TODO: Need to call a modern version of DatabaseManager.deleteCalendarAndRelatedData method
         This is a set of calls to replicate the behavior of the old monolith db call
         that would go through all tables to handle deleting (as cascade delete constraints have not yet been added,
         and to update the calendar number references down-stream. This is again for user-convenience, or so I tell myself
         as a cope for how badly designed this project originally was and I just, can't let go of it,
          so I keep trying to fix it bit by bit <3
          */
-        // TODO: Delete related events
+        eventMetadataService.deleteEventMetadataForCalendarDeletion(guildId, number)
         rsvpService.deleteRsvpForCalendarDeletion(guildId, number)
         announcementService.deleteAnnouncementsForCalendarDeletion(guildId, number)
         staticMessageService.deleteStaticMessagesForCalendarDeletion(guildId, number)
-
     }
 
+    /////////
+    /// Event
+    /// TODO: Need to figure out if I can fetch event sets from cache one day (eg, ongoing events)
+    /////////
+    suspend fun getEvent(guildId: Snowflake, calendarNumber: Int, id: String): Event? {
+        var event = eventCache.get(guildId, id)
+        if (event != null) return event
+
+        val calendar = getCalendar(guildId, calendarNumber) ?: return null
+
+        event = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .getEvent(guildId, calendar, id)
+        if (event != null) eventCache.put(guildId, id, event)
+
+        return event
+    }
+
+    suspend fun getUpcomingEvents(guildId: Snowflake, calendarNumber: Int, amount: Int): List<Event> {
+        val calendar = getCalendar(guildId, calendarNumber) ?: return emptyList()
+
+        val events = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .getUpcomingEvents(guildId, calendar, amount)
+        events.forEach { event -> eventCache.put(guildId, event.id, event) }
+
+        return events
+    }
+
+    suspend fun getOngoingEvents(guildId: Snowflake, calendarNumber: Int): List<Event> {
+        val calendar = getCalendar(guildId, calendarNumber) ?: return emptyList()
+
+        val events = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .getOngoingEvents(guildId, calendar)
+        events.forEach { event -> eventCache.put(guildId, event.id, event) }
+
+        return events
+    }
+
+    suspend fun getEventsInTimeRange(guildId: Snowflake, calendarNumber: Int, start: Instant, end: Instant): List<Event> {
+        val calendar = getCalendar(guildId, calendarNumber) ?: return emptyList()
+
+        val events = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .getEventsInTimeRange(guildId, calendar, start, end)
+        events.forEach { event -> eventCache.put(guildId, event.id, event) }
+
+        return events
+    }
+
+    // TODO: Add remaining CRUD methods (create/update/delete)
 
     /////////
     /// Extra functions

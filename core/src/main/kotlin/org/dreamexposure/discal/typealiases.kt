@@ -16,3 +16,4 @@ typealias StaticMessageCache = CacheRepository<Snowflake, StaticMessage>
 typealias AnnouncementCache = CacheRepository<Snowflake, Array<Announcement>>
 typealias AnnouncementWizardStateCache = CacheRepository<Snowflake, AnnouncementWizardState>
 typealias CalendarTokenCache = CacheRepository<Int, TokenV1Model>
+typealias EventCache = CacheRepository<String, Event>

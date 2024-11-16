@@ -30,6 +30,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_STATIC_MESSAGE_MINUTES("bot.cache.ttl-minutes.static-messages", 60),
     CACHE_TTL_ANNOUNCEMENT_MINUTES("bot.cache.ttl-minutes.announcements", 120),
     CACHE_TTL_CALENDAR_TOKEN_MINUTES("bot.cache.ttl-minutes.calendar", 60),
+    CACHE_TTL_EVENTS_MINUTES("bot.cache.ttl-minutes.event", 15),
 
     // Security configuration
 
