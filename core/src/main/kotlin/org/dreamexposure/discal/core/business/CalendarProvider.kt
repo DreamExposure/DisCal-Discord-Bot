@@ -10,6 +10,9 @@ import java.time.Instant
 interface CalendarProvider {
     val host: Host
 
+    /////////
+    /// Calendar functions
+    /////////
     suspend fun getCalendar(metadata: CalendarMetadata): Calendar?
 
     suspend fun createCalendar(guildId: Snowflake, spec: Calendar.CreateSpec): Calendar
@@ -19,13 +22,20 @@ interface CalendarProvider {
     suspend fun deleteCalendar(guildId: Snowflake, metadata: CalendarMetadata)
 
 
+    /////////
+    /// Event functions
+    /////////
+    suspend fun getEvent(calendar: Calendar, id: String): Event?
 
-    suspend fun getEvent(guildId: Snowflake, calendar: Calendar, id: String): Event?
+    suspend fun getUpcomingEvents(calendar: Calendar, amount: Int): List<Event>
 
-    suspend fun getUpcomingEvents(guildId: Snowflake, calendar: Calendar, amount: Int): List<Event>
+    suspend fun getOngoingEvents(calendar: Calendar): List<Event>
 
-    suspend fun getOngoingEvents(guildId: Snowflake, calendar: Calendar): List<Event>
+    suspend fun getEventsInTimeRange(calendar: Calendar, start: Instant, end: Instant): List<Event>
 
-    suspend fun getEventsInTimeRange(guildId: Snowflake, calendar: Calendar, start: Instant, end: Instant): List<Event>
-    // TODO: Implement the rest of required CRUD functions
+    suspend fun createEvent(calendar: Calendar, spec: Event.CreateSpec): Event
+
+    suspend fun updateEvent(calendar: Calendar, spec: Event.UpdateSpec): Event
+
+    suspend fun deleteEvent(calendar: Calendar, id: String)
 }

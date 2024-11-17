@@ -18,6 +18,13 @@ class EventMetadataService(
     /////////
     /// Event metadata - Prefer using full Event implementation in CalendarService
     /////////
+    suspend fun hasEventMetadata(guildId: Snowflake, eventId: String): Boolean {
+        val computedId = eventId.split("_")[0]
+
+        return eventMetadataRepository.existsByGuildIdAndEventId(guildId.asLong(), computedId)
+            .awaitSingle()
+    }
+
     suspend fun getEventMetadata(guildId: Snowflake, eventId: String): EventMetadata? {
         val computedId = eventId.split("_")[0]
 
@@ -57,6 +64,17 @@ class EventMetadataService(
             eventEnd = event.eventEnd.toEpochMilli(),
             imageLink = event.imageLink
         ).awaitSingleOrNull()
+    }
+
+    suspend fun upsertEventMetadata(event: EventMetadata) {
+        if (hasEventMetadata(event.guildId, event.id)) updateEventMetadata(event)
+        else createEventMetadata(event)
+    }
+
+    suspend fun deleteEventMetadata(guildId: Snowflake, id: String) {
+        if (id.contains("_")) return // Don't delete if child of recurring parent.
+
+        eventMetadataRepository.deleteByGuildIdAndEventId(guildId.asLong(), id).awaitSingleOrNull()
     }
 
     suspend fun deleteEventMetadataForCalendarDeletion(guildId: Snowflake, calendarNumber: Int) {

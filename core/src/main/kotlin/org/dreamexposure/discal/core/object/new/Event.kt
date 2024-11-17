@@ -52,5 +52,33 @@ data class Event(
             else -> false
         }
     }
+
+    ////////////////////////////
+    ////// Nested classes //////
+    ////////////////////////////
+    data class CreateSpec(
+        val name: String?,
+        val description: String?,
+        val start: Instant,
+        val end: Instant,
+        val color: EventColor,
+        val location: String?,
+        val image: String?,
+        val recur: Boolean,
+        val recurrence: Recurrence?,
+    )
+
+    data class UpdateSpec(
+        val id: String,
+        val name: String?,
+        val description: String?,
+        val start: Instant,
+        val end: Instant,
+        val color: EventColor,
+        val location: String?,
+        val image: String?,
+        val recur: Boolean?,
+        val recurrence: Recurrence?,
+    )
 }
 

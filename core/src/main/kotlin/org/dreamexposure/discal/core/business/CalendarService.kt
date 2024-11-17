@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component
 import java.time.Instant
 
 @Component
-class CalendarService(
+class   CalendarService(
     private val calendarMetadataRepository: CalendarMetadataRepository,
     private val calendarMetadataCache: CalendarMetadataCache,
     private val eventCache: EventCache,
@@ -190,7 +190,7 @@ class CalendarService(
 
         event = calendarProviders
             .first { it.host == calendar.metadata.host }
-            .getEvent(guildId, calendar, id)
+            .getEvent(calendar, id)
         if (event != null) eventCache.put(guildId, id, event)
 
         return event
@@ -201,7 +201,7 @@ class CalendarService(
 
         val events = calendarProviders
             .first { it.host == calendar.metadata.host }
-            .getUpcomingEvents(guildId, calendar, amount)
+            .getUpcomingEvents(calendar, amount)
         events.forEach { event -> eventCache.put(guildId, event.id, event) }
 
         return events
@@ -212,7 +212,7 @@ class CalendarService(
 
         val events = calendarProviders
             .first { it.host == calendar.metadata.host }
-            .getOngoingEvents(guildId, calendar)
+            .getOngoingEvents(calendar)
         events.forEach { event -> eventCache.put(guildId, event.id, event) }
 
         return events
@@ -223,13 +223,47 @@ class CalendarService(
 
         val events = calendarProviders
             .first { it.host == calendar.metadata.host }
-            .getEventsInTimeRange(guildId, calendar, start, end)
+            .getEventsInTimeRange(calendar, start, end)
         events.forEach { event -> eventCache.put(guildId, event.id, event) }
 
         return events
     }
 
-    // TODO: Add remaining CRUD methods (create/update/delete)
+    suspend fun createEvent(guildId: Snowflake, calendarNumber: Int, spec: Event.CreateSpec): Event {
+        val calendar = getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Cannot create a new event without a calendar")
+
+        val event = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .createEvent(calendar, spec)
+
+        eventCache.put(guildId, event.id, event)
+        return event
+    }
+
+    suspend fun updateEvent(guildId: Snowflake, calendarNumber: Int, spec: Event.UpdateSpec): Event {
+        val calendar = getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Cannot update event without a calendar")
+
+        val event = calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .updateEvent(calendar, spec)
+
+        eventCache.put(guildId, event.id, event)
+        return event
+    }
+
+    suspend fun deleteEvent(guildId: Snowflake, calendarNumber: Int, id: String) {
+        val calendar = getCalendar(guildId, calendarNumber) ?: return
+
+        calendarProviders
+            .first { it.host == calendar.metadata.host }
+            .deleteEvent(calendar, id)
+        eventCache.evict(guildId, id)
+
+        eventMetadataService.deleteEventMetadata(guildId, id)
+        announcementService.deleteAnnouncements(guildId, id)
+
+    }
+
 
     /////////
     /// Extra functions

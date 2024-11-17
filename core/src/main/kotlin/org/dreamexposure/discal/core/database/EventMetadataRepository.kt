@@ -6,6 +6,8 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 interface EventMetadataRepository : R2dbcRepository<EventMetadataData, Long> {
+    fun existsByGuildIdAndEventId(guildId: Long, eventId: String): Mono<Boolean>
+
     fun findByGuildIdAndEventId(guildId: Long, eventId: String): Mono<EventMetadataData>
 
     fun findAllByGuildIdAndEventIdIn(guildId: Long, eventIds: Collection<String>): Flux<EventMetadataData>
@@ -24,6 +26,8 @@ interface EventMetadataRepository : R2dbcRepository<EventMetadataData, Long> {
         eventEnd: Long,
         imageLink: String,
     ): Mono<Long>
+
+    fun deleteByGuildIdAndEventId(guildId: Long, eventId: String): Mono<Void>
 
     fun deleteAllByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Void>
 

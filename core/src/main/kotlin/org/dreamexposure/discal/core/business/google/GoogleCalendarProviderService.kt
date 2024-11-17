@@ -1,6 +1,8 @@
 package org.dreamexposure.discal.core.business.google
 
+import com.google.api.client.util.DateTime
 import com.google.api.services.calendar.model.AclRule
+import com.google.api.services.calendar.model.EventDateTime
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.business.CalendarProvider
 import org.dreamexposure.discal.core.business.EventMetadataService
@@ -128,24 +130,25 @@ class GoogleCalendarProviderService(
     /////////
     /// Events
     /////////
-    override suspend fun getEvent(guildId: Snowflake, calendar: Calendar, id: String): Event? {
+    override suspend fun getEvent(calendar: Calendar, id: String): Event? {
         val response = googleCalendarApiWrapper.getEvent(calendar.metadata, id)
         if (response.entity == null) return null
         val baseEvent = response.entity
 
-        val metadata = eventMetadataService.getEventMetadata(guildId, id) ?: EventMetadata(id, guildId, calendar.metadata.number)
+        val metadata = eventMetadataService.getEventMetadata(calendar.metadata.guildId, id)
+            ?: EventMetadata(id, calendar.metadata.guildId, calendar.metadata.number)
 
         return mapGoogleEventToDisCalEvent(calendar, baseEvent, metadata)
     }
 
-    override suspend fun getUpcomingEvents(guildId: Snowflake, calendar: Calendar, amount: Int): List<Event> {
+    override suspend fun getUpcomingEvents(calendar: Calendar, amount: Int): List<Event> {
         val response = googleCalendarApiWrapper.getEvents(calendar.metadata, amount, Instant.now())
         if (response.entity == null) return emptyList()
 
-        return loadEvents(guildId, calendar, response.entity)
+        return loadEvents(calendar, response.entity)
     }
 
-    override suspend fun getOngoingEvents(guildId: Snowflake, calendar: Calendar): List<Event> {
+    override suspend fun getOngoingEvents(calendar: Calendar): List<Event> {
         val now = Instant.now()
         val start = now.minus(14, ChronoUnit.DAYS) // 2 weeks ago
         val end = now.plus(1, ChronoUnit.DAYS) // One day from now
@@ -159,14 +162,107 @@ class GoogleCalendarProviderService(
             .filter { it.start.asInstant(calendar.timezone).isBefore(now) }
             .filter { it.end.asInstant(calendar.timezone).isAfter(now) }
 
-        return loadEvents(guildId, calendar, filtered)
+        return loadEvents(calendar, filtered)
     }
 
-    override suspend fun getEventsInTimeRange(guildId: Snowflake, calendar: Calendar, start: Instant, end: Instant): List<Event> {
+    override suspend fun getEventsInTimeRange(calendar: Calendar, start: Instant, end: Instant): List<Event> {
         val response = googleCalendarApiWrapper.getEvents(calendar.metadata, start, end)
         if (response.entity == null) return emptyList()
 
-        return loadEvents(guildId, calendar, response.entity)
+        return loadEvents(calendar, response.entity)
+    }
+
+    override suspend fun createEvent(calendar: Calendar, spec: Event.CreateSpec): Event {
+        val event = GoogleEvent()
+        event.id = KeyGenerator.generateEventId()
+        event.visibility = "public"
+
+        event.summary = spec.name
+        event.description = spec.description
+        event.location = spec.location
+
+        event.start = EventDateTime()
+            .setDateTime(DateTime(spec.start.toEpochMilli()))
+            .setTimeZone(calendar.timezone.id)
+        event.end = EventDateTime()
+            .setDateTime(DateTime(spec.end.toEpochMilli()))
+            .setTimeZone(calendar.timezone.id)
+
+        if (spec.color != EventColor.NONE)
+            event.colorId = spec.color.id.toString()
+
+        if (spec.recur && spec.recurrence != null)
+            event.recurrence = listOf(spec.recurrence.toRRule())
+
+        // Create event in google
+        val response = googleCalendarApiWrapper.createEvent(calendar.metadata, event)
+        if (response.error != null || response.entity == null) throw ApiException(response.error?.error, response.error?.exception)
+
+        // Create and save metadata
+        val metadata = eventMetadataService.createEventMetadata(EventMetadata(
+            id = event.id,
+            guildId = calendar.metadata.guildId,
+            calendarNumber = calendar.metadata.number,
+            eventEnd = spec.end,
+            imageLink = spec.image.orEmpty(),
+        ))
+
+        return mapGoogleEventToDisCalEvent(calendar, response.entity, metadata)
+    }
+
+    override suspend fun updateEvent(calendar: Calendar, spec: Event.UpdateSpec): Event {
+        val event = GoogleEvent()
+        event.id = spec.id
+
+        event.summary = spec.name
+        event.description = spec.description
+        event.location = spec.location
+
+        // Always update start/end so that we can safely handle all day events without DateTime by overwriting it
+        event.start = EventDateTime()
+            .setDateTime(DateTime(spec.start.toEpochMilli()))
+            .setTimeZone(calendar.timezone.id)
+        event.end = EventDateTime()
+            .setDateTime(DateTime(spec.end.toEpochMilli()))
+            .setTimeZone(calendar.timezone.id)
+
+        if (spec.color == EventColor.NONE)
+            event.colorId = null
+        else
+            event.colorId = spec.color.id.toString()
+
+        // Special recurrence handling
+        if (spec.recur != null) {
+            if (spec.recur) {
+                //event now recurs, add the RRUle.
+                spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+            }
+        } else {
+            //Recur equals null, so it's not changing whether its recurring, so handle if RRule changes only
+            spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+        }
+
+        // Okay, all values are set, let's patch this event now
+        val response = googleCalendarApiWrapper.patchEvent(calendar.metadata, event)
+        if (response.error != null || response.entity == null) throw ApiException(response.error?.error, response.error?.exception)
+
+        // Upsert metadata
+        val metadata = eventMetadataService.getEventMetadata(calendar.metadata.guildId, event.id)
+            ?: EventMetadata(
+            id = event.id,
+            guildId = calendar.metadata.guildId,
+            calendarNumber = calendar.metadata.number,
+            eventEnd = spec.end,
+            imageLink = spec.image.orEmpty(),
+        )
+        eventMetadataService.upsertEventMetadata(metadata)
+
+        return mapGoogleEventToDisCalEvent(calendar, response.entity, metadata)
+    }
+
+    override suspend fun deleteEvent(calendar: Calendar, id: String) {
+        val response = googleCalendarApiWrapper.deleteEvent(calendar.metadata, id)
+        if (response.error != null) throw ApiException(response.error.error, response.error.exception)
     }
 
     /////////
@@ -174,12 +270,13 @@ class GoogleCalendarProviderService(
     /////////
     private fun randomCredentialId() = Random.nextInt(Config.SECRET_GOOGLE_CREDENTIAL_COUNT.getInt())
 
-    private suspend fun loadEvents(guildId: Snowflake, calendar: Calendar, events: List<GoogleEvent>): List<Event> {
-        val metadataList = eventMetadataService.getMultipleEventsMetadata(guildId, events.map { it.id})
+    private suspend fun loadEvents(calendar: Calendar, events: List<GoogleEvent>): List<Event> {
+        val metadataList = eventMetadataService.getMultipleEventsMetadata(calendar.metadata.guildId, events.map { it.id})
 
         return events.map { googleEvent ->
             val computedId = googleEvent.id.split("_")[0]
-            val metadata = metadataList.firstOrNull { it.id == computedId } ?: EventMetadata(googleEvent.id, guildId, calendar.metadata.number)
+            val metadata = metadataList.firstOrNull { it.id == computedId }
+                ?: EventMetadata(googleEvent.id, calendar.metadata.guildId, calendar.metadata.number)
 
             mapGoogleEventToDisCalEvent(calendar, googleEvent, metadata)
         }
