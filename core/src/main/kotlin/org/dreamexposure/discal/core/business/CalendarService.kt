@@ -14,6 +14,8 @@ import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import java.time.Instant
 
@@ -25,11 +27,18 @@ class   CalendarService(
     private val calendarProviders: List<CalendarProvider>,
     private val calendarCache: CalendarCache,
     private val settingsService: GuildSettingsService,
-    private val staticMessageService: StaticMessageService,
-    private val rsvpService: RsvpService,
-    private val announcementService: AnnouncementService,
     private val eventMetadataService: EventMetadataService,
+    private val beanFactory: BeanFactory,
 ) {
+    // We're going to fetch beans here for a lot of services that depend on CalendarService due to architecture (plus these are used in only one place so...)
+    private val staticMessageService
+        get() = beanFactory.getBean<StaticMessageService>()
+    private val rsvpService
+        get() = beanFactory.getBean<RsvpService>()
+    private val announcementService
+    get() = beanFactory.getBean<AnnouncementService>()
+
+
     /////////
     /// Calendar count
     /////////
